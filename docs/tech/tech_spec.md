@@ -29,13 +29,15 @@
       "forest_tower": { "cleared": false, "highestFloor": 15 }
     }
   },
+  "party": ["hero_001", "mage_001", "healer_001", "scout_001"],  // Phase 3〜: パーティ（最大4人）
   "characters": [
     {
       "id": "hero_001",
       "name": "勇者",
-      "class": "warrior",
+      "type": "melee",             // Phase 3〜: タイプ（melee/magic/holy/agile）
       "level": 5,
       "exp": 120,
+      "limitBreak": 0,             // Phase 3〜: 限界突破回数（0-5）
       "stats": {
         "hp": 150,
         "maxHp": 150,
@@ -53,6 +55,23 @@
         "legs": null,
         "ears": null,
         "ring": null
+      },
+      "skills": {                  // Phase 3〜: スキル情報
+        "learned": ["sword_1", "sword_2", "surv_p1"],
+        "activeSlots": ["sword_1", "sword_2"],  // アクティブスキルセット枠（最大2）
+        "skillPoints": 2           // 未使用SP
+      },
+      "prestige": {                // Phase 5〜: 転生データ（キャラクター個別）
+        "prestigeCount": 0,        // 転生回数
+        "prestigePoints": 0,       // 未使用転生ポイント
+        "prestigeBonus": {
+          "hp": 0,                 // HP強化（投資済みpt数）
+          "atk": 0,                // ATK強化
+          "def": 0,                // DEF強化
+          "spd": 0,                // SPD強化
+          "expBonus": 0,           // EXP獲得ボーナス
+          "skillDamage": 0         // スキルダメージ強化
+        }
       }
     }
   ],
@@ -77,9 +96,34 @@
       { "slotIndex": 0, "itemId": "iron_sword", "category": "weapon", "rarity": "common", "sold": false }
     ]
   },
+  "base": {
+    "tavern": { "level": 3 },
+    "forge": { "level": 2 },
+    "training_ground": { "level": 1 },
+    "warehouse": { "level": 1 },
+    "market": { "level": 0 }
+  },
+  "materials": {
+    "enhance_stone": 25,
+    "magic_crystal": 3,
+    "rare_ore": 0,
+    "ancient_fragment": 0
+  },
   "settings": {
-    "soundEnabled": true
+    "potionThreshold": 0.3,          // ポーション自動使用閾値（0.1〜0.5）
+    "battleLogCount": 50,            // 戦闘ログ表示件数（20/50/100/200）
+    "toastEnabled": true,            // トースト通知ON/OFF
+    "autoSellRarity": null           // Phase 2〜: 自動売却レアリティ（null/common/uncommon）
+  },
+  "bossRush": {                        // Phase 5〜: ボスラッシュ状態
+    "isActive": false,
+    "currentWave": 0,
+    "accumulatedGold": 0,
+    "accumulatedExp": 0,
+    "bestWave": 0,
+    "bestWaveHp": 0
   }
+  // ※ キャラクターごとの転生データは characters[].prestige に格納（下記参照）
 }
 ```
 
@@ -110,6 +154,9 @@
   "timestamp": 1709856030000,
   "entries": [
     { "type": "attack", "actor": "勇者", "target": "スライム", "damage": 12 },
+    { "type": "skill", "actor": "勇者", "skillId": "sword_1", "skillName": "強撃", "target": "スライム", "damage": 55 },
+    { "type": "heal", "actor": "僧侶", "skillId": "heal_1", "skillName": "ヒール", "target": "勇者", "amount": 40 },
+    { "type": "buff", "actor": "魔法使い", "skillId": "buff_1", "skillName": "力の祝福", "target": "全体", "effect": "ATK+20%", "duration": 3 },
     { "type": "attack", "actor": "スライム", "target": "勇者", "damage": 3 },
     { "type": "defeat", "target": "スライム", "rewards": { "gold": 5, "exp": 10 } }
   ]
@@ -185,6 +232,49 @@
 | `restriction` | ポーション判定時 | `no_potion`: 使用不可、`potion_half`: 回復量×0.5 |
 | `bonus` | 報酬計算時 | `reward = base_reward × (1 + value)` |
 
+### 1.6 施設データ構造（Phase 4〜）
+
+施設レベルは `base` オブジェクトでプレイヤーごとに管理。`level: 0` は未建設を表す。
+
+```json
+{
+  "base": {
+    "tavern": { "level": 3 },
+    "forge": { "level": 2 },
+    "training_ground": { "level": 1 },
+    "warehouse": { "level": 1 },
+    "market": { "level": 0 }
+  }
+}
+```
+
+| 施設ID | 施設名 | 効果参照先 |
+|--------|--------|----------|
+| `tavern` | 酒場 | キャラスカウト（レアリティ上限） |
+| `forge` | 鍛冶屋 | 装備強化上限・製作レアリティ・コスト倍率 |
+| `training_ground` | 訓練場 | 控えキャラEXP獲得率 |
+| `warehouse` | 倉庫 | アイテム所持上限 |
+| `market` | 市場 | ゴールドボーナス倍率 |
+
+### 1.7 装備強化データ構造（Phase 4〜）
+
+強化済み装備はステータスに `enhanceLevel` フィールドを持つ。
+
+```json
+{
+  "id": "iron_sword_001",
+  "baseId": "iron_sword",
+  "slot": "weapon",
+  "rarity": "common",
+  "stats": { "atk": 5 },
+  "enhanceLevel": 3,
+  "level": 5
+}
+```
+
+- `enhanceLevel`: 現在の強化段階（0〜鍛冶屋LVの上限値）
+- 実効ステータス: `表示値 = 元のステータス + (enhanceLevel × 基礎値の10%)`
+
 ---
 
 ## 2. ディレクトリ構成
@@ -197,11 +287,22 @@
 │   ├── tech_battle_offline.md    # 戦闘ログ・オフライン計算仕様
 │   ├── tech_auth.md              # 認証システム仕様（Phase 2〜）
 │   ├── master_data.md            # マスターデータ定義
+│   ├── glossary.md              # 用語集（ゲーム・技術用語）
 │   ├── open_specs.md             # 未確定仕様一覧
+│   ├── reviews/                  # 仕様レビュー結果（/doc-review コマンドで自動生成）
 │   └── towers/                   # 塔別マスターデータ
+│       ├── TOWERS_OVERVIEW.md    # 全塔概要一覧（推奨LV・フロア数・ダンジョン構成）
 │       ├── 000_テンプレート.md    # 新規塔作成用テンプレート
 │       ├── 001_ゴブリンの塔.md    # ゴブリンの塔（敵・構成・ドロップ）
-│       └── 002_森の塔.md         # 森の塔（敵・構成・ドロップ）
+│       ├── 002_森の塔.md         # 森の塔（敵・構成・ドロップ）
+│       ├── 003_獣の塔.md         # 獣の塔（敵・構成・ドロップ）
+│       ├── 004_毒沼の塔.md       # 毒沼の塔（敵・構成・ドロップ）
+│       ├── 005_業火の塔.md       # 業火の塔（敵・構成・ドロップ）
+│       ├── 006_氷雪の塔.md       # 氷雪の塔（敵・構成・ドロップ）
+│       ├── 007_砂漠の塔.md       # 砂漠の塔（敵・構成・ドロップ）
+│       ├── 008_深海の塔.md       # 深海の塔（敵・構成・ドロップ）
+│       ├── 009_黄昏の塔.md       # 黄昏の塔（敵・構成・ドロップ）
+│       └── 010_天空の塔.md       # 天空の塔（敵・構成・ドロップ）
 │
 ├── frontend/                      # Vue.js SPA
 │   ├── src/
@@ -263,12 +364,16 @@
 │   │   │   ├── auth.py            # 認証
 │   │   │   ├── game.py            # ゲーム状態取得・保存
 │   │   │   ├── battle.py          # 戦闘結果計算
-│   │   │   └── offline.py         # オフライン報酬
+│   │   │   ├── offline.py         # オフライン報酬
+│   │   │   ├── base.py            # 施設建設・レベルアップ（Phase 4〜）
+│   │   │   └── forge.py           # 装備強化・製作・分解（Phase 4〜）
 │   │   ├── services/              # ビジネスロジック
 │   │   │   ├── battle_service.py  # 戦闘計算
 │   │   │   ├── offline_service.py # オフライン報酬計算
 │   │   │   ├── tower_service.py   # 塔・階層・敵データ
-│   │   │   └── auth_service.py    # 認証ロジック（Phase 2〜）
+│   │   │   ├── auth_service.py    # 認証ロジック（Phase 2〜）
+│   │   │   ├── base_service.py    # 施設建設・レベルアップ（Phase 4〜）
+│   │   │   └── forge_service.py   # 装備強化・製作・分解（Phase 4〜）
 │   │   └── db/
 │   │       └── database.py        # DB接続設定
 │   ├── requirements.txt
@@ -291,6 +396,17 @@
 | API通信 | Axios or fetch | FastAPI との REST 通信 |
 | 言語 | TypeScript | 型安全な開発 |
 
+### レスポンシブ設計
+
+| 項目 | 仕様 |
+|------|------|
+| デザイン方針 | モバイルファースト |
+| ブレークポイント | 768px（以下: モバイル、以上: PC） |
+| 最小対応幅 | 320px |
+| レイアウト | PC: 2カラム / モバイル: 1カラム（縦積み） |
+| タッチ対応 | ホバー依存のUI（`:hover` のみ）は避ける |
+| 数値表示ユーティリティ | 大きな数値（ゴールド等）を短縮表記する関数を `src/utils/format.ts` に実装 |
+
 ---
 
 ## 4. バックエンド構成
@@ -300,7 +416,7 @@
 | フレームワーク | FastAPI | REST API + 自動ドキュメント生成（Swagger UI） |
 | ORM | SQLAlchemy 2.0 | DB操作 |
 | バリデーション | Pydantic v2 | リクエスト/レスポンスの型定義 |
-| DB | SQLite（MVP）→ PostgreSQL | データ永続化 |
+| DB | SQLite（MVP）→ PostgreSQL | データ永続化。ゴールドは `BIGINT`（64bit）カラムで管理 |
 | マイグレーション | Alembic | DBスキーマ管理 |
 | 認証 | JWT（Phase 2〜） | ユーザー認証・セッション管理 |
 | OAuth | Google OAuth 2.0（Phase 2〜） | Googleアカウント連携 |
@@ -316,6 +432,8 @@ MAX_OFFLINE_HOURS = 24          # オフライン報酬の最大蓄積時間
 FAST_CALC_THRESHOLD = 100       # これ以上の未処理tickは簡略計算に切り替え
 MAX_BATTLE_LOG_RECORDS = 100    # DB保持ログ件数上限
 MAX_LOG_PER_RESPONSE = 50       # 1レスポンスあたりのログ件数上限
+MAX_PLAYER_LEVEL = 9999         # プレイヤーLV上限
+MAX_GOLD = 9_223_372_036_854_775_807  # ゴールド上限（64bit符号付き整数最大値）
 
 # 認証設定（Phase 2〜）
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
@@ -366,6 +484,45 @@ PASSWORD_MIN_LENGTH = 8
 | POST | `/api/shop/buy` | ショップでアイテム購入。常設商品: `itemId` + `quantity`（ポーションID等は常設扱い、在庫無制限）。日替わり商品: `dailySlotIndex`（枠番号指定、各1個限り） |
 | PUT | `/api/potion/config` | ポーション自動使用の閾値設定（`threshold`: 0.3/0.5/0.7） |
 | POST | `/api/equipment/equip` | 装備の変更（Phase 2〜） |
+| POST | `/api/equipment/sell` | 装備売却（`equipmentId`）。装備を消費してゴールドを獲得（売却価格 = 5 × レアリティ倍率 × 装備レベル）（Phase 2〜） |
+| POST | `/api/item/sell` | アイテム売却（`itemId`, `quantity`）。換金アイテムを売却してゴールドを獲得（Phase 2〜） |
+
+### パーティ・スキル（Phase 3〜）
+| メソッド | パス | 説明 |
+|---------|------|------|
+| PUT | `/api/party/edit` | パーティ編成の変更（`memberIds`: キャラID配列、最大4人） |
+| POST | `/api/skill/learn` | スキル習得（`characterId`, `skillId`）。SP消費。前提スキル未習得時はエラー |
+| PUT | `/api/skill/set-active` | アクティブスキルのセット変更（`characterId`, `activeSlots`: スキルID配列、最大2） |
+| POST | `/api/skill/reset` | スキル全リセット（`characterId`）。ゴールド消費（LV×50G）。全SP返却 |
+| POST | `/api/character/limit-break` | 限界突破（`characterId`, `materialCharacterId`）。素材キャラを消費 |
+
+### 施設・拠点（Phase 4〜）
+| メソッド | パス | 説明 |
+|---------|------|------|
+| POST | `/api/base/build` | 施設を建設（`facilityId`）。ゴールド+素材を消費してLV0→LV1 |
+| POST | `/api/base/upgrade` | 施設をレベルアップ（`facilityId`）。ゴールド+素材を消費 |
+| POST | `/api/base/scout` | 酒場でスカウト実行。ゴールドを消費してキャラ1体をランダム獲得 |
+
+### 鍛冶屋（Phase 4〜）
+| メソッド | パス | 説明 |
+|---------|------|------|
+| POST | `/api/forge/enhance` | 装備強化（`equipmentId`）。強化石+ゴールドを消費して+1 |
+| POST | `/api/forge/craft` | 装備製作（`rank`: 1-5）。素材+ゴールドを消費してランダム装備を生成 |
+| POST | `/api/forge/disassemble` | 装備分解（`equipmentId`）。装備を消費して素材を獲得 |
+
+### ボスラッシュ（Phase 5〜）
+| メソッド | パス | 説明 |
+|---------|------|------|
+| POST | `/api/boss-rush/start` | ボスラッシュ開始。通常塔探索を停止してボスラッシュモードに移行 |
+| POST | `/api/boss-rush/retire` | ボスラッシュリタイア。現在の戦闘完了後に終了し、累積報酬を確定取得 |
+| GET | `/api/boss-rush/ranking` | サーバーランキング取得（上位100件）。認証必須 |
+
+### 転生（Phase 5〜）
+| メソッド | パス | 説明 |
+|---------|------|------|
+| POST | `/api/prestige` | 転生実行（`characterId`）。LV9999チェック後、LV/EXP/SPリセット・転生ポイント10pt付与 |
+| PUT | `/api/prestige/invest` | 転生ポイント投資（`characterId`, `stat`, `points`）。指定のボーナスにポイントを割り振る |
+| POST | `/api/prestige/reset` | 転生ボーナス全リセット（`characterId`）。ゴールド消費で全ポイント返還 |
 
 > **設計方針**: `/api/battle/tick` がゲーム進行の中心。オンライン中のポーリングでもオフライン復帰時でも同じAPIを叩く。tickの中で戦闘計算・報酬付与・DB保存をすべて行うため、別途 save や offline/claim のエンドポイントは不要。塔の階層進行・撤退判定もtick処理内で行う。
 
@@ -385,6 +542,67 @@ PASSWORD_MIN_LENGTH = 8
 - **本番ではすべての戦闘計算はサーバー側（FastAPI）で実行**。チート対策のためフロントでは計算しない
 - フロントは **ポーリングで結果を取得** → テキストログとして表示するだけ
 - オフライン中はサーバーで何もせず、**復帰時に経過tick数分をまとめてシミュレーション** する
+
+### Phase 1 データ永続化方針
+
+認証システムはPhase 2からのため、Phase 1ではゲストアカウント方式でデータを保存する。
+
+| 項目 | 仕様 |
+|------|------|
+| 方式 | 初回アクセス時にサーバーがUUIDベースのゲストアカウントを自動作成 |
+| 識別トークン | UUID v4（サーバーで生成） |
+| トークン保存先 | クライアント側の LocalStorage（キー: `guest_token`） |
+| APIリクエスト | `Authorization: Bearer <guest_token>` ヘッダーで識別 |
+| サーバー側 | トークンに紐づくプレイヤーデータをSQLiteに保存 |
+| Phase 2移行 | ゲスト→本登録フロー（[tech_auth.md](tech_auth.md) 参照）で既存データを引き継ぎ |
+| データロスト | LocalStorage消去時はデータ復旧不可（Phase 1では許容） |
+
+```
+■ 初回アクセスフロー
+  1. フロント: LocalStorageに guest_token が存在するか確認
+  2. なければ POST /api/auth/guest → サーバーがUUID生成・DB保存・トークン返却
+  3. フロント: guest_token を LocalStorage に保存
+  4. 以降のAPIリクエストに Authorization ヘッダーを付与
+
+■ 再訪問フロー
+  1. フロント: LocalStorageから guest_token を取得
+  2. GET /api/game/state（Authorization ヘッダー付き）→ 既存データをロード
+```
+
+### エラーハンドリング・通信切断時の挙動
+
+| 項目 | 仕様 |
+|------|------|
+| リトライ回数 | 最大3回 |
+| リトライ間隔 | 指数バックオフ（1秒 → 2秒 → 4秒） |
+| 3回失敗時 | 画面上部に「接続エラー」バナーを表示。次のtickタイミング（60秒後）で自動リトライ再開 |
+| 切断中の表示 | 最後に取得したデータをそのまま表示（更新停止） |
+| 復帰時 | サーバーから最新状態を取得して画面を更新（通常のtick処理と同じ） |
+| ユーザー操作 | 切断中のAPI操作（装備変更等）は即座にエラー表示。復帰後に再操作が必要 |
+
+```
+■ 通信エラー時のフロー
+  1. API呼び出し失敗
+  2. 1秒後にリトライ（1回目）
+  3. 2秒後にリトライ（2回目）
+  4. 4秒後にリトライ（3回目）
+  5. 3回失敗 → 「接続エラー」バナー表示、ポーリング継続（次tick=60秒後に再試行）
+  6. 成功時 → バナー消去、最新状態を反映
+```
+
+### アクセシビリティ対応方針
+
+WCAG準拠レベルは明示的に定めず、ベストエフォートで以下を実装する。
+
+| 項目 | 方針 |
+|------|------|
+| HTML | セマンティックHTML要素を使用（`<button>`, `<nav>`, `<main>`, `<h1>`〜`<h6>` 等） |
+| キーボード操作 | Tab移動・Enter実行で全機能にアクセス可能にする |
+| 色非依存 | 色だけに依存しない情報表示（テキストラベル・アイコンを併用） |
+| フォーカス | フォーカスインジケータを視認可能に保つ（ブラウザデフォルトを削除しない） |
+
+- テキストベースUIのため、スクリーンリーダーとの親和性は自然に高い
+- 正式なWCAG準拠テスト・認証は行わない
 
 ### MVP開発方針
 Phase 1 から **フロントエンド（Vue + Vite）とバックエンド（FastAPI + SQLite）を同時開発** する。
@@ -429,9 +647,9 @@ Phase 1 から **フロントエンド（Vue + Vite）とバックエンド（Fa
 
 ## 8. 今後の検討事項
 
-- [ ] デプロイ先の選定（Vercel + Render / Railway / VPS など）
-- [ ] ブラウザ対応範囲（モバイル対応の詳細）
-- [ ] アクセシビリティ対応
+- [ ] デプロイ先の選定（Vercel + Render / Railway / VPS など）→ 実装完了後に決定
+- [x] ブラウザ対応範囲 → §3 レスポンシブ設計に反映済み
+- [x] アクセシビリティ対応 → §6 アクセシビリティ対応方針に反映済み
 - [ ] パフォーマンス目標（ログ保持件数の上限など）
 
 ---
@@ -447,3 +665,11 @@ Phase 1 から **フロントエンド（Vue + Vite）とバックエンド（Fa
 | 2026-03-08 | 認証システム仕様を追加（JWT、ゲストプレイ、メール登録、Google OAuth、API 10エンドポイント、DBモデル3テーブル） |
 | 2026-03-08 | 塔データ定義（1.4）・環境効果定義（1.5）を追加。ゲーム状態JSONに `towersCleared` フィールド追加 |
 | 2026-03-08 | 戦闘ログ・オフライン計算仕様を [tech_battle_offline.md](tech_battle_offline.md) に分離。認証システム仕様を [tech_auth.md](tech_auth.md) に分離 |
+| 2026-03-08 | Phase 4仕様: 施設データ構造（§1.6）・装備強化データ構造（§1.7）追加。ゲーム状態JSONに `base`・`materials` フィールド追加。施設API 3エンドポイント・鍛冶屋API 3エンドポイント追加。ディレクトリ構成にbase/forge関連ファイル追加 |
+| 2026-03-08 | Phase 3仕様: ゲーム状態JSONに `party`・`skills`・`limitBreak`・`type` フィールド追加（`class`→`type`に変更）。戦闘ログにスキル/回復/バフエントリー追加。パーティ・スキルAPI 5エンドポイント追加 |
+| 2026-03-08 | §3 レスポンシブ設計を追加（モバイルファースト、768px、最小320px、format.ts）。§4 設定値に `MAX_PLAYER_LEVEL=9999`・`MAX_GOLD=64bit整数最大値` 追加。DB型注記（BIGINT）追加 |
+| 2026-03-08 | Phase 5仕様: ゲーム状態JSONに `bossRush` フィールド・キャラクターの `prestige` フィールド追加。ボスラッシュAPI 3エンドポイント・転生API 3エンドポイント追加 |
+| 2026-03-08 | レビュー指摘対応: 売却API 2エンドポイント追加（`POST /api/equipment/sell`, `POST /api/item/sell`）。§2 ディレクトリ構成に glossary.md 追加 |
+| 2026-03-08 | レビュー指摘対応: §2 ディレクトリ構成の towers/ 一覧に TOWERS_OVERVIEW.md・003〜010_各塔.md を追加 |
+| 2026-03-09 | §6 に Phase 1 データ永続化方針（ゲストアカウント自動生成）、エラーハンドリング（指数バックオフ3回リトライ）、アクセシビリティ対応方針（ベストエフォート）を追加 |
+| 2026-03-09 | ゲーム状態JSONの settings フィールドを拡張（potionThreshold, battleLogCount, toastEnabled, autoSellRarity） |

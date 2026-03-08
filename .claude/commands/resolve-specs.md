@@ -17,11 +17,11 @@
 
 1. `docs/open_specs.md` から対象の未確定項目（`[ ]`）を抽出
 2. 関連する仕様書を読み込む:
-   - `docs/game_spec.md` — ゲームシステム・バランス
-   - `docs/tech_spec.md` — API・データ構造
-   - `docs/tech_battle_offline.md` — 戦闘・オフライン計算
-   - `docs/master_data.md` — マスターデータ
-   - `docs/towers/` 配下の塔データ（必要に応じて）
+   - `docs/design/game_spec.md` — ゲームシステム・バランス
+   - `docs/tech/tech_spec.md` — API・データ構造
+   - `docs/tech/tech_battle_offline.md` — 戦闘・オフライン計算
+   - `docs/data/master_data.md` — マスターデータ
+   - `docs/data/towers/` 配下の塔データ（必要に応じて）
 3. 既に確定済みの関連仕様を把握し、新たに確定する仕様が矛盾しないよう制約を整理する
 
 ### 3. 対話による検討
