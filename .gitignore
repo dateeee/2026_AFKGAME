@@ -1,1 +1,46 @@
+# Claude Code
 .claude/settings.local.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+build/
+*.egg
+.venv/
+venv/
+env/
+.env
+.env.*
+
+# FastAPI / SQLite
+*.db
+*.db-journal
+
+# Node / Frontend
+node_modules/
+frontend/dist/
+*.local
+
+# Logs
+*.log
+
+# Coverage / Test
+htmlcov/
+.coverage
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/

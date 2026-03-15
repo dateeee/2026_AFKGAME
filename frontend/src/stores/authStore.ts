@@ -1,0 +1,136 @@
+/**
+ * 認証ストア（Phase 2）
+ * - ユーザー情報管理
+ * - トークン管理（client.tsと連携）
+ * - ログイン/ログアウト/ゲスト開始
+ */
+
+import { ref, computed } from 'vue'
+import { defineStore } from 'pinia'
+import type { UserInfo } from '@/types/game'
+import * as authApi from '@/api/auth'
+import { setTokens, clearTokens, getRefreshToken, tryRefresh } from '@/api/client'
+
+export const useAuthStore = defineStore('auth', () => {
+  const user = ref<UserInfo | null>(null)
+  const loading = ref(false)
+  const error = ref<string | null>(null)
+
+  const isAuthenticated = computed(() => !!user.value)
+  const isGuest = computed(() => user.value?.isGuest ?? true)
+
+  function _handleAuthResponse(data: { accessToken: string; refreshToken: string; user: UserInfo }) {
+    setTokens(data.accessToken, data.refreshToken)
+    user.value = data.user
+    error.value = null
+  }
+
+  /** 起動時: リフレッシュトークンがあればセッション復元 */
+  async function restoreSession(): Promise<boolean> {
+    const rt = getRefreshToken()
+    if (!rt) return false
+
+    loading.value = true
+    try {
+      const data = await authApi.refreshToken(rt)
+      _handleAuthResponse(data)
+      return true
+    } catch {
+      clearTokens()
+      return false
+    } finally {
+      loading.value = false
+    }
+  }
+
+  /** ゲストプレイ開始 */
+  async function startAsGuest(): Promise<void> {
+    loading.value = true
+    error.value = null
+    try {
+      const data = await authApi.createGuest()
+      _handleAuthResponse(data)
+    } catch (e) {
+      error.value = (e as Error).message
+      throw e
+    } finally {
+      loading.value = false
+    }
+  }
+
+  /** メール+パスワード登録 */
+  async function register(email: string, password: string, displayName?: string): Promise<void> {
+    loading.value = true
+    error.value = null
+    try {
+      const data = await authApi.register(email, password, displayName)
+      _handleAuthResponse(data)
+    } catch (e) {
+      error.value = (e as Error).message
+      throw e
+    } finally {
+      loading.value = false
+    }
+  }
+
+  /** メール+パスワードログイン */
+  async function loginWithEmail(email: string, password: string): Promise<void> {
+    loading.value = true
+    error.value = null
+    try {
+      const data = await authApi.login(email, password)
+      _handleAuthResponse(data)
+    } catch (e) {
+      error.value = (e as Error).message
+      throw e
+    } finally {
+      loading.value = false
+    }
+  }
+
+  /** ログアウト */
+  async function logout(): Promise<void> {
+    const rt = getRefreshToken()
+    if (rt) {
+      try {
+        await authApi.logout(rt)
+      } catch {
+        // ログアウトAPIが失敗してもローカルはクリア
+      }
+    }
+    clearTokens()
+    user.value = null
+  }
+
+  /** ゲスト→本登録移行 */
+  async function linkAccount(email: string, password: string): Promise<void> {
+    loading.value = true
+    error.value = null
+    try {
+      const { getAccessToken } = await import('@/api/client')
+      const at = getAccessToken()
+      if (!at) throw new Error('Not authenticated')
+      const data = await authApi.linkAccount(at, email, password)
+      _handleAuthResponse(data)
+    } catch (e) {
+      error.value = (e as Error).message
+      throw e
+    } finally {
+      loading.value = false
+    }
+  }
+
+  return {
+    user,
+    loading,
+    error,
+    isAuthenticated,
+    isGuest,
+    restoreSession,
+    startAsGuest,
+    register,
+    loginWithEmail,
+    logout,
+    linkAccount,
+  }
+})

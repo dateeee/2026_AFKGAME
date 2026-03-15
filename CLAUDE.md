@@ -52,6 +52,13 @@
 │   │       ├── 004_強化系統.md     # 強化系統（バフ）
 │   │       ├── 005_弱体系統.md     # 弱体系統（デバフ・状態異常）
 │   │       └── 006_生存術系統.md   # 生存術系統（耐久・防御）
+│   ├── diagrams/                  # 設計図（Mermaid）
+│   │   ├── er_diagram.md          # ER図（データベース設計）
+│   │   ├── class_diagram.md       # クラス図（ドメインモデル）
+│   │   ├── screen_transition.md   # 画面遷移図
+│   │   ├── battle_flow.md         # 戦闘ターン処理フロー図
+│   │   ├── system_architecture.md # システム構成図
+│   │   └── api_sequence.md        # APIシーケンス図
 │   ├── glossary.md                # 用語集（ゲーム・技術用語）
 │   ├── open_specs.md              # 未確定仕様一覧（確定次第削除、最終的にファイル自体を削除）
 │   └── reviews/                   # 仕様レビュー結果（/doc-review コマンドで自動生成）
@@ -105,6 +112,13 @@
   - [docs/data/skills/SKILLS_OVERVIEW.md](docs/data/skills/SKILLS_OVERVIEW.md) — スキルシステム概要・系統別詳細
 - [docs/glossary.md](docs/glossary.md) — 用語集（ゲーム・技術用語）
 - [docs/open_specs.md](docs/open_specs.md) — 未確定仕様一覧（全確定後に削除）
+- 設計図（`docs/diagrams/`）
+  - [docs/diagrams/er_diagram.md](docs/diagrams/er_diagram.md) — ER図
+  - [docs/diagrams/class_diagram.md](docs/diagrams/class_diagram.md) — クラス図（ドメインモデル）
+  - [docs/diagrams/screen_transition.md](docs/diagrams/screen_transition.md) — 画面遷移図
+  - [docs/diagrams/battle_flow.md](docs/diagrams/battle_flow.md) — 戦闘ターン処理フロー図
+  - [docs/diagrams/system_architecture.md](docs/diagrams/system_architecture.md) — システム構成図
+  - [docs/diagrams/api_sequence.md](docs/diagrams/api_sequence.md) — APIシーケンス図
 
 ---
 
@@ -114,3 +128,4 @@
 |------|------|
 | 2026-03-08 | 初版作成 |
 | 2026-03-08 | レビュー指摘対応: ディレクトリ構成に towers/TOWERS_OVERVIEW.md・003〜010_各塔.md を追加。仕様書セクションに TOWERS_OVERVIEW.md リンクを追加 |
+| 2026-03-10 | 設計図6点を docs/diagrams/ に追加（ER図・クラス図・画面遷移図・戦闘フロー図・システム構成図・APIシーケンス図） |
