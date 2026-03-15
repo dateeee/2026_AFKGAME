@@ -12,7 +12,7 @@ export const useGameStore = defineStore('game', () => {
   const highestFloor = ref(0)
   const currentEnemy = ref<EnemyInfo | null>(null)
   const settings = ref<Settings>({
-    potionThreshold: 0.5,
+    potionThreshold: 0.3,
     battleLogCount: 50,
     toastEnabled: true,
     autoSellRarity: null,

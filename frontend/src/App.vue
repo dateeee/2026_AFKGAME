@@ -12,92 +12,115 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="app">
-    <div v-if="!gameStore.isConnected" class="error-banner">
+  <div class="flex flex-col min-h-screen min-h-dvh md:flex-row">
+    <!-- Error Banner -->
+    <div
+      v-if="!gameStore.isConnected"
+      class="bg-danger text-white px-4 py-2 text-center text-sm"
+    >
       {{ gameStore.errorMessage }}
     </div>
 
-    <main class="app-main">
-      <div v-if="isLoading" class="loading">Loading...</div>
-      <router-view v-else />
+    <!-- Sidebar Nav (desktop) -->
+    <nav class="hidden md:flex flex-col border-r border-border bg-bg w-20 order-first">
+      <router-link
+        v-for="item in [
+          { to: '/', label: 'ホーム', icon: '\u2694' },
+          { to: '/equipment', label: '装備', icon: '\uD83D\uDEE1' },
+          { to: '/shop', label: 'ショップ', icon: '\uD83D\uDCB0' },
+          { to: '/settings', label: '設定', icon: '\u2699' },
+        ]"
+        :key="item.to"
+        :to="item.to"
+        class="nav-link"
+        active-class="nav-link-active"
+      >
+        <span class="text-lg">{{ item.icon }}</span>
+        <span class="text-xs">{{ item.label }}</span>
+      </router-link>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-4 overflow-y-auto">
+      <div v-if="isLoading" class="flex items-center justify-center h-full">
+        <span class="text-xl text-text-muted animate-pulse">読み込み中...</span>
+      </div>
+      <router-view v-else v-slot="{ Component }">
+        <transition name="page-fade" mode="out-in">
+          <component :is="Component" />
+        </transition>
+      </router-view>
     </main>
 
-    <nav class="bottom-nav">
-      <router-link to="/" class="nav-item" active-class="active">Home</router-link>
-      <router-link to="/equipment" class="nav-item" active-class="active">Equip</router-link>
-      <router-link to="/shop" class="nav-item" active-class="active">Shop</router-link>
-      <router-link to="/settings" class="nav-item" active-class="active">Settings</router-link>
+    <!-- Bottom Nav (mobile) -->
+    <nav class="flex md:hidden border-t border-border bg-bg">
+      <router-link
+        v-for="item in [
+          { to: '/', label: 'ホーム', icon: '\u2694' },
+          { to: '/equipment', label: '装備', icon: '\uD83D\uDEE1' },
+          { to: '/shop', label: 'ショップ', icon: '\uD83D\uDCB0' },
+          { to: '/settings', label: '設定', icon: '\u2699' },
+        ]"
+        :key="item.to"
+        :to="item.to"
+        class="nav-link flex-1"
+        active-class="nav-link-active"
+      >
+        <span class="text-lg">{{ item.icon }}</span>
+        <span class="text-xs">{{ item.label }}</span>
+      </router-link>
     </nav>
   </div>
 </template>
 
 <style scoped>
-.app {
+.nav-link {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
-  min-height: 100dvh;
-}
-
-.error-banner {
-  background-color: var(--color-danger);
-  color: white;
-  padding: 0.5rem 1rem;
-  text-align: center;
-  font-size: 0.875rem;
-}
-
-.app-main {
-  flex: 1;
-  padding: 1rem;
-  overflow-y: auto;
-}
-
-.loading {
-  display: flex;
   align-items: center;
   justify-content: center;
-  height: 100%;
-  font-size: 1.25rem;
+  gap: 0.125rem;
+  padding: 0.625rem 0.5rem;
   color: var(--color-text-muted);
-}
-
-.bottom-nav {
-  display: flex;
-  border-top: 1px solid var(--color-border);
-  background: var(--color-bg-secondary);
-}
-
-.nav-item {
-  flex: 1;
-  text-align: center;
-  padding: 0.75rem;
   text-decoration: none;
-  color: var(--color-text-muted);
-  font-size: 0.875rem;
-  transition: color 0.2s;
+  transition: color 150ms, background-color 150ms;
+  position: relative;
 }
 
-.nav-item.active {
-  color: var(--color-primary);
-  font-weight: bold;
+.nav-link:hover {
+  color: var(--color-text);
+  background-color: var(--color-bg-elevated);
 }
 
+.nav-link-active {
+  color: var(--color-primary) !important;
+}
+
+.nav-link-active::after {
+  content: '';
+  position: absolute;
+  background-color: var(--color-primary);
+}
+
+/* Mobile: top accent bar */
+@media (max-width: 767px) {
+  .nav-link-active::after {
+    top: 0;
+    left: 25%;
+    right: 25%;
+    height: 2px;
+    border-radius: 0 0 2px 2px;
+  }
+}
+
+/* Desktop: left accent bar */
 @media (min-width: 768px) {
-  .app {
-    flex-direction: row;
-  }
-
-  .bottom-nav {
-    flex-direction: column;
-    border-top: none;
-    border-right: 1px solid var(--color-border);
-    order: -1;
-    width: 80px;
-  }
-
-  .nav-item {
-    padding: 1rem 0.5rem;
+  .nav-link-active::after {
+    left: 0;
+    top: 25%;
+    bottom: 25%;
+    width: 2px;
+    border-radius: 0 2px 2px 0;
   }
 }
 </style>

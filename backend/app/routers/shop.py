@@ -3,7 +3,6 @@
 import logging
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 logger = logging.getLogger("afkgame.shop")
@@ -13,28 +12,17 @@ from app.dependencies import get_current_player
 from app.models.player import Player
 from app.models.item import InventoryItem
 from app.master_data.items import ITEMS, get_item
+from app.schemas.shop import BuyRequest, ShopBuyResponse, ShopItemResponse, ShopLineupResponse
 
 router = APIRouter(prefix="/api/shop", tags=["shop"])
 
 
-class BuyRequest(BaseModel):
-    item_id: str
-    quantity: int
-
-
-class ShopItem(BaseModel):
-    item_id: str
-    name: str
-    price: int
-    quantity_owned: int
-
-
-@router.get("/lineup")
+@router.get("/lineup", response_model=ShopLineupResponse)
 def get_lineup(
     player: Player = Depends(get_current_player),
     db: Session = Depends(get_db),
-):
-    lineup: list[dict] = []
+) -> ShopLineupResponse:
+    lineup: list[ShopItemResponse] = []
     for item_id, item_data in ITEMS.items():
         if item_data.category != "potion":
             continue
@@ -42,23 +30,23 @@ def get_lineup(
             player_id=player.id, item_id=item_id
         ).first()
         owned = inv.quantity if inv else 0
-        lineup.append({
-            "item_id": item_data.id,
-            "name": item_data.name,
-            "price": item_data.price,
-            "heal_ratio": item_data.heal_ratio,
-            "quantity_owned": owned,
-            "stack_limit": item_data.stack_limit,
-        })
-    return {"lineup": lineup}
+        lineup.append(ShopItemResponse(
+            item_id=item_data.id,
+            name=item_data.name,
+            price=item_data.price,
+            heal_ratio=item_data.heal_ratio,
+            quantity_owned=owned,
+            stack_limit=item_data.stack_limit,
+        ))
+    return ShopLineupResponse(lineup=lineup)
 
 
-@router.post("/buy")
+@router.post("/buy", response_model=ShopBuyResponse)
 def buy_item(
     req: BuyRequest,
     player: Player = Depends(get_current_player),
     db: Session = Depends(get_db),
-):
+) -> ShopBuyResponse:
     if req.item_id not in ITEMS:
         raise HTTPException(status_code=404, detail="Item not found")
 
@@ -97,9 +85,9 @@ def buy_item(
         extra={"player_id": str(player.id), "item_id": req.item_id, "quantity": req.quantity, "gold": player.gold},
     )
 
-    return {
-        "status": "ok",
-        "gold": player.gold,
-        "item_id": req.item_id,
-        "quantity": inv.quantity,
-    }
+    return ShopBuyResponse(
+        status="ok",
+        gold=player.gold,
+        item_id=req.item_id,
+        quantity=inv.quantity,
+    )

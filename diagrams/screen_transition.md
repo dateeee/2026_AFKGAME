@@ -1,6 +1,6 @@
 # 画面遷移図
 
-> UI仕様: [game_spec.md §3](../design/game_spec.md)
+> UI仕様: [game_spec.md §3](docs/design/game_spec.md)
 
 ## 認証・エントリーフロー
 
@@ -179,7 +179,7 @@ stateDiagram-v2
         ボスラッシュ結果 : 獲得報酬一覧
         ボスラッシュ結果 : マイルストーン報酬
         ボスラッシュ結果 : 記録更新通知
-    end
+    }
 
     state ランキング画面 {
         direction TB
@@ -251,7 +251,7 @@ flowchart TD
     subgraph チュートリアル["チュートリアルヒント (初回1回のみ)"]
         Hint1["初回ログイン時:\n冒険者が自動で探索します"]
         Hint2["初回LVアップ時:\nステータスが上昇しました"]
-        Hint3["HP50%以下初到達時:\nポーションは自動使用されます"]
+        Hint3["設定閾値以下初到達時:\nポーションは自動使用されます"]
         Hint4["初回装備ドロップ時 Phase2:\n装備画面で装着できます"]
     end
 ```

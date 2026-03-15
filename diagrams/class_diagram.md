@@ -1,6 +1,6 @@
 # クラス図（ドメインモデル）
 
-> ゲーム仕様: [game_spec.md](../design/game_spec.md) / 技術仕様: [tech_spec.md](../tech/tech_spec.md)
+> ゲーム仕様: [game_spec.md](docs/design/game_spec.md) / 技術仕様: [tech_spec.md](docs/tech/tech_spec.md)
 
 ## プレイヤー・パーティ・キャラクター
 
@@ -17,6 +17,10 @@ classDiagram
         +int targetFloor
         +TowerMode towerMode
         +float hpThreshold
+        +string currentEnemyId  nullable
+        +int currentEnemyHp  nullable
+        +bigint runGold  塔内累積ゴールド
+        +int highestFloor  最高到達階
         +Settings settings
         +datetime lastTickAt
         +getParty() Party
@@ -381,6 +385,8 @@ classDiagram
     Enemy "1" --> "1" Rewards
     Enemy "1" --> "*" DropEntry
     Modifier --> ModifierType
+
+    note for Dungeon "イベントダンジョン（試練の迷宮/宝物庫/修練場）も\nDungeonクラスで表現。難易度（初級/中級/上級）は\nModifier（bonus型: 報酬倍率×1/2/4）で実装"
 ```
 
 ## 戦闘状態
@@ -545,7 +551,7 @@ classDiagram
         tavern  酒場: スカウト LV→レアリティ上限
         forge  鍛冶屋: 強化上限/製作レアリティ/コスト倍率
         training_ground  訓練場: 控えEXP獲得率 5-50%
-        warehouse  倉庫: 所持上限 50-300枠
+        warehouse  倉庫: 所持上限 70-300枠 (未建設50)
         market  市場: ゴールドボーナス +5-50%
     }
 

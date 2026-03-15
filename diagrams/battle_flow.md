@@ -1,6 +1,6 @@
 # 戦闘ターン処理フロー図
 
-> 戦闘仕様: [tech_battle_offline.md](../tech/tech_battle_offline.md) / [game_spec.md §2.2](../design/game_spec.md)
+> 戦闘仕様: [tech_battle_offline.md](docs/tech/tech_battle_offline.md) / [game_spec.md §2.2](docs/design/game_spec.md)
 
 ## 塔探索の全体フロー
 
@@ -89,15 +89,16 @@ flowchart TD
     Regen["パッシブ: リジェネ適用\n(ターン開始時HP回復)"]
     Regen --> PotionCheck
 
-    PotionCheck{"HP <= 閾値\n(30%/50%/70%)?\nかつポーション所持?"}
+    PotionCheck{"HP <= 閾値\n(設定値 10%-50%)?\nかつポーション所持?"}
     PotionCheck -->|Yes| UsePotion["ポーション自動使用\n優先: HP < ハイ < エリクサー\n(低回復量から使用)"]
-    PotionCheck -->|No| EnvRestrict
+    PotionCheck -->|No| SkillEntry
     UsePotion --> EnvRestrict
 
     EnvRestrict{"環境制限?\n(no_potion /\npotion_half)"}
-    EnvRestrict -->|no_potion| SkillEntry["ポーション使用不可"]
+    EnvRestrict -->|no_potion| PotionBlocked["ポーション使用不可\n(使用をキャンセル)"]
     EnvRestrict -->|potion_half| HalfPotion["回復量 x 0.5"]
     EnvRestrict -->|制限なし| SkillEntry
+    PotionBlocked --> SkillEntry
     HalfPotion --> SkillEntry
 
     subgraph SkillJudge["アクティブスキル発動判定"]

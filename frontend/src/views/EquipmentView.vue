@@ -24,7 +24,6 @@ function onSelectInventoryItem(item: Equipment) {
   if (selectedSlot.value && item.slot === selectedSlot.value) {
     compareItem.value = item
   } else {
-    // スロットが選択されていないか、スロットが一致しない場合は自動でスロット選択
     selectedSlot.value = item.slot
     compareItem.value = item
   }
@@ -54,26 +53,29 @@ async function onUnequip(slot: EquipmentSlot) {
 </script>
 
 <template>
-  <div class="equipment-view">
-    <h2 class="page-title">装備</h2>
+  <div class="mx-auto max-w-[600px]">
+    <h1 class="font-display text-xl font-bold text-accent mb-4">装備</h1>
 
-    <section class="section">
-      <h3 class="section-title">装備中</h3>
+    <!-- Equipped Section -->
+    <section class="panel mb-4">
+      <h2 class="panel-title">装備中</h2>
       <EquipmentSlotGrid @select-slot="onSelectSlot" />
-      <div v-if="selectedSlot && equipmentStore.equippedItems[selectedSlot]" class="unequip-area">
-        <button class="btn-unequip" @click="onUnequip(selectedSlot!)">
+      <div v-if="selectedSlot && equipmentStore.equippedItems[selectedSlot]" class="mt-2">
+        <button class="btn btn-secondary text-sm" @click="onUnequip(selectedSlot!)">
           {{ selectedSlot }}スロットの装備を外す
         </button>
       </div>
     </section>
 
-    <section class="section">
-      <h3 class="section-title">
+    <!-- Inventory Section -->
+    <section class="panel">
+      <h2 class="panel-title flex items-center gap-2">
         所持装備
-        <span v-if="selectedSlot" class="filter-badge">{{ selectedSlot }}のみ表示中
-          <button class="btn-clear-filter" @click="selectedSlot = null">&times;</button>
+        <span v-if="selectedSlot" class="badge bg-primary text-white">
+          {{ selectedSlot }}のみ表示中
+          <button class="ml-1 hover:opacity-70" @click="selectedSlot = null">&times;</button>
         </span>
-      </h3>
+      </h2>
       <EquipmentInventory
         :filter-slot="selectedSlot"
         @select="onSelectInventoryItem"
@@ -89,55 +91,3 @@ async function onUnequip(slot: EquipmentSlot) {
     />
   </div>
 </template>
-
-<style scoped>
-.equipment-view {
-  max-width: 600px;
-  margin: 0 auto;
-}
-.page-title {
-  font-size: 1.25rem;
-  margin-bottom: 1rem;
-}
-.section {
-  margin-bottom: 1.5rem;
-}
-.section-title {
-  font-size: 1rem;
-  margin-bottom: 0.5rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-.filter-badge {
-  font-size: 0.75rem;
-  padding: 0.1rem 0.5rem;
-  background: var(--color-primary);
-  color: white;
-  border-radius: 10px;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-.btn-clear-filter {
-  background: none;
-  border: none;
-  color: white;
-  cursor: pointer;
-  font-size: 0.875rem;
-  padding: 0;
-  line-height: 1;
-}
-.unequip-area {
-  margin-top: 0.5rem;
-}
-.btn-unequip {
-  padding: 0.25rem 0.75rem;
-  border-radius: 4px;
-  border: 1px solid var(--color-border);
-  background: var(--color-bg-secondary);
-  color: var(--color-text);
-  cursor: pointer;
-  font-size: 0.8125rem;
-}
-</style>

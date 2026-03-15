@@ -24,6 +24,7 @@ export interface Character {
   baseAtk: number
   baseDef: number
   baseSpd: number
+  effectiveMaxHp?: number
 }
 
 /** プレイヤー設定 */
@@ -64,7 +65,10 @@ export interface TowerClearInfo {
   highestFloor: number
 }
 
-/** 戦闘ログエントリー */
+/**
+ * 戦闘ログエントリー
+ * NOTE: battle_logsはCamelModel変換対象外。バックエンドからsnake_caseのまま返却される
+ */
 export interface BattleLogEntry {
   type: string
   actor?: string

@@ -19,11 +19,6 @@ export function usePolling() {
       usePlayerStore().loadFromState(response.updatedState)
       useEquipmentStore().loadFromState(response.updatedState)
 
-      // 装備ドロップをストアに追加
-      if (response.equipmentDrops?.length > 0) {
-        useEquipmentStore().addDrops(response.equipmentDrops)
-      }
-
       const battleStore = useBattleStore()
       if (response.battleLogs.length > 0) {
         battleStore.addBattleLogs(response.battleLogs)

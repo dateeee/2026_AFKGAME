@@ -5,6 +5,7 @@ import { usePlayerStore } from '@/stores/playerStore'
 import { useBattleStore } from '@/stores/battleStore'
 import { formatGold, formatTime } from '@/utils/format'
 import { postTowerSelect, postTowerRetire, putTowerMode, getGameState } from '@/api/client'
+import { RARITY_LABELS, SLOT_LABELS } from '@/stores/equipmentStore'
 import type { BattleLogEntry } from '@/types/game'
 
 const gameStore = useGameStore()
@@ -14,7 +15,8 @@ const battleStore = useBattleStore()
 const selectedTargetFloor = ref(5)
 
 const hero = computed(() => playerStore.characters[0] ?? null)
-const hpPercent = computed(() => hero.value ? (hero.value.hp / hero.value.maxHp) * 100 : 0)
+const effectiveMaxHp = computed(() => hero.value?.effectiveMaxHp ?? hero.value?.maxHp ?? 1)
+const hpPercent = computed(() => hero.value ? (hero.value.hp / effectiveMaxHp.value) * 100 : 0)
 const expRequired = computed(() => hero.value ? Math.floor(100 * Math.pow(hero.value.level, 1.5)) : 100)
 const expPercent = computed(() => hero.value ? (hero.value.exp / expRequired.value) * 100 : 0)
 const potionCount = computed(() => playerStore.potions['hp_potion'] ?? 0)
@@ -55,35 +57,35 @@ async function toggleMode() {
 function formatLogEntry(entry: BattleLogEntry): string {
   switch (entry.type) {
     case 'attack': {
-      const crit = entry.critical ? ' CRITICAL!' : ''
+      const crit = entry.critical ? ' クリティカル！' : ''
       return `${entry.actor} → ${entry.target}: ${entry.damage}${crit} (HP: ${entry.target_hp})`
     }
     case 'defeat':
-      return `${entry.target} defeated! +${entry.gold}G +${entry.exp}EXP`
+      return `${entry.target} 撃破！ +${entry.gold}G +${entry.exp}EXP`
     case 'level_up':
-      return `LEVEL UP! ${entry.actor} LV${entry.level}`
+      return `レベルアップ！ ${entry.actor} LV${entry.level}`
     case 'encounter':
-      return `--- Floor ${entry.floor}: ${entry.enemy} appeared (HP: ${entry.enemy_hp}) ---`
+      return `--- フロア ${entry.floor}: ${entry.enemy} 出現 (HP: ${entry.enemy_hp}) ---`
     case 'potion':
-      return `${entry.actor} used HP Potion (HP: ${entry.hp}/${entry.max_hp})`
+      return `${entry.actor} HPポーション使用 (HP: ${entry.hp}/${entry.max_hp})`
     case 'recovery':
-      return `${entry.actor} recovered ${entry.amount} HP (${entry.hp}/${entry.max_hp})`
+      return `${entry.actor} ${entry.amount} HP回復 (${entry.hp}/${entry.max_hp})`
     case 'tower_target_reached':
-      return `=== Target floor ${entry.floor} reached! ===`
+      return `=== 目標フロア ${entry.floor} 到達！ ===`
     case 'tower_restart':
-      return `--- Restarting tower from Floor 1 ---`
+      return `--- フロア1から再開 ---`
     case 'tower_exit':
-      return `--- Exiting tower ---`
+      return `--- 塔を退出 ---`
     case 'retreat_hp':
-      return `Retreated! HP too low (${entry.hp}/${entry.max_hp})`
+      return `撤退！ HP不足 (${entry.hp}/${entry.max_hp})`
     case 'player_defeated':
-      return `DEFEATED! Lost ${entry.exp_lost} EXP, ${entry.gold_lost}G`
+      return `全滅！ ${entry.exp_lost} EXP、${entry.gold_lost}G 喪失`
     case 'lifesteal':
-      return `${entry.actor} drained ${entry.amount} HP (${entry.hp}/${entry.max_hp})`
+      return `${entry.actor} ${entry.amount} HP吸収 (${entry.hp}/${entry.max_hp})`
     case 'equipment_drop':
-      return `[${entry.rarity}] ${entry.name} dropped! (${entry.slot})`
+      return `[${RARITY_LABELS[entry.rarity!] ?? entry.rarity}] ${entry.name} ドロップ！ (${SLOT_LABELS[entry.slot!] ?? entry.slot})`
     case 'equipment_auto_sold':
-      return `Auto-sold ${entry.name} for ${entry.gold}G`
+      return `${entry.name} を自動売却 ${entry.gold}G`
     default:
       return JSON.stringify(entry)
   }
@@ -95,102 +97,113 @@ function dismissOffline() {
 </script>
 
 <template>
-  <div class="game-view">
-    <!-- オフライン報酬モーダル -->
-    <div v-if="battleStore.offlineSummary" class="modal-overlay" @click.self="dismissOffline">
-      <div class="modal">
-        <h2>Offline Rewards</h2>
-        <div class="offline-summary">
-          <p>Elapsed: {{ formatTime(battleStore.offlineSummary.elapsedSeconds) }}</p>
-          <p>Ticks processed: {{ battleStore.offlineSummary.processedTicks }}</p>
-          <p class="reward-gold">+{{ formatGold(battleStore.offlineSummary.totalGold) }} Gold</p>
-          <p class="reward-exp">+{{ battleStore.offlineSummary.totalExp.toLocaleString() }} EXP</p>
-          <p>Enemies defeated: {{ battleStore.offlineSummary.enemiesDefeated }}</p>
-          <p>Floors cleared: {{ battleStore.offlineSummary.floorsCleared }}</p>
-          <p v-if="battleStore.offlineSummary.potionsUsed > 0">
-            Potions used: {{ battleStore.offlineSummary.potionsUsed }}
-          </p>
-          <p v-if="battleStore.offlineSummary.levelsGained > 0" class="reward-level">
-            Level up x{{ battleStore.offlineSummary.levelsGained }}!
-          </p>
+  <div class="grid gap-4 grid-cols-1 md:grid-cols-2">
+    <!-- Offline Rewards Modal -->
+    <transition name="modal-fade">
+      <div v-if="battleStore.offlineSummary" class="modal-overlay" @click.self="dismissOffline">
+        <div class="modal-panel text-center">
+          <h2 class="font-display text-lg font-semibold text-accent mb-4">オフライン報酬</h2>
+          <div class="text-left space-y-1 mb-4">
+            <p class="text-text-muted text-sm">経過時間: {{ formatTime(battleStore.offlineSummary.elapsedSeconds) }}</p>
+            <p class="text-text-muted text-sm">処理ティック数: {{ battleStore.offlineSummary.processedTicks }}</p>
+            <p class="gold-text text-lg">+{{ formatGold(battleStore.offlineSummary.totalGold) }} ゴールド</p>
+            <p class="text-exp font-bold">+{{ battleStore.offlineSummary.totalExp.toLocaleString() }} EXP</p>
+            <p class="text-sm">撃破した敵: {{ battleStore.offlineSummary.enemiesDefeated }}</p>
+            <p class="text-sm">クリアしたフロア: {{ battleStore.offlineSummary.floorsCleared }}</p>
+            <p v-if="battleStore.offlineSummary.potionsUsed > 0" class="text-sm text-hp">
+              使用したポーション: {{ battleStore.offlineSummary.potionsUsed }}
+            </p>
+            <p v-if="battleStore.offlineSummary.levelsGained > 0" class="text-primary font-bold text-lg">
+              レベルアップ x{{ battleStore.offlineSummary.levelsGained }}！
+            </p>
+          </div>
+          <button class="btn btn-primary w-full" @click="dismissOffline">OK</button>
         </div>
-        <button class="btn btn-primary" @click="dismissOffline">OK</button>
       </div>
-    </div>
+    </transition>
 
-    <!-- キャラクターパネル -->
-    <section class="character-panel">
-      <h2>Character</h2>
-      <div v-if="hero" class="character-info">
-        <p class="character-name">{{ hero.name }}</p>
-        <p>LV {{ hero.level }}</p>
+    <!-- Character Panel -->
+    <section class="panel">
+      <h2 class="panel-title">キャラクター</h2>
+      <div v-if="hero">
+        <p class="font-display text-lg font-bold text-text-bright">{{ hero.name }}</p>
+        <p class="text-sm text-text-muted mb-3">LV {{ hero.level }}</p>
 
-        <div class="stat-bar">
-          <div class="bar-label">HP</div>
-          <div class="bar-track">
-            <div class="bar-fill bar-fill--hp" :style="{ width: `${hpPercent}%` }" />
+        <!-- HP Bar -->
+        <div class="flex items-center gap-2 mb-2">
+          <span class="w-8 text-xs font-bold text-hp">HP</span>
+          <div class="stat-bar stat-bar-hp flex-1">
+            <div class="stat-bar-fill" :style="{ width: `${hpPercent}%` }"></div>
           </div>
-          <div class="bar-value">{{ hero.hp }} / {{ hero.maxHp }}</div>
+          <span class="text-xs min-w-[5rem] text-right">{{ hero.hp }} / {{ effectiveMaxHp }}</span>
         </div>
 
-        <div class="stat-bar">
-          <div class="bar-label">EXP</div>
-          <div class="bar-track">
-            <div class="bar-fill bar-fill--exp" :style="{ width: `${expPercent}%` }" />
+        <!-- EXP Bar -->
+        <div class="flex items-center gap-2 mb-3">
+          <span class="w-8 text-xs font-bold text-exp">EXP</span>
+          <div class="stat-bar stat-bar-exp flex-1">
+            <div class="stat-bar-fill" :style="{ width: `${expPercent}%` }"></div>
           </div>
-          <div class="bar-value">{{ hero.exp }} / {{ expRequired }}</div>
+          <span class="text-xs min-w-[5rem] text-right">{{ hero.exp }} / {{ expRequired }}</span>
         </div>
 
-        <div class="stats">
-          <span>ATK {{ hero.baseAtk }}</span>
-          <span>DEF {{ hero.baseDef }}</span>
-          <span>SPD {{ hero.baseSpd }}</span>
+        <!-- Stats -->
+        <div class="flex gap-4 text-sm mt-2">
+          <span class="text-text-bright font-semibold">ATK {{ hero.baseAtk }}</span>
+          <span class="text-text-bright font-semibold">DEF {{ hero.baseDef }}</span>
+          <span class="text-text-bright font-semibold">SPD {{ hero.baseSpd }}</span>
         </div>
 
-        <div class="potion-info">
-          HP Potion: {{ potionCount }}
+        <div class="mt-2 text-sm text-hp">
+          HPポーション: {{ potionCount }}
         </div>
       </div>
     </section>
 
-    <!-- 塔パネル -->
-    <section class="tower-panel">
-      <h2>Tower</h2>
+    <!-- Tower Panel -->
+    <section class="panel">
+      <h2 class="panel-title">塔</h2>
 
-      <div v-if="isInTower" class="tower-active">
-        <p class="tower-name">Goblin Tower</p>
-        <p>Floor {{ gameStore.currentFloor }} / {{ gameStore.targetFloor }}</p>
-        <p class="text-muted">
-          Mode: {{ gameStore.towerMode === 'auto_repeat' ? 'Auto Repeat' : 'Stop on Clear' }}
+      <!-- In Tower -->
+      <div v-if="isInTower">
+        <p class="font-display text-lg font-bold text-text-bright">ゴブリンの塔</p>
+        <p class="text-sm">フロア {{ gameStore.currentFloor }} / {{ gameStore.targetFloor }}</p>
+        <p class="text-xs text-text-muted mt-1">
+          モード: {{ gameStore.towerMode === 'auto_repeat' ? '自動周回' : 'クリア時停止' }}
         </p>
 
-        <!-- 敵情報 -->
-        <div v-if="gameStore.currentEnemy" class="enemy-info">
-          <p class="enemy-name">{{ gameStore.currentEnemy.name }} LV{{ gameStore.currentEnemy.level }}</p>
-          <div class="stat-bar">
-            <div class="bar-label">HP</div>
-            <div class="bar-track">
+        <!-- Enemy Info -->
+        <div v-if="gameStore.currentEnemy" class="mt-3 p-3 bg-bg rounded-lg border border-border">
+          <p class="font-semibold text-danger-glow mb-1">
+            {{ gameStore.currentEnemy.name }} LV{{ gameStore.currentEnemy.level }}
+          </p>
+          <div class="flex items-center gap-2">
+            <span class="w-8 text-xs font-bold text-danger">HP</span>
+            <div class="stat-bar flex-1 enemy-bar">
               <div
-                class="bar-fill bar-fill--enemy"
+                class="stat-bar-fill"
                 :style="{ width: `${(gameStore.currentEnemy.hp / gameStore.currentEnemy.maxHp) * 100}%` }"
-              />
+              ></div>
             </div>
-            <div class="bar-value">{{ gameStore.currentEnemy.hp }} / {{ gameStore.currentEnemy.maxHp }}</div>
+            <span class="text-xs min-w-[5rem] text-right">
+              {{ gameStore.currentEnemy.hp }} / {{ gameStore.currentEnemy.maxHp }}
+            </span>
           </div>
         </div>
 
-        <div class="tower-actions">
-          <button class="btn btn-secondary" @click="toggleMode">
-            {{ gameStore.towerMode === 'auto_repeat' ? 'Switch: Stop on Clear' : 'Switch: Auto Repeat' }}
+        <div class="flex gap-2 mt-3">
+          <button class="btn btn-secondary flex-1" @click="toggleMode">
+            {{ gameStore.towerMode === 'auto_repeat' ? 'クリア時停止' : '自動周回' }}
           </button>
-          <button class="btn btn-danger" @click="retireFromTower">Retire</button>
+          <button class="btn btn-danger" @click="retireFromTower">撤退</button>
         </div>
       </div>
 
-      <div v-else class="tower-select">
-        <p class="tower-name">Goblin Tower (Floor 1-20)</p>
-        <div class="floor-select">
-          <label>Target Floor:</label>
+      <!-- Tower Select -->
+      <div v-else class="flex flex-col gap-3">
+        <p class="font-display font-bold text-text-bright">ゴブリンの塔 (フロア 1-20)</p>
+        <div class="flex items-center gap-2">
+          <label class="text-sm">目標フロア:</label>
           <input
             type="number"
             v-model.number="selectedTargetFloor"
@@ -199,114 +212,40 @@ function dismissOffline() {
             class="floor-input"
           />
         </div>
-        <button class="btn btn-primary" @click="enterTower">Enter Tower</button>
+        <button class="btn btn-primary" @click="enterTower">塔に入る</button>
       </div>
     </section>
 
-    <!-- 戦闘ログ -->
-    <section class="battle-log-panel">
-      <h2>Battle Log</h2>
+    <!-- Battle Log -->
+    <section class="panel col-span-full">
+      <h2 class="panel-title">戦闘ログ</h2>
       <div class="battle-log">
         <template v-if="battleStore.battleLogs.length > 0">
           <div v-for="(tick, i) in battleStore.battleLogs.slice(-10)" :key="i" class="log-tick">
-            <div v-for="(entry, j) in tick" :key="j" class="log-entry" :class="`log-${entry.type}`">
+            <div
+              v-for="(entry, j) in tick"
+              :key="j"
+              class="log-entry"
+              :class="`log-${entry.type}`"
+            >
               {{ formatLogEntry(entry) }}
             </div>
           </div>
         </template>
-        <p v-else class="text-muted">No battle logs yet. Enter a tower to start!</p>
+        <p v-else class="text-text-muted text-sm italic">まだ戦闘ログがありません。塔に入って冒険を始めましょう！</p>
       </div>
     </section>
 
-    <div class="gold-display">
-      Gold: {{ formatGold(gameStore.gold) }}
+    <!-- Gold Display -->
+    <div class="col-span-full text-right">
+      <span class="gold-text text-lg">ゴールド: {{ formatGold(gameStore.gold) }}</span>
     </div>
   </div>
 </template>
 
 <style scoped>
-.game-view {
-  display: grid;
-  gap: 1rem;
-  grid-template-columns: 1fr;
-}
-
-@media (min-width: 768px) {
-  .game-view {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-.character-panel, .tower-panel, .battle-log-panel {
-  background: var(--color-bg-secondary);
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  padding: 1rem;
-}
-
-.battle-log-panel {
-  grid-column: 1 / -1;
-}
-
-h2 {
-  margin: 0 0 0.75rem;
-  font-size: 1rem;
-  color: var(--color-primary);
-}
-
-.character-name, .tower-name {
-  font-weight: bold;
-  font-size: 1.125rem;
-}
-
-.stat-bar {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin: 0.5rem 0;
-}
-
-.bar-label {
-  width: 2rem;
-  font-size: 0.75rem;
-  font-weight: bold;
-}
-
-.bar-track {
-  flex: 1;
-  height: 12px;
-  background: var(--color-bg);
-  border-radius: 6px;
-  overflow: hidden;
-}
-
-.bar-fill {
-  height: 100%;
-  border-radius: 6px;
-  transition: width 0.3s ease;
-}
-
-.bar-fill--hp { background: var(--color-hp); }
-.bar-fill--exp { background: var(--color-exp); }
-.bar-fill--enemy { background: #e74c3c; }
-
-.bar-value {
-  font-size: 0.75rem;
-  min-width: 5rem;
-  text-align: right;
-}
-
-.stats {
-  display: flex;
-  gap: 1rem;
-  font-size: 0.875rem;
-  margin-top: 0.5rem;
-}
-
-.potion-info {
-  margin-top: 0.5rem;
-  font-size: 0.875rem;
-  color: var(--color-hp);
+.enemy-bar .stat-bar-fill {
+  background: linear-gradient(90deg, #991b1b, var(--color-danger-glow));
 }
 
 .battle-log {
@@ -325,126 +264,31 @@ h2 {
   padding: 0.125rem 0;
 }
 
-.log-defeat { color: var(--color-gold); }
-.log-level_up { color: var(--color-exp); font-weight: bold; }
-.log-encounter { color: var(--color-text-muted); }
-.log-player_defeated { color: var(--color-danger); font-weight: bold; }
+.log-defeat { color: var(--color-gold); font-weight: 600; }
+.log-level_up { color: var(--color-exp); font-weight: 700; }
+.log-encounter { color: var(--color-text-muted); font-style: italic; }
+.log-player_defeated { color: var(--color-danger); font-weight: 700; text-transform: uppercase; }
 .log-potion { color: var(--color-hp); }
-
-.gold-display {
-  grid-column: 1 / -1;
-  text-align: right;
-  font-size: 1.125rem;
-  font-weight: bold;
-  color: var(--color-gold);
-}
-
-.text-muted {
-  color: var(--color-text-muted);
-}
-
-.enemy-info {
-  margin-top: 0.75rem;
-  padding: 0.5rem;
-  background: var(--color-bg);
-  border-radius: 4px;
-}
-
-.enemy-name {
-  font-weight: bold;
-  color: #e74c3c;
-  margin-bottom: 0.25rem;
-}
-
-.tower-actions {
-  display: flex;
-  gap: 0.5rem;
-  margin-top: 0.75rem;
-}
-
-.tower-select {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.floor-select {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
+.log-recovery { color: var(--color-hp); }
+.log-equipment_drop { color: var(--color-rarity-rare); font-weight: 600; }
+.log-equipment_auto_sold { color: var(--color-gold-dim); }
+.log-lifesteal { color: var(--color-hp); font-style: italic; }
 
 .floor-input {
   width: 4rem;
   padding: 0.375rem 0.5rem;
   border: 1px solid var(--color-border);
-  border-radius: 4px;
+  border-radius: 0.375rem;
   background: var(--color-bg);
-  color: var(--color-text);
+  color: var(--color-text-bright);
   font-size: 0.875rem;
+  font-family: var(--font-body);
   text-align: center;
+  transition: border-color 150ms;
 }
 
-.btn {
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 4px;
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: opacity 0.2s;
+.floor-input:focus {
+  border-color: var(--color-primary);
+  outline: none;
 }
-
-.btn:hover { opacity: 0.8; }
-
-.btn-primary {
-  background: var(--color-primary);
-  color: white;
-}
-
-.btn-secondary {
-  background: var(--color-border);
-  color: var(--color-text);
-}
-
-.btn-danger {
-  background: var(--color-danger);
-  color: white;
-}
-
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 100;
-}
-
-.modal {
-  background: var(--color-bg-secondary);
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-  padding: 1.5rem;
-  max-width: 400px;
-  width: 90%;
-  text-align: center;
-}
-
-.modal h2 {
-  margin-bottom: 1rem;
-}
-
-.offline-summary {
-  text-align: left;
-  margin-bottom: 1rem;
-}
-
-.offline-summary p {
-  margin: 0.25rem 0;
-}
-
-.reward-gold { color: var(--color-gold); font-weight: bold; }
-.reward-exp { color: var(--color-exp); font-weight: bold; }
-.reward-level { color: var(--color-primary); font-weight: bold; }
 </style>

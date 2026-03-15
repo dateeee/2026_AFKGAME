@@ -12,60 +12,47 @@ defineEmits<{
 </script>
 
 <template>
-  <div class="slot-grid">
+  <div class="grid grid-cols-3 gap-2">
     <div
       v-for="slot in SLOTS"
       :key="slot"
       class="slot-item"
       :class="{ filled: equipmentStore.equippedItems[slot] }"
+      :style="equipmentStore.equippedItems[slot] ? { borderColor: RARITY_COLORS[equipmentStore.equippedItems[slot]!.rarity] } : {}"
       @click="$emit('selectSlot', slot)"
     >
-      <div class="slot-label">{{ SLOT_LABELS[slot] }}</div>
-      <div v-if="equipmentStore.equippedItems[slot]" class="slot-equip">
+      <div class="text-[0.6875rem] text-text-muted mb-1">{{ SLOT_LABELS[slot] }}</div>
+      <div v-if="equipmentStore.equippedItems[slot]">
         <span
-          class="equip-name"
+          class="text-sm font-semibold"
           :style="{ color: RARITY_COLORS[equipmentStore.equippedItems[slot]!.rarity] }"
         >
           {{ BASE_NAMES[equipmentStore.equippedItems[slot]!.baseId] ?? equipmentStore.equippedItems[slot]!.baseId }}
         </span>
       </div>
-      <div v-else class="slot-empty">---</div>
+      <div v-else class="text-xs text-text-muted">---</div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.slot-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0.5rem;
-}
 .slot-item {
-  border: 1px solid var(--color-border);
-  border-radius: 4px;
+  border: 2px dashed var(--color-border);
+  border-radius: 0.5rem;
   padding: 0.5rem;
   text-align: center;
   cursor: pointer;
   background: var(--color-bg-secondary);
-  transition: background 0.15s;
+  transition: all 150ms;
 }
+
 .slot-item:hover {
-  background: var(--color-bg-hover, #2a2a2a);
+  background: var(--color-bg-elevated);
+  border-color: var(--color-border-glow);
 }
+
 .slot-item.filled {
-  border-color: var(--color-primary);
-}
-.slot-label {
-  font-size: 0.6875rem;
-  color: var(--color-text-muted);
-  margin-bottom: 0.25rem;
-}
-.equip-name {
-  font-size: 0.8125rem;
-  font-weight: bold;
-}
-.slot-empty {
-  font-size: 0.75rem;
-  color: var(--color-text-muted);
+  border-style: solid;
+  box-shadow: 0 0 8px color-mix(in srgb, var(--color-primary) 20%, transparent);
 }
 </style>

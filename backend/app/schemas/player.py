@@ -17,6 +17,7 @@ class CharacterResponse(CamelModel):
     base_atk: int
     base_def: int
     base_spd: int
+    effective_max_hp: int | None = None
 
 
 class PlayerResponse(CamelModel):

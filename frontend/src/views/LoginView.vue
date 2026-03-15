@@ -35,62 +35,84 @@ async function handleSubmit() {
 </script>
 
 <template>
-  <div class="login-container">
-    <h1 class="game-title">AFK GAME</h1>
-    <p class="subtitle">放置系ファンタジーRPG</p>
+  <div class="mx-auto max-w-[400px] mt-16 px-6 text-center">
+    <!-- Title -->
+    <h1 class="font-display text-[2.5rem] font-bold text-gold game-title-glow mb-1">
+      AFK GAME
+    </h1>
+    <p class="text-text-muted text-sm mb-8">放置系ファンタジーRPG</p>
 
-    <!-- ゲスト開始 -->
+    <!-- Guest Start -->
     <button
-      class="btn btn-guest"
+      class="btn btn-primary w-full py-3 text-base"
       :disabled="authStore.loading"
       @click="handleGuestStart"
     >
       {{ authStore.loading ? '準備中...' : 'ゲストで始める' }}
     </button>
 
-    <div class="divider"><span>または</span></div>
+    <!-- Divider -->
+    <div class="flex items-center my-6">
+      <div class="flex-1 border-b border-border"></div>
+      <span class="px-3 text-sm text-text-muted">または</span>
+      <div class="flex-1 border-b border-border"></div>
+    </div>
 
-    <!-- モード切替タブ -->
-    <div class="tabs">
+    <!-- Mode Tabs -->
+    <div class="flex mb-4">
       <button
-        :class="['tab', { active: mode === 'login' }]"
+        :class="[
+          'flex-1 py-2 text-sm border transition-all duration-150',
+          'rounded-l-lg',
+          mode === 'login'
+            ? 'bg-bg-elevated text-text-bright border-border-glow'
+            : 'bg-transparent text-text-muted border-border hover:bg-bg-secondary'
+        ]"
         @click="mode = 'login'"
       >
         ログイン
       </button>
       <button
-        :class="['tab', { active: mode === 'register' }]"
+        :class="[
+          'flex-1 py-2 text-sm border border-l-0 transition-all duration-150',
+          'rounded-r-lg',
+          mode === 'register'
+            ? 'bg-bg-elevated text-text-bright border-border-glow'
+            : 'bg-transparent text-text-muted border-border hover:bg-bg-secondary'
+        ]"
         @click="mode = 'register'"
       >
         新規登録
       </button>
     </div>
 
-    <!-- フォーム -->
-    <form class="auth-form" @submit.prevent="handleSubmit">
-      <div v-if="mode === 'register'" class="form-group">
-        <label for="displayName">表示名</label>
+    <!-- Form -->
+    <form class="text-left" @submit.prevent="handleSubmit">
+      <div v-if="mode === 'register'" class="mb-3">
+        <label for="displayName" class="block mb-1 text-sm text-text">表示名</label>
         <input
           id="displayName"
           v-model="displayName"
           type="text"
           placeholder="冒険者"
+          class="form-input"
         />
       </div>
 
-      <div class="form-group">
-        <label for="email">メールアドレス</label>
+      <div class="mb-3">
+        <label for="email" class="block mb-1 text-sm text-text">メールアドレス</label>
         <input
           id="email"
           v-model="email"
           type="email"
           required
           placeholder="example@mail.com"
+          class="form-input"
         />
       </div>
 
-      <div class="form-group">
-        <label for="password">パスワード</label>
+      <div class="mb-3">
+        <label for="password" class="block mb-1 text-sm text-text">パスワード</label>
         <input
           id="password"
           v-model="password"
@@ -98,14 +120,15 @@ async function handleSubmit() {
           required
           minlength="8"
           placeholder="8文字以上"
+          class="form-input"
         />
       </div>
 
-      <p v-if="authStore.error" class="error-message">{{ authStore.error }}</p>
+      <p v-if="authStore.error" class="text-danger-glow text-sm my-2">{{ authStore.error }}</p>
 
       <button
         type="submit"
-        class="btn btn-primary"
+        class="btn btn-secondary w-full py-3 text-base mt-2"
         :disabled="authStore.loading"
       >
         {{ authStore.loading ? '処理中...' : (mode === 'login' ? 'ログイン' : '登録') }}
@@ -115,135 +138,31 @@ async function handleSubmit() {
 </template>
 
 <style scoped>
-.login-container {
-  max-width: 400px;
-  margin: 60px auto;
-  padding: 24px;
-  text-align: center;
+.game-title-glow {
+  text-shadow:
+    0 0 20px rgba(139, 92, 246, 0.4),
+    0 0 60px rgba(139, 92, 246, 0.15),
+    0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
-.game-title {
-  font-size: 2rem;
-  margin-bottom: 4px;
-}
-
-.subtitle {
-  color: #888;
-  margin-bottom: 32px;
-}
-
-.btn {
-  display: block;
+.form-input {
   width: 100%;
-  padding: 12px;
-  border: none;
-  border-radius: 8px;
+  padding: 0.625rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.375rem;
+  background: var(--color-bg);
+  color: var(--color-text-bright);
   font-size: 1rem;
-  cursor: pointer;
+  font-family: var(--font-body);
+  transition: border-color 150ms;
 }
 
-.btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+.form-input:focus {
+  border-color: var(--color-primary);
+  outline: none;
 }
 
-.btn-guest {
-  background: #4a9eff;
-  color: #fff;
-}
-
-.btn-guest:hover:not(:disabled) {
-  background: #3a8eef;
-}
-
-.btn-primary {
-  background: #2c7a2c;
-  color: #fff;
-  margin-top: 8px;
-}
-
-.btn-primary:hover:not(:disabled) {
-  background: #1f6a1f;
-}
-
-.divider {
-  display: flex;
-  align-items: center;
-  margin: 24px 0;
-  color: #888;
-}
-
-.divider::before,
-.divider::after {
-  content: '';
-  flex: 1;
-  border-bottom: 1px solid #444;
-}
-
-.divider span {
-  padding: 0 12px;
-  font-size: 0.875rem;
-}
-
-.tabs {
-  display: flex;
-  gap: 0;
-  margin-bottom: 16px;
-}
-
-.tab {
-  flex: 1;
-  padding: 8px;
-  border: 1px solid #444;
-  background: transparent;
-  color: #aaa;
-  cursor: pointer;
-  font-size: 0.875rem;
-}
-
-.tab:first-child {
-  border-radius: 6px 0 0 6px;
-}
-
-.tab:last-child {
-  border-radius: 0 6px 6px 0;
-}
-
-.tab.active {
-  background: #333;
-  color: #fff;
-  border-color: #666;
-}
-
-.auth-form {
-  text-align: left;
-}
-
-.form-group {
-  margin-bottom: 12px;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 4px;
-  font-size: 0.875rem;
-  color: #ccc;
-}
-
-.form-group input {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #444;
-  border-radius: 6px;
-  background: #1a1a1a;
-  color: #fff;
-  font-size: 1rem;
-  box-sizing: border-box;
-}
-
-.error-message {
-  color: #ff6b6b;
-  font-size: 0.875rem;
-  margin: 8px 0;
+.form-input::placeholder {
+  color: var(--color-text-muted);
 }
 </style>

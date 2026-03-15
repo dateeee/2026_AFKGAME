@@ -8,122 +8,97 @@
 
 ## 1. データ設計
 
-### 1.1 ゲーム状態（API レスポンス / LocalStorage キャッシュ）
-```json
+### 1.1 ゲーム状態（API レスポンス: `GET /api/game/state`）
+
+> **注意**: 以下は `GameStateResponse` の実際のJSON構造。フロント・バック間で camelCase を使用。Phase 3以降のフィールドはコメントで記載。
+
+```jsonc
 {
-  "version": "1.0.0",
-  "lastTickAt": 1709856000000,
   "player": {
+    "id": "uuid-string",
     "gold": 1500,
-    "currentDungeon": "dungeon_001",
-    "currentTower": "goblin_tower",   // null = 塔外待機中
-    "currentFloor": 3,                // null = 塔外待機中（currentTowerと連動）
+    "currentTowerId": "goblin_tower",  // null = 塔外待機中
+    "currentFloor": 3,                 // null = 塔外待機中（currentTowerIdと連動）
     "targetFloor": 10,
+    "towerMode": "auto_repeat",        // "auto_repeat" | "stop_on_clear"
+    "hpThreshold": 0.3,                // 撤退条件HP閾値（0.0〜1.0）
     "highestFloor": 12,
-    "towerMode": "auto_repeat",
-    "retreatConditions": {
-      "hpThreshold": 0.3
-    },
-    "towersCleared": {
-      "goblin_tower": { "cleared": true, "highestFloor": 20 },
-      "forest_tower": { "cleared": false, "highestFloor": 15 }
-    }
+    "currentEnemyId": "goblin",        // null = 戦闘中でない
+    "currentEnemyHp": 8                // null = 戦闘中でない
   },
-  "party": ["hero_001", "mage_001", "healer_001", "scout_001"],  // Phase 3〜: パーティ（最大4人）
+  // "party": ["hero_001", ...],       // Phase 3〜: パーティ（最大4人）
   "characters": [
     {
       "id": "hero_001",
       "name": "勇者",
-      "type": "melee",             // Phase 3〜: タイプ（melee/magic/holy/agile）
+      "type": "melee",                 // Phase 3〜: タイプ（melee/magic/holy/agile）
       "level": 5,
       "exp": 120,
-      "limitBreak": 0,             // Phase 3〜: 限界突破回数（0-5）
-      "stats": {
-        "hp": 150,
-        "maxHp": 150,
-        "atk": 25,
-        "def": 12,
-        "spd": 10
-      },
-      "equipment": {
-        "weapon": null,
-        "shield": null,
-        "head": null,
-        "body": null,
-        "arms": null,
-        "waist": null,
-        "legs": null,
-        "ears": null,
-        "ring": null
-      },
-      "skills": {                  // Phase 3〜: スキル情報
-        "learned": ["sword_1", "sword_2", "surv_p1"],
-        "activeSlots": ["sword_1", "sword_2"],  // アクティブスキルセット枠（最大2）
-        "skillPoints": 2           // 未使用SP
-      },
-      "prestige": {                // Phase 5〜: 転生データ（キャラクター個別）
-        "prestigeCount": 0,        // 転生回数
-        "prestigePoints": 0,       // 未使用転生ポイント
-        "prestigeBonus": {
-          "hp": 0,                 // HP強化（投資済みpt数）
-          "atk": 0,                // ATK強化
-          "def": 0,                // DEF強化
-          "spd": 0,                // SPD強化
-          "expBonus": 0,           // EXP獲得ボーナス
-          "skillDamage": 0         // スキルダメージ強化
-        }
-      }
+      "hp": 150,                       // 現在HP
+      "maxHp": 150,                    // 基礎最大HP
+      "baseAtk": 25,                   // 基礎ATK
+      "baseDef": 12,                   // 基礎DEF
+      "baseSpd": 10,                   // 基礎SPD
+      "effectiveMaxHp": 150            // 装備込み最大HP（装備未装着時はmaxHpと同値）
+      // "limitBreak": 0,              // Phase 3〜: 限界突破回数（0-5）
+      // "skills": { ... },            // Phase 3〜: スキル情報
+      // "prestige": { ... }           // Phase 5〜: 転生データ
     }
   ],
-  "battle": {
-    "enemies": [
-      { "id": "goblin", "hp": 8, "maxHp": 35 }
-    ],
-    "turn": 4,
-    "towerGold": 45,
-    "towerLoot": [
-      { "itemId": "goblin_dagger", "quantity": 1 }
-    ]
+  "settings": {
+    "potionThreshold": 0.3,            // ポーション自動使用閾値（0.1〜0.5、0.1刻み。デフォルト0.3）
+    "battleLogCount": 50,              // 戦闘ログ表示件数（20/50/100/200）
+    "toastEnabled": true,              // トースト通知ON/OFF
+    "autoSellRarity": null             // Phase 2〜: 自動売却レアリティ（null/common/uncommon）
   },
   "potions": {
     "hp_potion": 10
   },
-  "potionAutoUseThreshold": 0.5,
-  "inventory": [],
-  "shop": {
-    "dailyResetAt": 1709856000000,
-    "dailyItems": [
-      { "slotIndex": 0, "itemId": "iron_sword", "category": "weapon", "rarity": "common", "sold": false }
-    ]
+  "towersCleared": {
+    "goblin_tower": { "cleared": true, "highestFloor": 20 },
+    "forest_tower": { "cleared": false, "highestFloor": 15 }
   },
-  "base": {
-    "tavern": { "level": 3 },
-    "forge": { "level": 2 },
-    "training_ground": { "level": 1 },
-    "warehouse": { "level": 1 },
-    "market": { "level": 0 }
+  "currentEnemy": {                    // null = 現在戦闘中でない
+    "id": "goblin",
+    "name": "ゴブリン",
+    "hp": 8,
+    "maxHp": 35,
+    "level": 2
   },
-  "materials": {
-    "enhance_stone": 25,
-    "magic_crystal": 3,
-    "rare_ore": 0,
-    "ancient_fragment": 0
-  },
-  "settings": {
-    "potionThreshold": 0.3,          // ポーション自動使用閾値（0.1〜0.5）
-    "battleLogCount": 50,            // 戦闘ログ表示件数（20/50/100/200）
-    "toastEnabled": true,            // トースト通知ON/OFF
-    "autoSellRarity": null           // Phase 2〜: 自動売却レアリティ（null/common/uncommon）
-  },
-  "bossRush": {                        // Phase 5〜: ボスラッシュ状態
-    "isActive": false,
-    "currentWave": 0,
-    "accumulatedGold": 0,
-    "accumulatedExp": 0,
-    "bestWave": 0,
-    "bestWaveHp": 0
+  "equipment": [                       // Phase 2〜: プレイヤーの全装備
+    {
+      "id": "equip_uuid",
+      "baseId": "sword",
+      "slot": "weapon",
+      "rarity": "uncommon",
+      "level": 5,
+      "enhanceLevel": 0,
+      "statAtk": 8,
+      "statDef": null,
+      "statHp": null,
+      "statSpd": null,
+      "lifesteal": null,
+      "isTwoHanded": false,
+      "locked": false,
+      "acquiredAt": "2026-03-15T12:00:00Z"
+    }
+  ],
+  "equipped": {                        // Phase 2〜: スロット→装備IDのマッピング
+    "weapon": "equip_uuid",
+    "shield": null,
+    "head": null,
+    "body": null,
+    "arms": null,
+    "waist": null,
+    "legs": null,
+    "ears": null,
+    "ring": null
   }
-  // ※ キャラクターごとの転生データは characters[].prestige に格納（下記参照）
+  // "inventory": [],                  // Phase 4〜: 素材インベントリ
+  // "shop": { ... },                  // Phase 2〜: 日替わりショップ状態
+  // "base": { ... },                  // Phase 4〜: 施設レベル
+  // "materials": { ... },             // Phase 4〜: 素材所持数
+  // "bossRush": { ... }               // Phase 5〜: ボスラッシュ状態
 }
 ```
 
@@ -282,27 +257,47 @@
 ```
 2026_AFKGAME/
 ├── docs/
-│   ├── game_spec.md              # ゲーム仕様書
-│   ├── tech_spec.md              # 本仕様書（技術設計）
-│   ├── tech_battle_offline.md    # 戦闘ログ・オフライン計算仕様
-│   ├── tech_auth.md              # 認証システム仕様（Phase 2〜）
-│   ├── master_data.md            # マスターデータ定義
-│   ├── glossary.md              # 用語集（ゲーム・技術用語）
-│   ├── open_specs.md             # 未確定仕様一覧
-│   ├── reviews/                  # 仕様レビュー結果（/doc-review コマンドで自動生成）
-│   └── towers/                   # 塔別マスターデータ
-│       ├── TOWERS_OVERVIEW.md    # 全塔概要一覧（推奨LV・フロア数・ダンジョン構成）
-│       ├── 000_テンプレート.md    # 新規塔作成用テンプレート
-│       ├── 001_ゴブリンの塔.md    # ゴブリンの塔（敵・構成・ドロップ）
-│       ├── 002_森の塔.md         # 森の塔（敵・構成・ドロップ）
-│       ├── 003_獣の塔.md         # 獣の塔（敵・構成・ドロップ）
-│       ├── 004_毒沼の塔.md       # 毒沼の塔（敵・構成・ドロップ）
-│       ├── 005_業火の塔.md       # 業火の塔（敵・構成・ドロップ）
-│       ├── 006_氷雪の塔.md       # 氷雪の塔（敵・構成・ドロップ）
-│       ├── 007_砂漠の塔.md       # 砂漠の塔（敵・構成・ドロップ）
-│       ├── 008_深海の塔.md       # 深海の塔（敵・構成・ドロップ）
-│       ├── 009_黄昏の塔.md       # 黄昏の塔（敵・構成・ドロップ）
-│       └── 010_天空の塔.md       # 天空の塔（敵・構成・ドロップ）
+│   ├── design/                    # ゲームデザイン仕様
+│   │   └── game_spec.md           # ゲーム仕様書（システム設計・バランス・UI）
+│   ├── tech/                      # 技術仕様
+│   │   ├── tech_spec.md           # 本仕様書（技術設計）
+│   │   ├── tech_battle_offline.md # 戦闘ログ・オフライン計算仕様
+│   │   └── tech_auth.md           # 認証システム仕様（Phase 2〜）
+│   ├── data/                      # マスターデータ
+│   │   ├── master_data.md         # マスターデータ定義（共通数値定義）
+│   │   ├── towers/                # 塔別マスターデータ
+│   │   │   ├── TOWERS_OVERVIEW.md # 全塔概要一覧（推奨LV・フロア数・ダンジョン構成）
+│   │   │   ├── 000_テンプレート.md # 新規塔作成用テンプレート
+│   │   │   ├── 001_ゴブリンの塔.md # ゴブリンの塔（敵・構成・ドロップ）
+│   │   │   ├── 002_森の塔.md      # 森の塔（敵・構成・ドロップ）
+│   │   │   ├── 003_獣の塔.md      # 獣の塔（敵・構成・ドロップ）
+│   │   │   ├── 004_毒沼の塔.md    # 毒沼の塔（敵・構成・ドロップ）
+│   │   │   ├── 005_業火の塔.md    # 業火の塔（敵・構成・ドロップ）
+│   │   │   ├── 006_氷雪の塔.md    # 氷雪の塔（敵・構成・ドロップ）
+│   │   │   ├── 007_砂漠の塔.md    # 砂漠の塔（敵・構成・ドロップ）
+│   │   │   ├── 008_深海の塔.md    # 深海の塔（敵・構成・ドロップ）
+│   │   │   ├── 009_黄昏の塔.md    # 黄昏の塔（敵・構成・ドロップ）
+│   │   │   └── 010_天空の塔.md    # 天空の塔（敵・構成・ドロップ）
+│   │   └── skills/                # スキル系統別マスターデータ
+│   │       ├── SKILLS_OVERVIEW.md # スキルシステム概要・共通ルール
+│   │       ├── 000_テンプレート.md # 新規系統作成用テンプレート
+│   │       ├── 001_剣術系統.md     # 剣術系統（物理単体攻撃）
+│   │       ├── 002_魔法系統.md     # 魔法系統（魔法攻撃）
+│   │       ├── 003_回復系統.md     # 回復系統（HP回復・蘇生）
+│   │       ├── 004_強化系統.md     # 強化系統（バフ）
+│   │       ├── 005_弱体系統.md     # 弱体系統（デバフ・状態異常）
+│   │       └── 006_生存術系統.md   # 生存術系統（耐久・防御）
+│   ├── glossary.md                # 用語集（ゲーム・技術用語）
+│   ├── open_specs.md              # 未確定仕様一覧
+│   └── reviews/                   # 仕様レビュー結果（/doc-review コマンドで自動生成）
+│
+├── diagrams/                      # 設計図（Mermaid）
+│   ├── er_diagram.md              # ER図（データベース設計）
+│   ├── class_diagram.md           # クラス図（ドメインモデル）
+│   ├── screen_transition.md       # 画面遷移図
+│   ├── battle_flow.md             # 戦闘ターン処理フロー図
+│   ├── system_architecture.md     # システム構成図
+│   └── api_sequence.md            # APIシーケンス図
 │
 ├── frontend/                      # Vue.js SPA
 │   ├── src/
@@ -314,30 +309,34 @@
 │   │   │   ├── gameStore.ts       # ゲーム状態管理
 │   │   │   ├── battleStore.ts     # 戦闘状態管理
 │   │   │   ├── playerStore.ts     # プレイヤー情報
+│   │   │   ├── equipmentStore.ts  # 装備管理（Phase 2〜）
 │   │   │   └── authStore.ts       # 認証状態管理（Phase 2〜）
 │   │   ├── composables/           # Composition API ロジック
 │   │   │   ├── usePolling.ts      # ポーリング制御（tick API呼び出し）
 │   │   │   ├── useBattleLocal.ts  # MVP用: フロント側tick計算（API未接続時）
-│   │   │   ├── useGameLoop.ts     # ゲーム起動・状態管理
-│   │   │   └── useAuth.ts         # 認証ロジック（Phase 2〜）
+│   │   │   └── useGameLoop.ts     # ゲーム起動・状態管理
 │   │   ├── components/            # UIコンポーネント
-│   │   │   ├── BattleLog.vue      # 戦闘ログ表示
-│   │   │   ├── CharacterStatus.vue # キャラステータス
-│   │   │   ├── TowerInfo.vue      # 塔・階層情報
-│   │   │   ├── HpBar.vue          # HPバー
-│   │   │   └── OfflineRewardModal.vue # オフライン報酬モーダル
+│   │   │   └── equipment/         # 装備関連コンポーネント（Phase 2〜）
+│   │   │       ├── EquipmentCard.vue      # 装備カード表示
+│   │   │       ├── EquipmentCompare.vue   # 装備比較
+│   │   │       ├── EquipmentInventory.vue # 装備インベントリ
+│   │   │       └── EquipmentSlotGrid.vue  # 装備スロット一覧
 │   │   ├── views/                 # ページコンポーネント
 │   │   │   ├── GameView.vue       # メインゲーム画面
-│   │   │   ├── LoginView.vue      # ログイン画面（Phase 2〜）
-│   │   │   ├── RegisterView.vue   # 登録画面（Phase 2〜）
+│   │   │   ├── LoginView.vue      # ログイン・登録統合画面（Phase 2〜。モード切替でログイン/登録を切り替え）
+│   │   │   ├── RegisterView.vue   # /register → LoginView?mode=register へリダイレクト（Phase 2〜）
+│   │   │   ├── SettingsView.vue   # 設定画面
 │   │   │   ├── ShopView.vue       # ショップ画面（Phase 1〜）
 │   │   │   ├── EquipmentView.vue  # 装備画面（Phase 2〜）
 │   │   │   ├── PartyView.vue      # パーティ編成画面（Phase 3〜）
 │   │   │   └── BaseView.vue       # 拠点画面（Phase 4〜）
 │   │   ├── api/                   # API通信
-│   │   │   └── client.ts          # FastAPI との通信レイヤー
+│   │   │   ├── client.ts          # FastAPI との通信レイヤー
+│   │   │   └── auth.ts            # 認証API（Phase 2〜）
 │   │   ├── types/                 # TypeScript 型定義
 │   │   │   └── game.ts            # ゲーム関連の型
+│   │   ├── utils/                 # ユーティリティ
+│   │   │   └── format.ts          # フォーマット関数
 │   │   └── assets/
 │   │       ├── icons/             # アイテム・装備アイコン
 │   │       └── styles/
@@ -350,30 +349,46 @@
 │   ├── app/
 │   │   ├── main.py                # FastAPI エントリーポイント
 │   │   ├── config.py              # 設定・定数
+│   │   ├── dependencies.py        # 依存性注入（認証・プレイヤー取得）
+│   │   ├── middleware.py          # ミドルウェア（リクエストログ等）
+│   │   ├── exceptions.py         # カスタム例外
+│   │   ├── logging_config.py     # ログ設定
 │   │   ├── models/                # SQLAlchemy モデル（DB定義）
 │   │   │   ├── player.py
 │   │   │   ├── character.py
 │   │   │   ├── item.py
+│   │   │   ├── equipment.py       # 装備モデル（Phase 2〜）
 │   │   │   └── user.py            # User, RefreshToken, EmailVerificationToken（Phase 2〜）
 │   │   ├── schemas/               # Pydantic スキーマ（API I/O）
+│   │   │   ├── __init__.py        # CamelModel ベースクラス
 │   │   │   ├── player.py
-│   │   │   ├── character.py
 │   │   │   ├── battle.py
+│   │   │   ├── equipment.py       # 装備スキーマ（Phase 2〜）
+│   │   │   ├── shop.py            # ショップスキーマ
+│   │   │   ├── tower.py           # 塔関連スキーマ
 │   │   │   └── auth.py            # 認証関連スキーマ（Phase 2〜）
 │   │   ├── routers/               # APIルーター
 │   │   │   ├── auth.py            # 認証
-│   │   │   ├── game.py            # ゲーム状態取得・保存
-│   │   │   ├── battle.py          # 戦闘結果計算
-│   │   │   ├── offline.py         # オフライン報酬
+│   │   │   ├── game.py            # ゲーム状態取得・設定更新
+│   │   │   ├── battle.py          # 戦闘tick処理（オフライン計算含む）
+│   │   │   ├── tower.py           # 塔選択・退却・モード変更
+│   │   │   ├── shop.py            # ショップ商品一覧・購入
+│   │   │   ├── equipment.py       # 装備一覧・装着・売却・ロック（Phase 2〜）
 │   │   │   ├── base.py            # 施設建設・レベルアップ（Phase 4〜）
 │   │   │   └── forge.py           # 装備強化・製作・分解（Phase 4〜）
 │   │   ├── services/              # ビジネスロジック
-│   │   │   ├── battle_service.py  # 戦闘計算
-│   │   │   ├── offline_service.py # オフライン報酬計算
-│   │   │   ├── tower_service.py   # 塔・階層・敵データ
+│   │   │   ├── battle_service.py  # 戦闘計算・エンカウント処理（オフライン報酬含む）
+│   │   │   ├── equipment_service.py # 装備ロジック（Phase 2〜）
 │   │   │   ├── auth_service.py    # 認証ロジック（Phase 2〜）
+│   │   │   ├── game_state_builder.py # ゲーム状態レスポンス構築
 │   │   │   ├── base_service.py    # 施設建設・レベルアップ（Phase 4〜）
 │   │   │   └── forge_service.py   # 装備強化・製作・分解（Phase 4〜）
+│   │   ├── master_data/           # マスターデータ（Python定数）
+│   │   │   ├── enemies.py         # 敵データ
+│   │   │   ├── towers.py          # 塔データ
+│   │   │   ├── items.py           # アイテムデータ
+│   │   │   ├── equipment.py       # 装備ベースデータ
+│   │   │   └── characters.py      # キャラクター成長データ
 │   │   └── db/
 │   │       └── database.py        # DB接続設定
 │   ├── requirements.txt
@@ -466,7 +481,7 @@ PASSWORD_MIN_LENGTH = 8
 | メソッド | パス | 説明 |
 |---------|------|------|
 | GET | `/api/game/state` | ゲーム状態の取得（起動時・復帰時に呼ぶ） |
-| PUT | `/api/game/settings` | プレイヤー設定の更新（音量等） |
+| PUT | `/api/game/settings` | プレイヤー設定の更新（ポーション閾値・戦闘ログ表示数・通知設定・自動売却レアリティ） |
 
 ### 戦闘（tick）
 | メソッド | パス | 説明 |
@@ -480,12 +495,13 @@ PASSWORD_MIN_LENGTH = 8
 | POST | `/api/tower/retire` | 現戦闘終了後にリタイア（進行中の階の戦闘完了後に撤退） |
 | PUT | `/api/tower/mode` | 進行モードの切り替え（進行中でも変更可） |
 | PUT | `/api/tower/retreat-conditions` | 撤退条件の更新（`hpThreshold`: 0〜1） |
-| GET | `/api/shop/lineup` | ショップの現在の品揃えを取得（常設＋日替わり） |
-| POST | `/api/shop/buy` | ショップでアイテム購入。常設商品: `itemId` + `quantity`（ポーションID等は常設扱い、在庫無制限）。日替わり商品: `dailySlotIndex`（枠番号指定、各1個限り） |
-| PUT | `/api/potion/config` | ポーション自動使用の閾値設定（`threshold`: 0.3/0.5/0.7） |
+| GET | `/api/shop/lineup` | ショップの現在の品揃えを取得。Phase 1: 常設のみ。Phase 2〜: 常設＋日替わり |
+| POST | `/api/shop/buy` | ショップでアイテム購入。常設商品: `itemId` + `quantity`（ポーションID等は常設扱い、在庫無制限）。Phase 2〜: 日替わり商品は `dailySlotIndex`（枠番号指定、各1個限り）を追加 |
+| GET | `/api/equipment/list` | プレイヤーの全装備一覧を取得（Phase 2〜） |
 | POST | `/api/equipment/equip` | 装備の変更（Phase 2〜） |
-| POST | `/api/equipment/sell` | 装備売却（`equipmentId`）。装備を消費してゴールドを獲得（売却価格 = 5 × レアリティ倍率 × 装備レベル）（Phase 2〜） |
-| POST | `/api/item/sell` | アイテム売却（`itemId`, `quantity`）。換金アイテムを売却してゴールドを獲得（Phase 2〜） |
+| POST | `/api/equipment/sell` | 装備売却（`equipmentIds`）。装備を消費してゴールドを獲得（売却価格 = 5 × レアリティ倍率 × 装備レベル）（Phase 2〜） |
+| POST | `/api/equipment/lock` | 装備のロック/アンロック切替（`equipmentId`）（Phase 2〜） |
+| POST | `/api/item/sell` | アイテム売却（`itemId`, `quantity`）。換金アイテム・素材を売却してゴールドを獲得（Phase 4〜） |
 
 ### パーティ・スキル（Phase 3〜）
 | メソッド | パス | 説明 |
@@ -802,3 +818,5 @@ Phase 1 から **フロントエンド（Vue + Vite）とバックエンド（Fa
 | 2026-03-09 | ゲーム状態JSONの settings フィールドを拡張（potionThreshold, battleLogCount, toastEnabled, autoSellRarity） |
 | 2026-03-15 | §6 にログ設計セクションを新設（ログレベル方針、フォーマット、認証エラー詳細ログ、リクエストログミドルウェア、機密情報マスク規則、統一エラーレスポンス形式、エラーコード体系、グローバル例外ハンドラ） |
 | 2026-03-15 | §6 ログ設計・エラーハンドリングを仮版から正式版に確定 |
+| 2026-03-15 | レビュー指摘対応: §2 ディレクトリ構成を新構造（design/tech/data/diagrams/skills）に更新。§1.1 potionAutoUseThreshold重複フィールドを削除、potionThresholdを0.1〜0.5/0.1刻みに統一。§5 ポーション閾値APIを0.1〜0.5に更新 |
+| 2026-03-15 | tech_battle_offline.md §3.2 エンカウント抽選ロジック追記（重み付きプール抽選・均等確率体数決定・Phase共通ロジック）、敵スキル処理フロー追記（Phase 5ボスラッシュWave 11+、CD管理は味方と同一） |

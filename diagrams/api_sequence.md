@@ -1,6 +1,6 @@
 # APIシーケンス図
 
-> 技術仕様: [tech_spec.md §5,§7](../tech/tech_spec.md)
+> 技術仕様: [tech_spec.md §5,§7](docs/tech/tech_spec.md)
 
 ## 1. 初回アクセス（ゲスト作成 — Phase 1）
 
@@ -21,9 +21,10 @@ sequenceDiagram
     API->>DB: Character作成 (勇者, melee, LV1)
     API->>DB: HPポーション x5 付与 (チュートリアル用)
     DB-->>API: OK
-    API-->>B: { guest_token: "uuid-v4" }
+    API-->>B: { access_token, refresh_token,<br/>user: {id, is_guest: true} }
 
-    B->>LS: guest_token を保存
+    B->>LS: refresh_token を保存
+    B->>B: access_token をメモリ(Pinia)に保持
 
     B->>API: GET /api/game/state<br/>Authorization: Bearer {token}
     API->>DB: Player + Characters + Inventory + Settings 取得
@@ -130,6 +131,8 @@ sequenceDiagram
     participant API as FastAPI
     participant DB as Database
 
+    Note over B: ダンジョン・塔一覧はゲーム状態の<br/>マスターデータから取得（専用APIなし）
+
     B->>API: POST /api/tower/select<br/>{<br/>  towerId: "forest_tower",<br/>  targetFloor: 15,<br/>  towerMode: "auto_repeat"<br/>}
 
     API->>DB: TowerClearRecord確認<br/>(前提塔クリア済み?)
@@ -171,7 +174,9 @@ sequenceDiagram
     API->>DB: ShopDailyState取得
     API->>API: リセット時刻チェック<br/>(00:00 UTC超過なら更新)
 
-    opt 日替わりリセット
+    Note over API: 日替わりショップは Phase 2 で実装<br/>Phase 1 では常設ポーションのみ
+
+    opt 日替わりリセット (Phase 2~)
         API->>API: 新ラインナップ生成<br/>(到達階層に応じたレアリティ)
         API->>DB: ShopDailySlot x5 更新
     end
@@ -223,11 +228,19 @@ sequenceDiagram
 
     Note over B: === 売却 ===
 
-    B->>API: POST /api/equipment/sell<br/>{ equipmentId: "old_dagger_001" }
+    B->>API: POST /api/equipment/sell<br/>{ equipmentIds: ["old_dagger_001"] }
     API->>API: ロック確認: locked=false ✓<br/>装備中でないことを確認 ✓<br/>売却価格 = 5 x 1.0(コモン) x 5(LV) = 25G
     API->>DB: Equipment削除
     API->>DB: gold += 25
     API-->>B: { success: true, gold: 900, soldPrice: 25 }
+
+    Note over B: === アイテム売却 ===
+
+    B->>API: POST /api/item/sell<br/>{ itemId: "goblin_fang", quantity: 3 }
+    API->>API: 換金アイテム確認 ✓<br/>所持数チェック: 5 >= 3 ✓<br/>売却価格 = 単価 x 3
+    API->>DB: InventoryItem.quantity -= 3
+    API->>DB: gold += 売却額
+    API-->>B: { success: true, gold: 950, soldPrice: 50 }
 ```
 
 ## 7. スキル習得・リセットフロー（Phase 3）
@@ -430,6 +443,13 @@ sequenceDiagram
     API-->>B: { ranking: [{rank, name, wave, hp}, ...],<br/>  myRank: 42 }
 ```
 
+## 11.5. イベントダンジョンフロー（Phase 5）
+
+> イベントダンジョン（試練の迷宮・宝物庫・修練場）は通常の塔と同じデータ構造で管理される。
+> 難易度（初級/中級/上級）は `Modifier`（bonus型: 報酬倍率 ×1/2/4）で実装し、
+> 塔選択API `/api/tower/select` で同一のフローを使用する。
+> 専用APIエンドポイントは不要。
+
 ## 12. 転生フロー（Phase 5）
 
 ```mermaid
@@ -542,7 +562,7 @@ sequenceDiagram
     Note over B,Google: === ゲスト→本登録 ===
 
     B->>API: POST /api/auth/link-account<br/>{ email, password }<br/>Authorization: Bearer {guest_token}
-    API->>DB: ゲストUserにemail/password紐づけ<br/>auth_type = email
+    API->>DB: ゲストUserにemail/password紐づけ<br/>is_guest = false
     API->>DB: 確認メール送信
     API->>DB: RefreshToken生成
     API-->>B: { accessToken, refreshToken }
@@ -554,4 +574,20 @@ sequenceDiagram
     API->>DB: トークン検証・ローテーション<br/>(旧トークン無効化)
     API->>DB: 新RefreshToken生成
     API-->>B: { newAccessToken, newRefreshToken }
+
+    Note over B,Google: === パスワードリセット ===
+
+    B->>API: POST /api/auth/password-reset/request<br/>{ email }
+    API->>DB: Userをemail検索
+    API->>API: リセットトークン生成
+    API->>DB: リセットトークン保存
+    API-->>B: { success: true, message: "リセットメール送信" }
+
+    Note over B: ユーザーがメール内リンクをクリック
+
+    B->>API: POST /api/auth/password-reset/confirm<br/>{ token, newPassword }
+    API->>DB: トークン検証（有効期限・使用済みチェック）
+    API->>API: bcryptハッシュ生成
+    API->>DB: password_hash更新<br/>トークンを使用済みに
+    API-->>B: { success: true }
 ```

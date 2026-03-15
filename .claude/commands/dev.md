@@ -20,7 +20,7 @@
 5. `docs/data/master_data.md` — マスターデータ（数値定義）
 6. `docs/data/towers/` 配下の塔データ（塔関連の場合）
 7. `docs/data/skills/` 配下のスキルデータ（スキル関連の場合）
-8. `docs/diagrams/` 配下の設計図（ER図・クラス図・APIシーケンス図等）
+8. `diagrams/` 配下の設計図（ER図・クラス図・APIシーケンス図等）
 9. `docs/open_specs.md` — 未確定仕様の確認
 
 **未確定仕様チェック**: 実装対象に未確定仕様（open_specs.md で `[ ]`）が含まれる場合、ユーザーに通知し、実装を進めるか仕様確定を先にするか確認する。

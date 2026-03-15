@@ -1,6 +1,6 @@
 # ER図（エンティティ関連図）
 
-> 技術仕様: [tech_spec.md](../tech/tech_spec.md) / 認証仕様: [tech_auth.md](../tech/tech_auth.md)
+> 技術仕様: [tech_spec.md](docs/tech/tech_spec.md) / 認証仕様: [tech_auth.md](docs/tech/tech_auth.md)
 
 ## 認証・アカウント系
 
@@ -12,19 +12,20 @@ erDiagram
     User ||--o{ EmailVerificationToken : "has"
 
     User {
-        uuid id PK
+        string id PK "user_UUID / guest_UUID"
         string email UK "nullable (guest)"
         string password_hash "nullable (guest/OAuth)"
         string google_id UK "nullable"
-        enum auth_type "guest / email / google"
+        string display_name "表示名"
+        boolean is_guest "default true"
         boolean email_verified "default false"
         datetime created_at
         datetime last_login_at
     }
 
     RefreshToken {
-        uuid id PK
-        uuid user_id FK "references User.id"
+        int id PK "auto increment"
+        string user_id FK "references User.id"
         string token_hash UK
         datetime expires_at "30日後"
         boolean revoked "default false"
@@ -32,8 +33,8 @@ erDiagram
     }
 
     EmailVerificationToken {
-        uuid id PK
-        uuid user_id FK "references User.id"
+        int id PK "auto increment"
+        string user_id FK "references User.id"
         string token_hash UK
         datetime expires_at "24時間後"
         boolean used "default false"
@@ -62,14 +63,18 @@ erDiagram
     ActiveSkillSlot }o--|| SkillMaster : "references"
 
     Player {
-        uuid id PK
-        uuid user_id FK "references User.id"
+        string id PK
+        string user_id FK "references User.id"
         bigint gold "default 0, BIGINT(64bit)"
         string current_tower_id FK "nullable, references Tower.id"
         int current_floor "nullable, 塔外時null"
         int target_floor "目標階"
         enum tower_mode "auto_repeat / stop_on_clear"
         float hp_threshold "撤退HP閾値 0.0-1.0"
+        string current_enemy_id "nullable, 現在戦闘中の敵ID"
+        int current_enemy_hp "nullable, 敵の残HP"
+        bigint run_gold "塔内累積ゴールド"
+        int highest_floor "最高到達階"
         datetime last_tick_at "最終tick処理時刻"
         datetime created_at
     }
@@ -88,7 +93,7 @@ erDiagram
         uuid player_id FK "references Player.id"
         string name "キャラクター名"
         enum type "melee / magic / holy / agile"
-        enum rarity "common / uncommon / rare / epic / legendary"
+        enum rarity "common-legendary (Phase 3〜)"
         int level "1-9999"
         bigint exp "現在レベル内の累積EXP"
         int limit_break "0-5 限界突破回数"
@@ -130,9 +135,8 @@ erDiagram
     }
 
     CharacterEquipSlot {
-        uuid id PK
-        uuid character_id FK "references Character.id"
-        enum slot "weapon/shield/head/body/arms/waist/legs/ears/ring"
+        uuid character_id PK_FK "references Character.id"
+        enum slot PK "weapon/shield/head/body/arms/waist/legs/ears/ring"
         uuid equipment_id FK "nullable, references Equipment.id"
     }
 

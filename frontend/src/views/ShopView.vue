@@ -9,12 +9,12 @@ const gameStore = useGameStore()
 const playerStore = usePlayerStore()
 
 interface ShopItem {
-  item_id: string
+  itemId: string
   name: string
   price: number
-  heal_ratio: number
-  quantity_owned: number
-  stack_limit: number
+  healRatio: number
+  quantityOwned: number
+  stackLimit: number
 }
 
 const shopItems = ref<ShopItem[]>([])
@@ -30,7 +30,7 @@ async function loadShop() {
     const data = await getShopLineup()
     shopItems.value = data.lineup
   } catch (e) {
-    message.value = 'Failed to load shop'
+    message.value = 'ショップの読み込みに失敗しました'
   }
 }
 
@@ -39,11 +39,10 @@ async function buyItem(itemId: string) {
   try {
     const result = await postShopBuy(itemId, buyQuantity.value)
     gameStore.gold = result.gold
-    // Refresh shop and player state
     await loadShop()
     const state = await getGameState()
     playerStore.loadFromState(state)
-    message.value = `Purchased ${buyQuantity.value}x!`
+    message.value = `${buyQuantity.value}個購入しました！`
     setTimeout(() => { message.value = '' }, 2000)
   } catch (e) {
     message.value = (e as Error).message
@@ -52,32 +51,37 @@ async function buyItem(itemId: string) {
 </script>
 
 <template>
-  <div class="shop-view">
-    <h1>Shop</h1>
-    <p class="gold-info">Gold: {{ formatGold(gameStore.gold) }}</p>
+  <div class="mx-auto max-w-[480px]">
+    <h1 class="font-display text-xl font-bold text-accent mb-2">ショップ</h1>
+    <p class="gold-text text-lg mb-4">ゴールド: {{ formatGold(gameStore.gold) }}</p>
 
-    <div v-if="message" class="shop-message">{{ message }}</div>
+    <div
+      v-if="message"
+      class="p-2 mb-3 bg-bg-secondary border border-border rounded-lg text-sm"
+    >
+      {{ message }}
+    </div>
 
-    <div class="shop-items">
-      <div v-for="item in shopItems" :key="item.item_id" class="shop-item">
-        <div class="item-info">
-          <span class="item-name">{{ item.name }}</span>
-          <span class="item-detail">HP {{ (item.heal_ratio * 100).toFixed(0) }}% recovery</span>
-          <span class="item-price">{{ item.price }}G</span>
-          <span class="item-owned">Owned: {{ item.quantity_owned }} / {{ item.stack_limit }}</span>
+    <div class="space-y-3">
+      <div v-for="item in shopItems" :key="item.itemId" class="panel">
+        <div class="flex flex-wrap gap-2 items-baseline mb-3">
+          <span class="font-display font-semibold text-text-bright">{{ item.name }}</span>
+          <span class="text-sm text-hp">HP {{ (item.healRatio * 100).toFixed(0) }}% 回復</span>
+          <span class="gold-text text-sm">{{ item.price }}G</span>
+          <span class="text-xs text-text-muted">所持: {{ item.quantityOwned }} / {{ item.stackLimit }}</span>
         </div>
-        <div class="item-actions">
-          <select v-model.number="buyQuantity" class="qty-select">
+        <div class="flex gap-2 items-center">
+          <select v-model.number="buyQuantity" class="shop-select">
             <option :value="1">1</option>
             <option :value="5">5</option>
             <option :value="10">10</option>
           </select>
           <button
             class="btn btn-primary"
-            @click="buyItem(item.item_id)"
-            :disabled="gameStore.gold < item.price * buyQuantity || item.quantity_owned + buyQuantity > item.stack_limit"
+            @click="buyItem(item.itemId)"
+            :disabled="gameStore.gold < item.price * buyQuantity || item.quantityOwned + buyQuantity > item.stackLimit"
           >
-            Buy ({{ formatGold(item.price * buyQuantity) }}G)
+            購入 ({{ formatGold(item.price * buyQuantity) }}G)
           </button>
         </div>
       </div>
@@ -86,96 +90,19 @@ async function buyItem(itemId: string) {
 </template>
 
 <style scoped>
-.shop-view {
-  max-width: 480px;
-}
-
-h1 {
-  color: var(--color-primary);
-  margin-bottom: 0.5rem;
-}
-
-.gold-info {
-  color: var(--color-gold);
-  font-weight: bold;
-  font-size: 1.125rem;
-  margin-bottom: 1rem;
-}
-
-.shop-message {
-  padding: 0.5rem;
-  margin-bottom: 0.75rem;
-  background: var(--color-bg-secondary);
+.shop-select {
+  padding: 0.375rem 0.5rem;
   border: 1px solid var(--color-border);
-  border-radius: 4px;
-  font-size: 0.875rem;
-}
-
-.shop-item {
-  background: var(--color-bg-secondary);
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  padding: 1rem;
-  margin-bottom: 0.75rem;
-}
-
-.item-info {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  align-items: baseline;
-  margin-bottom: 0.75rem;
-}
-
-.item-name {
-  font-weight: bold;
-  font-size: 1rem;
-}
-
-.item-detail {
-  color: var(--color-hp);
-  font-size: 0.8125rem;
-}
-
-.item-price {
-  color: var(--color-gold);
-  font-weight: bold;
-}
-
-.item-owned {
-  color: var(--color-text-muted);
-  font-size: 0.8125rem;
-}
-
-.item-actions {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-}
-
-.qty-select {
-  padding: 0.375rem;
-  border: 1px solid var(--color-border);
-  border-radius: 4px;
+  border-radius: 0.375rem;
   background: var(--color-bg);
   color: var(--color-text);
   font-size: 0.875rem;
+  font-family: var(--font-body);
+  transition: border-color 150ms;
 }
 
-.btn {
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 4px;
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: opacity 0.2s;
-}
-
-.btn:hover { opacity: 0.8; }
-.btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-.btn-primary {
-  background: var(--color-primary);
-  color: white;
+.shop-select:focus {
+  border-color: var(--color-primary);
+  outline: none;
 }
 </style>

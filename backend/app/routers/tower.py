@@ -4,7 +4,6 @@ import logging
 import math
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 logger = logging.getLogger("afkgame.tower")
@@ -14,21 +13,9 @@ from app.dependencies import get_current_player
 from app.models.player import Player
 from app.master_data.towers import TOWERS, get_tower
 from app.master_data.characters import required_exp
+from app.schemas.tower import TowerSelectRequest, TowerModeRequest, RetreatConditionsRequest
 
 router = APIRouter(prefix="/api/tower", tags=["tower"])
-
-
-class TowerSelectRequest(BaseModel):
-    tower_id: str
-    target_floor: int
-
-
-class TowerModeRequest(BaseModel):
-    mode: str  # "auto_repeat" | "stop_on_clear"
-
-
-class RetreatConditionsRequest(BaseModel):
-    hp_threshold: float
 
 
 @router.post("/select")
@@ -46,9 +33,13 @@ def select_tower(
     if req.target_floor < 1 or req.target_floor > tower.total_floors:
         raise HTTPException(status_code=400, detail="Invalid target floor")
 
+    if req.mode not in ("auto_repeat", "stop_on_clear"):
+        raise HTTPException(status_code=400, detail="Invalid mode")
+
     player.current_tower_id = req.tower_id
     player.current_floor = 1
     player.target_floor = req.target_floor
+    player.tower_mode = req.mode
     player.current_enemy_id = None
     player.current_enemy_hp = None
     player.run_gold = 0

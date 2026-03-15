@@ -100,11 +100,11 @@ async function fetchWithRetry<T>(url: string, options: RequestInit = {}): Promis
       if (response.status === 401 && attempt === 0) {
         const refreshed = await tryRefresh()
         if (refreshed) continue
-        throw new Error('Authentication failed')
+        throw new Error('認証に失敗しました')
       }
 
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+        throw new Error(`サーバーエラー (${response.status})`)
       }
       return await response.json() as T
     } catch (error) {
@@ -138,10 +138,10 @@ export async function putSettings(settings: Partial<Settings>): Promise<Settings
 }
 
 /** 塔選択 */
-export async function postTowerSelect(towerId: string, targetFloor: number) {
+export async function postTowerSelect(towerId: string, targetFloor: number, mode: string = 'auto_repeat') {
   return fetchWithRetry<{ status: string }>('/api/tower/select', {
     method: 'POST',
-    body: JSON.stringify({ tower_id: towerId, target_floor: targetFloor }),
+    body: JSON.stringify({ towerId, targetFloor, mode }),
   })
 }
 
@@ -164,27 +164,27 @@ export async function putTowerMode(mode: string) {
 export async function putRetreatConditions(hpThreshold: number) {
   return fetchWithRetry<{ status: string }>('/api/tower/retreat-conditions', {
     method: 'PUT',
-    body: JSON.stringify({ hp_threshold: hpThreshold }),
+    body: JSON.stringify({ hpThreshold }),
   })
 }
 
 /** ショップ商品一覧 */
 export async function getShopLineup() {
   return fetchWithRetry<{ lineup: Array<{
-    item_id: string
+    itemId: string
     name: string
     price: number
-    heal_ratio: number
-    quantity_owned: number
-    stack_limit: number
+    healRatio: number
+    quantityOwned: number
+    stackLimit: number
   }> }>('/api/shop/lineup')
 }
 
 /** ショップ購入 */
 export async function postShopBuy(itemId: string, quantity: number) {
-  return fetchWithRetry<{ status: string; gold: number; item_id: string; quantity: number }>('/api/shop/buy', {
+  return fetchWithRetry<{ status: string; gold: number; itemId: string; quantity: number }>('/api/shop/buy', {
     method: 'POST',
-    body: JSON.stringify({ item_id: itemId, quantity }),
+    body: JSON.stringify({ itemId, quantity }),
   })
 }
 

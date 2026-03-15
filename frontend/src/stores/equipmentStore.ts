@@ -14,11 +14,11 @@ export const RARITY_LABELS: Record<string, string> = {
 
 /** レアリティカラー */
 export const RARITY_COLORS: Record<string, string> = {
-  common: '#aaa',
-  uncommon: '#4caf50',
-  rare: '#2196f3',
-  epic: '#9c27b0',
-  legendary: '#ff9800',
+  common: '#9ca3af',
+  uncommon: '#4ade80',
+  rare: '#60a5fa',
+  epic: '#c084fc',
+  legendary: '#fb923c',
 }
 
 /** スロット表示名 */

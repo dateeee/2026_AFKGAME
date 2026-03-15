@@ -72,31 +72,37 @@ function handleClick(item: Equipment) {
 </script>
 
 <template>
-  <div class="inventory">
-    <div class="inv-controls">
-      <select v-model="filterRarity" class="inv-filter">
+  <div>
+    <!-- Controls -->
+    <div class="flex flex-wrap gap-2 mb-3">
+      <select v-model="filterRarity" class="inv-select">
         <option value="">全レアリティ</option>
         <option v-for="r in RARITY_ORDER" :key="r" :value="r">{{ RARITY_LABELS[r] }}</option>
       </select>
-      <select v-model="sortKey" class="inv-filter">
+      <select v-model="sortKey" class="inv-select">
         <option value="level">Lv順</option>
         <option value="rarity">レアリティ順</option>
       </select>
       <button
-        class="btn-sell-mode"
-        :class="{ active: selectionMode }"
+        class="btn ml-auto"
+        :class="selectionMode ? 'btn-danger' : 'btn-secondary'"
         @click="selectionMode = !selectionMode; selectedIds.clear()"
       >
         {{ selectionMode ? 'キャンセル' : '売却' }}
       </button>
     </div>
 
-    <div v-if="selectionMode && selectedIds.size > 0" class="sell-bar">
+    <!-- Sell Bar -->
+    <div
+      v-if="selectionMode && selectedIds.size > 0"
+      class="flex justify-between items-center p-2 bg-bg-secondary rounded-lg border border-border mb-2 text-sm"
+    >
       <span>{{ selectedIds.size }}件選択中</span>
-      <button class="btn-confirm-sell" @click="sellSelected">売却する</button>
+      <button class="btn btn-danger text-sm" @click="sellSelected">売却する</button>
     </div>
 
-    <div class="inv-grid">
+    <!-- Grid -->
+    <div class="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-2">
       <EquipmentCard
         v-for="item in filteredItems"
         :key="item.id"
@@ -106,68 +112,26 @@ function handleClick(item: Equipment) {
       />
     </div>
 
-    <div v-if="filteredItems.length === 0" class="inv-empty">
+    <div v-if="filteredItems.length === 0" class="text-center text-text-muted py-8">
       装備がありません
     </div>
   </div>
 </template>
 
 <style scoped>
-.inv-controls {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 0.75rem;
-  flex-wrap: wrap;
-}
-.inv-filter {
+.inv-select {
   padding: 0.25rem 0.5rem;
-  border-radius: 4px;
+  border-radius: 0.375rem;
   border: 1px solid var(--color-border);
   background: var(--color-bg-secondary);
   color: var(--color-text);
   font-size: 0.8125rem;
+  font-family: var(--font-body);
+  transition: border-color 150ms;
 }
-.btn-sell-mode {
-  margin-left: auto;
-  padding: 0.25rem 0.75rem;
-  border-radius: 4px;
-  border: 1px solid var(--color-border);
-  background: var(--color-bg-secondary);
-  color: var(--color-text);
-  cursor: pointer;
-  font-size: 0.8125rem;
-}
-.btn-sell-mode.active {
-  background: var(--color-danger);
-  color: white;
-  border-color: var(--color-danger);
-}
-.sell-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.5rem;
-  background: var(--color-bg-secondary);
-  border-radius: 4px;
-  margin-bottom: 0.5rem;
-  font-size: 0.875rem;
-}
-.btn-confirm-sell {
-  padding: 0.25rem 0.75rem;
-  background: var(--color-danger);
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-.inv-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 0.5rem;
-}
-.inv-empty {
-  text-align: center;
-  color: var(--color-text-muted);
-  padding: 2rem;
+
+.inv-select:focus {
+  border-color: var(--color-primary);
+  outline: none;
 }
 </style>

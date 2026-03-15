@@ -1,6 +1,6 @@
 # システム構成図
 
-> 技術仕様: [tech_spec.md](../tech/tech_spec.md)
+> 技術仕様: [tech_spec.md](docs/tech/tech_spec.md)
 
 ## 全体アーキテクチャ
 
@@ -18,6 +18,8 @@ flowchart TB
             EquipView["EquipmentView.vue\n(装備管理)\nPhase 2~"]
             PartyView["PartyView.vue\n(パーティ編成)\nPhase 3~"]
             BaseView["BaseView.vue\n(拠点施設)\nPhase 4~"]
+            BossRushView["BossRushView.vue\n(ボスラッシュ)\nPhase 5~"]
+            EventView["EventView.vue\n(イベントダンジョン)\nPhase 5~"]
         end
 
         subgraph Components["Components (UI部品)"]
@@ -74,7 +76,7 @@ flowchart TB
             battleRouter["battle.py\nPOST /api/battle/tick"]
             towerRouter["tower.py\nPOST /api/tower/select\nPOST /api/tower/retire\nPUT /api/tower/mode\nPUT /api/tower/retreat-conditions"]
             shopRouter["shop.py\nGET /api/shop/lineup\nPOST /api/shop/buy"]
-            equipRouter["equipment.py\nPOST /api/equipment/equip\nPOST /api/equipment/sell\nPUT /api/potion/config"]
+            equipRouter["equipment.py\nGET /api/equipment/list\nPOST /api/equipment/equip\nPOST /api/equipment/sell\nPOST /api/equipment/lock"]
             partyRouter["party.py Phase3~\nPUT /api/party/edit\nPOST /api/skill/learn\nPUT /api/skill/set-active\nPOST /api/skill/reset\nPOST /api/character/limit-break"]
             baseRouter["base.py Phase4~\nPOST /api/base/build\nPOST /api/base/upgrade\nPOST /api/base/scout"]
             forgeRouter["forge.py Phase4~\nPOST /api/forge/enhance\nPOST /api/forge/craft\nPOST /api/forge/disassemble"]
@@ -83,8 +85,8 @@ flowchart TB
         end
 
         subgraph Services["Services (ビジネスロジック)"]
-            battleService["battle_service.py\n戦闘計算 (サーバー権威)\nターン処理・ダメージ計算"]
-            offlineService["offline_service.py\nオフライン報酬計算\n正規/簡略 切り替え"]
+            battleService["battle_service.py\n戦闘計算 (サーバー権威)\nターン処理・ダメージ計算\nオフライン計算 (正規/簡略)"]
+            equipService["equipment_service.py\n装備ドロップ・売却・\n実効ステータス計算"]
             towerService["tower_service.py\n塔・階層・敵データ\nエンカウント抽選"]
             shopService["shop_service.py\nショップロジック\n日替わり更新"]
             authService["auth_service.py\n認証ロジック\nJWT/bcrypt Phase2~"]
@@ -93,9 +95,10 @@ flowchart TB
         end
 
         subgraph Models["Models (SQLAlchemy 2.0)"]
-            playerModel["player.py\nPlayer, PlayerSettings\nTowerClearRecord, Party"]
-            charModel["character.py\nCharacter, PrestigeBonus\nCharacterEquipSlot\nLearnedSkill, ActiveSkillSlot"]
-            itemModel["item.py\nEquipment, InventoryItem\nFacility, ShopDailyState\nBattleLog, BossRushState"]
+            playerModel["player.py\nPlayer, PlayerSettings\nTowerClearRecord\nParty (Phase3~)"]
+            charModel["character.py\nCharacter\nPrestigeBonus (Phase5~)\nLearnedSkill (Phase3~)\nActiveSkillSlot (Phase3~)"]
+            equipModel["equipment.py\nEquipment\nCharacterEquipSlot"]
+            itemModel["item.py\nBattleLog, InventoryItem\nFacility (Phase4~)\nShopDailyState (Phase2~)\nBossRushState (Phase5~)"]
             userModel["user.py Phase2~\nUser, RefreshToken\nEmailVerificationToken"]
         end
 
@@ -116,8 +119,7 @@ flowchart TB
         Models --> DB_Module
 
         battleService --> towerService
-        offlineService --> battleService
-        offlineService --> towerService
+        battleService --> equipService
     end
 
     DB_Module <-->|"SQLAlchemy ORM"| DB

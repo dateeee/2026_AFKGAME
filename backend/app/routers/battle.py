@@ -12,18 +12,9 @@ from app.db.database import get_db
 from app.dependencies import get_current_player
 from app.models.player import Player
 from app.schemas.battle import OfflineSummary, TickResponse
-from app.schemas.player import (
-    CharacterResponse,
-    EnemyInfo,
-    GameStateResponse,
-    PlayerResponse,
-    SettingsResponse,
-    TowerClearInfo,
-)
 from app.schemas.equipment import EquipmentResponse
 from app.services.battle_service import TickResult, process_tick
-from app.services.equipment_service import get_equipped_map
-from app.master_data.enemies import get_enemy
+from app.services.game_state_builder import build_game_state
 from app.config import (
     FAST_CALC_THRESHOLD,
     MAX_LOG_PER_RESPONSE,
@@ -32,48 +23,6 @@ from app.config import (
 )
 
 router = APIRouter(prefix="/api/battle", tags=["battle"])
-
-
-def _build_game_state(player: Player, db: Session | None = None) -> GameStateResponse:
-    potions: dict[str, int] = {}
-    for item in player.inventory_items:
-        if item.item_id.endswith("_potion"):
-            potions[item.item_id] = item.quantity
-
-    towers_cleared: dict[str, TowerClearInfo] = {}
-    for record in player.tower_clear_records:
-        towers_cleared[record.tower_id] = TowerClearInfo(
-            cleared=record.cleared, highest_floor=record.highest_floor
-        )
-
-    current_enemy = None
-    if player.current_enemy_id and player.current_enemy_hp is not None and player.current_enemy_hp > 0:
-        try:
-            ed = get_enemy(player.current_enemy_id)
-            current_enemy = EnemyInfo(
-                id=ed.id, name=ed.name, hp=player.current_enemy_hp,
-                max_hp=ed.hp, level=ed.level,
-            )
-        except KeyError:
-            pass
-
-    equipment_list = [EquipmentResponse.model_validate(e) for e in player.equipment]
-    equipped = {}
-    if player.characters:
-        equipped = get_equipped_map(player.characters[0].id, db)
-
-    return GameStateResponse(
-        player=PlayerResponse.model_validate(player),
-        characters=[CharacterResponse.model_validate(c) for c in player.characters],
-        settings=SettingsResponse.model_validate(player.settings) if player.settings else SettingsResponse(
-            potion_threshold=0.5, battle_log_count=50, toast_enabled=True, auto_sell_rarity=None
-        ),
-        potions=potions,
-        towers_cleared=towers_cleared,
-        current_enemy=current_enemy,
-        equipment=equipment_list,
-        equipped=equipped,
-    )
 
 
 @router.post("/tick", response_model=TickResponse)
@@ -96,14 +45,14 @@ def tick_endpoint(
     if pending_ticks <= 0:
         return TickResponse(
             battle_logs=[],
-            updated_state=_build_game_state(player, db),
+            updated_state=build_game_state(player, db),
         )
 
     character = player.characters[0] if player.characters else None
     if not character:
         return TickResponse(
             battle_logs=[],
-            updated_state=_build_game_state(player, db),
+            updated_state=build_game_state(player, db),
         )
 
     accumulated = TickResult()
@@ -174,7 +123,7 @@ def tick_endpoint(
 
     return TickResponse(
         battle_logs=all_logs,
-        updated_state=_build_game_state(player, db),
+        updated_state=build_game_state(player, db),
         offline_summary=offline_summary,
         equipment_drops=[EquipmentResponse.model_validate(e) for e in accumulated.equipment_drops],
         equipment_auto_sold=accumulated.equipment_auto_sold,

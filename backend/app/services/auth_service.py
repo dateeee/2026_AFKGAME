@@ -91,7 +91,8 @@ def refresh_tokens(raw_refresh_token: str, db: Session) -> tuple[str, str, User]
         revoke_all_tokens(record.user_id, db)
         raise ValueError("Refresh token reuse detected")
 
-    if record.expires_at < datetime.now(timezone.utc):
+    expires_at = record.expires_at if record.expires_at.tzinfo else record.expires_at.replace(tzinfo=timezone.utc)
+    if expires_at < datetime.now(timezone.utc):
         raise ValueError("Refresh token expired")
 
     # 旧トークンを無効化
@@ -147,7 +148,8 @@ def verify_email_token(raw_token: str, db: Session) -> User:
         raise ValueError("Invalid verification token")
     if record.used:
         raise ValueError("Token already used")
-    if record.expires_at < datetime.now(timezone.utc):
+    expires_at = record.expires_at if record.expires_at.tzinfo else record.expires_at.replace(tzinfo=timezone.utc)
+    if expires_at < datetime.now(timezone.utc):
         raise ValueError("Verification token expired")
 
     record.used = True
