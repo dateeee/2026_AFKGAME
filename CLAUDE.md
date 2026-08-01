@@ -12,7 +12,7 @@ Markdownには文字数上限を設けている。詳細は [docs/documentation_
 | A | `CLAUDE.md` | 3,000字 |
 | B | `README.md`、`*_OVERVIEW.md` | 6,000字 |
 | C | `docs/**`、`diagrams/**` | 8,000字 |
-| D | `.claude/commands/**` | 5,000字 |
+| D | `.claude/commands/**`、`.claude/skills/**` | 5,000字 |
 
 - 原則: **1ファイル = 1テーマ = 1回の読み込みで完結**
 - H2セクションは2,000字以内。表を優先し、同じ仕様を複数ファイルに重複させない
@@ -42,6 +42,7 @@ Markdownには文字数上限を設けている。詳細は [docs/documentation_
 - **未確定仕様**は [docs/open_specs.md](docs/open_specs.md) で管理。確定したら仕様書へ反映して削除し、すべて確定したらファイルごと削除する
 - **テスト標準**: バックエンド単体テストは pytest で C1（分岐）カバレッジ100%、結合テストは FastAPI TestClient + Playwright（E2E）
 - **実装規約**: スキーマは CamelModel で `schemas/`、ロジックは `services/`、ログは logging_config 準拠
+- **スキル/コマンドの使い分け**: 常時適用したい規約は `.claude/skills/`（自動起動。`dev`＝製造、`unit-test`＝単体テスト）、工程ゲートは `.claude/commands/`（`/` で明示起動・`model` 固定）
 
 ## コスト規律（AIエージェント運用）
 
@@ -56,6 +57,7 @@ Markdownには文字数上限を設けている。詳細は [docs/documentation_
 
 | 日付 | 内容 |
 |------|------|
+| 2026-08-02 | `/dev` をスキル化し、単体テスト用スキル `unit-test`（C1観点・実装パターン）を新設 |
 | 2026-08-02 | 上限超過8ファイルを索引 + 個別ファイルへ分割（全81ファイルが上限内）。索引の対応表を追加 |
 | 2026-08-02 | README.md を新設し概要・セットアップ・索引を移管。本書はAI開発ルールに特化。ドキュメント規約（文字数上限）を制定 |
 | 2026-08-01 | 開発工程定義書を新設。6工程モデル・テスト標準を追記 |
