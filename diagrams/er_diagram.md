@@ -7,7 +7,7 @@
 ```mermaid
 %%{init: {'theme': 'default', 'themeVariables': {'fontSize': '16px'}} }%%
 erDiagram
-    User ||--o| Player : "has"
+    User |o--o| Player : "has (ゲストはUserなしの場合あり)"
     User ||--o{ RefreshToken : "has"
     User ||--o{ EmailVerificationToken : "has"
 
@@ -57,18 +57,18 @@ erDiagram
     Character ||--o{ LearnedSkill : "has"
     Character ||--o{ ActiveSkillSlot : "has max 2"
     Character ||--o| PrestigeBonus : "has"
-    Character }o--o{ Party : "belongs to"
+    Character ||--o{ Party : "is assigned to"
 
     LearnedSkill }o--|| SkillMaster : "references"
     ActiveSkillSlot }o--|| SkillMaster : "references"
 
     Player {
         string id PK
-        string user_id FK "references User.id"
+        string user_id FK "nullable, references User.id"
         bigint gold "default 0, BIGINT(64bit)"
         string current_tower_id FK "nullable, references Tower.id"
         int current_floor "nullable, 塔外時null"
-        int target_floor "目標階"
+        int target_floor "nullable, 目標階（塔外時null）"
         enum tower_mode "auto_repeat / stop_on_clear"
         float hp_threshold "撤退HP閾値 0.0-1.0"
         string current_enemy_id "nullable, 現在戦闘中の敵ID"
@@ -135,7 +135,7 @@ erDiagram
     }
 
     CharacterEquipSlot {
-        uuid character_id PK_FK "references Character.id"
+        uuid character_id PK, FK "references Character.id"
         enum slot PK "weapon/shield/head/body/arms/waist/legs/ears/ring"
         uuid equipment_id FK "nullable, references Equipment.id"
     }
@@ -208,9 +208,9 @@ erDiagram
         string name "アイテム名"
         enum category "potion / material / currency"
         int stack_limit "所持上限 (potion:99, material:9999)"
-        int buy_price "nullable, ショップ購入価格"
+        int price "nullable, ショップ購入価格"
         int sell_price "nullable, 売却価格"
-        float heal_rate "nullable, 回復割合 (potion用)"
+        float heal_ratio "nullable, 回復割合 (potion用)"
         string description "アイテム説明"
     }
 ```
@@ -289,6 +289,8 @@ erDiagram
 
 ## ダンジョン・塔・敵系（マスターデータ）
 
+> **注**: このブロックのエンティティはDBテーブルではなく、コード内定義のマスターデータ（`backend/app/master_data/` 配下のdataclass）。FK表記は論理参照を示す（DBレベルのFK制約はない）。Dungeon・TowerModifier・recommended_lv等は将来のDB化を見据えた論理設計であり、現実装のTowerDataには未実装（Phase 3以降で追随）。
+
 ```mermaid
 %%{init: {'theme': 'default', 'themeVariables': {'fontSize': '16px'}} }%%
 erDiagram
@@ -311,7 +313,7 @@ erDiagram
         string id PK "例: goblin_tower"
         string dungeon_id FK "references Dungeon.id"
         string name "塔名"
-        int floors "総階数"
+        int total_floors "総階数"
         int recommended_lv_min "推奨LV下限"
         int recommended_lv_max "推奨LV上限"
         string unlock_tower_id FK "nullable, 前提塔ID"
@@ -347,8 +349,8 @@ erDiagram
         int atk "ATK"
         int def "DEF"
         int spd "SPD"
-        int reward_gold "撃破時ゴールド"
-        int reward_exp "撃破時EXP"
+        int gold "撃破時ゴールド"
+        int exp "撃破時EXP"
         boolean is_boss "ボスフラグ"
     }
 
@@ -356,7 +358,7 @@ erDiagram
         uuid id PK
         string enemy_id FK "references EnemyMaster.id"
         string item_id FK "references ItemMaster.id"
-        float drop_rate "ドロップ率 0.0-1.0"
-        int quantity "ドロップ数"
+        float rate "ドロップ率 0.0-1.0"
+        int quantity "ドロップ数（master_data §10.3 の階層ルールで決定）"
     }
 ```

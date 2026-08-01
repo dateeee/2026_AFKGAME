@@ -21,7 +21,7 @@ ENEMIES: dict[str, EnemyData] = {
     # ── ゴブリンの塔（001_ゴブリンの塔.md） ──
     "slime": EnemyData("slime", "スライム", 1, 20, 5, 2, 3, 5, 10),
     "goblin": EnemyData("goblin", "ゴブリン", 2, 35, 8, 4, 5, 8, 18),
-    "wolf": EnemyData("wolf", "ウルフ", 3, 30, 12, 3, 8, 10, 22),
+    "wolf": EnemyData("wolf", "オオカミ", 3, 30, 12, 3, 8, 10, 22),
     "goblin_archer": EnemyData("goblin_archer", "ゴブリンアーチャー", 4, 40, 14, 5, 7, 12, 28),
     "dire_wolf": EnemyData("dire_wolf", "ダイアウルフ", 6, 60, 18, 8, 10, 18, 40),
     "hobgoblin": EnemyData("hobgoblin", "ホブゴブリン", 8, 90, 22, 12, 7, 25, 55),

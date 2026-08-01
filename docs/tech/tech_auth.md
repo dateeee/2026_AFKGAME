@@ -1,6 +1,6 @@
 # AFK GAME — 認証システム仕様
 
-> 技術仕様の全体は [tech_spec.md](tech_spec.md)、ゲーム仕様は [game_spec.md](game_spec.md) を参照。
+> 技術仕様の全体は [tech_spec.md](tech_spec.md)、ゲーム仕様は [game_spec.md](../design/game_spec.md) を参照。
 
 ---
 
@@ -49,9 +49,9 @@ JWT（JSON Web Token）によるステートレス認証。アクセストーク
 
 ### ゲスト→本登録の移行
 1. ゲストプレイ中にメール登録またはGoogle連携を実行
-2. ゲストアカウントのゲームデータを本登録アカウントに移行
-3. ゲストアカウントは削除
-4. 新しいアカウントのJWTを発行
+2. ゲストアカウント自体を本登録化する（`is_guest = false` に変更し、email/password または Google 連携情報を付与）
+3. ゲームデータはアカウントに紐づいたまま保持される（アカウントの作り直し・削除は行わない）
+4. 新しいトークンペアを発行
 
 ## 4. JWT構造
 

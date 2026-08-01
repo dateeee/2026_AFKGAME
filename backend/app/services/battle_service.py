@@ -312,14 +312,21 @@ def process_tick(player: Player, character: Character, db: Session) -> TickResul
                     else:
                         # 退却条件チェック
                         if player.hp_threshold > 0 and character.hp < effective_max_hp * player.hp_threshold:
-                            # HP閾値による退却
+                            # HP閾値による退却。自動周回モードなら1階から再スタート（game_spec §2.2）
+                            tick_logs.append({"type": "retreat_hp", "hp": character.hp, "max_hp": effective_max_hp})
+                            if player.tower_mode == "auto_repeat":
+                                player.current_floor = 1
+                                player.current_enemy_id = None
+                                player.current_enemy_hp = None
+                                player.run_gold = 0
+                                tick_logs.append({"type": "tower_restart"})
+                                continue
                             player.current_tower_id = None
                             player.current_floor = None
                             player.target_floor = None
                             player.current_enemy_id = None
                             player.current_enemy_hp = None
                             player.run_gold = 0
-                            tick_logs.append({"type": "retreat_hp", "hp": character.hp, "max_hp": effective_max_hp})
                             break
                         player.current_floor = next_floor
                         player.current_enemy_id = None
@@ -340,9 +347,9 @@ def process_tick(player: Player, character: Character, db: Session) -> TickResul
                 # プレイヤー全滅
                 if character.hp <= 0:
                     result.defeated = True
-                    # ペナルティ: 現レベルEXP50%失、走行Gold失
-                    exp_penalty = math.floor(required_exp(character.level) * 0.5)
-                    character.exp = max(0, character.exp - exp_penalty)
+                    # ペナルティ: 現在レベル内の蓄積EXPの50%失、走行Gold失（game_spec §2.2 全滅時の処理）
+                    exp_penalty = math.floor(character.exp * 0.5)
+                    character.exp = character.exp - exp_penalty
                     gold_penalty = player.run_gold
                     player.gold = max(0, player.gold - gold_penalty)
                     result.total_gold -= gold_penalty

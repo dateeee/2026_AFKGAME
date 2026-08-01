@@ -109,7 +109,7 @@ flowchart TB
             authSchema["auth.py Phase2~\nLoginRequest\nTokenResponse"]
         end
 
-        Config["config.py\nTICK_INTERVAL = 60s\nTURNS_PER_TICK = 3\nFAST_CALC_THRESHOLD = 100\nMAX_OFFLINE_HOURS = 24\nMAX_BATTLE_LOG = 100\nMAX_PLAYER_LEVEL = 9999"]
+        Config["config.py\nTICK_INTERVAL_SECONDS = 60\nTURNS_PER_TICK = 3\nFAST_CALC_THRESHOLD = 100\nMAX_OFFLINE_HOURS = 24\nMAX_BATTLE_LOG_RECORDS = 100\nMAX_LOG_PER_RESPONSE = 50\nMAX_PLAYER_LEVEL = 9999"]
         DB_Module["db/database.py\nDB接続設定\nセッション管理"]
         Alembic["alembic/\nDBマイグレーション\nスキーマ管理"]
 

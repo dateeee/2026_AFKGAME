@@ -149,11 +149,6 @@ export interface TickResponse {
   equipmentAutoSold: Array<{ name: string; rarity: string; gold: number }>
 }
 
-/** ゲストトークンレスポンス（Phase 1互換） */
-export interface GuestTokenResponse {
-  guestToken: string
-}
-
 /** ユーザー情報 */
 export interface UserInfo {
   id: string

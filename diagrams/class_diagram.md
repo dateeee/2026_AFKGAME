@@ -2,6 +2,8 @@
 
 > ゲーム仕様: [game_spec.md](docs/design/game_spec.md) / 技術仕様: [tech_spec.md](docs/tech/tech_spec.md)
 
+> **注記**: 認証・アカウント系（User/RefreshToken等）はドメインモデルの対象外とし、ER図（[er_diagram.md](er_diagram.md)）を参照
+
 ## プレイヤー・パーティ・キャラクター
 
 ```mermaid
@@ -33,7 +35,7 @@ classDiagram
         +updateSettings(settings)
         +addGold(amount)
         +spendGold(amount) bool
-        +getTowerClearRecord(towerId) TowerProgress
+        +getTowerClearRecord(towerId) TowerClearRecord
     }
 
     class Settings {
@@ -109,7 +111,7 @@ classDiagram
         +getBonusPercent(stat) float
     }
 
-    class TowerProgress {
+    class TowerClearRecord {
         +string towerId
         +bool cleared
         +int highestFloor
@@ -117,7 +119,7 @@ classDiagram
 
     Player "1" --> "1" Settings
     Player "1" --> "1" Party
-    Player "1" --> "*" TowerProgress
+    Player "1" --> "*" TowerClearRecord
     Party "1" --> "1..4" Character
     Character "1" --> "1" Stats : baseStats
     Character "1" --> "0..1" PrestigeData
@@ -152,19 +154,16 @@ classDiagram
         +SkillType type  active/passive
         +int spCost  1/1/2/3
         +string prerequisiteId  nullable
-        ---
         Active専用
         +float multiplier  スキル倍率
         +int cooldown  CDターン数
         +SkillTargetType targetType
         +SkillPriority priority
         +float triggerCondition  HP%閾値等
-        ---
         Passive専用
         +string effectStat  対象ステータス
         +float effectValue  効果値
         +string effectType  percent/flat
-        ---
         +isPrerequisiteMet(learned) bool
         +isActive() bool
         +isPassive() bool
@@ -468,11 +467,17 @@ classDiagram
     }
 
     class TickResult {
-        +TurnResult[3] turns  3ターン分
-        +Stats[] updatedPartyStats
-        +int[] updatedEnemyHp
-        +bool leveledUp
-        +int newLevel
+        +LogEntry[][] battleLogs  tickごとのターンログ配列
+        +int totalGold
+        +int totalExp
+        +int enemiesDefeated
+        +int potionsUsed
+        +int levelsGained
+        +int floorsCleared
+        +bool defeated
+        +Equipment[] equipmentDrops
+        +object[] equipmentAutoSold  自動売却履歴(name/rarity/gold)
+        +accumulate(other TickResult)  複数tick集約用(自身に加算)
     }
 
     class OfflineSummary {
@@ -486,6 +491,18 @@ classDiagram
         +int enemiesDefeated  撃破敵数
         +int levelsGained  上昇レベル数
         +int floorsCleared  クリア階数
+    }
+
+    class LogEntry {
+        +string type  attack/heal/defeat等
+        +string actor  行動者
+        +string target  対象 nullable
+        +int damage  nullable
+    }
+
+    class LootEntry {
+        +string itemId
+        +int quantity
     }
 
     BattleState "1" --> "1..3" Enemy
@@ -525,6 +542,12 @@ classDiagram
         +Rarity rarity  common-rare
         +int price  固定価格テーブル
         +bool sold  購入済みか
+    }
+
+    class PotionStock {
+        +string itemId
+        +int quantity
+        +int price
     }
 
     class Facility {
@@ -584,6 +607,7 @@ classDiagram
     }
 
     Shop "1" --> "5" DailyItem
+    Shop "1" --> "*" PotionStock
     Facility --> FacilityType
     Facility ..> FacilityCost
     BossRushState ..> MilestoneReward

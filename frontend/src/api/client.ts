@@ -152,7 +152,7 @@ export async function postTowerSelect(towerId: string, targetFloor: number, mode
 
 /** 塔退却 */
 export async function postTowerRetire() {
-  return fetchWithRetry<{ status: string; gold_lost: number }>('/api/tower/retire', {
+  return fetchWithRetry<{ status: string }>('/api/tower/retire', {
     method: 'POST',
   })
 }

@@ -1,7 +1,6 @@
 """塔ルーター"""
 
 import logging
-import math
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
@@ -12,7 +11,6 @@ from app.db.database import get_db
 from app.dependencies import get_current_player
 from app.models.player import Player, TowerClearRecord
 from app.master_data.towers import TOWERS, get_tower
-from app.master_data.characters import required_exp
 from app.schemas.tower import (
     TowerSelectRequest,
     TowerModeRequest,
@@ -97,14 +95,7 @@ def retire_tower(
     if not player.current_tower_id:
         raise HTTPException(status_code=400, detail="Not in a tower")
 
-    # 退却ペナルティ
-    character = player.characters[0] if player.characters else None
-    if character:
-        exp_penalty = math.floor(required_exp(character.level) * 0.5)
-        character.exp = max(0, character.exp - exp_penalty)
-    gold_penalty = player.run_gold
-    player.gold = max(0, player.gold - gold_penalty)
-
+    # リタイア: 獲得済み報酬は保持（game_spec §2.2、ペナルティなし）
     player.current_tower_id = None
     player.current_floor = None
     player.target_floor = None
@@ -113,9 +104,9 @@ def retire_tower(
     player.run_gold = 0
     db.commit()
 
-    logger.info("塔リタイア", extra={"player_id": str(player.id), "gold": gold_penalty})
+    logger.info("塔リタイア", extra={"player_id": str(player.id)})
 
-    return {"status": "ok", "gold_lost": gold_penalty}
+    return {"status": "ok"}
 
 
 @router.put("/mode")

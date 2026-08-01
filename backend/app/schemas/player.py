@@ -70,7 +70,3 @@ class GameStateResponse(CamelModel):
     current_enemy: EnemyInfo | None = None
     equipment: list[EquipmentResponse] = []
     equipped: dict[str, str | None] = {}
-
-
-class GuestTokenResponse(CamelModel):
-    guest_token: str

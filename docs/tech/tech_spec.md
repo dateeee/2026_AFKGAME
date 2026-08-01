@@ -1,6 +1,6 @@
 # AFK GAME — 技術仕様書
 
-> プロジェクト概要は [CLAUDE.md](../CLAUDE.md)、ゲーム仕様は [game_spec.md](game_spec.md)、マスターデータは [master_data.md](master_data.md) を参照。
+> プロジェクト概要は [CLAUDE.md](../../CLAUDE.md)、ゲーム仕様は [game_spec.md](../design/game_spec.md)、マスターデータは [master_data.md](../data/master_data.md) を参照。
 >
 > 詳細仕様: [戦闘ログ・オフライン計算](tech_battle_offline.md) / [認証システム](tech_auth.md)
 
@@ -19,7 +19,7 @@
     "gold": 1500,
     "currentTowerId": "goblin_tower",  // null = 塔外待機中
     "currentFloor": 3,                 // null = 塔外待機中（currentTowerIdと連動）
-    "targetFloor": 10,
+    "targetFloor": 10,                 // null = 塔外待機中
     "towerMode": "auto_repeat",        // "auto_repeat" | "stop_on_clear"
     "hpThreshold": 0.3,                // 撤退条件HP閾値（0.0〜1.0）
     "highestFloor": 12,
@@ -287,6 +287,7 @@
 │   │       ├── 004_強化系統.md     # 強化系統（バフ）
 │   │       ├── 005_弱体系統.md     # 弱体系統（デバフ・状態異常）
 │   │       └── 006_生存術系統.md   # 生存術系統（耐久・防御）
+│   ├── development_process.md     # 開発工程定義書（6工程・成果物対応・完了基準・テスト標準）
 │   ├── glossary.md                # 用語集（ゲーム・技術用語）
 │   ├── open_specs.md              # 未確定仕様一覧
 │   └── reviews/                   # 仕様レビュー結果（/doc-review コマンドで自動生成）
@@ -420,7 +421,7 @@
 | 最小対応幅 | 320px |
 | レイアウト | PC: 2カラム / モバイル: 1カラム（縦積み） |
 | タッチ対応 | ホバー依存のUI（`:hover` のみ）は避ける |
-| 数値表示ユーティリティ | 大きな数値（ゴールド等）を短縮表記する関数を `src/utils/format.ts` に実装 |
+| 数値表示ユーティリティ | 大きな数値（ゴールド等）を短縮表記する関数を `src/utils/format.ts` に実装（表記ルールは game_spec §3「数値表示フォーマット」参照: 1,000以上をK/M/B/T/Qa/Qiで短縮、小数1桁・切り捨て） |
 
 ---
 
@@ -444,7 +445,7 @@ TICK_INTERVAL_SECONDS = 60      # 1 tick の間隔（秒）
 TURNS_PER_TICK = 3              # 1 tick あたりのターン数（20秒/ターン × 3 = 60秒）
 OFFLINE_EFFICIENCY = 1.0        # オフライン時の報酬効率（オンラインと同一）
 MAX_OFFLINE_HOURS = 24          # オフライン報酬の最大蓄積時間
-FAST_CALC_THRESHOLD = 100       # これ以上の未処理tickは簡略計算に切り替え
+FAST_CALC_THRESHOLD = 100       # これを超える（101以上の）未処理tickは簡略計算に切り替え
 MAX_BATTLE_LOG_RECORDS = 100    # DB保持ログ件数上限
 MAX_LOG_PER_RESPONSE = 50       # 1レスポンスあたりのログ件数上限
 MAX_PLAYER_LEVEL = 9999         # プレイヤーLV上限
@@ -492,8 +493,8 @@ PASSWORD_MIN_LENGTH = 8
 | メソッド | パス | 説明 |
 |---------|------|------|
 | GET | `/api/tower/list` | 全塔の一覧を取得（名前・階数・解放条件・解放/クリア状態・最高到達階）（Phase 2〜） |
-| POST | `/api/tower/select` | 塔・目標階の選択（`towerId`, `targetFloor`, `towerMode`: `auto_repeat` \| `stop_on_clear`）。未解放の塔は403 |
-| POST | `/api/tower/retire` | 現戦闘終了後にリタイア（進行中の階の戦闘完了後に撤退） |
+| POST | `/api/tower/select` | 塔・目標階の選択（`towerId`, `targetFloor`, `mode`: `auto_repeat` \| `stop_on_clear`）。未解放の塔は403、入塔中は400 |
+| POST | `/api/tower/retire` | 塔からリタイア（獲得済み報酬は保持・ペナルティなし） |
 | PUT | `/api/tower/mode` | 進行モードの切り替え（進行中でも変更可） |
 | PUT | `/api/tower/retreat-conditions` | 撤退条件の更新（`hpThreshold`: 0〜1） |
 | GET | `/api/shop/lineup` | ショップの現在の品揃えを取得。Phase 1: 常設のみ。Phase 2〜: 常設＋日替わり |
@@ -560,30 +561,33 @@ PASSWORD_MIN_LENGTH = 8
 - フロントは **ポーリングで結果を取得** → テキストログとして表示するだけ
 - オフライン中はサーバーで何もせず、**復帰時に経過tick数分をまとめてシミュレーション** する
 
-### Phase 1 データ永続化方針
+### ゲストアカウントによるデータ永続化方針
 
-認証システムはPhase 2からのため、Phase 1ではゲストアカウント方式でデータを保存する。
+> **注**: Phase 1 の旧方式（UUID識別トークンを LocalStorage キー `guest_token` に保存）は、Phase 2 の認証実装により **JWT方式に置き換え済み**。以下は現行仕様。
+
+初回アクセス時にサーバーがゲストアカウントを自動作成し、JWT（[tech_auth.md](tech_auth.md) 参照）で識別する。
 
 | 項目 | 仕様 |
 |------|------|
-| 方式 | 初回アクセス時にサーバーがUUIDベースのゲストアカウントを自動作成 |
-| 識別トークン | UUID v4（サーバーで生成） |
-| トークン保存先 | クライアント側の LocalStorage（キー: `guest_token`） |
-| APIリクエスト | `Authorization: Bearer <guest_token>` ヘッダーで識別 |
-| サーバー側 | トークンに紐づくプレイヤーデータをSQLiteに保存 |
-| Phase 2移行 | ゲスト→本登録フロー（[tech_auth.md](tech_auth.md) 参照）で既存データを引き継ぎ |
-| データロスト | LocalStorage消去時はデータ復旧不可（Phase 1では許容） |
+| 方式 | 初回アクセス時に `POST /api/auth/guest` でゲストアカウントを自動作成 |
+| 識別 | JWT（アクセストークン30分 + リフレッシュトークン30日） |
+| トークン保存先 | アクセストークン: メモリ保持 / リフレッシュトークン: LocalStorage（キー: `refresh_token`） |
+| APIリクエスト | `Authorization: Bearer <access_token>` ヘッダーで識別 |
+| サーバー側 | アカウントに紐づくプレイヤーデータをSQLiteに保存 |
+| 本登録移行 | ゲスト→本登録フロー（[tech_auth.md](tech_auth.md) 参照）で既存データを引き継ぎ |
+| データロスト | リフレッシュトークン消失時、ゲストのままではデータ復旧不可（本登録で回避可能） |
 
 ```
 ■ 初回アクセスフロー
-  1. フロント: LocalStorageに guest_token が存在するか確認
-  2. なければ POST /api/auth/guest → サーバーがUUID生成・DB保存・トークン返却
-  3. フロント: guest_token を LocalStorage に保存
+  1. フロント: LocalStorageに refresh_token が存在するか確認
+  2. なければ POST /api/auth/guest → JWT（accessToken/refreshToken）とユーザー情報を返却
+  3. フロント: refreshToken を LocalStorage に保存、accessToken はメモリ保持
   4. 以降のAPIリクエストに Authorization ヘッダーを付与
 
 ■ 再訪問フロー
-  1. フロント: LocalStorageから guest_token を取得
-  2. GET /api/game/state（Authorization ヘッダー付き）→ 既存データをロード
+  1. フロント: LocalStorageから refresh_token を取得
+  2. POST /api/auth/refresh → 新しいトークンペアを取得
+  3. GET /api/game/state（Authorization ヘッダー付き）→ 既存データをロード
 ```
 
 ### エラーハンドリング・通信切断時の挙動
@@ -822,3 +826,5 @@ Phase 1 から **フロントエンド（Vue + Vite）とバックエンド（Fa
 | 2026-03-15 | レビュー指摘対応: §2 ディレクトリ構成を新構造（design/tech/data/diagrams/skills）に更新。§1.1 potionAutoUseThreshold重複フィールドを削除、potionThresholdを0.1〜0.5/0.1刻みに統一。§5 ポーション閾値APIを0.1〜0.5に更新 |
 | 2026-03-15 | tech_battle_offline.md §3.2 エンカウント抽選ロジック追記（重み付きプール抽選・均等確率体数決定・Phase共通ロジック）、敵スキル処理フロー追記（Phase 5ボスラッシュWave 11+、CD管理は味方と同一） |
 | 2026-08-01 | 複数塔対応: `GET /api/tower/list` エンドポイント追加（解放/クリア状態含む）。`/api/tower/select` に未解放塔403の記載を追加 |
+| 2026-08-01 | 数値表示ユーティリティに短縮表記ルールの参照を追記。tech_battle_offline.md §4 を更新: ポーション閾値を「50%固定」→プレイヤー設定値参照に修正、§4.1 期待値計算式（期待与/被ダメ・周回解決・ポーション消費モデル）を追加、オフライン中の転生（発生しない・LV9999で成長停止）を追記 |
+| 2026-08-01 | レビュー指摘対応: §6 ゲスト認証をJWT現行仕様に更新（旧UUID方式の記述を置換）、§1.1 targetFloorにnull注記、§4 FAST_CALC_THRESHOLDコメント明確化、§2 に development_process.md 追加、ヘッダリンクを新ディレクトリ構造に修正 |

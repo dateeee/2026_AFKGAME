@@ -21,7 +21,7 @@ sequenceDiagram
     API->>DB: Character作成 (勇者, melee, LV1)
     API->>DB: HPポーション x5 付与 (チュートリアル用)
     DB-->>API: OK
-    API-->>B: { access_token, refresh_token,<br/>user: {id, is_guest: true} }
+    API-->>B: { accessToken, refreshToken,<br/>user: { id, isGuest: true } }
 
     B->>LS: refresh_token を保存
     B->>B: access_token をメモリ(Pinia)に保持
@@ -46,8 +46,16 @@ sequenceDiagram
     participant API as FastAPI
     participant DB as Database
 
-    B->>LS: guest_token を確認
-    LS-->>B: "uuid-v4" (既存)
+    B->>LS: refresh_token を確認
+    LS-->>B: "refresh-token-value" (既存)
+
+    B->>API: POST /api/auth/refresh<br/>{ refreshToken }
+    API->>DB: トークン検証・ローテーション<br/>(旧トークン無効化)
+    API->>DB: 新RefreshToken生成
+    API-->>B: { accessToken, refreshToken }
+
+    B->>LS: refresh_token を更新
+    B->>B: accessToken をメモリ(Pinia)に保持
 
     B->>API: GET /api/game/state<br/>Authorization: Bearer {token}
     API->>DB: プレイヤーデータ取得
@@ -67,7 +75,7 @@ sequenceDiagram
 
     API-->>B: TickResponse
 
-    Note over B: TickResponse 内容:<br/>offlineSummary: {<br/>  elapsedSeconds: 21600,<br/>  processedTicks: 360,<br/>  calcMethod: "fast",<br/>  totalGold: 12500,<br/>  totalExp: 45000,<br/>  enemiesDefeated: 720,<br/>  potionsUsed: 15,<br/>  levelsGained: 3<br/>}
+    Note over B: TickResponse 内容:<br/>offlineSummary: {<br/>  elapsedSeconds: 21600,<br/>  processedTicks: 360,<br/>  calcMethod: "simplified",<br/>  totalGold: 12500,<br/>  totalExp: 45000,<br/>  enemiesDefeated: 720,<br/>  potionsUsed: 15,<br/>  levelsGained: 3,<br/>  floorsCleared: 8<br/>}
 
     B->>B: Piniaストア更新
     B->>B: OfflineRewardModal 表示<br/>(経過6時間, +12,500G, +45,000EXP...)
@@ -131,33 +139,49 @@ sequenceDiagram
     participant API as FastAPI
     participant DB as Database
 
-    Note over B: ダンジョン・塔一覧はゲーム状態の<br/>マスターデータから取得（専用APIなし）
+    B->>API: GET /api/tower/list
+    API->>DB: TowerClearRecord取得
+    DB-->>API: 塔別クリア状況
+    API-->>B: [{<br/>  id, name, dungeonName, totalFloors,<br/>  unlockTowerId, unlocked, cleared, highestFloor<br/>}, ...]
 
-    B->>API: POST /api/tower/select<br/>{<br/>  towerId: "forest_tower",<br/>  targetFloor: 15,<br/>  towerMode: "auto_repeat"<br/>}
+    B->>API: POST /api/tower/select<br/>{<br/>  towerId: "forest_tower",<br/>  targetFloor: 15,<br/>  mode: "auto_repeat"<br/>}
 
     API->>DB: TowerClearRecord確認<br/>(前提塔クリア済み?)
     API->>API: バリデーション:<br/>塔解放済み? ✓<br/>targetFloor <= highestFloor? ✓
 
-    API->>DB: Player更新:<br/>currentTower = forest_tower<br/>currentFloor = 1<br/>targetFloor = 15<br/>towerMode = auto_repeat
+    Note over API: ※実装は塔の総階数上限のみ検証。<br/>到達済み最高階上限は未確定仕様<br/>(open_specs参照)
 
-    API-->>B: { success: true, updatedState }
+    alt 未解放塔を選択
+        API-->>B: 403 Tower is locked
+    else 既に入塔中
+        API-->>B: 400 Already in a tower
+    else 検証OK
+        API->>DB: Player更新:<br/>currentTower = forest_tower<br/>currentFloor = 1<br/>targetFloor = 15<br/>towerMode = auto_repeat
 
-    B->>B: gameStore更新
-    B->>B: TowerInfo.vue 再描画<br/>「森の塔 1F / 目標: 15F」
+        API-->>B: { status: "ok", updatedState }
 
-    Note over B,API: 次のtickから森の塔1Fで戦闘開始
+        B->>B: gameStore更新
+        B->>B: TowerInfo.vue 再描画<br/>「森の塔 1F / 目標: 15F」
+
+        Note over B,API: 次のtickから森の塔1Fで戦闘開始
+    end
 
     opt 進行中にモード変更
-        B->>API: PUT /api/tower/mode<br/>{ towerMode: "stop_on_clear" }
+        B->>API: PUT /api/tower/mode<br/>{ mode: "stop_on_clear" }
         API->>DB: towerMode更新
+        API-->>B: OK
+    end
+
+    opt 出発設定でHP閾値変更
+        B->>API: PUT /api/tower/retreat-conditions<br/>{ hpThreshold: 30 }
+        API->>DB: retreatHpThreshold更新
         API-->>B: OK
     end
 
     opt リタイア
         B->>API: POST /api/tower/retire
-        Note over API: 現在の戦闘完了後に撤退<br/>(戦闘途中で即中断はしない)
-        API->>DB: 撤退フラグ設定
-        API-->>B: OK (次tick処理で撤退実行)
+        Note over API: 即時撤退<br/>獲得済み報酬は保持(ペナルティなし)
+        API-->>B: { status: "ok" }
     end
 ```
 
@@ -171,17 +195,17 @@ sequenceDiagram
     participant DB as Database
 
     B->>API: GET /api/shop/lineup
-    API->>DB: ShopDailyState取得
-    API->>API: リセット時刻チェック<br/>(00:00 UTC超過なら更新)
+    API->>DB: 常設ラインナップ取得
 
-    Note over API: 日替わりショップは Phase 2 で実装<br/>Phase 1 では常設ポーションのみ
+    API-->>B: {<br/>  lineup: [<br/>    { itemId: "hp_potion", name: "HPポーション",<br/>      price: 25, healRatio: 0.3,<br/>      quantityOwned: 10, stackLimit: 99 },<br/>    ...<br/>  ]<br/>}
 
-    opt 日替わりリセット (Phase 2~)
+    Note over API: 日替わりショップ (daily / dailySlotIndex /<br/>nextResetAt) は Phase 2後半・未実装
+
+    opt 日替わりリセット (Phase 2後半・未実装)
+        API->>API: リセット時刻チェック<br/>(00:00 UTC超過なら更新)
         API->>API: 新ラインナップ生成<br/>(到達階層に応じたレアリティ)
         API->>DB: ShopDailySlot x5 更新
     end
-
-    API-->>B: {<br/>  permanent: [HPポーション25G, ...],<br/>  daily: [<br/>    {slot:0, 鉄の剣, common, 500G, sold:false},<br/>    {slot:1, ..., sold:true},<br/>    ...<br/>  ],<br/>  nextResetAt: "2026-03-11T00:00:00Z"<br/>}
 
     Note over B: === 常設商品の購入 ===
 
@@ -189,16 +213,16 @@ sequenceDiagram
     API->>API: 残金チェック: 25G x 5 = 125G <= 1500G ✓<br/>所持上限チェック: 10 + 5 = 15 <= 99 ✓
     API->>DB: gold -= 125
     API->>DB: hp_potion += 5
-    API-->>B: { success: true, gold: 1375, potionCount: 15 }
+    API-->>B: { status: "ok", gold: 1375, itemId: "hp_potion", quantity: 5 }
 
-    Note over B: === 日替わり商品の購入 ===
+    Note over B: === 日替わり商品の購入 (Phase 2後半・未実装) ===
 
     B->>API: POST /api/shop/buy<br/>{ dailySlotIndex: 0 }
     API->>API: sold=false確認 ✓<br/>残金チェック: 500G <= 1375G ✓<br/>所持上限チェック ✓
     API->>DB: gold -= 500
     API->>DB: Equipment生成 (鉄の剣)
     API->>DB: slot[0].sold = true
-    API-->>B: { success: true, gold: 875, equipment: {...} }
+    API-->>B: { status: "ok", gold: 875, equipment: {...} }
 
     B->>B: トースト「鉄の剣を購入しました」
 ```
@@ -212,6 +236,18 @@ sequenceDiagram
     participant API as FastAPI
     participant DB as Database
 
+    Note over B: === 装備一覧取得 ===
+
+    B->>API: GET /api/equipment/list
+    API->>DB: Equipment一覧取得
+    API-->>B: EquipmentResponse[]
+
+    Note over B: === ロック切替 ===
+
+    B->>API: POST /api/equipment/lock<br/>{ equipmentId: "iron_sword_001" }
+    API->>DB: Equipment.locked更新
+    API-->>B: { locked }
+
     Note over B: === 装備する ===
 
     B->>API: POST /api/equipment/equip<br/>{<br/>  characterId: "hero_001",<br/>  equipmentId: "iron_sword_001",<br/>  slot: "weapon"<br/>}
@@ -224,7 +260,7 @@ sequenceDiagram
         API->>DB: 盾スロットを null に更新
     end
 
-    API-->>B: { success: true, updatedCharacter }
+    API-->>B: { status: "ok" }
 
     Note over B: === 売却 ===
 
@@ -232,15 +268,15 @@ sequenceDiagram
     API->>API: ロック確認: locked=false ✓<br/>装備中でないことを確認 ✓<br/>売却価格 = 5 x 1.0(コモン) x 5(LV) = 25G
     API->>DB: Equipment削除
     API->>DB: gold += 25
-    API-->>B: { success: true, gold: 900, soldPrice: 25 }
+    API-->>B: { goldEarned: 25, itemsSold: 1 }
 
-    Note over B: === アイテム売却 ===
+    Note over B: === アイテム売却 (Phase 4〜) ===
 
     B->>API: POST /api/item/sell<br/>{ itemId: "goblin_fang", quantity: 3 }
     API->>API: 換金アイテム確認 ✓<br/>所持数チェック: 5 >= 3 ✓<br/>売却価格 = 単価 x 3
     API->>DB: InventoryItem.quantity -= 3
     API->>DB: gold += 売却額
-    API-->>B: { success: true, gold: 950, soldPrice: 50 }
+    API-->>B: { status: "ok", gold: 950, soldPrice: 50 }
 ```
 
 ## 7. スキル習得・リセットフロー（Phase 3）
@@ -259,7 +295,7 @@ sequenceDiagram
     API->>API: バリデーション:<br/>前提スキル(sword_1)習得済み? ✓<br/>SP残量 >= 必要SP(1)? ✓<br/>未習得スキル? ✓
     API->>DB: LearnedSkill追加 (sword_2)
     API->>DB: skillPoints -= 1
-    API-->>B: { success: true, remainingSP: 4 }
+    API-->>B: { status: "ok", remainingSP: 4 }
 
     Note over B: === アクティブスキル枠セット ===
 
@@ -267,7 +303,7 @@ sequenceDiagram
 
     API->>API: 習得済みスキル? ✓<br/>アクティブスキル? ✓<br/>最大2枠? ✓
     API->>DB: ActiveSkillSlot更新 (枠0=sword_1, 枠1=sword_2)
-    API-->>B: { success: true }
+    API-->>B: { status: "ok" }
 
     Note over B: === スキルリセット ===
 
@@ -280,7 +316,7 @@ sequenceDiagram
     API->>DB: ActiveSkillSlot全削除
     API->>DB: skillPoints = (現LV - 1) に戻す
 
-    API-->>B: {<br/>  success: true,<br/>  gold: 400,<br/>  returnedSP: 9<br/>}
+    API-->>B: {<br/>  status: "ok",<br/>  gold: 400,<br/>  returnedSP: 9<br/>}
 ```
 
 ## 8. 限界突破フロー（Phase 3）
@@ -301,7 +337,7 @@ sequenceDiagram
 
     Note over API: ステータスボーナス:<br/>突破0: +0%<br/>突破1: +5%<br/>突破2: +10%<br/>突破3: +15% ← Now<br/>突破4: +20%<br/>突破5: +30%
 
-    API-->>B: {<br/>  success: true,<br/>  limitBreak: 3,<br/>  bonusPercent: 15,<br/>  updatedStats: {...}<br/>}
+    API-->>B: {<br/>  status: "ok",<br/>  limitBreak: 3,<br/>  bonusPercent: 15,<br/>  updatedStats: {...}<br/>}
 
     B->>B: キャラステータス更新表示
 ```
@@ -324,7 +360,7 @@ sequenceDiagram
     API->>DB: gold -= コスト
     API->>DB: 素材消費
     API->>DB: Facility作成 (tavern, level=1)
-    API-->>B: { success: true, facility: {type: "tavern", level: 1} }
+    API-->>B: { status: "ok", facility: {type: "tavern", level: 1} }
 
     Note over B: === 施設レベルアップ ===
 
@@ -335,7 +371,7 @@ sequenceDiagram
     API->>DB: gold -= コスト
     API->>DB: 素材消費
     API->>DB: tavern.level = 2
-    API-->>B: { success: true, facility: {type: "tavern", level: 2} }
+    API-->>B: { status: "ok", facility: {type: "tavern", level: 2} }
 
     Note over B: === 酒場スカウト ===
 
@@ -374,7 +410,7 @@ sequenceDiagram
 
     API->>DB: 素材消費 (強化石, gold)
     API->>DB: enhanceLevel = 2<br/>実効ステータス再計算:<br/>ATK = 元ATK + (2 x 基礎値10%)
-    API-->>B: { success: true, enhanceLevel: 2, updatedStats }
+    API-->>B: { status: "ok", enhanceLevel: 2, updatedStats }
 
     Note over B: === 装備製作 ===
 
@@ -385,7 +421,7 @@ sequenceDiagram
     API->>API: ランダム装備生成:<br/>スロット: ランダム<br/>レアリティ: レア固定<br/>ステータス: 2-3種ランダム
     API->>DB: 素材消費
     API->>DB: Equipment作成
-    API-->>B: { success: true, equipment: {slot: "body", rarity: "rare", ...} }
+    API-->>B: { status: "ok", equipment: {slot: "body", rarity: "rare", ...} }
 
     Note over B: === 装備分解 ===
 
@@ -395,7 +431,7 @@ sequenceDiagram
 
     API->>DB: Equipment削除
     API->>DB: 素材追加
-    API-->>B: { success: true,<br/>  materials: {enhance_stone: +3, magic_crystal: +1} }
+    API-->>B: { status: "ok",<br/>  materials: {enhance_stone: +3, magic_crystal: +1} }
 ```
 
 ## 11. ボスラッシュフロー（Phase 5）
@@ -412,7 +448,7 @@ sequenceDiagram
     API->>API: 通常塔探索を停止<br/>(同時進行不可)
     API->>DB: BossRushState作成<br/>(isActive=true, wave=1)
     API->>DB: Player.currentTower = null
-    API-->>B: { success: true, bossRush: {isActive: true, wave: 1} }
+    API-->>B: { status: "ok", bossRush: {isActive: true, wave: 1} }
 
     Note over B,API: 以降は通常の tick ポーリングで進行<br/>各tickでウェーブ戦闘を処理
 
@@ -471,7 +507,7 @@ sequenceDiagram
 
     API->>DB: PrestigeBonus更新:<br/>prestigeCount += 1<br/>prestigePoints += 10
 
-    API-->>B: {<br/>  success: true,<br/>  character: {level: 1, ...},<br/>  prestige: {count: 1, points: 10}<br/>}
+    API-->>B: {<br/>  status: "ok",<br/>  character: {level: 1, ...},<br/>  prestige: {count: 1, points: 10}<br/>}
 
     Note over B: === ポイント投資 ===
 
@@ -483,7 +519,7 @@ sequenceDiagram
 
     Note over API: ATK +5%<br/>(1ptあたり+1%)
 
-    API-->>B: {<br/>  success: true,<br/>  prestige: {<br/>    points: 5,<br/>    bonusAtk: 5<br/>  }<br/>}
+    API-->>B: {<br/>  status: "ok",<br/>  prestige: {<br/>    points: 5,<br/>    bonusAtk: 5<br/>  }<br/>}
 
     Note over B: === ボーナスリセット ===
 
@@ -492,7 +528,7 @@ sequenceDiagram
     API->>API: リセットコスト確認<br/>(master_data §16参照)
     API->>DB: gold -= コスト
     API->>DB: 全bonus = 0<br/>prestigePoints = 投資済み全pt返還
-    API-->>B: { success: true, returnedPoints: 10 }
+    API-->>B: { status: "ok", returnedPoints: 10 }
 ```
 
 ## 13. 通信エラー時（リトライ）
@@ -581,7 +617,7 @@ sequenceDiagram
     API->>DB: Userをemail検索
     API->>API: リセットトークン生成
     API->>DB: リセットトークン保存
-    API-->>B: { success: true, message: "リセットメール送信" }
+    API-->>B: { status: "ok", message: "リセットメール送信" }
 
     Note over B: ユーザーがメール内リンクをクリック
 
@@ -589,5 +625,5 @@ sequenceDiagram
     API->>DB: トークン検証（有効期限・使用済みチェック）
     API->>API: bcryptハッシュ生成
     API->>DB: password_hash更新<br/>トークンを使用済みに
-    API-->>B: { success: true }
+    API-->>B: { status: "ok" }
 ```

@@ -11,7 +11,7 @@ flowchart TD
     SetParams --> Enter["1Fから探索開始\n全スキルCD=0"]
 
     Enter --> Encounter["現在階のエンカウントプールから\n敵を重み付き抽選\n(ボス階は固定)"]
-    Encounter --> EnemyCount["敵出現数を決定\n(1-3体, 階定義に従う)"]
+    Encounter --> EnemyCount["敵出現数を決定\n(1-3体, 階定義に従う)\nPhase 3~ (Phase 1-2は1体固定)"]
     EnemyCount --> BattleStart["戦闘開始"]
 
     subgraph 戦闘ループ["1階の戦闘 (複数ターン)"]
@@ -22,7 +22,7 @@ flowchart TD
         WipeCheck1 -->|Yes| Wipe
     end
 
-    FloorDone -->|Yes| FloorClear["階クリア!\n報酬付与 (Gold+EXP+Drop)"]
+    FloorDone -->|Yes| FloorClear["階クリア!\n報酬付与 (Gold+EXP+Drop) +\n最高到達階・塔クリア記録更新\n(ボス階クリアで cleared=True\n→ 次塔解放)"]
 
     FloorClear --> EnvRecovery{"環境効果:\n階クリア回復?"}
     EnvRecovery -->|Yes| HealEnv["HP += floor(maxHP x 回復率)"]
@@ -32,6 +32,10 @@ flowchart TD
     CheckHP -->|閾値以下| Retreat["撤退\n(報酬確定取得)"]
     CheckHP -->|閾値超| GoalCheck{"目標階に\n到達した?"}
 
+    Retreat --> RetreatModeCheck{"進行モード?"}
+    RetreatModeCheck -->|自動周回| RetreatRestart["1Fから再スタート\n(HP持ち越し, CDリセットなし)"]
+    RetreatModeCheck -->|クリア後停止| Stop
+
     GoalCheck -->|No| NextFloor["次の階へ\n(CDは継続)"]
     GoalCheck -->|Yes| ModeCheck{"進行モード?"}
 
@@ -40,11 +44,11 @@ flowchart TD
 
     NextFloor --> Encounter
     Restart --> Encounter
+    RetreatRestart --> Encounter
 
     Wipe["全滅!\n強制撤退 (モード問わず)"]
     Wipe --> Penalty["ペナルティ:\n- 蓄積EXPの50%ロスト\n- 塔内取得ゴールド全ロスト\n- 塔内取得アイテム全ロスト"]
     Penalty --> End([探索終了])
-    Retreat --> End
     Stop --> End
 ```
 
@@ -53,24 +57,24 @@ flowchart TD
 ```mermaid
 %%{init: {'theme': 'default', 'themeVariables': {'fontSize': '16px'}} }%%
 flowchart TD
-    Start([ターン開始]) --> Sort["全キャラ(味方+敵)を\nSPD降順でソート\n同SPD: キャラID順"]
+    Start([ターン開始]) --> Sort["全キャラ(味方+敵)を\nSPD降順でソート\n同SPD: キャラID順\n(複数パーティメンバー: Phase 3~)"]
     Sort --> NextChar["次のキャラクターを取得"]
 
     NextChar --> DeadCheck{HP = 0?}
     DeadCheck -->|Yes| SkipChar["スキップ"]
-    DeadCheck -->|No| ParaCheck{麻痺状態?}
+    DeadCheck -->|No| ParaCheck{"麻痺状態?\nPhase 3~"}
 
     ParaCheck -->|Yes| ParaRoll{"30%判定:\n行動不能?"}
     ParaRoll -->|行動不能| SkipChar
     ParaRoll -->|行動可能| StunCheck
     ParaCheck -->|No| StunCheck
 
-    StunCheck{スタン状態?}
+    StunCheck{"スタン状態?\nPhase 3~"}
     StunCheck -->|Yes| SkipChar
     StunCheck -->|No| PoisonDOT
 
     subgraph DOT["毒DOT処理 (行動前)"]
-        PoisonDOT{"毒状態?"}
+        PoisonDOT{"毒状態?\nPhase 3~ (スキル毒)"}
         PoisonDOT -->|Yes| ApplyPoison["ダメージ =\nfloor(maxHP x 5%)\n最低1"]
         PoisonDOT -->|No| EnvDOT
         ApplyPoison --> EnvDOT
@@ -90,18 +94,18 @@ flowchart TD
     Regen --> PotionCheck
 
     PotionCheck{"HP <= 閾値\n(設定値 10%-50%)?\nかつポーション所持?"}
-    PotionCheck -->|Yes| UsePotion["ポーション自動使用\n優先: HP < ハイ < エリクサー\n(低回復量から使用)"]
+    PotionCheck -->|Yes| EnvRestrict
     PotionCheck -->|No| SkillEntry
-    UsePotion --> EnvRestrict
 
     EnvRestrict{"環境制限?\n(no_potion /\npotion_half)"}
-    EnvRestrict -->|no_potion| PotionBlocked["ポーション使用不可\n(使用をキャンセル)"]
-    EnvRestrict -->|potion_half| HalfPotion["回復量 x 0.5"]
-    EnvRestrict -->|制限なし| SkillEntry
+    EnvRestrict -->|no_potion| PotionBlocked["ポーション使用不可\n(使用せずスキップ)"]
+    EnvRestrict -->|potion_half| HalfPotion["ポーション自動使用\n優先: HP < ハイ < エリクサー\n(低回復量から使用)\n回復量 x 0.5"]
+    EnvRestrict -->|制限なし| UsePotion["ポーション自動使用\n優先: HP < ハイ < エリクサー\n(低回復量から使用)"]
     PotionBlocked --> SkillEntry
     HalfPotion --> SkillEntry
+    UsePotion --> SkillEntry
 
-    subgraph SkillJudge["アクティブスキル発動判定"]
+    subgraph SkillJudge["アクティブスキル発動判定 (Phase 3~)\n敵はPhase 1-4は通常攻撃のみ\n(敵スキル: Phase 5~ ボスラッシュ強化ボスから)"]
         SkillEntry["スキル判定開始"]
         SkillEntry --> SilenceCheck{"沈黙状態?"}
         SilenceCheck -->|Yes| NormalAtk["通常攻撃"]
@@ -114,15 +118,15 @@ flowchart TD
         ReviveCheck -->|No| HealCheck
 
         HealCheck{"味方HP <= 40% &\n回復スキルCD完了?"}
-        HealCheck -->|Yes| UseHeal["回復スキル発動"]
+        HealCheck -->|Yes| UseHeal["回復スキル発動\nCDリセット\n(CD=スキル定義値)"]
         HealCheck -->|No| BuffDebuffCheck
 
         BuffDebuffCheck{"バフ/デバフ\nスキルCD完了?"}
-        BuffDebuffCheck -->|Yes| UseBuffDebuff["バフ/デバフ発動"]
+        BuffDebuffCheck -->|Yes| UseBuffDebuff["バフ/デバフ発動\nCDリセット\n(CD=スキル定義値)"]
         BuffDebuffCheck -->|No| AtkSkillCheck
 
         AtkSkillCheck{"攻撃スキル\nCD完了?"}
-        AtkSkillCheck -->|Yes| UseAtkSkill["攻撃スキル発動"]
+        AtkSkillCheck -->|Yes| UseAtkSkill["攻撃スキル発動\nCDリセット\n(CD=スキル定義値)"]
         AtkSkillCheck -->|No| NormalAtk
     end
 
@@ -134,11 +138,11 @@ flowchart TD
         NormalAtk --> SelectAtkTarget
 
         SelectAtkTarget{"攻撃種別"}
-        SelectAtkTarget -->|通常攻撃| RandTarget["ランダム1体"]
+        SelectAtkTarget -->|通常攻撃| RandTarget["ランダム1体\n(複数敵: Phase 3~)"]
         SelectAtkTarget -->|単体スキル| MaxHPTarget["HP割合最大の敵"]
-        SelectAtkTarget -->|範囲スキル| AllTarget["生存敵全体"]
+        SelectAtkTarget -->|範囲スキル| AllTarget["生存敵全体\n(複数敵: Phase 3~)"]
 
-        RandTarget --> TauntCheck{"挑発中の\n敵/味方あり?"}
+        RandTarget --> TauntCheck{"挑発中の\n敵/味方あり?\nPhase 3~"}
         TauntCheck -->|Yes| TauntRoll["挑発率で\nターゲット振り分け\n(最大80%,\n複数時は按分)"]
         TauntCheck -->|No| DmgCalc
         TauntRoll --> DmgCalc
@@ -153,7 +157,7 @@ flowchart TD
     subgraph Damage["ダメージ計算"]
         DmgCalc["基本ダメージ =\nATK x (1 ± 0.1乱数) - DEF x 0.5\nスキル時:\nATK x スキル倍率 - DEF x 0.5"]
 
-        DmgCalc --> CritCheck{"クリティカル?\n基本5% +\nパッシブ補正"}
+        DmgCalc --> CritCheck{"クリティカル?\n基本5% + パッシブ補正\n(合算上限100%, パッシブはPhase 3~)"}
         CritCheck -->|Yes| CritDmg["DEF減算後 x 1.5"]
         CritCheck -->|No| MinDmg
 
@@ -164,7 +168,7 @@ flowchart TD
         Min1 --> PassiveDmgReduce
         Min0 --> PassiveDmgReduce
 
-        PassiveDmgReduce["パッシブ:\n被ダメ軽減適用"]
+        PassiveDmgReduce["パッシブ: 被ダメ軽減適用\n(実効軽減率 上限80%)\nPhase 3~"]
         PassiveDmgReduce --> Lifesteal
 
         Lifesteal{"HP吸収装備?\n(3-8%)"}
@@ -172,7 +176,7 @@ flowchart TD
         Lifesteal -->|No| Counter
         ApplyLifesteal --> Counter
 
-        Counter{"被攻撃側に\n反撃パッシブ?"}
+        Counter{"被攻撃側に\n反撃パッシブ?\nPhase 3~"}
         Counter -->|Yes| CounterAtk["反撃ダメージ適用"]
         Counter -->|No| DefeatCheck
         CounterAtk --> DefeatCheck
@@ -185,7 +189,7 @@ flowchart TD
     BuffApply --> NextCharCheck
 
     DefeatCheck{"対象\nHP = 0?"}
-    DefeatCheck -->|Yes| GrantReward["報酬付与:\nGold (市場ボーナス込み)\n+ EXP\n+ ドロップ抽選"]
+    DefeatCheck -->|Yes| GrantReward["報酬付与:\nGold (市場ボーナス込み Phase 4~)\n+ EXP\n+ ドロップ抽選"]
     DefeatCheck -->|No| NextCharCheck
 
     GrantReward --> AllEnemyDead{"敵全滅?"}
@@ -220,23 +224,19 @@ flowchart TD
 
     subgraph TickLoop["tick処理ループ"]
         ProcessTick["1 tickを処理"]
-        ProcessTick --> T1["ターン1 処理\n(20秒分)"]
+        ProcessTick --> T1["ターン1 処理\n(20秒分)\n敵撃破直後にレベルアップ判定\n→ステータス上昇(タイプ成長率)\n+ SP +1 (Phase 3~)"]
         T1 --> T1Result{"階クリア or\n全滅 or\n撤退?"}
-        T1Result -->|No| T2["ターン2 処理\n(20秒分)"]
+        T1Result -->|No| T2["ターン2 処理\n(20秒分)\n敵撃破直後にレベルアップ判定"]
         T1Result -->|Yes| TickEnd
 
         T2 --> T2Result{"階クリア or\n全滅 or\n撤退?"}
-        T2Result -->|No| T3["ターン3 処理\n(20秒分)"]
+        T2Result -->|No| T3["ターン3 処理\n(20秒分)\n敵撃破直後にレベルアップ判定"]
         T2Result -->|Yes| TickEnd
 
         T3 --> TickEnd["tick終了"]
     end
 
-    TickEnd --> LevelUp{"レベルアップ\n判定"}
-    LevelUp -->|Yes| ApplyLevelUp["ステータス上昇\n(タイプ成長率)\nSP +1"]
-    LevelUp -->|No| LogSave
-
-    ApplyLevelUp --> LogSave["戦闘ログ保存\n(DB上限100件,\n古い分自動パージ)"]
+    TickEnd --> LogSave["戦闘ログ保存\n(DB上限100件,\n古い分自動パージ)"]
 
     LogSave --> MoreTicks{"未処理tick\n残り?"}
     MoreTicks -->|Yes| ProcessTick
@@ -272,7 +272,7 @@ flowchart TD
         CalcCycle --> CalcLvUp["次のLVアップまでの\n必要EXP → 必要周回数"]
         CalcLvUp --> BulkAdd["消化可能tick数 =\nmin(残りtick, LVアップまでtick)\n報酬を一括加算"]
         BulkAdd --> LvUpCheck{"LVアップ\n発生?"}
-        LvUpCheck -->|Yes| Recalc["ステータス再計算\n(成長率適用)\nSP +1 (自動習得しない)\n目標階は固定"]
+        LvUpCheck -->|Yes| Recalc["ステータス再計算\n(成長率適用)\nSP +1 (自動習得しない, Phase 3~)\n目標階は固定"]
         LvUpCheck -->|No| MoreTicks{"残りtick > 0?"}
         Recalc --> MoreTicks
         MoreTicks -->|Yes| FastStart
