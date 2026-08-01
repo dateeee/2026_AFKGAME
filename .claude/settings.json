@@ -11,5 +11,19 @@
       "WebFetch",
       "WebSearch"
     ]
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/stop-commit.sh\"",
+            "timeout": 15,
+            "statusMessage": "未コミットの変更を確認中..."
+          }
+        ]
+      }
+    ]
   }
 }
