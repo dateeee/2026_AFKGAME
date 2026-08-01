@@ -67,12 +67,13 @@ VS Code の場合は実行構成 **Full Stack** で両方を同時起動でき�
 │   ├── documentation_rules.md   # ドキュメント規約（文字数上限・分割ルール）
 │   ├── glossary.md              # 用語集
 │   ├── open_specs.md            # 未確定仕様一覧（全確定後に削除）
+│   ├── balance_backlog.md       # バランス調整バックログ（仕様確定済み・数値のみ調整待ち）
 │   ├── design/                  # ゲーム仕様
 │   │   ├── game_spec.md         # 索引（開発フェーズ・設計方針・変更履歴）
 │   │   └── systems/             # システム別仕様（character / battle / equipment 他）
 │   ├── tech/                    # 技術仕様
 │   │   ├── tech_spec.md         # 索引（章構成・変更履歴）
-│   │   └── tech_*.md            # data / structure / api / architecture / logging / battle / offline / auth
+│   │   └── tech_*.md            # レイヤー別 + 詳細設計（一覧は下記「ドキュメント索引」）
 │   ├── data/                    # マスターデータ
 │   │   ├── master_data.md       # 索引 + 塔データ一覧
 │   │   ├── master/              # カテゴリ別数値（character / item / equipment 他）
@@ -113,28 +114,26 @@ VS Code の場合は実行構成 **Full Stack** で両方を同時起動でき�
 ## ドキュメント索引
 
 ### 開発プロセス
-- [docs/development_process.md](docs/development_process.md) — 開発工程定義書（要件定義〜結合テストの6工程・完了基準・テスト標準）
+- [docs/development_process.md](docs/development_process.md) — 開発工程（6工程・完了基準・テスト標準）
 - [docs/documentation_rules.md](docs/documentation_rules.md) — ドキュメント規約（文字数上限・分割ルール）
 - [docs/glossary.md](docs/glossary.md) — 用語集
-- [docs/open_specs.md](docs/open_specs.md) — 未確定仕様一覧
+- [docs/open_specs.md](docs/open_specs.md) — 未確定仕様（実装をブロックする未決定事項）
+- [docs/balance_backlog.md](docs/balance_backlog.md) — バランス調整バックログ（プレイテストで数値を見直す項目）
 
-大きな仕様書は **索引ファイル + 個別ファイル** に分割している（[documentation_rules.md](docs/documentation_rules.md) §6）。索引から辿ること。
+大きな仕様書は **索引 + 個別ファイル** に分割している（[documentation_rules.md](docs/documentation_rules.md) §6）。索引から辿ること。
 
 ### 仕様書
 - [docs/design/game_spec.md](docs/design/game_spec.md) — ゲーム仕様の索引
   - [systems/](docs/design/systems/) — character / battle / equipment / economy / dungeon / endgame / ui
+  - 要件: [product](docs/design/product_requirements.md) プロダクト / [nfr](docs/design/non_functional_requirements.md) 非機能 / [operation](docs/design/operation_requirements.md) 運用
 - [docs/tech/tech_spec.md](docs/tech/tech_spec.md) — 技術仕様の索引
-  - [tech_data.md](docs/tech/tech_data.md) データ設計 / [tech_structure.md](docs/tech/tech_structure.md) ディレクトリ・フロント／バック構成 / [tech_api.md](docs/tech/tech_api.md) API設計
-  - [tech_architecture.md](docs/tech/tech_architecture.md) アーキテクチャ方針 / [tech_logging.md](docs/tech/tech_logging.md) ログ設計
-  - [tech_battle.md](docs/tech/tech_battle.md) 戦闘ログ・戦闘処理 / [tech_offline.md](docs/tech/tech_offline.md) オフライン計算 / [tech_auth.md](docs/tech/tech_auth.md) 認証（Phase 2〜）
+  - 基本設計: [data](docs/tech/tech_data.md) データ / [structure](docs/tech/tech_structure.md) 構成 / [api](docs/tech/tech_api.md) API / [architecture](docs/tech/tech_architecture.md) 方針 / [logging](docs/tech/tech_logging.md) ログ / [auth](docs/tech/tech_auth.md) 認証
+  - 非機能（設計）: [performance](docs/tech/tech_performance.md) 性能・容量 / [security](docs/tech/tech_security.md) セキュリティ / [operations](docs/tech/tech_operations.md) 運用
+  - 詳細設計: [battle](docs/tech/tech_battle.md) 戦闘 / [offline](docs/tech/tech_offline.md) オフライン / [tick](docs/tech/tech_tick.md) tick / [polling](docs/tech/tech_polling.md) フロント / [state](docs/tech/tech_state.md) 状態 / [rng](docs/tech/tech_rng.md) 乱数 / [numeric](docs/tech/tech_numeric.md) 数値
 - [docs/data/master_data.md](docs/data/master_data.md) — マスターデータの索引 + 塔データ一覧
   - [master/](docs/data/master/) — character / item / equipment / base / endgame
   - [towers/TOWERS_OVERVIEW.md](docs/data/towers/TOWERS_OVERVIEW.md) 全塔概要一覧 / [skills/SKILLS_OVERVIEW.md](docs/data/skills/SKILLS_OVERVIEW.md) スキルシステム概要
 
 ### 設計図
-- [er_diagram.md](diagrams/er_diagram.md) — ER図（索引 → [er_diagram/](diagrams/er_diagram/)）
-- [class_diagram.md](diagrams/class_diagram.md) — クラス図（索引 → [class_diagram/](diagrams/class_diagram/)）
-- [battle_flow.md](diagrams/battle_flow.md) — 戦闘ターン処理フロー図（索引 → [battle_flow/](diagrams/battle_flow/)）
-- [api_sequence.md](diagrams/api_sequence.md) — APIシーケンス図（索引 → [api_sequence/](diagrams/api_sequence/)）
-- [screen_transition.md](diagrams/screen_transition.md) — 画面遷移図
-- [system_architecture.md](diagrams/system_architecture.md) — システム構成図
+- 索引形式: [er_diagram.md](diagrams/er_diagram.md) ER図 / [class_diagram.md](diagrams/class_diagram.md) クラス図 / [battle_flow.md](diagrams/battle_flow.md) 戦闘フロー図 / [api_sequence.md](diagrams/api_sequence.md) APIシーケンス図
+- 単一: [screen_transition.md](diagrams/screen_transition.md) 画面遷移図 / [system_architecture.md](diagrams/system_architecture.md) システム構成図

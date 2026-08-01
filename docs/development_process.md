@@ -52,7 +52,7 @@ graph LR
 |------|------|
 | 目的 | ゲームとして「何を作るか」を確定する |
 | 主な作業 | ゲームシステム・バランス・UI要件の定義、未確定仕様の解消 |
-| 成果物 | [docs/design/game_spec.md](design/game_spec.md)（索引）＋ [design/systems/](design/systems/)（システム別仕様）、[docs/glossary.md](glossary.md)、[docs/open_specs.md](open_specs.md)（未確定管理） |
+| 成果物 | [docs/design/game_spec.md](design/game_spec.md)（索引）＋ [design/systems/](design/systems/)（システム別仕様）、[product_requirements.md](design/product_requirements.md)（プロダクト要件）、[non_functional_requirements.md](design/non_functional_requirements.md)（非機能要件）、[operation_requirements.md](design/operation_requirements.md)（運用・変更管理要件）、[docs/glossary.md](glossary.md)、[docs/open_specs.md](open_specs.md)（未確定管理） |
 | 完了基準 | open_specs.md の対象項目がすべて解消され、game_spec.md に反映されている |
 | レビュー | `/doc-review` → 指摘は `/fix-specs` で反映 |
 
@@ -60,10 +60,10 @@ graph LR
 
 | 項目 | 内容 |
 |------|------|
-| 目的 | システム構造・API・データモデル・画面構成を確定する |
-| 主な作業 | アーキテクチャ設計、API一覧定義、DB設計、画面遷移設計 |
-| 成果物 | [docs/tech/tech_spec.md](tech/tech_spec.md)（索引）＋ tech_data / tech_structure / tech_api / tech_architecture / tech_logging、[diagrams/](../diagrams/) 6点（ER図・クラス図・画面遷移図・戦闘フロー図・システム構成図・APIシーケンス図）、[docs/tech/tech_auth.md](tech/tech_auth.md)（認証方式） |
-| 完了基準 | 仕様書・設計図間の矛盾がない（`/diagrams-review` の指摘解消） |
+| 目的 | システム構造・API・データモデル・画面構成と、非機能要件の実現方式を確定する |
+| 主な作業 | アーキテクチャ設計、API一覧・共通仕様の定義、DB設計、画面遷移設計、性能／セキュリティ／運用の実現方式の設計 |
+| 成果物 | [docs/tech/tech_spec.md](tech/tech_spec.md)（索引）＋ **構造**: tech_data / tech_structure / tech_api / tech_architecture / tech_logging / [tech_auth.md](tech/tech_auth.md)（認証方式）<br>**非機能の実現方式**: [tech_performance.md](tech/tech_performance.md)（性能・容量）・[tech_security.md](tech/tech_security.md)（セキュリティ）・[tech_operations.md](tech/tech_operations.md)（運用）<br>**図**: [diagrams/](../diagrams/) 6点（ER図・クラス図・画面遷移図・戦闘フロー図・システム構成図・APIシーケンス図） |
+| 完了基準 | 仕様書・設計図間の矛盾がない（`/diagrams-review` の指摘解消）。要件定義の非機能・運用要件がすべて、実現方式を定めたいずれかの成果物に対応づいている |
 | レビュー | `/diagrams-review`、`/doc-review` |
 
 ### 3.3 詳細設計（ローレベル設計）
@@ -72,8 +72,8 @@ graph LR
 |------|------|
 | 目的 | 対象Phaseの機能を「実装可能な粒度」まで具体化する |
 | 主な作業 | 処理フロー・アルゴリズム・計算式の定義、マスターデータの数値確定 |
-| 成果物 | [docs/tech/tech_battle.md](tech/tech_battle.md)（戦闘処理）・[tech_offline.md](tech/tech_offline.md)（オフライン計算）、[docs/data/master_data.md](data/master_data.md)（索引）＋ [data/master/](data/master/)、[docs/data/towers/](data/towers/)・[docs/data/skills/](data/skills/)（数値定義） |
-| 完了基準 | 対象Phase機能の数値・計算式・分岐条件が仕様書から一意に実装できる（数値は仮置き可、ただし「仮置き」と明記） |
+| 成果物 | **処理**: [tech_battle.md](tech/tech_battle.md)（戦闘処理）・[tech_offline.md](tech/tech_offline.md)（オフライン計算）・[tech_tick.md](tech/tech_tick.md)（tick進行制御）・[tech_polling.md](tech/tech_polling.md)（フロントtick制御）<br>**横断規約**: [tech_rng.md](tech/tech_rng.md)（乱数）・[tech_numeric.md](tech/tech_numeric.md)（数値・丸め）・[tech_state.md](tech/tech_state.md)（進行状態と操作可否）<br>**数値**: [master_data.md](data/master_data.md)（索引）＋ [data/master/](data/master/)、[data/towers/](data/towers/)・[data/skills/](data/skills/) |
+| 完了基準 | 対象Phase機能の数値・計算式・分岐条件が仕様書から一意に実装できる（数値は仮置き可、ただし「仮置き」と明記）。各処理仕様に**分岐一覧（単体テスト観点）**が記載され、§3.5 のC1網羅の導出元になっている |
 | レビュー | `/doc-review`（詳細仕様の整合確認） |
 
 ### 3.4 製造
@@ -138,6 +138,7 @@ graph LR
 
 - 未確定仕様・仕様変更は [docs/open_specs.md](open_specs.md) で管理する（現行フロー維持）
 - 確定 → 該当工程の成果物（仕様書・設計図）へ反映 → 各ファイルの変更履歴に追記 → open_specs.md を更新
+- **仕様は確定済みで数値のみ調整待ち**の項目は [docs/balance_backlog.md](balance_backlog.md) で管理する。実装をブロックしないため open_specs.md には残さず、結合テスト〜リリース後の実測で確定する
 - 実装と仕様の乖離は `/full-review` で検出し、「仕様書を実装に合わせる」か「実装を修正する」かを都度判断して記録する
 
 ---
@@ -147,5 +148,6 @@ graph LR
 | 日付 | 内容 |
 |------|------|
 | 2026-08-02 | ドキュメント規約（documentation_rules.md）を適用範囲に追加、工程ゲートに「ドキュメント規約ゲート」を追加 |
+| 2026-08-02 | §6 変更管理に balance_backlog.md（仕様確定済み・数値のみ調整待ちの項目）の運用を追加 |
 | 2026-08-02 | 仕様書の分割に伴い成果物欄を更新（§3.1 design/systems/、§3.2 tech_* 5点、§3.3 tech_offline.md・data/master/） |
 | 2026-08-01 | 初版作成: 6工程（要件定義→基本設計→詳細設計→製造→単体テスト→結合テスト）の定義、V字モデル・Phase単位反復の採用、テスト標準の制定（バックエンド: pytest C1カバレッジ100%、フロントエンド: Playwright E2E、API統合: FastAPI TestClient） |
