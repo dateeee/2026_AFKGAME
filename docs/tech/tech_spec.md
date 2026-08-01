@@ -60,3 +60,4 @@
 | 2026-08-02 | 詳細設計の欠落5観点を新規5ファイルで補完: tick進行制御（tech_tick）・乱数設計（tech_rng）・数値／丸め規約（tech_numeric）・進行状態と操作可否（tech_state）・フロントtick制御（tech_polling）。各ファイルに「分岐一覧（単体テスト観点）」と「現行実装との差異」を付与 |
 | 2026-08-02 | 未確定仕様の確定を反映。tech_api.md: `/api/tower/select` の `targetFloor` 検証範囲（`min(塔別highestFloor + 1, totalFloors)`）と上限追従ルールを明記、深淵の塔セクション（`/api/abyss/ranking`・`towerId: "abyss_tower"` で既存 `/api/tower/*` を流用）を追加。tech_offline.md: 簡略計算でも上限追従を適用する旨を追記 |
 | 2026-08-02 | 基本設計の欠落観点を補完: §5.0 API共通仕様（ベースパス・命名・日時／数値・認証要否・共通ヘッダ・HTTPステータス使い分け）を tech_api.md に新設し `GET /health` を追加。§10 性能・容量設計（tech_performance）・§11 セキュリティ設計（tech_security）・§12 運用設計（tech_operations）の3ファイルを新設。tech_architecture.md の同時実行制御は tech_tick.md を正として不変条件のみ残す形に整理 |
+| 2026-08-02 | 目標階上限の実装反映に伴い tech_api.md を更新: `/api/tower/list` のレスポンスに `targetFloorCap`（塔ごとの選択上限）を追加し、クライアントが上限式を再実装しない旨を明記 |

@@ -39,10 +39,13 @@ function selectTower(tower: TowerInfo) {
   selectedTowerId.value = tower.id
 }
 
-// 選択中の塔が変わったら目標フロアを最終階に合わせる
+// 選択可能な目標フロアの上限 = min(その塔の到達済み最高階 + 1, 総階数)（systems/battle.md 目標階設定）
+const targetFloorCap = computed(() => selectedTower.value?.targetFloorCap ?? 1)
+
+// 選択中の塔が変わったら目標フロアを上限に収める
 watch(selectedTower, (tower) => {
-  if (tower && selectedTargetFloor.value > tower.totalFloors) {
-    selectedTargetFloor.value = tower.totalFloors
+  if (tower && selectedTargetFloor.value > tower.targetFloorCap) {
+    selectedTargetFloor.value = tower.targetFloorCap
   }
 })
 
@@ -246,7 +249,7 @@ function dismissOffline() {
           <div class="flex items-center justify-between">
             <p class="font-display font-bold text-text-bright">
               {{ tower.name }}
-              <span class="text-xs font-normal text-text-muted">(フロア 1-{{ tower.totalFloors }})</span>
+              <span class="text-xs font-normal text-text-muted">(全{{ tower.totalFloors }}F)</span>
             </p>
             <span v-if="gameStore.towersCleared[tower.id]?.cleared" class="badge badge-cleared">クリア済</span>
             <span v-else-if="!isUnlocked(tower)" class="badge badge-locked">未解放</span>
@@ -266,9 +269,10 @@ function dismissOffline() {
             type="number"
             v-model.number="selectedTargetFloor"
             min="1"
-            :max="selectedTower?.totalFloors ?? 20"
+            :max="targetFloorCap"
             class="floor-input"
           />
+          <span class="text-xs text-text-muted">/ {{ targetFloorCap }}（選択上限）</span>
         </div>
         <button class="btn btn-primary" :disabled="!selectedTower || !isUnlocked(selectedTower)" @click="enterTower">
           塔に入る

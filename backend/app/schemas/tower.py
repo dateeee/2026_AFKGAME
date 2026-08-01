@@ -26,3 +26,4 @@ class TowerInfo(CamelModel):
     unlocked: bool
     cleared: bool
     highest_floor: int
+    target_floor_cap: int  # 選択可能な目標階の上限 = min(highest_floor + 1, total_floors)

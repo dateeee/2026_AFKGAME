@@ -94,18 +94,63 @@ def _use_potion(player: Player, character: Character, effective_max_hp: int, db:
     return True
 
 
-def _update_tower_record(player: Player, tower_id: str, floor: int, is_boss: bool, db: Session) -> None:
-    """塔別クリア記録を更新。ボス討伐で cleared=True（次の塔の解放条件）"""
+def target_floor_cap(highest_floor: int, total_floors: int | None) -> int:
+    """目標階の選択上限 = min(到達済み最高階 + 1, 総階数)。
+
+    +1 は「未到達の次の階を1階ずつ開拓できるようにする」ため（systems/battle.md 目標階設定）。
+    total_floors=None は総階数を持たない無限塔（深淵の塔、Phase 5〜）を表し、上限は +1 のみ。
+    """
+    cap = highest_floor + 1
+    if total_floors is not None:
+        cap = min(cap, total_floors)
+    return cap
+
+
+def get_tower_highest_floor(player: Player, tower_id: str, db: Session) -> int:
+    """指定塔の到達済み最高階。記録がなければ0（未挑戦）"""
+    record = db.query(TowerClearRecord).filter_by(
+        player_id=player.id, tower_id=tower_id
+    ).first()
+    if not record:
+        return 0
+    return record.highest_floor or 0
+
+
+def _update_tower_record(player: Player, tower_id: str, floor: int, is_boss: bool, db: Session) -> int:
+    """塔別クリア記録を更新。ボス討伐で cleared=True（次の塔の解放条件）。
+
+    戻り値は**更新前**の到達済み最高階（上限追従の判定に使う）。
+    """
     record = db.query(TowerClearRecord).filter_by(
         player_id=player.id, tower_id=tower_id
     ).first()
     if not record:
         record = TowerClearRecord(player_id=player.id, tower_id=tower_id)
         db.add(record)
-    if floor > (record.highest_floor or 0):
+    old_highest = record.highest_floor or 0
+    if floor > old_highest:
         record.highest_floor = floor
     if is_boss:
         record.cleared = True
+    return old_highest
+
+
+def _follow_target_floor(
+    player: Player, total_floors: int | None, old_highest: int, cleared_floor: int
+) -> int | None:
+    """上限追従: 目標階が上限と一致している状態で新しい階をクリアしたら目標階を +1 する。
+
+    追従した場合は新しい目標階を返す。追従しない場合は None。
+    目標階を上限より低く設定している場合は追従しない（プレイヤーが意図した周回階を維持する）。
+    """
+    if cleared_floor <= old_highest:
+        return None  # 既踏の階の再クリア
+    old_cap = target_floor_cap(old_highest, total_floors)
+    new_cap = target_floor_cap(cleared_floor, total_floors)
+    if player.target_floor != old_cap or new_cap <= old_cap:
+        return None
+    player.target_floor = new_cap
+    return new_cap
 
 
 def _recover_hp(character: Character, effective_max_hp: int, effective_def: int) -> int:
@@ -283,10 +328,17 @@ def process_tick(player: Player, character: Character, db: Session) -> TickResul
                     current_floor = player.current_floor or 1
                     if current_floor > (player.highest_floor or 0):
                         player.highest_floor = current_floor
-                    _update_tower_record(
+                    old_highest = _update_tower_record(
                         player, player.current_tower_id, current_floor,
                         enemy_data.is_boss, db,
                     )
+
+                    # 上限追従: 目標階が上限と一致していたら自動で +1（オフライン中も適用）
+                    followed = _follow_target_floor(
+                        player, tower.total_floors, old_highest, current_floor,
+                    )
+                    if followed is not None:
+                        tick_logs.append({"type": "target_floor_follow", "target_floor": followed})
 
                     next_floor = current_floor + 1
 

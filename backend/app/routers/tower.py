@@ -11,6 +11,7 @@ from app.db.database import get_db
 from app.dependencies import get_current_player
 from app.models.player import Player, TowerClearRecord
 from app.master_data.towers import TOWERS, get_tower
+from app.services.battle_service import get_tower_highest_floor, target_floor_cap
 from app.schemas.tower import (
     TowerSelectRequest,
     TowerModeRequest,
@@ -38,8 +39,10 @@ def list_towers(
 ):
     records = {r.tower_id: r for r in db.query(TowerClearRecord).filter_by(player_id=player.id).all()}
     cleared_ids = {tid for tid, r in records.items() if r.cleared}
-    return [
-        TowerInfo(
+
+    def _info(t) -> TowerInfo:
+        highest = records[t.id].highest_floor if t.id in records else 0
+        return TowerInfo(
             id=t.id,
             name=t.name,
             dungeon_name=t.dungeon_name,
@@ -47,10 +50,11 @@ def list_towers(
             unlock_tower_id=t.unlock_tower_id,
             unlocked=_is_tower_unlocked(t.id, cleared_ids),
             cleared=records[t.id].cleared if t.id in records else False,
-            highest_floor=records[t.id].highest_floor if t.id in records else 0,
+            highest_floor=highest,
+            target_floor_cap=target_floor_cap(highest, t.total_floors),
         )
-        for t in TOWERS.values()
-    ]
+
+    return [_info(t) for t in TOWERS.values()]
 
 
 @router.post("/select")
@@ -67,7 +71,11 @@ def select_tower(
     tower = get_tower(req.tower_id)
     if not _is_tower_unlocked(req.tower_id, _get_cleared_tower_ids(player, db)):
         raise HTTPException(status_code=403, detail="Tower is locked")
-    if req.target_floor < 1 or req.target_floor > tower.total_floors:
+    # 目標階の上限は塔ごとに個別管理（systems/battle.md 目標階設定）
+    cap = target_floor_cap(
+        get_tower_highest_floor(player, req.tower_id, db), tower.total_floors
+    )
+    if req.target_floor < 1 or req.target_floor > cap:
         raise HTTPException(status_code=400, detail="Invalid target floor")
 
     if req.mode not in ("auto_repeat", "stop_on_clear"):

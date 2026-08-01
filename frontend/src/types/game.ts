@@ -75,6 +75,8 @@ export interface TowerInfo {
   unlocked: boolean
   cleared: boolean
   highestFloor: number
+  /** 選択可能な目標階の上限 = min(highestFloor + 1, totalFloors) */
+  targetFloorCap: number
 }
 
 /**
