@@ -48,9 +48,10 @@
   "potions": {
     "hp_potion": 10
   },
-  "towersCleared": {
+  "towersCleared": {                   // 塔別の到達記録。目標階の上限 = min(highestFloor + 1, totalFloors)
     "goblin_tower": { "cleared": true, "highestFloor": 20 },
-    "forest_tower": { "cleared": false, "highestFloor": 15 }
+    "forest_tower": { "cleared": false, "highestFloor": 15 },
+    "abyss_tower": { "cleared": false, "highestFloor": 87 }   // 深淵の塔（無限塔）。cleared は常に false
   },
   "currentEnemy": {                    // null = 現在戦闘中でない
     "id": "goblin",

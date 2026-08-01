@@ -65,7 +65,7 @@ erDiagram
         string id PK "例: goblin_tower"
         string dungeon_id FK "references Dungeon.id"
         string name "塔名"
-        int total_floors "総階数"
+        int total_floors "nullable, 総階数（NULL = 無限塔）"
         int recommended_lv_min "推奨LV下限"
         int recommended_lv_max "推奨LV上限"
         string unlock_tower_id FK "nullable, 前提塔ID"

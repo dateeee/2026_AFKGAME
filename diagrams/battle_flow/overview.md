@@ -30,7 +30,11 @@ flowchart TD
 
     HealEnv --> CheckHP{"HP閾値\n撤退チェック"}
     CheckHP -->|閾値以下| Retreat["撤退\n(報酬確定取得)"]
-    CheckHP -->|閾値超| GoalCheck{"目標階に\n到達した?"}
+    CheckHP -->|閾値超| UpdateHighest["塔別 highestFloor を更新\n(クリア階が過去最高なら)"]
+    UpdateHighest --> FollowCheck{"目標階 ==\n旧上限?"}
+    FollowCheck -->|Yes| FollowUp["上限追従:\ntargetFloor += 1\n(min(highestFloor+1, totalFloors) まで)"]
+    FollowCheck -->|No| GoalCheck{"目標階に\n到達した?"}
+    FollowUp --> GoalCheck
 
     Retreat --> RetreatModeCheck{"進行モード?"}
     RetreatModeCheck -->|自動周回| RetreatRestart["1Fから再スタート\n(HP持ち越し, CDリセットなし)"]

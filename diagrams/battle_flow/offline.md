@@ -29,7 +29,7 @@ flowchart TD
         CalcCycle --> CalcLvUp["次のLVアップまでの\n必要EXP → 必要周回数"]
         CalcLvUp --> BulkAdd["消化可能tick数 =\nmin(残りtick, LVアップまでtick)\n報酬を一括加算"]
         BulkAdd --> LvUpCheck{"LVアップ\n発生?"}
-        LvUpCheck -->|Yes| Recalc["ステータス再計算\n(成長率適用)\nSP +1 (自動習得しない, Phase 3~)\n目標階は固定"]
+        LvUpCheck -->|Yes| Recalc["ステータス再計算\n(成長率適用)\nSP +1 (自動習得しない, Phase 3~)\n目標階は固定 (上限追従のみ適用)"]
         LvUpCheck -->|No| MoreTicks{"残りtick > 0?"}
         Recalc --> MoreTicks
         MoreTicks -->|Yes| FastStart

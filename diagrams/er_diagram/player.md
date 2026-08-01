@@ -132,6 +132,7 @@ erDiagram
         string tower_id FK "references Tower.id"
         boolean cleared "ボス討伐済みか"
         int highest_floor "最高到達階"
+        datetime highest_floor_at "nullable, 最高到達階を更新した時刻（ランキングのタイブレーク用）"
     }
 
     CharacterEquipSlot {

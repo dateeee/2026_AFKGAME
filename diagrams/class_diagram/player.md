@@ -113,6 +113,7 @@ classDiagram
         +string towerId
         +bool cleared
         +int highestFloor
+        +datetime highestFloorAt  nullable ランキングのタイブレーク用
     }
 
     Player "1" --> "1" Settings

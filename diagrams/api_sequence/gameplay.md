@@ -18,15 +18,17 @@ sequenceDiagram
 
     B->>API: POST /api/tower/select<br/>{<br/>  towerId: "forest_tower",<br/>  targetFloor: 15,<br/>  mode: "auto_repeat"<br/>}
 
-    API->>DB: TowerClearRecord確認<br/>(前提塔クリア済み?)
-    API->>API: バリデーション:<br/>塔解放済み? ✓<br/>targetFloor <= highestFloor? ✓
+    API->>DB: TowerClearRecord確認<br/>(前提塔クリア済み? / 塔別highestFloor)
+    API->>API: バリデーション:<br/>塔解放済み? ✓<br/>1 ≦ targetFloor ≦ min(highestFloor + 1, totalFloors)? ✓
 
-    Note over API: ※実装は塔の総階数上限のみ検証。<br/>到達済み最高階上限は未確定仕様<br/>(open_specs参照)
+    Note over API: 上限は塔ごとに個別判定。<br/>未挑戦の塔(highestFloor=0)は1Fのみ選択可。<br/>深淵の塔は totalFloors 無しのため highestFloor+1 のみ
 
     alt 未解放塔を選択
         API-->>B: 403 Tower is locked
     else 既に入塔中
         API-->>B: 400 Already in a tower
+    else targetFloor が範囲外
+        API-->>B: 400 Invalid target floor
     else 検証OK
         API->>DB: Player更新:<br/>currentTower = forest_tower<br/>currentFloor = 1<br/>targetFloor = 15<br/>towerMode = auto_repeat
 

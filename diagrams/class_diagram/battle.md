@@ -21,7 +21,7 @@ classDiagram
     class Tower {
         +string id
         +string name
-        +int floors  総階数
+        +int floors  総階数 nullable(NULL=無限塔)
         +int recommendedLvMin
         +int recommendedLvMax
         +Modifier[] modifiers
