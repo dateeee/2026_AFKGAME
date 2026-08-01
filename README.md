@@ -21,7 +21,7 @@
 ```bash
 cd backend
 python -m venv .venv && .venv\Scripts\activate   # Windows
-pip install -r requirements.txt
+pip install -r requirements.txt -r requirements-dev.txt
 uvicorn app.main:app --reload --port 8000
 ```
 
@@ -53,7 +53,7 @@ VS Code の場合は実行構成 **Full Stack** で両方を同時起動でき�
 |---------|------|
 | `npm run dev` / `npm run build` | フロント開発サーバー / 本番ビルド |
 | `npm run type-check` | TypeScript 型チェック（vue-tsc） |
-| `pytest --cov=app --cov-branch` | バックエンド単体テスト（C1カバレッジ100%基準） |
+| `pytest` | バックエンドテスト（C1カバレッジ100%基準） |
 | `python scripts/check_doc_size.py` | ドキュメント文字数チェック |
 
 ## ディレクトリ構成

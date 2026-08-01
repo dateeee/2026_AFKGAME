@@ -123,16 +123,29 @@ graph LR
 | 単体テストゲート | 製造完了後 | 全PASS + C1カバレッジ100% |
 | Phase完了ゲート | 結合テスト完了時 | API統合テスト・E2E全PASS + `/full-review` で仕様との乖離ゼロ |
 
-## 5. 現在の工程状況（2026-08-01時点）
+## 5. 現在の工程状況（2026-08-02時点）
 
 | Phase | 詳細設計 | 製造 | 単体テスト | 結合テスト |
 |-------|---------|------|-----------|-----------|
-| Phase 1 (MVP) | 完了 | 完了 | **未整備（遡及対象）** | **未整備（遡及対象）** |
-| Phase 2 | 完了 | 進行中（装備・複数塔・認証・常設ショップは実装済み。日替わりショップは未実装） | 未着手 | 未着手 |
+| Phase 1 (MVP) | 完了 | 完了 | 進行中（遡及整備） | **未整備（遡及対象）** |
+| Phase 2 | 完了 | 進行中（装備・複数塔・認証・常設ショップは実装済み。日替わりショップは未実装） | 進行中 | 未着手 |
 | Phase 3〜5 | 完了（数値は仮置き） | 未着手 | — | — |
 
 - Phase 1〜2 の実装済み機能はテストの**遡及整備**を行う。Phase 2 の Phase完了ゲート通過までに単体・結合テストを整備すること
-- テスト基盤（pytest / pytest-cov / Playwright）の導入は Phase 2 テスト工程の最初のタスクとする
+- テスト基盤（pytest / pytest-cov）は導入済み（`backend/pytest.ini`・`backend/tests/`・`backend/requirements-dev.txt`）。Playwright は結合テスト着手時に導入する
+
+### 5.1 単体テストの整備状況（C1カバレッジ）
+
+| 対象 | 状況 |
+|------|------|
+| `routers/tower.py`・`schemas/` | 100%（整備済み） |
+| `services/battle_service.py` | 79%（オフライン簡略計算・装備連動の分岐が未整備） |
+| `routers/auth.py`・`services/auth_service.py` | 未整備 |
+| `routers/battle.py`・`game.py`・`shop.py`・`equipment.py` | 未整備 |
+| `services/equipment_service.py`・`game_state_builder.py` | 未整備 |
+| 全体 | 60% ← 完了基準は100% |
+
+- 数値は `pytest` 実行時に更新する。整備完了（全体100%）をもって単体テストゲート通過とする
 
 ## 6. 変更管理
 
@@ -149,5 +162,6 @@ graph LR
 |------|------|
 | 2026-08-02 | ドキュメント規約（documentation_rules.md）を適用範囲に追加、工程ゲートに「ドキュメント規約ゲート」を追加 |
 | 2026-08-02 | §6 変更管理に balance_backlog.md（仕様確定済み・数値のみ調整待ちの項目）の運用を追加 |
+| 2026-08-02 | テスト基盤（pytest / pytest-cov）の導入に伴い §5 の工程状況を更新し、§5.1 単体テストの整備状況（C1カバレッジ）を追加 |
 | 2026-08-02 | 仕様書の分割に伴い成果物欄を更新（§3.1 design/systems/、§3.2 tech_* 5点、§3.3 tech_offline.md・data/master/） |
 | 2026-08-01 | 初版作成: 6工程（要件定義→基本設計→詳細設計→製造→単体テスト→結合テスト）の定義、V字モデル・Phase単位反復の採用、テスト標準の制定（バックエンド: pytest C1カバレッジ100%、フロントエンド: Playwright E2E、API統合: FastAPI TestClient） |
