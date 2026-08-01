@@ -2,6 +2,14 @@
 
 > プロジェクト概要は [README.md](../../README.md)、技術仕様は [tech_spec.md](../tech/tech_spec.md)、マスターデータは [master_data.md](../data/master_data.md) を参照。
 > 本書は索引。コアシステム仕様（§2）とUI構成（§3）は [systems/](systems/) 配下の個別ファイルに分割している。変更履歴は本書（§7）に集約する。
+>
+> 本書は**機能要件**（何を作るか）を扱う。機能以外の要件は次を参照。
+
+| 要件 | ファイル |
+|------|---------|
+| 目的・ターゲット・想定プレイサイクル・スコープ・成功基準 | [product_requirements.md](product_requirements.md) |
+| 性能・容量・可用性・不正防止・プライバシー | [non_functional_requirements.md](non_functional_requirements.md) |
+| バランス改定・データ移行・障害時の補填 | [operation_requirements.md](operation_requirements.md) |
 
 ---
 
