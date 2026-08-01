@@ -1,6 +1,6 @@
 # AFK GAME — 開発工程定義書
 
-> プロジェクト概要は [CLAUDE.md](../CLAUDE.md) を参照。本書は AFK GAME の開発工程（要件定義〜結合テスト）と、各工程の成果物・完了基準・テスト標準を定義する。
+> プロジェクト概要は [README.md](../README.md) を参照。本書は AFK GAME の開発工程（要件定義〜結合テスト）と、各工程の成果物・完了基準・テスト標準を定義する。
 
 ---
 
@@ -9,6 +9,7 @@
 - 開発を **要件定義 → 基本設計 → 詳細設計 → 製造 → 単体テスト → 結合テスト** の6工程で管理する
 - 適用範囲は AFK GAME の全開発（Phase 1〜5）
 - 既存ドキュメントのディレクトリ構成は変更せず、本書で各工程への対応付けを行う
+- 各工程の成果物（Markdown）の記述規約（文字数上限・分割ルール）は [documentation_rules.md](documentation_rules.md) に従う
 
 ## 2. 工程モデル
 
@@ -51,7 +52,7 @@ graph LR
 |------|------|
 | 目的 | ゲームとして「何を作るか」を確定する |
 | 主な作業 | ゲームシステム・バランス・UI要件の定義、未確定仕様の解消 |
-| 成果物 | [docs/design/game_spec.md](design/game_spec.md)、[docs/glossary.md](glossary.md)、[docs/open_specs.md](open_specs.md)（未確定管理） |
+| 成果物 | [docs/design/game_spec.md](design/game_spec.md)（索引）＋ [design/systems/](design/systems/)（システム別仕様）、[docs/glossary.md](glossary.md)、[docs/open_specs.md](open_specs.md)（未確定管理） |
 | 完了基準 | open_specs.md の対象項目がすべて解消され、game_spec.md に反映されている |
 | レビュー | `/doc-review` → 指摘は `/fix-specs` で反映 |
 
@@ -61,7 +62,7 @@ graph LR
 |------|------|
 | 目的 | システム構造・API・データモデル・画面構成を確定する |
 | 主な作業 | アーキテクチャ設計、API一覧定義、DB設計、画面遷移設計 |
-| 成果物 | [docs/tech/tech_spec.md](tech/tech_spec.md)（API設計・データ構造・アーキテクチャ）、[diagrams/](../diagrams/) 6点（ER図・クラス図・画面遷移図・戦闘フロー図・システム構成図・APIシーケンス図）、[docs/tech/tech_auth.md](tech/tech_auth.md)（認証方式） |
+| 成果物 | [docs/tech/tech_spec.md](tech/tech_spec.md)（索引）＋ tech_data / tech_structure / tech_api / tech_architecture / tech_logging、[diagrams/](../diagrams/) 6点（ER図・クラス図・画面遷移図・戦闘フロー図・システム構成図・APIシーケンス図）、[docs/tech/tech_auth.md](tech/tech_auth.md)（認証方式） |
 | 完了基準 | 仕様書・設計図間の矛盾がない（`/diagrams-review` の指摘解消） |
 | レビュー | `/diagrams-review`、`/doc-review` |
 
@@ -71,7 +72,7 @@ graph LR
 |------|------|
 | 目的 | 対象Phaseの機能を「実装可能な粒度」まで具体化する |
 | 主な作業 | 処理フロー・アルゴリズム・計算式の定義、マスターデータの数値確定 |
-| 成果物 | [docs/tech/tech_battle_offline.md](tech/tech_battle_offline.md)（戦闘・オフライン計算アルゴリズム）、[docs/data/master_data.md](data/master_data.md)、[docs/data/towers/](data/towers/)・[docs/data/skills/](data/skills/)（数値定義） |
+| 成果物 | [docs/tech/tech_battle.md](tech/tech_battle.md)（戦闘処理）・[tech_offline.md](tech/tech_offline.md)（オフライン計算）、[docs/data/master_data.md](data/master_data.md)（索引）＋ [data/master/](data/master/)、[docs/data/towers/](data/towers/)・[docs/data/skills/](data/skills/)（数値定義） |
 | 完了基準 | 対象Phase機能の数値・計算式・分岐条件が仕様書から一意に実装できる（数値は仮置き可、ただし「仮置き」と明記） |
 | レビュー | `/doc-review`（詳細仕様の整合確認） |
 
@@ -116,6 +117,7 @@ graph LR
 | ゲート | タイミング | 判定手段 |
 |-------|----------|---------|
 | 仕様確定ゲート | 要件・詳細設計の変更時 | `/doc-review` 指摘ゼロ、open_specs.md 対象項目解消 |
+| ドキュメント規約ゲート | 仕様書・設計図の変更時 | `python scripts/check_doc_size.py` が `違反 0`（exit 0） |
 | 設計整合ゲート | 基本設計の変更時 | `/diagrams-review` 指摘ゼロ |
 | 製造完了ゲート | 実装完了時 | コードレビュー指摘対応 + `vue-tsc` 型チェックPASS |
 | 単体テストゲート | 製造完了後 | 全PASS + C1カバレッジ100% |
@@ -144,4 +146,6 @@ graph LR
 
 | 日付 | 内容 |
 |------|------|
+| 2026-08-02 | ドキュメント規約（documentation_rules.md）を適用範囲に追加、工程ゲートに「ドキュメント規約ゲート」を追加 |
+| 2026-08-02 | 仕様書の分割に伴い成果物欄を更新（§3.1 design/systems/、§3.2 tech_* 5点、§3.3 tech_offline.md・data/master/） |
 | 2026-08-01 | 初版作成: 6工程（要件定義→基本設計→詳細設計→製造→単体テスト→結合テスト）の定義、V字モデル・Phase単位反復の採用、テスト標準の制定（バックエンド: pytest C1カバレッジ100%、フロントエンド: Playwright E2E、API統合: FastAPI TestClient） |

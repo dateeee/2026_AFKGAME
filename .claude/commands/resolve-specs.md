@@ -21,10 +21,10 @@ model: sonnet
 
 | 項目のカテゴリ | 主な参照先 |
 |---|---|
-| ゲームシステム・バランス・UI | docs/design/game_spec.md |
-| API・データ構造・インフラ | docs/tech/tech_spec.md |
-| 戦闘計算・オフライン計算 | docs/tech/tech_battle_offline.md |
-| 数値定義（敵・装備・スキル・経済） | docs/data/master_data.md |
+| ゲームシステム・バランス・UI | docs/design/systems/（索引: design/game_spec.md） |
+| API・データ構造・インフラ | docs/tech/tech_api.md、tech_data.md、tech_architecture.md |
+| 戦闘計算・オフライン計算 | docs/tech/tech_battle.md、tech_offline.md |
+| 数値定義（敵・装備・スキル・経済） | docs/data/master/（索引: data/master_data.md） |
 | 認証 | docs/tech/tech_auth.md |
 
 ## 手順

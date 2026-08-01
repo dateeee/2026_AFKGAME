@@ -24,21 +24,22 @@ model: sonnet
 3. 上記で見つかったファイルをすべて読み込む
 
 #### 仕様書
-以下の仕様書を全て読み込んでください:
 
-1. `CLAUDE.md` — プロジェクト概要・アーキテクチャ方針
-2. `docs/design/game_spec.md` — ゲームシステム・バランス・UI仕様
-3. `docs/tech/tech_spec.md` — API設計・データ構造
-4. `docs/tech/tech_battle_offline.md` — 戦闘ログ・オフライン計算
+仕様書・設計図は **索引 + 個別ファイル** 構成（[documentation_rules.md](../../docs/documentation_rules.md) §8）。索引で担当ファイルを特定し、**照合に必要な個別ファイルのみ**読むこと:
+
+1. `CLAUDE.md` — アーキテクチャ不変条件・開発方針（プロジェクト概要は `README.md`）
+2. `docs/design/game_spec.md` → `design/systems/`（character / battle / equipment / economy / dungeon / endgame / ui）— ゲームシステム・バランス・UI仕様
+3. `docs/tech/tech_spec.md` → `tech_data.md` / `tech_structure.md` / `tech_api.md` / `tech_architecture.md` / `tech_logging.md`
+4. `docs/tech/tech_battle.md`・`tech_offline.md` — 戦闘処理・オフライン計算
 5. `docs/tech/tech_auth.md` — 認証システム
-6. `docs/data/master_data.md` — マスターデータ
+6. `docs/data/master_data.md` → `data/master/`（character / item / equipment / base / endgame）— マスターデータ
 7. `docs/data/towers/` 配下の全塔データファイル
 8. `docs/data/skills/` 配下の全スキルデータファイル
-9. `diagrams/er_diagram.md` — ER図
-10. `diagrams/class_diagram.md` — クラス図
+9. `diagrams/er_diagram.md` → `er_diagram/` — ER図
+10. `diagrams/class_diagram.md` → `class_diagram/` — クラス図
 11. `diagrams/screen_transition.md` — 画面遷移図
-12. `diagrams/api_sequence.md` — APIシーケンス図
-13. `diagrams/battle_flow.md` — 戦闘フロー図
+12. `diagrams/api_sequence.md` → `api_sequence/` — APIシーケンス図
+13. `diagrams/battle_flow.md` → `battle_flow/` — 戦闘フロー図
 14. `diagrams/system_architecture.md` — システム構成図
 
 ### ステップ2: 仕様書-コード整合性チェック（観点A）
@@ -49,14 +50,14 @@ model: sonnet
 
 ### A. 仕様書-コード整合性
 
-1. **API完全性**: tech_spec.md で定義された全エンドポイントが `backend/app/routers/` に実装されているか
+1. **API完全性**: tech_api.md で定義された全エンドポイントが `backend/app/routers/` に実装されているか
    - 各エンドポイントのHTTPメソッド、パス、リクエスト/レスポンス形式が仕様と一致するか
 
-2. **データモデル適合**: `backend/app/models/` のSQLAlchemyモデルが `diagrams/er_diagram.md` と一致するか
+2. **データモデル適合**: `backend/app/models/` のSQLAlchemyモデルが `diagrams/er_diagram/` 配下のER図と一致するか
    - テーブル名、カラム名、型、リレーションシップの整合性
    - 必須カラムの欠落、不要カラムの存在
 
-3. **ビジネスロジック適合**: `backend/app/services/` のロジックが `docs/design/game_spec.md` の仕様を正しく実装しているか
+3. **ビジネスロジック適合**: `backend/app/services/` のロジックが `docs/design/systems/` 配下の仕様を正しく実装しているか
    - ダメージ計算式
    - 経験値・レベルアップ計算
    - ドロップ率計算
@@ -69,7 +70,7 @@ model: sonnet
    - ポーション効果、価格
    - `services/` 内にハードコードされた数値がないか
 
-5. **UI仕様適合**: フロントエンドの画面構成が `docs/design/game_spec.md` のUI仕様セクションと一致するか
+5. **UI仕様適合**: フロントエンドの画面構成が `docs/design/systems/ui.md` と一致するか
    - 各画面（ゲーム画面、装備画面、ショップ画面、設定画面等）の構成要素
    - 表示すべき情報（ステータス、レベル、ゴールド等）が全て表示されているか
 

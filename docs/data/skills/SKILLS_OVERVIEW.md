@@ -6,7 +6,7 @@
 
 ## 1. 共通ルール
 
-スキルシステムは Phase 3 で解放される。詳細な仕様は [game_spec.md § 2.8](../game_spec.md) を参照。
+スキルシステムは Phase 3 で解放される。詳細な仕様は [game_spec.md § 2.8](../../design/systems/character.md#28-スキルシステムphase-3) を参照。
 
 ### スキルポイント（SP）
 

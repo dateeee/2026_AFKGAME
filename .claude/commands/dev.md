@@ -13,11 +13,11 @@
 
 対象機能に関連する仕様書を読み込んでください:
 
-1. `docs/design/game_spec.md` — ゲームシステム・バランス仕様
-2. `docs/tech/tech_spec.md` — API設計・データ構造
-3. `docs/tech/tech_battle_offline.md` — 戦闘ログ・オフライン計算（戦闘関連の場合）
+1. `docs/design/game_spec.md` → `design/systems/` — ゲームシステム・バランス仕様（索引から該当ファイルのみ読む）
+2. `docs/tech/tech_spec.md` → `tech_api.md`（API設計）・`tech_data.md`（データ構造）・`tech_structure.md`（実装配置）
+3. `docs/tech/tech_battle.md`・`tech_offline.md` — 戦闘処理・オフライン計算（戦闘関連の場合）
 4. `docs/tech/tech_auth.md` — 認証システム（認証関連の場合）
-5. `docs/data/master_data.md` — マスターデータ（数値定義）
+5. `docs/data/master_data.md` → `data/master/` — マスターデータ（数値定義）
 6. `docs/data/towers/` 配下の塔データ（塔関連の場合）
 7. `docs/data/skills/` 配下のスキルデータ（スキル関連の場合）
 8. `diagrams/` 配下の設計図（ER図・クラス図・APIシーケンス図等）

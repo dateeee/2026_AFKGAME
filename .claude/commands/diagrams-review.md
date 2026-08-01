@@ -16,24 +16,24 @@ model: sonnet
 ## レビュー対象ファイル
 
 ### 設計図
-`diagrams/` ディレクトリ配下の全 `.md` ファイルを読み込んでください:
+主要4図は **索引 + 同名ディレクトリ** 構成。索引で担当ファイルを特定し、**必要な子ファイルのみ**読むこと（全図の一括読み込みは禁止）:
 
-1. `diagrams/er_diagram.md` — ER図（データベース設計）
-2. `diagrams/class_diagram.md` — クラス図（ドメインモデル）
-3. `diagrams/screen_transition.md` — 画面遷移図
-4. `diagrams/battle_flow.md` — 戦闘ターン処理フロー図
-5. `diagrams/system_architecture.md` — システム構成図
-6. `diagrams/api_sequence.md` — APIシーケンス図
+1. `diagrams/er_diagram.md` → `er_diagram/` （player / item / battle）— ER図
+2. `diagrams/class_diagram.md` → `class_diagram/` （player / battle / item）— クラス図
+3. `diagrams/battle_flow.md` → `battle_flow/` （overview / turn / offline / bossrush）— 戦闘フロー図
+4. `diagrams/api_sequence.md` → `api_sequence/` （core / auth / gameplay / character / base / endgame）— APIシーケンス図
+5. `diagrams/screen_transition.md` — 画面遷移図（単一ファイル）
+6. `diagrams/system_architecture.md` — システム構成図（単一ファイル）
 
 ### 仕様書（照合用）
-以下の仕様書を全て読み込んでください:
+仕様書も索引 + 個別ファイル構成。**照合に必要なファイル・セクションのみ**読むこと:
 
-1. `CLAUDE.md` — プロジェクト概要・アーキテクチャ方針
-2. `docs/design/game_spec.md` — ゲームシステム・バランス・UI仕様
-3. `docs/tech/tech_spec.md` — API設計・データ構造
-4. `docs/tech/tech_battle_offline.md` — 戦闘ログ・オフライン計算
+1. `CLAUDE.md` — アーキテクチャ不変条件・開発方針（プロジェクト概要は `README.md`）
+2. `docs/design/game_spec.md` → `design/systems/` — ゲームシステム・バランス・UI仕様
+3. `docs/tech/tech_spec.md` → `tech_data.md`（データ構造）・`tech_api.md`（API設計）・`tech_architecture.md`（アーキテクチャ）
+4. `docs/tech/tech_battle.md` / `tech_offline.md` — 戦闘処理・オフライン計算
 5. `docs/tech/tech_auth.md` — 認証システム
-6. `docs/data/master_data.md` — マスターデータ
+6. `docs/data/master_data.md` → `data/master/` — マスターデータ
 
 ### コード（照合用）
 実装済みのコードがあれば読み込んでください:
@@ -51,12 +51,12 @@ model: sonnet
 
 各設計図が対応する仕様書の内容と一致しているか:
 
-1. **ER図 ↔ tech_spec.md**: テーブル定義、カラム、型、リレーションが仕様書のデータ構造と一致するか
-2. **クラス図 ↔ game_spec.md / tech_spec.md**: ドメインモデルのクラス・属性・メソッドが仕様書の機能定義と一致するか
-3. **画面遷移図 ↔ game_spec.md §3**: 画面構成、遷移条件、Phase別タブ構成がUI仕様と一致するか
-4. **戦闘フロー図 ↔ tech_battle_offline.md**: ターン処理の順序、条件分岐、状態遷移が戦闘仕様と一致するか
-5. **APIシーケンス図 ↔ tech_spec.md §5,§7**: エンドポイント、リクエスト/レスポンスフロー、認証フローが仕様と一致するか
-6. **システム構成図 ↔ tech_spec.md / CLAUDE.md**: アーキテクチャ方針（ハイブリッドtick制、サーバー権威等）が反映されているか
+1. **ER図 ↔ tech_data.md**: テーブル定義、カラム、型、リレーションが仕様書のデータ構造と一致するか
+2. **クラス図 ↔ design/systems/ / tech_data.md**: ドメインモデルのクラス・属性・メソッドが仕様書の機能定義と一致するか
+3. **画面遷移図 ↔ systems/ui.md**: 画面構成、遷移条件、Phase別タブ構成がUI仕様と一致するか
+4. **戦闘フロー図 ↔ tech_battle.md / tech_offline.md**: ターン処理の順序、条件分岐、状態遷移が戦闘仕様と一致するか
+5. **APIシーケンス図 ↔ tech_api.md / tech_architecture.md**: エンドポイント、リクエスト/レスポンスフロー、認証フローが仕様と一致するか
+6. **システム構成図 ↔ tech_architecture.md / CLAUDE.md**: アーキテクチャ方針（ハイブリッドtick制、サーバー権威等）が反映されているか
 
 ### B. コードとの整合性
 
@@ -87,6 +87,12 @@ model: sonnet
 1. 仕様書で定義された主要機能に対応する設計図が存在するか
 2. 新しく追加された仕様（Phase 3〜5の機能等）が設計図に反映されているか
 3. 設計図内で「TODO」「TBD」「未定」等の未完成箇所がないか
+
+### F. ドキュメント規約（[docs/documentation_rules.md](../../docs/documentation_rules.md)）
+
+1. `python scripts/check_doc_size.py` を実行し、`diagrams/` 配下の `ERROR`（上限超過）を重要度=高で報告する
+2. 超過時は同名ディレクトリへ図単位で切り出す分割案を修正案に書く（既存の `er_diagram/` 等と同じ構成にする）
+3. 索引ファイルに全子ファイルへのリンクが揃っているか確認する（§6 分割時の必須事項）
 
 ## 出力形式
 

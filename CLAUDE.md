@@ -1,149 +1,64 @@
-# AFK GAME
+# AFK GAME — AI開発ルール
 
 放置系ファンタジーRPGのWebブラウザゲーム。
+**プロジェクト概要・セットアップ・ドキュメント索引は [README.md](README.md) を参照。**
 
-## プロジェクト概要
+## ドキュメント規約（必読）
 
-プレイヤーは冒険者ギルドのマスターとなり、冒険者たちを育成・編成してダンジョンへ派遣する。
-アプリを閉じている間も冒険者たちは自動で探索・戦闘を続け、戻ってきた時に報酬をまとめて受け取れる。
+Markdownには文字数上限を設けている。詳細は [docs/documentation_rules.md](docs/documentation_rules.md)。
 
-## 技術スタック
+| 区分 | 対象 | 上限 |
+|------|------|------|
+| A | `CLAUDE.md` | 3,000字 |
+| B | `README.md`、`*_OVERVIEW.md` | 6,000字 |
+| C | `docs/**`、`diagrams/**` | 8,000字 |
+| D | `.claude/commands/**` | 5,000字 |
 
-| レイヤー | 技術 |
-|---------|------|
-| フロントエンド | Vue.js 3 (SPA / Composition API / TypeScript) + Vite + Pinia |
-| バックエンド | Python / FastAPI + SQLAlchemy 2.0 + Pydantic v2 |
-| DB | SQLite（MVP）→ PostgreSQL（本番） |
-| 描画方式 | テキストベース（Canvas不使用）。アイテム等にはアイコン画像を使用 |
+- 原則: **1ファイル = 1テーマ = 1回の読み込みで完結**
+- H2セクションは2,000字以内。表を優先し、同じ仕様を複数ファイルに重複させない
+- 変更履歴は直近10件のみ保持し、**分割ファイルの履歴は索引（親）に集約**する
+- ドキュメントの作成・改稿後は `python scripts/check_doc_size.py` を実行する（超過は exit 1）
 
-## ディレクトリ構成
+大きな仕様書は **索引 + 個別ファイル**構成。索引で担当ファイルを特定し、必要なものだけ読むこと（節番号は分割後も維持）。
 
-```
-2026_AFKGAME/
-├── CLAUDE.md                      # 本ファイル（プロジェクト概要）
-├── docs/
-│   ├── development_process.md     # 開発工程定義書（6工程・成果物対応・完了基準・テスト標準）
-│   ├── design/                    # ゲームデザイン仕様
-│   │   └── game_spec.md           # ゲーム仕様書（システム設計・バランス・UI）
-│   ├── tech/                      # 技術仕様
-│   │   ├── tech_spec.md           # 技術仕様書（設計・API・データ構造）
-│   │   ├── tech_battle_offline.md # 技術仕様：戦闘ログ・オフライン計算
-│   │   └── tech_auth.md           # 技術仕様：認証システム（Phase 2〜）
-│   ├── data/                      # マスターデータ
-│   │   ├── master_data.md         # マスターデータ（共通数値定義）
-│   │   ├── towers/                # 塔別マスターデータ
-│   │   │   ├── TOWERS_OVERVIEW.md # 全塔概要一覧（推奨LV・フロア数・ダンジョン構成）
-│   │   │   ├── 000_テンプレート.md # 新規塔作成用テンプレート
-│   │   │   ├── 001_ゴブリンの塔.md # ゴブリンの塔（敵・構成・ドロップ）
-│   │   │   ├── 002_森の塔.md      # 森の塔（敵・構成・ドロップ）
-│   │   │   ├── 003_獣の塔.md      # 獣の塔（敵・構成・ドロップ）
-│   │   │   ├── 004_毒沼の塔.md    # 毒沼の塔（敵・構成・ドロップ）
-│   │   │   ├── 005_業火の塔.md    # 業火の塔（敵・構成・ドロップ）
-│   │   │   ├── 006_氷雪の塔.md    # 氷雪の塔（敵・構成・ドロップ）
-│   │   │   ├── 007_砂漠の塔.md    # 砂漠の塔（敵・構成・ドロップ）
-│   │   │   ├── 008_深海の塔.md    # 深海の塔（敵・構成・ドロップ）
-│   │   │   ├── 009_黄昏の塔.md    # 黄昏の塔（敵・構成・ドロップ）
-│   │   │   └── 010_天空の塔.md    # 天空の塔（敵・構成・ドロップ）
-│   │   └── skills/                # スキル系統別マスターデータ
-│   │       ├── SKILLS_OVERVIEW.md # スキルシステム概要・共通ルール
-│   │       ├── 000_テンプレート.md # 新規系統作成用テンプレート
-│   │       ├── 001_剣術系統.md     # 剣術系統（物理単体攻撃）
-│   │       ├── 002_魔法系統.md     # 魔法系統（魔法攻撃）
-│   │       ├── 003_回復系統.md     # 回復系統（HP回復・蘇生）
-│   │       ├── 004_強化系統.md     # 強化系統（バフ）
-│   │       ├── 005_弱体系統.md     # 弱体系統（デバフ・状態異常）
-│   │       └── 006_生存術系統.md   # 生存術系統（耐久・防御）
-│   ├── glossary.md                # 用語集（ゲーム・技術用語）
-│   ├── open_specs.md              # 未確定仕様一覧（確定次第削除、最終的にファイル自体を削除）
-│   └── reviews/                   # 仕様レビュー結果（/doc-review コマンドで自動生成）
-├── diagrams/                      # 設計図（Mermaid）
-│   ├── er_diagram.md              # ER図（データベース設計）
-│   ├── class_diagram.md           # クラス図（ドメインモデル）
-│   ├── screen_transition.md       # 画面遷移図
-│   ├── battle_flow.md             # 戦闘ターン処理フロー図
-│   ├── system_architecture.md     # システム構成図
-│   └── api_sequence.md            # APIシーケンス図
-├── frontend/                      # Vue.js SPA
-│   └── src/
-│       ├── views/                 # ページコンポーネント
-│       ├── components/            # UIコンポーネント
-│       ├── stores/                # Pinia ストア
-│       ├── composables/           # Composition API ロジック
-│       ├── api/                   # API通信レイヤー
-│       └── types/                 # TypeScript 型定義
-├── backend/                       # FastAPI サーバー
-│   └── app/
-│       ├── routers/               # APIルーター
-│       ├── services/              # ビジネスロジック
-│       ├── models/                # SQLAlchemy モデル
-│       └── schemas/               # Pydantic スキーマ
-└── README.md
-```
+| 索引 | 個別ファイル |
+|------|------------|
+| [docs/design/game_spec.md](docs/design/game_spec.md) | `design/systems/` — character / battle / equipment / economy / dungeon / endgame / ui |
+| [docs/tech/tech_spec.md](docs/tech/tech_spec.md) | `tech/tech_*.md` — data / structure / api / architecture / logging（別途 battle / offline / auth） |
+| [docs/data/master_data.md](docs/data/master_data.md) | `data/master/` — character / item / equipment / base / endgame |
+| `diagrams/*.md`（4図） | 同名ディレクトリ配下（`er_diagram/` 等） |
 
-## アーキテクチャ方針
+## アーキテクチャ不変条件
 
-- **ハイブリッドtick制**: 戦闘はバックエンドで60秒間隔（固定）のtickごとに処理。オンライン中はポーリング、オフライン中は復帰時にまとめて計算
+- **サーバー権威**: 戦闘計算はバックエンドで実行（チート対策）。フロントはログ表示のみ
+- **ハイブリッドtick制**: 60秒間隔（固定）のtickで戦闘処理。オンライン中はポーリング、オフライン中は復帰時に一括計算
 - **シングルプレイ専用**: マルチプレイは想定しない
-- **サーバー権威**: 戦闘計算はサーバー側で実行（チート対策）。フロントはログ表示のみ
-- **MVP同時開発**: Phase 1からフロント（Vue）＋バックエンド（FastAPI + SQLite）を同時開発
-- **開発時フォールバック**: バックエンド未起動時はフロント単体でも動作可能（`useBattleLocal.ts`、デバッグ用）
-
-## 開発フェーズ
-
-- **Phase 1 (MVP)**: キャラ1体の自動戦闘、レベルアップ、オフライン報酬、常設ショップ（ポーション）（1画面デモ）
-- **Phase 2**: 装備システム、複数の塔、ショップ拡張（日替わり装備）、認証
-- **Phase 3**: パーティ編成、タイプ（素質）・スキルシステム
-- **Phase 4**: 拠点建設（酒場・鍛冶屋・訓練場・倉庫・市場）、素材・生産システム
-- **Phase 5**: エンドコンテンツ（ボスラッシュ、転生等）
+- **開発時フォールバック**: バックエンド未起動でもフロント単体で動作可（`useBattleLocal.ts`、デバッグ用）
 
 ## 開発方針
 
-- **開発工程**: 要件定義 → 基本設計 → 詳細設計 → 製造 → 単体テスト → 結合テストの6工程で管理。詳細は [docs/development_process.md](docs/development_process.md)（工程定義書）を参照
-- **仕様は全Phase確定 → 実装は段階的**: 全Phase(1-5)の仕様を先に確定してから、Phase 1から順に実装する（要件定義・基本設計は全Phase一括、詳細設計以降はPhase単位で反復）
-- 未確定の仕様は [docs/open_specs.md](docs/open_specs.md) で管理。確定したら仕様書に反映し、open_specs.md から削除
-- すべて確定したら open_specs.md 自体を削除する
-- **テスト標準**: バックエンド単体テストは pytest で C1（分岐）カバレッジ100%、結合テストは FastAPI TestClient（API統合）+ Playwright（E2E）
+- **6工程で管理**: 要件定義 → 基本設計 → 詳細設計 → 製造 → 単体テスト → 結合テスト（[docs/development_process.md](docs/development_process.md)）
+- **仕様は全Phase確定 → 実装は段階的**: 全Phase(1-5)の仕様を確定してから Phase 1 から順に実装する
+- **未確定仕様**は [docs/open_specs.md](docs/open_specs.md) で管理。確定したら仕様書へ反映して削除し、すべて確定したらファイルごと削除する
+- **テスト標準**: バックエンド単体テストは pytest で C1（分岐）カバレッジ100%、結合テストは FastAPI TestClient + Playwright（E2E）
+- **実装規約**: スキーマは CamelModel で `schemas/`、ロジックは `services/`、ログは logging_config 準拠
 
 ## コスト規律（AIエージェント運用）
 
-トークン消費を抑えるため、Claude Code での作業は以下を厳守する:
-
 - **サブエージェントは並列化の価値がある場合のみ**起動する（同時最大4体）。1体で済む調査・修正はメインコンテキストで行う
-- **機械的な作業**（一括置換・リンク修正・定型データ生成・構文検証）は `model: sonnet` を指定したサブエージェントか、スクラッチパッドの使い捨てスクリプトで処理する。判断を伴う設計・レビューのみ上位モデルで行う
-- サブエージェントには**担当ファイルのみを列挙**し、「列挙外は読まない」「戻り値は結論のみ（引用は最小限）」を明示する
-- 仕様書・コードは**必要なセクションだけを読む**（大きなファイルの全文読み込みを避ける）
-- レビュー系コマンド（/doc-review 等）は**差分モードがデフォルト**。全量レビューは `full` 指定時のみ
-- 工程の区切り（レビュー完了・コミット後など）でユーザーに `/compact` または `/clear` を提案する（長大コンテキストの持ち越しを避ける）
-
-## 仕様書
-
-- [docs/development_process.md](docs/development_process.md) — 開発工程定義書（6工程・成果物対応・完了基準・テスト標準）
-- [docs/design/game_spec.md](docs/design/game_spec.md) — ゲーム仕様（システム設計・バランス・UI）
-- [docs/tech/tech_spec.md](docs/tech/tech_spec.md) — 技術仕様（API設計・データ構造・アーキテクチャ）
-  - [docs/tech/tech_battle_offline.md](docs/tech/tech_battle_offline.md) — 戦闘ログ・オフライン計算
-  - [docs/tech/tech_auth.md](docs/tech/tech_auth.md) — 認証システム（Phase 2〜）
-- [docs/data/master_data.md](docs/data/master_data.md) — マスターデータ（敵・塔・キャラ数値定義）
-  - [docs/data/towers/TOWERS_OVERVIEW.md](docs/data/towers/TOWERS_OVERVIEW.md) — 全塔概要一覧（推奨LV・フロア数・ダンジョン構成）
-  - [docs/data/skills/SKILLS_OVERVIEW.md](docs/data/skills/SKILLS_OVERVIEW.md) — スキルシステム概要・系統別詳細
-- [docs/glossary.md](docs/glossary.md) — 用語集（ゲーム・技術用語）
-- [docs/open_specs.md](docs/open_specs.md) — 未確定仕様一覧（全確定後に削除）
-- 設計図（`diagrams/`）
-  - [diagrams/er_diagram.md](diagrams/er_diagram.md) — ER図
-  - [diagrams/class_diagram.md](diagrams/class_diagram.md) — クラス図（ドメインモデル）
-  - [diagrams/screen_transition.md](diagrams/screen_transition.md) — 画面遷移図
-  - [diagrams/battle_flow.md](diagrams/battle_flow.md) — 戦闘ターン処理フロー図
-  - [diagrams/system_architecture.md](diagrams/system_architecture.md) — システム構成図
-  - [diagrams/api_sequence.md](diagrams/api_sequence.md) — APIシーケンス図
-
----
+- **機械的な作業**（一括置換・リンク修正・定型データ生成・構文検証）は `model: sonnet` のサブエージェントか使い捨てスクリプトで処理する
+- サブエージェントには**担当ファイルのみを列挙**し、「列挙外は読まない」「戻り値は結論のみ」を明示する
+- 仕様書・コードは**必要なセクションだけ読む**（大きなファイルの全文読み込みを避ける）
+- レビュー系コマンド（`/doc-review` 等）は**差分モードがデフォルト**。全量は `full` 指定時のみ
+- 工程の区切り（レビュー完了・コミット後）で `/compact` または `/clear` を提案する
 
 ## 変更履歴
 
 | 日付 | 内容 |
 |------|------|
+| 2026-08-02 | 上限超過8ファイルを索引 + 個別ファイルへ分割（全81ファイルが上限内）。索引の対応表を追加 |
+| 2026-08-02 | README.md を新設し概要・セットアップ・索引を移管。本書はAI開発ルールに特化。ドキュメント規約（文字数上限）を制定 |
+| 2026-08-01 | 開発工程定義書を新設。6工程モデル・テスト標準を追記 |
+| 2026-03-15 | Phase 4 を「拠点建設・素材生産」に修正。diagrams/ をトップレベルへ移動 |
+| 2026-03-10 | 設計図6点を追加 |
 | 2026-03-08 | 初版作成 |
-| 2026-03-08 | レビュー指摘対応: ディレクトリ構成に towers/TOWERS_OVERVIEW.md・003〜010_各塔.md を追加。仕様書セクションに TOWERS_OVERVIEW.md リンクを追加 |
-| 2026-03-10 | 設計図6点を docs/diagrams/ に追加（ER図・クラス図・画面遷移図・戦闘フロー図・システム構成図・APIシーケンス図） |
-| 2026-03-15 | Phase 4「冒険者派遣」→削除済みのため「拠点建設（5施設）、素材・生産システム」に修正 |
-| 2026-03-15 | diagrams/ を docs/ 配下からトップレベルに移動（仕様書と設計図の分離） |
-| 2026-08-01 | 開発工程定義書（docs/development_process.md）を新設。開発方針に6工程モデル・テスト標準（pytest C1 100%・Playwright）を追記 |

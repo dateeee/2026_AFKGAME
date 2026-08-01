@@ -1,6 +1,6 @@
 # 画面遷移図
 
-> UI仕様: [game_spec.md §3](docs/design/game_spec.md)
+> UI仕様: [game_spec.md §3](../docs/design/systems/ui.md)
 
 ## 認証・エントリーフロー
 

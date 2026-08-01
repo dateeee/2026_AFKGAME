@@ -1,6 +1,6 @@
 # システム構成図
 
-> 技術仕様: [tech_spec.md](docs/tech/tech_spec.md)
+> 技術仕様: [tech_spec.md](../docs/tech/tech_spec.md)
 
 ## 全体アーキテクチャ
 
