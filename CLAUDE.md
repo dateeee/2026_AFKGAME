@@ -22,6 +22,7 @@
 2026_AFKGAME/
 ├── CLAUDE.md                      # 本ファイル（プロジェクト概要）
 ├── docs/
+│   ├── development_process.md     # 開発工程定義書（6工程・成果物対応・完了基準・テスト標準）
 │   ├── design/                    # ゲームデザイン仕様
 │   │   └── game_spec.md           # ゲーム仕様書（システム設計・バランス・UI）
 │   ├── tech/                      # 技術仕様
@@ -97,12 +98,15 @@
 
 ## 開発方針
 
-- **仕様は全Phase確定 → 実装は段階的**: 全Phase(1-5)の仕様を先に確定してから、Phase 1から順に実装する
+- **開発工程**: 要件定義 → 基本設計 → 詳細設計 → 製造 → 単体テスト → 結合テストの6工程で管理。詳細は [docs/development_process.md](docs/development_process.md)（工程定義書）を参照
+- **仕様は全Phase確定 → 実装は段階的**: 全Phase(1-5)の仕様を先に確定してから、Phase 1から順に実装する（要件定義・基本設計は全Phase一括、詳細設計以降はPhase単位で反復）
 - 未確定の仕様は [docs/open_specs.md](docs/open_specs.md) で管理。確定したら仕様書に反映し、open_specs.md から削除
 - すべて確定したら open_specs.md 自体を削除する
+- **テスト標準**: バックエンド単体テストは pytest で C1（分岐）カバレッジ100%、結合テストは FastAPI TestClient（API統合）+ Playwright（E2E）
 
 ## 仕様書
 
+- [docs/development_process.md](docs/development_process.md) — 開発工程定義書（6工程・成果物対応・完了基準・テスト標準）
 - [docs/design/game_spec.md](docs/design/game_spec.md) — ゲーム仕様（システム設計・バランス・UI）
 - [docs/tech/tech_spec.md](docs/tech/tech_spec.md) — 技術仕様（API設計・データ構造・アーキテクチャ）
   - [docs/tech/tech_battle_offline.md](docs/tech/tech_battle_offline.md) — 戦闘ログ・オフライン計算
@@ -131,3 +135,4 @@
 | 2026-03-10 | 設計図6点を docs/diagrams/ に追加（ER図・クラス図・画面遷移図・戦闘フロー図・システム構成図・APIシーケンス図） |
 | 2026-03-15 | Phase 4「冒険者派遣」→削除済みのため「拠点建設（5施設）、素材・生産システム」に修正 |
 | 2026-03-15 | diagrams/ を docs/ 配下からトップレベルに移動（仕様書と設計図の分離） |
+| 2026-08-01 | 開発工程定義書（docs/development_process.md）を新設。開発方針に6工程モデル・テスト標準（pytest C1 100%・Playwright）を追記 |
