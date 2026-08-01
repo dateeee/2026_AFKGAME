@@ -42,6 +42,7 @@ frontend/dist/
 # Coverage / Test
 htmlcov/
 .coverage
+.coverage.*
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
