@@ -491,7 +491,8 @@ PASSWORD_MIN_LENGTH = 8
 ### 操作系（プレイヤーのアクション）
 | メソッド | パス | 説明 |
 |---------|------|------|
-| POST | `/api/tower/select` | 塔・目標階の選択（`towerId`, `targetFloor`, `towerMode`: `auto_repeat` \| `stop_on_clear`） |
+| GET | `/api/tower/list` | 全塔の一覧を取得（名前・階数・解放条件・解放/クリア状態・最高到達階）（Phase 2〜） |
+| POST | `/api/tower/select` | 塔・目標階の選択（`towerId`, `targetFloor`, `towerMode`: `auto_repeat` \| `stop_on_clear`）。未解放の塔は403 |
 | POST | `/api/tower/retire` | 現戦闘終了後にリタイア（進行中の階の戦闘完了後に撤退） |
 | PUT | `/api/tower/mode` | 進行モードの切り替え（進行中でも変更可） |
 | PUT | `/api/tower/retreat-conditions` | 撤退条件の更新（`hpThreshold`: 0〜1） |
@@ -820,3 +821,4 @@ Phase 1 から **フロントエンド（Vue + Vite）とバックエンド（Fa
 | 2026-03-15 | §6 ログ設計・エラーハンドリングを仮版から正式版に確定 |
 | 2026-03-15 | レビュー指摘対応: §2 ディレクトリ構成を新構造（design/tech/data/diagrams/skills）に更新。§1.1 potionAutoUseThreshold重複フィールドを削除、potionThresholdを0.1〜0.5/0.1刻みに統一。§5 ポーション閾値APIを0.1〜0.5に更新 |
 | 2026-03-15 | tech_battle_offline.md §3.2 エンカウント抽選ロジック追記（重み付きプール抽選・均等確率体数決定・Phase共通ロジック）、敵スキル処理フロー追記（Phase 5ボスラッシュWave 11+、CD管理は味方と同一） |
+| 2026-08-01 | 複数塔対応: `GET /api/tower/list` エンドポイント追加（解放/クリア状態含む）。`/api/tower/select` に未解放塔403の記載を追加 |

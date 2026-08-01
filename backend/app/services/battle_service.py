@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 
 from sqlalchemy.orm import Session
 
-from app.models.player import Player
+from app.models.player import Player, TowerClearRecord
 from app.models.character import Character
 from app.models.equipment import Equipment
 from app.models.item import InventoryItem
@@ -92,6 +92,20 @@ def _use_potion(player: Player, character: Character, effective_max_hp: int, db:
     character.hp = min(effective_max_hp, character.hp + heal)
     item.quantity -= 1
     return True
+
+
+def _update_tower_record(player: Player, tower_id: str, floor: int, is_boss: bool, db: Session) -> None:
+    """塔別クリア記録を更新。ボス討伐で cleared=True（次の塔の解放条件）"""
+    record = db.query(TowerClearRecord).filter_by(
+        player_id=player.id, tower_id=tower_id
+    ).first()
+    if not record:
+        record = TowerClearRecord(player_id=player.id, tower_id=tower_id)
+        db.add(record)
+    if floor > (record.highest_floor or 0):
+        record.highest_floor = floor
+    if is_boss:
+        record.cleared = True
 
 
 def _recover_hp(character: Character, effective_max_hp: int, effective_def: int) -> int:
@@ -269,6 +283,10 @@ def process_tick(player: Player, character: Character, db: Session) -> TickResul
                     current_floor = player.current_floor or 1
                     if current_floor > (player.highest_floor or 0):
                         player.highest_floor = current_floor
+                    _update_tower_record(
+                        player, player.current_tower_id, current_floor,
+                        enemy_data.is_boss, db,
+                    )
 
                     next_floor = current_floor + 1
 

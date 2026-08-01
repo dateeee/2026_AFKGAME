@@ -65,6 +65,18 @@ export interface TowerClearInfo {
   highestFloor: number
 }
 
+/** 塔情報（一覧API） */
+export interface TowerInfo {
+  id: string
+  name: string
+  dungeonName: string
+  totalFloors: number
+  unlockTowerId: string | null
+  unlocked: boolean
+  cleared: boolean
+  highestFloor: number
+}
+
 /**
  * 戦闘ログエントリー
  * NOTE: battle_logsはCamelModel変換対象外。バックエンドからsnake_caseのまま返却される

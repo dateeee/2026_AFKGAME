@@ -6,7 +6,7 @@
  * - 指数バックオフリトライ（最大3回）
  */
 
-import type { Equipment, GameState, Settings, TickResponse } from '@/types/game'
+import type { Equipment, GameState, Settings, TickResponse, TowerInfo } from '@/types/game'
 import { refreshToken as refreshTokenApi } from '@/api/auth'
 
 const USE_API = import.meta.env.VITE_USE_API !== 'false'
@@ -135,6 +135,11 @@ export async function putSettings(settings: Partial<Settings>): Promise<Settings
     method: 'PUT',
     body: JSON.stringify(settings),
   })
+}
+
+/** 塔一覧取得 */
+export async function getTowerList(): Promise<TowerInfo[]> {
+  return fetchWithRetry<TowerInfo[]>('/api/tower/list')
 }
 
 /** 塔選択 */

@@ -1,18 +1,50 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useGameStore } from '@/stores/gameStore'
 import { usePlayerStore } from '@/stores/playerStore'
 import { useBattleStore } from '@/stores/battleStore'
 import { formatGold, formatTime } from '@/utils/format'
 import { postTowerSelect, postTowerRetire, putTowerMode, getGameState } from '@/api/client'
 import { RARITY_LABELS, SLOT_LABELS } from '@/stores/equipmentStore'
-import type { BattleLogEntry } from '@/types/game'
+import type { BattleLogEntry, TowerInfo } from '@/types/game'
 
 const gameStore = useGameStore()
 const playerStore = usePlayerStore()
 const battleStore = useBattleStore()
 
+const selectedTowerId = ref('goblin_tower')
 const selectedTargetFloor = ref(5)
+
+onMounted(() => {
+  gameStore.loadTowers().catch(() => { /* 一覧取得失敗時はゲーム状態から復元されるまで空表示 */ })
+})
+
+// 塔の解放状態は最新のゲーム状態（towersCleared）から算出する
+function isUnlocked(tower: TowerInfo): boolean {
+  if (tower.unlockTowerId === null) return true
+  return gameStore.towersCleared[tower.unlockTowerId]?.cleared
+    ?? tower.unlocked
+}
+
+function towerName(towerId: string | null): string {
+  return gameStore.towers.find(t => t.id === towerId)?.name ?? ''
+}
+
+const selectedTower = computed(() =>
+  gameStore.towers.find(t => t.id === selectedTowerId.value) ?? null
+)
+
+function selectTower(tower: TowerInfo) {
+  if (!isUnlocked(tower)) return
+  selectedTowerId.value = tower.id
+}
+
+// 選択中の塔が変わったら目標フロアを最終階に合わせる
+watch(selectedTower, (tower) => {
+  if (tower && selectedTargetFloor.value > tower.totalFloors) {
+    selectedTargetFloor.value = tower.totalFloors
+  }
+})
 
 const hero = computed(() => playerStore.characters[0] ?? null)
 const effectiveMaxHp = computed(() => hero.value?.effectiveMaxHp ?? hero.value?.maxHp ?? 1)
@@ -24,7 +56,7 @@ const isInTower = computed(() => !!gameStore.currentTowerId)
 
 async function enterTower() {
   try {
-    await postTowerSelect('goblin_tower', selectedTargetFloor.value)
+    await postTowerSelect(selectedTowerId.value, selectedTargetFloor.value)
     const state = await getGameState()
     gameStore.loadFromState(state)
     playerStore.loadFromState(state)
@@ -166,7 +198,7 @@ function dismissOffline() {
 
       <!-- In Tower -->
       <div v-if="isInTower">
-        <p class="font-display text-lg font-bold text-text-bright">ゴブリンの塔</p>
+        <p class="font-display text-lg font-bold text-text-bright">{{ towerName(gameStore.currentTowerId) || '塔' }}</p>
         <p class="text-sm">フロア {{ gameStore.currentFloor }} / {{ gameStore.targetFloor }}</p>
         <p class="text-xs text-text-muted mt-1">
           モード: {{ gameStore.towerMode === 'auto_repeat' ? '自動周回' : 'クリア時停止' }}
@@ -201,18 +233,46 @@ function dismissOffline() {
 
       <!-- Tower Select -->
       <div v-else class="flex flex-col gap-3">
-        <p class="font-display font-bold text-text-bright">ゴブリンの塔 (フロア 1-20)</p>
+        <div
+          v-for="tower in gameStore.towers"
+          :key="tower.id"
+          class="tower-card"
+          :class="{
+            'tower-card-selected': tower.id === selectedTowerId,
+            'tower-card-locked': !isUnlocked(tower),
+          }"
+          @click="selectTower(tower)"
+        >
+          <div class="flex items-center justify-between">
+            <p class="font-display font-bold text-text-bright">
+              {{ tower.name }}
+              <span class="text-xs font-normal text-text-muted">(フロア 1-{{ tower.totalFloors }})</span>
+            </p>
+            <span v-if="gameStore.towersCleared[tower.id]?.cleared" class="badge badge-cleared">クリア済</span>
+            <span v-else-if="!isUnlocked(tower)" class="badge badge-locked">未解放</span>
+          </div>
+          <p v-if="!isUnlocked(tower)" class="text-xs text-text-muted mt-1">
+            {{ towerName(tower.unlockTowerId) }}のボス討伐で解放
+          </p>
+          <p v-else-if="(gameStore.towersCleared[tower.id]?.highestFloor ?? 0) > 0" class="text-xs text-text-muted mt-1">
+            最高到達: {{ gameStore.towersCleared[tower.id]!.highestFloor }}F
+          </p>
+        </div>
+        <p v-if="gameStore.towers.length === 0" class="text-text-muted text-sm italic">塔一覧を読み込み中...</p>
+
         <div class="flex items-center gap-2">
           <label class="text-sm">目標フロア:</label>
           <input
             type="number"
             v-model.number="selectedTargetFloor"
             min="1"
-            max="20"
+            :max="selectedTower?.totalFloors ?? 20"
             class="floor-input"
           />
         </div>
-        <button class="btn btn-primary" @click="enterTower">塔に入る</button>
+        <button class="btn btn-primary" :disabled="!selectedTower || !isUnlocked(selectedTower)" @click="enterTower">
+          塔に入る
+        </button>
       </div>
     </section>
 
@@ -273,6 +333,45 @@ function dismissOffline() {
 .log-equipment_drop { color: var(--color-rarity-rare); font-weight: 600; }
 .log-equipment_auto_sold { color: var(--color-gold-dim); }
 .log-lifesteal { color: var(--color-hp); font-style: italic; }
+
+.tower-card {
+  padding: 0.625rem 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  background: var(--color-bg);
+  cursor: pointer;
+  transition: border-color 150ms;
+}
+
+.tower-card:hover:not(.tower-card-locked) {
+  border-color: var(--color-primary);
+}
+
+.tower-card-selected {
+  border-color: var(--color-primary);
+}
+
+.tower-card-locked {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.badge {
+  font-size: 0.6875rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  font-weight: 600;
+}
+
+.badge-cleared {
+  color: var(--color-gold);
+  border: 1px solid var(--color-gold-dim);
+}
+
+.badge-locked {
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+}
 
 .floor-input {
   width: 4rem;

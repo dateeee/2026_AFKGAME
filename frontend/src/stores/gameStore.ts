@@ -1,6 +1,7 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import type { EnemyInfo, GameState, Settings, TowerClearInfo } from '@/types/game'
+import type { EnemyInfo, GameState, Settings, TowerClearInfo, TowerInfo } from '@/types/game'
+import { getTowerList } from '@/api/client'
 
 export const useGameStore = defineStore('game', () => {
   const gold = ref(0)
@@ -18,6 +19,7 @@ export const useGameStore = defineStore('game', () => {
     autoSellRarity: null,
   })
   const towersCleared = ref<Record<string, TowerClearInfo>>({})
+  const towers = ref<TowerInfo[]>([])
   const isConnected = ref(true)
   const isLoading = ref(false)
   const errorMessage = ref<string | null>(null)
@@ -35,6 +37,10 @@ export const useGameStore = defineStore('game', () => {
     towersCleared.value = state.towersCleared
   }
 
+  async function loadTowers() {
+    towers.value = await getTowerList()
+  }
+
   function setConnectionError(message: string) {
     isConnected.value = false
     errorMessage.value = message
@@ -48,7 +54,7 @@ export const useGameStore = defineStore('game', () => {
   return {
     gold, currentTowerId, currentFloor, targetFloor, towerMode, hpThreshold,
     highestFloor, currentEnemy,
-    settings, towersCleared, isConnected, isLoading, errorMessage,
-    loadFromState, setConnectionError, clearError,
+    settings, towersCleared, towers, isConnected, isLoading, errorMessage,
+    loadFromState, loadTowers, setConnectionError, clearError,
   }
 })

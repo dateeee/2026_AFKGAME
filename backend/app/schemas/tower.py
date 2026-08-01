@@ -15,3 +15,14 @@ class TowerModeRequest(CamelModel):
 
 class RetreatConditionsRequest(CamelModel):
     hp_threshold: float
+
+
+class TowerInfo(CamelModel):
+    id: str
+    name: str
+    dungeon_name: str
+    total_floors: int
+    unlock_tower_id: str | None = None
+    unlocked: bool
+    cleared: bool
+    highest_floor: int

@@ -10,12 +10,49 @@ logger = logging.getLogger("afkgame.tower")
 
 from app.db.database import get_db
 from app.dependencies import get_current_player
-from app.models.player import Player
+from app.models.player import Player, TowerClearRecord
 from app.master_data.towers import TOWERS, get_tower
 from app.master_data.characters import required_exp
-from app.schemas.tower import TowerSelectRequest, TowerModeRequest, RetreatConditionsRequest
+from app.schemas.tower import (
+    TowerSelectRequest,
+    TowerModeRequest,
+    RetreatConditionsRequest,
+    TowerInfo,
+)
 
 router = APIRouter(prefix="/api/tower", tags=["tower"])
+
+
+def _is_tower_unlocked(tower_id: str, cleared_ids: set[str]) -> bool:
+    tower = get_tower(tower_id)
+    return tower.unlock_tower_id is None or tower.unlock_tower_id in cleared_ids
+
+
+def _get_cleared_tower_ids(player: Player, db: Session) -> set[str]:
+    records = db.query(TowerClearRecord).filter_by(player_id=player.id, cleared=True).all()
+    return {r.tower_id for r in records}
+
+
+@router.get("/list", response_model=list[TowerInfo])
+def list_towers(
+    player: Player = Depends(get_current_player),
+    db: Session = Depends(get_db),
+):
+    records = {r.tower_id: r for r in db.query(TowerClearRecord).filter_by(player_id=player.id).all()}
+    cleared_ids = {tid for tid, r in records.items() if r.cleared}
+    return [
+        TowerInfo(
+            id=t.id,
+            name=t.name,
+            dungeon_name=t.dungeon_name,
+            total_floors=t.total_floors,
+            unlock_tower_id=t.unlock_tower_id,
+            unlocked=_is_tower_unlocked(t.id, cleared_ids),
+            cleared=records[t.id].cleared if t.id in records else False,
+            highest_floor=records[t.id].highest_floor if t.id in records else 0,
+        )
+        for t in TOWERS.values()
+    ]
 
 
 @router.post("/select")
@@ -30,6 +67,8 @@ def select_tower(
         raise HTTPException(status_code=404, detail="Tower not found")
 
     tower = get_tower(req.tower_id)
+    if not _is_tower_unlocked(req.tower_id, _get_cleared_tower_ids(player, db)):
+        raise HTTPException(status_code=403, detail="Tower is locked")
     if req.target_floor < 1 or req.target_floor > tower.total_floors:
         raise HTTPException(status_code=400, detail="Invalid target floor")
 
