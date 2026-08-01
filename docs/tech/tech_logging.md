@@ -101,7 +101,7 @@ Python標準 `logging` モジュールを使用。Uvicornのアクセスログ�
 | プレフィックス | 対象 | 例 |
 |---------------|------|-----|
 | `AUTH_` | 認証関連 | `AUTH_HEADER_MISSING`, `AUTH_INVALID_FORMAT`, `AUTH_PLAYER_NOT_FOUND`, `AUTH_TOKEN_EXPIRED` |
-| `BATTLE_` | 戦闘関連 | `BATTLE_NOT_IN_TOWER`, `BATTLE_ALREADY_WIPED` |
+| `BATTLE_` | 戦闘関連 | `BATTLE_NOT_IN_TOWER`, `BATTLE_ALREADY_WIPED`, `BATTLE_TICK_BUSY`(503) |
 | `GAME_` | ゲーム状態関連 | `GAME_STATE_NOT_FOUND` |
 | `SHOP_` | ショップ関連 | `SHOP_INSUFFICIENT_GOLD`, `SHOP_ITEM_SOLD_OUT` |
 | `TOWER_` | 塔関連 | `TOWER_NOT_UNLOCKED`, `TOWER_INVALID_FLOOR` |
@@ -109,6 +109,7 @@ Python標準 `logging` モジュールを使用。Uvicornのアクセスログ�
 | `SKILL_` | スキル関連 | `SKILL_INSUFFICIENT_SP`, `SKILL_PREREQUISITE_NOT_MET` |
 | `BASE_` | 施設関連 | `BASE_INSUFFICIENT_MATERIALS`, `BASE_MAX_LEVEL` |
 | `FORGE_` | 鍛冶屋関連 | `FORGE_INSUFFICIENT_MATERIALS`, `FORGE_LEVEL_TOO_LOW` |
+| `RATE_LIMIT_` | レート制限 | `RATE_LIMIT_EXCEEDED`(429)。`Retry-After` ヘッダを併せて返す |
 | `INTERNAL_` | サーバー内部エラー | `INTERNAL_UNEXPECTED_ERROR` |
 
 ### グローバル例外ハンドラ

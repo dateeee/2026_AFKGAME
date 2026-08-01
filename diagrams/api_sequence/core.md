@@ -71,7 +71,7 @@ sequenceDiagram
     API->>DB: Player更新 (gold, exp, level)
     API->>DB: Character更新 (stats, sp)
     API->>DB: Inventory更新 (ポーション消費分)
-    API->>DB: lastTickAt = 現在時刻
+    API->>DB: lastTickAt += 処理tick数 × 60秒<br/>(24時間超で打ち切った場合のみ現在時刻)
 
     API-->>B: TickResponse
 

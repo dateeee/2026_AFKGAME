@@ -85,7 +85,7 @@ flowchart TD
 
     LogSave --> MoreTicks{"未処理tick\n残り?"}
     MoreTicks -->|Yes| ProcessTick
-    MoreTicks -->|No| UpdateDB["lastTickAt更新\nステータス保存"]
+    MoreTicks -->|No| UpdateDB["lastTickAt += 処理tick数×60秒\n(端数は繰り越し)\nステータス保存"]
 
     UpdateDB --> Response["レスポンス返却:\n- battleLogs (上限50件)\n- updatedState\n- offlineSummary (復帰時)"]
 ```
