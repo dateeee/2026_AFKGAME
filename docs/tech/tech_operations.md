@@ -3,7 +3,7 @@
 > [tech_spec.md](tech_spec.md) §12。性能設計は [tech_performance.md](tech_performance.md)、秘密情報の扱いは [tech_security.md](tech_security.md) §11.8、ログ仕様は [tech_logging.md](tech_logging.md) を参照。
 >
 > **運用「要件」（バランス改定ポリシー・補填・告知・サポート窓口）は [operation_requirements.md](../design/operation_requirements.md) が正**。本書はその実現方式（環境・設定・監視・ジョブ・手順）のみを扱う。
-> デプロイ先は未確定（[open_specs.md](../open_specs.md)）。本書はデプロイ先に依存しない運用方針を定める。
+> デプロイ先は **AWS**（EC2 1台 + S3/CloudFront）。構成は §12.1 が正。
 
 ---
 
@@ -16,6 +16,19 @@
 
 - ステージング環境は設けない（個人開発のため）。本番反映前の確認は `local` で行う
 - 環境の識別は環境変数 `APP_ENV`（`local` / `production`）。**本番でのみ有効化される制約**（HTTPS必須・CORSワイルドカード禁止・`USE_API` 強制）はこの値で判定する
+
+### 本番構成（AWS）
+
+| 層 | 構成 |
+|----|------|
+| フロント（SPA） | S3（静的ホスティング）+ CloudFront。HTTPS は CloudFront が終端する |
+| API | EC2 1台。Nginx をリバースプロキシに FastAPI（uvicorn）を常駐させる |
+| DB | 同一 EC2 の EBS 上に配置。SQLite → PostgreSQL（§12.4 の移行判断ライン） |
+| 定期ジョブ | 同一 EC2 の OS cron（§12.6） |
+| バックアップ | EBS の日次スナップショット。RPO 24時間を満たす（[non_functional_requirements.md](../design/non_functional_requirements.md) §3） |
+
+- フロントとバックエンドは**別オリジン**（CloudFront / EC2）になる。許可オリジンは §12.2 の `CORS_ORIGINS` が正
+- マネージドコンテナ（App Runner・ECS Fargate）は採用しない。ファイルシステムが揮発し、SQLite と OS cron を継続できないため
 
 ## 12.2 環境変数一覧
 
@@ -98,10 +111,10 @@
 | 戦闘ログ | tick処理内 | 100件超を古い順に削除（バッチ不要） |
 | 日替わりショップ | 遅延評価 | `GET /api/shop/lineup` 取得時に 00:00 UTC を跨いだかを判定して再生成（[systems/economy.md](../design/systems/economy.md)。バッチ不要） |
 
-- 実行方式は OS の cron（1日1回 03:00 UTC）。デプロイ先が未定のため、実装は Phase 2 のテスト工程以降に行う
+- 実行方式は本番 EC2 の OS cron（1日1回 03:00 UTC。§12.1）。実装は Phase 2 のテスト工程以降に行う
 - ジョブは **べき等**とし、二重実行しても結果が変わらないよう実装する（削除対象を条件で特定する形にする）
 - **ゲスト削除は事前告知できない**（連絡先を持たないため）。緩和策（本登録導線の常設・データ復旧不可の明示）は [non_functional_requirements.md](../design/non_functional_requirements.md) §5 が正
-- 退会（アカウント削除）要求への対応も本節のジョブと同じ削除処理を用いる（実装は未着手 → [open_specs.md](../open_specs.md)）
+- 退会（アカウント削除）要求も本節のジョブと同じ削除処理を用いる（**Phase 2** で実装。要件は [non_functional_requirements.md](../design/non_functional_requirements.md) §5）
 
 ## 12.7 リリース時の技術チェックと障害対応
 

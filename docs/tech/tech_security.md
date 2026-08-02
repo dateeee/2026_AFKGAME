@@ -44,7 +44,7 @@
 | 許可ヘッダ | `Authorization, Content-Type` |
 | 公開ヘッダ | `X-Request-ID`（クライアントの問い合わせ時にログと突合するため） |
 
-- フロントとバックエンドは別オリジンでのデプロイを前提とする（デプロイ先は未定。[open_specs.md](../open_specs.md)）
+- フロントとバックエンドは別オリジンでのデプロイを前提とする（本番構成は [tech_operations.md](tech_operations.md) §12.1）
 
 ## 11.3 入力バリデーション方針
 
@@ -55,7 +55,7 @@
 | 対象 | 制約 |
 |------|------|
 | `quantity`（購入・売却） | 1〜99 の整数 |
-| `targetFloor` | 1〜対象塔の総階数（[open_specs.md](../open_specs.md) の「目標階の選択上限」確定後に更新） |
+| `targetFloor` | `1 <= targetFloor <= min(塔別 highestFloor + 1, 総階数)`（[tech_api.md](tech_api.md)「操作系」が正） |
 | `hpThreshold` / `potionThreshold` | 0〜1 の小数（刻みは仕様どおり） |
 | `memberIds` | 配列長 ≤ 4、重複禁止 |
 | `activeSlots` | 配列長 ≤ 2 |

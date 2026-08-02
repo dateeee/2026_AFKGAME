@@ -12,7 +12,18 @@
 
 | ファイル | 内容 |
 |---------|------|
-| `docs/open_specs.md` | Alembic のセットアップが完了したため項目を削除（`backend/alembic.ini` + `backend/alembic/`。ベースライン `3685584aaa5b` と日替わりショップ `36e28dd936bc` の2リビジョン） |
+| `docs/open_specs.md` | **ファイルごと削除**。Phase 2〜5 の未確定仕様8件をすべて確定し、Phase 1〜5 の未確定仕様がゼロになったため（本書の方針「全項目が解消されたらファイル自体を削除」に準拠） |
+| `docs/tech/tech_operations.md` | 要件定義でデプロイ先を確定。§12.1 に**本番構成（AWS）**を新設（フロント=S3+CloudFront／API=EC2 1台に Nginx+FastAPI／DB=同EC2のEBS上／定期ジョブ=OS cron／バックアップ=EBS日次スナップショット）。マネージドコンテナ（App Runner・ECS Fargate）を不採用とする理由（FSが揮発し SQLite と OS cron を継続できない）を明記。§12.6 の「デプロイ先が未定」注記を解消し、退会削除処理を Phase 2 実装として確定 |
+| `docs/design/non_functional_requirements.md` | 退会（アカウント削除）を確定。**§5.1 を新設**し Phase 2 実装・設定画面からの導線・再認証による誤操作防止・全ゲームデータの即時物理削除（猶予期間なし）を定義。「規約類」行の宙に浮いた `open_specs.md` 参照を設定画面への掲示に置換 |
+| `docs/design/operation_requirements.md` | ゲーム内お知らせを確定。**§3.1 を新設**し Phase 3 実装・マスターデータ配信（DBテーブル/管理画面なし）・ヘッダからの参照と未読件数・既読はクライアント保持・掲示は最新20件（仮置き）を定義。§1 の「プレイテスト後に調整」の参照先を `balance_backlog.md` へ修正 |
+| `docs/design/product_requirements.md` | §6「未確定事項」を**アセット調達方針**へ置換。BGM/SE=商用可のフリー素材、キャラ絵/背景=AI生成、外注・有償素材は不使用。ライセンス一覧のリポジトリ常設と設定画面クレジット掲示を定義 |
+| `docs/design/systems/endgame.md` | イベントダンジョン（§2.13）に**進行モデル**と**敵プールの調達**を追加。塔と同じ階層制で1ダンジョン10階・10階ボス撃破でクリア・周回自由、難易度ごとに到達最高階を個別管理。雑魚は塔1〜10の既存敵を難易度別の固定ステータスで流用し、10階ボスのみイベント専用9体（3種×3難易度）を新規定義 |
+| `docs/design/systems/ui.md` | 設定画面に**アカウント欄（Phase 2〜）**を追加（問い合わせ先・規約類・クレジット・退会。退会は最下部へ視覚的に分離）。**お知らせ（Phase 3〜）**を追加（ヘッダアイコン＋未読バッジ、モーダルで操作を強制しない） |
+| `docs/design/game_spec.md` | §1 Phase 2 に「退会（アカウント削除）」、Phase 3 に「ゲーム内お知らせ」を追加。§5 末尾の未確定管理の記述を「Phase 1〜5 全確定」へ更新 |
+| `docs/data/master/character.md` | §7.3 に**命名規約**を追加。酒場専用16体は2〜4文字のカタカナ和風名、IDは §7.1 と同じ `<役割英名>_<連番3桁>`（`hero`/`mage`/`healer`/`scout`）。実名の定義は Phase 4 の詳細設計 |
+| `docs/tech/tech_api.md` | イベントダンジョン節の「入退場APIの方式は未確定」を解消。進行が塔と同じ階層制に確定したため `/api/tower/*` へ難易度パラメータを足して再利用する方針を明記（確定は Phase 5 の基本設計） |
+| `docs/tech/tech_security.md`・`docs/tech/tech_numeric.md` | 確定済みの「目標階の選択上限」を参照したまま残っていた記述を修正。`1 <= targetFloor <= min(塔別 highestFloor + 1, 総階数)` を明記し `tech_api.md` を正とした。デプロイ先の未定注記も `tech_operations.md §12.1` への参照へ置換 |
+| `README.md`・`CLAUDE.md`・`docs/development_process.md`・`docs/balance_backlog.md`・`docs/known_issues.md`・`.claude/project/{requirements,dev,review-docs}.md` | `open_specs.md` 削除に伴う参照更新。索引から除外し、管理フロー自体は「未確定が生じたら同名で作成する」として維持 |
 | `docs/tech/tech_operations.md` | §12.4 のツール欄を「未セットアップ」から実配置（`alembic.ini` / `env.py` が `app.config.DATABASE_URL` を参照）へ更新 |
 | `docs/tech/tech_structure.md` | Phase 2 日替わりショップの製造に追従。`models/shop.py`・`services/shop_daily_service.py`・`alembic.ini` / `alembic/` の内訳を追加 |
 | `diagrams/api_sequence/gameplay.md` | §5 ショップ購入フローの「Phase 2後半・未実装」注記を解消。`GET /api/shop/lineup` の応答に `daily` / `dailyResetAt` を、購入側に鮮度判定の注記を追加 |

@@ -18,12 +18,12 @@
 
 | 変更ファイル | 照合先 |
 |------------|--------|
-| `design/game_spec.md`、`design/systems/*.md` | `data/master/`、`tech/`、`TOWERS_OVERVIEW.md`、`SKILLS_OVERVIEW.md`、`open_specs.md` |
+| `design/game_spec.md`、`design/systems/*.md` | `data/master/`、`tech/`、`TOWERS_OVERVIEW.md`、`SKILLS_OVERVIEW.md` |
 | `data/master_data.md`、`data/master/*.md` | `design/systems/`、`tech/`、各塔ファイル（数値が変わった場合のみ） |
 | `tech/*.md` | `design/systems/`、`data/master/`、相互 |
 | `towers/NNN_*.md` | `TOWERS_OVERVIEW.md`、`master_data.md`、`game_spec.md`（塔・ドロップ関連） |
 | `skills/NNN_*.md` | `SKILLS_OVERVIEW.md`、`game_spec.md`（スキル関連） |
-| `open_specs.md` | 確定項目が反映されるべき各仕様書 |
+| `open_specs.md`（存在する場合） | 確定項目が反映されるべき各仕様書 |
 | `README.md` / `CLAUDE.md` / `development_process.md` / `glossary.md` / `documentation_rules.md` | ディレクトリ構成・索引・リンク・用語の整合のみ |
 
 ## 2. 全量モードの分担（`doc-review`・最大4体）
@@ -33,7 +33,7 @@
 | 数値・計算式・定数 | `design/systems/`、`data/master/`、`tech_data.md`、`tech_battle.md`、`tech_offline.md` |
 | 塔データ | `TOWERS_OVERVIEW.md`、`towers/001〜010`、`data/master/`、`systems/dungeon.md`、`master_data.md`（塔一覧） |
 | スキル・API・データ構造 | `SKILLS_OVERVIEW.md`、`skills/001〜006`、`systems/character.md`、`tech_api.md`、`tech_data.md`、`tech_auth.md` |
-| 網羅性・Phase整合・リンク | `open_specs.md`、`README.md`、`CLAUDE.md`、`glossary.md`、`development_process.md`、`documentation_rules.md`、各索引 + 全ファイルへの grep（TBD・未定・Phase表記） |
+| 網羅性・Phase整合・リンク | `README.md`、`CLAUDE.md`、`glossary.md`、`development_process.md`、`documentation_rules.md`、各索引 + 全ファイルへの grep（TBD・未定・Phase表記） |
 
 ## 3. `doc-review` の観点
 
@@ -46,8 +46,8 @@
 | 整合性 | 5 | **塔データ**: 階層数・推奨LV・解放条件・ボス名が概要と一致するか |
 | 整合性 | 6 | **API網羅性**: `game_spec.md` の機能に対応するAPIが `tech_api.md` にあるか |
 | 整合性 | 7 | **データ構造**: `tech_data.md` のJSON構造が `game_spec.md` の仕様を表現できるか |
-| 網羅性 | 8 | `open_specs.md` の確定済み項目が対応仕様書に反映されているか |
-| 網羅性 | 9 | 「TBD」「後日検討」「未定」が `open_specs.md` に未登録でないか（grep で抽出してから該当箇所のみ読む） |
+| 網羅性 | 8 | `open_specs.md` があれば、その確定済み項目が対応仕様書に反映されているか |
+| 網羅性 | 9 | 「TBD」「後日検討」「未定」が未管理で残っていないか（grep で抽出してから該当箇所のみ読む）。`open_specs.md` が不在なら本文にこれらが残っていること自体が指摘対象 |
 | 網羅性 | 10 | 言及されているが詳細が未定義の機能がないか |
 | 網羅性 | 11 | `docs/` のファイルが `README.md` の索引・ディレクトリ構成に未記載でないか（重要度=中） |
 | 規約 | 12 | `python scripts/check_doc_size.py --sections` の出力を**そのまま取り込む**（目視で数えない） |
@@ -87,5 +87,5 @@
 | 4 | 仕様書間の整合を保つため、関連する全ファイルをまとめて修正する |
 | 5 | 修正案が曖昧な場合は [profile.md](profile.md) §5 の不変条件に従って最も妥当な修正を行う |
 | 6 | 変更履歴は仕様書に書かず、`docs/changelog.md` の先頭へ `\| ファイル \| 内容 \|` 行を追記する |
-| 7 | `open_specs.md` に関する指摘があれば同ファイルも更新する |
+| 7 | 未確定仕様に関する指摘があれば `open_specs.md` も更新する（不在なら新規作成する） |
 | 8 | サブエージェントは「10ファイル以上にまたがる機械的修正」のみ。最大2体・`sonnet`・担当ファイル列挙を厳守 |

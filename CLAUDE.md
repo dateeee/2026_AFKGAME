@@ -40,7 +40,7 @@ Markdownには文字数上限を設けている。詳細は [docs/documentation_
 - **7工程で管理**: 要件定義 → 基本設計 → 詳細設計 → テストリスト作成 → 製造 → 単体テスト → 結合テスト（[docs/development_process.md](docs/development_process.md)）
 - **製造はTDD**: バックエンドの新規実装はテストを先に書く（Red → Green → Refactor）
 - **仕様は全Phase確定 → 実装は段階的**: 全Phase(1-5)の仕様を確定してから Phase 1 から順に実装する
-- **未確定仕様**は [docs/open_specs.md](docs/open_specs.md) で管理。確定したら仕様書へ反映して削除し、すべて確定したらファイルごと削除する
+- **未確定仕様はゼロ**（Phase 1〜5 の仕様は全確定）。新たに生じたら `docs/open_specs.md` を作成して管理し、確定・反映したら削除する
 - **テスト標準**: バックエンド単体テストは pytest で C1（分岐）カバレッジ100%、結合テストは FastAPI TestClient + Playwright（E2E）
 - **実装規約**: スキーマは CamelModel で `schemas/`、ロジックは `services/`、ログは logging_config 準拠
 - **作業はすべてスキル経由**: 7工程 + 支援7件を `.claude/skills/` に用意している（自動起動 / `/` で明示起動）。対応表は [.claude/project/INDEX.md](.claude/project/INDEX.md)

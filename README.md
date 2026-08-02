@@ -113,7 +113,6 @@ VS Code の場合は実行構成 **Full Stack** で両方を同時起動でき�
 - [.claude/project/INDEX.md](.claude/project/INDEX.md) — 工程↔スキル↔プロファイル対応表
 - [docs/documentation_rules.md](docs/documentation_rules.md) — ドキュメント規約（文字数上限・分割）
 - [docs/glossary.md](docs/glossary.md) — 用語集
-- [docs/open_specs.md](docs/open_specs.md) — 未確定仕様（実装をブロックする事項）
 - [docs/balance_backlog.md](docs/balance_backlog.md) — バランス調整（見直す数値）
 - [docs/known_issues.md](docs/known_issues.md) — 実装の疑義
 

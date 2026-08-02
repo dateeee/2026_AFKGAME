@@ -13,14 +13,14 @@
 | 非機能要件 | `docs/design/non_functional_requirements.md` | 性能・可用性・セキュリティの要求値 |
 | 運用要件 | `docs/design/operation_requirements.md` | 運用・変更管理 |
 | 用語集 | `docs/glossary.md` | 用語の正 |
-| 未確定管理 | `docs/open_specs.md` | 未確定仕様のチェックリスト |
+| 未確定管理 | `docs/open_specs.md` | 未確定仕様のチェックリスト（**全解消済みのため現在は不在**。新たに生じたら作成する） |
 | 数値調整待ち | `docs/balance_backlog.md` | 仕様確定済み・数値のみ未定の項目 |
 
 ## 2. 参照先（読む順）
 
 | 順 | 参照先 | 読む範囲 |
 |----|--------|---------|
-| 1 | `docs/open_specs.md` | 全文（チェックリストのみで軽い） |
+| 1 | `docs/open_specs.md` | 全文（チェックリストのみで軽い）。不在なら未確定ゼロと判断する |
 | 2 | `docs/design/game_spec.md` | 索引の該当Phase行のみ |
 | 3 | `docs/design/systems/<対象>.md` | 該当セクションのみ |
 | 4 | `docs/glossary.md` | 対象の用語のみ（Grepで行を特定） |
@@ -74,7 +74,7 @@
 
 一般スキルの完了基準に加え、以下を満たすこと。
 
-- `docs/open_specs.md` の対象項目がすべて解消され、`game_spec.md` 系へ反映されている
+- 対象の未確定項目がすべて解消され、`game_spec.md` 系へ反映されている（`open_specs.md` があれば該当行を削除。全解消ならファイルごと削除）
 - 数値のみ未定の項目は `docs/balance_backlog.md` へ移してある（`open_specs.md` に残さない）
 - `python scripts/check_doc_size.py` が exit 0
 

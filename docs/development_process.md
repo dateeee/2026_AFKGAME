@@ -39,7 +39,7 @@ graph LR
 
 | 工程 | 適用単位 | 状態 |
 |------|---------|------|
-| 要件定義 | 全Phase一括 | ほぼ完了（未確定仕様は open_specs.md で差分管理） |
+| 要件定義 | 全Phase一括 | 完了（Phase 1〜5 の未確定仕様はゼロ） |
 | 基本設計 | 全Phase一括 | 完了（変更時は差分更新） |
 | 詳細設計 | Phase単位 | Phase単位で数値・アルゴリズムを確定 |
 | テストリスト作成 | 機能単位 | 分岐一覧を失敗するテストへ落とす（バックエンドのみ） |
@@ -73,8 +73,8 @@ graph LR
 |------|------|
 | 目的 | ゲームとして「何を作るか」を確定する |
 | 主な作業 | ゲームシステム・バランス・UI要件の定義、未確定仕様の解消 |
-| 成果物 | [game_spec.md](design/game_spec.md)（索引）＋ [design/systems/](design/systems/)、要件3種（[product](design/product_requirements.md) / [nfr](design/non_functional_requirements.md) / [operation](design/operation_requirements.md)）、[glossary.md](glossary.md)、[open_specs.md](open_specs.md) |
-| 完了基準 | open_specs.md の対象項目がすべて解消され、game_spec.md に反映されている |
+| 成果物 | [game_spec.md](design/game_spec.md)（索引）＋ [design/systems/](design/systems/)、要件3種（[product](design/product_requirements.md) / [nfr](design/non_functional_requirements.md) / [operation](design/operation_requirements.md)）、[glossary.md](glossary.md) |
+| 完了基準 | 未確定仕様が解消され、game_spec.md 系へ反映されている |
 | レビュー | `doc-review` スキル → 指摘は `fix-specs` スキルで反映 |
 
 ### 3.2 基本設計（ハイレベル設計）
@@ -156,7 +156,7 @@ graph LR
 
 | ゲート | タイミング | 判定手段 |
 |-------|----------|---------|
-| 仕様確定ゲート | 要件・詳細設計の変更時 | `doc-review` 指摘ゼロ、open_specs.md 対象項目解消 |
+| 仕様確定ゲート | 要件・詳細設計の変更時 | `doc-review` 指摘ゼロ、未確定仕様の解消 |
 | ドキュメント規約ゲート | 仕様書・設計図の変更時 | `python scripts/check_doc_size.py` が `違反 0`（exit 0） |
 | 設計整合ゲート | 基本設計の変更時 | `diagrams-review` 指摘ゼロ |
 | テストリストゲート | 製造着手前 | 分岐一覧の全項目にテストが存在し、実行して全件 FAIL（Red）を確認 |
@@ -197,8 +197,8 @@ graph LR
 
 ## 6. 変更管理
 
-- 未確定仕様・仕様変更は [docs/open_specs.md](open_specs.md) で管理する（現行フロー維持）
-- 確定 → 該当工程の成果物（仕様書・設計図）へ反映 → [changelog.md](changelog.md) に追記 → open_specs.md を更新
+- 未確定仕様・仕様変更は `docs/open_specs.md` で管理する。**現在は未確定ゼロのため不在**。新たに生じたら作成する
+- 確定 → 成果物（仕様書・設計図）へ反映 → [changelog.md](changelog.md) に追記 → open_specs.md から削除（全解消でファイルごと削除）
 - **仕様は確定済みで数値のみ調整待ち**の項目は [docs/balance_backlog.md](balance_backlog.md) で管理する。実装をブロックしないため open_specs.md には残さず、結合テスト〜リリース後の実測で確定する
 - **実装側の疑義**（仕様との乖離・デッドコード・規約違反）は [docs/known_issues.md](known_issues.md) で管理する。対応時は「仕様書を実装に合わせる」か「実装を修正する」かを都度判断する
 - 実装と仕様の乖離は `full-review` スキルで検出し、上記フローで記録する
