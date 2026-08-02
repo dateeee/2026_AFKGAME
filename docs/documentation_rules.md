@@ -111,7 +111,7 @@ docs/data/towers/
 python scripts/check_doc_size.py          # 判定（新規の上限超過があれば exit 1）
 python scripts/check_doc_size.py --list   # 全ファイルの文字数一覧
 python scripts/check_doc_size.py --sections  # H2セクションの文字数も表示
-python scripts/check_docs.py              # リンク・索引到達性・曖昧語・正の逸脱（違反は exit 1）
+python scripts/check_docs.py              # リンク・索引到達性・曖昧語・正の逸脱・決定先送り・台帳存否（違反は exit 1）
 ```
 
 - ドキュメントの新規作成・改稿時に**両方**実行する

@@ -13,7 +13,7 @@ description: 設計図（Mermaid図）と仕様書・コードの整合性レビ
 |----|---------|------|
 | 1 | `.claude/references/review-procedure.md` | モード判定・差分特定・機械的検証・指摘の書き方・出力 |
 | 2 | `.claude/project/profile.md` | ディレクトリ・不変条件・コスト規律 |
-| 3 | `.claude/project/review-docs.md` | パラメータ（§0）・観点（§4）・重要度基準（§5） |
+| 3 | `.claude/project/review-diagrams.md` | パラメータ（§0）・観点（§1）・重要度基準（§2） |
 | 4 | `.claude/project/basic-design.md` | 対象の図一覧と照合先（§1）・Mermaid の機械検証（§4） |
 
 設計図が索引 + 同名ディレクトリ構成の場合、**索引で担当を特定し必要な子ファイルのみ**読む。全図の一括読み込みは禁止。

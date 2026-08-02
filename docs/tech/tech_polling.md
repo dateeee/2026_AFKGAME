@@ -78,7 +78,7 @@ tickレスポンスの反映順序を固定し、部分反映による表示不�
 
 ## 5. 分岐一覧（テスト観点）
 
-単体レベルの検証はE2E（Playwright）に統合する（[development_process.md §3.6](../development_process.md)）。
+単体レベルの検証はE2E（Playwright）に統合する（[phases.md §3.6](../process/phases.md)）。
 
 | # | 分岐 | 期待結果 |
 |---|------|---------|

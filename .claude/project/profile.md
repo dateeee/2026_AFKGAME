@@ -52,7 +52,7 @@
 | HTMLカバレッジレポート | `backend/htmlcov/index.html`（未実行行=赤、部分分岐=黄） |
 | フロント型チェック | `cd frontend && npm run type-check`（`vue-tsc --noEmit`） |
 | ドキュメント規約チェック | `python scripts/check_doc_size.py`（`--list` / `--sections`。上限90%超は残量WARN） |
-| ドキュメント機械検証 | `python scripts/check_docs.py`（リンク・索引到達性・曖昧語・正の逸脱。`--links` 等で個別実行） |
+| ドキュメント機械検証 | `python scripts/check_docs.py`（リンク・索引到達性・曖昧語・正の逸脱・決定先送り・台帳存否。`--links` 等で個別実行） |
 | 分岐一覧の検証 | `python scripts/check_branch_list.py`（構造検証。`--tests` でテストとの対応照合） |
 
 ## 5. アーキテクチャ不変条件

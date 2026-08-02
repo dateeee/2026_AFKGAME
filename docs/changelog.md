@@ -12,6 +12,10 @@
 
 | ファイル | 内容 |
 |---------|------|
+| `docs/development_process.md` / `docs/process/phases.md`（新設） / `docs/tech/tech_{tick,polling,performance}.md` / `docs/design/{non_functional,operation}_requirements.md` / `README.md` | **ISSUE-804①**: 残量28字まで逼迫した工程定義書を索引 + 個別ファイルへ分割。§3 工程定義（3,682字）を `process/phases.md` へ移設（節番号 §3.x 維持）、§3.x を直接参照する5ファイルのリンクを張り替え |
+| `.claude/project/review-docs.md` / `.claude/project/review-diagrams.md`（新設） / `.claude/skills/diagrams-review/SKILL.md` / `.claude/project/INDEX.md` | **ISSUE-804②**: 残量44字の review-docs.md から `diagrams-review` 固有分（パラメータ・観点・重要度基準）を review-diagrams.md へ切り出し。空いた容量で fix-specs 運用ルール11（移管指摘の全文検索範囲・台帳の言及元列挙）と doc-review 観点15（`--pending --ledger` 取り込み）を追加 |
+| `scripts/check_docs.py` / `README.md` / `.claude/project/profile.md` / `docs/documentation_rules.md` | 機械検証を2件常設化（レビュー2巡連続の提案）: `--pending`（決定先送りの台帳リンク検査）・`--ledger`（open_specs.md の存否と本文断定の整合検査）。コマンド表の説明を更新 |
+| `diagrams/screen_transition/endgame.md` / `diagrams/screen_transition/main_nav.md` | `diagrams-review` 持ち越し分: 導線の決定先送り2行を台帳（open_specs.md #4）リンクへ置換、「タブ構成は Phase 4 から変更なし」の断定を導線確定までの据え置きに条件化、ログアウト表示条件を `ui.md`（ゲスト時は警告後に実行可）へ整合 |
 | `CLAUDE.md` / `.claude/skills/fix-specs/SKILL.md` | コスト規律の改善: 工程区切りの既定を `/clear` に変更（レビュー→修正適用は別セッション）。fix-specs に `model: sonnet` を指定し、引数による ISSUE・重要度の絞り込みを明記 |
 | `docs/tech/tech_api.md` / `docs/open_specs.md` | **ISSUE-801**: ISSUE-703 の移管漏れ（`tech_api.md` イベントダンジョン・お知らせ節に残っていた決定先送り2行）へ台帳リンクを付与し、既読保持先の「確定」の主語を台帳へ移管。逆方向の取り残し防止として `open_specs.md` #2・#3 の「決定時にすること」へ `tech_api.md` の該当節を追加 |
 | `docs/known_issues.md` / `.claude/project/dev.md` / `.claude/project/requirements.md` | **ISSUE-802**: ISSUE-701 の走査範囲外に残っていた「`open_specs.md` は不在／未確定ゼロ」の断定3箇所を運用記述（不在＝未確定ゼロ）へ統一し、実ファイルと一致しないチェックリスト形式（`[ ]` / `[x]`）前提の記述3箇所を「一覧表 + 詳細ブロック」前提へ修正 |

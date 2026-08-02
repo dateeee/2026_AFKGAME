@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""ドキュメント機械検証（リンク・索引到達性・曖昧語・正の逸脱）
+"""ドキュメント機械検証（リンク・索引到達性・曖昧語・正の逸脱・台帳整合）
 
 レビュー工程で繰り返し検出されてきた機械判定可能な指摘クラスを、
 使い捨てスクリプトではなく常設チェックとして固定する。
@@ -9,10 +9,12 @@
     2. 索引到達性   docs/**・diagrams/** の全ファイルが README.md / CLAUDE.md から辿れるか
     3. 曖昧語       仕様書本文に「適宜」「おおよそ」「TBD」「後日検討」「未定」が残っていないか
     4. 正の逸脱     docs/spec_ownership.md の検出パターンが正・許可ファイル以外に現れていないか
+    5. 決定先送り   「Phase N の基本設計で確定する」形の先送りが台帳（open_specs.md）へリンクしているか
+    6. 台帳存否     open_specs.md の実在と、本文の「不在」「実在」の断定が一致するか
 
 使い方:
     python scripts/check_docs.py            # 全検証（ERROR があれば exit 1）
-    python scripts/check_docs.py --links    # リンク検査のみ（--reach / --words / --owner も同様）
+    python scripts/check_docs.py --links    # リンク検査のみ（--reach / --words / --owner / --pending / --ledger も同様）
 """
 
 from __future__ import annotations
@@ -132,6 +134,52 @@ def check_ambiguous(files: list[Path]) -> list[str]:
     return errors
 
 
+# 決定先送り（doc-review ISSUE-801/803 の検出パターンを常設化）
+# 「定義する」「追記する」「行う」は選択肢が未決なのではなく後工程で書くだけなので対象外
+PENDING = re.compile(r"Phase\s*[0-9]+\s*の(基本設計|詳細設計)で.{0,40}(確定|決める|決定)")
+PENDING_DIRS = ("docs/", "diagrams/")
+PENDING_EXCLUDE = ("docs/open_specs.md", "docs/balance_backlog.md")
+
+LEDGER = ROOT / "docs" / "open_specs.md"
+# 台帳の存否を事実として断定するパターン（「不在なら」「不在＝」等の条件文は対象外）
+LEDGER_ABSENT = re.compile(r"(現在は不在|ため不在|ため現在は不在|全解消済み|未確定ゼロのため)")
+LEDGER_PRESENT = re.compile(r"(現在|現時点).{0,8}([0-9]+\s*(件|項目)|実在)")
+
+
+def check_pending(files: list[Path]) -> list[str]:
+    """決定先送りの行が台帳へリンクしているか（走査対象: docs/**・diagrams/**）。"""
+    errors = []
+    for path in files:
+        rel = path.relative_to(ROOT).as_posix()
+        if not rel.startswith(PENDING_DIRS) or rel in PENDING_EXCLUDE:
+            continue
+        for no, line in body_lines(path):
+            if not PENDING.search(line):
+                continue
+            if "open_specs" in line or "balance_backlog" in line:
+                continue
+            errors.append(f"ERROR {rel}:{no}: 決定先送りが台帳へリンクしていない（open_specs.md へ登録し、行内でリンクする）")
+    return errors
+
+
+def check_ledger(files: list[Path]) -> list[str]:
+    """open_specs.md の実在と、本文の存否の断定の整合。"""
+    errors = []
+    exists = LEDGER.exists()
+    for path in files:
+        rel = path.relative_to(ROOT).as_posix()
+        if rel == "docs/open_specs.md":
+            continue
+        for no, line in body_lines(path):
+            if "open_specs" not in line:
+                continue
+            if exists and LEDGER_ABSENT.search(line):
+                errors.append(f"ERROR {rel}:{no}: open_specs.md は実在するのに不在と断定している")
+            elif not exists and LEDGER_PRESENT.search(line):
+                errors.append(f"ERROR {rel}:{no}: open_specs.md は不在なのに実在を前提にしている")
+    return errors
+
+
 def parse_ownership() -> list[tuple[str, str, set[str], re.Pattern]]:
     """spec_ownership.md から (トピック, 正, 許可, パターン) を読む。検出パターン列が空の行は対象外。"""
     if not OWNERSHIP.exists():
@@ -178,6 +226,8 @@ def main() -> int:
         "--reach": ("索引到達性", check_reachability),
         "--words": ("曖昧語", check_ambiguous),
         "--owner": ("正の逸脱", check_ownership),
+        "--pending": ("決定先送り", check_pending),
+        "--ledger": ("台帳存否", check_ledger),
     }
     selected = [k for k in checks if k in args] or list(checks)
 

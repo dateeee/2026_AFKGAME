@@ -34,7 +34,7 @@
 | スキル | プロファイル | 用途 |
 |-------|------------|------|
 | `doc-review` | [review-docs.md](review-docs.md) | 仕様書の横断レビュー |
-| `diagrams-review` | [review-docs.md](review-docs.md) | 設計図と仕様書・コードの整合レビュー |
+| `diagrams-review` | [review-diagrams.md](review-diagrams.md) | 設計図と仕様書・コードの整合レビュー |
 | `fix-specs` | [review-docs.md](review-docs.md) | レビュー結果の仕様書への反映 |
 | `backend-review` | [review-code.md](review-code.md) | バックエンドのコードレビュー |
 | `frontend-review` | [review-code.md](review-code.md) | フロントエンドのコードレビュー |

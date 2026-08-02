@@ -57,7 +57,7 @@ VS Code は実行構成 **Full Stack** で同時起動できる（[.vscode/launc
 | `npm run test:e2e` | E2Eテスト（Playwright。専用ポート/DBで自動起動） |
 | `pytest` | バックエンドテスト（C1 100%・`htmlcov/` にHTMLレポート） |
 | `python scripts/check_doc_size.py` | ドキュメント文字数チェック |
-| `python scripts/check_docs.py` | ドキュメント機械検証（リンク・索引・曖昧語・正の逸脱） |
+| `python scripts/check_docs.py` | ドキュメント機械検証（リンク・索引・曖昧語・正の逸脱・決定先送り・台帳存否） |
 | `python scripts/check_branch_list.py` | 分岐一覧の構造検証（`--tests` でテスト対応照合） |
 | `python scripts/rotate_reviews.py --apply` | レビュー結果の退避（直下は最新10件、超過分は `archive/` へ） |
 
@@ -108,7 +108,7 @@ VS Code は実行構成 **Full Stack** で同時起動できる（[.vscode/launc
 ## ドキュメント索引
 
 ### 開発プロセス
-- [docs/development_process.md](docs/development_process.md) — 開発工程（7工程・TDD・テスト標準）
+- [docs/development_process.md](docs/development_process.md) — 開発工程（7工程・TDD・テスト標準。工程定義は [process/phases.md](docs/process/phases.md)）
 - [.claude/project/INDEX.md](.claude/project/INDEX.md) — 工程↔スキル↔プロファイル対応表
 - [docs/documentation_rules.md](docs/documentation_rules.md) — ドキュメント規約（文字数上限・分割）
 - [docs/spec_ownership.md](docs/spec_ownership.md) — 正の所在マップ
