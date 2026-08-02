@@ -12,6 +12,9 @@
 
 | ファイル | 内容 |
 |---------|------|
+| `docs/tech/tech_api.md` / `docs/open_specs.md` | **ISSUE-801**: ISSUE-703 の移管漏れ（`tech_api.md` イベントダンジョン・お知らせ節に残っていた決定先送り2行）へ台帳リンクを付与し、既読保持先の「確定」の主語を台帳へ移管。逆方向の取り残し防止として `open_specs.md` #2・#3 の「決定時にすること」へ `tech_api.md` の該当節を追加 |
+| `docs/known_issues.md` / `.claude/project/dev.md` / `.claude/project/requirements.md` | **ISSUE-802**: ISSUE-701 の走査範囲外に残っていた「`open_specs.md` は不在／未確定ゼロ」の断定3箇所を運用記述（不在＝未確定ゼロ）へ統一し、実ファイルと一致しないチェックリスト形式（`[ ]` / `[x]`）前提の記述3箇所を「一覧表 + 詳細ブロック」前提へ修正 |
+| `docs/open_specs.md` / `docs/design/systems/ui.md` | **ISSUE-803**: 設計図にしか無かった4件目の未確定仕様「ボスラッシュ・イベントダンジョンへの導線（タブ追加かホーム内セクションか）」を台帳 #4 として登録（§4 詳細ブロック付き）し、正となる記述を `ui.md` ナビゲーション構造へ追加。図側2ファイルの追随は `diagrams-review` の担当 |
 | `docs/development_process.md` / `CLAUDE.md` / `docs/design/game_spec.md` / `docs/balance_backlog.md` | **ISSUE-701**: `open_specs.md` 新設（ISSUE-604）に追従していなかった「未確定仕様はゼロ・ファイルは不在」の断定を、「原則ゼロ。生じた場合のみ台帳を置く（不在＝未確定ゼロ）」の運用記述へ4ファイル一括で統一（`balance_backlog.md:5` はレビュー未検出分を grep で追加検出）。**ISSUE-702**: 仕様確定ゲートの判定手段を「未確定仕様の解消」から「`open_specs.md` の未解消が対象Phaseの期限内」へ変更し、期限付き先送りを正規運用として `open_specs.md` 前書きにも明記。区分C上限内へ収めるため §5 のテスト基盤・遡及整備の2行を1行へ統合。修正後検証で `development_process.md` 内に旧表現の残留2箇所を検出し、§2.2 の工程状態表と §3.1 要件定義の完了基準（重複していた「未確定仕様の解消」を §4 ゲート参照へ委譲）も併せて修正 |
 | `docs/open_specs.md` | **ISSUE-703**: 本文に残っていた同種の決定先送り2件を台帳へ移管（#2 お知らせ既読状態のクライアント保持先 / #3 難易度別到達記録 `towersCleared` のキー体系）。各項目に §1 と同形式の4行詳細ブロック（確定範囲 / 未確定範囲 / 背景 / 決定時にすること）を追加 |
 | `docs/design/operation_requirements.md` / `docs/design/systems/endgame.md` / `docs/balance_backlog.md` | **ISSUE-703**: 「Phase N の基本設計で確定する」の本文記述を台帳参照へ置換。数値である「お知らせ掲示件数の上限値」は `balance_backlog.md` へ B-7 として登録（未着手Phaseのため仮置き値は「未設定」。その表記ルールを §1 に追記） |

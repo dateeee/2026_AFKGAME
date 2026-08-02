@@ -12,6 +12,7 @@
 | 1 | Phase 3 以降のモバイルナビで「その他」へまとめる対象タブ | [design/systems/ui.md](design/systems/ui.md) ナビゲーション構造 | Phase 3 の基本設計 |
 | 2 | お知らせの既読状態のクライアント保持先 | [design/operation_requirements.md](design/operation_requirements.md) §3.1 | Phase 3 の基本設計 |
 | 3 | 難易度別到達記録（`towersCleared`）のキー体系 | [tech/tech_data.md](tech/tech_data.md) | Phase 5 の基本設計 |
+| 4 | ボスラッシュ・イベントダンジョンへの導線 | [design/systems/ui.md](design/systems/ui.md) ナビゲーション構造 | Phase 5 の基本設計 |
 
 ## 1. モバイルナビ「その他」の対象タブ
 
@@ -29,7 +30,7 @@
 | 確定している範囲 | 既読状態はクライアント側で保持し、サーバーはプレイヤーごとの既読状態を持たない（[design/operation_requirements.md](design/operation_requirements.md) §3.1）。ヘッダに未読件数を表示する（[design/systems/ui.md](design/systems/ui.md)） |
 | 未確定な範囲 | クライアントのどこへ保持するか（LocalStorage / Pinia の永続化 / セーブデータ同梱） |
 | 背景 | お知らせは Phase 3 実装。保持先によって機種変更・ブラウザ変更時に既読が引き継がれるかが変わる |
-| 決定時にすること | `operation_requirements.md` §3.1 と [tech/tech_state.md](tech/tech_state.md) へ保持先を明記し、本書の行を削除する |
+| 決定時にすること | `operation_requirements.md` §3.1、[tech/tech_state.md](tech/tech_state.md)、[tech/tech_api.md](tech/tech_api.md)「お知らせ」節へ保持先を明記し、本書の行を削除する |
 
 ## 3. 難易度別到達記録（`towersCleared`）のキー体系
 
@@ -38,4 +39,13 @@
 | 確定している範囲 | 難易度ごとに到達済み最高階を個別管理する（[design/systems/endgame.md](design/systems/endgame.md)）。到達記録の保持先は `towersCleared`（[tech/tech_data.md](tech/tech_data.md)） |
 | 未確定な範囲 | 難易度を `towersCleared` のキーへどう畳み込むか（`"{towerId}_{difficulty}"` 形式 / 値をオブジェクト化 など） |
 | 背景 | 難易度は Phase 5（エンドコンテンツ）で追加される。Phase 1〜4 のセーブデータとの後方互換が要る |
-| 決定時にすること | `tech_data.md` のセーブデータ構造へキー体系を定義し、本書の行を削除する |
+| 決定時にすること | `tech_data.md` のセーブデータ構造へキー体系を定義し、[tech/tech_api.md](tech/tech_api.md)「イベントダンジョン」節へ反映し、本書の行を削除する |
+
+## 4. ボスラッシュ・イベントダンジョンへの導線
+
+| 項目 | 内容 |
+|------|------|
+| 確定している範囲 | ボスラッシュ（[design/systems/endgame.md](design/systems/endgame.md) §2.11）・イベントダンジョン（同 §2.13）は Phase 5 で追加される。現行のタブ構成図（[diagrams/screen_transition/main_nav.md](../diagrams/screen_transition/main_nav.md)「Phase別タブ構成」）は導線確定までタブ構成を Phase 4 のまま据え置いて描いている |
+| 未確定な範囲 | 導線をタブ追加とするか、ホーム内セクションとするか |
+| 背景 | タブは Phase 4 で7項目に達しており、タブ追加はモバイル5枠上限（#1）に直結する。#1 の「その他」対象タブの決定と連動する |
+| 決定時にすること | `ui.md` ナビゲーション構造へ導線を明記し、`diagrams/screen_transition/` の2図（endgame / main_nav）を追随させ、本書の行を削除する |

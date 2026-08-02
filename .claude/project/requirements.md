@@ -13,14 +13,14 @@
 | 非機能要件 | `docs/design/non_functional_requirements.md` | 性能・可用性・セキュリティの要求値 |
 | 運用要件 | `docs/design/operation_requirements.md` | 運用・変更管理 |
 | 用語集 | `docs/glossary.md` | 用語の正 |
-| 未確定管理 | `docs/open_specs.md` | 未確定仕様のチェックリスト（**全解消済みのため現在は不在**。新たに生じたら作成する） |
+| 未確定管理 | `docs/open_specs.md` | 未確定仕様の一覧（**原則ゼロ**。生じたときだけ作成する） |
 | 数値調整待ち | `docs/balance_backlog.md` | 仕様確定済み・数値のみ未定の項目 |
 
 ## 2. 参照先（読む順）
 
 | 順 | 参照先 | 読む範囲 |
 |----|--------|---------|
-| 1 | `docs/open_specs.md` | 全文（チェックリストのみで軽い）。不在なら未確定ゼロと判断する |
+| 1 | `docs/open_specs.md` | 全文（一覧表 + 詳細ブロックで軽い）。不在なら未確定ゼロと判断する |
 | 2 | `docs/design/game_spec.md` | 索引の該当Phase行のみ |
 | 3 | `docs/design/systems/<対象>.md` | 該当セクションのみ |
 | 4 | `docs/glossary.md` | 対象の用語のみ（Grepで行を特定） |
@@ -67,7 +67,7 @@
 
 1. 該当仕様書へ反映（数値・計算式・分岐条件を一意に書く）
 2. `docs/changelog.md` の先頭（最新日付ブロック）へ追記
-3. `docs/open_specs.md` の該当項目を削除（`[x]` のまま残さない）
+3. `docs/open_specs.md` の該当行と詳細ブロックを削除する
 4. 全項目が確定したら `open_specs.md` をファイルごと削除する
 
 ## 5. 完了基準

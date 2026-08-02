@@ -9,7 +9,7 @@
 
 - 単体テスト・結合テスト・コードレビューで検出した実装側の疑義を、対応するまでここに記録する
 - 対応方針は「仕様書を実装に合わせる」か「実装を修正する」かを都度判断する（[development_process.md](development_process.md) §6）
-- **未確定仕様**は `open_specs.md`（現在は未確定ゼロのため不在）、**数値のみ調整待ち**は [balance_backlog.md](balance_backlog.md) に置き、本書には含めない
+- **未確定仕様**は [open_specs.md](open_specs.md)、**数値のみ調整待ち**は [balance_backlog.md](balance_backlog.md) に置き、本書には含めない
 - 対応が完了した項目は §3 へ移す（直近10件のみ保持）
 
 ## 2. 未対応の項目

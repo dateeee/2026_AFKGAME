@@ -92,6 +92,7 @@
 
 - Phase 1 ではホーム＋ショップ＋設定のみ表示。Phase進行に応じてタブが追加される
 - 5項目を超える Phase 3 以降は**モバイルのみ**末尾を「その他」へまとめる（PCは全項目を並べる）。対象項目は [open_specs.md](../../open_specs.md) で管理する。根拠は [tech_design_system.md](../../tech/tech_design_system.md) §3
+- Phase 5 のボスラッシュ・イベントダンジョンへの導線（タブ追加かホーム内セクションか）は [open_specs.md](../../open_specs.md) で管理する
 
 ## 通知システム（Phase 1〜）
 
