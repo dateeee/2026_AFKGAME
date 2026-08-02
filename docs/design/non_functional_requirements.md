@@ -33,7 +33,7 @@
 
 - **tick処理時間が60秒（ポーリング周期）を超えないこと**は必須要件。超過すると次tickと重なり処理が破綻する
 - 目標を超過した場合の対処順序は [tech_performance.md §10.4](../tech/tech_performance.md)。ただし **tick間隔の変更・報酬効率の低下をもって性能対策としてはならない**
-- 計測・負荷試験は [development_process.md §3.6](../development_process.md) 結合テストの一部として実施する
+- 計測・負荷試験は [development_process.md §3.7](../development_process.md) 結合テストの一部として実施する
 
 ## 2. 容量・データ保持要件
 

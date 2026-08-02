@@ -75,7 +75,7 @@
 | 負荷試験 | 同時100ユーザーのポーリングを再現（k6 または locust） | Phase 2 結合テストで初回実施 |
 | DB容量検証 | 1,000人相当のダミーデータを投入しサイズとクエリ時間を確認 | 負荷試験と同時 |
 
-- 検証は [development_process.md](../development_process.md) §3.6 結合テストの一部として扱い、Phase完了ゲートの判定材料にする
+- 検証は [development_process.md](../development_process.md) §3.7 結合テストの一部として扱い、Phase完了ゲートの判定材料にする
 
 ---
 
