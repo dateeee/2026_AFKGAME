@@ -105,6 +105,7 @@ stateDiagram-v2
             問い合わせ先 : メール/フォーム導線 (Phase 2~)
             規約類 : 利用規約 + プライバシーポリシー (Phase 2~)
             クレジット : アセット出典 (Phase 2~)
+            ログアウト : 認証ユーザーのみ表示 (Phase 2~)
             退会 : 最下部に分離配置 (Phase 2~)
         }
 
@@ -159,5 +160,5 @@ stateDiagram-v2
 - Phase 1 ではホーム + ショップ + 設定のみ表示
 - 塔タブ・ダンジョン選択はPhase 2時点ではホーム画面内セクションとして実装中（タブ分離は製造残。構成自体は仕様準拠のため変更なし）
 - お知らせはタブではなくヘッダ導線（[systems/ui.md](../../docs/design/systems/ui.md)「お知らせ（Phase 3〜）」）
-- 退会確認で削除を実行した後は、メインナビの外にある認証フロー（[auth.md](auth.md)）のログイン画面へ戻る
+- 退会確認で削除を実行した後、およびログアウト実行後は、メインナビの外にある認証フロー（[auth.md](auth.md)）のログイン画面へ戻る。ログアウトは `POST /api/auth/logout`（[api_sequence/auth.md](../api_sequence/auth.md) §14）を呼ぶ
 - ボスラッシュ・イベントダンジョンの導線（タブ追加かホーム内セクションか）は **Phase 5 の基本設計**で確定する（[systems/endgame.md](../../docs/design/systems/endgame.md)）

@@ -44,4 +44,4 @@ stateDiagram-v2
 ```
 
 - 対応するAPIシーケンスは [api_sequence/auth.md](../api_sequence/auth.md)
-- 退会（アカウント削除）からログイン画面へ戻る導線は [main_nav.md](main_nav.md)
+- 退会（アカウント削除）とログアウトの画面構成は [main_nav.md](main_nav.md) の設定画面。いずれも実行後は**本図の ログイン画面**へ戻る

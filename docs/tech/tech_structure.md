@@ -92,6 +92,7 @@
 │   │   │   ├── base.py            # 施設建設・レベルアップ（Phase 4〜）
 │   │   │   ├── forge.py           # 装備強化・製作・分解（Phase 4〜）
 │   │   │   ├── boss_rush.py       # ボスラッシュ・ランキング（Phase 5〜）
+│   │   │   ├── abyss.py           # 深淵の塔ランキング（Phase 5〜）
 │   │   │   └── prestige.py        # 転生・ポイント振り分け（Phase 5〜）
 │   │   ├── services/              # ビジネスロジック
 │   │   │   ├── battle_service.py  # 戦闘計算・エンカウント処理（オフライン報酬含む）

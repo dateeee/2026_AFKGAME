@@ -12,6 +12,12 @@
 
 | ファイル | 内容 |
 |---------|------|
+| `diagrams/screen_transition/main_nav.md` | **ISSUE-301**: 設定画面に `ログアウト`（Phase 2〜・認証ユーザーのみ表示）を追加。実行後は認証フローのログイン画面へ戻る旨と `POST /api/auth/logout` の呼び出しを箇条書きに明記 |
+| `diagrams/screen_transition/auth.md` | **ISSUE-303**: 退会・ログアウトの遷移先を「本図のログイン画面」と明示し、`main_nav.md` との相互参照ループを解消 |
+| `docs/tech/tech_structure.md` | **ISSUE-302**: §2 の `routers/` に `abyss.py`（深淵の塔ランキング・Phase 5〜）を追加。`GET /api/abyss/ranking` の実装配置を確定 |
+| `diagrams/system_architecture/application.md` | **ISSUE-302**: Routers に `abyss.py` を追加。**ISSUE-304**: `player.py` の Schemas に `SettingsResponse` を追加（`SettingsUpdate` との対を明示） |
+| `diagrams/api_sequence/endgame.md` | **ISSUE-302**: §11.7 にランキング取得の担当ルーター（`routers/abyss.py`）を注記。**ISSUE-305**: 見出しを「ボスラッシュ・イベント・深淵の塔・転生」へ変更し収録フローと一致させた |
+| `diagrams/api_sequence.md` | **ISSUE-305**: 索引の `character.md` の呼称を見出しに合わせて「パーティ・スキル・限界突破（Phase 3）」へ変更 |
 | `docs/reviews/diagrams-review/2026-08-02_181653.md` | 設計整合ゲートの確認レビュー（差分モード）。ISSUE-201〜204 の解消を全件確認し、新規指摘5件（高1・中2・低2）を記録 |
 | `diagrams/system_architecture/application.md` | **ISSUE-201**: Schemas サブグラフを `backend/app/schemas/` の実装配置へ修正。実在しない `character.py` を削除し、`tower.py`・`equipment.py`（Phase 2〜）・`shop.py` を追加。`CharacterResponse` / `GameStateResponse` を `player.py` へ、存在しない `BattleLogEntry` を削除、`TokenResponse` → `AuthResponse`。Phase 3〜5 の追加スキーマは図に描かない旨を注記 |
 | `docs/tech/tech_structure.md` | **ISSUE-202**: §2 の `routers/` ツリーに `party.py`（Phase 3〜）・`boss_rush.py`・`prestige.py`（Phase 5〜）を追加。システム構成図が描く11ルーターと一致させた |

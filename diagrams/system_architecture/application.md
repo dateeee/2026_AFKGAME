@@ -81,6 +81,7 @@ flowchart TB
             baseRouter["base.py Phase4~\nPOST /api/base/build\nPOST /api/base/upgrade\nPOST /api/base/scout"]
             forgeRouter["forge.py Phase4~\nPOST /api/forge/enhance\nPOST /api/forge/craft\nPOST /api/forge/disassemble"]
             bossRushRouter["boss_rush.py Phase5~\nPOST /api/boss-rush/start\nPOST /api/boss-rush/retire\nGET /api/boss-rush/ranking"]
+            abyssRouter["abyss.py Phase5~\nGET /api/abyss/ranking"]
             prestigeRouter["prestige.py Phase5~\nPOST /api/prestige\nPUT /api/prestige/invest\nPOST /api/prestige/reset"]
         end
 
@@ -104,7 +105,7 @@ flowchart TB
         end
 
         subgraph Schemas["Schemas (Pydantic v2)"]
-            playerSchema["player.py\nPlayerResponse\nCharacterResponse\nGameStateResponse\nSettingsUpdate"]
+            playerSchema["player.py\nPlayerResponse\nCharacterResponse\nGameStateResponse\nSettingsUpdate / SettingsResponse"]
             battleSchema["battle.py\nTickResponse\nOfflineSummary"]
             towerSchema["tower.py\nTowerSelectRequest\nTowerInfo"]
             equipSchema["equipment.py Phase2~\nEquipmentResponse\nEquipRequest"]

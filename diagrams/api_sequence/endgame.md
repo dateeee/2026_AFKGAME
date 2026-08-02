@@ -1,4 +1,4 @@
-# APIシーケンス図 — ボスラッシュ・転生（Phase 5）
+# APIシーケンス図 — ボスラッシュ・イベント・深淵の塔・転生（Phase 5）
 
 > 親: [api_sequence.md](../api_sequence.md)。API定義は [tech_api.md](../../docs/tech/tech_api.md)。
 
@@ -56,7 +56,7 @@ sequenceDiagram
 
 ## 11.7. 深淵の塔ランキング（Phase 5）
 
-> 入塔・目標階設定・リタイアは通常の塔と同じ `/api/tower/*` を `towerId: "abyss_tower"` で使用する（[gameplay.md](gameplay.md) §4）。専用エンドポイントはランキング取得のみ。
+> 入塔・目標階設定・リタイアは通常の塔と同じ `/api/tower/*` を `towerId: "abyss_tower"` で使用する（[gameplay.md](gameplay.md) §4）。専用エンドポイントはランキング取得のみで、`routers/abyss.py` が担当する（[tech_structure.md](../../docs/tech/tech_structure.md) §2）。
 
 ```mermaid
 %%{init: {'theme': 'default', 'sequence': {'actorFontSize': 18, 'messageFontSize': 16, 'noteFontSize': 14}} }%%
