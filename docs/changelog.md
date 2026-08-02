@@ -12,6 +12,7 @@
 
 | ファイル | 内容 |
 |---------|------|
+| `CLAUDE.md` / `.claude/skills/fix-specs/SKILL.md` | コスト規律の改善: 工程区切りの既定を `/clear` に変更（レビュー→修正適用は別セッション）。fix-specs に `model: sonnet` を指定し、引数による ISSUE・重要度の絞り込みを明記 |
 | `docs/tech/tech_api.md` / `docs/open_specs.md` | **ISSUE-801**: ISSUE-703 の移管漏れ（`tech_api.md` イベントダンジョン・お知らせ節に残っていた決定先送り2行）へ台帳リンクを付与し、既読保持先の「確定」の主語を台帳へ移管。逆方向の取り残し防止として `open_specs.md` #2・#3 の「決定時にすること」へ `tech_api.md` の該当節を追加 |
 | `docs/known_issues.md` / `.claude/project/dev.md` / `.claude/project/requirements.md` | **ISSUE-802**: ISSUE-701 の走査範囲外に残っていた「`open_specs.md` は不在／未確定ゼロ」の断定3箇所を運用記述（不在＝未確定ゼロ）へ統一し、実ファイルと一致しないチェックリスト形式（`[ ]` / `[x]`）前提の記述3箇所を「一覧表 + 詳細ブロック」前提へ修正 |
 | `docs/open_specs.md` / `docs/design/systems/ui.md` | **ISSUE-803**: 設計図にしか無かった4件目の未確定仕様「ボスラッシュ・イベントダンジョンへの導線（タブ追加かホーム内セクションか）」を台帳 #4 として登録（§4 詳細ブロック付き）し、正となる記述を `ui.md` ナビゲーション構造へ追加。図側2ファイルの追随は `diagrams-review` の担当 |
