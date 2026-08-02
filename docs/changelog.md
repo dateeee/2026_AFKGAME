@@ -12,6 +12,17 @@
 
 | ファイル | 内容 |
 |---------|------|
+| `docs/design/game_spec.md` | 要件定義の整合性チェック指摘を反映。§1 に**塔の実装Phase対応表**を新設し、Phase 1〜5 の各節へ追加される塔を明記（Phase 1=塔1／2=塔2／3=塔3-5／4=塔6-8／5=塔9-10+深淵の塔）。§6「今後の検討事項」を削除し `open_specs.md` / `balance_backlog.md` への参照に一本化 |
+| `docs/design/systems/dungeon.md` | ダンジョン2〜4の見出しを「Phase Nでは定義のみ」から実装Phase（3〜／4〜／5〜）へ修正。**深淵の塔（Phase 5）の解放条件「天空の塔クリア」が成立しない矛盾を解消**。環境効果を Phase 3〜 と明記 |
+| `docs/design/systems/character.md` | 複数挑発時のルールを合算80%上限・比率按分へ修正（`battle.md` の上限規定と統一。残り20%は常にランダム）。キャラレアリティ倍率テーブルを削除し `master/character.md` §7.2 を正とする |
+| `docs/design/systems/battle.md` | ポーションの回復量・価格テーブルを削除し `master/item.md` §3.1 を正とする |
+| `docs/design/systems/equipment.md` | §2.4 に**装備カテゴリ（9スロット→武器/防具/アクセサリーの対応表）**を新設。装備分解・装備製作のテーブルを削除し `master/equipment.md` §13・§14 を正とする |
+| `docs/design/systems/economy.md` | 訓練場EXP獲得率（LV6: 28%→30%）と市場ボーナス（LV4: +18%→+20%、LV6: +28%→+30%）の数列の破れを修正。施設レベルを「LV0（未建設）〜LV10」へ統一。日替わり商品にカテゴリ対応の参照を追加 |
+| `docs/design/systems/ui.md` | ナビゲーション構造の見出しを「Phase 2〜」→「Phase 1〜」へ修正（Phase 1 のショップ到達手段が未定義だった問題を解消）。戦闘ログ表示件数の選択肢から到達不能な 200件 を削除 |
+| `docs/design/systems/endgame.md` | §2.14 深淵の塔のランキングに公開範囲・ゲスト時の扱い（§2.11 と同一）を明記 |
+| `docs/design/product_requirements.md` | §3 塔1本の攻略期間を 3〜7日 → **9〜18日** へ修正（塔10本＝約3〜6ヶ月との算術矛盾を解消）。§4.1 の境界定義に深淵の塔のランキングを追記 |
+| `docs/glossary.md` | 塔1〜10 のPhase表記を `game_spec.md` の対応表へ統一（塔6-8: Phase 3→4、塔9-10: Phase 4〜5→5）。挑発の定義に合算80%上限を明記。「装備カテゴリ」を追加 |
+| `docs/data/master/item.md` | `speed_boots`（足スロット）をアクセサリーから**防具**へ移し価格を 1,000G→1,200G に修正。防具表にスロット・効果列を追加。ショップ装備の設計方針の重複記述を `economy.md` への参照へ変更 |
 | `docs/development_process.md` | §5「現在の工程状況」の結合テスト欄を L1完了 / L2未着手へ更新。§5.3「結合テストの整備状況（L1）」を新設 |
 | `docs/known_issues.md` | §3「対応済みの項目」を新設。結合テストで検出した2件（ヘルスチェックの仕様乖離 / `DATABASE_URL` の環境変数未対応）を**実装を仕様へ合わせて**解消し記録。未対応 #6 に環境変数一覧（tech_operations §12.2）の未実装を追加 |
 | `README.md` | 環境変数表に `DATABASE_URL` を追加 |
