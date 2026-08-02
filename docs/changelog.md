@@ -12,6 +12,8 @@
 
 | ファイル | 内容 |
 |---------|------|
+| `docs/reviews/diagrams-review/2026-08-02_175941.md` | 設計整合ゲートの**確認レビュー**（`diagrams-review` 差分モード）を追加。前回指摘13件の解消を全件確認したうえで、新規指摘4件（高1 / 中2 / 低1）。ISSUE-201: システム構成図の Schemas に実在しない `character.py`、実装済み3ファイルの欠落。ISSUE-202: `tech_structure.md` の routers 一覧に `party.py`・`boss_rush.py`・`prestige.py` が無い。ISSUE-203: APIシーケンス図に `POST /api/auth/logout`・`PUT /api/game/settings`（実装済み）ほか4フローが無い。ISSUE-204: 画面遷移図の分割で `ログイン画面` がメインナビの子として描画される。機械検証（Mermaid構文・リンク切れ・TODO残存・ER図↔models・図↔`tech_api.md`↔routers）はすべて OK |
+| `.gitignore` | `.claude/worktrees/` を追加。サブエージェント用ワークツリーの残骸が未追跡ファイルとして残るため |
 | `docs/reviews/**` | **ディレクトリ構成を変更**。フラットな21ファイルを `docs/reviews/{スキル名}/YYYY-MM-DD_HHMMSS.md` へ再配置し（`doc-review` 14件 / `diagrams-review` 5件 / `full-review` 2件）、ファイル名から種別プレフィックスを削除。直下10件を超える `doc-review` の古い4件を `doc-review/archive/` へ退避（削除はしていない） |
 | `docs/documentation_rules.md` | **§9「レビュー結果アーカイブの運用」を新設**。1スキル=1ディレクトリ・直下は最新10件・超過分は `archive/` へ退避（削除しない）・差分モードで読むのは直下の最新1件のみ、を規定。§9.2 にディレクトリ分割だけでは件数の増加が止まらない理由を明記。§2・§3 の除外行から §9 を参照 |
 | `scripts/rotate_reviews.py` | **新規**。レビュー結果のローテーション（引数なし=退避対象の確認、`--apply`=`archive/` へ移動、`--list`=全件と文字数）。移動は `git mv` で行い履歴を維持する |
