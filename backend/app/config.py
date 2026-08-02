@@ -1,4 +1,13 @@
-"""AFK Game - 設定・定数"""
+"""AFK Game - 設定・定数
+
+環境変数の参照は本モジュールに集約する（tech_operations.md §12.2）。
+アプリケーションコードから `os.environ` を直接読まない。
+"""
+
+import os
+
+# アプリバージョン（FastAPI のメタ情報と /health の応答で共有する）
+APP_VERSION = "0.1.0"
 
 # tick設定
 TICK_INTERVAL_SECONDS = 60
@@ -15,16 +24,14 @@ MAX_LOG_PER_RESPONSE = 50
 MAX_PLAYER_LEVEL = 9999
 MAX_GOLD = 9_223_372_036_854_775_807
 
-# DB
-DATABASE_URL = "sqlite:///./afkgame.db"
+# DB（tech_operations.md §12.2）
+DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite:///./afkgame.db")
 
 # アプリケーションログ
 LOG_LEVEL = "INFO"   # 環境変数 LOG_LEVEL で上書き可
 LOG_FORMAT = "text"  # text / json、環境変数 LOG_FORMAT で上書き可
 
 # ── 認証 (Phase 2) ──
-import os
-
 JWT_SECRET = os.environ.get("JWT_SECRET", "dev-secret-change-in-production")
 JWT_ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30

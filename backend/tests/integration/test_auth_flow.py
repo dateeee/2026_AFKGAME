@@ -9,6 +9,18 @@ import pytest
 pytestmark = pytest.mark.integration
 
 
+class TestHealthCheck:
+    """運用の死活監視（tech_operations.md §12.3）。認証不要で `/api` の外に置く"""
+
+    def test_認証なしでヘルスチェックへ到達できる(self, api):
+        res = api.get("/health")
+        assert res.status_code == 200
+        body = res.json()
+        assert body["status"] == "ok"
+        assert body["db"] == "ok"
+        assert body["version"]
+
+
 class TestScenario01認証からゲーム状態取得:
     """必須シナリオ #1: トークン発行と初期状態の返却"""
 

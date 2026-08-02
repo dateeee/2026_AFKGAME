@@ -21,11 +21,14 @@
 | 3 | `services/battle_service.py` | `_get_potion_count()` がどこからも呼ばれていないデッドコード | 低 | 単体テスト |
 | 4 | `services/equipment_service.py` | L109 が SQLAlchemy 2.0 非推奨の `Query.get()`。同ファイル内の `get_effective_stats` は `db.get()` を使用しており不統一 | 低 | 単体テスト |
 | 5 | `services/equipment_service.py` | オートセルの `RARITY_ORDER` 未知値を例外もログもなく無視。設定APIでの入力検証要否は未確認 | 低 | 単体テスト |
-| 6 | `app/main.py` L49 | ヘルスチェックが `GET /api/health`。[tech_api.md](tech/tech_api.md) §運用・[tech_operations.md](tech/tech_operations.md) §12.3 は **`GET /health`**（認証不要・レート制限対象外）と定義。応答も `{"status":"ok"}` のみで、仕様の `version`・`db` と DB異常時の 503（`SELECT 1` 失敗）が無い | 中（仕様乖離。デプロイ先の死活監視が404になる） | 結合テスト |
+| 6 | `app/config.py` | [tech_operations.md](tech/tech_operations.md) §12.2 の環境変数一覧のうち、実装は `JWT_SECRET`・`GOOGLE_CLIENT_ID`・`GOOGLE_CLIENT_SECRET` のみ。`APP_ENV`・`CORS_ORIGINS`・`FRONTEND_BASE_URL`・`LOG_LEVEL`・`LOG_FORMAT`・`SMTP_*` は未対応で、`LOG_LEVEL` / `LOG_FORMAT` は「環境変数で上書き可」とコメントされているが実装がない（[README.md](../README.md) も環境変数として案内）。§12.2 の**起動時バリデーション**（本番で必須変数が既定値のままなら起動中止）も未実装 | 中（本番の設定が効かない） | 結合テスト |
 
 - 単体テストは**現状の実装に合わせて**作成済み。上記を修正する場合は該当テストの期待値も併せて更新すること
-- #6 は方針未決のため結合テストを書いていない。パス・応答形式を確定してからテストを追加すること
+- #6 のうち `DATABASE_URL` は E2E のDB分離に必要なため先行対応済み（§3）
 
 ## 3. 対応済みの項目
 
-（現在なし）
+| # | 対象 | 内容 | 対応 |
+|---|------|------|------|
+| 1 | `app/main.py` | ヘルスチェックが `GET /api/health` で `{"status":"ok"}` のみを返し、[tech_api.md](tech/tech_api.md) §運用・[tech_operations.md](tech/tech_operations.md) §12.3 の `GET /health`・`version`・`db`・DB異常時503 と乖離 | **実装を仕様へ合わせた**。`SELECT 1` による疎通確認と 503（`{"status":"degraded","db":"error"}`）を追加。単体3件・結合1件のテストを追加 |
+| 2 | `app/config.py` | `DATABASE_URL` が定数固定で、[tech_operations.md](tech/tech_operations.md) §12.2 の環境変数指定が効かない | **実装を仕様へ合わせた**。`os.environ.get` で上書き可能にし、E2E は専用DBを指すようにした |

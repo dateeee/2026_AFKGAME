@@ -13,7 +13,8 @@
 | ファイル | 内容 |
 |---------|------|
 | `docs/development_process.md` | §5「現在の工程状況」の結合テスト欄を L1完了 / L2未着手へ更新。§5.3「結合テストの整備状況（L1）」を新設 |
-| `docs/known_issues.md` | #6 を追加: ヘルスチェックが `GET /api/health` で実装され、仕様の `GET /health`・DB疎通・503分岐と乖離（結合テストで検出） |
+| `docs/known_issues.md` | §3「対応済みの項目」を新設。結合テストで検出した2件（ヘルスチェックの仕様乖離 / `DATABASE_URL` の環境変数未対応）を**実装を仕様へ合わせて**解消し記録。未対応 #6 に環境変数一覧（tech_operations §12.2）の未実装を追加 |
+| `README.md` | 環境変数表に `DATABASE_URL` を追加 |
 | `.claude/project/integration-test.md` | L1を「整備済み」へ更新。§1.1 記述規約（マーカー・DBセッション・乱数/時刻/ログの扱い）と §3.1「意図的にL1で扱わない経路」を新設 |
 | `.claude/skills/test-list/SKILL.md` | 初版作成: 工程4「テストリスト作成」の一般手順。分岐一覧→失敗するテストへの展開、Red確認、工程内検証（§5）を規定 |
 | `.claude/skills/test-list/references/patterns.md` | 初版作成: テスト実装パターンの一般形。旧 `unit-test/references/patterns.md` から移設し、固有の値を除去 |

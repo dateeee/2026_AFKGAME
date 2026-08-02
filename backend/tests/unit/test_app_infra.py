@@ -20,8 +20,10 @@ import pytest
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.testclient import TestClient
 from pydantic import BaseModel
+from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session
 
+from app.config import APP_VERSION
 from app.db.database import get_db
 from app.exceptions import AppError, register_exception_handlers
 from app.logging_config import (
@@ -306,8 +308,54 @@ class TestSetupLogging:
 # ── main.py ──
 
 
+class TestConfig:
+    """tech_operations.md §12.2 環境変数一覧
+
+    分岐観点: 環境変数あり（上書き）/ なし（既定値）
+    """
+
+    @staticmethod
+    def _reload_config():
+        import importlib
+
+        from app import config
+
+        return importlib.reload(config)
+
+    def test_DATABASE_URLは環境変数で上書きできる(self, monkeypatch):
+        monkeypatch.setenv("DATABASE_URL", "sqlite:///./e2e.db")
+        try:
+            assert self._reload_config().DATABASE_URL == "sqlite:///./e2e.db"
+        finally:
+            monkeypatch.delenv("DATABASE_URL")
+            self._reload_config()
+
+    def test_DATABASE_URLの既定値はローカルのSQLite(self, monkeypatch):
+        monkeypatch.delenv("DATABASE_URL", raising=False)
+        assert self._reload_config().DATABASE_URL == "sqlite:///./afkgame.db"
+
+
 class TestHealthCheck:
-    def test_ヘルスチェックはokを返す(self, client):
-        res = client.get("/api/health")
+    """tech_operations.md §12.3 / tech_api.md §運用
+
+    分岐観点: DB疎通OK（200）/ DB疎通NG（503）
+    """
+
+    def test_DB疎通できれば200でバージョンとDB状態を返す(self, client):
+        res = client.get("/health")
         assert res.status_code == 200
-        assert res.json() == {"status": "ok"}
+        assert res.json() == {"status": "ok", "version": APP_VERSION, "db": "ok"}
+
+    def test_DB疎通に失敗すれば503でdegradedを返す(self, client, monkeypatch):
+        def _fail(*args, **kwargs):
+            raise OperationalError("SELECT 1", {}, Exception("db is down"))
+
+        monkeypatch.setattr(Session, "execute", _fail)
+
+        res = client.get("/health")
+        assert res.status_code == 503
+        assert res.json() == {"status": "degraded", "db": "error"}
+
+    def test_ヘルスチェックは認証を要求しない(self, client):
+        client.headers.pop("Authorization")
+        assert client.get("/health").status_code == 200

@@ -41,6 +41,7 @@ VS Code の場合は実行構成 **Full Stack** で両方を同時起動でき�
 
 | 変数 | 既定値 | 用途 |
 |------|-------|------|
+| `DATABASE_URL` | `sqlite:///./afkgame.db` | DB接続文字列 |
 | `JWT_SECRET` | `dev-secret-change-in-production` | JWT署名鍵（本番では必ず変更） |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | 空 | Google OAuth（空の場合は無効） |
 | `LOG_LEVEL` / `LOG_FORMAT` | `INFO` / `text` | ログ出力設定 |
