@@ -12,6 +12,7 @@
 
 | ファイル | 内容 |
 |---------|------|
+| `docs/reviews/doc-review/2026-08-02_191502.md` | **新規**: デザインシステム導入（`4eeebf0`）後の仕様確定ゲート再確認。新規指摘7件（中5 / 低2）。前回 10件はすべて解消済みを確認。指摘はいずれも `tech_design_system.md` と既存仕様書（主に `systems/ui.md`）の突き合わせから発生 |
 | `diagrams/system_architecture/application.md` | **ISSUE-401/402/403/405**: `Components` を実装の3層（`ui/` UIプリミティブ / `layout/` アプリシェル / `equipment/`）へ描き替え、実在しない6部品と `useAuth.ts` を削除。`SettingsView` `equipmentStore` `api/auth.ts` を追加。`Assets` に `tokens.css` / `main.css` を明記し、依存辺を実装の参照関係（UIプリミティブはストア非参照）に合わせて再構成 |
 | `diagrams/screen_transition/modal.md` | **ISSUE-404**: モーダルの表示方法を「PC: 画面中央 / モバイル: 下寄せ」に修正し、実体が `components/ui/BaseModal` 1点であることと `tech_design_system.md` §2 が正である旨を追記 |
 | `docs/reviews/diagrams-review/2026-08-02_190219.md` | **新規**: デザインシステム導入（`4eeebf0`）後の設計整合ゲート再確認。新規指摘5件（高1 / 中3 / 低1）。前回 ISSUE-301〜305 はすべて解消済みを確認 |
