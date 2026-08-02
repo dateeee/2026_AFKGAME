@@ -2,8 +2,8 @@
 
 放置系ファンタジーRPGのWebブラウザゲーム。
 
-プレイヤーは冒険者ギルドのマスターとなり、冒険者たちを育成・編成してダンジョン（塔）へ派遣する。
-アプリを閉じている間も冒険者たちは自動で探索・戦闘を続け、戻ってきた時に報酬をまとめて受け取れる。
+プレイヤーは冒険者ギルドのマスターとして冒険者を育成・編成し、ダンジョン（塔）へ派遣する。
+アプリを閉じている間も探索・戦闘は自動で進み、復帰時に報酬をまとめて受け取れる。
 
 ## 技術スタック
 
@@ -53,34 +53,35 @@ VS Code の場合は実行構成 **Full Stack** で両方を同時起動でき�
 |---------|------|
 | `npm run dev` / `npm run build` | フロント開発サーバー / 本番ビルド |
 | `npm run type-check` | 型チェック（vue-tsc） |
-| `pytest` | バックエンドテスト（C1カバレッジ100%・`htmlcov/` にHTMLレポート出力） |
+| `pytest` | バックエンドテスト（C1 100%・`htmlcov/` にHTMLレポート） |
 | `python scripts/check_doc_size.py` | ドキュメント文字数チェック |
 
 ## ディレクトリ構成
 
 ```
 2026_AFKGAME/
-├── README.md                    # 本ファイル（プロジェクト概要・セットアップ）
+├── README.md                    # 本ファイル（概要・セットアップ）
 ├── CLAUDE.md                    # AIエージェント向け開発ルール
 ├── docs/                        # 仕様書
-│   ├── development_process.md   # 開発工程定義書（6工程・完了基準・テスト標準）
-│   ├── documentation_rules.md   # ドキュメント規約（文字数上限・分割ルール）
+│   ├── development_process.md   # 開発工程定義書（7工程・TDD・テスト標準）
+│   ├── documentation_rules.md   # ドキュメント規約（文字数上限・分割）
 │   ├── glossary.md              # 用語集
 │   ├── open_specs.md            # 未確定仕様一覧（全確定後に削除）
-│   ├── balance_backlog.md       # バランス調整バックログ（仕様確定済み・数値のみ調整待ち）
+│   ├── balance_backlog.md       # バランス調整（数値のみ調整待ち）
+│   ├── known_issues.md          # 実装の疑義
 │   ├── design/                  # ゲーム仕様
 │   │   ├── game_spec.md         # 索引（開発フェーズ・設計方針・変更履歴）
 │   │   └── systems/             # システム別仕様（character / battle / equipment 他）
 │   ├── tech/                    # 技術仕様
 │   │   ├── tech_spec.md         # 索引（章構成・変更履歴）
-│   │   └── tech_*.md            # レイヤー別 + 詳細設計（一覧は下記「ドキュメント索引」）
+│   │   └── tech_*.md            # レイヤー別 + 詳細設計（一覧は下記索引）
 │   ├── data/                    # マスターデータ
 │   │   ├── master_data.md       # 索引 + 塔データ一覧
 │   │   ├── master/              # カテゴリ別数値（character / item / equipment 他）
 │   │   ├── towers/              # 塔別データ（OVERVIEW + 001〜010）
 │   │   └── skills/              # スキル系統別データ（OVERVIEW + 001〜006）
-│   └── reviews/                 # レビュー結果（レビュー系コマンドが自動生成）
-├── diagrams/                    # 設計図（Mermaid）。各図は索引 + 同名ディレクトリに分割
+│   └── reviews/                 # レビュー結果（自動生成）
+├── diagrams/                    # 設計図（Mermaid）。索引 + 同名ディレクトリに分割
 ├── scripts/                     # 開発補助スクリプト
 ├── frontend/src/                # Vue.js SPA
 │   ├── views/ components/       # ページ / UIコンポーネント
@@ -97,13 +98,13 @@ VS Code の場合は実行構成 **Full Stack** で両方を同時起動でき�
 - **ハイブリッドtick制**: 戦闘はバックエンドで60秒間隔のtickごとに処理。オンライン中はポーリング、オフライン中は復帰時にまとめて計算
 - **サーバー権威**: 戦闘計算はサーバー側で実行（チート対策）。フロントはログ表示のみ
 - **シングルプレイ専用**: マルチプレイは想定しない
-- **MVP同時開発**: Phase 1からフロント（Vue）＋バックエンド（FastAPI + SQLite）を同時開発
+- **MVP同時開発**: フロント（Vue）＋バックエンド（FastAPI + SQLite）を同時開発
 
 ## 開発フェーズ
 
 | Phase | 内容 | 状況 |
 |-------|------|------|
-| Phase 1 (MVP) | キャラ1体の自動戦闘、レベルアップ、オフライン報酬、常設ショップ | 実装完了（テスト遡及整備中） |
+| Phase 1 (MVP) | キャラ1体の自動戦闘、レベルアップ、オフライン報酬、常設ショップ | 実装・単体テスト完了 |
 | Phase 2 | 装備システム、複数の塔、ショップ拡張（日替わり装備）、認証 | 進行中 |
 | Phase 3 | パーティ編成、タイプ（素質）・スキルシステム | 未着手 |
 | Phase 4 | 拠点建設（酒場・鍛冶屋・訓練場・倉庫・市場）、素材・生産システム | 未着手 |
@@ -114,11 +115,12 @@ VS Code の場合は実行構成 **Full Stack** で両方を同時起動でき�
 ## ドキュメント索引
 
 ### 開発プロセス
-- [docs/development_process.md](docs/development_process.md) — 開発工程（6工程・完了基準・テスト標準）
-- [docs/documentation_rules.md](docs/documentation_rules.md) — ドキュメント規約（文字数上限・分割ルール）
+- [docs/development_process.md](docs/development_process.md) — 開発工程（7工程・TDD・テスト標準）
+- [docs/documentation_rules.md](docs/documentation_rules.md) — ドキュメント規約（文字数上限・分割）
 - [docs/glossary.md](docs/glossary.md) — 用語集
-- [docs/open_specs.md](docs/open_specs.md) — 未確定仕様（実装をブロックする未決定事項）
-- [docs/balance_backlog.md](docs/balance_backlog.md) — バランス調整バックログ（プレイテストで数値を見直す項目）
+- [docs/open_specs.md](docs/open_specs.md) — 未確定仕様（実装をブロックする事項）
+- [docs/balance_backlog.md](docs/balance_backlog.md) — バランス調整（見直す数値）
+- [docs/known_issues.md](docs/known_issues.md) — 実装の疑義
 
 大きな仕様書は **索引 + 個別ファイル** に分割している（[documentation_rules.md](docs/documentation_rules.md) §6）。索引から辿ること。
 
