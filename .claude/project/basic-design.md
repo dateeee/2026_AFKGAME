@@ -1,0 +1,80 @@
+# 基本設計 — プロジェクト固有プロファイル
+
+> 一般手順は [.claude/skills/basic-design/SKILL.md](../skills/basic-design/SKILL.md) を参照。本書は AFK GAME 固有の値のみを持つ。
+> 共通の値は [profile.md](profile.md)。
+
+## 1. 成果物
+
+| 成果物 | パス | 役割 |
+|-------|------|------|
+| 技術仕様（索引） | `docs/tech/tech_spec.md` | 個別ファイルへの索引 |
+| データ設計 | `docs/tech/tech_data.md` | DBスキーマ・JSON構造 |
+| 実装配置 | `docs/tech/tech_structure.md` | ディレクトリ構成・モジュール責務 |
+| API設計 | `docs/tech/tech_api.md` | エンドポイント一覧・共通仕様 |
+| アーキテクチャ | `docs/tech/tech_architecture.md` | 層構成・依存方向 |
+| ログ設計 | `docs/tech/tech_logging.md` | ログレベル・出力項目 |
+| 認証方式 | `docs/tech/tech_auth.md` | 認証フロー・トークン |
+| 性能・容量 | `docs/tech/tech_performance.md` | 非機能要件の実現方式 |
+| セキュリティ | `docs/tech/tech_security.md` | 非機能要件の実現方式 |
+| 運用 | `docs/tech/tech_operations.md` | 運用要件の実現方式 |
+
+### 設計図（6点・索引 + 同名ディレクトリ構成）
+
+| 図 | パス | 検証対象 |
+|----|------|---------|
+| ER図 | `diagrams/er_diagram.md` + `er_diagram/` | `tech_data.md`・`backend/app/models/` |
+| クラス図 | `diagrams/class_diagram.md` + `class_diagram/` | `backend/app/`・`frontend/src/` の構造 |
+| 画面遷移図 | `diagrams/screen_transition.md` | `design/systems/ui.md`・`frontend/src/router/` |
+| 戦闘フロー図 | `diagrams/battle_flow.md` + `battle_flow/` | `tech_battle.md`・`services/battle_service.py` |
+| システム構成図 | `diagrams/system_architecture.md` | `tech_architecture.md` |
+| APIシーケンス図 | `diagrams/api_sequence.md` + `api_sequence/` | `tech_api.md`・`backend/app/routers/` |
+
+**索引で担当ファイルを特定し、必要な子ファイルのみ読む**（全図の一括読み込みは禁止）。
+
+## 2. 参照先（読む順）
+
+| 順 | 参照先 | 読む範囲 |
+|----|--------|---------|
+| 1 | `docs/design/game_spec.md` → `systems/` | 設計対象の機能セクションのみ |
+| 2 | `docs/design/non_functional_requirements.md` | 要求値の該当行のみ |
+| 3 | `docs/tech/tech_spec.md` | 索引から対象ファイルを特定 |
+| 4 | 既存の `backend/app/` `frontend/src/` | 対応するモジュールのみ（現状のパターン把握） |
+
+## 3. 固有の観点
+
+| # | 観点 | 判定基準 |
+|---|------|---------|
+| 1 | サーバー権威 | 戦闘計算・報酬決定のAPIがすべてバックエンド側にあるか。フロントに計算を持たせていないか |
+| 2 | tick制の一貫性 | 60秒固定間隔の前提が `tech_tick.md`・`tech_polling.md`・API設計で揃っているか |
+| 3 | API網羅性 | `game_spec.md` の各機能に対応するエンドポイントが `tech_api.md` に存在するか |
+| 4 | データ構造の表現力 | `tech_data.md` のスキーマが `game_spec.md` の仕様を表現できているか |
+| 5 | 図とテキストの一致 | ER図のPK/FK・APIシーケンスのエンドポイント名が `tech_*.md` と一致しているか |
+| 6 | オフライン復帰 | 復帰時の一括計算が API・データ構造の両面で成立しているか |
+| 7 | 非機能の実現方式 | 非機能・運用要件の各項目が `tech_performance` / `tech_security` / `tech_operations` のいずれかに対応づいているか |
+
+## 4. Mermaid の検証
+
+設計図の構文は**目視しない**。スクラッチパッドに使い捨てスクリプトを書き、以下を機械的に検証する。
+
+| 検証項目 | 方法 |
+|---------|------|
+| コードフェンスの閉じ漏れ | ` ```mermaid ` と ` ``` ` の対応を数える |
+| `end` の対応 | `subgraph` / `loop` / `alt` / `opt` と `end` の数を照合 |
+| ER図のPK/FK整合 | エンティティ定義から属性を抽出し、リレーション両端の存在を確認 |
+| 相対リンク切れ | 索引の子ファイルリンクが実在するか |
+
+## 5. 完了基準
+
+一般スキルの完了基準に加え、以下を満たすこと。
+
+- 仕様書・設計図間に矛盾がない（`diagrams-review` の指摘解消）
+- 要件定義の非機能・運用要件がすべて、実現方式を定めたいずれかの成果物に対応づいている
+- `python scripts/check_doc_size.py` が exit 0
+
+## 6. 次工程
+
+| 次にやること | 手段 |
+|------------|------|
+| 設計整合ゲート | `diagrams-review` スキル |
+| 仕様確定ゲート | `doc-review` スキル |
+| 詳細設計へ | `detail-design` スキル |

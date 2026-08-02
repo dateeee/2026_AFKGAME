@@ -13,6 +13,23 @@
 | ファイル | 内容 |
 |---------|------|
 | `.claude/project/INDEX.md` | 初版作成: 一般スキルとプロジェクト固有プロファイルを分離。全7工程にスキルを用意し、旧 `.claude/commands/` の7件をスキルへ一元化 |
+| `.claude/project/_TEMPLATE.md` | 初版作成。工程プロファイルの記述スキーマを制定し、`.claude/skills/` + `.claude/references/` を無改造でコピー → `.claude/project/` のみ書き直す再利用手順を定義 |
+| `.claude/project/profile.md` | 初版作成。技術スタック・ディレクトリ・常用コマンド・アーキテクチャ不変条件6件・コスト規律を集約（全スキルが最初に読む共通プロファイル） |
+| `.claude/project/requirements.md` | 初版作成。要件定義の成果物・参照順・固有観点・`resolve-specs` の運用ルール・カテゴリ別参照先を定義 |
+| `.claude/project/basic-design.md` | 初版作成。基本設計の成果物・設計図6点と照合先・固有観点・Mermaid の機械検証項目を定義 |
+| `.claude/project/detail-design.md` | 初版作成。詳細設計の成果物・固有観点に加え、**分岐一覧（単体テスト観点）の記載形式と記載ルール**を定義 |
+| `.claude/project/test-list.md` | 初版作成。テストリスト作成の対象範囲・共通フィクスチャ6件・記述規約・TDD適用時期を定義 |
+| `.claude/project/dev.md` | 初版作成。製造の実装順（バックエンド4層 → フロント5層）・参照順・TDD適用範囲・固有観点を定義 |
+| `.claude/project/unit-test.md` | 初版作成。単体テストの前提・コマンド・固有の分岐観点10領域・除外規則・整備状況を定義 |
+| `.claude/project/integration-test.md` | 初版作成。結合テスト2レイヤーの配置・シナリオ導出元・Phase 1〜2 の必須シナリオ7件・固有観点を定義 |
+| `.claude/project/test-patterns.md` | 初版作成。`unit-test/references/patterns.md` から AFK GAME 固有の実例（乱数固定・時刻固定・エラーコード検証）を分離 |
+| `.claude/project/review-docs.md` | 初版作成。`doc-review` / `diagrams-review` / `fix-specs` のパラメータ・差分照合先・全量分担・観点・重要度基準を集約 |
+| `.claude/project/review-code.md` | 初版作成。`backend-review` / `frontend-review` の観点26件と重要度基準を集約 |
+| `.claude/project/review-fullstack.md` | 初版作成。`full-review` の観点13件・差分照合先・機械的検証4項目を分離（`review-code.md` の上限超過を §6.2 サブシステム分割で解消） |
+| `.claude/references/review-procedure.md` | 初版作成。レビュー5スキル共通の一般手順（コスト規律・モード判定・差分特定・全量分担・機械的検証・指摘の書き方・担当範囲の切り分け）をプロジェクト非依存で定義 |
+| `.claude/skills/requirements/SKILL.md` | 初版作成。工程1の一般手順。§5 に**工程内整合性チェック**（機械検証／読んで確認／矛盾時の対応）を新設 |
+| `.claude/skills/basic-design/SKILL.md` | 初版作成。工程2の一般手順。§5 に**工程内整合性チェック**（図↔テキスト↔上流要件の突き合わせ、非機能の対応漏れ検出）を新設 |
+| `.claude/skills/detail-design/SKILL.md` | 初版作成。工程3の一般手順。§5 に**工程内整合性チェック**と §5.3 **分岐一覧の自己検証**（処理フローとの1対1突き合わせ）を新設 |
 | `docs/changelog.md` | 新設。全32ファイルの変更履歴（116件）を集約し、各ファイルの変更履歴セクションを廃止（本文から計13,540字を削減） |
 | `docs/documentation_rules.md` | §5.1「変更履歴は1ファイルへ集約する」を新設。§2・§3 の除外に `changelog.md` を追加。§6 の「履歴は親に集約」を撤回。§7 に履歴セクション検出を追記 |
 | `scripts/check_doc_size.py` | 変更履歴セクションの復活を ERROR として検出する検査を追加。`docs/changelog.md` を除外対象に追加 |
