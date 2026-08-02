@@ -71,15 +71,15 @@ sequenceDiagram
     B->>API: GET /api/shop/lineup
     API->>DB: 常設ラインナップ取得
 
-    API-->>B: {<br/>  lineup: [<br/>    { itemId: "hp_potion", name: "HPポーション",<br/>      price: 25, healRatio: 0.3,<br/>      quantityOwned: 10, stackLimit: 99 },<br/>    ...<br/>  ]<br/>}
+    Note over API: 日替わり枠の鮮度判定 (遅延評価)
 
-    Note over API: 日替わりショップ (daily / dailySlotIndex /<br/>dailyResetAt) は Phase 2後半・未実装
-
-    opt 日替わりリセット (Phase 2後半・未実装)
-        API->>API: リセット時刻チェック<br/>(00:00 UTC超過なら更新)
+    opt 未生成 または now >= reset_at
         API->>API: 新ラインナップ生成<br/>(到達階層に応じたレアリティ)
-        API->>DB: ShopDailySlot x5 更新
+        API->>DB: ShopDailyState.reset_at 更新<br/>ShopDailySlot x5 差し替え
     end
+
+    API->>DB: ShopDailySlot取得
+    API-->>B: {<br/>  lineup: [<br/>    { itemId: "hp_potion", name: "HPポーション",<br/>      price: 25, healRatio: 0.3,<br/>      quantityOwned: 10, stackLimit: 99 },<br/>    ...<br/>  ],<br/>  daily: [ { slotIndex, baseId, rarity, level,<br/>    statAtk, price, soldOut }, ... ],<br/>  dailyResetAt: "2026-08-03T00:00:00Z"<br/>}
 
     Note over B: === 常設商品の購入 ===
 
@@ -89,9 +89,10 @@ sequenceDiagram
     API->>DB: hp_potion += 5
     API-->>B: { status: "ok", gold: 1375, itemId: "hp_potion", quantity: 5 }
 
-    Note over B: === 日替わり商品の購入 (Phase 2後半・未実装) ===
+    Note over B: === 日替わり商品の購入 ===
 
     B->>API: POST /api/shop/buy<br/>{ dailySlotIndex: 0 }
+    Note over API: 購入時も鮮度判定を行い、<br/>再生成後の枠に対して処理する
 
     alt 売り切れ
         API-->>B: 400 { code: "SHOP_ITEM_SOLD_OUT" }

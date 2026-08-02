@@ -71,6 +71,7 @@
 │   │   │   ├── character.py
 │   │   │   ├── item.py
 │   │   │   ├── equipment.py       # 装備モデル（Phase 2〜）
+│   │   │   ├── shop.py            # ShopDailyState, ShopDailySlot（Phase 2〜）
 │   │   │   └── user.py            # User, RefreshToken, EmailVerificationToken（Phase 2〜）
 │   │   ├── schemas/               # Pydantic スキーマ（API I/O）
 │   │   │   ├── __init__.py        # CamelModel ベースクラス
@@ -92,6 +93,7 @@
 │   │   ├── services/              # ビジネスロジック
 │   │   │   ├── battle_service.py  # 戦闘計算・エンカウント処理（オフライン報酬含む）
 │   │   │   ├── equipment_service.py # 装備ロジック（Phase 2〜）
+│   │   │   ├── shop_daily_service.py # 日替わりショップ（Phase 2〜）
 │   │   │   ├── auth_service.py    # 認証ロジック（Phase 2〜）
 │   │   │   ├── game_state_builder.py # ゲーム状態レスポンス構築
 │   │   │   ├── base_service.py    # 施設建設・レベルアップ（Phase 4〜）
@@ -105,8 +107,10 @@
 │   │   └── db/
 │   │       └── database.py        # DB接続設定
 │   ├── requirements.txt
+│   ├── alembic.ini                # 接続先は env.py が config.DATABASE_URL から設定
 │   └── alembic/                   # DBマイグレーション
-│       └── ...
+│       ├── env.py
+│       └── versions/              # 1リリース = 1リビジョン
 │
 └── README.md
 ```

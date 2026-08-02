@@ -89,8 +89,15 @@ RARITY_BASE_RATES = [
 # フロア補正係数: adjusted = base × (1 + FLOOR_RARITY_BONUS × floor)
 FLOOR_RARITY_BONUS = 0.05
 
+# 基礎値の式 (master/equipment.md §6.1): floor(装備レベル × 係数 + 定数)
+EQUIPMENT_BASE_VALUE_COEF = 1.5
+EQUIPMENT_BASE_VALUE_OFFSET = 2
+
 # ステータス係数 (base_value に掛ける)
 STAT_MODIFIERS = {"atk": 1.0, "def": 0.7, "hp": 5.0, "spd": 0.3}
+
+# 装備の所持枠上限 (economy.md §2.9「倉庫」。倉庫未建設=LV0 の初期値)
+EQUIPMENT_STORAGE_LIMIT = 50
 
 # ドロップ確率
 NORMAL_ENEMY_DROP_RATE = (0.10, 0.20)
@@ -102,3 +109,33 @@ LIFESTEAL_RANGE = (0.03, 0.08)
 
 # レアリティ順序 (オートセル比較用)
 RARITY_ORDER = ["common", "uncommon", "rare", "epic", "legendary"]
+
+# ── 日替わりショップ (Phase 2) ──
+# 仕様: tech_shop.md、数値の正: economy.md §2.5
+
+# ショップ性能係数。「ドロップ品の約70%の性能」を数値化したもの
+SHOP_STAT_FACTOR = 0.7
+
+# 枠番号 → カテゴリ (tech_shop.md §2.2)。武器2・防具2・アクセサリー1
+SHOP_SLOT_CATEGORIES = ["weapon", "weapon", "armor", "armor", "accessory"]
+
+# カテゴリ → 候補スロット (tech_shop.md §2.2)
+SHOP_CATEGORY_SLOTS = {
+    "weapon": ["weapon"],
+    "armor": ["shield", "head", "body", "arms", "waist", "legs"],
+    "accessory": ["ears", "ring"],
+}
+
+# 解放帯 (最高到達階層の下限) → レアリティ出現率 (仮置き。balance_backlog.md)
+SHOP_RARITY_RATES = {
+    0:  {"common": 1.00},
+    5:  {"common": 0.70, "uncommon": 0.30},
+    15: {"common": 0.55, "uncommon": 0.30, "rare": 0.15},
+}
+
+# 価格テーブル: レアリティ → カテゴリ → ゴールド (レベル・到達階層には依存しない)
+SHOP_PRICES = {
+    "common":   {"weapon": 500,  "armor": 400,  "accessory": 300},
+    "uncommon": {"weapon": 1500, "armor": 1200, "accessory": 1000},
+    "rare":     {"weapon": 4000, "armor": 3200, "accessory": 2500},
+}

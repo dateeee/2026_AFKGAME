@@ -151,6 +151,23 @@ export interface TickResponse {
   equipmentAutoSold: Array<{ name: string; rarity: string; gold: number }>
 }
 
+/** 日替わりショップの1枠 */
+export interface ShopDailyItem {
+  slotIndex: number
+  category: 'weapon' | 'armor' | 'accessory'
+  baseId: string
+  name: string
+  slot: EquipmentSlot
+  rarity: Rarity
+  level: number
+  statAtk: number | null
+  statDef: number | null
+  statHp: number | null
+  statSpd: number | null
+  price: number
+  soldOut: boolean
+}
+
 /** ユーザー情報 */
 export interface UserInfo {
   id: string

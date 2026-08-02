@@ -6,12 +6,15 @@ from dataclasses import dataclass
 
 from app.config import (
     BOSS_ENEMY_DROP_RATE,
+    EQUIPMENT_BASE_VALUE_COEF,
+    EQUIPMENT_BASE_VALUE_OFFSET,
     FLOOR_RARITY_BONUS,
     LIFESTEAL_CHANCE,
     LIFESTEAL_RANGE,
     NORMAL_ENEMY_DROP_RATE,
     RARITY_BASE_RATES,
     RARITY_TIERS,
+    SHOP_CATEGORY_SLOTS,
     STAT_MODIFIERS,
 )
 
@@ -59,8 +62,25 @@ for _e in ALL_EQUIPMENT:
 EQUIPMENT_SLOTS = ["weapon", "shield", "head", "body", "arms", "waist", "legs", "ears", "ring"]
 
 
+# カテゴリ → ベース装備一覧（ベースID昇順）
+_EQUIPMENT_BY_CATEGORY: dict[str, list[EquipmentBase]] = {
+    category: sorted((e for e in ALL_EQUIPMENT if e.slot in slots), key=lambda e: e.id)
+    for category, slots in SHOP_CATEGORY_SLOTS.items()
+}
+
+
 def get_equipment_base(base_id: str) -> EquipmentBase:
     return _EQUIPMENT_BY_ID[base_id]
+
+
+def get_bases_by_category(category: str) -> list[EquipmentBase]:
+    """カテゴリに属するベース装備をID昇順で返す（master/equipment.md §6.0）"""
+    return _EQUIPMENT_BY_CATEGORY[category]
+
+
+def calc_base_value(level: int) -> int:
+    """装備レベルから基礎値を求める（master/equipment.md §6.1）"""
+    return math.floor(level * EQUIPMENT_BASE_VALUE_COEF + EQUIPMENT_BASE_VALUE_OFFSET)
 
 
 def _roll_drop(is_boss: bool) -> bool:
@@ -88,7 +108,7 @@ def _roll_stats(rarity: str, enemy_level: int) -> dict:
     else:
         chosen = random.sample(stat_keys, stat_count)
 
-    base_value = math.floor(enemy_level * 1.5 + 2)
+    base_value = calc_base_value(enemy_level)
     multiplier = tier["multiplier"]
 
     result = {}

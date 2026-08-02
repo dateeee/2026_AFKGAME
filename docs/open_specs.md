@@ -13,7 +13,6 @@
 
 - [ ] デプロイ先の選定（Vercel + Render / Railway / VPS など）
 - [ ] アセット調達方針（キャラ絵・BGM・SE: 自作 / フリー素材 / AI生成 / 外注）→ 必要になった時点で決定
-- [ ] Alembic のセットアップ — `requirements.txt` に記載済みだが未初期化。マイグレーション運用（tech_operations §12.4）が機能しないため、Phase 2 のテスト工程までに整備
 - [ ] 退会（アカウント削除）機能 — 要件は non_functional_requirements §5 で定義済み、実装・API未定義。削除処理は tech_operations §12.6 のゲスト削除ジョブと共通化する想定
 - [ ] ゲーム内お知らせ機能 — 未実装。告知手段がないため下方修正を伴うバランス改定・計画メンテナンス告知（operation_requirements §3）が実施できない
 - [ ] 定期ジョブの実行基盤 — cron 相当をデプロイ先が提供するか未定（tech_operations §12.6）。デプロイ先選定と併せて決定

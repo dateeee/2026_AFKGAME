@@ -6,7 +6,7 @@
  * - 指数バックオフリトライ（最大3回）
  */
 
-import type { Equipment, GameState, Settings, TickResponse, TowerInfo } from '@/types/game'
+import type { Equipment, GameState, Settings, ShopDailyItem, TickResponse, TowerInfo } from '@/types/game'
 import { refreshToken as refreshTokenApi } from '@/api/auth'
 
 const USE_API = import.meta.env.VITE_USE_API !== 'false'
@@ -173,23 +173,35 @@ export async function putRetreatConditions(hpThreshold: number) {
   })
 }
 
-/** ショップ商品一覧 */
+/** ショップ商品一覧（常設 + 日替わり） */
 export async function getShopLineup() {
-  return fetchWithRetry<{ lineup: Array<{
-    itemId: string
-    name: string
-    price: number
-    healRatio: number
-    quantityOwned: number
-    stackLimit: number
-  }> }>('/api/shop/lineup')
+  return fetchWithRetry<{
+    lineup: Array<{
+      itemId: string
+      name: string
+      price: number
+      healRatio: number
+      quantityOwned: number
+      stackLimit: number
+    }>
+    daily: ShopDailyItem[]
+    dailyResetAt: string
+  }>('/api/shop/lineup')
 }
 
-/** ショップ購入 */
+/** ショップ購入（常設商品） */
 export async function postShopBuy(itemId: string, quantity: number) {
   return fetchWithRetry<{ status: string; gold: number; itemId: string; quantity: number }>('/api/shop/buy', {
     method: 'POST',
     body: JSON.stringify({ itemId, quantity }),
+  })
+}
+
+/** ショップ購入（日替わり装備） */
+export async function postShopBuyDaily(dailySlotIndex: number) {
+  return fetchWithRetry<{ status: string; gold: number; equipment: Equipment }>('/api/shop/buy', {
+    method: 'POST',
+    body: JSON.stringify({ dailySlotIndex }),
   })
 }
 

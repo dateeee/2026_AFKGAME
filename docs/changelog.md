@@ -12,6 +12,10 @@
 
 | ファイル | 内容 |
 |---------|------|
+| `docs/open_specs.md` | Alembic のセットアップが完了したため項目を削除（`backend/alembic.ini` + `backend/alembic/`。ベースライン `3685584aaa5b` と日替わりショップ `36e28dd936bc` の2リビジョン） |
+| `docs/tech/tech_operations.md` | §12.4 のツール欄を「未セットアップ」から実配置（`alembic.ini` / `env.py` が `app.config.DATABASE_URL` を参照）へ更新 |
+| `docs/tech/tech_structure.md` | Phase 2 日替わりショップの製造に追従。`models/shop.py`・`services/shop_daily_service.py`・`alembic.ini` / `alembic/` の内訳を追加 |
+| `diagrams/api_sequence/gameplay.md` | §5 ショップ購入フローの「Phase 2後半・未実装」注記を解消。`GET /api/shop/lineup` の応答に `daily` / `dailyResetAt` を、購入側に鮮度判定の注記を追加 |
 | `docs/tech/tech_shop.md` | 仕様レビュー ISSUE-002/004/005/006/007/011 を反映。§2.5・§2.6 を `## 3. ステータスと価格` へ昇格し以降の節番号を繰り下げ（H2 2,000字超過を解消）。基礎値の式を `master/equipment.md §6.1` へのリンクに置換。**購入時の所持枠上限チェック（`400 SHOP_INVENTORY_FULL`）を追加**。分岐一覧を42件（生成23・購入19）へ拡充（コモンが確定する正常経路、付与数の範囲が単一値のケース、所持枠の真偽2行） |
 | `docs/data/master/equipment.md` | ISSUE-001/003。**§6.0 ベース装備一覧（15種）を新設**（ID・名前・スロット・持ち手。従来 `backend/app/master_data/equipment.py` にしか定義が無く、不変条件6「データ駆動」に反していた）。基礎値式・参考値表・売却価格表の変数名を「敵LV」→「装備レベル」へ統一 |
 | `docs/design/systems/equipment.md` | ISSUE-004。基礎値式・ステータス補正・売却価格式の再掲を削除し `master/equipment.md §6.0 / §6.1 / §6.3` へのリンクに置換（正を1ファイルに統一） |

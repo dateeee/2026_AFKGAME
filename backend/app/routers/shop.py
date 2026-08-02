@@ -11,8 +11,17 @@ from app.db.database import get_db
 from app.dependencies import get_current_player
 from app.models.player import Player
 from app.models.item import InventoryItem
+from app.master_data.equipment import get_equipment_base
 from app.master_data.items import ITEMS, get_item
-from app.schemas.shop import BuyRequest, ShopBuyResponse, ShopItemResponse, ShopLineupResponse
+from app.schemas.equipment import EquipmentResponse
+from app.schemas.shop import (
+    BuyRequest,
+    ShopBuyResponse,
+    ShopDailyItemResponse,
+    ShopItemResponse,
+    ShopLineupResponse,
+)
+from app.services import shop_daily_service
 
 router = APIRouter(prefix="/api/shop", tags=["shop"])
 
@@ -38,7 +47,32 @@ def get_lineup(
             quantity_owned=owned,
             stack_limit=item_data.stack_limit,
         ))
-    return ShopLineupResponse(lineup=lineup)
+
+    state = shop_daily_service.ensure_fresh_lineup(db, player)
+    daily = []
+    for slot in shop_daily_service.get_slots(db, state):
+        base = get_equipment_base(slot.base_id)
+        daily.append(ShopDailyItemResponse(
+            slot_index=slot.slot_index,
+            category=slot.category,
+            base_id=slot.base_id,
+            name=base.name,
+            slot=base.slot,
+            rarity=slot.rarity,
+            level=slot.level,
+            stat_atk=slot.stat_atk,
+            stat_def=slot.stat_def,
+            stat_hp=slot.stat_hp,
+            stat_spd=slot.stat_spd,
+            price=slot.price,
+            sold_out=slot.sold,
+        ))
+
+    return ShopLineupResponse(
+        lineup=lineup,
+        daily=daily,
+        daily_reset_at=shop_daily_service.format_reset_at(state.reset_at),
+    )
 
 
 @router.post("/buy", response_model=ShopBuyResponse)
@@ -47,6 +81,14 @@ def buy_item(
     player: Player = Depends(get_current_player),
     db: Session = Depends(get_db),
 ) -> ShopBuyResponse:
+    if req.daily_slot_index is not None:
+        equipment = shop_daily_service.buy_daily(db, player, req.daily_slot_index)
+        return ShopBuyResponse(
+            status="ok",
+            gold=player.gold,
+            equipment=EquipmentResponse.model_validate(equipment),
+        )
+
     if req.item_id not in ITEMS:
         raise HTTPException(status_code=404, detail="Item not found")
 
