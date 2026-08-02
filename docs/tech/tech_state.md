@@ -24,7 +24,7 @@
 | 塔の対 | `currentTowerId` / `currentFloor` / `targetFloor` は同時にnull、または同時に非null |
 | 敵の対 | `currentEnemyId` と `currentEnemyHp` は同時にnull、または同時に非null |
 | 敵の従属 | `currentEnemyId ≠ null` ならば `currentTowerId ≠ null` |
-| 階の範囲 | `1 ≤ currentFloor` かつ `targetFloor ≤ 塔の総階数` |
+| 階の範囲 | `1 ≤ currentFloor` かつ `targetFloor ≤ min(塔別 highestFloor + 1, 塔の総階数)`（[tech_api.md](tech_api.md)「操作系」が正。深淵の塔は総階数を持たないため `highestFloor + 1` のみ） |
 | 排他 | `bossRush.active = true` ならば `currentTowerId = null` |
 | HP | 全キャラの `hp` は `0 ≤ hp ≤ effectiveMaxHp` |
 
@@ -117,7 +117,7 @@ stateDiagram-v2
 | 1 | `IDLE` で `tower/retire` | `400` |
 | 2 | `EXPLORING` で `tower/select` | `400 TOWER_ALREADY_IN` |
 | 3 | 未解放の塔を選択 | `403 TOWER_NOT_UNLOCKED` |
-| 4 | `targetFloor` が総階数超過 | `400 TOWER_INVALID_FLOOR` |
+| 4 | `targetFloor` が上限 `min(塔別 highestFloor + 1, 総階数)` 超過 | `400 TOWER_INVALID_FLOOR` |
 | 5 | `EXPLORING` で `party/edit` | `400 PARTY_LOCKED_IN_TOWER` |
 | 6 | 全滅（`runGold=0` のとき） | ゴールド減算0・下限を割らない |
 | 7 | 全滅（装備中の装備をrun中に取得） | 装備解除のうえ削除 |
@@ -126,3 +126,5 @@ stateDiagram-v2
 | 10 | `auto_repeat` で目標階クリア | `currentFloor=1`・探索セッション継続 |
 | 11 | `stop_on_clear` で目標階クリア | `IDLE`・探索セッション確定 |
 | 12 | 不変条件違反データ | `500 INTERNAL_UNEXPECTED_ERROR` + ERRORログ |
+
+- #4 は上限が `highestFloor + 1` 側で決まる場合（総階数以内だが未到達の階を指定）と `総階数` 側で決まる場合の**両方**を試験する

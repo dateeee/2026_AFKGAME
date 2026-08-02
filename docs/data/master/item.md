@@ -70,40 +70,18 @@ Phase 1ではショップ購入のみ。敵ドロップは Phase 2以降。
 ### 4.1 常設商品
 ポーション（セクション3.1参照）。在庫無制限。
 
-### 4.2 日替わり候補プール
+### 4.2 日替わり装備（Phase 2〜）
 
-日替わりショップの抽選対象となる装備一覧。ショップの仕様は [game_spec.md 2.5](../../design/systems/economy.md#25-ショップphase-1) を参照。
+**本節では商品を個別に定義しない。** 品揃えは毎日サーバーが生成するため、固定の商品表を持たない。
 
-> **ショップ装備の設計方針**は [systems/economy.md §2.5](../../design/systems/economy.md)「ショップ装備の位置づけ」が正。本節の数値はその方針に従って算出したもの。
+| 対象 | 正 |
+|------|-----|
+| 抽選対象（ベース装備15種） | [master/equipment.md §6.0](equipment.md) |
+| 生成手順（枠構成・ベース抽選・レアリティ抽選） | [tech_shop.md §2](../../tech/tech_shop.md) |
+| ステータス・価格の算出 | [tech_shop.md §3.1](../../tech/tech_shop.md)（基礎値は [master/equipment.md §6.1](equipment.md)） |
+| 設計方針（ショップ装備の位置づけ） | [systems/economy.md §2.5](../../design/systems/economy.md) |
 
-#### 武器
-| ID | 名前 | レアリティ | 基礎ATK | 価格 |
-|----|------|-----------|---------|------|
-| `wooden_sword` | 木の剣 | コモン | +3 | 500G |
-| `iron_sword` | 鉄の剣 | コモン | +5 | 500G |
-| `steel_sword` | 鋼の剣 | アンコモン | +8 | 1,500G |
-| `silver_sword` | 銀の剣 | アンコモン | +11 | 1,500G |
-| `magic_blade` | 魔法の刃 | レア | +15 | 4,000G |
-
-#### 防具
-| ID | 名前 | レアリティ | スロット | 効果 | 価格 |
-|----|------|-----------|---------|------|------|
-| `leather_armor` | 革の鎧 | コモン | 胴体 | DEF+2 | 400G |
-| `chain_mail` | チェインメイル | コモン | 胴体 | DEF+4 | 400G |
-| `iron_armor` | 鉄の鎧 | アンコモン | 胴体 | DEF+6 | 1,200G |
-| `steel_armor` | 鋼の鎧 | アンコモン | 胴体 | DEF+8 | 1,200G |
-| `speed_boots` | 速さのブーツ | アンコモン | 足 | SPD+3 | 1,200G |
-| `mithril_armor` | ミスリルの鎧 | レア | 胴体 | DEF+10 | 3,200G |
-
-#### アクセサリー
-| ID | 名前 | レアリティ | スロット | 効果 | 価格 |
-|----|------|-----------|---------|------|------|
-| `power_ring` | 力の指輪 | コモン | 指輪 | ATK+2 | 300G |
-| `guard_ring` | 守りの指輪 | コモン | 指輪 | DEF+2 | 300G |
-| `life_pendant` | 命のペンダント | アンコモン | 耳 | HP+20 | 1,000G |
-| `hero_amulet` | 勇者のお守り | レア | 指輪 | ATK+3, DEF+3 | 2,500G |
-
-> スロットとカテゴリの対応は [systems/equipment.md §2.4](../../design/systems/equipment.md) が正。`speed_boots` は「足」スロットのため**防具**カテゴリで扱い、価格もアンコモン防具の 1,200G を適用する。
+- スロットとカテゴリの対応は [systems/equipment.md §2.4](../../design/systems/equipment.md) が正
 
 ---
 

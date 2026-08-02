@@ -38,7 +38,7 @@
 
 ## 8. 今後の検討事項
 
-- [ ] デプロイ先の選定（Vercel + Render / Railway / VPS など）→ 実装完了後に決定
+- [x] デプロイ先の選定 → **AWS**（EC2 1台 + S3/CloudFront）。[tech_operations.md](tech_operations.md) §12.1 に反映済み
 - [x] ブラウザ対応範囲 → [tech_structure.md](tech_structure.md) §3 レスポンシブ設計に反映済み
 - [x] アクセシビリティ対応 → [tech_architecture.md](tech_architecture.md) アクセシビリティ対応方針に反映済み
 - [x] パフォーマンス目標（ログ保持件数の上限など）→ 目標値は [non_functional_requirements.md](../design/non_functional_requirements.md) §1〜§2、実現方式は [tech_performance.md](tech_performance.md) に反映済み

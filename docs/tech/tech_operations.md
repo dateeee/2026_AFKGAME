@@ -25,7 +25,7 @@
 | API | EC2 1台。Nginx をリバースプロキシに FastAPI（uvicorn）を常駐させる |
 | DB | 同一 EC2 の EBS 上に配置。SQLite → PostgreSQL（§12.4 の移行判断ライン） |
 | 定期ジョブ | 同一 EC2 の OS cron（§12.6） |
-| バックアップ | EBS の日次スナップショット。RPO 24時間を満たす（[non_functional_requirements.md](../design/non_functional_requirements.md) §3） |
+| バックアップ | EBS の日次スナップショットを取得する。方式・頻度・保持期間・保管先は **§12.5 が正** |
 
 - フロントとバックエンドは**別オリジン**（CloudFront / EC2）になる。許可オリジンは §12.2 の `CORS_ORIGINS` が正
 - マネージドコンテナ（App Runner・ECS Fargate）は採用しない。ファイルシステムが揮発し、SQLite と OS cron を継続できないため
@@ -91,12 +91,14 @@
 
 | 項目 | 仕様 |
 |------|------|
-| 頻度 | 日次フルバックアップ（`production` のみ） |
-| 方式 | SQLite: `VACUUM INTO` でのファイルコピー（稼働中でも整合が取れる）／PostgreSQL: `pg_dump` |
-| 保持期間 | 14日 |
-| 保管先 | アプリ稼働ノードとは別のストレージ |
+| 頻度 | 日次（`production` のみ）。§12.6 と同じ OS cron で実行する |
+| 方式 | **論理バックアップ**（SQLite: `VACUUM INTO` でのファイルコピー／PostgreSQL: `pg_dump`）と、**EBS 日次スナップショット**（ボリューム全体）を併用する |
+| 保持期間 | 14日（論理バックアップ・スナップショットとも） |
+| 保管先 | アプリ稼働ノードとは別のストレージ（論理バックアップは S3、スナップショットは EBS の保管領域） |
 | 検証 | 月1回、バックアップからのリストアを実施して復元可能性を確認する |
 | RPO / RTO | [non_functional_requirements.md](../design/non_functional_requirements.md) §3 に従う |
+
+- 両方式を持つのは、稼働中ボリュームのスナップショットが書き込み途中の状態を含みうるのに対し、論理バックアップはDBの整合を保証できるため。**復旧は論理バックアップを第一手段**とし、ボリューム障害時にスナップショットから復元する
 
 **復元時の注意**: 復元すると `lastTickAt` が過去に巻き戻る。次回のtick処理で「復元時点〜現在」が未処理tickとして再計算されるため、**報酬の二重付与にはならず、消失もしない**（[tech_tick.md](tech_tick.md) §1）。ただし巻き戻し幅が `MAX_OFFLINE_HOURS`（24時間）を超える場合、超過分は切り捨てられる。
 

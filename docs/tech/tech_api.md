@@ -132,11 +132,11 @@
 
 ## イベントダンジョン（Phase 5〜）
 
-機能仕様は [systems/endgame.md §2.13](../design/systems/endgame.md)（常設3種 × 固定難易度3段階）。進行は通常の塔と同じ階層制のため、**`/api/tower/*` に難易度パラメータを足して再利用する方針**とする。エンドポイントの確定と本節への追記は Phase 5 の基本設計で行う。
+機能仕様は [systems/endgame.md §2.13](../design/systems/endgame.md)（常設3種 × 固定難易度3段階）。進行は通常の塔と同じ階層制のため、**`/api/tower/*` に難易度パラメータを足して再利用する方針**とする。エンドポイントと、難易度別の到達記録を `towersCleared`（[tech_data.md](tech_data.md)）へ保持するキー体系の確定、および本節への追記は Phase 5 の基本設計で行う。
 
 ## お知らせ（Phase 3〜）
 
-要件は [operation_requirements.md](../design/operation_requirements.md) §3.1（マスターデータ配信・既読はクライアント保持）。エンドポイントの定義は Phase 3 の基本設計で行う。
+要件は [operation_requirements.md](../design/operation_requirements.md) §3.1（マスターデータ配信・既読はクライアント保持）。エンドポイントの定義と、既読状態のクライアント保持先の確定は Phase 3 の基本設計で行う（マスターの項目定義は Phase 3 の詳細設計）。
 
 ## 転生（Phase 5〜）
 | メソッド | パス | 説明 |

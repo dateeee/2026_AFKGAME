@@ -12,10 +12,22 @@
 
 | ファイル | 内容 |
 |---------|------|
+| `docs/tech/tech_spec.md` | レビュー指摘ISSUE-001。§8「今後の検討事項」のデプロイ先の選定を `[x]` へ変更し、AWS（EC2 1台 + S3/CloudFront）確定と `tech_operations.md` §12.1 への反映を明記（Vercel/Render/Railway/VPS の候補列挙を削除） |
+| `docs/data/master/item.md` | レビュー指摘ISSUE-002。§4.2 の固定商品表12件（`wooden_sword`〜`hero_amulet`）を**削除**。ベース装備一覧に存在しないIDで、`tech_shop.md` の生成方式とも矛盾していたため。節名を「日替わり装備（Phase 2〜）」とし、抽選対象・生成手順・算出式・設計方針の正へのリンク表に置換 |
+| `docs/data/master_data.md` | レビュー指摘ISSUE-002。索引から `master/item.md` の内容欄「日替わり候補プール」を削除（正は `master/equipment.md` §6.0） |
+| `docs/tech/tech_operations.md` | レビュー指摘ISSUE-003。§12.1 のバックアップ行を「方式・頻度・保持期間・保管先は §12.5 が正」に変更し、§12.5 の方式を**論理バックアップ（`VACUUM INTO`／`pg_dump`）と EBS 日次スナップショットの併用**として確定。復旧は論理バックアップを第一手段とする根拠と、実行を §12.6 と同じ OS cron で行うことを追記 |
+| `docs/tech/tech_state.md` | レビュー指摘ISSUE-004。§1.1 不変条件の階の範囲と §5 分岐#4 を `min(塔別 highestFloor + 1, 総階数)` へ修正（従来は総階数のみで、到達済み最高階+1 超過の 400 分岐が欠落していた）。#4 は上限がどちら側で決まる場合も試験する旨を追記 |
+| `docs/design/systems/endgame.md` | レビュー指摘ISSUE-005。§2.13 に、難易度別の到達記録を `towersCleared` へ保持するキー体系は Phase 5 の基本設計で確定する旨を追記 |
+| `docs/tech/tech_api.md` | レビュー指摘ISSUE-005・006。イベントダンジョン節に難易度別到達記録のキー体系の確定担当を、お知らせ節に既読状態のクライアント保持先の確定担当（基本設計）とマスター項目定義の担当（詳細設計）を追記 |
+| `docs/design/operation_requirements.md` | レビュー指摘ISSUE-006・010。§3.1 にお知らせマスターの項目定義・掲示件数上限は Phase 3 詳細設計、既読保持先は Phase 3 基本設計で確定する旨を追記。ゲスト削除の告知不可の説明から実数値「90日」を外し `tech_auth.md` を正として参照 |
+| `docs/design/systems/ui.md` | レビュー指摘ISSUE-007。「ナビゲーション構造」に**ヘッダ（全画面共通）**を新設（タイトル／お知らせ＝Phase 3／設定、保存操作は置かない）。参照のみで未定義だった「全画面共通のヘッダ」を解消し、Phase 1 レイアウト図から `[セーブ]` を削除 |
+| `docs/design/product_requirements.md` | レビュー指摘ISSUE-008。§6（アセット調達方針）末尾に残っていた旧§6「未確定事項」の1行を §3 想定プレイサイクルの直下へ移動 |
+| `docs/documentation_rules.md` | レビュー指摘ISSUE-009。§5.1 の移行前後比較表から、削除済みの `open_specs.md` 行を削除 |
+| `docs/reviews/review_2026-08-02_162707.md` | Phase 2〜5 要件定義の仕様確定ゲート結果（差分モード・指摘10件: 高4/中3/低3） |
 | `docs/open_specs.md` | **ファイルごと削除**。Phase 2〜5 の未確定仕様8件をすべて確定し、Phase 1〜5 の未確定仕様がゼロになったため（本書の方針「全項目が解消されたらファイル自体を削除」に準拠） |
 | `docs/tech/tech_operations.md` | 要件定義でデプロイ先を確定。§12.1 に**本番構成（AWS）**を新設（フロント=S3+CloudFront／API=EC2 1台に Nginx+FastAPI／DB=同EC2のEBS上／定期ジョブ=OS cron／バックアップ=EBS日次スナップショット）。マネージドコンテナ（App Runner・ECS Fargate）を不採用とする理由（FSが揮発し SQLite と OS cron を継続できない）を明記。§12.6 の「デプロイ先が未定」注記を解消し、退会削除処理を Phase 2 実装として確定 |
 | `docs/design/non_functional_requirements.md` | 退会（アカウント削除）を確定。**§5.1 を新設**し Phase 2 実装・設定画面からの導線・再認証による誤操作防止・全ゲームデータの即時物理削除（猶予期間なし）を定義。「規約類」行の宙に浮いた `open_specs.md` 参照を設定画面への掲示に置換 |
-| `docs/design/operation_requirements.md` | ゲーム内お知らせを確定。**§3.1 を新設**し Phase 3 実装・マスターデータ配信（DBテーブル/管理画面なし）・ヘッダからの参照と未読件数・既読はクライアント保持・掲示は最新20件（仮置き）を定義。§1 の「プレイテスト後に調整」の参照先を `balance_backlog.md` へ修正 |
+| `docs/design/operation_requirements.md` | ゲーム内お知らせを確定。**§3.1 を新設**し Phase 3 実装・マスターデータ配信（DBテーブル/管理画面なし）・ヘッダからの参照と未読件数・既読はクライアント保持・掲示件数に上限を設けることを定義。§1 の「プレイテスト後に調整」の参照先を `balance_backlog.md` へ修正 |
 | `docs/design/product_requirements.md` | §6「未確定事項」を**アセット調達方針**へ置換。BGM/SE=商用可のフリー素材、キャラ絵/背景=AI生成、外注・有償素材は不使用。ライセンス一覧のリポジトリ常設と設定画面クレジット掲示を定義 |
 | `docs/design/systems/endgame.md` | イベントダンジョン（§2.13）に**進行モデル**と**敵プールの調達**を追加。塔と同じ階層制で1ダンジョン10階・10階ボス撃破でクリア・周回自由、難易度ごとに到達最高階を個別管理。雑魚は塔1〜10の既存敵を難易度別の固定ステータスで流用し、10階ボスのみイベント専用9体（3種×3難易度）を新規定義 |
 | `docs/design/systems/ui.md` | 設定画面に**アカウント欄（Phase 2〜）**を追加（問い合わせ先・規約類・クレジット・退会。退会は最下部へ視覚的に分離）。**お知らせ（Phase 3〜）**を追加（ヘッダアイコン＋未読バッジ、モーダルで操作を強制しない） |
