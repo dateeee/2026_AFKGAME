@@ -12,6 +12,12 @@
 
 | ファイル | 内容 |
 |---------|------|
+| `docs/reviews/**` | **ディレクトリ構成を変更**。フラットな21ファイルを `docs/reviews/{スキル名}/YYYY-MM-DD_HHMMSS.md` へ再配置し（`doc-review` 14件 / `diagrams-review` 5件 / `full-review` 2件）、ファイル名から種別プレフィックスを削除。直下10件を超える `doc-review` の古い4件を `doc-review/archive/` へ退避（削除はしていない） |
+| `docs/documentation_rules.md` | **§9「レビュー結果アーカイブの運用」を新設**。1スキル=1ディレクトリ・直下は最新10件・超過分は `archive/` へ退避（削除しない）・差分モードで読むのは直下の最新1件のみ、を規定。§9.2 にディレクトリ分割だけでは件数の増加が止まらない理由を明記。§2・§3 の除外行から §9 を参照 |
+| `scripts/rotate_reviews.py` | **新規**。レビュー結果のローテーション（引数なし=退避対象の確認、`--apply`=`archive/` へ移動、`--list`=全件と文字数）。移動は `git mv` で行い履歴を維持する |
+| `README.md` | コマンド表に `rotate_reviews.py` を追加。ディレクトリ構成の `reviews/` 説明を新構成へ更新 |
+| `.claude/references/review-format.md`・`review-procedure.md` | 保存先を `docs/reviews/{スキル名}/YYYY-MM-DD_HHMMSS.md` へ変更。モード判定は保存先ディレクトリ直下の最新1件（`archive/` を見ない）と明記し、出力手順にローテーション実行を追加 |
+| `.claude/project/review-docs.md`・`review-code.md`・`review-fullstack.md`・`_TEMPLATE.md`・`profile.md` | §0 のパラメータ表を「prefix」から「保存先ディレクトリ」へ置換。`fix-specs` の対象を `docs/reviews/doc-review/` 直下の最新へ変更 |
 | `diagrams/system_architecture.md` | 設計図レビュー指摘ISSUE-110。7,967字で追記余地が無かったため、索引 + `system_architecture/`（`application.md` / `tick_flow.md` / `authority.md` / `deployment.md`）へ分割。他5図と同じハブ&スポーク構成に統一 |
 | `diagrams/system_architecture/deployment.md` | 設計図レビュー指摘ISSUE-110。**新規**。本番構成（AWS）の図を追加。CloudFront/S3 によるSPA配信、EC2（Nginx → uvicorn → EBS上のDB、OS cron）、バックアップ経路、別オリジンである旨を図示（数値・設定値は `tech_operations.md` §12 が正） |
 | `diagrams/system_architecture/application.md` | 設計図レビュー指摘ISSUE-101・ISSUE-104。Models に `shop.py`（ShopDailyState / ShopDailySlot）を追加し `item.py` から ShopDailyState を削除。Services を実装配置に合わせ、`shop_service.py`→`shop_daily_service.py`、実在しない `tower_service.py` を削除（塔・エンカウントは `battle_service.py`）、`game_state_builder.py` を追加。DB は「SQLite（local / production 初期）→ §12.4 の判断ラインで PostgreSQL」へ修正（Phase での切替という誤りを解消） |
@@ -25,7 +31,7 @@
 | `diagrams/class_diagram.md` | 設計図レビュー指摘ISSUE-112。索引の item 行から列挙型 `EquipSlot`・`EquipCategory` を外して主要クラスのみに統一し、列挙型は各ファイル参照である旨を明記 |
 | `README.md` / `CLAUDE.md` / `.claude/project/basic-design.md` | 設計図レビュー指摘ISSUE-110。システム構成図・画面遷移図の索引化に伴い、設計図の索引・図数表記（4図→6図）・検証対象を更新 |
 | `scripts/check_doc_size.py` | `.claude/worktrees/`（エージェント用の作業コピー。リポジトリの複製で成果物ではない）を走査対象から除外。旧スナップショットの上限超過・変更履歴セクションが ERROR として大量に出ていたため |
-| `docs/reviews/diagrams-review_2026-08-02_171929.md` | 設計整合ゲート（`diagrams-review` 差分モード）の結果を追加。指摘13件（高3 / 中7 / 低3）。Mermaid構文・リンク切れ・図↔モデルの機械照合はすべて OK |
+| `docs/reviews/diagrams-review/2026-08-02_171929.md` | 設計整合ゲート（`diagrams-review` 差分モード）の結果を追加。指摘13件（高3 / 中7 / 低3）。Mermaid構文・リンク切れ・図↔モデルの機械照合はすべて OK |
 | `docs/tech/tech_spec.md` | レビュー指摘ISSUE-001。§8「今後の検討事項」のデプロイ先の選定を `[x]` へ変更し、AWS（EC2 1台 + S3/CloudFront）確定と `tech_operations.md` §12.1 への反映を明記（Vercel/Render/Railway/VPS の候補列挙を削除） |
 | `docs/data/master/item.md` | レビュー指摘ISSUE-002。§4.2 の固定商品表12件（`wooden_sword`〜`hero_amulet`）を**削除**。ベース装備一覧に存在しないIDで、`tech_shop.md` の生成方式とも矛盾していたため。節名を「日替わり装備（Phase 2〜）」とし、抽選対象・生成手順・算出式・設計方針の正へのリンク表に置換 |
 | `docs/data/master_data.md` | レビュー指摘ISSUE-002。索引から `master/item.md` の内容欄「日替わり候補プール」を削除（正は `master/equipment.md` §6.0） |
@@ -37,7 +43,7 @@
 | `docs/design/systems/ui.md` | レビュー指摘ISSUE-007。「ナビゲーション構造」に**ヘッダ（全画面共通）**を新設（タイトル／お知らせ＝Phase 3／設定、保存操作は置かない）。参照のみで未定義だった「全画面共通のヘッダ」を解消し、Phase 1 レイアウト図から `[セーブ]` を削除 |
 | `docs/design/product_requirements.md` | レビュー指摘ISSUE-008。§6（アセット調達方針）末尾に残っていた旧§6「未確定事項」の1行を §3 想定プレイサイクルの直下へ移動 |
 | `docs/documentation_rules.md` | レビュー指摘ISSUE-009。§5.1 の移行前後比較表から、削除済みの `open_specs.md` 行を削除 |
-| `docs/reviews/review_2026-08-02_162707.md` | Phase 2〜5 要件定義の仕様確定ゲート結果（差分モード・指摘10件: 高4/中3/低3） |
+| `docs/reviews/doc-review/2026-08-02_162707.md` | Phase 2〜5 要件定義の仕様確定ゲート結果（差分モード・指摘10件: 高4/中3/低3） |
 | `docs/open_specs.md` | **ファイルごと削除**。Phase 2〜5 の未確定仕様8件をすべて確定し、Phase 1〜5 の未確定仕様がゼロになったため（本書の方針「全項目が解消されたらファイル自体を削除」に準拠） |
 | `docs/tech/tech_operations.md` | 要件定義でデプロイ先を確定。§12.1 に**本番構成（AWS）**を新設（フロント=S3+CloudFront／API=EC2 1台に Nginx+FastAPI／DB=同EC2のEBS上／定期ジョブ=OS cron／バックアップ=EBS日次スナップショット）。マネージドコンテナ（App Runner・ECS Fargate）を不採用とする理由（FSが揮発し SQLite と OS cron を継続できない）を明記。§12.6 の「デプロイ先が未定」注記を解消し、退会削除処理を Phase 2 実装として確定 |
 | `docs/design/non_functional_requirements.md` | 退会（アカウント削除）を確定。**§5.1 を新設**し Phase 2 実装・設定画面からの導線・再認証による誤操作防止・全ゲームデータの即時物理削除（猶予期間なし）を定義。「規約類」行の宙に浮いた `open_specs.md` 参照を設定画面への掲示に置換 |

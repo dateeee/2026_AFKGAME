@@ -81,8 +81,8 @@
 
 ```markdown
 ## 0. レビューパラメータ
-| スキル | prefix | レポートタイトル | カテゴリ |
-                            ← 出力ファイル名 docs/reviews/{prefix}_YYYY-MM-DD_HHMMSS.md を決める
+| スキル | 保存先ディレクトリ | レポートタイトル | カテゴリ |
+                            ← 保存先 docs/reviews/{スキル名}/YYYY-MM-DD_HHMMSS.md を決める
 
 ## 1. 差分モードの照合先
 | 変更ファイル | 照合先 |

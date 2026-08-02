@@ -6,11 +6,12 @@
 
 ## 0. レビューパラメータ
 
-| スキル | prefix | レポートタイトル | カテゴリ |
-|-------|--------|---------------|---------|
-| `backend-review` | `backend-review` | バックエンドコードレビュー結果 | コード品質 / セキュリティ / 一貫性 |
-| `frontend-review` | `frontend-review` | フロントエンドコードレビュー結果 | コード品質 / 状態管理 / エラーハンドリング・UX / パフォーマンス |
+| スキル | 保存先ディレクトリ | レポートタイトル | カテゴリ |
+|-------|-----------------|---------------|---------|
+| `backend-review` | `docs/reviews/backend-review/` | バックエンドコードレビュー結果 | コード品質 / セキュリティ / 一貫性 |
+| `frontend-review` | `docs/reviews/frontend-review/` | フロントエンドコードレビュー結果 | コード品質 / 状態管理 / エラーハンドリング・UX / パフォーマンス |
 
+ファイル名は `YYYY-MM-DD_HHMMSS.md`。保存後に `python scripts/rotate_reviews.py --apply` を実行する。
 該当箇所は行番号（`xxx.py 行N〜M`）で示す。
 
 ## 1. 対象ファイル

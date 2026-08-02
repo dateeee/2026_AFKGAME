@@ -57,6 +57,7 @@ VS Code の場合は実行構成 **Full Stack** で両方を同時起動でき�
 | `npm run test:e2e` | E2Eテスト（Playwright。フロント・バックを専用ポート/DBで自動起動） |
 | `pytest` | バックエンドテスト（C1 100%・`htmlcov/` にHTMLレポート） |
 | `python scripts/check_doc_size.py` | ドキュメント文字数チェック |
+| `python scripts/rotate_reviews.py --apply` | レビュー結果のローテーション（直下は最新10件、超過分は `archive/` へ） |
 
 ## ディレクトリ構成
 
@@ -73,7 +74,7 @@ VS Code の場合は実行構成 **Full Stack** で両方を同時起動でき�
 │   ├── design/                  # ゲーム仕様（索引 game_spec.md + systems/）
 │   ├── tech/                    # 技術仕様（索引 tech_spec.md + tech_*.md）
 │   ├── data/                    # マスターデータ（索引 master_data.md + master/ towers/ skills/）
-│   └── reviews/                 # レビュー結果（自動生成）
+│   └── reviews/                 # レビュー結果（自動生成。スキル名/日時.md + archive/）
 ├── diagrams/                    # 設計図（Mermaid）。索引 + 同名ディレクトリに分割
 ├── scripts/                     # 開発補助スクリプト
 ├── frontend/                    # Vue.js SPA
@@ -131,5 +132,5 @@ VS Code の場合は実行構成 **Full Stack** で両方を同時起動でき�
   - [towers/TOWERS_OVERVIEW.md](docs/data/towers/TOWERS_OVERVIEW.md) 全塔概要一覧 / [skills/SKILLS_OVERVIEW.md](docs/data/skills/SKILLS_OVERVIEW.md) スキルシステム概要
 
 ### 設計図
-- 索引形式: [er_diagram.md](diagrams/er_diagram.md) ER図 / [class_diagram.md](diagrams/class_diagram.md) クラス図 / [battle_flow.md](diagrams/battle_flow.md) 戦闘フロー図 / [api_sequence.md](diagrams/api_sequence.md) APIシーケンス図
-- 単一: [screen_transition.md](diagrams/screen_transition.md) 画面遷移図 / [system_architecture.md](diagrams/system_architecture.md) システム構成図
+- 全6図とも索引 + 同名ディレクトリ構成: [er_diagram.md](diagrams/er_diagram.md) ER図 / [class_diagram.md](diagrams/class_diagram.md) クラス図 / [battle_flow.md](diagrams/battle_flow.md) 戦闘フロー図 / [api_sequence.md](diagrams/api_sequence.md) APIシーケンス図
+- [system_architecture.md](diagrams/system_architecture.md) システム構成図（全体構成 / tick / サーバー権威 / 本番構成）/ [screen_transition.md](diagrams/screen_transition.md) 画面遷移図（認証 / ナビ / Phase 5 / モーダル）

@@ -1,12 +1,16 @@
 # レビュー結果 共通出力形式
 
 レビュー系スキル（`doc-review` `backend-review` `frontend-review` `diagrams-review` `full-review`）共通の出力形式。
-各スキルのプロファイルで定義される **prefix・レポートタイトル・カテゴリ一覧・重要度基準** を以下のテンプレートに当てはめる。
+各スキルのプロファイルで定義される **保存先・レポートタイトル・カテゴリ一覧・重要度基準** を以下のテンプレートに当てはめる。
 `fix-specs` スキルがこの形式を解析するため、見出し構造・ISSUE表の項目名を変更しないこと。
 
 ## 保存先
 
-`docs/reviews/{prefix}_YYYY-MM-DD_HHMMSS.md`（YYYY-MM-DD_HHMMSSは現在日時。`docs/reviews/` がなければ作成する）
+`docs/reviews/{スキル名}/YYYY-MM-DD_HHMMSS.md`（YYYY-MM-DD_HHMMSS は現在日時。ディレクトリがなければ作成する）
+
+- **スキル名ごとにディレクトリを分け、ファイル名は日時のみ**とする。種別はディレクトリ名が示すため、ファイル名に繰り返さない
+- 保存後に `python scripts/rotate_reviews.py --apply` を実行する。ディレクトリ直下は最新10件に保たれ、超過分は `archive/` へ移動する（**削除はしない**）
+- 過去レポートは追記型アーカイブとして残す。**通常の作業では読み込まない**（読むのは差分モードの起点となる最新1件のみ）
 
 ## フォーマット
 

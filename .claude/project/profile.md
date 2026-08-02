@@ -25,7 +25,7 @@
 | `docs/tech/` | 基本設計・詳細設計の成果物（`tech_spec.md` 索引 + `tech_*.md`） |
 | `docs/data/` | マスターデータ（`master_data.md` 索引 + `master/` `towers/` `skills/`） |
 | `diagrams/` | 設計図6点（各図は索引 + 同名ディレクトリ構成） |
-| `docs/reviews/` | レビュー結果の追記型アーカイブ（ドキュメント規約の対象外） |
+| `docs/reviews/` | レビュー結果の追記型アーカイブ（スキル名ごとのディレクトリ + `archive/`。ドキュメント規約の文字数対象外） |
 
 ## 3. 技術スタック
 

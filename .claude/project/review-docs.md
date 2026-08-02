@@ -5,12 +5,12 @@
 
 ## 0. レビューパラメータ
 
-| スキル | prefix | レポートタイトル | カテゴリ |
-|-------|--------|---------------|---------|
-| `doc-review` | `review` | 仕様レビュー結果 | 整合性 / 網羅性 / 規約 |
-| `diagrams-review` | `diagrams-review` | 設計図レビュー結果 | 仕様書との整合性 / コードとの整合性 / 設計図間の整合性 / Mermaid構文 / 網羅性 |
+| スキル | 保存先ディレクトリ | レポートタイトル | カテゴリ |
+|-------|-----------------|---------------|---------|
+| `doc-review` | `docs/reviews/doc-review/` | 仕様レビュー結果 | 整合性 / 網羅性 / 規約 |
+| `diagrams-review` | `docs/reviews/diagrams-review/` | 設計図レビュー結果 | 仕様書との整合性 / コードとの整合性 / 設計図間の整合性 / Mermaid構文 / 網羅性 |
 
-保存先は `docs/reviews/{prefix}_YYYY-MM-DD_HHMMSS.md`。
+ファイル名は `YYYY-MM-DD_HHMMSS.md`。保存後に `python scripts/rotate_reviews.py --apply` を実行する（[review-format.md](../references/review-format.md)「保存先」）。
 
 ## 1. 差分モードの照合先（`doc-review`）
 
@@ -81,7 +81,7 @@
 
 | # | ルール |
 |---|-------|
-| 1 | 対象は `docs/reviews/review_*.md` の最新（引数でパス指定も可） |
+| 1 | 対象は `docs/reviews/doc-review/` 直下の最新（`archive/` は見ない。引数でパス指定も可） |
 | 2 | 重要度「高」から優先的に修正する |
 | 3 | 修正前に該当箇所を必ず読み、レビュー時点から内容が変わっていないか確認する |
 | 4 | 仕様書間の整合を保つため、関連する全ファイルをまとめて修正する |
