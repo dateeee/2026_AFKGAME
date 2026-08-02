@@ -12,6 +12,19 @@
 
 | ファイル | 内容 |
 |---------|------|
+| `diagrams/system_architecture.md` | 設計図レビュー指摘ISSUE-110。7,967字で追記余地が無かったため、索引 + `system_architecture/`（`application.md` / `tick_flow.md` / `authority.md` / `deployment.md`）へ分割。他5図と同じハブ&スポーク構成に統一 |
+| `diagrams/system_architecture/deployment.md` | 設計図レビュー指摘ISSUE-110。**新規**。本番構成（AWS）の図を追加。CloudFront/S3 によるSPA配信、EC2（Nginx → uvicorn → EBS上のDB、OS cron）、バックアップ経路、別オリジンである旨を図示（数値・設定値は `tech_operations.md` §12 が正） |
+| `diagrams/system_architecture/application.md` | 設計図レビュー指摘ISSUE-101・ISSUE-104。Models に `shop.py`（ShopDailyState / ShopDailySlot）を追加し `item.py` から ShopDailyState を削除。Services を実装配置に合わせ、`shop_service.py`→`shop_daily_service.py`、実在しない `tower_service.py` を削除（塔・エンカウントは `battle_service.py`）、`game_state_builder.py` を追加。DB は「SQLite（local / production 初期）→ §12.4 の判断ラインで PostgreSQL」へ修正（Phase での切替という誤りを解消） |
+| `diagrams/system_architecture/tick_flow.md` | 設計図レビュー指摘ISSUE-101。実在しない `tower_service.py` への参照を `master_data/`（塔・敵マスター）へ差し替え |
+| `diagrams/screen_transition.md` | ISSUE-102・103 の追記で 8,387字（区分C 8,000字）を超えたため、索引 + `screen_transition/`（`auth.md` / `main_nav.md` / `endgame.md` / `modal.md`）へ分割。これで全6図がハブ&スポーク構成になった |
+| `diagrams/screen_transition/` | 設計図レビュー指摘ISSUE-102・103・105・106・113。ヘッダ（全画面共通）の注記とお知らせ画面（Phase 3〜）を追加。設定画面にアカウント欄4項目（問い合わせ先・規約類・クレジット・退会）と退会確認（再認証→削除確認）の遷移を追加。ログ表示件数の `200` を削除し `20/50/100`（上限=DB保存100件）へ修正。Phase 5 タブ構成から仕様に無い「ボスラッシュ・イベント」を外し、導線は Phase 5 の基本設計で確定する旨を注記。冒頭のUI仕様リンクのラベルを参照先（`systems/ui.md` §3）に一致させた |
+| `diagrams/api_sequence/auth.md` | 設計図レビュー指摘ISSUE-107。実装済みで図に無かった `POST /api/auth/register` と `GET /api/auth/verify-email` のシーケンスを追加 |
+| `diagrams/api_sequence/base.md` | 設計図レビュー指摘ISSUE-108。強化フローの例示値 `iron_sword_001` を `sword_001` へ修正（Equipment.id は UUID、`iron_sword` はベース装備に存在しない） |
+| `diagrams/api_sequence/gameplay.md` | 設計図レビュー指摘ISSUE-111。`GET /api/shop/lineup` の `daily` レスポンス例を実装の `ShopDailyItemResponse` に合わせ12項目へ修正（category / name / slot / statDef / statHp / statSpd を追加） |
+| `diagrams/er_diagram/player.md` | 設計図レビュー指摘ISSUE-109。`TowerClearRecord.highest_floor_at` に Phase 5〜 の注記を追加（未実装列であることを図から判別できるようにした） |
+| `diagrams/class_diagram.md` | 設計図レビュー指摘ISSUE-112。索引の item 行から列挙型 `EquipSlot`・`EquipCategory` を外して主要クラスのみに統一し、列挙型は各ファイル参照である旨を明記 |
+| `README.md` / `CLAUDE.md` / `.claude/project/basic-design.md` | 設計図レビュー指摘ISSUE-110。システム構成図・画面遷移図の索引化に伴い、設計図の索引・図数表記（4図→6図）・検証対象を更新 |
+| `scripts/check_doc_size.py` | `.claude/worktrees/`（エージェント用の作業コピー。リポジトリの複製で成果物ではない）を走査対象から除外。旧スナップショットの上限超過・変更履歴セクションが ERROR として大量に出ていたため |
 | `docs/reviews/diagrams-review_2026-08-02_171929.md` | 設計整合ゲート（`diagrams-review` 差分モード）の結果を追加。指摘13件（高3 / 中7 / 低3）。Mermaid構文・リンク切れ・図↔モデルの機械照合はすべて OK |
 | `docs/tech/tech_spec.md` | レビュー指摘ISSUE-001。§8「今後の検討事項」のデプロイ先の選定を `[x]` へ変更し、AWS（EC2 1台 + S3/CloudFront）確定と `tech_operations.md` §12.1 への反映を明記（Vercel/Render/Railway/VPS の候補列挙を削除） |
 | `docs/data/master/item.md` | レビュー指摘ISSUE-002。§4.2 の固定商品表12件（`wooden_sword`〜`hero_amulet`）を**削除**。ベース装備一覧に存在しないIDで、`tech_shop.md` の生成方式とも矛盾していたため。節名を「日替わり装備（Phase 2〜）」とし、抽選対象・生成手順・算出式・設計方針の正へのリンク表に置換 |

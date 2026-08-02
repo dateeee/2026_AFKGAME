@@ -11,4 +11,6 @@
 |---------|--------------|---------|
 | プレイヤー・パーティ・キャラクター<br>スキルシステム | Player / Party / Character / Stats / PrestigeData / Settings / TowerClearRecord / Skill / SkillTree / SkillSet | [class_diagram/player.md](class_diagram/player.md) |
 | ダンジョン・塔・敵<br>戦闘状態 | Dungeon / Tower / Enemy / EnemyEncounter / Modifier / BattleState / TurnResult / TickResult / Buff / Debuff / StatusAilment / OfflineSummary | [class_diagram/battle.md](class_diagram/battle.md) |
-| 装備・アイテム<br>ショップ<br>施設・ボスラッシュ | Equipment / EquipSlot / InventoryItem / DropEntry / Shop / DailyItem / EquipCategory / PotionStock / Facility / FacilityCost / BossRushState / MilestoneReward | [class_diagram/item.md](class_diagram/item.md) |
+| 装備・アイテム<br>ショップ<br>施設・ボスラッシュ | Equipment / InventoryItem / DropEntry / Shop / DailyItem / PotionStock / Facility / FacilityCost / BossRushState / MilestoneReward | [class_diagram/item.md](class_diagram/item.md) |
+
+- 「含まれるクラス」は主要クラスのみ。列挙型（Rarity・EquipSlot・EquipCategory 等）は各ファイルを参照

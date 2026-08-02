@@ -79,7 +79,7 @@ sequenceDiagram
     end
 
     API->>DB: ShopDailySlot取得
-    API-->>B: {<br/>  lineup: [<br/>    { itemId: "hp_potion", name: "HPポーション",<br/>      price: 25, healRatio: 0.3,<br/>      quantityOwned: 10, stackLimit: 99 },<br/>    ...<br/>  ],<br/>  daily: [ { slotIndex, baseId, rarity, level,<br/>    statAtk, price, soldOut }, ... ],<br/>  dailyResetAt: "2026-08-03T00:00:00Z"<br/>}
+    API-->>B: {<br/>  lineup: [<br/>    { itemId: "hp_potion", name: "HPポーション",<br/>      price: 25, healRatio: 0.3,<br/>      quantityOwned: 10, stackLimit: 99 },<br/>    ...<br/>  ],<br/>  daily: [ { slotIndex, category, baseId, name, slot,<br/>    rarity, level, statAtk, statDef, statHp,<br/>    statSpd, price, soldOut }, ... ],<br/>  dailyResetAt: "2026-08-03T00:00:00Z"<br/>}
 
     Note over B: === 常設商品の購入 ===
 

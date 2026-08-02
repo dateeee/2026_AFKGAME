@@ -12,6 +12,24 @@ sequenceDiagram
     participant DB as Database
     participant Google as Google OAuth
 
+    Note over B,Google: === 新規登録（メール） ===
+
+    B->>API: POST /api/auth/register<br/>{ email, password }
+    API->>DB: email重複チェック
+    API->>API: bcryptハッシュ生成 (cost=12)
+    API->>DB: User作成 (is_guest=false, email_verified=false)
+    API->>DB: EmailVerificationToken生成・確認メール送信
+    API->>DB: RefreshToken生成
+    API-->>B: { accessToken, refreshToken }
+    Note over B: 未確認でもプレイ可（ホームへ遷移）
+
+    Note over B,Google: === メール確認 ===
+
+    B->>API: GET /api/auth/verify-email?token={token}
+    API->>DB: トークン検証（有効期限・使用済み）
+    API->>DB: User.email_verified = true<br/>トークンを使用済みに
+    API-->>B: { status: "ok" }
+
     Note over B,Google: === メールログイン ===
 
     B->>API: POST /api/auth/login<br/>{ email, password }

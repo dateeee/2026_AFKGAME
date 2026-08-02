@@ -64,7 +64,7 @@ sequenceDiagram
 
     Note over B: === 装備強化 ===
 
-    B->>API: POST /api/forge/enhance<br/>{ equipmentId: "iron_sword_001" }
+    B->>API: POST /api/forge/enhance<br/>{ equipmentId: "sword_001" }
 
     API->>API: 鍛冶屋LV=3 → 強化上限+3<br/>現在+1 < +3 ✓<br/>コスト: 強化石 + gold<br/>(コスト倍率 x0.9)
 

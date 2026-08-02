@@ -26,7 +26,7 @@ Markdownには文字数上限を設けている。詳細は [docs/documentation_
 | [docs/design/game_spec.md](docs/design/game_spec.md) | `design/systems/` — character / battle / equipment / economy / dungeon / endgame / ui |
 | [docs/tech/tech_spec.md](docs/tech/tech_spec.md) | `tech/tech_*.md` — data / structure / api / architecture / logging（詳細設計: battle / offline / tick / polling / state / rng / numeric / shop、認証: auth） |
 | [docs/data/master_data.md](docs/data/master_data.md) | `data/master/` — character / item / equipment / base / endgame |
-| `diagrams/*.md`（4図） | 同名ディレクトリ配下（`er_diagram/` 等） |
+| `diagrams/*.md`（6図） | 同名ディレクトリ配下（`er_diagram/` 等） |
 
 ## アーキテクチャ不変条件
 

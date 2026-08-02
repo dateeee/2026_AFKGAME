@@ -24,9 +24,9 @@
 |----|------|---------|
 | ER図 | `diagrams/er_diagram.md` + `er_diagram/` | `tech_data.md`・`backend/app/models/` |
 | クラス図 | `diagrams/class_diagram.md` + `class_diagram/` | `backend/app/`・`frontend/src/` の構造 |
-| 画面遷移図 | `diagrams/screen_transition.md` | `design/systems/ui.md`・`frontend/src/router/` |
+| 画面遷移図 | `diagrams/screen_transition.md` + `screen_transition/` | `design/systems/ui.md`・`frontend/src/router/` |
 | 戦闘フロー図 | `diagrams/battle_flow.md` + `battle_flow/` | `tech_battle.md`・`services/battle_service.py` |
-| システム構成図 | `diagrams/system_architecture.md` | `tech_architecture.md` |
+| システム構成図 | `diagrams/system_architecture.md` + `system_architecture/` | `tech_architecture.md`・`tech_operations.md` §12 |
 | APIシーケンス図 | `diagrams/api_sequence.md` + `api_sequence/` | `tech_api.md`・`backend/app/routers/` |
 
 **索引で担当ファイルを特定し、必要な子ファイルのみ読む**（全図の一括読み込みは禁止）。

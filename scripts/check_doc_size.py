@@ -31,6 +31,7 @@ SECTION_LIMIT = 2000
 EXCLUDE = (
     "node_modules/",
     ".git/",
+    ".claude/worktrees/",  # エージェント用の作業コピー（リポジトリの複製であり成果物ではない）
     ".venv/",
     "venv/",
     "dist/",
