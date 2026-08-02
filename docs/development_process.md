@@ -47,6 +47,24 @@ graph LR
 | 単体テスト | Phase単位 | C1網羅の測定と補完（同一変更内での完結を推奨） |
 | 結合テスト | Phase単位 | Phase完了ゲート |
 
+### 2.3 工程とスキルの対応
+
+各工程には**手順を統一するスキル**が1件ずつある。工程の作業はスキル経由で行う。
+一般手順は `.claude/skills/`、固有の値は `.claude/project/` に分離（索引: [INDEX.md](../.claude/project/INDEX.md)）。
+
+| 工程 | 工程スキル | ゲートスキル |
+|------|----------|------------|
+| 要件定義 | `requirements`（+ `resolve-specs`） | `doc-review` → `fix-specs` |
+| 基本設計 | `basic-design` | `diagrams-review`、`doc-review` |
+| 詳細設計 | `detail-design` | `doc-review` |
+| テストリスト作成 | `test-list` | （Red確認は工程内） |
+| 製造 | `dev` | `backend-review`、`frontend-review` |
+| 単体テスト | `unit-test` | （C1 100%は工程内） |
+| 結合テスト | `integration-test` | `full-review` |
+
+**各工程スキルは工程内検証を持つ**（機械的検証 → 読んで確認 → 矛盾時の対応）。
+横断レビューへ丸投げせず、その工程で潰せる矛盾は工程内で解消してからゲートへ渡す。
+
 ## 3. 工程定義
 
 ### 3.1 要件定義
@@ -57,7 +75,7 @@ graph LR
 | 主な作業 | ゲームシステム・バランス・UI要件の定義、未確定仕様の解消 |
 | 成果物 | [game_spec.md](design/game_spec.md)（索引）＋ [design/systems/](design/systems/)（システム別仕様）、[product_requirements.md](design/product_requirements.md)（プロダクト要件）、[non_functional_requirements.md](design/non_functional_requirements.md)（非機能要件）、[operation_requirements.md](design/operation_requirements.md)（運用・変更管理要件）、[glossary.md](glossary.md)、[open_specs.md](open_specs.md)（未確定管理） |
 | 完了基準 | open_specs.md の対象項目がすべて解消され、game_spec.md に反映されている |
-| レビュー | `/doc-review` → 指摘は `/fix-specs` で反映 |
+| レビュー | `doc-review` スキル → 指摘は `fix-specs` スキルで反映 |
 
 ### 3.2 基本設計（ハイレベル設計）
 
@@ -66,8 +84,8 @@ graph LR
 | 目的 | システム構造・API・データモデル・画面構成と、非機能要件の実現方式を確定する |
 | 主な作業 | アーキテクチャ設計、API一覧・共通仕様の定義、DB設計、画面遷移設計、性能／セキュリティ／運用の実現方式の設計 |
 | 成果物 | [tech_spec.md](tech/tech_spec.md)（索引）＋ **構造**: tech_data / tech_structure / tech_api / tech_architecture / tech_logging / tech_auth（認証方式）<br>**非機能の実現方式**: tech_performance（性能・容量）・tech_security・tech_operations（運用）<br>**図**: [diagrams/](../diagrams/) 6点（ER・クラス・画面遷移・戦闘フロー・システム構成・APIシーケンス） |
-| 完了基準 | 仕様書・設計図間の矛盾がない（`/diagrams-review` の指摘解消）。要件定義の非機能・運用要件がすべて、実現方式を定めたいずれかの成果物に対応づいている |
-| レビュー | `/diagrams-review`、`/doc-review` |
+| 完了基準 | 仕様書・設計図間の矛盾がない（`diagrams-review` の指摘解消）。要件定義の非機能・運用要件がすべて、実現方式を定めたいずれかの成果物に対応づいている |
+| レビュー | `diagrams-review` スキル、`doc-review` スキル |
 
 ### 3.3 詳細設計（ローレベル設計）
 
@@ -77,7 +95,7 @@ graph LR
 | 主な作業 | 処理フロー・アルゴリズム・計算式の定義、マスターデータの数値確定 |
 | 成果物 | [tech_spec.md](tech/tech_spec.md) 配下の **処理**: tech_battle（戦闘）・tech_offline（オフライン計算）・tech_tick（tick進行）・tech_polling（フロントtick）<br>**横断規約**: tech_rng（乱数）・tech_numeric（数値・丸め）・tech_state（進行状態と操作可否）<br>**数値**: [master_data.md](data/master_data.md)（索引）＋ [data/master/](data/master/)、[data/towers/](data/towers/)・[data/skills/](data/skills/) |
 | 完了基準 | 対象Phase機能の数値・計算式・分岐条件が仕様書から一意に実装できる（数値は仮置き可、ただし「仮置き」と明記）。各処理仕様に**分岐一覧（単体テスト観点）**が記載され、§3.4 のテストリストと §3.6 のC1網羅の導出元になっている |
-| レビュー | `/doc-review`（詳細仕様の整合確認） |
+| レビュー | `doc-review` スキル（詳細仕様の整合確認） |
 
 ### 3.4 テストリスト作成
 
@@ -101,8 +119,8 @@ graph LR
 | 主な作業 | backend/（FastAPI）は Red-Green-Refactor を1テストずつ回す。frontend/（Vue 3）は従来どおり実装 |
 | 成果物 | 実装コード一式 |
 | 規約 | 既存コード規約に従う（スキーマは CamelModel、スキーマは `schemas/` に配置、ロジックは `services/` に集約、ログは logging_config 準拠 等） |
-| 完了基準 | §3.4 の全テストがPASS、`/backend-review`・`/frontend-review`・`/full-review` の指摘対応完了 |
-| レビュー | `/backend-review`、`/frontend-review`、`/full-review`（仕様との整合） |
+| 完了基準 | §3.4 の全テストがPASS、`backend-review`・`frontend-review` の指摘対応完了 |
+| レビュー | `backend-review` スキル、`frontend-review` スキル（仕様↔コードの統合整合は §3.7 の `full-review`） |
 
 - **TDDサイクル**: Red（テストが失敗する）→ Green（**最小の実装**で通す）→ Refactor（テストを保ったまま整理）
 - テストを通すために期待値のほうを書き換えない。テストが誤りなら詳細設計に戻って分岐一覧を正す
@@ -138,13 +156,13 @@ graph LR
 
 | ゲート | タイミング | 判定手段 |
 |-------|----------|---------|
-| 仕様確定ゲート | 要件・詳細設計の変更時 | `/doc-review` 指摘ゼロ、open_specs.md 対象項目解消 |
+| 仕様確定ゲート | 要件・詳細設計の変更時 | `doc-review` 指摘ゼロ、open_specs.md 対象項目解消 |
 | ドキュメント規約ゲート | 仕様書・設計図の変更時 | `python scripts/check_doc_size.py` が `違反 0`（exit 0） |
-| 設計整合ゲート | 基本設計の変更時 | `/diagrams-review` 指摘ゼロ |
+| 設計整合ゲート | 基本設計の変更時 | `diagrams-review` 指摘ゼロ |
 | テストリストゲート | 製造着手前 | 分岐一覧の全項目にテストが存在し、実行して全件 FAIL（Red）を確認 |
 | 製造完了ゲート | 実装完了時 | テスト全PASS（Green）+ コードレビュー指摘対応 + `vue-tsc` 型チェックPASS |
 | 単体テストゲート | 製造完了後 | 全PASS + C1カバレッジ100% |
-| Phase完了ゲート | 結合テスト完了時 | API統合テスト・E2E全PASS + `/full-review` で仕様との乖離ゼロ |
+| Phase完了ゲート | 結合テスト完了時 | API統合テスト・E2E全PASS + `full-review` で仕様との乖離ゼロ |
 
 ## 5. 現在の工程状況（2026-08-02時点）
 
@@ -176,4 +194,4 @@ graph LR
 - 確定 → 該当工程の成果物（仕様書・設計図）へ反映 → [changelog.md](changelog.md) に追記 → open_specs.md を更新
 - **仕様は確定済みで数値のみ調整待ち**の項目は [docs/balance_backlog.md](balance_backlog.md) で管理する。実装をブロックしないため open_specs.md には残さず、結合テスト〜リリース後の実測で確定する
 - **実装側の疑義**（仕様との乖離・デッドコード・規約違反）は [docs/known_issues.md](known_issues.md) で管理する。対応時は「仕様書を実装に合わせる」か「実装を修正する」かを都度判断する
-- 実装と仕様の乖離は `/full-review` で検出し、上記フローで記録する
+- 実装と仕様の乖離は `full-review` スキルで検出し、上記フローで記録する

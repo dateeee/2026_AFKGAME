@@ -12,7 +12,7 @@ Markdownには文字数上限を設けている。詳細は [docs/documentation_
 | A | `CLAUDE.md` | 3,000字 |
 | B | `README.md`、`*_OVERVIEW.md` | 6,000字 |
 | C | `docs/**`、`diagrams/**` | 8,000字 |
-| D | `.claude/commands/**`、`.claude/skills/**` | 5,000字 |
+| D | `.claude/skills/**`、`.claude/references/**`、`.claude/project/**` | 5,000字 |
 
 - 原則: **1ファイル = 1テーマ = 1回の読み込みで完結**
 - H2セクションは2,000字以内。表を優先し、同じ仕様を複数ファイルに重複させない
@@ -43,7 +43,8 @@ Markdownには文字数上限を設けている。詳細は [docs/documentation_
 - **未確定仕様**は [docs/open_specs.md](docs/open_specs.md) で管理。確定したら仕様書へ反映して削除し、すべて確定したらファイルごと削除する
 - **テスト標準**: バックエンド単体テストは pytest で C1（分岐）カバレッジ100%、結合テストは FastAPI TestClient + Playwright（E2E）
 - **実装規約**: スキーマは CamelModel で `schemas/`、ロジックは `services/`、ログは logging_config 準拠
-- **スキル/コマンドの使い分け**: 常時適用したい規約は `.claude/skills/`（自動起動。`dev`＝製造、`unit-test`＝テスト）、工程ゲートは `.claude/commands/`（`/` で明示起動・`model` 固定）
+- **作業はすべてスキル経由**: 7工程 + 支援7件を `.claude/skills/` に用意している（自動起動 / `/` で明示起動）。対応表は [.claude/project/INDEX.md](.claude/project/INDEX.md)
+- **一般手順と固有値の分離**: `.claude/skills/**` `.claude/references/**` はプロジェクト非依存（他プロジェクトへ無改造でコピー可）、固有の値は `.claude/project/**` にのみ置く（[_TEMPLATE.md](.claude/project/_TEMPLATE.md) に沿って書き直す）
 
 ## コスト規律（AIエージェント運用）
 
@@ -51,5 +52,5 @@ Markdownには文字数上限を設けている。詳細は [docs/documentation_
 - **機械的な作業**（一括置換・リンク修正・定型データ生成・構文検証）は `model: sonnet` のサブエージェントか使い捨てスクリプトで処理する
 - サブエージェントには**担当ファイルのみを列挙**し、「列挙外は読まない」「戻り値は結論のみ」を明示する
 - 仕様書・コードは**必要なセクションだけ読む**（大きなファイルの全文読み込みを避ける）
-- レビュー系コマンド（`/doc-review` 等）は**差分モードがデフォルト**。全量は `full` 指定時のみ
+- レビュー系スキル（`doc-review` 等）は**差分モードがデフォルト**。全量は `full` 指定時のみ
 - 工程の区切り（レビュー完了・コミット後）で `/compact` または `/clear` を提案する

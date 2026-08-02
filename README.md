@@ -62,6 +62,10 @@ VS Code の場合は実行構成 **Full Stack** で両方を同時起動でき�
 2026_AFKGAME/
 ├── README.md                    # 本ファイル（概要・セットアップ）
 ├── CLAUDE.md                    # AIエージェント向け開発ルール
+├── .claude/                     # エージェント定義
+│   ├── skills/                  # 工程スキル7件 + 支援スキル7件（プロジェクト非依存）
+│   ├── references/              # スキル共通リファレンス（同上）
+│   └── project/                 # プロジェクト固有プロファイル（索引: INDEX.md）
 ├── docs/                        # 仕様書
 │   ├── development_process.md   # 開発工程定義書（7工程・TDD・テスト標準）
 │   ├── documentation_rules.md   # ドキュメント規約（文字数上限・分割）
@@ -70,17 +74,9 @@ VS Code の場合は実行構成 **Full Stack** で両方を同時起動でき�
 │   ├── open_specs.md            # 未確定仕様一覧（全確定後に削除）
 │   ├── balance_backlog.md       # バランス調整（数値のみ調整待ち）
 │   ├── known_issues.md          # 実装の疑義
-│   ├── design/                  # ゲーム仕様
-│   │   ├── game_spec.md         # 索引（開発フェーズ・設計方針）
-│   │   └── systems/             # システム別仕様（character / battle / equipment 他）
-│   ├── tech/                    # 技術仕様
-│   │   ├── tech_spec.md         # 索引（章構成）
-│   │   └── tech_*.md            # レイヤー別 + 詳細設計（一覧は下記索引）
-│   ├── data/                    # マスターデータ
-│   │   ├── master_data.md       # 索引 + 塔データ一覧
-│   │   ├── master/              # カテゴリ別数値（character / item / equipment 他）
-│   │   ├── towers/              # 塔別データ（OVERVIEW + 001〜010）
-│   │   └── skills/              # スキル系統別データ（OVERVIEW + 001〜006）
+│   ├── design/                  # ゲーム仕様（索引 game_spec.md + systems/）
+│   ├── tech/                    # 技術仕様（索引 tech_spec.md + tech_*.md）
+│   ├── data/                    # マスターデータ（索引 master_data.md + master/ towers/ skills/）
 │   └── reviews/                 # レビュー結果（自動生成）
 ├── diagrams/                    # 設計図（Mermaid）。索引 + 同名ディレクトリに分割
 ├── scripts/                     # 開発補助スクリプト
@@ -116,6 +112,7 @@ VS Code の場合は実行構成 **Full Stack** で両方を同時起動でき�
 
 ### 開発プロセス
 - [docs/development_process.md](docs/development_process.md) — 開発工程（7工程・TDD・テスト標準）
+- [.claude/project/INDEX.md](.claude/project/INDEX.md) — 工程↔スキル↔プロファイル対応表
 - [docs/documentation_rules.md](docs/documentation_rules.md) — ドキュメント規約（文字数上限・分割）
 - [docs/glossary.md](docs/glossary.md) — 用語集
 - [docs/open_specs.md](docs/open_specs.md) — 未確定仕様（実装をブロックする事項）

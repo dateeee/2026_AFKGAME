@@ -1,8 +1,8 @@
 # レビュー結果 共通出力形式
 
-レビュー系コマンド（`/doc-review` `/backend-review` `/frontend-review` `/diagrams-review` `/full-review`）共通の出力形式。
-各コマンド側で定義される **prefix・レポートタイトル・カテゴリ一覧・重要度基準** を以下のテンプレートに当てはめる。
-`/fix-specs` がこの形式を解析するため、見出し構造・ISSUE表の項目名を変更しないこと。
+レビュー系スキル（`doc-review` `backend-review` `frontend-review` `diagrams-review` `full-review`）共通の出力形式。
+各スキルのプロファイルで定義される **prefix・レポートタイトル・カテゴリ一覧・重要度基準** を以下のテンプレートに当てはめる。
+`fix-specs` スキルがこの形式を解析するため、見出し構造・ISSUE表の項目名を変更しないこと。
 
 ## 保存先
 

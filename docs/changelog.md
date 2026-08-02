@@ -12,6 +12,21 @@
 
 | ファイル | 内容 |
 |---------|------|
+| `.claude/skills/test-list/SKILL.md` | 初版作成: 工程4「テストリスト作成」の一般手順。分岐一覧→失敗するテストへの展開、Red確認、工程内検証（§5）を規定 |
+| `.claude/skills/test-list/references/patterns.md` | 初版作成: テスト実装パターンの一般形。旧 `unit-test/references/patterns.md` から移設し、固有の値を除去 |
+| `.claude/skills/integration-test/SKILL.md` | 初版作成: 工程7「結合テスト」の一般手順。シナリオ設計、失敗時の原因切り分け、工程内検証（§5）を規定 |
+| `.claude/skills/dev/SKILL.md` | 工程5「製造」の一般手順へ全面改稿。固有値をプロファイル参照へ退避し、工程内検証（§6）を追加 |
+| `.claude/skills/unit-test/SKILL.md` | 工程6「単体テスト」の一般手順へ全面改稿。実装前のテスト作成は `test-list` へ分離し、C1測定・補完に特化。工程内検証（§4）を追加 |
+| `.claude/skills/unit-test/references/c1_checklist.md` | 固有の分岐観点を削除しプロファイル参照へ変更。docstring 書式は `test-list` のパターン集へ集約 |
+| `.claude/skills/doc-review/SKILL.md` 他6件 | 初版作成: 旧 `.claude/commands/` の7件（doc-review / diagrams-review / backend-review / frontend-review / full-review / fix-specs / resolve-specs）をスキルへ一元化 |
+| `.claude/commands/`（7件） | 削除。全機能を同名スキルへ移行 |
+| `.claude/references/review-procedure.md` | 節番号の重複を解消（§7 担当範囲の切り分け / §8 出力と報告）。`sonnet` サブエージェントへの委譲をコスト規律へ追加 |
+| `.claude/references/review-format.md` | コマンド表記をスキル表記へ変更 |
+| `.claude/references/resolve-specs/templates.md` | コマンド表記をスキル表記へ変更 |
+| `docs/development_process.md` | §2.3「工程とスキルの対応」を新設（工程↔スキル↔ゲートの対応表・工程内検証の方針）。`/コマンド` 表記をスキル名へ統一 |
+| `docs/documentation_rules.md` | 区分Dの対象を `.claude/skills` `.claude/references` `.claude/project` へ更新。コマンド表記をスキル表記へ変更 |
+| `CLAUDE.md` | 「作業はすべてスキル経由」「一般手順と固有値の分離」へ改稿。区分Dの対象を更新 |
+| `README.md` | ディレクトリ構成に `.claude/` を追加。`docs/` 配下の記述を索引セクションと重複しない粒度へ圧縮。工程↔スキル対応表へのリンクを追加 |
 | `.claude/project/INDEX.md` | 初版作成: 一般スキルとプロジェクト固有プロファイルを分離。全7工程にスキルを用意し、旧 `.claude/commands/` の7件をスキルへ一元化 |
 | `.claude/project/_TEMPLATE.md` | 初版作成。工程プロファイルの記述スキーマを制定し、`.claude/skills/` + `.claude/references/` を無改造でコピー → `.claude/project/` のみ書き直す再利用手順を定義 |
 | `.claude/project/profile.md` | 初版作成。技術スタック・ディレクトリ・常用コマンド・アーキテクチャ不変条件6件・コスト規律を集約（全スキルが最初に読む共通プロファイル） |
