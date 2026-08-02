@@ -117,7 +117,7 @@ VS Code の場合は実行構成 **Full Stack** で両方を同時起動でき�
 - [docs/balance_backlog.md](docs/balance_backlog.md) — バランス調整（見直す数値）
 - [docs/known_issues.md](docs/known_issues.md) — 実装の疑義
 
-大きな仕様書は **索引 + 個別ファイル** に分割している（[documentation_rules.md](docs/documentation_rules.md) §6）。索引から辿ること。
+大きな仕様書は **索引 + 個別ファイル** 構成。索引から辿ること。
 
 ### 仕様書
 - [docs/design/game_spec.md](docs/design/game_spec.md) — ゲーム仕様の索引
@@ -126,7 +126,7 @@ VS Code の場合は実行構成 **Full Stack** で両方を同時起動でき�
 - [docs/tech/tech_spec.md](docs/tech/tech_spec.md) — 技術仕様の索引
   - 基本設計: [data](docs/tech/tech_data.md) データ / [structure](docs/tech/tech_structure.md) 構成 / [api](docs/tech/tech_api.md) API / [architecture](docs/tech/tech_architecture.md) 方針 / [logging](docs/tech/tech_logging.md) ログ / [auth](docs/tech/tech_auth.md) 認証
   - 非機能（設計）: [performance](docs/tech/tech_performance.md) 性能・容量 / [security](docs/tech/tech_security.md) セキュリティ / [operations](docs/tech/tech_operations.md) 運用
-  - 詳細設計: [battle](docs/tech/tech_battle.md) 戦闘 / [offline](docs/tech/tech_offline.md) オフライン / [tick](docs/tech/tech_tick.md) tick / [polling](docs/tech/tech_polling.md) フロント / [state](docs/tech/tech_state.md) 状態 / [rng](docs/tech/tech_rng.md) 乱数 / [numeric](docs/tech/tech_numeric.md) 数値 / [shop](docs/tech/tech_shop.md) ショップ
+  - 詳細設計: [battle](docs/tech/tech_battle.md) 戦闘 / [offline](docs/tech/tech_offline.md) オフライン / [tick](docs/tech/tech_tick.md) tick / [polling](docs/tech/tech_polling.md) フロント / [state](docs/tech/tech_state.md) 状態 / [rng](docs/tech/tech_rng.md) 乱数 / [numeric](docs/tech/tech_numeric.md) 数値 / [shop](docs/tech/tech_shop.md) ショップ / [design-system](docs/tech/tech_design_system.md) デザインシステム
 - [docs/data/master_data.md](docs/data/master_data.md) — マスターデータの索引 + 塔データ一覧
   - [master/](docs/data/master/) — character / item / equipment / base / endgame
   - [towers/TOWERS_OVERVIEW.md](docs/data/towers/TOWERS_OVERVIEW.md) 全塔概要一覧 / [skills/SKILLS_OVERVIEW.md](docs/data/skills/SKILLS_OVERVIEW.md) スキルシステム概要

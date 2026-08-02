@@ -136,9 +136,10 @@
 | ビルドツール | Vite | 高速ビルド・HMR |
 | UIフレームワーク | Vue 3 (Composition API) | SPA コンポーネント管理 |
 | 状態管理 | Pinia | ゲーム状態のリアクティブ管理 |
-| ルーティング | Vue Router | 画面遷移（ゲーム / 装備 / パーティ / 拠点） |
+| ルーティング | Vue Router | 画面遷移（`router/index.ts` の定義が正） |
 | API通信 | Axios or fetch | FastAPI との REST 通信 |
 | 言語 | TypeScript | 型安全な開発 |
+| スタイル | Tailwind CSS v4 | ユーティリティCSS。色・寸法・部品の定義は [tech_design_system.md](tech_design_system.md) が正（トークンは `assets/styles/tokens.css` の `@theme`） |
 
 ### レスポンシブ設計
 
@@ -151,8 +152,7 @@
 | タッチ対応 | ホバー依存のUIは避ける。`:hover` は `@media (hover: hover)` で囲む（タップ後にホバーが残るため） |
 | タップ領域・入力 | タップ対象44px以上。入力部品は16px固定（下回ると iOS Safari が自動拡大する） |
 | セーフエリア | `viewport-fit=cover` + `env(safe-area-inset-*)`。`AppShell` が引き受ける |
-| 見た目の規約 | 色・寸法・部品の定義は [tech_design_system.md](tech_design_system.md) が正 |
-| 数値表示ユーティリティ | 大きな数値（ゴールド等）を短縮表記する関数を `src/utils/format.ts` に実装（表記ルールは game_spec §3「数値表示フォーマット」参照: 1,000以上をK/M/B/T/Qa/Qiで短縮、小数1桁・切り捨て） |
+| 数値表示ユーティリティ | 大きな数値を短縮表記する関数を `src/utils/format.ts` に実装。表記ルールは [ui.md](../design/systems/ui.md)「数値表示フォーマット」が正 |
 
 ---
 
