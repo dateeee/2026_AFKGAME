@@ -65,6 +65,14 @@ sequenceDiagram
     API->>DB: 新RefreshToken生成
     API-->>B: { newAccessToken, newRefreshToken }
 
+    Note over B,Google: === ログアウト ===
+
+    B->>API: POST /api/auth/logout<br/>{ refreshToken }
+    API->>DB: RefreshToken検索 (token_hash)
+    API->>DB: RefreshToken.revoked = true
+    API-->>B: { status: "ok" }
+    B->>B: 保持中のトークンを破棄<br/>ログイン画面へ遷移
+
     Note over B,Google: === パスワードリセット ===
 
     B->>API: POST /api/auth/password-reset/request<br/>{ email }

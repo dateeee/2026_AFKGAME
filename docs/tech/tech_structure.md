@@ -88,8 +88,11 @@
 │   │   │   ├── tower.py           # 塔選択・退却・モード変更
 │   │   │   ├── shop.py            # ショップ商品一覧・購入
 │   │   │   ├── equipment.py       # 装備一覧・装着・売却・ロック（Phase 2〜）
+│   │   │   ├── party.py           # パーティ編成・スキル・限界突破（Phase 3〜）
 │   │   │   ├── base.py            # 施設建設・レベルアップ（Phase 4〜）
-│   │   │   └── forge.py           # 装備強化・製作・分解（Phase 4〜）
+│   │   │   ├── forge.py           # 装備強化・製作・分解（Phase 4〜）
+│   │   │   ├── boss_rush.py       # ボスラッシュ・ランキング（Phase 5〜）
+│   │   │   └── prestige.py        # 転生・ポイント振り分け（Phase 5〜）
 │   │   ├── services/              # ビジネスロジック
 │   │   │   ├── battle_service.py  # 戦闘計算・エンカウント処理（オフライン報酬含む）
 │   │   │   ├── equipment_service.py # 装備ロジック（Phase 2〜）

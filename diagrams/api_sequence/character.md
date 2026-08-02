@@ -1,6 +1,29 @@
-# APIシーケンス図 — スキル・限界突破（Phase 3）
+# APIシーケンス図 — パーティ・スキル・限界突破（Phase 3）
 
 > 親: [api_sequence.md](../api_sequence.md)。API定義は [tech_api.md](../../docs/tech/tech_api.md)。
+
+## 6.5. パーティ編成フロー（Phase 3）
+
+```mermaid
+%%{init: {'theme': 'default', 'sequence': {'actorFontSize': 18, 'messageFontSize': 16, 'noteFontSize': 14}} }%%
+sequenceDiagram
+    participant B as ブラウザ
+    participant API as FastAPI
+    participant DB as Database
+
+    B->>API: PUT /api/party/edit<br/>{ memberIds: ["hero_001", "hero_003"] }
+
+    API->>API: バリデーション:<br/>最大4人? ✓<br/>所持キャラ? ✓<br/>塔外にいる? ✓
+    API->>DB: Party更新 (メンバー・並び順)
+
+    Note over API: パーティ外キャラは控え枠。<br/>戦闘に参加せずEXPも獲得しない
+
+    API-->>B: { status: "ok", party: [...] }
+
+    B->>B: partyStore 更新<br/>次のtickから新編成で戦闘
+```
+
+- 編成ルール（最大4人・控え枠・入れ替えは塔外のみ）は [systems/character.md](../../docs/design/systems/character.md) §2.7 が正
 
 ## 7. スキル習得・リセットフロー（Phase 3）
 

@@ -104,10 +104,12 @@ flowchart TB
         end
 
         subgraph Schemas["Schemas (Pydantic v2)"]
-            playerSchema["player.py\nPlayerResponse\nSettingsUpdate"]
-            charSchema["character.py\nCharacterResponse\nPartyEdit"]
-            battleSchema["battle.py\nTickResponse\nBattleLogEntry\nOfflineSummary"]
-            authSchema["auth.py Phase2~\nLoginRequest\nTokenResponse"]
+            playerSchema["player.py\nPlayerResponse\nCharacterResponse\nGameStateResponse\nSettingsUpdate"]
+            battleSchema["battle.py\nTickResponse\nOfflineSummary"]
+            towerSchema["tower.py\nTowerSelectRequest\nTowerInfo"]
+            equipSchema["equipment.py Phase2~\nEquipmentResponse\nEquipRequest"]
+            shopSchema["shop.py\nShopLineupResponse\nShopDailyItemResponse"]
+            authSchema["auth.py Phase2~\nLoginRequest\nAuthResponse"]
         end
 
         Config["config.py\nTICK_INTERVAL_SECONDS = 60\nTURNS_PER_TICK = 3\nFAST_CALC_THRESHOLD = 100\nMAX_OFFLINE_HOURS = 24\nMAX_BATTLE_LOG_RECORDS = 100\nMAX_LOG_PER_RESPONSE = 50\nMAX_PLAYER_LEVEL = 9999"]
@@ -139,3 +141,4 @@ flowchart TB
 ```
 
 - DB の移行判断ライン（§12.4）とデプロイ構成は [tech_operations.md](../../docs/tech/tech_operations.md) §12 が正。デプロイ構成の図は [deployment.md](deployment.md)
+- Schemas は `backend/app/schemas/` の実装済みファイルのみを描く。Phase 3〜5 で追加するスキーマ（`PartyEdit` 等）は Routers の Phase 注記と [tech_structure.md](../../docs/tech/tech_structure.md) §2 を参照

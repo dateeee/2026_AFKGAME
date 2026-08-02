@@ -12,6 +12,14 @@
 
 | ファイル | 内容 |
 |---------|------|
+| `diagrams/system_architecture/application.md` | **ISSUE-201**: Schemas サブグラフを `backend/app/schemas/` の実装配置へ修正。実在しない `character.py` を削除し、`tower.py`・`equipment.py`（Phase 2〜）・`shop.py` を追加。`CharacterResponse` / `GameStateResponse` を `player.py` へ、存在しない `BattleLogEntry` を削除、`TokenResponse` → `AuthResponse`。Phase 3〜5 の追加スキーマは図に描かない旨を注記 |
+| `docs/tech/tech_structure.md` | **ISSUE-202**: §2 の `routers/` ツリーに `party.py`（Phase 3〜）・`boss_rush.py`・`prestige.py`（Phase 5〜）を追加。システム構成図が描く11ルーターと一致させた |
+| `diagrams/api_sequence/auth.md` | **ISSUE-203**: 「ログアウト」シーケンス（`POST /api/auth/logout` → RefreshToken 無効化 → トークン破棄）を「トークンリフレッシュ」の直後に追加 |
+| `diagrams/api_sequence/core.md` | **ISSUE-203**: §3.5「設定変更」（`PUT /api/game/settings`）を新設。保存ボタン無し=変更即時反映、未指定フィールドは不変、`autoSellRarity` は null でOFFに戻せることを明記 |
+| `diagrams/api_sequence/character.md` | **ISSUE-203**: §6.5「パーティ編成フロー」（`PUT /api/party/edit`、Phase 3）を追加。タイトルを「パーティ・スキル・限界突破」へ変更 |
+| `diagrams/api_sequence/endgame.md` | **ISSUE-203**: §11.7「深淵の塔ランキング」（`GET /api/abyss/ranking`、Phase 5）を追加。同階は先着上位・登録は認証ユーザーのみを明記 |
+| `diagrams/api_sequence.md` | 索引の節一覧に 3.5 / 6.5 / 11.7 を追加 |
+| `diagrams/screen_transition/main_nav.md` | **ISSUE-204**: `退会確認 --> ログイン画面` を削除。`ログイン画面` が `メインナビ` の子状態として暗黙生成されるのを防ぎ、遷移先が `screen_transition/auth.md` の認証フローである旨を箇条書きへ移動 |
 | `docs/reviews/diagrams-review/2026-08-02_175941.md` | 設計整合ゲートの**確認レビュー**（`diagrams-review` 差分モード）を追加。前回指摘13件の解消を全件確認したうえで、新規指摘4件（高1 / 中2 / 低1）。ISSUE-201: システム構成図の Schemas に実在しない `character.py`、実装済み3ファイルの欠落。ISSUE-202: `tech_structure.md` の routers 一覧に `party.py`・`boss_rush.py`・`prestige.py` が無い。ISSUE-203: APIシーケンス図に `POST /api/auth/logout`・`PUT /api/game/settings`（実装済み）ほか4フローが無い。ISSUE-204: 画面遷移図の分割で `ログイン画面` がメインナビの子として描画される。機械検証（Mermaid構文・リンク切れ・TODO残存・ER図↔models・図↔`tech_api.md`↔routers）はすべて OK |
 | `.gitignore` | `.claude/worktrees/` を追加。サブエージェント用ワークツリーの残骸が未追跡ファイルとして残るため |
 | `docs/reviews/**` | **ディレクトリ構成を変更**。フラットな21ファイルを `docs/reviews/{スキル名}/YYYY-MM-DD_HHMMSS.md` へ再配置し（`doc-review` 14件 / `diagrams-review` 5件 / `full-review` 2件）、ファイル名から種別プレフィックスを削除。直下10件を超える `doc-review` の古い4件を `doc-review/archive/` へ退避（削除はしていない） |

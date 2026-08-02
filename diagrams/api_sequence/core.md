@@ -130,6 +130,31 @@ sequenceDiagram
     end
 ```
 
+## 3.5. 設定変更（Phase 1〜）
+
+```mermaid
+%%{init: {'theme': 'default', 'sequence': {'actorFontSize': 18, 'messageFontSize': 16, 'noteFontSize': 14}} }%%
+sequenceDiagram
+    participant B as ブラウザ
+    participant API as FastAPI
+    participant DB as Database
+
+    Note over B: 設定画面で項目を変更<br/>(保存ボタンは無し = 変更即時反映)
+
+    B->>API: PUT /api/game/settings<br/>{ potionThreshold, battleLogCount,<br/>  toastEnabled, autoSellRarity }<br/>Authorization: Bearer {token}
+
+    API->>DB: PlayerSettings 取得<br/>(無ければ既定値で作成)
+    API->>DB: 指定されたフィールドのみ更新
+
+    Note over API: 未指定フィールドは変更しない。<br/>autoSellRarity は null 指定で OFF に戻せる
+
+    API-->>B: SettingsResponse<br/>(更新後の全設定値)
+
+    B->>B: settingsStore 更新<br/>次のtickから新しい閾値・表示件数が適用
+```
+
+- 設定はサーバー側に保存する（[systems/ui.md](../../docs/design/systems/ui.md) 設定画面）。画面遷移は [screen_transition/main_nav.md](../screen_transition/main_nav.md) の設定画面
+
 ## 13. 通信エラー時（リトライ）
 
 ```mermaid
