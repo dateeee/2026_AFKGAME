@@ -109,4 +109,4 @@
 - **ゴールド上限**: **9,223,372,036,854,775,807**（64bit符号付き整数最大値）。インフレ対策は設けない。既存のゴールドシンク（施設・強化・製作等）で自然に消費される設計
 - **数値表示**: 大きな数値は短縮表記（1,000以上を K/M/B/T/Qa/Qi で表記、小数1桁・切り捨て。詳細は [systems/ui.md](systems/ui.md) 参照）
 
-Phase 1〜5 の仕様は全確定済み。数値のみ未定の項目は [balance_backlog.md](../balance_backlog.md) で管理する。
+Phase 1〜5 の仕様は確定済み。未確定が生じた場合は [open_specs.md](../open_specs.md)、数値のみ未定の項目は [balance_backlog.md](../balance_backlog.md) で管理する。

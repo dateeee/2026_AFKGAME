@@ -12,6 +12,12 @@
 
 | ファイル | 内容 |
 |---------|------|
+| `docs/development_process.md` / `CLAUDE.md` / `docs/design/game_spec.md` / `docs/balance_backlog.md` | **ISSUE-701**: `open_specs.md` 新設（ISSUE-604）に追従していなかった「未確定仕様はゼロ・ファイルは不在」の断定を、「原則ゼロ。生じた場合のみ台帳を置く（不在＝未確定ゼロ）」の運用記述へ4ファイル一括で統一（`balance_backlog.md:5` はレビュー未検出分を grep で追加検出）。**ISSUE-702**: 仕様確定ゲートの判定手段を「未確定仕様の解消」から「`open_specs.md` の未解消が対象Phaseの期限内」へ変更し、期限付き先送りを正規運用として `open_specs.md` 前書きにも明記。区分C上限内へ収めるため §5 のテスト基盤・遡及整備の2行を1行へ統合。修正後検証で `development_process.md` 内に旧表現の残留2箇所を検出し、§2.2 の工程状態表と §3.1 要件定義の完了基準（重複していた「未確定仕様の解消」を §4 ゲート参照へ委譲）も併せて修正 |
+| `docs/open_specs.md` | **ISSUE-703**: 本文に残っていた同種の決定先送り2件を台帳へ移管（#2 お知らせ既読状態のクライアント保持先 / #3 難易度別到達記録 `towersCleared` のキー体系）。各項目に §1 と同形式の4行詳細ブロック（確定範囲 / 未確定範囲 / 背景 / 決定時にすること）を追加 |
+| `docs/design/operation_requirements.md` / `docs/design/systems/endgame.md` / `docs/balance_backlog.md` | **ISSUE-703**: 「Phase N の基本設計で確定する」の本文記述を台帳参照へ置換。数値である「お知らせ掲示件数の上限値」は `balance_backlog.md` へ B-7 として登録（未着手Phaseのため仮置き値は「未設定」。その表記ルールを §1 に追記） |
+| `docs/tech/tech_auth.md` | **ISSUE-704**: §7 のリフレッシュトークン保管先の2択（`httpOnly` Cookie または LocalStorage）を **LocalStorage に確定**（キー: `refresh_token`）。`tech_security.md` §11.7 の XSS リスク受容判断・`tech_architecture.md` の既存記述と整合し、§3 ログアウト 2. をフロント完結で破棄できる手順へ明示化 |
+| `docs/spec_ownership.md` | **ISSUE-706**: 「ログアウトの挙動」行の許可列へ `tech_api.md` を追加（エンドポイント定義の正）。加えて2トピックを新規登録 — 「リフレッシュトークンの保管先」（正: `tech_auth.md`、検出パターン `httpOnly`）、「未確定仕様・調整待ち数値の管理ルール」（正: `development_process.md` §6）。いずれも複数指摘がまたがったファイル組の境界確定（`fix-specs` ルール9） |
+| `README.md` | **ISSUE-705**: 「主なコマンド」表へ `check_docs.py` と `check_branch_list.py` を追加（`CLAUDE.md` が必須としているコマンドの掲載漏れ）。区分B上限内へ収めるため、直後の「ドキュメント索引」と重複するディレクトリツリーの `docs/` 配下4行を1行へ集約 |
 | `scripts/check_docs.py` | **新規（プロセス改善）**: ドキュメント機械検証の常設化（リンク切れ・索引到達性・曖昧語・正の逸脱）。レビューで再発していた機械検出可能な指摘クラスを LLM 目視から移管し、仕様確定ゲートの判定に追加。初回実行で `SKILLS_OVERVIEW.md` の `000_テンプレート.md` 索引未登録を検出・解消 |
 | `scripts/check_branch_list.py` | **新規（プロセス改善）**: 分岐一覧の構造検証（連番・空セル・真偽対・ループ）と、`--tests` でのテスト対応照合（docstring マーカー「`分岐: tech_<x>.md §<節> #<行>`」）。テストリストゲートの判定に追加 |
 | `docs/spec_ownership.md` | **新規（プロセス改善）**: 正の所在マップ。トピック→正ファイルの宣言台帳（経験値式・ゲスト削除90日・UI境界ほか7件を初期登録）。`check_docs.py --owner` が逸脱を機械検出。重複禁止ルール（`documentation_rules.md` §5）の運用装置 |

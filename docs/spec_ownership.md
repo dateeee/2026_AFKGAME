@@ -29,7 +29,9 @@
 | ヘッダの構成要素 | `docs/design/systems/ui.md` | `docs/tech/tech_design_system.md` | — | ISSUE-601 で確定（2026-08-02） |
 | モーダルの表示位置・閉じ方 | `docs/tech/tech_design_system.md` | `docs/design/systems/ui.md` | — | ISSUE-502 で確定（2026-08-02） |
 | ナビゲーション項目と「その他」まとめ | `docs/design/systems/ui.md` | `docs/tech/tech_design_system.md` | — | ISSUE-603 で確定（対象項目は `open_specs.md` 管理） |
-| ログアウトの挙動 | `docs/tech/tech_auth.md` | `docs/design/systems/ui.md` | — | API定義は `tech_api.md` が正（ISSUE-602） |
+| ログアウトの挙動（フロー・トークン失効） | `docs/tech/tech_auth.md` | `docs/design/systems/ui.md`, `docs/tech/tech_api.md` | — | エンドポイント定義そのものは `tech_api.md` が正（ISSUE-602） |
+| リフレッシュトークンの保管先 | `docs/tech/tech_auth.md` | `docs/tech/tech_architecture.md`, `docs/tech/tech_security.md` | `httpOnly` | §7 が正。LocalStorage で確定（ISSUE-704）。XSSリスクの受容判断は `tech_security.md` §11.7 |
+| 未確定仕様・調整待ち数値の管理ルール | `docs/development_process.md` | `docs/open_specs.md`, `docs/balance_backlog.md`, `CLAUDE.md` | — | §6 が正。台帳は open_specs / balance_backlog、振り分けと解消フローの正はプロセス側（ISSUE-701〜703） |
 
 ## 3. 境界の一般原則
 

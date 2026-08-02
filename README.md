@@ -57,6 +57,8 @@ VS Code は実行構成 **Full Stack** で同時起動できる（[.vscode/launc
 | `npm run test:e2e` | E2Eテスト（Playwright。専用ポート/DBで自動起動） |
 | `pytest` | バックエンドテスト（C1 100%・`htmlcov/` にHTMLレポート） |
 | `python scripts/check_doc_size.py` | ドキュメント文字数チェック |
+| `python scripts/check_docs.py` | ドキュメント機械検証（リンク・索引・曖昧語・正の逸脱） |
+| `python scripts/check_branch_list.py` | 分岐一覧の構造検証（`--tests` でテスト対応照合） |
 | `python scripts/rotate_reviews.py --apply` | レビュー結果の退避（直下は最新10件、超過分は `archive/` へ） |
 
 ## ディレクトリ構成
@@ -69,11 +71,7 @@ VS Code は実行構成 **Full Stack** で同時起動できる（[.vscode/launc
 │   ├── skills/                  # 工程7件 + 支援7件（プロジェクト非依存）
 │   ├── references/              # スキル共通リファレンス（同上）
 │   └── project/                 # プロジェクト固有プロファイル（索引: INDEX.md）
-├── docs/                        # 仕様書
-│   ├── *.md                     # プロセス・規約・バックログ
-│   ├── design/                  # ゲーム仕様（索引 + systems/）
-│   ├── tech/                    # 技術仕様（索引 + tech_*.md）
-│   ├── data/                    # マスターデータ（索引 + master/ towers/ skills/）
+├── docs/                        # 仕様書（*.md プロセス・規約 / design/ tech/ data/。索引は後述）
 │   └── reviews/                 # レビュー結果（自動生成。スキル名/日時.md）
 ├── diagrams/                    # 設計図（Mermaid）。索引 + 同名ディレクトリに分割
 ├── scripts/                     # 開発補助スクリプト
