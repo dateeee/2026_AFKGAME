@@ -14,7 +14,8 @@ description: バックエンド（FastAPI）の単体テストを pytest で作�
 |------|-----|
 | 配置 | `backend/tests/unit/test_<対象モジュール>.py` |
 | 対象 | `services/` `routers/` `master_data/`（`models/` `schemas/` は定義のみのため副次的） |
-| 設定 | `backend/pytest.ini`（`--cov=app --cov-branch --cov-report=term-missing` は設定済み） |
+| 設定 | `backend/pytest.ini`（`--cov=app --cov-branch`、term-missing + HTML の両レポート設定済み）/ `backend/.coveragerc`（除外・整形） |
+| レポート | ターミナル（term-missing）と `backend/htmlcov/index.html`（HTML・未達行がハイライト表示。gitignore済み） |
 | 共通フィクスチャ | `backend/tests/conftest.py`（`db` `user` `player` `character` `client` `tower_record`） |
 | マーカー | `pytestmark = pytest.mark.unit` をモジュール先頭に置く |
 
@@ -26,8 +27,11 @@ description: バックエンド（FastAPI）の単体テストを pytest で作�
 cd backend && python -m pytest --cov=app --cov-branch --cov-report=term-missing -q
 ```
 
+`cd backend && python -m pytest -q` だけでも同じ計測が走る（オプションは pytest.ini に設定済み）。
 対象モジュールだけを見る場合は `--cov=app.services.battle_service` のように絞る。
 **Missing 列の読み方は [references/c1_checklist.md](references/c1_checklist.md) の「レポートの読み方」を参照**（`181->189` のような矢印表記が C1 の未達分岐）。
+
+未達分岐が多いときは HTML レポート（`backend/htmlcov/index.html`）を開くと、未実行行が赤、**部分分岐が黄**でソース上に直接表示されるため原因を特定しやすい。
 
 ### 2. 分岐観点を洗い出す
 

@@ -52,8 +52,8 @@ VS Code の場合は実行構成 **Full Stack** で両方を同時起動でき�
 | コマンド | 内容 |
 |---------|------|
 | `npm run dev` / `npm run build` | フロント開発サーバー / 本番ビルド |
-| `npm run type-check` | TypeScript 型チェック（vue-tsc） |
-| `pytest` | バックエンドテスト（C1カバレッジ100%基準） |
+| `npm run type-check` | 型チェック（vue-tsc） |
+| `pytest` | バックエンドテスト（C1カバレッジ100%・`htmlcov/` にHTMLレポート出力） |
 | `python scripts/check_doc_size.py` | ドキュメント文字数チェック |
 
 ## ディレクトリ構成
