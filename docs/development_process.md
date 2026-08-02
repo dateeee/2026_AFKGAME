@@ -6,7 +6,8 @@
 
 ## 1. 目的と適用範囲
 
-- 開発を **要件定義 → 基本設計 → 詳細設計 → 製造 → 単体テスト → 結合テスト** の6工程で管理する
+- 開発を **要件定義 → 基本設計 → 詳細設計 → テストリスト作成 → 製造 → 単体テスト → 結合テスト** の7工程で管理する
+- 製造は **TDD（テスト駆動開発）** で進める。適用範囲はバックエンドのみ（§3.4）
 - 適用範囲は AFK GAME の全開発（Phase 1〜5）
 - 既存ドキュメントのディレクトリ構成は変更せず、本書で各工程への対応付けを行う
 - 各工程の成果物（Markdown）の記述規約（文字数上限・分割ルール）は [documentation_rules.md](documentation_rules.md) に従う
@@ -127,25 +128,38 @@ graph LR
 
 | Phase | 詳細設計 | 製造 | 単体テスト | 結合テスト |
 |-------|---------|------|-----------|-----------|
-| Phase 1 (MVP) | 完了 | 完了 | 進行中（遡及整備） | **未整備（遡及対象）** |
-| Phase 2 | 完了 | 進行中（装備・複数塔・認証・常設ショップは実装済み。日替わりショップは未実装） | 進行中 | 未着手 |
+| Phase 1 (MVP) | 完了 | 完了 | **完了（C1 100%）** | **未整備（遡及対象）** |
+| Phase 2 | 完了 | 進行中（装備・複数塔・認証・常設ショップは実装済み。日替わりショップは未実装） | **完了（実装済み範囲）** | 未着手 |
 | Phase 3〜5 | 完了（数値は仮置き） | 未着手 | — | — |
 
-- Phase 1〜2 の実装済み機能はテストの**遡及整備**を行う。Phase 2 の Phase完了ゲート通過までに単体・結合テストを整備すること
+- Phase 1〜2 の実装済み機能はテストの**遡及整備**を行う。単体テストは完了。Phase 2 の Phase完了ゲート通過までに結合テストを整備すること
 - テスト基盤（pytest / pytest-cov）は導入済み（`backend/pytest.ini`・`backend/tests/`・`backend/requirements-dev.txt`）。Playwright は結合テスト着手時に導入する
 
 ### 5.1 単体テストの整備状況（C1カバレッジ）
 
+**単体テストゲート通過（2026-08-02）**: `app/` 全40モジュールが C1 100%、306件 PASS。`# pragma: no cover` の使用はゼロ。
+
 | 対象 | 状況 |
 |------|------|
-| `routers/tower.py`・`schemas/` | 100%（整備済み） |
-| `services/battle_service.py` | 79%（オフライン簡略計算・装備連動の分岐が未整備） |
-| `routers/auth.py`・`services/auth_service.py` | 未整備 |
-| `routers/battle.py`・`game.py`・`shop.py`・`equipment.py` | 未整備 |
-| `services/equipment_service.py`・`game_state_builder.py` | 未整備 |
-| 全体 | 60% ← 完了基準は100% |
+| `routers/`（tower・auth・battle・game・shop・equipment） | 100% |
+| `services/`（battle・auth・equipment・game_state_builder） | 100% |
+| `master_data/`・`models/`・`schemas/` | 100% |
+| 基盤（`main`・`config`・`dependencies`・`exceptions`・`logging_config`・`db`・`middleware`） | 100% |
+| 全体 | **100%**（1,578 stmts / 296 branches） |
 
-- 数値は `pytest` 実行時に更新する。整備完了（全体100%）をもって単体テストゲート通過とする
+- 数値は `pytest` 実行時に更新する。製造の追加・変更時は同一変更内で100%を維持する
+
+### 5.2 単体テスト整備で検出した実装の疑義（未対応）
+
+| # | 対象 | 内容 | 影響度 |
+|---|------|------|--------|
+| 1 | `routers/auth.py` | パスワードリセットがメール確認トークンを共用。リセット完了で `email_verified=True` の副作用が生じ、リセット用トークンを `GET /verify-email` に流用可能。[tech_auth.md](tech/tech_auth.md) §6 は同テーブルをメール確認専用と定義 | 中（仕様乖離） |
+| 2 | `routers/battle.py` | 簡易計算が [tech_offline.md](tech/tech_offline.md) §4 と乖離。仕様は「乱数なし期待値計算・サマリーのみ」だが、実装は乱数込み10tickの実シミュレーションに倍率を掛けログも返す。装備ドロップ・自動売却は外挿されない | 中（仕様乖離） |
+| 3 | `services/battle_service.py` | `_get_potion_count()` が未使用のデッドコード | 低 |
+| 4 | `services/equipment_service.py` | L109 が非推奨の `Query.get()`。同ファイルの `get_effective_stats` は `db.get()` で不統一 | 低 |
+| 5 | `services/equipment_service.py` | オートセルの `RARITY_ORDER` 未知値を例外もログもなく無視 | 低 |
+
+- テストは**現状の実装に合わせて**作成済み。修正する場合は該当テストの期待値も併せて更新すること
 
 ## 6. 変更管理
 
@@ -160,6 +174,7 @@ graph LR
 
 | 日付 | 内容 |
 |------|------|
+| 2026-08-02 | **単体テストゲート通過**: バックエンド全40モジュールが C1 100%（306件 PASS）。§5・§5.1 を更新し、検出した実装の疑義を §5.2 に新設 |
 | 2026-08-02 | ドキュメント規約（documentation_rules.md）を適用範囲に追加、工程ゲートに「ドキュメント規約ゲート」を追加 |
 | 2026-08-02 | §6 変更管理に balance_backlog.md（仕様確定済み・数値のみ調整待ちの項目）の運用を追加 |
 | 2026-08-02 | テスト基盤（pytest / pytest-cov）の導入に伴い §5 の工程状況を更新し、§5.1 単体テストの整備状況（C1カバレッジ）を追加 |
