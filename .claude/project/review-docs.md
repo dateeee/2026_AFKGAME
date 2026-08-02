@@ -60,7 +60,7 @@
 
 | 分類 | 観点 |
 |------|------|
-| 仕様書との整合性 | ER図↔`tech_data.md` / クラス図↔`systems/`・`tech_data.md` / 画面遷移図↔`systems/ui.md` / 戦闘フロー図↔`tech_battle.md`・`tech_offline.md` / APIシーケンス図↔`tech_api.md`・`tech_architecture.md` / システム構成図↔`tech_architecture.md`・不変条件 |
+| 仕様書との整合性 | ER図↔`tech_data.md` / クラス図↔`systems/`・`tech_data.md` / 画面遷移図↔`systems/ui*.md` / 戦闘フロー図↔`tech_battle.md`・`tech_offline.md` / APIシーケンス図↔`tech_api.md`・`tech_architecture.md` / システム構成図↔`tech_architecture.md`・不変条件 |
 | コードとの整合性 | ER図↔`backend/app/models/` / クラス図↔`services/`・`stores/` / 画面遷移図↔`frontend/src/router/` / APIシーケンス図↔`routers/`・`frontend/src/api/` |
 | 設計図間の整合性 | ER図↔クラス図（属性・リレーション）、画面遷移図↔APIシーケンス図（遷移で発生する呼び出し）、戦闘フロー図↔APIシーケンス図（呼び出しタイミング） |
 | Mermaid構文 | [basic-design.md](basic-design.md) §4 の**機械検証**で判定する（目視しない） |

@@ -75,11 +75,11 @@ UI が使うのはセマンティックだけ。テーマ変更はプリミテ�
 | 要素 | 役割 |
 |------|------|
 | `AppShell` | `100dvh` の grid。スクロールするのは `main` だけ（`minmax(0, 1fr)` + `overflow-y: auto`） |
-| `AppHeader` | ブランド（ホームへ戻る）とゴールド。**ゴールドの表示場所はここ1箇所に固定する** |
+| `AppHeader` | ブランド（ホームへ戻る）・ゴールド・設定・お知らせ（Phase 3〜）。**ゴールドの表示場所はここ1箇所に固定する**。要素の一覧は [systems/ui.md](../design/systems/ui.md) ヘッダ表が正 |
 | `AppNav` | 項目は `navItems.ts` の1箇所。モバイルはボトム、PC（768px〜）は左サイドに自動で切り替わる |
 | `ConnectionBanner` | 通信エラー。`position: fixed` でレイアウトの流れから外す（フローに置くと本体がずれる） |
 
-- 画面追加は `navItems.ts` に1行追加すれば両ナビに反映される。**5項目を超えたら**モバイルで1項目64px を割るため「その他」へのまとめを検討する
+- 画面追加は `navItems.ts` に1行追加すれば両ナビに反映される。**5項目を超えたら**モバイルは1項目64px を割るため末尾を「その他」へまとめる（PCは全項目を並べる）。対象項目は [systems/ui.md](../design/systems/ui.md) ナビゲーション構造が正
 - セーフエリアは `.pt-safe` / `.pb-safe` / `.px-safe`、`index.html` の `viewport-fit=cover` と対で機能する
 - 拡大操作は禁止しない（`maximum-scale` を指定しない）。入力欄の自動ズームは16px指定で回避する
 

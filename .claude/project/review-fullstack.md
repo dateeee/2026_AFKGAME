@@ -35,8 +35,8 @@
 | `backend/app/schemas/*.py` | `frontend/src/types/`、`tech_api.md` |
 | `backend/app/services/*.py` | `design/systems/`、`tech_battle.md`・`tech_offline.md` |
 | `backend/app/master_data/*.py` | `docs/data/master/`、`docs/data/towers/`、`docs/data/skills/` |
-| `frontend/src/router/index.ts` | `diagrams/screen_transition.md`、`design/systems/ui.md` |
-| `frontend/src/views/`・`components/` | `design/systems/ui.md` |
+| `frontend/src/router/index.ts` | `diagrams/screen_transition.md`、`design/systems/ui*.md` |
+| `frontend/src/views/`・`components/` | `design/systems/ui*.md` |
 | `frontend/src/stores/`・`api/` | `backend/app/routers/`、`backend/app/schemas/` |
 
 ## 3. 観点
@@ -47,7 +47,7 @@
 | 仕様書-コード | 2 | **データモデル**: `models/` が `diagrams/er_diagram/` と一致するか（テーブル名・カラム名・型・リレーション、必須カラムの欠落、不要カラム） |
 | 仕様書-コード | 3 | **ビジネスロジック**: `services/` が `design/systems/` を正しく実装しているか（ダメージ計算・経験値/レベルアップ・ドロップ率・オフライン報酬・ショップ価格） |
 | 仕様書-コード | 4 | **マスターデータ**: `backend/app/master_data/` が `docs/data/` と一致するか。**`services/` に数値がハードコードされていないか** |
-| 仕様書-コード | 5 | **UI仕様**: 各画面の構成要素・表示情報（ステータス・レベル・ゴールド等）が `systems/ui.md` と一致するか |
+| 仕様書-コード | 5 | **UI仕様**: 各画面の構成要素・表示情報（ステータス・レベル・ゴールド等）が `systems/ui*.md` と一致するか |
 | 仕様書-コード | 6 | **画面遷移**: `frontend/src/router/index.ts` が `diagrams/screen_transition.md` と一致し、全画面がルート定義にあり、認証ガードが適切か |
 | 統合整合性 | 7 | **API型整合**: `frontend/src/types/` と `backend/app/schemas/` の一致（camelCase↔snake_case 変換、オプショナル/必須、enum・定数値） |
 | 統合整合性 | 8 | **エンドポイント整合**: `frontend/src/api/` の URL・HTTPメソッド・ボディ・レスポンス期待値が `routers/` と一致するか |

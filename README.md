@@ -12,7 +12,7 @@
 | フロントエンド | Vue.js 3 (SPA / Composition API / TypeScript) + Vite + Pinia + Tailwind CSS |
 | バックエンド | Python / FastAPI + SQLAlchemy 2.0 + Pydantic v2 |
 | DB | SQLite（MVP）→ PostgreSQL（本番） |
-| 描画方式 | テキストベース（Canvas不使用）。アイテム等にはアイコン画像を使用 |
+| 描画方式 | テキストベース（Canvas不使用）。UIアイコンはSVG、アイテムは画像 |
 
 ## セットアップ
 
@@ -35,7 +35,7 @@ npm install
 npm run dev        # http://localhost:5173（/api は :8000 へプロキシ）
 ```
 
-VS Code の場合は実行構成 **Full Stack** で両方を同時起動できる（[.vscode/launch.json](.vscode/launch.json)）。
+VS Code は実行構成 **Full Stack** で同時起動できる（[.vscode/launch.json](.vscode/launch.json)）。
 
 ### 環境変数（`backend/.env`）
 
@@ -54,10 +54,10 @@ VS Code の場合は実行構成 **Full Stack** で両方を同時起動でき�
 |---------|------|
 | `npm run dev` / `npm run build` | フロント開発サーバー / 本番ビルド |
 | `npm run type-check` | 型チェック（vue-tsc + E2E） |
-| `npm run test:e2e` | E2Eテスト（Playwright。フロント・バックを専用ポート/DBで自動起動） |
+| `npm run test:e2e` | E2Eテスト（Playwright。専用ポート/DBで自動起動） |
 | `pytest` | バックエンドテスト（C1 100%・`htmlcov/` にHTMLレポート） |
 | `python scripts/check_doc_size.py` | ドキュメント文字数チェック |
-| `python scripts/rotate_reviews.py --apply` | レビュー結果のローテーション（直下は最新10件、超過分は `archive/` へ） |
+| `python scripts/rotate_reviews.py --apply` | レビュー結果の退避（直下は最新10件、超過分は `archive/` へ） |
 
 ## ディレクトリ構成
 
@@ -66,15 +66,15 @@ VS Code の場合は実行構成 **Full Stack** で両方を同時起動でき�
 ├── README.md                    # 本ファイル（概要・セットアップ）
 ├── CLAUDE.md                    # AIエージェント向け開発ルール
 ├── .claude/                     # エージェント定義
-│   ├── skills/                  # 工程スキル7件 + 支援スキル7件（プロジェクト非依存）
+│   ├── skills/                  # 工程7件 + 支援7件（プロジェクト非依存）
 │   ├── references/              # スキル共通リファレンス（同上）
 │   └── project/                 # プロジェクト固有プロファイル（索引: INDEX.md）
 ├── docs/                        # 仕様書
-│   ├── *.md                     # プロセス・規約・バックログ（→「ドキュメント索引」）
-│   ├── design/                  # ゲーム仕様（索引 game_spec.md + systems/）
-│   ├── tech/                    # 技術仕様（索引 tech_spec.md + tech_*.md）
-│   ├── data/                    # マスターデータ（索引 master_data.md + master/ towers/ skills/）
-│   └── reviews/                 # レビュー結果（自動生成。スキル名/日時.md + archive/）
+│   ├── *.md                     # プロセス・規約・バックログ
+│   ├── design/                  # ゲーム仕様（索引 + systems/）
+│   ├── tech/                    # 技術仕様（索引 + tech_*.md）
+│   ├── data/                    # マスターデータ（索引 + master/ towers/ skills/）
+│   └── reviews/                 # レビュー結果（自動生成。スキル名/日時.md）
 ├── diagrams/                    # 設計図（Mermaid）。索引 + 同名ディレクトリに分割
 ├── scripts/                     # 開発補助スクリプト
 ├── frontend/                    # Vue.js SPA
@@ -115,22 +115,23 @@ VS Code の場合は実行構成 **Full Stack** で両方を同時起動でき�
 - [docs/documentation_rules.md](docs/documentation_rules.md) — ドキュメント規約（文字数上限・分割）
 - [docs/glossary.md](docs/glossary.md) — 用語集
 - [docs/balance_backlog.md](docs/balance_backlog.md) — バランス調整（見直す数値）
+- [docs/open_specs.md](docs/open_specs.md) — 未確定仕様（確定後に削除）
 - [docs/known_issues.md](docs/known_issues.md) — 実装の疑義
 
 大きな仕様書は **索引 + 個別ファイル** 構成。索引から辿ること。
 
 ### 仕様書
 - [docs/design/game_spec.md](docs/design/game_spec.md) — ゲーム仕様の索引
-  - [systems/](docs/design/systems/) — character / battle / equipment / economy / dungeon / endgame / ui
+  - [systems/](docs/design/systems/) — character / battle / equipment / economy / dungeon / endgame / ui / ui_onboarding
   - 要件: [product](docs/design/product_requirements.md) プロダクト / [nfr](docs/design/non_functional_requirements.md) 非機能 / [operation](docs/design/operation_requirements.md) 運用
 - [docs/tech/tech_spec.md](docs/tech/tech_spec.md) — 技術仕様の索引
   - 基本設計: [data](docs/tech/tech_data.md) データ / [structure](docs/tech/tech_structure.md) 構成 / [api](docs/tech/tech_api.md) API / [architecture](docs/tech/tech_architecture.md) 方針 / [logging](docs/tech/tech_logging.md) ログ / [auth](docs/tech/tech_auth.md) 認証
   - 非機能（設計）: [performance](docs/tech/tech_performance.md) 性能・容量 / [security](docs/tech/tech_security.md) セキュリティ / [operations](docs/tech/tech_operations.md) 運用
-  - 詳細設計: [battle](docs/tech/tech_battle.md) 戦闘 / [offline](docs/tech/tech_offline.md) オフライン / [tick](docs/tech/tech_tick.md) tick / [polling](docs/tech/tech_polling.md) フロント / [state](docs/tech/tech_state.md) 状態 / [rng](docs/tech/tech_rng.md) 乱数 / [numeric](docs/tech/tech_numeric.md) 数値 / [shop](docs/tech/tech_shop.md) ショップ / [design-system](docs/tech/tech_design_system.md) デザインシステム
+  - 詳細設計: [battle](docs/tech/tech_battle.md) 戦闘 / [offline](docs/tech/tech_offline.md) オフライン / [tick](docs/tech/tech_tick.md) / [polling](docs/tech/tech_polling.md) フロント / [state](docs/tech/tech_state.md) 状態 / [rng](docs/tech/tech_rng.md) 乱数 / [numeric](docs/tech/tech_numeric.md) 数値 / [shop](docs/tech/tech_shop.md) ショップ / [design-system](docs/tech/tech_design_system.md)
 - [docs/data/master_data.md](docs/data/master_data.md) — マスターデータの索引 + 塔データ一覧
   - [master/](docs/data/master/) — character / item / equipment / base / endgame
-  - [towers/TOWERS_OVERVIEW.md](docs/data/towers/TOWERS_OVERVIEW.md) 全塔概要一覧 / [skills/SKILLS_OVERVIEW.md](docs/data/skills/SKILLS_OVERVIEW.md) スキルシステム概要
+  - [TOWERS_OVERVIEW.md](docs/data/towers/TOWERS_OVERVIEW.md) 全塔概要一覧 / [SKILLS_OVERVIEW.md](docs/data/skills/SKILLS_OVERVIEW.md) スキルシステム概要
 
 ### 設計図
-- 全6図とも索引 + 同名ディレクトリ構成: [er_diagram.md](diagrams/er_diagram.md) ER図 / [class_diagram.md](diagrams/class_diagram.md) クラス図 / [battle_flow.md](diagrams/battle_flow.md) 戦闘フロー図 / [api_sequence.md](diagrams/api_sequence.md) APIシーケンス図
-- [system_architecture.md](diagrams/system_architecture.md) システム構成図（全体構成 / tick / サーバー権威 / 本番構成）/ [screen_transition.md](diagrams/screen_transition.md) 画面遷移図（認証 / ナビ / Phase 5 / モーダル）
+- 全6図とも索引 + 同名ディレクトリ構成: [er_diagram.md](diagrams/er_diagram.md) / [class_diagram.md](diagrams/class_diagram.md) / [battle_flow.md](diagrams/battle_flow.md) / [api_sequence.md](diagrams/api_sequence.md)
+- [system_architecture.md](diagrams/system_architecture.md)（全体構成 / tick / サーバー権威 / 本番構成）/ [screen_transition.md](diagrams/screen_transition.md)（認証 / ナビ / Phase 5 / モーダル）

@@ -59,7 +59,7 @@
 | 経済・ショップ | `design/systems/economy.md`、`data/master/` |
 | ダンジョン・塔 | `design/systems/dungeon.md`、`data/towers/` |
 | エンドゲーム | `design/systems/endgame.md`、`data/master/` |
-| UI・画面 | `design/systems/ui.md`、`diagrams/screen_transition.md` |
+| UI・画面 | `design/systems/ui*.md`、`diagrams/screen_transition.md` |
 | オフライン・tick | `tech/tech_offline.md`、`tech/tech_tick.md`、`tech/tech_polling.md` |
 | 認証 | `tech/tech_auth.md` |
 
