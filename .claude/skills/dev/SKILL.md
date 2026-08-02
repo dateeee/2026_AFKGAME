@@ -75,16 +75,23 @@ description: AFK GAME の機能をフロントエンド（Vue 3）とバック�
 
 仕様書に**分岐一覧が無い**場合は、実装に入る前にユーザーへ通知し、詳細設計へ分岐一覧を追記してから進める。
 
-## 5. 実装の実行
+## 5. 実装の実行（バックエンドはTDD）
 
 **バックエンドを先に実装する。**
 
-1. **モデル** (`backend/app/models/`) — SQLAlchemy 2.0 の `Mapped[]` + `mapped_column()`
-2. **スキーマ** (`backend/app/schemas/`) — Pydantic v2。CamelModel を継承
-3. **サービス** (`backend/app/services/`) — ビジネスロジック
-4. **ルーター** (`backend/app/routers/`) — FastAPI の APIRouter
+1. **テストリスト** (`backend/tests/unit/`) — 分岐一覧を1観点1テストへ展開し、**失敗するテスト**として書く。実行して期待どおり落ちること（Red）を確認する → 詳細は **unit-test スキル**
+2. **モデル** (`backend/app/models/`) — SQLAlchemy 2.0 の `Mapped[]` + `mapped_column()`
+3. **スキーマ** (`backend/app/schemas/`) — Pydantic v2。CamelModel を継承
+4. **サービス** (`backend/app/services/`) — ビジネスロジック。**Red → Green → Refactor** を1テストずつ回す
+5. **ルーター** (`backend/app/routers/`) — FastAPI の APIRouter。TestClient のテストを先に書く
 
-続いてフロントエンド。
+**TDDの原則**
+
+- Green は**最小の実装**で通す。先回りして未テストの機能を作り込まない
+- テストが通らないとき、**期待値のほうを書き換えない**。テストが誤りなら詳細設計に戻って分岐一覧を正す
+- 実装中に分岐一覧に無い分岐を見つけたら、**詳細設計へ追記 → テスト追加 → 実装**の順で進める
+
+続いてフロントエンド（**TDD対象外**。型チェックとE2Eで検証）。
 
 1. **型定義** (`frontend/src/types/`) — バックエンドのスキーマに対応するTypeScript型
 2. **API層** (`frontend/src/api/`) — API通信
@@ -94,11 +101,11 @@ description: AFK GAME の機能をフロントエンド（Vue 3）とバック�
 
 ## 6. 動作確認
 
-- バックエンド: `cd backend && python -m py_compile app/main.py`
+- バックエンド: `cd backend && python -m pytest -q`（**全PASS = Green** が製造完了の条件）
 - フロントエンド: `cd frontend && npm run type-check`
 - lint（設定がある場合）
 
-単体テストの作成は本スキルの範囲外。製造完了後に **unit-test スキル**（C1カバレッジ100%）へ引き継ぐ。
+C1カバレッジの測定と、テストリストから漏れた分岐の補完は **unit-test スキル**へ引き継ぐ（開発工程定義書 §3.6）。
 
 ## 7. 完了報告
 
