@@ -12,6 +12,7 @@
 
 | ファイル | 内容 |
 |---------|------|
+| `docs/reviews/diagrams-review/2026-08-02_181653.md` | 設計整合ゲートの確認レビュー（差分モード）。ISSUE-201〜204 の解消を全件確認し、新規指摘5件（高1・中2・低2）を記録 |
 | `diagrams/system_architecture/application.md` | **ISSUE-201**: Schemas サブグラフを `backend/app/schemas/` の実装配置へ修正。実在しない `character.py` を削除し、`tower.py`・`equipment.py`（Phase 2〜）・`shop.py` を追加。`CharacterResponse` / `GameStateResponse` を `player.py` へ、存在しない `BattleLogEntry` を削除、`TokenResponse` → `AuthResponse`。Phase 3〜5 の追加スキーマは図に描かない旨を注記 |
 | `docs/tech/tech_structure.md` | **ISSUE-202**: §2 の `routers/` ツリーに `party.py`（Phase 3〜）・`boss_rush.py`・`prestige.py`（Phase 5〜）を追加。システム構成図が描く11ルーターと一致させた |
 | `diagrams/api_sequence/auth.md` | **ISSUE-203**: 「ログアウト」シーケンス（`POST /api/auth/logout` → RefreshToken 無効化 → トークン破棄）を「トークンリフレッシュ」の直後に追加 |
