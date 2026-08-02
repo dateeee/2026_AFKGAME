@@ -1,0 +1,198 @@
+#!/usr/bin/env python3
+"""ドキュメント機械検証（リンク・索引到達性・曖昧語・正の逸脱）
+
+レビュー工程で繰り返し検出されてきた機械判定可能な指摘クラスを、
+使い捨てスクリプトではなく常設チェックとして固定する。
+
+検証項目:
+    1. リンク       相対Markdownリンクの参照先が実在するか
+    2. 索引到達性   docs/**・diagrams/** の全ファイルが README.md / CLAUDE.md から辿れるか
+    3. 曖昧語       仕様書本文に「適宜」「おおよそ」「TBD」「後日検討」「未定」が残っていないか
+    4. 正の逸脱     docs/spec_ownership.md の検出パターンが正・許可ファイル以外に現れていないか
+
+使い方:
+    python scripts/check_docs.py            # 全検証（ERROR があれば exit 1）
+    python scripts/check_docs.py --links    # リンク検査のみ（--reach / --words / --owner も同様）
+"""
+
+from __future__ import annotations
+
+import re
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+OWNERSHIP = ROOT / "docs" / "spec_ownership.md"
+
+# 検査対象外（check_doc_size.py と同基準 + 追記型アーカイブ）
+EXCLUDE = (
+    "node_modules/",
+    ".git/",
+    ".claude/worktrees/",
+    ".venv/",
+    "venv/",
+    "dist/",
+    "docs/reviews/",   # 追記型アーカイブ。過去レポートのリンク切れは修正しない（documentation_rules.md §8）
+    "docs/changelog.md",  # 追記型アーカイブ。過去行は当時のパスを保持する
+)
+
+# 曖昧語（detail-design スキル §5.1 / doc-review 観点9 を常設化）
+AMBIGUOUS = re.compile(r"適宜|おおよそ|TBD|後日検討|未定(?!義)")
+# 曖昧語検査の対象は仕様書系のみ（管理台帳・プロセス文書は「未定」を扱う場でありうるため除外）
+AMBIGUOUS_DIRS = ("docs/design/", "docs/tech/", "docs/data/", "diagrams/")
+AMBIGUOUS_EXCLUDE = ("docs/open_specs.md", "docs/balance_backlog.md", "docs/known_issues.md")
+
+LINK = re.compile(r"!?\[[^\]]*\]\(([^)\s]+)(?:\s+\"[^\"]*\")?\)")
+
+
+def targets() -> list[Path]:
+    result = []
+    for path in sorted(ROOT.rglob("*.md")):
+        rel = path.relative_to(ROOT).as_posix()
+        if any(rel.startswith(x) or f"/{x}" in f"/{rel}" for x in EXCLUDE):
+            continue
+        result.append(path)
+    return result
+
+
+def body_lines(path: Path):
+    """コードフェンス外の (行番号, 行) を返す。"""
+    in_code = False
+    for no, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+        if line.lstrip().startswith("```"):
+            in_code = not in_code
+            continue
+        if not in_code:
+            yield no, line
+
+
+def extract_links(path: Path) -> list[tuple[int, str]]:
+    """(行番号, リンク先) の一覧。外部URL・アンカーのみ・テンプレート表記は除く。"""
+    links = []
+    for no, line in body_lines(path):
+        for target in LINK.findall(line):
+            if target.startswith(("http://", "https://", "mailto:", "#")) or "{" in target:
+                continue
+            links.append((no, target.split("#")[0]))
+    return [(no, t) for no, t in links if t]
+
+
+def check_links(files: list[Path]) -> list[str]:
+    errors = []
+    for path in files:
+        rel = path.relative_to(ROOT).as_posix()
+        for no, target in extract_links(path):
+            resolved = (path.parent / target).resolve()
+            if not resolved.exists():
+                errors.append(f"ERROR {rel}:{no}: リンク切れ → {target}")
+    return errors
+
+
+def check_reachability(files: list[Path]) -> list[str]:
+    """README.md / CLAUDE.md を起点に、docs/**・diagrams/** の全 .md へ到達できるか。"""
+    nodes = {p.resolve() for p in files}
+    graph: dict[Path, set[Path]] = {}
+    for path in files:
+        edges = set()
+        for _, target in extract_links(path):
+            resolved = (path.parent / target).resolve()
+            if resolved in nodes:
+                edges.add(resolved)
+        graph[path.resolve()] = edges
+
+    seen: set[Path] = set()
+    stack = [p.resolve() for p in (ROOT / "README.md", ROOT / "CLAUDE.md") if p.exists()]
+    while stack:
+        node = stack.pop()
+        if node in seen:
+            continue
+        seen.add(node)
+        stack.extend(graph.get(node, ()))
+
+    errors = []
+    for path in sorted(nodes - seen):
+        rel = path.relative_to(ROOT).as_posix()
+        if rel.startswith(("docs/", "diagrams/")):
+            errors.append(f"ERROR {rel}: README.md / CLAUDE.md の索引から到達できない（索引未登録）")
+    return errors
+
+
+def check_ambiguous(files: list[Path]) -> list[str]:
+    errors = []
+    for path in files:
+        rel = path.relative_to(ROOT).as_posix()
+        if not rel.startswith(AMBIGUOUS_DIRS) or rel in AMBIGUOUS_EXCLUDE:
+            continue
+        for no, line in body_lines(path):
+            if "open_specs" in line or "balance_backlog" in line:  # 管理台帳への誘導行は正当な言及
+                continue
+            m = AMBIGUOUS.search(line)
+            if m:
+                errors.append(f"ERROR {rel}:{no}: 曖昧語「{m.group()}」が残っている（未確定なら open_specs.md へ登録する）")
+    return errors
+
+
+def parse_ownership() -> list[tuple[str, str, set[str], re.Pattern]]:
+    """spec_ownership.md から (トピック, 正, 許可, パターン) を読む。検出パターン列が空の行は対象外。"""
+    if not OWNERSHIP.exists():
+        return []
+    rows = []
+    for _, line in body_lines(OWNERSHIP):
+        cells = [c.strip() for c in line.strip().strip("|").split("|")]
+        if len(cells) < 4 or cells[0] in ("トピック", "") or set(cells[0]) <= {"-", " ", ":"}:
+            continue
+        topic, canonical, allowed, pattern = cells[0], cells[1], cells[2], cells[3]
+        pattern = pattern.strip("`").strip()
+        if not pattern or pattern in ("—", "-"):
+            continue
+        canonical = canonical.strip("`")
+        allow = {canonical} | {a.strip().strip("`") for a in allowed.split(",") if a.strip().strip("`") not in ("—", "-", "")}
+        rows.append((topic, canonical, allow, re.compile(pattern)))
+    return rows
+
+
+def check_ownership(files: list[Path]) -> list[str]:
+    errors = []
+    rules = parse_ownership()
+    for path in files:
+        rel = path.relative_to(ROOT).as_posix()
+        if not rel.startswith(("docs/design/", "docs/tech/", "docs/data/")):
+            continue
+        text = path.read_text(encoding="utf-8")
+        for topic, canonical, allow, rx in rules:
+            if rel not in allow and rx.search(text):
+                errors.append(f"ERROR {rel}: 「{topic}」の記載は {canonical} が正（重複させずリンクする。docs/spec_ownership.md）")
+    return errors
+
+
+def main() -> int:
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except (AttributeError, OSError):  # pragma: no cover - 実行環境依存
+        pass
+
+    args = sys.argv[1:]
+    files = targets()
+    checks = {
+        "--links": ("リンク", check_links),
+        "--reach": ("索引到達性", check_reachability),
+        "--words": ("曖昧語", check_ambiguous),
+        "--owner": ("正の逸脱", check_ownership),
+    }
+    selected = [k for k in checks if k in args] or list(checks)
+
+    total = 0
+    for key in selected:
+        label, fn = checks[key]
+        errors = fn(files)
+        total += len(errors)
+        for e in errors:
+            print(e)
+        print(f"[{label}] {'OK' if not errors else f'{len(errors)} 件'}")
+
+    print(f"\n{len(files)} files checked: {'違反なし' if total == 0 else f'{total} 件の違反'}")
+    return 1 if total else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

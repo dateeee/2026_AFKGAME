@@ -12,6 +12,14 @@
 
 | ファイル | 内容 |
 |---------|------|
+| `scripts/check_docs.py` | **新規（プロセス改善）**: ドキュメント機械検証の常設化（リンク切れ・索引到達性・曖昧語・正の逸脱）。レビューで再発していた機械検出可能な指摘クラスを LLM 目視から移管し、仕様確定ゲートの判定に追加。初回実行で `SKILLS_OVERVIEW.md` の `000_テンプレート.md` 索引未登録を検出・解消 |
+| `scripts/check_branch_list.py` | **新規（プロセス改善）**: 分岐一覧の構造検証（連番・空セル・真偽対・ループ）と、`--tests` でのテスト対応照合（docstring マーカー「`分岐: tech_<x>.md §<節> #<行>`」）。テストリストゲートの判定に追加 |
+| `docs/spec_ownership.md` | **新規（プロセス改善）**: 正の所在マップ。トピック→正ファイルの宣言台帳（経験値式・ゲスト削除90日・UI境界ほか7件を初期登録）。`check_docs.py --owner` が逸脱を機械検出。重複禁止ルール（`documentation_rules.md` §5）の運用装置 |
+| `scripts/check_doc_size.py` | 上限90%超のファイルに残量WARNを追加（ISSUE-608 型の「修正反映で超過」を予防し、分割・圧縮を先行させる） |
+| `.claude/references/review-format.md` / `review-procedure.md` | ISSUE番号をディレクトリ内一意（100の位切り上げ採番）に変更、「検出可能工程」欄を新設（工程改善への還元用）。差分モードに前回指摘ファイルのペア全体照合を追加、常設スクリプト優先を明記 |
+| `.claude/skills/fix-specs/SKILL.md` / `basic-design/SKILL.md` | 収束改善: 同一ファイル組に2件以上の指摘はペア全体を突合して境界確定、修正後検証は別コンテキストで実施。新規仕様ファイル追加時の3点（索引登録・境界明記・正の宣言）を追加、基本設計のゲート2種を並走させ修正を1パスに統合 |
+| `.claude/project/` review-docs / detail-design / test-list / basic-design / profile | doc-review 観点9・11・14を `check_docs.py` へ移管、fix-specs 固有ルール（ペア突合・検証サブエージェント）を追加。分岐一覧の標準形式（4列）と検証コマンドを規定、常用コマンド表へ新スクリプト2件を登録 |
+| `docs/development_process.md` / `documentation_rules.md` / `README.md` / `CLAUDE.md` | 工程ゲートの判定手段へ常設スクリプトを追加（仕様確定・設計整合・テストリスト）。正の所在マップを索引・重複禁止ルールへ接続 |
 | `docs/design/systems/ui_onboarding.md` | **ISSUE-608（新規ファイル）**: `ui.md` が区分C上限まで残り27字となり以降の追記ができないため、「認証画面（Phase 2〜）」と「チュートリアル（Phase 1〜）」を切り出した（`documentation_rules.md` §6）。`ui.md` は 7,973 → 6,121字。索引（`README.md` / `CLAUDE.md` / `game_spec.md` §3）と `.claude/project/**` の対象ファイル指定（`systems/ui.md` → `systems/ui*.md`）を更新 |
 | `docs/design/systems/ui.md` | **ISSUE-601**: 設定タブに「ヘッダ右端の設定導線と同一画面（導線は2箇所）」を明記。**ISSUE-602**: ログアウト行の参照を `tech_auth.md` §3 へ。**ISSUE-604**: 「その他」まとめの対象項目を `open_specs.md` 管理へ変更（本文から未確定事項を排除）。**ISSUE-605**: Phase 1 レイアウト例にボトムナビ行を追加。**ISSUE-606**: 数値表示の実装先参照を索引 `tech_spec.md` §3 から実体 `tech_structure.md` §3 へ |
 | `docs/tech/tech_design_system.md` | **ISSUE-601**: `AppHeader` の構成要素をブランド・ゴールド・設定・お知らせ（Phase 3〜）へ揃え、一覧は `systems/ui.md` ヘッダ表が正と明記。**ISSUE-603**: 「その他」まとめを「検討する」から確定表現（PCは全項目を並べる）へ改め、対象項目の正を `systems/ui.md` に置いた |

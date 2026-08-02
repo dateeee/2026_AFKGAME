@@ -55,6 +55,7 @@
 | 4 | テスト関数名は**日本語**で期待する振る舞いを書く（例: `test_目標階が上限と一致していれば追従する`） |
 | 5 | 境界値・等価クラスは `@pytest.mark.parametrize` にまとめ、各ケースに `#` コメントで意図を書く |
 | 6 | **1テスト1観点**。複数分岐を1つのテストに詰め込まない |
+| 7 | テスト関数の docstring に対応マーカー「`分岐: tech_<対象>.md §<節> #<行番号>`」を書く（一覧が1つの文書は §省略可、`#3,4` と複数可）。`check_branch_list.py --tests` がこれで対応を照合する |
 
 実装パターンは一般形を [.claude/skills/test-list/references/patterns.md](../skills/test-list/references/patterns.md)、AFK GAME のモジュール名・エラーコードを使った実例を [test-patterns.md](test-patterns.md) に置いている。
 
@@ -73,7 +74,7 @@
 
 一般スキルの完了基準に加え、以下を満たすこと。
 
-- 分岐一覧の全項目にテストが対応している
+- 分岐一覧の全項目にテストが対応している: `python scripts/check_branch_list.py --tests` が exit 0（マーカーで機械照合）
 - 実行して**期待どおりに失敗する**（Red の確認）: `cd backend && python -m pytest -q`
 - 実装を先に書いていない（テストの後追いで書いていない）
 

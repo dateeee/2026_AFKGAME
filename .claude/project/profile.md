@@ -51,7 +51,9 @@
 | 未達分岐の特定 | `cd backend && python -m pytest --cov=app --cov-branch --cov-report=term-missing -q` |
 | HTMLカバレッジレポート | `backend/htmlcov/index.html`（未実行行=赤、部分分岐=黄） |
 | フロント型チェック | `cd frontend && npm run type-check`（`vue-tsc --noEmit`） |
-| ドキュメント規約チェック | `python scripts/check_doc_size.py`（`--list` / `--sections`） |
+| ドキュメント規約チェック | `python scripts/check_doc_size.py`（`--list` / `--sections`。上限90%超は残量WARN） |
+| ドキュメント機械検証 | `python scripts/check_docs.py`（リンク・索引到達性・曖昧語・正の逸脱。`--links` 等で個別実行） |
+| 分岐一覧の検証 | `python scripts/check_branch_list.py`（構造検証。`--tests` でテストとの対応照合） |
 
 ## 5. アーキテクチャ不変条件
 
@@ -85,5 +87,7 @@
 |---|------|
 | 1 | 文字数上限は [docs/documentation_rules.md](../../docs/documentation_rules.md) §3（`.claude/**` は区分D = 5,000字） |
 | 2 | **変更履歴セクションを個々のファイルに置かない**。改稿時は [docs/changelog.md](../../docs/changelog.md) の先頭へ1行追記する（§5.1） |
-| 3 | ドキュメントの作成・改稿後は `python scripts/check_doc_size.py` を実行する（超過・履歴セクションの復活は exit 1） |
+| 3 | ドキュメントの作成・改稿後は `python scripts/check_doc_size.py` と `python scripts/check_docs.py` を実行する（違反は exit 1） |
+| 4 | 同じ数値・仕様の正は1ファイル。トピックごとの正は [docs/spec_ownership.md](../../docs/spec_ownership.md) で宣言する |
+| 5 | 機械検証は常設スクリプト（§4）を優先する。使い捨てスクリプトは常設で賄えない検証のみ。同種の使い捨てを繰り返すなら常設化を提案する |
 

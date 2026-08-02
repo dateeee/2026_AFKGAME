@@ -69,12 +69,12 @@
 
 - 仕様書・設計図間に矛盾がない（`diagrams-review` の指摘解消）
 - 要件定義の非機能・運用要件がすべて、実現方式を定めたいずれかの成果物に対応づいている
-- `python scripts/check_doc_size.py` が exit 0
+- 新規の仕様ファイルは索引（`README.md`）へ登録し、既存ファイルと記述が重なるトピックの正を [docs/spec_ownership.md](../../docs/spec_ownership.md) へ宣言している
+- `python scripts/check_doc_size.py`・`python scripts/check_docs.py` が exit 0
 
 ## 6. 次工程
 
 | 次にやること | 手段 |
 |------------|------|
-| 設計整合ゲート | `diagrams-review` スキル |
-| 仕様確定ゲート | `doc-review` スキル |
+| 設計整合・仕様確定ゲート | `diagrams-review` → `doc-review` を続けて実行し、両レポートの指摘を**1回の修正パス**で反映する |
 | 詳細設計へ | `detail-design` スキル |

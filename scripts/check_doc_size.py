@@ -129,6 +129,11 @@ def main() -> int:
         over = chars - limit
         print(f"ERROR {rel}: {chars:,}字 > {limit:,}字（区分{zone[0]}）- {over:,}字 超過")
 
+    # 上限の90%を超えたファイルは、次の追記が超過を生む前に分割・圧縮を先行させる（レビュー指摘の反映が規約違反でブロックされる事態を防ぐ）
+    nears = [r for r in rows if r[3] * 0.9 < r[2] <= r[3] and r[0] not in KNOWN_OVERSIZED]
+    for rel, zone, chars, limit in nears:
+        print(f"WARN  {rel}: {chars:,}字（上限{limit:,}字・残り{limit - chars:,}字）- 追記の前に分割・圧縮を検討（§6）")
+
     # 変更履歴は docs/changelog.md へ集約する（§5.1）。個別ファイルへの復活を禁止する
     histories = [(rel, no, head) for rel, _, _, _ in rows for no, head in history_sections(rel)]
     for rel, no, head in histories:
@@ -140,7 +145,7 @@ def main() -> int:
                 print(f"WARN  {rel}: {heading} が {chars:,}字 > {SECTION_LIMIT:,}字")
 
     ok = len(rows) - len(errors) - len(known)
-    print(f"\n{len(rows)} files checked: {ok} OK, {len(known)} 既知超過, {len(errors)} 違反", end="")
+    print(f"\n{len(rows)} files checked: {ok} OK, {len(known)} 既知超過, {len(errors)} 違反, 残量WARN {len(nears)}", end="")
     print(f", 変更履歴 {len(histories)} 件" if histories else "")
 
     if errors:

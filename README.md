@@ -113,6 +113,7 @@ VS Code は実行構成 **Full Stack** で同時起動できる（[.vscode/launc
 - [docs/development_process.md](docs/development_process.md) — 開発工程（7工程・TDD・テスト標準）
 - [.claude/project/INDEX.md](.claude/project/INDEX.md) — 工程↔スキル↔プロファイル対応表
 - [docs/documentation_rules.md](docs/documentation_rules.md) — ドキュメント規約（文字数上限・分割）
+- [docs/spec_ownership.md](docs/spec_ownership.md) — 正の所在マップ
 - [docs/glossary.md](docs/glossary.md) — 用語集
 - [docs/balance_backlog.md](docs/balance_backlog.md) — バランス調整（見直す数値）
 - [docs/open_specs.md](docs/open_specs.md) — 未確定仕様（確定後に削除）
