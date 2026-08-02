@@ -12,6 +12,13 @@
 
 | ファイル | 内容 |
 |---------|------|
+| `docs/tech/tech_shop.md` | **新規**。Phase 2 日替わりショップの詳細設計（遅延評価による24時間更新・5枠の抽選手順・ステータス算出・購入フロー・データ構造・分岐一覧36件） |
+| `docs/tech/tech_spec.md` | 詳細仕様の索引に `tech_shop.md` を追加 |
+| `docs/tech/tech_api.md` | `/api/shop/lineup`・`/api/shop/buy` に `tech_shop.md` へのリンクと、常設／日替わり指定の排他（422）を追記 |
+| `docs/tech/tech_data.md` | ゲーム状態JSONの `"shop"` コメントを削除し、日替わりショップ状態は `GET /api/shop/lineup` で取得する旨に修正 |
+| `docs/data/master/equipment.md` | §6.1 のショップ購入時の装備レベルを確定（**最高到達階層と同じ・下限1**）。定義のない「ショップテーブル参照」を解消 |
+| `diagrams/er_diagram/item.md` | `ShopDailySlot` に `level`・`stat_atk/def/hp/spd` を追加し、`item_id` を `base_id` へ改名（**抽選結果を生成時に確定保存**するため） |
+| `docs/balance_backlog.md` | B-6（日替わりショップの帯内レアリティ出現率）を追加 |
 | `docs/data/towers/TOWERS_OVERVIEW.md` | 仕様レビュー ISSUE-001 を反映。**塔別表「対応フェーズ」・ダンジョン別表「解放フェーズ」を `afa3d41` の後ろ倒し（1ダンジョン=1Phase）へ追従**（塔2=Phase 2／塔3-5=3／塔6-8=4／塔9-10=5）。`game_spec.md §1` を正とする旨を明記 |
 | `docs/design/systems/endgame.md` | ISSUE-003。マイルストーン報酬・転生ボーナス一覧・深淵の塔スケーリング式の3テーブルを削除し、`master/endgame.md §15.2 / §16.1 / §18.2` へのリンクに置換（設計意図の記述は残置） |
 | `docs/data/towers/000〜010`・`docs/data/skills/000・001` | ISSUE-004。13ファイルに再掲されていたダメージ計算式を削除し、`systems/battle.md`（通常攻撃）・`tech_battle.md §3.1`（スキル）へのリンクに置換。テンプレートも同時に修正し新規ファイルへの再混入を防止 |

@@ -1,6 +1,6 @@
 # ER図 — 装備・アイテム・ショップ・施設
 
-> 親: [er_diagram.md](../er_diagram.md)。データ構造は [tech_data.md](../../docs/tech/tech_data.md)。
+> 親: [er_diagram.md](../er_diagram.md)。データ構造は [tech_data.md](../../docs/tech/tech_data.md)、日替わりショップの生成・購入は [tech_shop.md](../../docs/tech/tech_shop.md)。
 
 ## 装備・アイテム系
 
@@ -69,9 +69,14 @@ erDiagram
         uuid id PK
         uuid shop_daily_state_id FK "references ShopDailyState.id"
         int slot_index "0-4 枠番号"
-        string item_id "装備マスターID"
+        string base_id "装備マスターID"
         enum category "weapon / armor / accessory"
         enum rarity "common / uncommon / rare"
+        int level "装備レベル (= 最高到達階層, 下限1)"
+        int stat_atk "nullable, ATK値"
+        int stat_def "nullable, DEF値"
+        int stat_hp "nullable, HP値"
+        int stat_spd "nullable, SPD値"
         int price "購入価格"
         boolean sold "購入済みフラグ"
     }

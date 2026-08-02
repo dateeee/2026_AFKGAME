@@ -27,6 +27,7 @@
 | 戦闘ログ保持ポリシー・戦闘処理フロー | [tech_battle.md](tech_battle.md) |
 | オフラインまとめ計算・簡略計算アルゴリズム | [tech_offline.md](tech_offline.md) |
 | tick進行制御（tick数算出・排他・トランザクション） | [tech_tick.md](tech_tick.md) |
+| 日替わりショップ（品揃え生成・24時間更新・購入） | [tech_shop.md](tech_shop.md) |
 | 乱数設計（RNG注入・消費順序・再現性） | [tech_rng.md](tech_rng.md) |
 | 数値・丸め規約（丸め方向・キャップ・適用順序） | [tech_numeric.md](tech_numeric.md) |
 | 進行状態と操作可否（状態機械・不変条件・探索セッション） | [tech_state.md](tech_state.md) |

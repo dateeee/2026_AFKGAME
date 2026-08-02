@@ -90,7 +90,7 @@
     "ring": null
   }
   // "inventory": [],                  // Phase 4〜: 素材インベントリ
-  // "shop": { ... },                  // Phase 2〜: 日替わりショップ状態
+  // 日替わりショップ状態は本JSONに含めない（Phase 2〜: GET /api/shop/lineup で取得。tech_shop.md）
   // "base": { ... },                  // Phase 4〜: 施設レベル
   // "materials": { ... },             // Phase 4〜: 素材所持数
   // "bossRush": { ... }               // Phase 5〜: ボスラッシュ状態
