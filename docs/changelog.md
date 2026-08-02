@@ -8,6 +8,12 @@
 
 ---
 
+## 2026-08-03
+
+| ファイル | 内容 |
+|---------|------|
+| `.claude/project/profile.md` / `CLAUDE.md` / `docs/spec_ownership.md` / `scripts/check_docs.py` | **ISSUE-901**: profile.md §6 #6 を CLAUDE.md と同内容（`/clear` 既定・レビュー→修正適用は別セッション）へ更新。コスト規律の正を profile.md §6 に確定して spec_ownership.md へ登録し、CLAUDE.md 側は要約 + リンクへ縮約。再発防止として重複ルール改稿時の突合ルールを profile.md §7 へ追加し、`check_docs.py --owner` の走査範囲を CLAUDE.md・`.claude/**` へ拡張 |
+
 ## 2026-08-02
 
 | ファイル | 内容 |

@@ -15,7 +15,7 @@
 | `doc-review` が重複記載を指摘したとき | `fix-specs` で正を決めて修正し、**下表へ行を追加**する（検出パターンを書けば再発を機械検出できる） |
 | 正を移すとき | 下表の正ファイル列を更新し、旧・正ファイル側の記載をリンクに置き換える |
 
-- **検出パターン**列は正規表現。`check_docs.py` が `docs/design/` `docs/tech/` `docs/data/` を走査し、正・許可以外のファイルでパターンが一致したら ERROR にする
+- **検出パターン**列は正規表現。`check_docs.py` が `docs/design/` `docs/tech/` `docs/data/` `CLAUDE.md` `.claude/**` を走査し、正・許可以外のファイルでパターンが一致したら ERROR にする
 - **許可**列は「現状すでに記載があり、参照として妥当な箇所」の凍結リスト。新たな転載を防ぐのが目的であり、許可は増やさず縮減していく
 - パターンが書けない（文章的な）トピックは検出パターンを `—` にする。境界の宣言だけでも `doc-review` の照合基準になる
 
@@ -32,6 +32,7 @@
 | ログアウトの挙動（フロー・トークン失効） | `docs/tech/tech_auth.md` | `docs/design/systems/ui.md`, `docs/tech/tech_api.md` | — | エンドポイント定義そのものは `tech_api.md` が正（ISSUE-602） |
 | リフレッシュトークンの保管先 | `docs/tech/tech_auth.md` | `docs/tech/tech_architecture.md`, `docs/tech/tech_security.md` | `httpOnly` | §7 が正。LocalStorage で確定（ISSUE-704）。XSSリスクの受容判断は `tech_security.md` §11.7 |
 | 未確定仕様・調整待ち数値の管理ルール | `docs/development_process.md` | `docs/open_specs.md`, `docs/balance_backlog.md`, `CLAUDE.md` | — | §6 が正。台帳は open_specs / balance_backlog、振り分けと解消フローの正はプロセス側（ISSUE-701〜703） |
+| コスト規律（サブエージェント運用・読み方・工程区切り） | `.claude/project/profile.md` | `CLAUDE.md`, `.claude/references/review-procedure.md` | `同時最大4体` | §6 が正。CLAUDE.md は常時読込のため要約 + リンクを残す。review-procedure.md は一般手順としての原則再掲のみ可（固有値は持たない）。ISSUE-901 で確定（2026-08-03） |
 
 ## 3. 境界の一般原則
 

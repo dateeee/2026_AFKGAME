@@ -204,7 +204,7 @@ def check_ownership(files: list[Path]) -> list[str]:
     rules = parse_ownership()
     for path in files:
         rel = path.relative_to(ROOT).as_posix()
-        if not rel.startswith(("docs/design/", "docs/tech/", "docs/data/")):
+        if not rel.startswith(("docs/design/", "docs/tech/", "docs/data/", ".claude/")) and rel != "CLAUDE.md":
             continue
         text = path.read_text(encoding="utf-8")
         for topic, canonical, allow, rx in rules:
