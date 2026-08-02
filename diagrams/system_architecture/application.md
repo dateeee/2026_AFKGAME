@@ -13,6 +13,7 @@ flowchart TB
         subgraph Views["Views (ページコンポーネント)"]
             GameView["GameView.vue\n(メインゲーム画面)\nPhase 1~"]
             ShopView["ShopView.vue\n(ショップ)\nPhase 1~"]
+            SettingsView["SettingsView.vue\n(設定)\nPhase 1~"]
             LoginView["LoginView.vue\n(ログイン)\nPhase 2~"]
             RegisterView["RegisterView.vue\n(登録)\nPhase 2~"]
             EquipView["EquipmentView.vue\n(装備管理)\nPhase 2~"]
@@ -22,47 +23,44 @@ flowchart TB
             EventView["EventView.vue\n(イベントダンジョン)\nPhase 5~"]
         end
 
-        subgraph Components["Components (UI部品)"]
-            BattleLog["BattleLog.vue\n戦闘ログ表示\n自動スクロール"]
-            CharStatus["CharacterStatus.vue\nLV/HP/ATK/DEF/SPD\nEXPバー"]
-            TowerInfo["TowerInfo.vue\n塔名・階層・モード\n環境効果表示"]
-            HpBar["HpBar.vue\nHP/maxHP ゲージ\nCSS width%"]
-            OfflineModal["OfflineRewardModal.vue\nオフライン報酬サマリー"]
-            Toast["ToastNotification.vue\n最大3件・3秒消去"]
+        subgraph Components["Components (tech_design_system.md が正)"]
+            UiPrimitives["ui/ UIプリミティブ\nBase{Button,Card,Modal,Badge,\nField,Select,TextInput}\nNumberStepper / StatBar\nAppIcon / icons.ts\n※ストアを参照しない"]
+            Layout["layout/ アプリシェル\nAppShell (100dvh grid)\nAppHeader / AppNav / navItems.ts\nConnectionBanner (接続エラー)"]
+            EquipComp["equipment/ Phase2~\nEquipmentCard / EquipmentCompare\nEquipmentInventory / EquipmentSlotGrid"]
         end
 
         subgraph Stores["Pinia Stores (状態管理)"]
             gameStore["gameStore.ts\nゴールド・塔情報・設定\nゲーム全体状態"]
             battleStore["battleStore.ts\n戦闘ログ・敵情報\nターン数"]
             playerStore["playerStore.ts\nキャラクター一覧\nパーティ・インベントリ"]
-            authStore["authStore.ts\nJWTトークン\nユーザーセッション\nPhase 2~"]
+            equipmentStore["equipmentStore.ts\n装備一覧・装着状態\nPhase 2~"]
+            authStore["authStore.ts\nJWTトークン・セッション\nlogin/logout/restoreSession\nPhase 2~"]
         end
 
         subgraph Composables["Composables (ロジック)"]
             usePolling["usePolling.ts\n60秒ポーリング制御\nsetInterval管理"]
             useGameLoop["useGameLoop.ts\nゲーム起動・状態管理\n復帰時処理"]
             useBattleLocal["useBattleLocal.ts\nローカル計算\n(デバッグ用フォールバック)"]
-            useAuth["useAuth.ts\n認証ロジック\nPhase 2~"]
         end
 
         Router["router/index.ts\nVue Router\n画面ルーティング"]
-        APIClient["api/client.ts\nAxios/fetch\nREST通信レイヤー\nUSE_APIフラグ"]
+        APIClient["api/client.ts\napi/auth.ts (Phase 2~)\nAxios/fetch\nREST通信レイヤー\nUSE_APIフラグ"]
         Types["types/game.ts\nTypeScript型定義\nゲーム関連の型"]
-        Assets["assets/\nicons/ アイコン画像\nstyles/ CSS"]
+        Assets["assets/\nicons/ アイコン画像\nstyles/tokens.css デザイントークン\n(色・書体・寸法の唯一の定義元)\nstyles/main.css ベース・ユーティリティ"]
 
         Router --> Views
-        Views --> Components
+        Layout --> Views
+        Views --> UiPrimitives
+        Views --> EquipComp
         Views --> Stores
         Views --> Composables
         Composables --> Stores
         Composables --> APIClient
-        Components --> Stores
-
-        GameView --> BattleLog
-        GameView --> CharStatus
-        GameView --> TowerInfo
-        GameView --> HpBar
-        GameView --> OfflineModal
+        Layout --> UiPrimitives
+        Layout --> Stores
+        EquipComp --> UiPrimitives
+        EquipComp --> Stores
+        UiPrimitives --> Assets
     end
 
     APIClient <-->|"REST API (JSON)\nAuthorization: Bearer token"| Routers
@@ -142,4 +140,5 @@ flowchart TB
 ```
 
 - DB の移行判断ライン（§12.4）とデプロイ構成は [tech_operations.md](../../docs/tech/tech_operations.md) §12 が正。デプロイ構成の図は [deployment.md](deployment.md)
+- Components の3層構成（トークン / UIプリミティブ / アプリシェル）と各層の責務は [tech_design_system.md](../../docs/tech/tech_design_system.md) が正。UIプリミティブはトークンだけを参照し、ストアには触れない
 - Schemas は `backend/app/schemas/` の実装済みファイルのみを描く。Phase 3〜5 で追加するスキーマ（`PartyEdit` 等）は Routers の Phase 注記と [tech_structure.md](../../docs/tech/tech_structure.md) §2 を参照
