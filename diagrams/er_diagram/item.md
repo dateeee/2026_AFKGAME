@@ -18,7 +18,7 @@ erDiagram
         string base_id "装備マスターID"
         enum slot "weapon/shield/head/body/arms/waist/legs/ears/ring"
         enum rarity "common/uncommon/rare/epic/legendary"
-        int level "装備レベル (= ドロップ元敵LV相当)"
+        int level "装備レベル (ドロップ=敵LV / ショップ=最高到達階層)"
         int enhance_level "強化段階 0-10"
         int stat_atk "nullable, ATK値"
         int stat_def "nullable, DEF値"

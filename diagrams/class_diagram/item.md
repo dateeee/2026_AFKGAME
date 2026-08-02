@@ -14,7 +14,7 @@ classDiagram
         +string baseId
         +EquipSlot slot
         +Rarity rarity
-        +int level  ドロップ元敵LV相当
+        +int level  ドロップ=敵LV / ショップ=最高到達階層
         +int enhanceLevel  0-10
         +int atk  nullable
         +int def  nullable
@@ -82,7 +82,7 @@ classDiagram
     InventoryItem --> ItemCategory
 ```
 
-## ショップ・施設・ボスラッシュ
+## ショップ
 
 ```mermaid
 %%{init: {'theme': 'default', 'themeVariables': {'fontSize': '16px'}} }%%
@@ -98,17 +98,29 @@ classDiagram
         +canBuy(itemId, qty, playerGold) bool
         +getDailyLineup() DailyItem[]
         +checkReset()
-        +refreshDaily(highestFloor)
+        +refreshDaily(highestFloor, rng)  rngは Random インスタンス
         +getAvailableRarities(highestFloor) Rarity[]
     }
 
     class DailyItem {
         +int slotIndex  0-4
-        +string itemId  装備マスターID
-        +EquipSlot category  weapon/armor/accessory
+        +string baseId  装備マスターID
+        +EquipCategory category  weapon/armor/accessory
         +Rarity rarity  common-rare
+        +int level  装備レベル (= 最高到達階層, 下限1)
+        +int statAtk  nullable
+        +int statDef  nullable
+        +int statHp  nullable
+        +int statSpd  nullable
         +int price  固定価格テーブル
         +bool sold  購入済みか
+    }
+
+    class EquipCategory {
+        <<enumeration>>
+        weapon  武器
+        armor  防具: 盾/頭/胴体/腕/腰/足
+        accessory  アクセサリー: 耳/指輪
     }
 
     class PotionStock {
@@ -116,6 +128,21 @@ classDiagram
         +int quantity
         +int price
     }
+
+    Shop "1" --> "5" DailyItem
+    Shop "1" --> "*" PotionStock
+    DailyItem --> EquipCategory
+```
+
+- 抽選結果（レアリティ・レベル・ステータス）は生成時に確定して保存する（[tech_shop.md §5](../../docs/tech/tech_shop.md)）
+- `EquipCategory`（3値）は `EquipSlot`（9値）とは別概念。カテゴリ→スロットの対応は [systems/equipment.md §2.4](../../docs/design/systems/equipment.md)
+
+## 施設・ボスラッシュ
+
+```mermaid
+%%{init: {'theme': 'default', 'themeVariables': {'fontSize': '16px'}} }%%
+classDiagram
+    direction TB
 
     class Facility {
         +FacilityType type
@@ -173,8 +200,6 @@ classDiagram
         +bool claimed
     }
 
-    Shop "1" --> "5" DailyItem
-    Shop "1" --> "*" PotionStock
     Facility --> FacilityType
     Facility ..> FacilityCost
     BossRushState ..> MilestoneReward

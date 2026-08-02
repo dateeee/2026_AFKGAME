@@ -68,7 +68,7 @@
       "rarity": "uncommon",
       "level": 5,
       "enhanceLevel": 0,
-      "statAtk": 8,
+      "statAtk": 11,
       "statDef": null,
       "statHp": null,
       "statSpd": null,
@@ -232,8 +232,8 @@
 
 ```json
 {
-  "id": "iron_sword_001",
-  "baseId": "iron_sword",
+  "id": "sword_001",
+  "baseId": "sword",
   "slot": "weapon",
   "rarity": "common",
   "stats": { "atk": 5 },

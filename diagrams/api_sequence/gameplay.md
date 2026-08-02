@@ -73,7 +73,7 @@ sequenceDiagram
 
     API-->>B: {<br/>  lineup: [<br/>    { itemId: "hp_potion", name: "HPポーション",<br/>      price: 25, healRatio: 0.3,<br/>      quantityOwned: 10, stackLimit: 99 },<br/>    ...<br/>  ]<br/>}
 
-    Note over API: 日替わりショップ (daily / dailySlotIndex /<br/>nextResetAt) は Phase 2後半・未実装
+    Note over API: 日替わりショップ (daily / dailySlotIndex /<br/>dailyResetAt) は Phase 2後半・未実装
 
     opt 日替わりリセット (Phase 2後半・未実装)
         API->>API: リセット時刻チェック<br/>(00:00 UTC超過なら更新)
@@ -92,13 +92,21 @@ sequenceDiagram
     Note over B: === 日替わり商品の購入 (Phase 2後半・未実装) ===
 
     B->>API: POST /api/shop/buy<br/>{ dailySlotIndex: 0 }
-    API->>API: sold=false確認 ✓<br/>残金チェック: 500G <= 1375G ✓<br/>所持上限チェック ✓
-    API->>DB: gold -= 500
-    API->>DB: Equipment生成 (鉄の剣)
-    API->>DB: slot[0].sold = true
-    API-->>B: { status: "ok", gold: 875, equipment: {...} }
 
-    B->>B: トースト「鉄の剣を購入しました」
+    alt 売り切れ
+        API-->>B: 400 { code: "SHOP_ITEM_SOLD_OUT" }
+    else ゴールド不足
+        API-->>B: 400 { code: "SHOP_INSUFFICIENT_GOLD" }
+    else 所持枠が上限
+        API-->>B: 400 { code: "SHOP_INVENTORY_FULL" }
+    else 正常
+        API->>API: sold=false確認 ✓<br/>残金チェック: 500G <= 1375G ✓<br/>所持上限チェック: 12 < 50 ✓
+        API->>DB: gold -= 500
+        API->>DB: Equipment生成 (剣)
+        API->>DB: slot[0].sold = true
+        API-->>B: { status: "ok", gold: 875, equipment: {...} }
+        B->>B: トースト「剣を購入しました」
+    end
 ```
 
 ## 6. 装備変更フロー
@@ -118,17 +126,17 @@ sequenceDiagram
 
     Note over B: === ロック切替 ===
 
-    B->>API: POST /api/equipment/lock<br/>{ equipmentId: "iron_sword_001" }
+    B->>API: POST /api/equipment/lock<br/>{ equipmentId: "sword_001" }
     API->>DB: Equipment.locked更新
     API-->>B: { locked }
 
     Note over B: === 装備する ===
 
-    B->>API: POST /api/equipment/equip<br/>{<br/>  characterId: "hero_001",<br/>  equipmentId: "iron_sword_001",<br/>  slot: "weapon"<br/>}
+    B->>API: POST /api/equipment/equip<br/>{<br/>  characterId: "hero_001",<br/>  equipmentId: "sword_001",<br/>  slot: "weapon"<br/>}
 
     API->>API: バリデーション:<br/>装備の所有者確認 ✓<br/>スロット適合確認 ✓<br/>両手武器チェック:<br/>  両手武器→盾スロット自動解除
 
-    API->>DB: CharacterEquipSlot更新<br/>(weapon = iron_sword_001)
+    API->>DB: CharacterEquipSlot更新<br/>(weapon = sword_001)
 
     opt 両手武器装備時
         API->>DB: 盾スロットを null に更新

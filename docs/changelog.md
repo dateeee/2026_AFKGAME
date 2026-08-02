@@ -12,7 +12,18 @@
 
 | ファイル | 内容 |
 |---------|------|
-| `docs/tech/tech_shop.md` | **新規**。Phase 2 日替わりショップの詳細設計（遅延評価による24時間更新・5枠の抽選手順・ステータス算出・購入フロー・データ構造・分岐一覧36件） |
+| `docs/tech/tech_shop.md` | 仕様レビュー ISSUE-002/004/005/006/007/011 を反映。§2.5・§2.6 を `## 3. ステータスと価格` へ昇格し以降の節番号を繰り下げ（H2 2,000字超過を解消）。基礎値の式を `master/equipment.md §6.1` へのリンクに置換。**購入時の所持枠上限チェック（`400 SHOP_INVENTORY_FULL`）を追加**。分岐一覧を42件（生成23・購入19）へ拡充（コモンが確定する正常経路、付与数の範囲が単一値のケース、所持枠の真偽2行） |
+| `docs/data/master/equipment.md` | ISSUE-001/003。**§6.0 ベース装備一覧（15種）を新設**（ID・名前・スロット・持ち手。従来 `backend/app/master_data/equipment.py` にしか定義が無く、不変条件6「データ駆動」に反していた）。基礎値式・参考値表・売却価格表の変数名を「敵LV」→「装備レベル」へ統一 |
+| `docs/design/systems/equipment.md` | ISSUE-004。基礎値式・ステータス補正・売却価格式の再掲を削除し `master/equipment.md §6.0 / §6.1 / §6.3` へのリンクに置換（正を1ファイルに統一） |
+| `docs/design/systems/economy.md` | ISSUE-007/010。倉庫節に**所持枠上限の適用範囲**を追加（**Phase 2 から適用**。ショップ購入=`SHOP_INVENTORY_FULL` で失敗 / 戦闘ドロップ=破棄）。日替わりの「更新間隔 24時間」を「毎日 00:00 UTC にリセット（初回のみ24時間未満あり）」へ修正 |
+| `docs/tech/tech_logging.md` | ISSUE-007。エラーコード体系の `SHOP_` に `SHOP_INVENTORY_FULL` を追加 |
+| `docs/tech/tech_data.md` | ISSUE-012・設計図レビュー ISSUE-104。装備JSON例の `statAtk` を計算式どおりの 11 に修正。マスターに存在しない `iron_sword` を `sword` へ |
+| `docs/tech/tech_api.md` | `tech_shop.md` の節番号繰り下げに追従（§5→§6、§3→§4） |
+| `README.md`・`CLAUDE.md`・`docs/data/master_data.md` | ISSUE-008/001。詳細設計の索引に `shop` を追加。マスターデータ索引に §6.0 ベース装備一覧を追加 |
+| `diagrams/class_diagram/item.md`・`diagrams/class_diagram.md` | 設計図レビュー ISSUE-101/102/107/108。`DailyItem` に `level`・`statAtk/Def/Hp/Spd` を追加し `itemId`→`baseId`（ER図と属性一致）。`EquipCategory`（3値）を新設し `EquipSlot`（9値）と分離。`refreshDaily` に `rng` 引数を明示。H2 を「ショップ」「施設・ボスラッシュ」に分割 |
+| `diagrams/api_sequence/gameplay.md` | ISSUE-103/104/106。`nextResetAt`→`dailyResetAt`、「鉄の剣」→「剣」。日替わり購入に失敗経路の `alt`（売り切れ / ゴールド不足 / 所持枠上限）を追加 |
+| `diagrams/er_diagram/item.md` | ISSUE-003 と同根。`Equipment.level` の注記を「ドロップ=敵LV / ショップ=最高到達階層」へ |
+| `docs/tech/tech_shop.md` | **新規**。Phase 2 日替わりショップの詳細設計（遅延評価による24時間更新・5枠の抽選手順・ステータス算出・購入フロー・データ構造・分岐一覧38件） |
 | `docs/tech/tech_spec.md` | 詳細仕様の索引に `tech_shop.md` を追加 |
 | `docs/tech/tech_api.md` | `/api/shop/lineup`・`/api/shop/buy` に `tech_shop.md` へのリンクと、常設／日替わり指定の排他（422）を追記 |
 | `docs/tech/tech_data.md` | ゲーム状態JSONの `"shop"` コメントを削除し、日替わりショップ状態は `GET /api/shop/lineup` で取得する旨に修正 |

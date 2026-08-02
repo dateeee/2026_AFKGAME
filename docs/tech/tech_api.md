@@ -81,8 +81,8 @@
 | POST | `/api/tower/retire` | 塔からリタイア（獲得済み報酬は保持・ペナルティなし） |
 | PUT | `/api/tower/mode` | 進行モードの切り替え（進行中でも変更可） |
 | PUT | `/api/tower/retreat-conditions` | 撤退条件の更新（`hpThreshold`: 0〜1） |
-| GET | `/api/shop/lineup` | ショップの現在の品揃えを取得。Phase 1: 常設のみ。Phase 2〜: 常設＋日替わり5枠＋次回更新時刻（[tech_shop.md §5](tech_shop.md)） |
-| POST | `/api/shop/buy` | ショップでアイテム購入。常設商品: `itemId` + `quantity`（ポーションID等は常設扱い、在庫無制限）。Phase 2〜: 日替わり商品は `dailySlotIndex`（枠番号指定、各1個限り）を追加。両方の指定・どちらも未指定は 422（[tech_shop.md §3](tech_shop.md)） |
+| GET | `/api/shop/lineup` | ショップの現在の品揃えを取得。Phase 1: 常設のみ。Phase 2〜: 常設＋日替わり5枠＋次回更新時刻（[tech_shop.md §6](tech_shop.md)） |
+| POST | `/api/shop/buy` | ショップでアイテム購入。常設商品: `itemId` + `quantity`（ポーションID等は常設扱い、在庫無制限）。Phase 2〜: 日替わり商品は `dailySlotIndex`（枠番号指定、各1個限り）を追加。両方の指定・どちらも未指定は 422（[tech_shop.md §4](tech_shop.md)） |
 | GET | `/api/equipment/list` | プレイヤーの全装備一覧を取得（Phase 2〜） |
 | POST | `/api/equipment/equip` | 装備の変更（Phase 2〜） |
 | POST | `/api/equipment/sell` | 装備売却（`equipmentIds`）。装備を消費してゴールドを獲得（売却価格 = 5 × レアリティ倍率 × 装備レベル）（Phase 2〜） |
