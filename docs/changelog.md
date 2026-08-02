@@ -12,6 +12,14 @@
 
 | ファイル | 内容 |
 |---------|------|
+| `frontend/tests/e2e/**`（新規） | **結合テスト L2（E2E / Playwright）を整備**。必須シナリオ #1 認証→ゲーム状態取得 / #2 塔選択→目標階設定 / #5 装備ドロップ→装備変更→ステータス反映 / #6 常設ショップ購入 の4本＋画面遷移で13件。バックは :8100（`DATABASE_URL=sqlite:///./e2e.db`）、フロントは :5174 で自動起動し開発環境と分離。時刻は `last_tick_at` の巻き戻しで進め、乱数を含むドロップ・報酬は条件成立まで進める（固定スリープなし）。12回連続実行で結果が安定することを確認 |
+| `frontend/src/App.vue`・`composables/useGameLoop.ts` | E2Eで検出した不具合を修正。初期化が `onMounted` の1回のみで、ゲスト作成・ログイン後にゲーム状態が読み込まれず**ホームが401バナー付きの空表示**になっていた。未認証時は読み込まず、認証状態の変化を監視して初期化する |
+| `frontend/src/views/LoginView.vue` | 同上。`/register` からの `?mode=register` を参照しておらず登録フォームが開かなかったのを修正 |
+| `frontend/package.json`・`playwright.config.ts`・`tsconfig.e2e.json`・`vite.config.ts` | Playwright を導入し `npm run test:e2e` を追加。`npm run type-check` にE2Eの型チェックを含める。Vite のプロキシ先を `VITE_API_PROXY_TARGET` で差し替え可能に |
+| `.claude/project/integration-test.md` | L2 を「整備済み」へ。§1.2「L2 の記述規約」を新設。§3 必須シナリオ表に L2 列を追加し、§3.1 を「意図的に扱わない経路」へ改題（`GET /api/health` の除外を解消） |
+| `README.md` | 主なコマンドに `npm run test:e2e` を追加。ディレクトリ構成に `frontend/tests/e2e/`・`backend/tests/` を追加し、`docs/` 直下の個別ファイル列挙は「ドキュメント索引」への参照へ集約 |
+| `docs/development_process.md` | §5 の結合テスト欄を「完了（L1・L2）」へ。§5.3 を L1・L2 両方の整備状況（L1 29件・L2 13件）に更新 |
+| `docs/known_issues.md` | §3 対応済みへ2件追加（認証直後のゲーム状態未読み込み、`/register` のモード未反映）。いずれもE2Eで検出し実装を修正 |
 | `docs/design/game_spec.md` | 要件定義の整合性チェック指摘を反映。§1 に**塔の実装Phase対応表**を新設し、Phase 1〜5 の各節へ追加される塔を明記（Phase 1=塔1／2=塔2／3=塔3-5／4=塔6-8／5=塔9-10+深淵の塔）。§6「今後の検討事項」を削除し `open_specs.md` / `balance_backlog.md` への参照に一本化 |
 | `docs/design/systems/dungeon.md` | ダンジョン2〜4の見出しを「Phase Nでは定義のみ」から実装Phase（3〜／4〜／5〜）へ修正。**深淵の塔（Phase 5）の解放条件「天空の塔クリア」が成立しない矛盾を解消**。環境効果を Phase 3〜 と明記 |
 | `docs/design/systems/character.md` | 複数挑発時のルールを合算80%上限・比率按分へ修正（`battle.md` の上限規定と統一。残り20%は常にランダム）。キャラレアリティ倍率テーブルを削除し `master/character.md` §7.2 を正とする |

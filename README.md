@@ -53,7 +53,8 @@ VS Code の場合は実行構成 **Full Stack** で両方を同時起動でき�
 | コマンド | 内容 |
 |---------|------|
 | `npm run dev` / `npm run build` | フロント開発サーバー / 本番ビルド |
-| `npm run type-check` | 型チェック（vue-tsc） |
+| `npm run type-check` | 型チェック（vue-tsc + E2E） |
+| `npm run test:e2e` | E2Eテスト（Playwright。フロント・バックを専用ポート/DBで自動起動） |
 | `pytest` | バックエンドテスト（C1 100%・`htmlcov/` にHTMLレポート） |
 | `python scripts/check_doc_size.py` | ドキュメント文字数チェック |
 
@@ -68,27 +69,23 @@ VS Code の場合は実行構成 **Full Stack** で両方を同時起動でき�
 │   ├── references/              # スキル共通リファレンス（同上）
 │   └── project/                 # プロジェクト固有プロファイル（索引: INDEX.md）
 ├── docs/                        # 仕様書
-│   ├── development_process.md   # 開発工程定義書（7工程・TDD・テスト標準）
-│   ├── documentation_rules.md   # ドキュメント規約（文字数上限・分割）
-│   ├── changelog.md             # 全ドキュメントの変更履歴（集約・上限対象外）
-│   ├── glossary.md              # 用語集
-│   ├── open_specs.md            # 未確定仕様一覧（全確定後に削除）
-│   ├── balance_backlog.md       # バランス調整（数値のみ調整待ち）
-│   ├── known_issues.md          # 実装の疑義
+│   ├── *.md                     # プロセス・規約・バックログ（→「ドキュメント索引」）
 │   ├── design/                  # ゲーム仕様（索引 game_spec.md + systems/）
 │   ├── tech/                    # 技術仕様（索引 tech_spec.md + tech_*.md）
 │   ├── data/                    # マスターデータ（索引 master_data.md + master/ towers/ skills/）
 │   └── reviews/                 # レビュー結果（自動生成）
 ├── diagrams/                    # 設計図（Mermaid）。索引 + 同名ディレクトリに分割
 ├── scripts/                     # 開発補助スクリプト
-├── frontend/src/                # Vue.js SPA
-│   ├── views/ components/       # ページ / UIコンポーネント
-│   ├── stores/ composables/     # Pinia ストア / Composition API ロジック
-│   └── api/ types/              # API通信レイヤー / 型定義
-└── backend/app/                 # FastAPI サーバー
-    ├── routers/ services/       # APIルーター / ビジネスロジック
-    ├── models/ schemas/         # SQLAlchemy モデル / Pydantic スキーマ
-    └── master_data/             # マスターデータ定義
+├── frontend/                    # Vue.js SPA
+│   ├── src/views/ components/   # ページ / UIコンポーネント
+│   ├── src/stores/ composables/ # Pinia ストア / Composition API ロジック
+│   ├── src/api/ types/          # API通信レイヤー / 型定義
+│   └── tests/e2e/               # E2Eテスト（Playwright）
+└── backend/                     # FastAPI サーバー
+    ├── app/routers/ services/   # APIルーター / ビジネスロジック
+    ├── app/models/ schemas/     # SQLAlchemy モデル / Pydantic スキーマ
+    ├── app/master_data/         # マスターデータ定義
+    └── tests/unit/ integration/ # 単体テスト / API統合テスト
 ```
 
 ## アーキテクチャ方針
@@ -101,7 +98,7 @@ VS Code の場合は実行構成 **Full Stack** で両方を同時起動でき�
 
 | Phase | 内容 | 状況 |
 |-------|------|------|
-| Phase 1 (MVP) | キャラ1体の自動戦闘、レベルアップ、オフライン報酬、常設ショップ | 実装・単体テスト完了 |
+| Phase 1 (MVP) | キャラ1体の自動戦闘、レベルアップ、オフライン報酬、常設ショップ | 実装・テスト完了 |
 | Phase 2 | 装備システム、複数の塔、ショップ拡張（日替わり装備）、認証 | 進行中 |
 | Phase 3 | パーティ編成、タイプ（素質）・スキルシステム | 未着手 |
 | Phase 4 | 拠点建設（酒場・鍛冶屋・訓練場・倉庫・市場）、素材・生産システム | 未着手 |

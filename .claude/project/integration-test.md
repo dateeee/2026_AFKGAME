@@ -8,9 +8,7 @@
 | レイヤー | 内容 | 配置 | 状態 |
 |---------|------|------|------|
 | L1: API統合テスト | FastAPI TestClient + インメモリSQLite。APIシーケンスを検証 | `backend/tests/integration/` | **整備済み**（Phase 1〜2） |
-| L2: E2Eテスト | Playwright。フロント＋バックを通しで起動し画面操作で検証 | `frontend/tests/e2e/` | **未整備**（Playwright 未導入） |
-
-L2 着手時に Playwright を `frontend/` へ導入し、手順を本節へ追記する。
+| L2: E2Eテスト | Playwright。フロント＋バックを通しで起動し画面操作で検証 | `frontend/tests/e2e/` | **整備済み**（Phase 1〜2） |
 
 ### 1.1 L1 の記述規約
 
@@ -26,6 +24,21 @@ L2 着手時に Playwright を `frontend/` へ導入し、手順を本節へ追�
 | ドロップ | `always_drop` フィクスチャで抽選を成立させる（ドロップ率は検証対象外） |
 | ログ経由の値 | `app_logs` フィクスチャ（`afkgame` ロガーは `propagate=False` のため caplog 単体では拾えない） |
 
+### 1.2 L2 の記述規約
+
+| 項目 | 規約 |
+|------|------|
+| 実行 | `cd frontend && npm run test:e2e`（`playwright.config.ts` がフロント・バックを自動起動） |
+| サーバー | バック :8100（`DATABASE_URL=sqlite:///./e2e.db`）／フロント :5174。開発用の :8000 / :5173 とDBを分ける |
+| 起動確認 | バックは `GET /health` が通るまで待つ。`reuseExistingServer` は使わない（開発用DBを掴む事故を防ぐ） |
+| 実行順 | 1つのDBを共有するため `workers: 1` の直列。独立性は**テストごとにゲストを作る**ことで担保 |
+| ヘルパー | `tests/e2e/support/harness.ts`。画面操作はUI経由、DB直接操作は**時刻の巻き戻しだけ** |
+| 時刻 | `advanceTicks(page, n)` で `last_tick_at` を戻して再読み込み。tick を起こすのはアプリ側 |
+| 乱数 | ドロップ・報酬は固定できないため `advanceUntil(page, 条件)` で条件成立まで進める。回数を決め打ちしない |
+| リトライ | `retries: 0`。不安定なテストはリトライで隠さず原因を直す |
+| セレクタ | `data-testid` は使わない。role・表示文言と、意味のあるクラス（`.tower-card` 等）で引く |
+| 注意 | 正規表現マッチは空白を正規化しない。改行を含む要素は文字列マッチで引く |
+
 ## 2. シナリオの導出元
 
 | 順 | 参照先 | 読む範囲 |
@@ -39,24 +52,24 @@ L2 着手時に Playwright を `frontend/` へ導入し、手順を本節へ追�
 
 ## 3. 必須シナリオ（Phase 1〜2）
 
-| # | シナリオ | レイヤー | 検証内容 | L1 |
-|---|---------|---------|---------|----|
-| 1 | 認証 → ゲーム状態取得 | L1・L2 | トークン発行、初期状態の返却 | `test_auth_flow` |
-| 2 | 塔選択 → 目標階設定 | L1・L2 | 塔別クリア記録の独立、上限追従 | `test_tower_flow` |
-| 3 | tick進行 → 戦闘ログ取得 | L1 | 60秒tickの進行、サーバー権威（フロントに計算がない） | `test_battle_flow` |
-| 4 | オフライン復帰 → 一括計算 | L1 | 経過時間ぶんのtickが一括処理され、上限でクランプされる | `test_battle_flow` |
-| 5 | 装備ドロップ → 装備変更 → ステータス反映 | L1・L2 | ドロップ〜装備〜ステータス計算の連結 | `test_equipment_flow` |
-| 6 | 常設ショップ購入 → 所持金・在庫の反映 | L1・L2 | gold不足時のエラー、購入後の整合 | `test_shop_flow` |
-| 7 | ゲスト → 正規ユーザー移行 | L1 | データ引き継ぎ | `test_auth_flow` |
+| # | シナリオ | 検証内容 | L1 | L2 |
+|---|---------|---------|----|----|
+| 1 | 認証 → ゲーム状態取得 | トークン発行、初期状態の返却 | `test_auth_flow` | `auth.spec` |
+| 2 | 塔選択 → 目標階設定 | 塔別クリア記録の独立、上限追従 | `test_tower_flow` | `tower.spec` |
+| 3 | tick進行 → 戦闘ログ取得 | 60秒tickの進行、サーバー権威（フロントに計算がない） | `test_battle_flow` | — |
+| 4 | オフライン復帰 → 一括計算 | 経過時間ぶんのtickが一括処理され、上限でクランプされる | `test_battle_flow` | — |
+| 5 | 装備ドロップ → 装備変更 → ステータス反映 | ドロップ〜装備〜ステータス計算の連結 | `test_equipment_flow` | `equipment.spec` |
+| 6 | 常設ショップ購入 → 所持金・在庫の反映 | gold不足時のエラー、購入後の整合 | `test_shop_flow` | `shop.spec` |
+| 7 | ゲスト → 正規ユーザー移行 | データ引き継ぎ | `test_auth_flow` | — |
 
 Phase 3〜5 のシナリオは、該当Phaseの詳細設計完了時に本表へ追加する。
 
-### 3.1 意図的に L1 で扱わない経路
+### 3.1 意図的に扱わない経路
 
 | 経路 | 理由 |
 |------|------|
-| `POST /api/auth/google` | 実装が未着手（`GOOGLE_CLIENT_ID` 有無にかかわらず 501） |
-| `GET /api/health` | 仕様との乖離が未解決（[known_issues.md](../../docs/known_issues.md) #6）。パス・応答形式の確定後にテストを追加する |
+| `POST /api/auth/google` | 実装が未着手（`GOOGLE_CLIENT_ID` 有無にかかわらず 501）。L1・L2 とも対象外 |
+| #3・#4・#7 の L2 | 検証内容がサーバー内部の計算・データ引き継ぎで、画面操作を挟んでも増える情報がない |
 
 ## 4. 固有の観点
 

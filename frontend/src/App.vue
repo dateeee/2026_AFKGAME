@@ -1,14 +1,16 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { watch } from 'vue'
 import { useGameLoop } from '@/composables/useGameLoop'
+import { useAuthStore } from '@/stores/authStore'
 import { useGameStore } from '@/stores/gameStore'
 
 const gameStore = useGameStore()
+const authStore = useAuthStore()
 const { initialize, isLoading } = useGameLoop()
 
-onMounted(() => {
-  initialize()
-})
+// ゲスト開始・ログインでは App が再マウントされないため、onMounted だけでは
+// 認証直後のゲーム状態が読み込まれない。認証状態の変化を起点に初期化する。
+watch(() => authStore.isAuthenticated, () => initialize(), { immediate: true })
 </script>
 
 <template>

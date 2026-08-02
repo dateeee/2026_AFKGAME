@@ -1,14 +1,16 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
 
+const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
 
 const email = ref('')
 const password = ref('')
-const mode = ref<'login' | 'register'>('login')
+// RegisterView から ?mode=register で飛んできた場合は登録フォームを開いた状態にする
+const mode = ref<'login' | 'register'>(route.query.mode === 'register' ? 'register' : 'login')
 const displayName = ref('')
 
 async function handleGuestStart() {

@@ -1,5 +1,6 @@
 import { ref } from 'vue'
 import { getGameState, USE_API } from '@/api/client'
+import { useAuthStore } from '@/stores/authStore'
 import { useGameStore } from '@/stores/gameStore'
 import { usePlayerStore } from '@/stores/playerStore'
 import { useEquipmentStore } from '@/stores/equipmentStore'
@@ -12,8 +13,10 @@ export function useGameLoop() {
   const { start: startPolling, tick } = usePolling()
 
   /**
-   * ゲーム初期化（認証済み前提で呼ばれる）
-   * 認証フローはrouter guardとauthStoreが担当
+   * ゲーム初期化
+   * 認証フローはrouter guardとauthStoreが担当。
+   * ログイン画面では未認証のまま呼ばれるため、その場合は何も読まずに戻る
+   * （401を叩いてエラーバナーを出さないため）。
    */
   async function initialize() {
     if (!USE_API) {
@@ -22,8 +25,14 @@ export function useGameLoop() {
       return
     }
 
+    if (!useAuthStore().isAuthenticated) {
+      isLoading.value = false
+      return
+    }
+
     const gameStore = useGameStore()
     gameStore.isLoading = true
+    isLoading.value = true
 
     try {
       const state = await getGameState()

@@ -32,3 +32,5 @@
 |---|------|------|------|
 | 1 | `app/main.py` | ヘルスチェックが `GET /api/health` で `{"status":"ok"}` のみを返し、[tech_api.md](tech/tech_api.md) §運用・[tech_operations.md](tech/tech_operations.md) §12.3 の `GET /health`・`version`・`db`・DB異常時503 と乖離 | **実装を仕様へ合わせた**。`SELECT 1` による疎通確認と 503（`{"status":"degraded","db":"error"}`）を追加。単体3件・結合1件のテストを追加 |
 | 2 | `app/config.py` | `DATABASE_URL` が定数固定で、[tech_operations.md](tech/tech_operations.md) §12.2 の環境変数指定が効かない | **実装を仕様へ合わせた**。`os.environ.get` で上書き可能にし、E2E は専用DBを指すようにした |
+| 3 | `App.vue` / `useGameLoop.ts` | ゲーム状態の初期化が `onMounted` の1回のみ。ログイン画面では未認証のまま `GET /api/game/state` を叩いて401になり、ゲスト作成・ログイン後は App が再マウントされないため**ホームがエラーバナー付きの空表示のまま**だった（再読み込みで復旧）。[screen_transition.md](../diagrams/screen_transition.md)「ゲスト自動作成 → ホーム」と乖離 | **実装を修正**。未認証時は何も読まずに戻り、認証状態の変化を監視して初期化する。E2E（`auth.spec`）で検出・再発防止 |
+| 4 | `LoginView.vue` | `RegisterView` が `?mode=register` で飛ばしているのに参照しておらず、`/register` へ行っても登録フォームが開かなかった | **実装を修正**。クエリを見て初期モードを決める。E2E（`auth.spec`）で検出・再発防止 |
