@@ -1,6 +1,6 @@
 # ゲーム仕様 — キャラクター・パーティ・スキル
 
-> [game_spec.md](../game_spec.md) §2.1 / §2.7 / §2.8。数値定義は [master_data.md](../../data/master_data.md)、変更履歴は親に集約（[§7](../game_spec.md#7-変更履歴)）。
+> [game_spec.md](../game_spec.md) §2.1 / §2.7 / §2.8。数値定義は [master_data.md](../../data/master_data.md)。
 
 ## 2.1 キャラクター
 

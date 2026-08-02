@@ -1,6 +1,6 @@
 # ゲーム仕様 — ショップ・拠点
 
-> [game_spec.md](../game_spec.md) §2.5 / §2.9。数値定義は [master_data.md](../../data/master_data.md)、変更履歴は親に集約（[§7](../game_spec.md#7-変更履歴)）。
+> [game_spec.md](../game_spec.md) §2.5 / §2.9。数値定義は [master_data.md](../../data/master_data.md)。
 
 ## 2.5 ショップ（Phase 1〜）
 

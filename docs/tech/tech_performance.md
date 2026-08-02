@@ -1,7 +1,7 @@
 # AFK GAME — 性能・容量設計
 
 > [tech_spec.md](tech_spec.md) §10。**目標値（どこまで満たすか）は [non_functional_requirements.md](../design/non_functional_requirements.md) §1〜§3 が正**。本書はそれを満たすための**実現方式**を扱い、目標値を再掲しない。
-> 運用面の監視・移行手順は [tech_operations.md](tech_operations.md)、tick処理そのものは [tech_tick.md](tech_tick.md)。変更履歴は親に集約（[§9](tech_spec.md#9-変更履歴)）。
+> 運用面の監視・移行手順は [tech_operations.md](tech_operations.md)、tick処理そのものは [tech_tick.md](tech_tick.md)。
 
 ---
 
@@ -76,7 +76,3 @@
 | DB容量検証 | 1,000人相当のダミーデータを投入しサイズとクエリ時間を確認 | 負荷試験と同時 |
 
 - 検証は [development_process.md](../development_process.md) §3.7 結合テストの一部として扱い、Phase完了ゲートの判定材料にする
-
----
-
-> 変更履歴は [tech_spec.md](tech_spec.md#9-変更履歴) を参照。

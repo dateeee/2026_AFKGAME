@@ -1,6 +1,6 @@
 # AFK GAME — セキュリティ設計
 
-> [tech_spec.md](tech_spec.md) §11。認証方式そのものは [tech_auth.md](tech_auth.md)、ログのマスク規則・統一エラー形式は [tech_logging.md](tech_logging.md)、環境変数の管理は [tech_operations.md](tech_operations.md) を参照。変更履歴は親に集約（[§9](tech_spec.md#9-変更履歴)）。
+> [tech_spec.md](tech_spec.md) §11。認証方式そのものは [tech_auth.md](tech_auth.md)、ログのマスク規則・統一エラー形式は [tech_logging.md](tech_logging.md)、環境変数の管理は [tech_operations.md](tech_operations.md) を参照。
 >
 > 本書は **認証方式以外**のセキュリティ方針（通信・入力検証・認可・レート制限・秘密情報）を扱う。
 > **守るべき要件（何を防ぐか）は [non_functional_requirements.md](../design/non_functional_requirements.md) §4 が正**。本書はその実現方式を定める。
@@ -128,7 +128,3 @@
 | 秘密鍵のローテーション | ローテーション時は既存の全アクセストークンが無効化される（利用者は再ログインが必要）。実施は計画メンテナンス扱い |
 | ソースへの直書き | 禁止（既定値を持つのは非機密の設定値のみ） |
 | 依存脆弱性 | `pip-audit`（backend）・`npm audit`（frontend）を製造完了ゲートで実行し、High 以上は対応する |
-
----
-
-> 変更履歴は [tech_spec.md](tech_spec.md#9-変更履歴) を参照。

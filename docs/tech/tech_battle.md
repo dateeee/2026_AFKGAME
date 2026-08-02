@@ -189,8 +189,3 @@ def select_target(actor, action_type, allies, enemies):
         alive = [a for a in allies if a.hp > 0]
         return min(alive, key=lambda a: a.hp / a.maxHp)
 ```
-
-
----
-
-> 変更履歴は [tech_spec.md](tech_spec.md) を参照。

@@ -1,6 +1,6 @@
 # ゲーム仕様 — エンドコンテンツ（Phase 5〜）
 
-> [game_spec.md](../game_spec.md) §2.11 / §2.12 / §2.13。数値定義は [master_data.md](../../data/master_data.md)、変更履歴は親に集約（[§7](../game_spec.md#7-変更履歴)）。
+> [game_spec.md](../game_spec.md) §2.11 / §2.12 / §2.13。数値定義は [master_data.md](../../data/master_data.md)。
 
 ## 2.11 ボスラッシュ（Phase 5〜）
 

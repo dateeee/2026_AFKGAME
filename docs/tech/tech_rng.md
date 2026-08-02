@@ -81,7 +81,3 @@
 | [battle_service.py:50](../../backend/app/services/battle_service.py) | グローバル `random.uniform` を直呼び | §2 インスタンス注入 |
 | [battle_service.py:52](../../backend/app/services/battle_service.py) | クリティカル率 `0.05` をコード内に直書き | マスターデータ／ステータス由来の `crit_rate` を参照 |
 | [master_data/equipment.py](../../backend/app/master_data/equipment.py)・[master_data/towers.py](../../backend/app/master_data/towers.py) | 各モジュールがグローバル `random` を個別に使用（乱数源が3本に分散） | §2 同一インスタンスを引数で受け取る |
-
----
-
-> 変更履歴は [tech_spec.md](tech_spec.md) を参照。

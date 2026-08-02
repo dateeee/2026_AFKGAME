@@ -1,6 +1,6 @@
 # AFK GAME — ディレクトリ・フロント／バック構成
 
-> [tech_spec.md](tech_spec.md) §2〜§4。変更履歴は親に集約（[§9](tech_spec.md#9-変更履歴)）。
+> [tech_spec.md](tech_spec.md) §2〜§4。
 
 ## 2. ディレクトリ構成
 

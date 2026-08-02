@@ -1,6 +1,6 @@
 # AFK GAME — データ設計
 
-> [tech_spec.md](tech_spec.md) §1。ゲーム仕様は [game_spec.md](../design/game_spec.md)、DB構造は [er_diagram.md](../../diagrams/er_diagram.md)、変更履歴は親に集約（[§9](tech_spec.md#9-変更履歴)）。
+> [tech_spec.md](tech_spec.md) §1。ゲーム仕様は [game_spec.md](../design/game_spec.md)、DB構造は [er_diagram.md](../../diagrams/er_diagram.md)。
 
 ## 1.1 ゲーム状態（API レスポンス: `GET /api/game/state`）
 

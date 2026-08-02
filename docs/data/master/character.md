@@ -1,6 +1,6 @@
 # マスターデータ — キャラクター・スキル
 
-> [master_data.md](../master_data.md) §1 / §7 / §8 / §9。仕様は [game_spec.md](../../design/game_spec.md)、スキル詳細は [SKILLS_OVERVIEW.md](../skills/SKILLS_OVERVIEW.md)、変更履歴は親に集約（[§17](../master_data.md#17-変更履歴)）。
+> [master_data.md](../master_data.md) §1 / §7 / §8 / §9。仕様は [game_spec.md](../../design/game_spec.md)、スキル詳細は [SKILLS_OVERVIEW.md](../skills/SKILLS_OVERVIEW.md)。
 
 ## 1. プレイヤーキャラクター
 

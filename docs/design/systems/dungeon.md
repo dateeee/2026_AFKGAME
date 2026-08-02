@@ -1,6 +1,6 @@
 # ゲーム仕様 — ダンジョン・塔
 
-> [game_spec.md](../game_spec.md) §2.6。各塔の詳細は [TOWERS_OVERVIEW.md](../../data/towers/TOWERS_OVERVIEW.md)、変更履歴は親に集約（[§7](../game_spec.md#7-変更履歴)）。
+> [game_spec.md](../game_spec.md) §2.6。各塔の詳細は [TOWERS_OVERVIEW.md](../../data/towers/TOWERS_OVERVIEW.md)。
 
 ## 2.6 ダンジョン・塔
 

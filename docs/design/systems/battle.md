@@ -1,6 +1,6 @@
 # ゲーム仕様 — 戦闘・HP回復
 
-> [game_spec.md](../game_spec.md) §2.2 / §2.3。実装アルゴリズムは [tech_battle.md](../../tech/tech_battle.md)、変更履歴は親に集約（[§7](../game_spec.md#7-変更履歴)）。
+> [game_spec.md](../game_spec.md) §2.2 / §2.3。実装アルゴリズムは [tech_battle.md](../../tech/tech_battle.md)。
 
 ## 2.2 戦闘システム
 

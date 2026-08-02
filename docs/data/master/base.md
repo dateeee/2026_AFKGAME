@@ -1,6 +1,6 @@
 # マスターデータ — 素材・施設（Phase 4〜）
 
-> [master_data.md](../master_data.md) §10 / §11。仕様は [game_spec.md](../../design/game_spec.md)、変更履歴は親に集約（[§17](../master_data.md#17-変更履歴)）。
+> [master_data.md](../master_data.md) §10 / §11。仕様は [game_spec.md](../../design/game_spec.md)。
 
 ## 10. 素材データ（Phase 4〜）
 

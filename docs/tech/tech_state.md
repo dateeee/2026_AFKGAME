@@ -126,7 +126,3 @@ stateDiagram-v2
 | 10 | `auto_repeat` で目標階クリア | `currentFloor=1`・探索セッション継続 |
 | 11 | `stop_on_clear` で目標階クリア | `IDLE`・探索セッション確定 |
 | 12 | 不変条件違反データ | `500 INTERNAL_UNEXPECTED_ERROR` + ERRORログ |
-
----
-
-> 変更履歴は [tech_spec.md](tech_spec.md) を参照。

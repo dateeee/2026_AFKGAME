@@ -99,7 +99,3 @@ C1網羅の対象分岐。[development_process.md §3.4](../development_process.
 | [battle.py:40](../../backend/app/routers/battle.py) | 24時間超を無言で切り詰め | §2 `capped` をサマリーに含める |
 | [battle.py:29](../../backend/app/routers/battle.py) | 行ロックなし（二重tickが成立する） | §3 排他ロック |
 | [battle.py:66](../../backend/app/routers/battle.py) | 簡略計算 = 10tickサンプルの平均 × 残り | [tech_offline.md §4](tech_offline.md) の期待値計算 |
-
----
-
-> 変更履歴は [tech_spec.md](tech_spec.md) を参照。

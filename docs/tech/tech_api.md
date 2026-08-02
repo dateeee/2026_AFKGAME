@@ -1,6 +1,6 @@
 # AFK GAME — API設計
 
-> [tech_spec.md](tech_spec.md) §5。呼び出しシーケンスは [api_sequence.md](../../diagrams/api_sequence.md)、認証は [tech_auth.md](tech_auth.md)、変更履歴は親に集約（[§9](tech_spec.md#9-変更履歴)）。
+> [tech_spec.md](tech_spec.md) §5。呼び出しシーケンスは [api_sequence.md](../../diagrams/api_sequence.md)、認証は [tech_auth.md](tech_auth.md)。
 > エラー形式・エラーコードは [tech_logging.md](tech_logging.md)、レート制限・認可は [tech_security.md](tech_security.md)。
 
 ## 5.0 共通仕様

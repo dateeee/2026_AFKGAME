@@ -97,12 +97,3 @@
 | 規約類 | 公開時に利用規約・プライバシーポリシーを掲示すること（Google OAuth 利用の前提条件でもある → [open_specs.md](../open_specs.md)） |
 
 - 削除ジョブの実行方式は [tech_operations.md §12.6](../tech/tech_operations.md)
-
----
-
-## 6. 変更履歴
-
-| 日付 | 内容 |
-|------|------|
-| 2026-08-02 | 初版作成: 性能・容量・可用性・セキュリティ・プライバシーの各要件を定義 |
-| 2026-08-02 | 要件層／設計層の分離を適用: 実現方式を [tech_performance.md](../tech/tech_performance.md)・[tech_security.md](../tech/tech_security.md)・[tech_operations.md](../tech/tech_operations.md) へ移し、本書は目標値と受入基準のみを持つ構成に整理。§1 応答時間目標を tech側の見積りと整合（tick 1〜100tick を 800ms 等）、§3 に稼働率99%・RTO 4時間・計画停止24時間未満の必須制約を追加、§4 脅威に S-1〜S-8 の識別子を付与 |

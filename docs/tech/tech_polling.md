@@ -102,7 +102,3 @@ tickレスポンスの反映順序を固定し、部分反映による表示不�
 | [usePolling.ts](../../frontend/src/composables/usePolling.ts) | 多重タブ制御なし | §2.1 リーダー選出 |
 | [usePolling.ts](../../frontend/src/composables/usePolling.ts) | `focus` 未購読（スリープ復帰で取りこぼす） | §3 `focus` でも即時tick |
 | [usePolling.ts:18](../../frontend/src/composables/usePolling.ts) | 検証なしで逐次ストアへ代入 | §4 検証してから反映 |
-
----
-
-> 変更履歴は [tech_spec.md](tech_spec.md) を参照。

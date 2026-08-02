@@ -1,6 +1,6 @@
 # AFK GAME — 運用設計（環境・監視・データライフサイクル）
 
-> [tech_spec.md](tech_spec.md) §12。性能設計は [tech_performance.md](tech_performance.md)、秘密情報の扱いは [tech_security.md](tech_security.md) §11.8、ログ仕様は [tech_logging.md](tech_logging.md) を参照。変更履歴は親に集約（[§9](tech_spec.md#9-変更履歴)）。
+> [tech_spec.md](tech_spec.md) §12。性能設計は [tech_performance.md](tech_performance.md)、秘密情報の扱いは [tech_security.md](tech_security.md) §11.8、ログ仕様は [tech_logging.md](tech_logging.md) を参照。
 >
 > **運用「要件」（バランス改定ポリシー・補填・告知・サポート窓口）は [operation_requirements.md](../design/operation_requirements.md) が正**。本書はその実現方式（環境・設定・監視・ジョブ・手順）のみを扱う。
 > デプロイ先は未確定（[open_specs.md](../open_specs.md)）。本書はデプロイ先に依存しない運用方針を定める。
@@ -125,7 +125,3 @@
 | データ不整合 | 対象プレイヤーのtickログ | 該当プレイヤーのみバックアップから復元 |
 
 - 問い合わせ対応では `X-Request-ID`（[tech_logging.md](tech_logging.md)）を起点にログを追跡する。プレイヤーには画面上のエラー表示にリクエストIDを含めて伝える
-
----
-
-> 変更履歴は [tech_spec.md](tech_spec.md#9-変更履歴) を参照。

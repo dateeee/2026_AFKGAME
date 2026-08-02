@@ -1,6 +1,6 @@
 # AFK GAME — ログ設計・エラーハンドリング
 
-> [tech_spec.md](tech_spec.md) §6「ログ設計」。アーキテクチャ方針は [tech_architecture.md](tech_architecture.md)、変更履歴は親に集約（[§9](tech_spec.md#9-変更履歴)）。
+> [tech_spec.md](tech_spec.md) §6「ログ設計」。アーキテクチャ方針は [tech_architecture.md](tech_architecture.md)。
 
 ## ログライブラリ
 Python標準 `logging` モジュールを使用。Uvicornのアクセスログと連携する。
