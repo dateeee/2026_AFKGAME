@@ -5,6 +5,10 @@ import { usePlayerStore } from '@/stores/playerStore'
 import { RARITY_COLORS, RARITY_LABELS, SLOT_LABELS } from '@/stores/equipmentStore'
 import { getShopLineup, postShopBuy, postShopBuyDaily, getGameState } from '@/api/client'
 import { formatGold, formatTime } from '@/utils/format'
+import BaseCard from '@/components/ui/BaseCard.vue'
+import BaseButton from '@/components/ui/BaseButton.vue'
+import BaseBadge from '@/components/ui/BaseBadge.vue'
+import BaseSelect from '@/components/ui/BaseSelect.vue'
 import type { ShopDailyItem } from '@/types/game'
 
 const gameStore = useGameStore()
@@ -18,6 +22,12 @@ interface ShopItem {
   quantityOwned: number
   stackLimit: number
 }
+
+const QUANTITY_OPTIONS: Array<{ value: number; label: string }> = [
+  { value: 1, label: '1個' },
+  { value: 5, label: '5個' },
+  { value: 10, label: '10個' },
+]
 
 const tab = ref<'permanent' | 'daily'>('permanent')
 const shopItems = ref<ShopItem[]>([])
@@ -102,110 +112,224 @@ async function buyDaily(item: ShopDailyItem) {
 </script>
 
 <template>
-  <div class="mx-auto max-w-[480px]">
-    <h1 class="font-display text-xl font-bold text-accent mb-2">ショップ</h1>
-    <p class="gold-text text-lg mb-4">ゴールド: {{ formatGold(gameStore.gold) }}</p>
+  <div class="shop">
+    <h1>ショップ</h1>
 
-    <div class="flex gap-2 mb-4">
+    <!-- タブ。押せる範囲を広く取り、選択中は面ごと持ち上げる -->
+    <div class="tabs" role="tablist">
       <button
-        class="btn flex-1"
-        :class="tab === 'permanent' ? 'btn-primary' : 'btn-secondary'"
-        @click="tab = 'permanent'"
+        v-for="t in [{ id: 'permanent', label: '常設' }, { id: 'daily', label: '日替わり' }] as const"
+        :key="t.id"
+        class="tab"
+        :class="{ 'tab-active': tab === t.id }"
+        role="tab"
+        :aria-selected="tab === t.id"
+        @click="tab = t.id"
       >
-        常設
-      </button>
-      <button
-        class="btn flex-1"
-        :class="tab === 'daily' ? 'btn-primary' : 'btn-secondary'"
-        @click="tab = 'daily'"
-      >
-        日替わり
+        {{ t.label }}
       </button>
     </div>
 
-    <div
-      v-if="message"
-      class="p-2 mb-3 bg-bg-secondary border border-border rounded-lg text-sm"
-    >
-      {{ message }}
-    </div>
+    <p v-if="message" class="shop-message" role="status">{{ message }}</p>
 
-    <div v-if="tab === 'permanent'" class="space-y-3">
-      <div v-for="item in shopItems" :key="item.itemId" class="panel">
-        <div class="flex flex-wrap gap-2 items-baseline mb-3">
-          <span class="font-display font-semibold text-text-bright">{{ item.name }}</span>
-          <span class="text-sm text-hp">HP {{ (item.healRatio * 100).toFixed(0) }}% 回復</span>
-          <span class="gold-text text-sm">{{ item.price }}G</span>
-          <span class="text-xs text-text-muted">所持: {{ item.quantityOwned }} / {{ item.stackLimit }}</span>
-        </div>
-        <div class="flex gap-2 items-center">
-          <select v-model.number="buyQuantity" class="shop-select">
-            <option :value="1">1</option>
-            <option :value="5">5</option>
-            <option :value="10">10</option>
-          </select>
-          <button
-            class="btn btn-primary"
-            @click="buyItem(item.itemId)"
+    <!-- 常設 -->
+    <div v-if="tab === 'permanent'" class="shop-list">
+      <BaseCard v-for="item in shopItems" :key="item.itemId" as="article">
+        <template #title>{{ item.name }}</template>
+        <template #actions>
+          <BaseBadge tone="gold" icon="coin" class="num">{{ item.price }}G</BaseBadge>
+        </template>
+
+        <p class="item-effect">HP <span class="num">{{ (item.healRatio * 100).toFixed(0) }}</span>% 回復</p>
+        <p class="item-stock num">所持: {{ item.quantityOwned }} / {{ item.stackLimit }}</p>
+
+        <div class="buy-row">
+          <BaseSelect
+            v-model="buyQuantity"
+            :options="QUANTITY_OPTIONS"
+            aria-label="購入数"
+          />
+          <BaseButton
+            variant="primary"
+            class="buy-btn"
             :disabled="gameStore.gold < item.price * buyQuantity || item.quantityOwned + buyQuantity > item.stackLimit"
+            @click="buyItem(item.itemId)"
           >
             購入 ({{ formatGold(item.price * buyQuantity) }}G)
-          </button>
+          </BaseButton>
         </div>
-      </div>
+      </BaseCard>
     </div>
 
-    <div v-else class="space-y-3">
-      <p class="text-xs text-text-muted">次回更新まで: {{ remainingLabel }}</p>
+    <!-- 日替わり -->
+    <div v-else class="shop-list">
+      <p class="daily-reset">次回更新まで: <span class="num">{{ remainingLabel }}</span></p>
 
-      <div
+      <BaseCard
         v-for="item in dailyItems"
         :key="item.slotIndex"
-        class="panel"
-        :class="{ 'opacity-50': item.soldOut }"
-        :style="{ borderColor: RARITY_COLORS[item.rarity] }"
+        as="article"
+        class="daily-card"
+        :class="{ 'is-soldout': item.soldOut }"
+        :style="{ '--rarity': RARITY_COLORS[item.rarity] }"
       >
-        <div class="flex flex-wrap gap-2 items-baseline mb-1">
-          <span class="font-display font-semibold" :style="{ color: RARITY_COLORS[item.rarity] }">
-            {{ item.name }}
-          </span>
-          <span class="text-xs text-text-muted">
-            {{ RARITY_LABELS[item.rarity] }} / {{ SLOT_LABELS[item.slot] }} / Lv.{{ item.level }}
-          </span>
-        </div>
-        <div class="flex flex-wrap gap-2 text-sm text-text-bright mb-3">
-          <span v-for="line in statLines(item)" :key="line">{{ line }}</span>
-        </div>
-        <div class="flex gap-2 items-center">
-          <span v-if="item.soldOut" class="text-sm text-text-muted">売り切れ</span>
-          <button
-            v-else
-            class="btn btn-primary"
-            @click="buyDaily(item)"
-            :disabled="gameStore.gold < item.price"
-          >
-            購入 ({{ formatGold(item.price) }}G)
-          </button>
-        </div>
-      </div>
+        <template #title>
+          <span class="daily-name">{{ item.name }}</span>
+        </template>
+        <template #actions>
+          <BaseBadge tone="gold" icon="coin" class="num">{{ formatGold(item.price) }}G</BaseBadge>
+        </template>
+
+        <p class="daily-meta">
+          {{ RARITY_LABELS[item.rarity] }} / {{ SLOT_LABELS[item.slot] }} / Lv.{{ item.level }}
+        </p>
+
+        <ul class="stat-chips">
+          <li v-for="line in statLines(item)" :key="line" class="stat-chip num">{{ line }}</li>
+        </ul>
+
+        <p v-if="item.soldOut" class="soldout-note">売り切れ</p>
+        <BaseButton
+          v-else
+          variant="primary"
+          block
+          :disabled="gameStore.gold < item.price"
+          @click="buyDaily(item)"
+        >
+          購入 ({{ formatGold(item.price) }}G)
+        </BaseButton>
+      </BaseCard>
     </div>
   </div>
 </template>
 
 <style scoped>
-.shop-select {
-  padding: 0.375rem 0.5rem;
-  border: 1px solid var(--color-border);
-  border-radius: 0.375rem;
-  background: var(--color-bg);
-  color: var(--color-text);
-  font-size: 0.875rem;
-  font-family: var(--font-body);
-  transition: border-color 150ms;
+.shop {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
-.shop-select:focus {
-  border-color: var(--color-primary);
-  outline: none;
+/* --- タブ --- */
+.tabs {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  background-color: var(--color-surface-1);
+  border: 1px solid var(--color-line-soft);
+  border-radius: var(--radius-lg);
+}
+
+.tab {
+  flex: 1;
+  min-height: 2.5rem;
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-content-muted);
+  font-size: var(--text-label);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--duration-fast) ease, color var(--duration-fast) ease;
+}
+
+@media (hover: hover) {
+  .tab:hover:not(.tab-active) {
+    color: var(--color-content);
+  }
+}
+
+.tab-active {
+  background-color: var(--color-surface-3);
+  color: var(--color-content-strong);
+  box-shadow: inset 0 1px 0 rgba(242, 239, 228, 0.06);
+}
+
+.shop-message {
+  padding: 0.625rem 0.875rem;
+  background-color: var(--color-surface-2);
+  border: 1px solid var(--color-line-soft);
+  border-left: 3px solid var(--color-accent);
+  border-radius: var(--radius-md);
+  font-size: var(--text-label);
+  color: var(--color-content);
+}
+
+.shop-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* --- 常設 --- */
+.item-effect {
+  font-size: var(--text-body);
+  color: var(--color-hp-bright);
+}
+
+.item-stock {
+  margin-top: 0.125rem;
+  font-size: var(--text-caption);
+  color: var(--color-content-faint);
+}
+
+.buy-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.875rem;
+}
+
+/* 個数セレクトは内容幅のまま、購入ボタンが残りを埋める */
+.buy-btn {
+  flex: 1;
+}
+
+/* --- 日替わり --- */
+.daily-reset {
+  font-size: var(--text-caption);
+  color: var(--color-content-faint);
+}
+
+/* レアリティは左端の帯で示す。枠線全体を色付けると一覧が騒がしくなる。
+   BaseCard の .panel と同じ詳細度だと打ち消せないため、親クラスを重ねる */
+.shop .daily-card {
+  border-left: 3px solid var(--rarity, var(--color-line));
+}
+
+.daily-card.is-soldout {
+  opacity: 0.5;
+}
+
+.daily-name {
+  color: var(--rarity, var(--color-content-strong));
+  letter-spacing: 0.02em;
+}
+
+.daily-meta {
+  font-size: var(--text-caption);
+  color: var(--color-content-muted);
+}
+
+.stat-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  margin: 0.625rem 0 0.875rem;
+  list-style: none;
+}
+
+.stat-chip {
+  padding: 0.1875rem 0.5rem;
+  background-color: var(--color-surface-inset);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  color: var(--color-content-strong);
+}
+
+.soldout-note {
+  font-size: var(--text-label);
+  color: var(--color-content-faint);
 }
 </style>

@@ -29,6 +29,12 @@
 │   │   │   ├── useBattleLocal.ts  # MVP用: フロント側tick計算（API未接続時）
 │   │   │   └── useGameLoop.ts     # ゲーム起動・状態管理
 │   │   ├── components/            # UIコンポーネント
+│   │   │   ├── ui/                # UIプリミティブ（tech_design_system.md が正）
+│   │   │   │   ├── AppIcon.vue, icons.ts   # インラインSVG（絵文字は使わない）
+│   │   │   │   ├── Base{Button,Card,Modal,Badge,Field,Select,TextInput}.vue
+│   │   │   │   └── NumberStepper.vue, StatBar.vue
+│   │   │   ├── layout/            # アプリシェル（ヘッダ・ナビ・スクロール境界）
+│   │   │   │   └── AppShell, AppHeader, AppNav, navItems.ts, ConnectionBanner
 │   │   │   └── equipment/         # 装備関連コンポーネント（Phase 2〜）
 │   │   │       ├── EquipmentCard.vue      # 装備カード表示
 │   │   │       ├── EquipmentCompare.vue   # 装備比較
@@ -53,6 +59,8 @@
 │   │   └── assets/
 │   │       ├── icons/             # アイテム・装備アイコン
 │   │       └── styles/
+│   │           ├── tokens.css     # デザイントークン（色・書体・寸法の唯一の定義元）
+│   │           └── main.css       # Tailwind読込・ベース・横断ユーティリティ
 │   ├── index.html
 │   ├── vite.config.ts
 │   ├── tsconfig.json
@@ -140,7 +148,10 @@
 | ブレークポイント | 768px（以下: モバイル、以上: PC） |
 | 最小対応幅 | 320px |
 | レイアウト | PC: 2カラム / モバイル: 1カラム（縦積み） |
-| タッチ対応 | ホバー依存のUI（`:hover` のみ）は避ける |
+| タッチ対応 | ホバー依存のUIは避ける。`:hover` は `@media (hover: hover)` で囲む（タップ後にホバーが残るため） |
+| タップ領域・入力 | タップ対象44px以上。入力部品は16px固定（下回ると iOS Safari が自動拡大する） |
+| セーフエリア | `viewport-fit=cover` + `env(safe-area-inset-*)`。`AppShell` が引き受ける |
+| 見た目の規約 | 色・寸法・部品の定義は [tech_design_system.md](tech_design_system.md) が正 |
 | 数値表示ユーティリティ | 大きな数値（ゴールド等）を短縮表記する関数を `src/utils/format.ts` に実装（表記ルールは game_spec §3「数値表示フォーマット」参照: 1,000以上をK/M/B/T/Qa/Qiで短縮、小数1桁・切り捨て） |
 
 ---

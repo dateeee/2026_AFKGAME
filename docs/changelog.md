@@ -12,6 +12,9 @@
 
 | ファイル | 内容 |
 |---------|------|
+| `docs/tech/tech_design_system.md` | **新規**: デザインシステム（トークン / UIプリミティブ / アプリシェルの3層、禁止事項、画面追加手順）を定義。フロントの見た目の一貫性を構造で担保する |
+| `docs/tech/tech_spec.md` | 関連詳細仕様の一覧に `tech_design_system.md` を追加 |
+| `docs/tech/tech_structure.md` | §2 のフロント構成に `components/ui/`・`components/layout/`・`assets/styles/tokens.css` を追加。§3 レスポンシブ設計にタップ領域44px・入力16px固定・セーフエリア・`@media (hover: hover)` の規約を追加 |
 | `diagrams/screen_transition/main_nav.md` | **ISSUE-301**: 設定画面に `ログアウト`（Phase 2〜・認証ユーザーのみ表示）を追加。実行後は認証フローのログイン画面へ戻る旨と `POST /api/auth/logout` の呼び出しを箇条書きに明記 |
 | `diagrams/screen_transition/auth.md` | **ISSUE-303**: 退会・ログアウトの遷移先を「本図のログイン画面」と明示し、`main_nav.md` との相互参照ループを解消 |
 | `docs/tech/tech_structure.md` | **ISSUE-302**: §2 の `routers/` に `abyss.py`（深淵の塔ランキング・Phase 5〜）を追加。`GET /api/abyss/ranking` の実装配置を確定 |

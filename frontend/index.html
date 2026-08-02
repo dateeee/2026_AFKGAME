@@ -2,11 +2,22 @@
 <html lang="ja">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AFK Game</title>
+    <!-- viewport-fit=cover: ノッチ・ホームインジケータ領域まで描画し、余白は env(safe-area-inset-*) で確保する。
+         maximum-scale / user-scalable は指定しない（拡大を禁じるとアクセシビリティを損なうため。
+         入力欄の自動ズームは font-size 16px で回避している） -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#070a08" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="description" content="放置系ファンタジーRPG。冒険者が自動で塔を探索します。" />
+    <title>AFK GAME</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+    <!-- Cinzel は欧文専用（和文グリフを持たない）。日本語は Noto Sans JP へ自動フォールバックさせる。
+         フォールバック順は tokens.css の --font-display / --font-body で定義している -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    >
   </head>
   <body>
     <div id="app"></div>

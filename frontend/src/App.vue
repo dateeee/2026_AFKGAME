@@ -1,128 +1,71 @@
 <script setup lang="ts">
-import { watch } from 'vue'
+import { computed, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { useGameLoop } from '@/composables/useGameLoop'
 import { useAuthStore } from '@/stores/authStore'
-import { useGameStore } from '@/stores/gameStore'
+import AppShell from '@/components/layout/AppShell.vue'
+import ConnectionBanner from '@/components/layout/ConnectionBanner.vue'
 
-const gameStore = useGameStore()
+const route = useRoute()
 const authStore = useAuthStore()
 const { initialize, isLoading } = useGameLoop()
 
 // ゲスト開始・ログインでは App が再マウントされないため、onMounted だけでは
 // 認証直後のゲーム状態が読み込まれない。認証状態の変化を起点に初期化する。
 watch(() => authStore.isAuthenticated, () => initialize(), { immediate: true })
+
+// 認証画面はヘッダ・ナビを出さず、1枚の画面として見せる
+const isPublic = computed(() => route.meta.public === true)
+
+// ホームだけ PC で2カラムに広げる。他は読みやすさ優先で1カラム幅に収める
+const shellWidth = computed(() => (route.name === 'game' ? 'wide' : 'content'))
 </script>
 
 <template>
-  <div class="flex flex-col min-h-screen min-h-dvh md:flex-row">
-    <!-- Error Banner -->
-    <div
-      v-if="!gameStore.isConnected"
-      class="bg-danger text-white px-4 py-2 text-center text-sm"
-    >
-      {{ gameStore.errorMessage }}
+  <ConnectionBanner />
+
+  <main v-if="isPublic" class="auth-main px-safe">
+    <router-view />
+  </main>
+
+  <AppShell v-else :width="shellWidth">
+    <div v-if="isLoading" class="loading">
+      <span class="loading-text">読み込み中...</span>
     </div>
-
-    <!-- Sidebar Nav (desktop) -->
-    <nav class="hidden md:flex flex-col border-r border-border bg-bg w-20 order-first">
-      <router-link
-        v-for="item in [
-          { to: '/', label: 'ホーム', icon: '\u2694' },
-          { to: '/equipment', label: '装備', icon: '\uD83D\uDEE1' },
-          { to: '/shop', label: 'ショップ', icon: '\uD83D\uDCB0' },
-          { to: '/settings', label: '設定', icon: '\u2699' },
-        ]"
-        :key="item.to"
-        :to="item.to"
-        class="nav-link"
-        active-class="nav-link-active"
-      >
-        <span class="text-lg">{{ item.icon }}</span>
-        <span class="text-xs">{{ item.label }}</span>
-      </router-link>
-    </nav>
-
-    <!-- Main Content -->
-    <main class="flex-1 p-4 overflow-y-auto">
-      <div v-if="isLoading" class="flex items-center justify-center h-full">
-        <span class="text-xl text-text-muted animate-pulse">読み込み中...</span>
-      </div>
-      <router-view v-else v-slot="{ Component }">
-        <transition name="page-fade" mode="out-in">
-          <component :is="Component" />
-        </transition>
-      </router-view>
-    </main>
-
-    <!-- Bottom Nav (mobile) -->
-    <nav class="flex md:hidden border-t border-border bg-bg">
-      <router-link
-        v-for="item in [
-          { to: '/', label: 'ホーム', icon: '\u2694' },
-          { to: '/equipment', label: '装備', icon: '\uD83D\uDEE1' },
-          { to: '/shop', label: 'ショップ', icon: '\uD83D\uDCB0' },
-          { to: '/settings', label: '設定', icon: '\u2699' },
-        ]"
-        :key="item.to"
-        :to="item.to"
-        class="nav-link flex-1"
-        active-class="nav-link-active"
-      >
-        <span class="text-lg">{{ item.icon }}</span>
-        <span class="text-xs">{{ item.label }}</span>
-      </router-link>
-    </nav>
-  </div>
+    <router-view v-else v-slot="{ Component }">
+      <transition name="page-fade" mode="out-in">
+        <component :is="Component" />
+      </transition>
+    </router-view>
+  </AppShell>
 </template>
 
 <style scoped>
-.nav-link {
+.auth-main {
+  min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.125rem;
-  padding: 0.625rem 0.5rem;
-  color: var(--color-text-muted);
-  text-decoration: none;
-  transition: color 150ms, background-color 150ms;
-  position: relative;
+  padding: 2rem 1rem calc(2rem + env(safe-area-inset-bottom, 0px));
 }
 
-.nav-link:hover {
-  color: var(--color-text);
-  background-color: var(--color-bg-elevated);
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 0;
 }
 
-.nav-link-active {
-  color: var(--color-primary) !important;
+.loading-text {
+  font-size: var(--text-label);
+  letter-spacing: 0.1em;
+  color: var(--color-content-faint);
+  animation: loading-pulse 1.4s ease-in-out infinite;
 }
 
-.nav-link-active::after {
-  content: '';
-  position: absolute;
-  background-color: var(--color-primary);
-}
-
-/* Mobile: top accent bar */
-@media (max-width: 767px) {
-  .nav-link-active::after {
-    top: 0;
-    left: 25%;
-    right: 25%;
-    height: 2px;
-    border-radius: 0 0 2px 2px;
-  }
-}
-
-/* Desktop: left accent bar */
-@media (min-width: 768px) {
-  .nav-link-active::after {
-    left: 0;
-    top: 25%;
-    bottom: 25%;
-    width: 2px;
-    border-radius: 0 2px 2px 0;
-  }
+@keyframes loading-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
 }
 </style>

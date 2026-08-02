@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useEquipmentStore } from '@/stores/equipmentStore'
+import { useEquipmentStore, SLOT_LABELS } from '@/stores/equipmentStore'
 import { usePlayerStore } from '@/stores/playerStore'
 import { useGameStore } from '@/stores/gameStore'
 import EquipmentSlotGrid from '@/components/equipment/EquipmentSlotGrid.vue'
 import EquipmentInventory from '@/components/equipment/EquipmentInventory.vue'
 import EquipmentCompare from '@/components/equipment/EquipmentCompare.vue'
+import BaseCard from '@/components/ui/BaseCard.vue'
+import BaseButton from '@/components/ui/BaseButton.vue'
+import AppIcon from '@/components/ui/AppIcon.vue'
 import type { Equipment, EquipmentSlot } from '@/types/game'
 
 const equipmentStore = useEquipmentStore()
@@ -53,34 +56,37 @@ async function onUnequip(slot: EquipmentSlot) {
 </script>
 
 <template>
-  <div class="mx-auto max-w-[600px]">
-    <h1 class="font-display text-xl font-bold text-accent mb-4">装備</h1>
+  <div class="equipment-view">
+    <h1>装備</h1>
 
-    <!-- Equipped Section -->
-    <section class="panel mb-4">
-      <h2 class="panel-title">装備中</h2>
+    <BaseCard title="装備中">
       <EquipmentSlotGrid @select-slot="onSelectSlot" />
-      <div v-if="selectedSlot && equipmentStore.equippedItems[selectedSlot]" class="mt-2">
-        <button class="btn btn-secondary text-sm" @click="onUnequip(selectedSlot!)">
-          {{ selectedSlot }}スロットの装備を外す
-        </button>
-      </div>
-    </section>
+      <BaseButton
+        v-if="selectedSlot && equipmentStore.equippedItems[selectedSlot]"
+        variant="secondary"
+        size="sm"
+        class="unequip-btn"
+        @click="onUnequip(selectedSlot!)"
+      >
+        {{ SLOT_LABELS[selectedSlot] ?? selectedSlot }}スロットの装備を外す
+      </BaseButton>
+    </BaseCard>
 
-    <!-- Inventory Section -->
-    <section class="panel">
-      <h2 class="panel-title flex items-center gap-2">
-        所持装備
-        <span v-if="selectedSlot" class="badge bg-primary text-white">
-          {{ selectedSlot }}のみ表示中
-          <button class="ml-1 hover:opacity-70" @click="selectedSlot = null">&times;</button>
-        </span>
-      </h2>
+    <BaseCard>
+      <template #title>所持装備</template>
+      <template v-if="selectedSlot" #actions>
+        <!-- 絞り込み中であることと、その解除を1箇所にまとめる -->
+        <button type="button" class="filter-chip" @click="selectedSlot = null">
+          {{ SLOT_LABELS[selectedSlot] ?? selectedSlot }}のみ表示中
+          <AppIcon name="close" :size="12" />
+        </button>
+      </template>
+
       <EquipmentInventory
         :filter-slot="selectedSlot"
         @select="onSelectInventoryItem"
       />
-    </section>
+    </BaseCard>
 
     <EquipmentCompare
       v-if="compareItem && selectedSlot"
@@ -91,3 +97,37 @@ async function onUnequip(slot: EquipmentSlot) {
     />
   </div>
 </template>
+
+<style scoped>
+.equipment-view {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.unequip-btn {
+  margin-top: 0.75rem;
+}
+
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-height: 1.875rem;
+  padding: 0 0.5rem;
+  border: 1px solid var(--color-accent-dim);
+  border-radius: 999px;
+  background-color: color-mix(in srgb, var(--color-accent) 10%, transparent);
+  color: var(--color-accent-bright);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--duration-fast) ease;
+}
+
+@media (hover: hover) {
+  .filter-chip:hover {
+    background-color: color-mix(in srgb, var(--color-accent) 20%, transparent);
+  }
+}
+</style>

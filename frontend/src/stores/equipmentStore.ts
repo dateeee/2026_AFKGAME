@@ -12,13 +12,17 @@ export const RARITY_LABELS: Record<string, string> = {
   legendary: 'レジェンダリー',
 }
 
-/** レアリティカラー */
+/**
+ * レアリティカラー。
+ * 実際の色は assets/styles/tokens.css で定義する。
+ * ここに16進数を直接書かないこと（テーマ変更が2箇所に分かれるため）。
+ */
 export const RARITY_COLORS: Record<string, string> = {
-  common: '#9ca3af',
-  uncommon: '#4ade80',
-  rare: '#60a5fa',
-  epic: '#c084fc',
-  legendary: '#fb923c',
+  common: 'var(--color-rarity-common)',
+  uncommon: 'var(--color-rarity-uncommon)',
+  rare: 'var(--color-rarity-rare)',
+  epic: 'var(--color-rarity-epic)',
+  legendary: 'var(--color-rarity-legendary)',
 }
 
 /** スロット表示名 */

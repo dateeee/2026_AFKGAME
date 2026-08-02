@@ -1,67 +1,15 @@
 @import "tailwindcss";
+@import "./tokens.css";
 
-/* ============================================
-   Dark Fantasy Design System
-   ============================================ */
-
-@theme {
-  /* --- Colors --- */
-  --color-bg-darkest: #0b0c14;
-  --color-bg: #12131e;
-  --color-bg-secondary: #1a1c2e;
-  --color-bg-elevated: #222540;
-  --color-bg-overlay: rgba(5, 5, 15, 0.85);
-
-  --color-border: #2d2f4a;
-  --color-border-glow: #3d3f6a;
-
-  --color-text: #d4d0c8;
-  --color-text-muted: #7a7890;
-  --color-text-bright: #f0ece0;
-
-  --color-primary: #8b5cf6;
-  --color-primary-dim: #6d40d6;
-  --color-accent: #c084fc;
-
-  --color-gold: #f5c542;
-  --color-gold-dim: #b8942e;
-
-  --color-hp: #34d399;
-  --color-hp-low: #ef4444;
-  --color-exp: #60a5fa;
-
-  --color-danger: #dc2626;
-  --color-danger-glow: #f87171;
-  --color-success: #22c55e;
-
-  /* Rarity */
-  --color-rarity-common: #9ca3af;
-  --color-rarity-uncommon: #4ade80;
-  --color-rarity-rare: #60a5fa;
-  --color-rarity-epic: #c084fc;
-  --color-rarity-legendary: #fb923c;
-
-  /* --- Fonts --- */
-  --font-display: 'Cinzel', 'Georgia', serif;
-  --font-body: 'Inter', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
-
-  /* --- Animations --- */
-  --animate-page-enter: page-enter 200ms ease-out;
-  --animate-page-leave: page-leave 150ms ease-in;
-  --animate-modal-enter: modal-enter 250ms cubic-bezier(0.16, 1, 0.3, 1);
-  --animate-bar-shimmer: bar-shimmer 3s ease-in-out infinite;
-  --animate-log-appear: log-appear 200ms ease-out;
-  --animate-rarity-glow: rarity-glow 2s ease-in-out infinite alternate;
-  --animate-pulse-gold: pulse-gold 600ms ease-in-out;
-}
-
-/* ============================================
+/* ============================================================
    Base Layer
-   ============================================ */
+   色・寸法の値は tokens.css のセマンティックトークンのみを参照する
+   ============================================================ */
 
 @layer base {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
@@ -69,259 +17,161 @@
 
   html {
     font-size: 16px;
+    /* 端末の文字サイズ設定で横幅が壊れるのを防ぐ */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    /* 放置ゲームの誤操作防止: 引っ張って更新・バウンスを止める */
+    overscroll-behavior-y: none;
+    height: 100%;
   }
 
   body {
     font-family: var(--font-body);
-    background-color: var(--color-bg-darkest);
-    color: var(--color-text);
+    font-size: var(--text-body);
+    color: var(--color-content);
+    background-color: var(--color-surface-base);
+    /* 単色ベタ塗りを避け、上方に淡い光源を置いて奥行きを作る。
+       background-attachment: fixed は使わない
+       （iOS Safari が正しく扱えず、合成レイヤーの描画崩れも起きるため。
+        スクロールするのは body ではなく main なので固定する必要もない） */
+    background-image:
+      radial-gradient(120% 80% at 50% -20%, rgba(201, 162, 39, 0.06) 0%, transparent 60%),
+      radial-gradient(100% 60% at 50% 100%, rgba(108, 191, 135, 0.035) 0%, transparent 70%);
+    background-repeat: no-repeat;
     min-width: 320px;
-    line-height: 1.5;
+    min-height: 100%;
+    line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* iOS でタップ時の灰色ハイライトを消す（自前の :active 表現に統一） */
+    -webkit-tap-highlight-color: transparent;
   }
 
   a {
-    color: var(--color-primary);
+    color: var(--color-accent-bright);
     text-decoration: none;
-    transition: color 150ms;
+    transition: color var(--duration-fast);
   }
 
   a:hover {
-    color: var(--color-accent);
-  }
-
-  h1, h2, h3 {
-    font-family: var(--font-display);
-    color: var(--color-text-bright);
-    letter-spacing: 0.02em;
+    color: var(--color-accent-pale);
   }
 
   h1 {
-    font-size: 1.5rem;
+    font-family: var(--font-display);
+    font-size: var(--text-title);
     font-weight: 700;
-    color: var(--color-accent);
+    color: var(--color-content-strong);
+    letter-spacing: 0.02em;
+  }
+
+  h2,
+  h3 {
+    font-family: var(--font-body);
+    font-weight: 600;
+    color: var(--color-content-strong);
   }
 
   h2 {
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: var(--color-primary);
+    font-size: var(--text-heading);
   }
 
   h3 {
-    font-family: var(--font-body);
-    font-size: 1rem;
-    font-weight: 600;
+    font-size: var(--text-body);
   }
 
-  /* Focus ring for accessibility */
+  /* フォーム部品はブラウザ既定の書体を継承しない。16px を下回らせない */
+  button,
+  input,
+  select,
+  textarea {
+    font-family: inherit;
+    font-size: var(--text-input);
+    color: inherit;
+  }
+
   *:focus-visible {
-    outline: 2px solid var(--color-primary);
+    outline: 2px solid var(--color-accent);
     outline-offset: 2px;
+    border-radius: var(--radius-sm);
   }
 
-  /* Custom scrollbar */
   ::-webkit-scrollbar {
     width: 6px;
+    height: 6px;
   }
   ::-webkit-scrollbar-track {
-    background: var(--color-bg-darkest);
+    background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: var(--color-border);
+    background: var(--color-line);
     border-radius: 3px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: var(--color-border-glow);
+    background: var(--color-line-strong);
+  }
+
+  /* 動きを減らす設定を尊重する（常時走るシマー等を止める） */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }
 
-/* ============================================
-   Component Layer
-   ============================================ */
+/* ============================================================
+   Utility Layer
+   UIプリミティブに属さない、横断的に効く最小限のクラスのみ
+   ============================================================ */
 
-@layer components {
-  /* --- Panel / Card --- */
-  .panel {
-    background-color: var(--color-bg-secondary);
-    border: 1px solid var(--color-border);
-    border-top: 2px solid var(--color-primary);
-    border-radius: 0.75rem;
-    padding: 1rem;
-    box-shadow:
-      0 4px 16px rgba(0, 0, 0, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.03);
+@layer utilities {
+  /* 数値は等幅で。毎tick更新される値の桁揺れを止める */
+  .num {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
   }
 
-  .panel-title {
-    font-family: var(--font-display);
-    font-size: 1.125rem;
+  /* ラベル（小見出し・項目名）の共通体裁 */
+  .label-caps {
+    font-size: var(--text-caption);
     font-weight: 600;
-    color: var(--color-primary);
-    margin-bottom: 0.75rem;
-    letter-spacing: 0.03em;
+    letter-spacing: 0.14em;
+    color: var(--color-content-muted);
+    text-transform: uppercase;
   }
 
-  /* --- Buttons --- */
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1.25rem;
-    border: none;
-    border-radius: 0.5rem;
-    font-family: var(--font-body);
-    font-size: 0.875rem;
-    font-weight: 600;
-    letter-spacing: 0.025em;
-    cursor: pointer;
-    transition: all 150ms;
+  /* 端末のセーフエリア（ホームインジケータ・ノッチ）分の余白 */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .pt-safe {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+  .px-safe {
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
   }
 
-  .btn:active {
-    transform: scale(0.97);
-  }
-
-  .btn:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-    transform: none;
-  }
-
-  .btn-primary {
-    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dim));
-    color: white;
-  }
-
-  .btn-primary:hover:not(:disabled) {
-    filter: brightness(1.15);
-  }
-
-  .btn-secondary {
-    background: transparent;
-    border: 1px solid var(--color-border);
-    color: var(--color-text);
-  }
-
-  .btn-secondary:hover:not(:disabled) {
-    background-color: var(--color-bg-elevated);
-    border-color: var(--color-border-glow);
-  }
-
-  .btn-danger {
-    background: linear-gradient(135deg, var(--color-danger), #b91c1c);
-    color: white;
-  }
-
-  .btn-danger:hover:not(:disabled) {
-    filter: brightness(1.15);
-  }
-
-  /* --- Stat Bars (HP / EXP) --- */
-  .stat-bar {
-    position: relative;
-    height: 14px;
-    background-color: var(--color-bg-darkest);
-    border-radius: 7px;
-    overflow: hidden;
-  }
-
-  .stat-bar-fill {
-    height: 100%;
-    border-radius: 7px;
-    transition: width 400ms ease-out;
-    position: relative;
-  }
-
-  .stat-bar-fill::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      90deg,
-      transparent 0%,
-      rgba(255, 255, 255, 0.15) 50%,
-      transparent 100%
-    );
-    background-size: 200% 100%;
-    animation: var(--animate-bar-shimmer);
-  }
-
-  .stat-bar-hp .stat-bar-fill {
-    background: linear-gradient(90deg, #059669, var(--color-hp));
-  }
-
-  .stat-bar-exp .stat-bar-fill {
-    background: linear-gradient(90deg, #2563eb, var(--color-exp));
-  }
-
-  .stat-bar-label {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.625rem;
-    font-weight: 600;
-    color: white;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-    z-index: 1;
-  }
-
-  /* --- Modal --- */
-  .modal-overlay {
-    position: fixed;
-    inset: 0;
-    background-color: var(--color-bg-overlay);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 50;
-    padding: 1rem;
-  }
-
-  .modal-panel {
-    background-color: var(--color-bg);
-    border: 1px solid var(--color-border-glow);
-    border-top: 2px solid var(--color-primary);
-    border-radius: 1rem;
-    padding: 1.5rem;
-    max-width: 480px;
-    width: 100%;
-    box-shadow:
-      0 8px 32px rgba(0, 0, 0, 0.5),
-      inset 0 1px 0 rgba(255, 255, 255, 0.03);
-  }
-
-  /* --- Badge --- */
-  .badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.125rem 0.5rem;
-    border-radius: 9999px;
-    font-size: 0.75rem;
-    font-weight: 500;
-    letter-spacing: 0.025em;
-  }
-
-  /* --- Gold display --- */
-  .gold-text {
-    color: var(--color-gold);
-    font-weight: 600;
-    text-shadow: 0 0 8px rgba(245, 197, 66, 0.3);
+  /* タップ領域の下限を満たす */
+  .tap-target {
+    min-height: var(--size-tap-min);
+    min-width: var(--size-tap-min);
   }
 }
 
-/* ============================================
-   Keyframe Animations
-   ============================================ */
+/* ============================================================
+   Keyframes
+   ============================================================ */
 
 @keyframes page-enter {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(6px);
   }
   to {
     opacity: 1;
@@ -341,64 +191,60 @@
 @keyframes modal-enter {
   from {
     opacity: 0;
-    transform: scale(0.95);
+    transform: translateY(12px) scale(0.98);
   }
   to {
     opacity: 1;
-    transform: scale(1);
+    transform: translateY(0) scale(1);
   }
-}
-
-@keyframes bar-shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
 }
 
 @keyframes log-appear {
   from {
     opacity: 0;
-    transform: translateX(-8px);
+    transform: translateY(-4px);
   }
   to {
     opacity: 1;
-    transform: translateX(0);
+    transform: translateY(0);
   }
 }
 
 @keyframes rarity-glow {
   from {
-    box-shadow: 0 0 4px var(--glow-color, var(--color-rarity-legendary));
+    box-shadow: 0 0 0 1px var(--glow-color), 0 0 6px -2px var(--glow-color);
   }
   to {
-    box-shadow: 0 0 12px var(--glow-color, var(--color-rarity-legendary));
+    box-shadow: 0 0 0 1px var(--glow-color), 0 0 16px -2px var(--glow-color);
   }
 }
 
-@keyframes pulse-gold {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05); color: var(--color-gold); }
-}
-
-/* ============================================
+/* ============================================================
    Vue Transition Classes
-   ============================================ */
+   ============================================================ */
 
 .page-fade-enter-active {
-  animation: page-enter 200ms ease-out;
+  animation: var(--animate-page-enter);
 }
 
 .page-fade-leave-active {
-  animation: page-leave 150ms ease-in;
+  animation: var(--animate-page-leave);
 }
 
-.modal-fade-enter-active {
-  animation: modal-enter 250ms cubic-bezier(0.16, 1, 0.3, 1);
+.modal-fade-enter-active .modal-panel {
+  animation: var(--animate-modal-enter);
 }
 
+.modal-fade-enter-active,
 .modal-fade-leave-active {
-  animation: page-leave 150ms ease-in;
+  transition: opacity var(--duration-base) var(--ease-out-quart);
+}
+
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+  opacity: 0;
 }
 
 .log-enter-active {
-  animation: log-appear 200ms ease-out;
+  animation: var(--animate-log-appear);
 }

@@ -1,11 +1,18 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { useGameStore } from '@/stores/gameStore'
 import { usePlayerStore } from '@/stores/playerStore'
 import { useBattleStore } from '@/stores/battleStore'
 import { formatGold, formatTime } from '@/utils/format'
 import { postTowerSelect, postTowerRetire, putTowerMode, getGameState } from '@/api/client'
 import { RARITY_LABELS, SLOT_LABELS } from '@/stores/equipmentStore'
+import BaseCard from '@/components/ui/BaseCard.vue'
+import BaseButton from '@/components/ui/BaseButton.vue'
+import BaseBadge from '@/components/ui/BaseBadge.vue'
+import BaseModal from '@/components/ui/BaseModal.vue'
+import StatBar from '@/components/ui/StatBar.vue'
+import NumberStepper from '@/components/ui/NumberStepper.vue'
+import AppIcon from '@/components/ui/AppIcon.vue'
 import type { BattleLogEntry, TowerInfo } from '@/types/game'
 
 const gameStore = useGameStore()
@@ -14,6 +21,7 @@ const battleStore = useBattleStore()
 
 const selectedTowerId = ref('goblin_tower')
 const selectedTargetFloor = ref(5)
+const logScroller = ref<HTMLElement | null>(null)
 
 onMounted(() => {
   gameStore.loadTowers().catch(() => { /* 一覧取得失敗時はゲーム状態から復元されるまで空表示 */ })
@@ -51,11 +59,25 @@ watch(selectedTower, (tower) => {
 
 const hero = computed(() => playerStore.characters[0] ?? null)
 const effectiveMaxHp = computed(() => hero.value?.effectiveMaxHp ?? hero.value?.maxHp ?? 1)
-const hpPercent = computed(() => hero.value ? (hero.value.hp / effectiveMaxHp.value) * 100 : 0)
 const expRequired = computed(() => hero.value ? Math.floor(100 * Math.pow(hero.value.level, 1.5)) : 100)
-const expPercent = computed(() => hero.value ? (hero.value.exp / expRequired.value) * 100 : 0)
 const potionCount = computed(() => playerStore.potions['hp_potion'] ?? 0)
 const isInTower = computed(() => !!gameStore.currentTowerId)
+
+const heroStats = computed(() => hero.value ? [
+  { key: 'ATK', value: hero.value.baseAtk },
+  { key: 'DEF', value: hero.value.baseDef },
+  { key: 'SPD', value: hero.value.baseSpd },
+] : [])
+
+// 直近のログだけを描画する（DOMノード数を抑え、スマホでの描画を軽く保つ）
+const visibleLogs = computed(() => battleStore.battleLogs.slice(-10))
+
+// 新しいログは下に積まれるため、追加のたびに最新行まで送る
+watch(() => battleStore.battleLogs.length, async () => {
+  await nextTick()
+  const el = logScroller.value
+  if (el) el.scrollTop = el.scrollHeight
+})
 
 async function enterTower() {
   try {
@@ -132,160 +154,180 @@ function dismissOffline() {
 </script>
 
 <template>
-  <div class="grid gap-4 grid-cols-1 md:grid-cols-2">
-    <!-- Offline Rewards Modal -->
-    <transition name="modal-fade">
-      <div v-if="battleStore.offlineSummary" class="modal-overlay" @click.self="dismissOffline">
-        <div class="modal-panel text-center">
-          <h2 class="font-display text-lg font-semibold text-accent mb-4">オフライン報酬</h2>
-          <div class="text-left space-y-1 mb-4">
-            <p class="text-text-muted text-sm">経過時間: {{ formatTime(battleStore.offlineSummary.elapsedSeconds) }}</p>
-            <p class="text-text-muted text-sm">処理ティック数: {{ battleStore.offlineSummary.processedTicks }}</p>
-            <p class="gold-text text-lg">+{{ formatGold(battleStore.offlineSummary.totalGold) }} ゴールド</p>
-            <p class="text-exp font-bold">+{{ battleStore.offlineSummary.totalExp.toLocaleString() }} EXP</p>
-            <p class="text-sm">撃破した敵: {{ battleStore.offlineSummary.enemiesDefeated }}</p>
-            <p class="text-sm">クリアしたフロア: {{ battleStore.offlineSummary.floorsCleared }}</p>
-            <p v-if="battleStore.offlineSummary.potionsUsed > 0" class="text-sm text-hp">
-              使用したポーション: {{ battleStore.offlineSummary.potionsUsed }}
-            </p>
-            <p v-if="battleStore.offlineSummary.levelsGained > 0" class="text-primary font-bold text-lg">
-              レベルアップ x{{ battleStore.offlineSummary.levelsGained }}！
-            </p>
-          </div>
-          <button class="btn btn-primary w-full" @click="dismissOffline">OK</button>
-        </div>
-      </div>
-    </transition>
-
-    <!-- Character Panel -->
-    <section class="panel">
-      <h2 class="panel-title">キャラクター</h2>
-      <div v-if="hero">
-        <p class="font-display text-lg font-bold text-text-bright">{{ hero.name }}</p>
-        <p class="text-sm text-text-muted mb-3">LV {{ hero.level }}</p>
-
-        <!-- HP Bar -->
-        <div class="flex items-center gap-2 mb-2">
-          <span class="w-8 text-xs font-bold text-hp">HP</span>
-          <div class="stat-bar stat-bar-hp flex-1">
-            <div class="stat-bar-fill" :style="{ width: `${hpPercent}%` }"></div>
-          </div>
-          <span class="text-xs min-w-[5rem] text-right">{{ hero.hp }} / {{ effectiveMaxHp }}</span>
-        </div>
-
-        <!-- EXP Bar -->
-        <div class="flex items-center gap-2 mb-3">
-          <span class="w-8 text-xs font-bold text-exp">EXP</span>
-          <div class="stat-bar stat-bar-exp flex-1">
-            <div class="stat-bar-fill" :style="{ width: `${expPercent}%` }"></div>
-          </div>
-          <span class="text-xs min-w-[5rem] text-right">{{ hero.exp }} / {{ expRequired }}</span>
-        </div>
-
-        <!-- Stats -->
-        <div class="flex gap-4 text-sm mt-2">
-          <span class="text-text-bright font-semibold">ATK {{ hero.baseAtk }}</span>
-          <span class="text-text-bright font-semibold">DEF {{ hero.baseDef }}</span>
-          <span class="text-text-bright font-semibold">SPD {{ hero.baseSpd }}</span>
-        </div>
-
-        <div class="mt-2 text-sm text-hp">
-          HPポーション: {{ potionCount }}
-        </div>
-      </div>
-    </section>
-
-    <!-- Tower Panel -->
-    <section class="panel">
-      <h2 class="panel-title">塔</h2>
-
-      <!-- In Tower -->
-      <div v-if="isInTower">
-        <p class="font-display text-lg font-bold text-text-bright">{{ towerName(gameStore.currentTowerId) || '塔' }}</p>
-        <p class="text-sm">フロア {{ gameStore.currentFloor }} / {{ gameStore.targetFloor }}</p>
-        <p class="text-xs text-text-muted mt-1">
-          モード: {{ gameStore.towerMode === 'auto_repeat' ? '自動周回' : 'クリア時停止' }}
+  <div class="home-grid">
+    <!-- オフライン報酬 -->
+    <BaseModal :open="!!battleStore.offlineSummary" title="オフライン報酬" @close="dismissOffline">
+      <template v-if="battleStore.offlineSummary">
+        <p class="offline-lead">
+          {{ formatTime(battleStore.offlineSummary.elapsedSeconds) }}のあいだ、冒険者は塔を進み続けました。
         </p>
 
-        <!-- Enemy Info -->
-        <div v-if="gameStore.currentEnemy" class="mt-3 p-3 bg-bg rounded-lg border border-border">
-          <p class="font-semibold text-danger-glow mb-1">
-            {{ gameStore.currentEnemy.name }} LV{{ gameStore.currentEnemy.level }}
-          </p>
-          <div class="flex items-center gap-2">
-            <span class="w-8 text-xs font-bold text-danger">HP</span>
-            <div class="stat-bar flex-1 enemy-bar">
-              <div
-                class="stat-bar-fill"
-                :style="{ width: `${(gameStore.currentEnemy.hp / gameStore.currentEnemy.maxHp) * 100}%` }"
-              ></div>
-            </div>
-            <span class="text-xs min-w-[5rem] text-right">
-              {{ gameStore.currentEnemy.hp }} / {{ gameStore.currentEnemy.maxHp }}
+        <div class="offline-headline">
+          <div class="offline-figure">
+            <span class="label-caps">獲得ゴールド</span>
+            <span class="offline-value num text-gold">+{{ formatGold(battleStore.offlineSummary.totalGold) }}</span>
+          </div>
+          <div class="offline-figure">
+            <span class="label-caps">獲得EXP</span>
+            <span class="offline-value num text-exp-bright">
+              +{{ formatGold(battleStore.offlineSummary.totalExp) }}
             </span>
           </div>
         </div>
 
-        <div class="flex gap-2 mt-3">
-          <button class="btn btn-secondary flex-1" @click="toggleMode">
-            {{ gameStore.towerMode === 'auto_repeat' ? 'クリア時停止' : '自動周回' }}
-          </button>
-          <button class="btn btn-danger" @click="retireFromTower">撤退</button>
-        </div>
-      </div>
-
-      <!-- Tower Select -->
-      <div v-else class="flex flex-col gap-3">
-        <div
-          v-for="tower in gameStore.towers"
-          :key="tower.id"
-          class="tower-card"
-          :class="{
-            'tower-card-selected': tower.id === selectedTowerId,
-            'tower-card-locked': !isUnlocked(tower),
-          }"
-          @click="selectTower(tower)"
-        >
-          <div class="flex items-center justify-between">
-            <p class="font-display font-bold text-text-bright">
-              {{ tower.name }}
-              <span class="text-xs font-normal text-text-muted">(全{{ tower.totalFloors }}F)</span>
-            </p>
-            <span v-if="gameStore.towersCleared[tower.id]?.cleared" class="badge badge-cleared">クリア済</span>
-            <span v-else-if="!isUnlocked(tower)" class="badge badge-locked">未解放</span>
+        <dl class="offline-detail">
+          <div><dt>撃破した敵</dt><dd class="num">{{ battleStore.offlineSummary.enemiesDefeated }}</dd></div>
+          <div><dt>クリアしたフロア</dt><dd class="num">{{ battleStore.offlineSummary.floorsCleared }}</dd></div>
+          <div><dt>処理ティック数</dt><dd class="num">{{ battleStore.offlineSummary.processedTicks }}</dd></div>
+          <div v-if="battleStore.offlineSummary.potionsUsed > 0">
+            <dt>使用したポーション</dt><dd class="num">{{ battleStore.offlineSummary.potionsUsed }}</dd>
           </div>
-          <p v-if="!isUnlocked(tower)" class="text-xs text-text-muted mt-1">
-            {{ towerName(tower.unlockTowerId) }}のボス討伐で解放
-          </p>
-          <p v-else-if="(gameStore.towersCleared[tower.id]?.highestFloor ?? 0) > 0" class="text-xs text-text-muted mt-1">
-            最高到達: {{ gameStore.towersCleared[tower.id]!.highestFloor }}F
-          </p>
-        </div>
-        <p v-if="gameStore.towers.length === 0" class="text-text-muted text-sm italic">塔一覧を読み込み中...</p>
+        </dl>
 
-        <div class="flex items-center gap-2">
-          <label class="text-sm">目標フロア:</label>
-          <input
-            type="number"
-            v-model.number="selectedTargetFloor"
-            min="1"
-            :max="targetFloorCap"
-            class="floor-input"
-          />
-          <span class="text-xs text-text-muted">/ {{ targetFloorCap }}（選択上限）</span>
+        <p v-if="battleStore.offlineSummary.levelsGained > 0" class="offline-levelup">
+          レベルアップ ×{{ battleStore.offlineSummary.levelsGained }}
+        </p>
+      </template>
+
+      <template #footer>
+        <BaseButton variant="primary" block @click="dismissOffline">OK</BaseButton>
+      </template>
+    </BaseModal>
+
+    <!-- キャラクター -->
+    <BaseCard title="キャラクター">
+      <div v-if="hero" class="hero">
+        <div class="hero-head">
+          <p class="hero-name">{{ hero.name }}</p>
+          <BaseBadge tone="gold">LV {{ hero.level }}</BaseBadge>
         </div>
-        <button class="btn btn-primary" :disabled="!selectedTower || !isUnlocked(selectedTower)" @click="enterTower">
-          塔に入る
-        </button>
+
+        <div class="bars">
+          <StatBar label="HP" :value="hero.hp" :max="effectiveMaxHp" tone="hp" :low-threshold="0.3" />
+          <StatBar label="EXP" :value="hero.exp" :max="expRequired" tone="exp" />
+        </div>
+
+        <dl class="stat-grid">
+          <div v-for="stat in heroStats" :key="stat.key" class="stat-cell">
+            <dt class="label-caps">{{ stat.key }}</dt>
+            <dd class="stat-value num">{{ stat.value }}</dd>
+          </div>
+        </dl>
+
+        <p class="hero-potion">HPポーション: <span class="num">{{ potionCount }}</span></p>
       </div>
-    </section>
+    </BaseCard>
 
-    <!-- Battle Log -->
-    <section class="panel col-span-full">
-      <h2 class="panel-title">戦闘ログ</h2>
-      <div class="battle-log">
-        <template v-if="battleStore.battleLogs.length > 0">
-          <div v-for="(tick, i) in battleStore.battleLogs.slice(-10)" :key="i" class="log-tick">
+    <!-- 塔 -->
+    <BaseCard title="塔">
+      <!-- 攻略中 -->
+      <div v-if="isInTower" class="tower-run">
+        <div class="tower-run-head">
+          <p class="tower-run-name">{{ towerName(gameStore.currentTowerId) || '塔' }}</p>
+          <BaseBadge :tone="gameStore.towerMode === 'auto_repeat' ? 'success' : 'neutral'">
+            モード: {{ gameStore.towerMode === 'auto_repeat' ? '自動周回' : 'クリア時停止' }}
+          </BaseBadge>
+        </div>
+
+        <p class="tower-floor num">フロア {{ gameStore.currentFloor }} / {{ gameStore.targetFloor }}</p>
+
+        <!-- 交戦中の敵 -->
+        <div v-if="gameStore.currentEnemy" class="enemy">
+          <p class="enemy-name">
+            {{ gameStore.currentEnemy.name }}
+            <span class="enemy-level num">LV{{ gameStore.currentEnemy.level }}</span>
+          </p>
+          <StatBar
+            label="HP"
+            :value="gameStore.currentEnemy.hp"
+            :max="gameStore.currentEnemy.maxHp"
+            tone="enemy"
+          />
+        </div>
+
+        <div class="tower-actions">
+          <BaseButton variant="secondary" block @click="toggleMode">
+            {{ gameStore.towerMode === 'auto_repeat' ? 'クリア時停止' : '自動周回' }}
+          </BaseButton>
+          <BaseButton variant="danger" @click="retireFromTower">撤退</BaseButton>
+        </div>
+      </div>
+
+      <!-- 塔選択 -->
+      <div v-else class="tower-select">
+        <!-- 塔の選択はラジオ相当。Tab で移動し Enter/Space で選べるようにする -->
+        <ul class="tower-list" role="radiogroup" aria-label="挑戦する塔">
+          <li
+            v-for="tower in gameStore.towers"
+            :key="tower.id"
+            class="tower-card"
+            :class="{
+              'tower-card-selected': tower.id === selectedTowerId,
+              'tower-card-locked': !isUnlocked(tower),
+            }"
+            role="radio"
+            :aria-checked="tower.id === selectedTowerId"
+            :aria-disabled="!isUnlocked(tower)"
+            :tabindex="isUnlocked(tower) ? 0 : -1"
+            @click="selectTower(tower)"
+            @keydown.enter.prevent="selectTower(tower)"
+            @keydown.space.prevent="selectTower(tower)"
+          >
+            <div class="tower-card-head">
+              <p class="font-display tower-card-name">
+                {{ tower.name }}
+                <span class="tower-card-floors num">全{{ tower.totalFloors }}F</span>
+              </p>
+              <BaseBadge v-if="gameStore.towersCleared[tower.id]?.cleared" tone="gold" icon="check">
+                クリア済
+              </BaseBadge>
+              <BaseBadge v-else-if="!isUnlocked(tower)" tone="neutral" icon="lock">未解放</BaseBadge>
+            </div>
+            <p v-if="!isUnlocked(tower)" class="tower-card-note">
+              {{ towerName(tower.unlockTowerId) }}のボス討伐で解放
+            </p>
+            <p v-else-if="(gameStore.towersCleared[tower.id]?.highestFloor ?? 0) > 0" class="tower-card-note num">
+              最高到達: {{ gameStore.towersCleared[tower.id]!.highestFloor }}F
+            </p>
+          </li>
+        </ul>
+
+        <p v-if="gameStore.towers.length === 0" class="empty-note">塔一覧を読み込み中...</p>
+
+        <div class="target-floor">
+          <span class="target-floor-label">目標フロア</span>
+          <NumberStepper
+            v-model="selectedTargetFloor"
+            :min="1"
+            :max="targetFloorCap"
+            aria-label="目標フロア"
+          />
+          <span class="target-floor-cap num">/ {{ targetFloorCap }}（選択上限）</span>
+        </div>
+
+        <BaseButton
+          variant="primary"
+          size="lg"
+          block
+          :disabled="!selectedTower || !isUnlocked(selectedTower)"
+          @click="enterTower"
+        >
+          塔に入る
+        </BaseButton>
+      </div>
+    </BaseCard>
+
+    <!-- 戦闘ログ -->
+    <BaseCard title="戦闘ログ" class="log-card">
+      <template #actions>
+        <span v-if="isInTower" class="log-live">
+          <span class="log-live-dot" aria-hidden="true"></span>進行中
+        </span>
+      </template>
+
+      <div ref="logScroller" class="battle-log">
+        <template v-if="visibleLogs.length > 0">
+          <div v-for="(tick, i) in visibleLogs" :key="i" class="log-tick">
             <div
               v-for="(entry, j) in tick"
               :key="j"
@@ -296,102 +338,366 @@ function dismissOffline() {
             </div>
           </div>
         </template>
-        <p v-else class="text-text-muted text-sm italic">まだ戦闘ログがありません。塔に入って冒険を始めましょう！</p>
+        <div v-else class="log-empty">
+          <AppIcon name="tower" :size="28" />
+          <p>まだ戦闘ログがありません。<br />塔に入って冒険を始めましょう！</p>
+        </div>
       </div>
-    </section>
-
-    <!-- Gold Display -->
-    <div class="col-span-full text-right">
-      <span class="gold-text text-lg">ゴールド: {{ formatGold(gameStore.gold) }}</span>
-    </div>
+    </BaseCard>
   </div>
 </template>
 
 <style scoped>
-.enemy-bar .stat-bar-fill {
-  background: linear-gradient(90deg, #991b1b, var(--color-danger-glow));
+.home-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
 }
 
-.battle-log {
-  max-height: 300px;
-  overflow-y: auto;
-  font-size: 0.8125rem;
-  font-family: var(--font-mono);
+/* --- キャラクター --- */
+.hero {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
 }
 
-.log-tick {
-  border-bottom: 1px solid var(--color-border);
-  padding: 0.25rem 0;
+.hero-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
 }
 
-.log-entry {
-  padding: 0.125rem 0;
+.hero-name {
+  font-size: var(--text-title);
+  font-weight: 700;
+  color: var(--color-content-strong);
+  letter-spacing: 0.02em;
 }
 
-.log-defeat { color: var(--color-gold); font-weight: 600; }
-.log-level_up { color: var(--color-exp); font-weight: 700; }
-.log-encounter { color: var(--color-text-muted); font-style: italic; }
-.log-player_defeated { color: var(--color-danger); font-weight: 700; text-transform: uppercase; }
-.log-potion { color: var(--color-hp); }
-.log-recovery { color: var(--color-hp); }
-.log-equipment_drop { color: var(--color-rarity-rare); font-weight: 600; }
-.log-equipment_auto_sold { color: var(--color-gold-dim); }
-.log-lifesteal { color: var(--color-hp); font-style: italic; }
+.bars {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* 数値を主役にする。ラベルは小さく沈め、値を大きく明るく置く */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+
+.stat-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.125rem;
+  padding: 0.5rem 0.25rem;
+  background-color: var(--color-surface-2);
+  border-radius: var(--radius-md);
+}
+
+.stat-value {
+  font-size: var(--text-stat);
+  font-weight: 700;
+  color: var(--color-content-strong);
+}
+
+.hero-potion {
+  font-size: var(--text-label);
+  color: var(--color-content-muted);
+}
+
+/* --- 塔（攻略中） --- */
+.tower-run {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.tower-run-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.tower-run-name {
+  font-size: var(--text-title);
+  font-weight: 700;
+  color: var(--color-content-strong);
+}
+
+.tower-floor {
+  font-size: var(--text-heading);
+  font-weight: 600;
+  color: var(--color-content);
+}
+
+.enemy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background-color: var(--color-surface-inset);
+  border: 1px solid var(--color-line-soft);
+  border-radius: var(--radius-md);
+}
+
+.enemy-name {
+  font-size: var(--text-body);
+  font-weight: 600;
+  color: var(--color-danger-bright);
+}
+
+.enemy-level {
+  margin-left: 0.375rem;
+  font-size: var(--text-caption);
+  color: var(--color-content-muted);
+}
+
+.tower-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* --- 塔（選択） --- */
+.tower-select {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.tower-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  list-style: none;
+}
 
 .tower-card {
+  /* 行そのものがタップ対象。指で押せる高さを確保する */
+  min-height: var(--size-tap-min);
   padding: 0.625rem 0.75rem;
-  border: 1px solid var(--color-border);
-  border-radius: 0.5rem;
-  background: var(--color-bg);
+  background-color: var(--color-surface-2);
+  border: 1px solid var(--color-line-soft);
+  border-left: 3px solid transparent;
+  border-radius: var(--radius-md);
   cursor: pointer;
-  transition: border-color 150ms;
+  transition: border-color var(--duration-fast) ease, background-color var(--duration-fast) ease;
 }
 
-.tower-card:hover:not(.tower-card-locked) {
-  border-color: var(--color-primary);
+@media (hover: hover) {
+  .tower-card:hover:not(.tower-card-locked) {
+    background-color: var(--color-surface-3);
+  }
 }
 
+/* 選択状態は左の帯で示す（枠線の色替えだけだと選択中か判別しにくい） */
 .tower-card-selected {
-  border-color: var(--color-primary);
+  border-color: var(--color-line);
+  border-left-color: var(--color-accent);
+  background-color: var(--color-surface-3);
 }
 
 .tower-card-locked {
-  opacity: 0.55;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
-.badge {
-  font-size: 0.6875rem;
-  padding: 0.125rem 0.5rem;
-  border-radius: 9999px;
+.tower-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.tower-card-name {
+  font-size: var(--text-body);
+  font-weight: 600;
+  color: var(--color-content-strong);
+}
+
+.tower-card-floors {
+  margin-left: 0.375rem;
+  font-size: var(--text-caption);
+  font-weight: 400;
+  color: var(--color-content-faint);
+}
+
+.tower-card-note {
+  margin-top: 0.25rem;
+  font-size: var(--text-caption);
+  color: var(--color-content-muted);
+}
+
+.empty-note {
+  font-size: var(--text-label);
+  color: var(--color-content-faint);
+}
+
+.target-floor {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  flex-wrap: wrap;
+}
+
+.target-floor-label {
+  font-size: var(--text-label);
+  color: var(--color-content-muted);
+}
+
+.target-floor-cap {
+  font-size: var(--text-caption);
+  color: var(--color-content-faint);
+}
+
+/* --- 戦闘ログ --- */
+.log-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: var(--text-caption);
+  color: var(--color-hp-bright);
+}
+
+.log-live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background-color: var(--color-hp);
+  animation: live-pulse 2s ease-in-out infinite;
+}
+
+@keyframes live-pulse {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 1; }
+}
+
+.battle-log {
+  /* スマホでは画面の 3 割程度に収め、下のナビまで届かせない */
+  max-height: 34dvh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  line-height: 1.55;
+}
+
+.log-tick {
+  padding: 0.375rem 0 0.375rem 0.625rem;
+  border-left: 2px solid var(--color-line-soft);
+}
+
+.log-tick + .log-tick {
+  border-top: 1px solid var(--color-line-soft);
+}
+
+.log-entry {
+  color: var(--color-content-muted);
+  overflow-wrap: anywhere;
+}
+
+/* 種別ごとの色。彩度は抑え、重要なものだけ明るくする */
+.log-attack { color: var(--color-content); }
+.log-defeat { color: var(--color-gold); font-weight: 600; }
+.log-level_up { color: var(--color-exp-bright); font-weight: 700; }
+.log-encounter { color: var(--color-content-faint); }
+.log-tower_target_reached { color: var(--color-accent-bright); font-weight: 700; }
+.log-player_defeated { color: var(--color-danger-bright); font-weight: 700; }
+.log-retreat_hp { color: var(--color-danger-bright); }
+.log-potion,
+.log-recovery { color: var(--color-hp-bright); }
+.log-lifesteal { color: var(--color-hp); }
+.log-equipment_drop { color: var(--color-rarity-rare); font-weight: 600; }
+.log-equipment_auto_sold { color: var(--color-content-faint); }
+
+.log-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 2rem 1rem;
+  color: var(--color-content-faint);
+  font-family: var(--font-body);
+  font-size: var(--text-label);
+  text-align: center;
+}
+
+/* --- オフライン報酬 --- */
+.offline-lead {
+  font-size: var(--text-label);
+  color: var(--color-content-muted);
+  margin-bottom: 1rem;
+}
+
+.offline-headline {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.offline-figure {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem;
+  background-color: var(--color-surface-2);
+  border-radius: var(--radius-md);
+}
+
+.offline-value {
+  font-size: var(--text-stat);
+  font-weight: 700;
+}
+
+.offline-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  font-size: var(--text-label);
+}
+
+.offline-detail > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.offline-detail dt {
+  color: var(--color-content-muted);
+}
+
+.offline-detail dd {
+  color: var(--color-content-strong);
   font-weight: 600;
 }
 
-.badge-cleared {
-  color: var(--color-gold);
-  border: 1px solid var(--color-gold-dim);
-}
-
-.badge-locked {
-  color: var(--color-text-muted);
-  border: 1px solid var(--color-border);
-}
-
-.floor-input {
-  width: 4rem;
-  padding: 0.375rem 0.5rem;
-  border: 1px solid var(--color-border);
-  border-radius: 0.375rem;
-  background: var(--color-bg);
-  color: var(--color-text-bright);
-  font-size: 0.875rem;
-  font-family: var(--font-body);
+.offline-levelup {
+  margin-top: 0.875rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-md);
+  background-color: color-mix(in srgb, var(--color-exp) 14%, transparent);
+  color: var(--color-exp-bright);
+  font-weight: 700;
   text-align: center;
-  transition: border-color 150ms;
 }
 
-.floor-input:focus {
-  border-color: var(--color-primary);
-  outline: none;
+/* --- PC: 2カラム --- */
+@media (min-width: 768px) {
+  .home-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .log-card {
+    grid-column: 1 / -1;
+  }
+
+  .battle-log {
+    max-height: 22rem;
+  }
 }
 </style>

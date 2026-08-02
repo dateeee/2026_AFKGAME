@@ -12,47 +12,80 @@ defineEmits<{
 </script>
 
 <template>
-  <div class="grid grid-cols-3 gap-2">
-    <div
+  <div class="slot-grid">
+    <button
       v-for="slot in SLOTS"
       :key="slot"
+      type="button"
       class="slot-item"
       :class="{ filled: equipmentStore.equippedItems[slot] }"
-      :style="equipmentStore.equippedItems[slot] ? { borderColor: RARITY_COLORS[equipmentStore.equippedItems[slot]!.rarity] } : {}"
+      :style="equipmentStore.equippedItems[slot]
+        ? { '--slot-rarity-color': RARITY_COLORS[equipmentStore.equippedItems[slot]!.rarity] }
+        : {}"
       @click="$emit('selectSlot', slot)"
     >
-      <div class="text-[0.6875rem] text-text-muted mb-1">{{ SLOT_LABELS[slot] }}</div>
-      <div v-if="equipmentStore.equippedItems[slot]">
-        <span
-          class="text-sm font-semibold"
-          :style="{ color: RARITY_COLORS[equipmentStore.equippedItems[slot]!.rarity] }"
-        >
-          {{ BASE_NAMES[equipmentStore.equippedItems[slot]!.baseId] ?? equipmentStore.equippedItems[slot]!.baseId }}
-        </span>
-      </div>
-      <div v-else class="text-xs text-text-muted">---</div>
-    </div>
+      <span class="slot-label">{{ SLOT_LABELS[slot] }}</span>
+      <span v-if="equipmentStore.equippedItems[slot]" class="slot-name">
+        {{ BASE_NAMES[equipmentStore.equippedItems[slot]!.baseId] ?? equipmentStore.equippedItems[slot]!.baseId }}
+      </span>
+      <span v-else class="slot-empty" aria-label="未装備">—</span>
+    </button>
   </div>
 </template>
 
 <style scoped>
+.slot-grid {
+  display: grid;
+  /* 320px 幅でも 3 列が破綻しないよう、最小幅を指定して自動で列数を決める */
+  grid-template-columns: repeat(auto-fill, minmax(5.5rem, 1fr));
+  gap: 0.5rem;
+}
+
 .slot-item {
-  border: 2px dashed var(--color-border);
-  border-radius: 0.5rem;
-  padding: 0.5rem;
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.1875rem;
+  /* 空スロットも指で押せる高さを確保する */
+  min-height: 3.75rem;
+  padding: 0.5rem 0.375rem;
+  background-color: var(--color-surface-2);
+  border: 1px dashed var(--color-line);
+  border-radius: var(--radius-md);
   cursor: pointer;
-  background: var(--color-bg-secondary);
-  transition: all 150ms;
+  transition: background-color var(--duration-fast) ease, border-color var(--duration-fast) ease;
 }
 
-.slot-item:hover {
-  background: var(--color-bg-elevated);
-  border-color: var(--color-border-glow);
+@media (hover: hover) {
+  .slot-item:hover {
+    background-color: var(--color-surface-3);
+    border-color: var(--color-line-strong);
+  }
 }
 
+/* 装備済みは実線 + レアリティ色。空きは破線のままにして一目で区別できるようにする */
 .slot-item.filled {
   border-style: solid;
-  box-shadow: 0 0 8px color-mix(in srgb, var(--color-primary) 20%, transparent);
+  border-color: var(--slot-rarity-color, var(--color-line-strong));
+  background-color: var(--color-surface-3);
+}
+
+.slot-label {
+  font-size: var(--text-caption);
+  color: var(--color-content-muted);
+}
+
+.slot-name {
+  font-size: var(--text-label);
+  font-weight: 600;
+  color: var(--slot-rarity-color, var(--color-content-strong));
+  text-align: center;
+  line-height: 1.25;
+}
+
+.slot-empty {
+  font-size: var(--text-label);
+  color: var(--color-content-faint);
 }
 </style>
