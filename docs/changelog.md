@@ -12,6 +12,12 @@
 
 | ファイル | 内容 |
 |---------|------|
+| `docs/data/towers/TOWERS_OVERVIEW.md` | 仕様レビュー ISSUE-001 を反映。**塔別表「対応フェーズ」・ダンジョン別表「解放フェーズ」を `afa3d41` の後ろ倒し（1ダンジョン=1Phase）へ追従**（塔2=Phase 2／塔3-5=3／塔6-8=4／塔9-10=5）。`game_spec.md §1` を正とする旨を明記 |
+| `docs/design/systems/endgame.md` | ISSUE-003。マイルストーン報酬・転生ボーナス一覧・深淵の塔スケーリング式の3テーブルを削除し、`master/endgame.md §15.2 / §16.1 / §18.2` へのリンクに置換（設計意図の記述は残置） |
+| `docs/data/towers/000〜010`・`docs/data/skills/000・001` | ISSUE-004。13ファイルに再掲されていたダメージ計算式を削除し、`systems/battle.md`（通常攻撃）・`tech_battle.md §3.1`（スキル）へのリンクに置換。テンプレートも同時に修正し新規ファイルへの再混入を防止 |
+| `docs/design/systems/equipment.md`・`docs/data/master/equipment.md` | ISSUE-005。鍛冶屋LV別の強化上限・コスト倍率の具体値を削除し `economy.md §2.9` へのリンクに置換（同表を唯一の正とする） |
+| `docs/tech/tech_api.md`・`docs/glossary.md` | ISSUE-006。仮置き値「転生ポイント10pt」を確定値として持っていた2箇所から数値を削除し `master/endgame.md §16.1` へのリンクに置換 |
+| `docs/tech/tech_api.md`・`docs/open_specs.md` | ISSUE-002。イベントダンジョンのAPI・データ構造が未定義だった件を「イベントダンジョンの入退場API・データ構造」として `open_specs.md` へ登録し、`tech_api.md` に未確定である旨の節を追加 |
 | `frontend/tests/e2e/**`（新規） | **結合テスト L2（E2E / Playwright）を整備**。必須シナリオ #1 認証→ゲーム状態取得 / #2 塔選択→目標階設定 / #5 装備ドロップ→装備変更→ステータス反映 / #6 常設ショップ購入 の4本＋画面遷移で13件。バックは :8100（`DATABASE_URL=sqlite:///./e2e.db`）、フロントは :5174 で自動起動し開発環境と分離。時刻は `last_tick_at` の巻き戻しで進め、乱数を含むドロップ・報酬は条件成立まで進める（固定スリープなし）。12回連続実行で結果が安定することを確認 |
 | `frontend/src/App.vue`・`composables/useGameLoop.ts` | E2Eで検出した不具合を修正。初期化が `onMounted` の1回のみで、ゲスト作成・ログイン後にゲーム状態が読み込まれず**ホームが401バナー付きの空表示**になっていた。未認証時は読み込まず、認証状態の変化を監視して初期化する |
 | `frontend/src/views/LoginView.vue` | 同上。`/register` からの `?mode=register` を参照しておらず登録フォームが開かなかったのを修正 |

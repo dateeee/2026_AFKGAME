@@ -130,10 +130,14 @@
 
 > 深淵の塔への入塔・目標階設定・リタイアは通常の塔と同じ `/api/tower/*` を `towerId: "abyss_tower"` で使用する（専用エンドポイントは設けない）。`/api/tower/list` では `totalFloors` を `null` で返し、階数無限を表す。
 
+## イベントダンジョン（Phase 5〜）
+
+機能仕様は [systems/endgame.md §2.13](../design/systems/endgame.md)（常設3種 × 固定難易度3段階）。**入退場APIの方式は未確定**（`/api/tower/*` に難易度パラメータを足して再利用するか、専用エンドポイントを新設するか）。[open_specs.md](../open_specs.md) で管理し、基本設計で確定してから本節へ追記する。
+
 ## 転生（Phase 5〜）
 | メソッド | パス | 説明 |
 |---------|------|------|
-| POST | `/api/prestige` | 転生実行（`characterId`）。LV9999チェック後、LV/EXP/SPリセット・転生ポイント10pt付与 |
+| POST | `/api/prestige` | 転生実行（`characterId`）。LV9999チェック後、LV/EXP/SPリセット・転生ポイントを付与（付与量は [master/endgame.md §16.1](../data/master/endgame.md)） |
 | PUT | `/api/prestige/invest` | 転生ポイント投資（`characterId`, `stat`, `points`）。指定のボーナスにポイントを割り振る |
 | POST | `/api/prestige/reset` | 転生ボーナス全リセット（`characterId`）。ゴールド消費で全ポイント返還 |
 
