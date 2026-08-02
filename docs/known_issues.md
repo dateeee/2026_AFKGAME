@@ -21,8 +21,10 @@
 | 3 | `services/battle_service.py` | `_get_potion_count()` がどこからも呼ばれていないデッドコード | 低 | 単体テスト |
 | 4 | `services/equipment_service.py` | L109 が SQLAlchemy 2.0 非推奨の `Query.get()`。同ファイル内の `get_effective_stats` は `db.get()` を使用しており不統一 | 低 | 単体テスト |
 | 5 | `services/equipment_service.py` | オートセルの `RARITY_ORDER` 未知値を例外もログもなく無視。設定APIでの入力検証要否は未確認 | 低 | 単体テスト |
+| 6 | `app/main.py` L49 | ヘルスチェックが `GET /api/health`。[tech_api.md](tech/tech_api.md) §運用・[tech_operations.md](tech/tech_operations.md) §12.3 は **`GET /health`**（認証不要・レート制限対象外）と定義。応答も `{"status":"ok"}` のみで、仕様の `version`・`db` と DB異常時の 503（`SELECT 1` 失敗）が無い | 中（仕様乖離。デプロイ先の死活監視が404になる） | 結合テスト |
 
 - 単体テストは**現状の実装に合わせて**作成済み。上記を修正する場合は該当テストの期待値も併せて更新すること
+- #6 は方針未決のため結合テストを書いていない。パス・応答形式を確定してからテストを追加すること
 
 ## 3. 対応済みの項目
 

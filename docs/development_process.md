@@ -73,7 +73,7 @@ graph LR
 |------|------|
 | 目的 | ゲームとして「何を作るか」を確定する |
 | 主な作業 | ゲームシステム・バランス・UI要件の定義、未確定仕様の解消 |
-| 成果物 | [game_spec.md](design/game_spec.md)（索引）＋ [design/systems/](design/systems/)（システム別仕様）、[product_requirements.md](design/product_requirements.md)（プロダクト要件）、[non_functional_requirements.md](design/non_functional_requirements.md)（非機能要件）、[operation_requirements.md](design/operation_requirements.md)（運用・変更管理要件）、[glossary.md](glossary.md)、[open_specs.md](open_specs.md)（未確定管理） |
+| 成果物 | [game_spec.md](design/game_spec.md)（索引）＋ [design/systems/](design/systems/)、要件3種（[product](design/product_requirements.md) / [nfr](design/non_functional_requirements.md) / [operation](design/operation_requirements.md)）、[glossary.md](glossary.md)、[open_specs.md](open_specs.md) |
 | 完了基準 | open_specs.md の対象項目がすべて解消され、game_spec.md に反映されている |
 | レビュー | `doc-review` スキル → 指摘は `fix-specs` スキルで反映 |
 
@@ -83,7 +83,7 @@ graph LR
 |------|------|
 | 目的 | システム構造・API・データモデル・画面構成と、非機能要件の実現方式を確定する |
 | 主な作業 | アーキテクチャ設計、API一覧・共通仕様の定義、DB設計、画面遷移設計、性能／セキュリティ／運用の実現方式の設計 |
-| 成果物 | [tech_spec.md](tech/tech_spec.md)（索引）＋ **構造**: tech_data / tech_structure / tech_api / tech_architecture / tech_logging / tech_auth（認証方式）<br>**非機能の実現方式**: tech_performance（性能・容量）・tech_security・tech_operations（運用）<br>**図**: [diagrams/](../diagrams/) 6点（ER・クラス・画面遷移・戦闘フロー・システム構成・APIシーケンス） |
+| 成果物 | [tech_spec.md](tech/tech_spec.md)（索引）配下の**構造**（data / structure / api / architecture / logging / auth）と**非機能の実現方式**（performance / security / operations）、[diagrams/](../diagrams/) 6点 |
 | 完了基準 | 仕様書・設計図間の矛盾がない（`diagrams-review` の指摘解消）。要件定義の非機能・運用要件がすべて、実現方式を定めたいずれかの成果物に対応づいている |
 | レビュー | `diagrams-review` スキル、`doc-review` スキル |
 
@@ -93,7 +93,7 @@ graph LR
 |------|------|
 | 目的 | 対象Phaseの機能を「実装可能な粒度」まで具体化する |
 | 主な作業 | 処理フロー・アルゴリズム・計算式の定義、マスターデータの数値確定 |
-| 成果物 | [tech_spec.md](tech/tech_spec.md) 配下の **処理**: tech_battle（戦闘）・tech_offline（オフライン計算）・tech_tick（tick進行）・tech_polling（フロントtick）<br>**横断規約**: tech_rng（乱数）・tech_numeric（数値・丸め）・tech_state（進行状態と操作可否）<br>**数値**: [master_data.md](data/master_data.md)（索引）＋ [data/master/](data/master/)、[data/towers/](data/towers/)・[data/skills/](data/skills/) |
+| 成果物 | [tech_spec.md](tech/tech_spec.md) 配下の**処理**（battle / offline / tick / polling）と**横断規約**（rng / numeric / state）、**数値**は [master_data.md](data/master_data.md)（索引）＋ [data/](data/) 配下 |
 | 完了基準 | 対象Phase機能の数値・計算式・分岐条件が仕様書から一意に実装できる（数値は仮置き可、ただし「仮置き」と明記）。各処理仕様に**分岐一覧（単体テスト観点）**が記載され、§3.4 のテストリストと §3.6 のC1網羅の導出元になっている |
 | レビュー | `doc-review` スキル（詳細仕様の整合確認） |
 
@@ -168,25 +168,33 @@ graph LR
 
 | Phase | 詳細設計 | 製造 | 単体テスト | 結合テスト |
 |-------|---------|------|-----------|-----------|
-| Phase 1 (MVP) | 完了 | 完了 | **完了（C1 100%）** | **未整備（遡及対象）** |
-| Phase 2 | 完了 | 進行中（装備・複数塔・認証・常設ショップは実装済み。日替わりショップは未実装） | **完了（実装済み範囲）** | 未着手 |
+| Phase 1 (MVP) | 完了 | 完了 | **完了（C1 100%）** | **L1完了 / L2未着手** |
+| Phase 2 | 完了 | 進行中（装備・複数塔・認証・常設ショップは実装済み。日替わりショップは未実装） | **完了（実装済み範囲）** | **L1完了（実装済み範囲）/ L2未着手** |
 | Phase 3〜5 | 完了（数値は仮置き） | 未着手 | — | — |
 
-- Phase 1〜2 の実装済み機能は単体テストの**遡及整備**が完了。Phase完了ゲート通過までに結合テストを整備すること
-- テスト基盤（pytest / pytest-cov）は導入済み（`backend/pytest.ini`・`backend/tests/`）。Playwright は結合テスト着手時に導入する
+- Phase 1〜2 の実装済み機能は単体テスト・API統合テスト（L1）の**遡及整備**が完了
+- Phase完了ゲートには E2E（L2）が要る。Playwright は L2 着手時に導入する
+- テスト基盤（pytest / pytest-cov）は導入済み（`backend/pytest.ini`・`backend/tests/`）
 
 ### 5.1 単体テストの整備状況（C1カバレッジ）
 
-**単体テストゲート通過（2026-08-02）**: `app/` 全40モジュール（routers / services / master_data / models / schemas / 基盤）が C1 100%、306件 PASS、1,578 stmts / 296 branches。`# pragma: no cover` の使用はゼロ。
+**単体テストゲート通過（2026-08-02）**: `app/` 全40モジュールが C1 100%、306件 PASS、1,578 stmts / 296 branches。`# pragma: no cover` の使用はゼロ。
 
 - 数値は `pytest` 実行時に更新する。製造の追加・変更時は同一変更内で100%を維持する
-- 単体テスト整備で検出した実装の疑義（仕様乖離・デッドコード等 5件）は [known_issues.md](known_issues.md) で管理する
 
 ### 5.2 TDDの適用範囲
 
 - TDD（§3.4〜§3.5）は**新規実装から適用**する。Phase 2 の残り（日替わりショップ）と Phase 3〜5 が対象
 - 実装済み（Phase 1〜2）のテストは遡及整備で C1 100% に到達済みのため、**書き直さない**
 - 既存機能の修正・リファクタ時は、先に**その変更を表すテストを追加**してから実装に着手する
+
+### 5.3 結合テストの整備状況（L1: API統合テスト）
+
+**28件 PASS（2026-08-02）**。`backend/tests/integration/` に導線ごと5ファイル。必須シナリオ7件（[.claude/project/integration-test.md](../.claude/project/integration-test.md) §3）を全てカバーし、実装済み25エンドポイントのうち23に到達。
+
+- 未到達2件は `POST /api/auth/google`（実装が501）と `GET /api/health`（仕様乖離が未解決 → [known_issues.md](known_issues.md) #6）
+- 外部要因は固定する（乱数=固定シード、時刻=`last_tick_at` の巻き戻し）。スリープで待たない
+- 検出した乖離は [known_issues.md](known_issues.md) へ記録し、テストの期待値を実装へ寄せない
 
 ## 6. 変更管理
 

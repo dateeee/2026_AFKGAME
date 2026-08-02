@@ -7,10 +7,24 @@
 
 | レイヤー | 内容 | 配置 | 状態 |
 |---------|------|------|------|
-| L1: API統合テスト | FastAPI TestClient + SQLite実DB。APIシーケンスを検証 | `backend/tests/integration/` | **未整備** |
+| L1: API統合テスト | FastAPI TestClient + インメモリSQLite。APIシーケンスを検証 | `backend/tests/integration/` | **整備済み**（Phase 1〜2） |
 | L2: E2Eテスト | Playwright。フロント＋バックを通しで起動し画面操作で検証 | `frontend/tests/e2e/` | **未整備**（Playwright 未導入） |
 
-着手時に `backend/tests/integration/` を作成し、Playwright を `frontend/` に導入する。導入手順は本プロファイルへ追記すること。
+L2 着手時に Playwright を `frontend/` へ導入し、手順を本節へ追記する。
+
+### 1.1 L1 の記述規約
+
+| 項目 | 規約 |
+|------|------|
+| マーカー | `pytestmark = pytest.mark.integration` |
+| 実行 | `cd backend && python -m pytest tests/integration -q --no-cov` |
+| ファイル分割 | 導線ごとに1ファイル（`test_auth_flow` / `test_tower_flow` / `test_battle_flow` / `test_shop_flow` / `test_equipment_flow`） |
+| プレイヤー生成 | フィクスチャで直接作らず **`POST /api/auth/guest` から始める** |
+| DBセッション | `tests/integration/conftest.py` の `db` を使う（単体用の `expire_on_commit=False` はコミット後もリレーションが古いまま残り、本番と挙動が変わる） |
+| 乱数 | `fixed_rng` フィクスチャで固定シードを与える |
+| 時刻 | `rewind(player, 秒)` で `last_tick_at` を過去へ戻す。スリープしない |
+| ドロップ | `always_drop` フィクスチャで抽選を成立させる（ドロップ率は検証対象外） |
+| ログ経由の値 | `app_logs` フィクスチャ（`afkgame` ロガーは `propagate=False` のため caplog 単体では拾えない） |
 
 ## 2. シナリオの導出元
 
@@ -25,17 +39,24 @@
 
 ## 3. 必須シナリオ（Phase 1〜2）
 
-| # | シナリオ | レイヤー | 検証内容 |
-|---|---------|---------|---------|
-| 1 | 認証 → ゲーム状態取得 | L1・L2 | トークン発行、初期状態の返却 |
-| 2 | 塔選択 → 目標階設定 | L1・L2 | 塔別クリア記録の独立、上限追従 |
-| 3 | tick進行 → 戦闘ログ取得 | L1 | 60秒tickの進行、サーバー権威（フロントに計算がない） |
-| 4 | オフライン復帰 → 一括計算 | L1 | 経過時間ぶんのtickが一括処理され、上限でクランプされる |
-| 5 | 装備ドロップ → 装備変更 → ステータス反映 | L1・L2 | ドロップ〜装備〜ステータス計算の連結 |
-| 6 | 常設ショップ購入 → 所持金・在庫の反映 | L1・L2 | gold不足時のエラー、購入後の整合 |
-| 7 | ゲスト → 正規ユーザー移行 | L1 | データ引き継ぎ |
+| # | シナリオ | レイヤー | 検証内容 | L1 |
+|---|---------|---------|---------|----|
+| 1 | 認証 → ゲーム状態取得 | L1・L2 | トークン発行、初期状態の返却 | `test_auth_flow` |
+| 2 | 塔選択 → 目標階設定 | L1・L2 | 塔別クリア記録の独立、上限追従 | `test_tower_flow` |
+| 3 | tick進行 → 戦闘ログ取得 | L1 | 60秒tickの進行、サーバー権威（フロントに計算がない） | `test_battle_flow` |
+| 4 | オフライン復帰 → 一括計算 | L1 | 経過時間ぶんのtickが一括処理され、上限でクランプされる | `test_battle_flow` |
+| 5 | 装備ドロップ → 装備変更 → ステータス反映 | L1・L2 | ドロップ〜装備〜ステータス計算の連結 | `test_equipment_flow` |
+| 6 | 常設ショップ購入 → 所持金・在庫の反映 | L1・L2 | gold不足時のエラー、購入後の整合 | `test_shop_flow` |
+| 7 | ゲスト → 正規ユーザー移行 | L1 | データ引き継ぎ | `test_auth_flow` |
 
 Phase 3〜5 のシナリオは、該当Phaseの詳細設計完了時に本表へ追加する。
+
+### 3.1 意図的に L1 で扱わない経路
+
+| 経路 | 理由 |
+|------|------|
+| `POST /api/auth/google` | 実装が未着手（`GOOGLE_CLIENT_ID` 有無にかかわらず 501） |
+| `GET /api/health` | 仕様との乖離が未解決（[known_issues.md](../../docs/known_issues.md) #6）。パス・応答形式の確定後にテストを追加する |
 
 ## 4. 固有の観点
 
