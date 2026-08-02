@@ -12,6 +12,7 @@
 
 | ファイル | 内容 |
 |---------|------|
+| `docs/reviews/diagrams-review_2026-08-02_171929.md` | 設計整合ゲート（`diagrams-review` 差分モード）の結果を追加。指摘13件（高3 / 中7 / 低3）。Mermaid構文・リンク切れ・図↔モデルの機械照合はすべて OK |
 | `docs/tech/tech_spec.md` | レビュー指摘ISSUE-001。§8「今後の検討事項」のデプロイ先の選定を `[x]` へ変更し、AWS（EC2 1台 + S3/CloudFront）確定と `tech_operations.md` §12.1 への反映を明記（Vercel/Render/Railway/VPS の候補列挙を削除） |
 | `docs/data/master/item.md` | レビュー指摘ISSUE-002。§4.2 の固定商品表12件（`wooden_sword`〜`hero_amulet`）を**削除**。ベース装備一覧に存在しないIDで、`tech_shop.md` の生成方式とも矛盾していたため。節名を「日替わり装備（Phase 2〜）」とし、抽選対象・生成手順・算出式・設計方針の正へのリンク表に置換 |
 | `docs/data/master_data.md` | レビュー指摘ISSUE-002。索引から `master/item.md` の内容欄「日替わり候補プール」を削除（正は `master/equipment.md` §6.0） |
