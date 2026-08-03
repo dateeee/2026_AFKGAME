@@ -43,8 +43,14 @@ test.describe('シナリオ#2 塔選択から目標階設定', () => {
     await expect(locked.getByText('未解放')).toBeVisible()
     await expect(locked.getByText('ゴブリンの塔のボス討伐で解放')).toBeVisible()
 
-    // クリックしても選択は移らない（ゴブリンの塔が選ばれたまま）
-    await locked.click()
+    // 選択肢として無効。ポインタでもキーボード（Tab）でも到達できない
+    await expect(locked).toHaveAttribute('aria-disabled', 'true')
+    await expect(locked).toHaveAttribute('tabindex', '-1')
+
+    // クリックが届いた場合も選択は移らない（ゴブリンの塔が選ばれたまま）。
+    // 無効な要素への通常クリックは actionability チェックで待たされるため、
+    // force で発火させてハンドラ側のガードだけを見る
+    await locked.click({ force: true })
     await expect(locked).not.toHaveClass(/tower-card-selected/)
     await expect(towerCard(page, 'ゴブリンの塔')).toHaveClass(/tower-card-selected/)
   })

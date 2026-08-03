@@ -12,6 +12,7 @@
 
 | ファイル | 内容 |
 |---------|------|
+| `frontend/tests/e2e/tower.spec.ts` / `docs/known_issues.md` / `docs/development_process.md` | known_issues #9（L2の既存失敗）を解消。未解放の塔カードの `role="radio"` + `aria-disabled="true"` + `tabindex="-1"` は正しい表現のため実装は変えず、テスト側で無効であることを属性検証し、ハンドラのガードは `click({ force: true })` で確認する形にした。§5 の Phase 2 結合テストを「完了（L1・L2）」、§5.3 を L1 29件・L2 13件 PASS へ更新 |
 | `docs/known_issues.md` / `docs/development_process.md` | 製造完了ゲートのレビュー指摘を反映（backend 18件・frontend 12件）。known_issues は解消4件（トークン用途分離・`Query.get()`・オートセル未知値・ログ設定の環境変数）を §3 へ移し、判断待ち4件（オフライン簡易計算の仕様乖離・`AUTH_*` コード移行・開発時フォールバックの水準確定・深淵の塔の `None` 対応）とE2Eの既存失敗1件を §2 へ登録。§5 は Phase 2 製造を「完了」、単体402件 PASS / C1 100%、L2 は12件PASS/1件FAILへ更新 |
 | `docs/reviews/backend-review/` / `docs/reviews/frontend-review/` | 製造完了ゲートの初回コードレビューを実施（backend 18件・frontend 12件の指摘） |
 | `backend/requirements.txt` | レビューの「ruff の常設化」提案に沿って `ruff` を追加（未使用import・E402・print混入の検出用。実行コマンドはファイル内コメント）。`pydantic[email]` も追加（`EmailStr` 検証） |
