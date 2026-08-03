@@ -1,6 +1,7 @@
 ---
 name: resolve-specs
 description: 未確定仕様の確定。未確定管理ファイルの項目をユーザーと対話しながら1つずつ決め、仕様書へ反映して一覧から削除する。「未確定仕様を確定させたい」「open_specs を潰して」「この仕様を決めたい」「resolve-specs して」など、要件定義工程で仕様の穴を埋める依頼で使用する。引数で Phase・カテゴリ・項目名を絞れる。参照先・反映先はプロジェクト固有プロファイルから読み込む。
+argument-hint: "[Phase | カテゴリ | 項目名]"
 ---
 
 # 未確定仕様の確定（resolve-specs）
@@ -15,7 +16,7 @@ description: 未確定仕様の確定。未確定管理ファイルの項目を�
 | 1 | `.claude/project/profile.md` | ディレクトリ・不変条件（§5）・コスト規律 |
 | 2 | `.claude/project/requirements.md` §4 | 進め方の固有ルール・カテゴリ別参照先・確定後の反映先 |
 
-出力テンプレートは、**該当ステップに到達してから**プロファイルが指すテンプレート集を読む。
+出力テンプレートは、**該当ステップに到達してから** [references/templates.md](references/templates.md) を読む。
 
 ## 1. スコープの特定
 

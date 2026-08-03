@@ -12,6 +12,8 @@
 
 | ファイル | 内容 |
 |---------|------|
+| `.claude/skills/**`（14件） | 全 SKILL.md へ `argument-hint` を追加（`/` 起動時の補完に引数仕様を表示）。`templates.md` を `.claude/references/resolve-specs/` から `skills/resolve-specs/references/` へ移動しスキル内参照へ変更（claude-code-best-practice 照合。レポート: `docs/reviews/skill-improvement/2026-08-04_skill-improvement.md`） |
+| `.claude/project/_TEMPLATE.md` | 新スキル追加時の SKILL.md frontmatter 規約（description トリガー句・argument-hint・model・資料配置・Gotchas 運用）を追記。`requirements.md` のテンプレート参照リンクを新パスへ更新 |
 | `docs/design/systems/battle.md` 他3件 | 挑発の合算上限を80%へ統一（`006_生存術系統.md` §4 の按分表、`tech_battle.md` §3.1.3 の擬似コードを `TAUNT_CAP=0.8` ベースへ修正、段階別挑発率を 段階1=50%〜段階4=80% に統一）。正を `spec_ownership.md` へ登録（doc-review ISSUE-1001・1002） |
 | `docs/design/systems/equipment.md` | レアリティ出現率の階層補正に100%上限と順次独立判定（レジェンダリー→アンコモンの順、外れたらコモン）を明記。高階層で確率が破綻しないことを追記（ISSUE-1003）。HP吸収の例示を `floor()` 適用後の1HPへ修正（ISSUE-1006） |
 | `docs/tech/tech_data.md` ほか3件 | `battleLogCount` の選択肢から200を削除。`tech_polling.md`・`class_diagram/player.md`・`er_diagram/player.md` にも伝播（ISSUE-1004）。`characters` に Phase 3〜 の `rarity` / `effectiveAtk` / `effectiveDef` / `effectiveSpd` を追加（ISSUE-1017） |

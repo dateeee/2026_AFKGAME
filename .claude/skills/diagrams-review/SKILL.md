@@ -1,6 +1,7 @@
 ---
 name: diagrams-review
 description: 設計図（Mermaid図）と仕様書・コードの整合性レビュー。ER図・クラス図・画面遷移図・戦闘フロー図・APIシーケンス図・システム構成図の乖離や図どうしの矛盾、Mermaid構文の不備を検出してレポート化する。「設計図をレビューして」「図と実装がずれていないか見て」「diagrams-review して」など、基本設計の設計整合ゲートで使用する。既定は前回レビュー以降の差分、引数 full で全量。
+argument-hint: "[full | 追加観点]"
 ---
 
 # 設計図レビュー（diagrams-review）

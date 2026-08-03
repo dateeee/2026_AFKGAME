@@ -1,6 +1,7 @@
 ---
 name: fix-specs
 description: 仕様書レビュー結果の修正適用。doc-review が出力した最新レポートの指摘に従って仕様書を修正する。「レビュー指摘を反映して」「fix-specs して」「指摘を仕様書に反映して」など、doc-review の後続で使用する。引数でレビューファイルのパスを指定可能。修正ルール・変更履歴の書き方はプロジェクト固有プロファイルから読み込む。
+argument-hint: "[レポートパス | ISSUE-NNN | 重要度]"
 model: sonnet
 ---
 

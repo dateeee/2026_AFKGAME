@@ -47,7 +47,7 @@
 |---|-------|
 | 1 | **1回の実行で扱う項目は最大3件**。4件以上残る場合は「続きは再実行してください」と案内して終了する |
 | 2 | **サブエージェントを使わない**。すべてメインコンテキストで処理する |
-| 3 | 出力テンプレートは [.claude/references/resolve-specs/templates.md](../references/resolve-specs/templates.md) を、該当ステップに到達してから読む |
+| 3 | 出力テンプレートは [.claude/skills/resolve-specs/references/templates.md](../skills/resolve-specs/references/templates.md) を、該当ステップに到達してから読む |
 
 ### カテゴリ → 参照先の対応表
 
