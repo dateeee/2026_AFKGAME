@@ -2,7 +2,7 @@
 
 from datetime import datetime
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String
+from sqlalchemy import DateTime, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.types import JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -24,6 +24,9 @@ class BattleLog(Base):
 
 class InventoryItem(Base):
     __tablename__ = "inventory_items"
+    __table_args__ = (
+        UniqueConstraint("player_id", "item_id", name="uq_inventory_items_player_item"),
+    )
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_new_uuid)
     player_id: Mapped[str] = mapped_column(String(36), ForeignKey("players.id"), nullable=False)

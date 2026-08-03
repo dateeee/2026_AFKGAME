@@ -65,7 +65,7 @@ erDiagram
 
     Player {
         string id PK
-        string user_id FK "nullable, references User.id"
+        string user_id FK, UK "nullable, references User.id（1ユーザー1プレイヤー）"
         bigint gold "default 0, BIGINT(64bit)"
         string current_tower_id FK "nullable, references Tower.id"
         int current_floor "nullable, 塔外時null"
@@ -82,7 +82,7 @@ erDiagram
 
     PlayerSettings {
         uuid id PK
-        uuid player_id FK "references Player.id"
+        uuid player_id FK, UK "references Player.id（1プレイヤー1設定）"
         float potion_threshold "0.1-0.5, default 0.3"
         int battle_log_count "20/50/100, default 50"
         boolean toast_enabled "default true"
@@ -129,8 +129,8 @@ erDiagram
 
     TowerClearRecord {
         uuid id PK
-        uuid player_id FK "references Player.id"
-        string tower_id FK "references Tower.id"
+        uuid player_id FK, UK "references Player.id（tower_id と複合一意）"
+        string tower_id FK, UK "references Tower.id"
         boolean cleared "ボス討伐済みか"
         int highest_floor "最高到達階"
         datetime highest_floor_at "nullable, 最高到達階を更新した時刻（ランキングのタイブレーク用・Phase 5〜）"

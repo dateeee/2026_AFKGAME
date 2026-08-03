@@ -20,20 +20,24 @@ import pytest
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.testclient import TestClient
 from pydantic import BaseModel
-from sqlalchemy.exc import OperationalError
+from sqlalchemy.exc import IntegrityError, OperationalError
 from sqlalchemy.orm import Session
 
 from app import config, main
 from app.config import APP_VERSION
 from app.db.database import get_db
 from app.exceptions import AppError, register_exception_handlers
+from app import logging_config
 from app.logging_config import (
     JsonFormatter,
     TextFormatter,
+    dev_only_token,
     mask_email,
     mask_token,
     setup_logging,
 )
+from app.models.item import InventoryItem
+from app.models.player import Player, PlayerSettings, TowerClearRecord
 from app.models.user import User
 from app.services.auth_service import create_access_token
 from tests.helpers import error_code, error_message
@@ -57,14 +61,18 @@ class TestGetDb:
 
 
 class TestGetCurrentUser:
+    """401 の理由は error.code で判別できること（tech_logging.md エラーコード体系）"""
+
     def test_認証ヘッダなしは401(self, client):
         res = client.get("/api/game/state", headers={"Authorization": ""})
         assert res.status_code == 401
+        assert error_code(res) == "AUTH_HEADER_MISSING"
         assert error_message(res) == "Authorization header missing"
 
     def test_Bearer形式でないヘッダは401(self, client):
         res = client.get("/api/game/state", headers={"Authorization": "Basic abc"})
         assert res.status_code == 401
+        assert error_code(res) == "AUTH_INVALID_FORMAT"
         assert error_message(res) == "Invalid authorization header"
 
     def test_期限切れトークンは401(self, client, monkeypatch):
@@ -74,6 +82,8 @@ class TestGetCurrentUser:
         monkeypatch.setattr("app.dependencies.verify_access_token", _expired)
         res = client.get("/api/game/state")
         assert res.status_code == 401
+        # 期限切れは refresh を試すべき状態。AUTH_INVALID_TOKEN（再ログイン）と区別する
+        assert error_code(res) == "AUTH_TOKEN_EXPIRED"
         assert error_message(res) == "Token expired"
 
     def test_署名不正トークンは401(self, client, monkeypatch):
@@ -83,18 +93,21 @@ class TestGetCurrentUser:
         monkeypatch.setattr("app.dependencies.verify_access_token", _invalid)
         res = client.get("/api/game/state")
         assert res.status_code == 401
+        assert error_code(res) == "AUTH_INVALID_TOKEN"
         assert error_message(res) == "Invalid token"
 
     def test_subのないペイロードは401(self, client, monkeypatch):
         monkeypatch.setattr("app.dependencies.verify_access_token", lambda token: {})
         res = client.get("/api/game/state")
         assert res.status_code == 401
+        assert error_code(res) == "AUTH_INVALID_TOKEN"
         assert error_message(res) == "Invalid token payload"
 
     def test_存在しないユーザーのトークンは401(self, client):
         token = create_access_token("ghost-user", is_guest=False)
         res = client.get("/api/game/state", headers={"Authorization": f"Bearer {token}"})
         assert res.status_code == 401
+        assert error_code(res) == "AUTH_USER_NOT_FOUND"
         assert error_message(res) == "User not found"
 
 
@@ -106,6 +119,7 @@ class TestGetCurrentPlayer:
         token = create_access_token(u.id, is_guest=False)
         res = client.get("/api/game/state", headers={"Authorization": f"Bearer {token}"})
         assert res.status_code == 404
+        assert error_code(res) == "AUTH_PLAYER_NOT_FOUND"
         assert error_message(res) == "Player not found"
 
     def test_正常な認証でプレイヤーを取得できる(self, client):
@@ -234,6 +248,18 @@ class TestMaskToken:
         assert mask_token("abcdefghijkl") == "abcd****ijkl"
 
 
+class TestDevOnlyToken:
+    """メール送信の実装までの暫定措置（backend-review ISSUE-104）"""
+
+    def test_開発環境では生のトークンを返す(self, monkeypatch):
+        monkeypatch.setattr(logging_config, "IS_PRODUCTION", False)
+        assert dev_only_token("abcdefghijkl") == "abcdefghijkl"
+
+    def test_本番環境ではマスクする(self, monkeypatch):
+        monkeypatch.setattr(logging_config, "IS_PRODUCTION", True)
+        assert dev_only_token("abcdefghijkl") == "abcd****ijkl"
+
+
 class TestMaskEmail:
     def test_先頭2文字とドメインのみ表示する(self):
         assert mask_email("taro@example.com") == "ta***@example.com"
@@ -358,6 +384,33 @@ class TestValidateProductionSettings:
         monkeypatch.setattr(config, "IS_PRODUCTION", False)
         monkeypatch.setattr(config, "JWT_SECRET", config.DEFAULT_JWT_SECRET)
         config.validate_production_settings()
+
+
+class TestUniqueConstraints:
+    """query-then-create するテーブルの重複行をDBで防ぐ（backend-review ISSUE-108）
+
+    二重リクエスト（ポーリングと復帰処理の同時実行等）で重複行ができると、
+    `.first()` がどちらを返すか不定になり進捗・所持数が欠落する。
+    """
+
+    def _expect_conflict(self, db, row) -> None:
+        db.add(row)
+        with pytest.raises(IntegrityError):
+            db.commit()
+        db.rollback()
+
+    def test_塔クリア記録は塔ごとに1件(self, db, player, tower_record):
+        tower_record("goblin_tower")
+        self._expect_conflict(db, TowerClearRecord(player_id=player.id, tower_id="goblin_tower"))
+
+    def test_所持アイテムはアイテムごとに1件(self, db, player):
+        self._expect_conflict(db, InventoryItem(player_id=player.id, item_id="hp_potion"))
+
+    def test_プレイヤー設定はプレイヤーごとに1件(self, db, player):
+        self._expect_conflict(db, PlayerSettings(player_id=player.id))
+
+    def test_ユーザーに紐づくプレイヤーは1件(self, db, player, user):
+        self._expect_conflict(db, Player(user_id=user.id))
 
 
 class TestInitSchema:

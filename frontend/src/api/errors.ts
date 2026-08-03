@@ -29,6 +29,17 @@ export class ApiError extends Error {
   }
 }
 
+/** リフレッシュ不能でセッションが失効したときのコード（client.ts が投げる） */
+export const SESSION_EXPIRED_CODE = 'AUTH_REFRESH_FAILED'
+
+/**
+ * セッション失効（再ログインが必要）か。
+ * 通信断と違い、リトライやバナー表示では回復しないためログイン画面へ誘導する。
+ */
+export function isSessionExpired(error: unknown): boolean {
+  return error instanceof ApiError && error.code === SESSION_EXPIRED_CODE
+}
+
 /** 通信断を表す ApiError を作る */
 export function networkError(cause?: unknown): ApiError {
   return new ApiError(

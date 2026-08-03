@@ -19,6 +19,7 @@ from app.models.character import Character
 from app.models.equipment import CharacterEquipSlot, Equipment
 from app.models.player import Player
 from app.services import equipment_service as es
+from tests.helpers import count_queries
 
 pytestmark = pytest.mark.unit
 
@@ -121,7 +122,7 @@ class TestTryDrop:
     @staticmethod
     def _patch_drop(monkeypatch, drop):
         monkeypatch.setattr(
-            es, "generate_equipment_drop", lambda enemy_level, floor, is_boss: drop
+            es, "generate_equipment_drop", lambda enemy_level, floor, is_boss, rng: drop
         )
 
     def test_ドロップしなければ何も返さない(self, db, player, monkeypatch):
@@ -169,6 +170,17 @@ class TestTryDrop:
         assert sold == {"name": "剣", "rarity": "uncommon", "gold": 65}
         assert player.gold == 1065
         assert db.query(Equipment).count() == 0
+
+    def test_自動売却益は塔内取得ゴールドにも計上される(self, db, player, monkeypatch):
+        """全滅ペナルティの没収対象を取得経路で非対称にしない（backend-review ISSUE-106）"""
+        player.settings.auto_sell_rarity = "rare"
+        player.run_gold = 200
+        db.commit()
+        self._patch_drop(monkeypatch, _drop_dict(rarity="uncommon", level=10))
+
+        _, sold = es.try_drop(player, 10, 1, False, db)
+
+        assert player.run_gold == 200 + sold["gold"]
 
     def test_閾値と同じレアリティも自動売却される(self, db, player, monkeypatch):
         player.settings.auto_sell_rarity = "common"
@@ -368,6 +380,24 @@ class TestCalcSellPrice:
 
 
 class TestGetEffectiveStats:
+    def test_装着数に比例してクエリが増えない(self, db, make_character, make_equipment):
+        """N+1防止（backend-review ISSUE-110）。tick毎・レベルアップ毎に呼ばれる"""
+
+        def _measure(slots) -> int:
+            char = make_character()
+            for slot, base_id in slots:
+                equip = make_equipment(slot=slot, base_id=base_id, stat_atk=1)
+                _slot_of(db, char.id, slot).equipment_id = equip.id
+            db.commit()
+            db.expire_all()
+            with count_queries(db) as sql:
+                es.get_effective_stats(char, db)
+            return len(sql)
+
+        one = _measure([("head", "helm")])
+        three = _measure([("head", "helm"), ("ring", "ring"), ("body", "chest_armor")])
+        assert one == three, f"装着数でクエリ数が変わる（1件={one} / 3件={three}）"
+
     def test_装備が無ければ基礎値のみを返す(self, db, make_character):
         char = make_character()
         assert es.get_effective_stats(char, db) == {

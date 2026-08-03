@@ -67,14 +67,25 @@ const expRequired = computed(() => hero.value ? Math.floor(100 * Math.pow(hero.v
 const potionCount = computed(() => playerStore.potions['hp_potion'] ?? 0)
 const isInTower = computed(() => !!gameStore.currentTowerId)
 
+// 攻略中に最高到達階が伸びると targetFloorCap が変わる。塔選択へ戻ったタイミングで
+// 一覧を取り直さないと、実際には選べる階が NumberStepper の max で弾かれ続ける
+watch(isInTower, (inTower, wasInTower) => {
+  if (wasInTower && !inTower) {
+    gameStore.loadTowers().catch(() => { /* 失敗時は前回の一覧を保持する */ })
+  }
+})
+
 const heroStats = computed(() => hero.value ? [
   { key: 'ATK', value: hero.value.baseAtk },
   { key: 'DEF', value: hero.value.baseDef },
   { key: 'SPD', value: hero.value.baseSpd },
 ] : [])
 
-// 直近のログだけを描画する（DOMノード数を抑え、スマホでの描画を軽く保つ）
-const visibleLogs = computed(() => battleStore.battleLogs.slice(-10))
+// 設定「戦闘ログ表示件数」（20/50/100・tick群単位）に従って直近ぶんだけ描画する。
+// ストア側も同じ上限で保持しているが、設定を下げた直後は保持済みログが残るため表示側でも絞る
+const visibleLogs = computed(() =>
+  battleStore.battleLogs.slice(-gameStore.settings.battleLogCount)
+)
 
 // 新しいログは下に積まれるため、追加のたびに最新行まで送る
 watch(() => battleStore.battleLogs.length, async () => {

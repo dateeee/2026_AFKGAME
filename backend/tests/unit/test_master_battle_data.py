@@ -95,7 +95,7 @@ class TestRollEncounter:
             captured.update(population=population, weights=weights, k=k)
             return [population[1]]
 
-        monkeypatch.setattr(towers_module.random, "choices", _choices)
+        monkeypatch.setattr(towers_module.DEFAULT_RNG, "choices", _choices)
 
         enemy = roll_encounter("goblin_tower", 1)
 

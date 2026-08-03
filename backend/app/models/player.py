@@ -3,7 +3,16 @@
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import BigInteger, Boolean, DateTime, Float, ForeignKey, Integer, String
+from sqlalchemy import (
+    BigInteger,
+    Boolean,
+    DateTime,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.config import (
@@ -26,7 +35,11 @@ class Player(Base):
     __tablename__ = "players"
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_new_uuid)
-    user_id: Mapped[str | None] = mapped_column(String(50), ForeignKey("users.id"), nullable=True)
+    # 1ユーザー = 1プレイヤー。query-then-create で重複が生まれると
+    # `.first()` がどちらを返すか不定になるためDB側で防ぐ（ISSUE-108）
+    user_id: Mapped[str | None] = mapped_column(
+        String(50), ForeignKey("users.id"), nullable=True, unique=True
+    )
     gold: Mapped[int] = mapped_column(BigInteger, default=0)
     current_tower_id: Mapped[str | None] = mapped_column(String(50), nullable=True)
     current_floor: Mapped[int | None] = mapped_column(Integer, nullable=True)
@@ -53,7 +66,9 @@ class PlayerSettings(Base):
     __tablename__ = "player_settings"
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_new_uuid)
-    player_id: Mapped[str] = mapped_column(String(36), ForeignKey("players.id"), nullable=False)
+    player_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("players.id"), nullable=False, unique=True
+    )
     potion_threshold: Mapped[float] = mapped_column(
         Float, default=DEFAULT_POTION_THRESHOLD
     )
@@ -68,6 +83,9 @@ class PlayerSettings(Base):
 
 class TowerClearRecord(Base):
     __tablename__ = "tower_clear_records"
+    __table_args__ = (
+        UniqueConstraint("player_id", "tower_id", name="uq_tower_clear_records_player_tower"),
+    )
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_new_uuid)
     player_id: Mapped[str] = mapped_column(String(36), ForeignKey("players.id"), nullable=False)

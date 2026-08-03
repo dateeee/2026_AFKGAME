@@ -3,7 +3,7 @@
 import logging
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.config import (
@@ -13,6 +13,8 @@ from app.config import (
 )
 from app.db.database import get_db
 from app.dependencies import get_current_user
+from app.exceptions import AppError
+from app.logging_config import dev_only_token
 from app.models.character import Character
 from app.models.item import InventoryItem
 from app.models.player import Player, PlayerSettings
@@ -121,10 +123,7 @@ def register(body: RegisterRequest, db: Session = Depends(get_db)) -> AuthRespon
     """
     existing = db.query(User).filter(User.email == body.email).first()
     if existing:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Email already registered",
-        )
+        raise AppError("AUTH_EMAIL_TAKEN", "Email already registered", 409)
 
     user = User(
         is_guest=False,
@@ -142,7 +141,7 @@ def register(body: RegisterRequest, db: Session = Depends(get_db)) -> AuthRespon
     verification_token = create_email_verification_token(user.id, db)
     logger.info(
         "メール確認トークン発行（開発用ログ出力）",
-        extra={"user_id": user.id, "verification_token": verification_token},
+        extra={"user_id": user.id, "verification_token": dev_only_token(verification_token)},
     )
 
     access_token = create_access_token(user.id, is_guest=False)
@@ -159,10 +158,10 @@ def login(body: LoginRequest, db: Session = Depends(get_db)) -> AuthResponse:
     """メール+パスワードでログイン。"""
     user = db.query(User).filter(User.email == body.email).first()
     if not user or not user.password_hash:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+        raise AppError("AUTH_INVALID_CREDENTIALS", "Invalid credentials", 401)
 
     if not verify_password(body.password, user.password_hash):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+        raise AppError("AUTH_INVALID_CREDENTIALS", "Invalid credentials", 401)
 
     user.last_login_at = datetime.now(timezone.utc)
 
@@ -182,7 +181,7 @@ def refresh(body: RefreshRequest, db: Session = Depends(get_db)) -> AuthResponse
         new_access, new_refresh, user = refresh_tokens(body.refresh_token, db)
     except ValueError as e:
         db.commit()  # revoke_all_tokensの変更をコミット
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))
+        raise AppError("AUTH_REFRESH_INVALID", str(e), 401)
 
     db.commit()
     return _build_auth_response(user, new_access, new_refresh)
@@ -208,7 +207,7 @@ def verify_email(
     try:
         user = verify_email_token(token, db)
     except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+        raise AppError("AUTH_VERIFICATION_INVALID", str(e), 400)
 
     db.commit()
     logger.info("メール確認完了", extra={"user_id": user.id})
@@ -219,17 +218,11 @@ def verify_email(
 def google_auth(body: GoogleAuthRequest, db: Session = Depends(get_db)) -> AuthResponse:
     """Google認可コードでログイン/登録。"""
     if not GOOGLE_CLIENT_ID:
-        raise HTTPException(
-            status_code=status.HTTP_501_NOT_IMPLEMENTED,
-            detail="Google OAuth is not configured",
-        )
+        raise AppError("AUTH_GOOGLE_NOT_CONFIGURED", "Google OAuth is not configured", 501)
 
     # TODO: Google認可コード → アクセストークン → ユーザー情報取得
     # MVP段階では未実装（GOOGLE_CLIENT_ID設定時のみ有効化）
-    raise HTTPException(
-        status_code=status.HTTP_501_NOT_IMPLEMENTED,
-        detail="Google OAuth not yet implemented",
-    )
+    raise AppError("AUTH_GOOGLE_NOT_IMPLEMENTED", "Google OAuth not yet implemented", 501)
 
 
 @router.post("/link-account", response_model=AuthResponse)
@@ -240,18 +233,12 @@ def link_account(
 ) -> AuthResponse:
     """ゲストアカウントを本登録（メールまたはGoogle）に移行。"""
     if not current_user.is_guest:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Account is already registered",
-        )
+        raise AppError("AUTH_ALREADY_REGISTERED", "Account is already registered", 400)
 
     if body.email and body.password:
         existing = db.query(User).filter(User.email == body.email).first()
         if existing:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="Email already registered",
-            )
+            raise AppError("AUTH_EMAIL_TAKEN", "Email already registered", 409)
 
         current_user.email = body.email
         current_user.password_hash = hash_password(body.password)
@@ -261,23 +248,19 @@ def link_account(
         verification_token = create_email_verification_token(current_user.id, db)
         logger.info(
             "アカウント移行: メール確認トークン発行",
-            extra={"user_id": current_user.id, "verification_token": verification_token},
+            extra={
+                "user_id": current_user.id,
+                "verification_token": dev_only_token(verification_token),
+            },
         )
 
     elif body.google_auth_code:
         if not GOOGLE_CLIENT_ID:
-            raise HTTPException(
-                status_code=status.HTTP_501_NOT_IMPLEMENTED,
-                detail="Google OAuth is not configured",
-            )
-        raise HTTPException(
-            status_code=status.HTTP_501_NOT_IMPLEMENTED,
-            detail="Google OAuth not yet implemented",
-        )
+            raise AppError("AUTH_GOOGLE_NOT_CONFIGURED", "Google OAuth is not configured", 501)
+        raise AppError("AUTH_GOOGLE_NOT_IMPLEMENTED", "Google OAuth not yet implemented", 501)
     else:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Provide email+password or googleAuthCode",
+        raise AppError(
+            "AUTH_LINK_PAYLOAD_INVALID", "Provide email+password or googleAuthCode", 400
         )
 
     # 旧トークン全無効化 + 新トークン発行
@@ -305,7 +288,7 @@ def password_reset_request(
         )
         logger.info(
             "パスワードリセットトークン発行（開発用ログ出力）",
-            extra={"user_id": user.id, "reset_token": token},
+            extra={"user_id": user.id, "reset_token": dev_only_token(token)},
         )
         db.commit()
 
@@ -322,7 +305,7 @@ def password_reset_confirm(
     try:
         user = consume_password_reset_token(body.token, db)
     except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+        raise AppError("AUTH_RESET_TOKEN_INVALID", str(e), 400)
 
     user.password_hash = hash_password(body.new_password)
     revoke_all_tokens(user.id, db)

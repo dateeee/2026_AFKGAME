@@ -45,6 +45,9 @@ DEFEAT_EXP_PENALTY = 0.5     # 全滅時に持ち帰れるEXPの割合
 # オフライン簡易計算のサンプルtick数（tech_offline.md §4）
 OFFLINE_SAMPLE_TICKS = 10
 
+# 戦闘乱数のシード（tech_rng.md §2）。空 = OSエントロピー、調査時のみ固定する
+BATTLE_RNG_SEED = os.environ.get("BATTLE_RNG_SEED", "")
+
 # 実行環境（tech_operations.md §12.2）。production では必須変数の既定値使用を起動時に拒否する
 APP_ENV = os.environ.get("APP_ENV", "development")
 IS_PRODUCTION = APP_ENV == "production"

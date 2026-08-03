@@ -32,7 +32,7 @@ from app.models.user import (
 )
 from app.services import auth_service
 from app.services.auth_service import create_email_verification_token
-from tests.helpers import error_message
+from tests.helpers import error_code, error_message
 
 pytestmark = pytest.mark.unit
 
@@ -116,6 +116,7 @@ class TestRegister:
         _register(client)
         res = _register(client)
         assert res.status_code == 409
+        assert error_code(res) == "AUTH_EMAIL_TAKEN"
         assert error_message(res) == "Email already registered"
 
     def test_表示名を省略するとメールのローカル部になる(self, client):
@@ -150,6 +151,7 @@ class TestLogin:
     def test_未登録メールは401(self, client):
         res = _login(client, email="nobody@example.com")
         assert res.status_code == 401
+        assert error_code(res) == "AUTH_INVALID_CREDENTIALS"
         assert error_message(res) == "Invalid credentials"
 
     def test_パスワード未設定ユーザーは401(self, client, db):
@@ -162,6 +164,7 @@ class TestLogin:
         _register(client)
         res = _login(client, password="wrongpass123")
         assert res.status_code == 401
+        assert error_code(res) == "AUTH_INVALID_CREDENTIALS"
         assert error_message(res) == "Invalid credentials"
 
 
@@ -177,11 +180,13 @@ class TestRefresh:
         client.post("/api/auth/refresh", json={"refreshToken": old})
         res = client.post("/api/auth/refresh", json={"refreshToken": old})
         assert res.status_code == 401
+        assert error_code(res) == "AUTH_REFRESH_INVALID"
         assert error_message(res) == "Refresh token reuse detected"
 
     def test_未知のリフレッシュトークンは401(self, client):
         res = client.post("/api/auth/refresh", json={"refreshToken": "bogus"})
         assert res.status_code == 401
+        assert error_code(res) == "AUTH_REFRESH_INVALID"
         assert error_message(res) == "Invalid refresh token"
 
 
@@ -213,6 +218,7 @@ class TestVerifyEmail:
     def test_無効なトークンは400(self, client):
         res = client.get("/api/auth/verify-email", params={"token": "bogus"})
         assert res.status_code == 400
+        assert error_code(res) == "AUTH_VERIFICATION_INVALID"
         assert error_message(res) == "Invalid verification token"
 
 
@@ -221,12 +227,14 @@ class TestGoogleAuth:
         monkeypatch.setattr("app.routers.auth.GOOGLE_CLIENT_ID", "")
         res = client.post("/api/auth/google", json={"authCode": "code"})
         assert res.status_code == 501
+        assert error_code(res) == "AUTH_GOOGLE_NOT_CONFIGURED"
         assert error_message(res) == "Google OAuth is not configured"
 
     def test_クライアントID設定済みでも未実装の501(self, client, monkeypatch):
         monkeypatch.setattr("app.routers.auth.GOOGLE_CLIENT_ID", "dummy-client-id")
         res = client.post("/api/auth/google", json={"authCode": "code"})
         assert res.status_code == 501
+        assert error_code(res) == "AUTH_GOOGLE_NOT_IMPLEMENTED"
         assert error_message(res) == "Google OAuth not yet implemented"
 
 
@@ -259,6 +267,7 @@ class TestLinkAccount:
         headers = {"Authorization": f"Bearer {token}"}
         res = self._link(client, headers, email="x@example.com", password="password123")
         assert res.status_code == 400
+        assert error_code(res) == "AUTH_ALREADY_REGISTERED"
         assert error_message(res) == "Account is already registered"
 
     def test_8文字未満のパスワードは422(self, client):
@@ -271,6 +280,7 @@ class TestLinkAccount:
         headers, _ = _guest_headers(client)
         res = self._link(client, headers, email="taken@example.com", password="password123")
         assert res.status_code == 409
+        assert error_code(res) == "AUTH_EMAIL_TAKEN"
         assert error_message(res) == "Email already registered"
 
     def test_Google連携はクライアントID未設定なら設定なしの501(self, client, monkeypatch):
@@ -278,6 +288,7 @@ class TestLinkAccount:
         headers, _ = _guest_headers(client)
         res = self._link(client, headers, googleAuthCode="code")
         assert res.status_code == 501
+        assert error_code(res) == "AUTH_GOOGLE_NOT_CONFIGURED"
         assert error_message(res) == "Google OAuth is not configured"
 
     def test_Google連携はクライアントID設定済みでも未実装の501(self, client, monkeypatch):
@@ -285,6 +296,7 @@ class TestLinkAccount:
         headers, _ = _guest_headers(client)
         res = self._link(client, headers, googleAuthCode="code")
         assert res.status_code == 501
+        assert error_code(res) == "AUTH_GOOGLE_NOT_IMPLEMENTED"
         assert error_message(res) == "Google OAuth not yet implemented"
 
     def test_メールのみでパスワードなしは400(self, client):
@@ -292,12 +304,14 @@ class TestLinkAccount:
         headers, _ = _guest_headers(client)
         res = self._link(client, headers, email="a@example.com")
         assert res.status_code == 400
+        assert error_code(res) == "AUTH_LINK_PAYLOAD_INVALID"
         assert error_message(res) == "Provide email+password or googleAuthCode"
 
     def test_連携情報なしは400(self, client):
         headers, _ = _guest_headers(client)
         res = self._link(client, headers)
         assert res.status_code == 400
+        assert error_code(res) == "AUTH_LINK_PAYLOAD_INVALID"
         assert error_message(res) == "Provide email+password or googleAuthCode"
 
 
@@ -386,4 +400,5 @@ class TestPasswordResetConfirm:
     def test_無効なトークンは400(self, client):
         res = self._confirm(client, "bogus")
         assert res.status_code == 400
+        assert error_code(res) == "AUTH_RESET_TOKEN_INVALID"
         assert error_message(res) == "Invalid verification token"

@@ -1,7 +1,7 @@
 """戦闘ルーター"""
 
 import logging
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.dependencies import get_current_player
 from app.models.player import Player
+from app.rng import new_rng
 from app.schemas.battle import OfflineSummary, TickResponse
 from app.schemas.equipment import EquipmentResponse
 from app.services.battle_service import process_pending_ticks
@@ -36,10 +37,10 @@ def tick_endpoint(
     if last_tick.tzinfo is None:
         last_tick = last_tick.replace(tzinfo=timezone.utc)
     elapsed = (now - last_tick).total_seconds()
-    pending_ticks = min(
-        int(elapsed // TICK_INTERVAL_SECONDS),
-        MAX_OFFLINE_HOURS * 3600 // TICK_INTERVAL_SECONDS,
-    )
+    max_ticks = MAX_OFFLINE_HOURS * 3600 // TICK_INTERVAL_SECONDS
+    elapsed_ticks = int(elapsed // TICK_INTERVAL_SECONDS)
+    capped = elapsed_ticks > max_ticks
+    pending_ticks = min(elapsed_ticks, max_ticks)
 
     if pending_ticks <= 0:
         return TickResponse(
@@ -54,7 +55,11 @@ def tick_endpoint(
             updated_state=build_game_state(player, db),
         )
 
-    accumulated, calc_method = process_pending_ticks(player, character, pending_ticks, db)
+    # 乱数源は1リクエストにつき1インスタンス（tech_rng.md §2）。
+    # 戦闘・エンカウント・ドロップ・装備生成がこのインスタンスを共有する
+    accumulated, calc_method = process_pending_ticks(
+        player, character, pending_ticks, db, new_rng()
+    )
 
     logger.info(
         "tick処理完了",
@@ -65,7 +70,12 @@ def tick_endpoint(
         },
     )
 
-    player.last_tick_at = now
+    # 端数は次回へ繰り越す（tech_tick.md §1）。now を代入すると毎回0〜59秒が捨てられ、
+    # プレイし続けるほど進行が遅れる。上限クランプ時だけは超過分を破棄する（§2）。
+    if capped:
+        player.last_tick_at = now
+    else:
+        player.last_tick_at = last_tick + timedelta(seconds=pending_ticks * TICK_INTERVAL_SECONDS)
     db.commit()
 
     # ログを最新N件に制限

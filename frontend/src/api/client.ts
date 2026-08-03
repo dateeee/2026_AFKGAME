@@ -16,7 +16,7 @@ import type {
   TowerInfo,
 } from '@/types/game'
 import { refreshToken as refreshTokenApi } from '@/api/auth'
-import { ApiError, networkError, toApiError } from '@/api/errors'
+import { ApiError, SESSION_EXPIRED_CODE, networkError, toApiError } from '@/api/errors'
 
 const USE_API = import.meta.env.VITE_USE_API !== 'false'
 const MAX_RETRIES = 3
@@ -113,7 +113,7 @@ async function sendWithAuth(url: string, options: RequestInit): Promise<Response
 
   if (!await tryRefresh()) {
     // リフレッシュ不可＝再送しても結果は変わらないので即時失敗させる
-    throw new ApiError('認証に失敗しました', 'AUTH_REFRESH_FAILED', 401)
+    throw new ApiError('認証に失敗しました', SESSION_EXPIRED_CODE, 401)
   }
   return await fetch(url, { ...options, headers: buildHeaders(options) })
 }

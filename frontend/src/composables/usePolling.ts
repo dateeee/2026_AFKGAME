@@ -1,6 +1,6 @@
 import { ref, onUnmounted } from 'vue'
 import { postTick } from '@/api/client'
-import { errorMessage } from '@/api/errors'
+import { errorMessage, isSessionExpired } from '@/api/errors'
 import { useAuthStore } from '@/stores/authStore'
 import { useGameStore } from '@/stores/gameStore'
 import { useBattleStore } from '@/stores/battleStore'
@@ -45,6 +45,13 @@ export function usePolling() {
 
       gameStore.clearError()
     } catch (error) {
+      // セッション失効はリトライで回復しない。止めずに放置すると60秒ごとに
+      // 失敗リクエストと赤バナーが出続け、ログイン画面へも誘導されない
+      if (isSessionExpired(error)) {
+        stop()
+        await useAuthStore().expireSession()
+        return
+      }
       gameStore.setConnectionError(errorMessage(error))
     }
   }

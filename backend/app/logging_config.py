@@ -6,7 +6,7 @@ import re
 import sys
 from datetime import datetime, timezone
 
-from app.config import LOG_FORMAT, LOG_LEVEL
+from app.config import IS_PRODUCTION, LOG_FORMAT, LOG_LEVEL
 
 
 def mask_token(token: str) -> str:
@@ -14,6 +14,17 @@ def mask_token(token: str) -> str:
     if len(token) <= 8:
         return "****"
     return token[:4] + "****" + token[-4:]
+
+
+def dev_only_token(token: str) -> str:
+    """開発用に平文でログ出力するワンタイムトークン。本番ではマスクする。
+
+    メール確認・パスワードリセットのメール送信が未実装のため、開発環境では
+    ログのトークンをそのまま使って動作確認する。本番ログに平文で残すと
+    ログ閲覧者がメール確認・パスワードリセットを実行できてしまうため抑止する
+    （backend-review ISSUE-104。メール送信の実装で本関数ごと不要になる）。
+    """
+    return mask_token(token) if IS_PRODUCTION else token
 
 
 def mask_email(email: str) -> str:
@@ -30,7 +41,8 @@ def mask_email(email: str) -> str:
 LOG_EXTRA_KEYS = (
     # 共通・リクエスト
     "reason", "request_id", "method", "path", "status_code", "duration_ms", "client_ip",
-    # 認証（token / verification_token / reset_token は開発用のログ出力）
+    # 認証（token / verification_token / reset_token は開発用のログ出力。
+    # 本番では `dev_only_token()` でマスクしてから extra へ渡すこと）
     "user_id", "token", "verification_token", "reset_token", "email",
     # ゲーム
     "player_id", "tower_id", "item_id", "quantity", "gold", "ticks", "calc_method",

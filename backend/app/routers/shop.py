@@ -32,14 +32,20 @@ def get_lineup(
     player: Player = Depends(get_current_player),
     db: Session = Depends(get_db),
 ) -> ShopLineupResponse:
+    potion_ids = [i for i, d in ITEMS.items() if d.category == "potion"]
+    # 種別ごとに引かず1回でまとめる（ISSUE-110）
+    owned_by_item = {
+        inv.item_id: inv.quantity
+        for inv in db.query(InventoryItem).filter(
+            InventoryItem.player_id == player.id,
+            InventoryItem.item_id.in_(potion_ids),
+        )
+    }
+
     lineup: list[ShopItemResponse] = []
-    for item_id, item_data in ITEMS.items():
-        if item_data.category != "potion":
-            continue
-        inv = db.query(InventoryItem).filter_by(
-            player_id=player.id, item_id=item_id
-        ).first()
-        owned = inv.quantity if inv else 0
+    for item_id in potion_ids:
+        item_data = ITEMS[item_id]
+        owned = owned_by_item.get(item_id, 0)
         lineup.append(ShopItemResponse(
             item_id=item_data.id,
             name=item_data.name,

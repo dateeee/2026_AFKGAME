@@ -18,7 +18,7 @@
 | 7 | エンカウント抽選 | 重み付き | `weight` に比例 | tech_battle §3.2 |
 | 8 | 敵の出現数 | 離散一様 | min〜max | tech_battle §3.2 |
 | 9 | 装備ドロップ判定 | 一様 `[0,1)` | `r < drop_rate` | [master/equipment.md](../data/master/equipment.md) |
-| 10 | 装備レアリティ | 累積確率 | レアリティ順に比較 | master/equipment.md |
+| 10 | 装備レアリティ（ドロップ） | 順次独立判定 | レジェンダリー→アンコモンの順に `r < 補正後確率` | [systems/equipment.md](../design/systems/equipment.md) |
 | 11 | 装備のステータス種別・値 | 離散一様 / 一様 | — | master/equipment.md |
 | 12 | HP吸収の付与 | 一様 `[0,1)` | `r < 0.10` | master/equipment.md |
 | 13 | アイテムドロップ | 一様 `[0,1)` | `r < rate` | [tech_data.md §1.2](tech_data.md) |
@@ -78,6 +78,6 @@
 
 | 箇所 | 現行実装 | 本仕様 |
 |------|---------|-------|
-| [battle_service.py:50](../../backend/app/services/battle_service.py) | グローバル `random.uniform` を直呼び | §2 インスタンス注入 |
-| [battle_service.py:52](../../backend/app/services/battle_service.py) | クリティカル率 `0.05` をコード内に直書き | マスターデータ／ステータス由来の `crit_rate` を参照 |
-| [master_data/equipment.py](../../backend/app/master_data/equipment.py)・[master_data/towers.py](../../backend/app/master_data/towers.py) | 各モジュールがグローバル `random` を個別に使用（乱数源が3本に分散） | §2 同一インスタンスを引数で受け取る |
+| [battle_service.py](../../backend/app/services/battle_service.py) | クリティカル率はプレイヤー・敵で共通の定数（`config.CRIT_RATE`） | Phase 3〜 はキャラクターごとの `crit_rate`（装備・スキルの合算）を参照する |
+
+§2 のインスタンス注入は実装済み（[app/rng.py](../../backend/app/rng.py)。`routers/battle.py` が1リクエストにつき1つ生成し、戦闘・エンカウント・ドロップ・装備生成へ引き渡す。backend-review ISSUE-109）。

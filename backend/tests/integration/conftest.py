@@ -20,6 +20,7 @@ from sqlalchemy.pool import StaticPool
 from app.db.database import Base, get_db
 from app.main import app
 from app.models.player import Player
+from app.routers import battle as battle_router
 
 # 乱数の固定シード。戦闘・ドロップの結果を実行のたびに同じにする
 INTEGRATION_SEED = 20260802
@@ -86,11 +87,16 @@ def rewind(db):
 
 
 @pytest.fixture
-def fixed_rng():
-    """乱数を固定する。ダメージ分散・エンカウント・ドロップ内容を再現可能にする"""
-    random.seed(INTEGRATION_SEED)
-    yield
-    random.seed()
+def fixed_rng(monkeypatch):
+    """乱数を固定する。ダメージ分散・エンカウント・ドロップ内容を再現可能にする。
+
+    tick処理は1リクエストにつき1インスタンスを生成する（tech_rng.md §2）ため、
+    ルーターの生成関数を差し替えて全リクエストで同じ列を共有させる。
+    戻り値の `Random` を `seed()` し直せば、同一テスト内で列を巻き戻せる。
+    """
+    shared = random.Random(INTEGRATION_SEED)
+    monkeypatch.setattr(battle_router, "new_rng", lambda: shared)
+    return shared
 
 
 @pytest.fixture
@@ -115,4 +121,4 @@ def always_drop(monkeypatch):
     """装備ドロップ抽選を必ず成立させる（ドロップ率そのものは結合の検証対象ではない）"""
     from app.master_data import equipment as equipment_master
 
-    monkeypatch.setattr(equipment_master, "_roll_drop", lambda is_boss: True)
+    monkeypatch.setattr(equipment_master, "_roll_drop", lambda is_boss, rng: True)

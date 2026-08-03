@@ -45,6 +45,7 @@
 | `LOG_FORMAT` | ログ形式（`text` / `json`） | `text` | ○ |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Google OAuth | なし | Phase 2〜 ○ |
 | `SMTP_HOST` / `SMTP_PORT` / `SMTP_USER` / `SMTP_PASSWORD` | 確認メール・パスワードリセット送信 | なし | Phase 2〜 ○ |
+| `BATTLE_RNG_SEED` | 戦闘乱数のシード固定（[tech_rng.md §2](tech_rng.md) の調査用。本番では未設定） | なし | — |
 
 - **起動時バリデーション**: `APP_ENV=production` かつ必須変数が未設定・既定値のままの場合は、起動を中止して ERROR ログを出す（設定漏れのまま本番稼働することを防ぐ）
 - 変数を追加したら `.env.example` と本表を同時に更新する

@@ -12,6 +12,13 @@
 
 | ファイル | 内容 |
 |---------|------|
+| `docs/tech/tech_battle.md` | §5「分岐一覧（1tick内のターン処理）」を新設（行動順の決定・行動前の打ち切り判定の5分岐）。撃破済み・場から除かれた敵が同一ターン内に反撃しない分岐を明示（backend-review ISSUE-101） |
+| `docs/tech/tech_tick.md` | §6 から端数繰り越しの行を削除（実装済み）。残る是正対象3件の行番号を現行コードへ更新（ISSUE-102） |
+| `docs/tech/tech_rng.md` | §1 #10 のドロップ時レアリティ抽選を「累積確率」から「順次独立判定」へ修正し、定義元を `systems/equipment.md` に変更（ショップの累積方式とは意図的に別方式）。§6 からインスタンス注入の行を削除し、残るクリティカル率の行を Phase 3〜 の課題として書き直した（ISSUE-109） |
+| `docs/tech/tech_logging.md` | エラーコード体系に「AUTH_ コード一覧」（15コード・HTTPステータス・発生条件）を追加。クライアントはメッセージ文字列ではなくコードで分岐する旨を明記（ISSUE-105） |
+| `docs/tech/tech_operations.md` | §12.2 の環境変数一覧へ `BATTLE_RNG_SEED`（戦闘乱数のシード固定・調査用）を追加（ISSUE-109） |
+| `diagrams/er_diagram/player.md`・`item.md` | `Player.user_id`・`PlayerSettings.player_id`・`TowerClearRecord(player_id, tower_id)`・`InventoryItem(player_id, item_id)`・`ShopDailyState.player_id` に `UK` 表記を追加（ISSUE-108） |
+| `docs/known_issues.md` | 先送り4件を登録（#7 レート制限未実装 / #14 ドロップ経路の所持枠上限 / #15 BattleLog 未使用 / #16 トースト未実装）。認証系 `AUTH_*` コードの未対応を §3 対応済みへ移動 |
 | `.claude/skills/**`（14件） | 全 SKILL.md へ `argument-hint` を追加（`/` 起動時の補完に引数仕様を表示）。`templates.md` を `.claude/references/resolve-specs/` から `skills/resolve-specs/references/` へ移動しスキル内参照へ変更（claude-code-best-practice 照合。レポート: `docs/reviews/skill-improvement/2026-08-04_skill-improvement.md`） |
 | `.claude/project/_TEMPLATE.md` | 新スキル追加時の SKILL.md frontmatter 規約（description トリガー句・argument-hint・model・資料配置・Gotchas 運用）を追記。`requirements.md` のテンプレート参照リンクを新パスへ更新 |
 | `docs/design/systems/battle.md` 他3件 | 挑発の合算上限を80%へ統一（`006_生存術系統.md` §4 の按分表、`tech_battle.md` §3.1.3 の擬似コードを `TAUNT_CAP=0.8` ベースへ修正、段階別挑発率を 段階1=50%〜段階4=80% に統一）。正を `spec_ownership.md` へ登録（doc-review ISSUE-1001・1002） |

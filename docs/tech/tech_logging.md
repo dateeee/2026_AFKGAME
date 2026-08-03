@@ -112,6 +112,28 @@ Python標準 `logging` モジュールを使用。Uvicornのアクセスログ�
 | `RATE_LIMIT_` | レート制限 | `RATE_LIMIT_EXCEEDED`(429)。`Retry-After` ヘッダを併せて返す |
 | `INTERNAL_` | サーバー内部エラー | `INTERNAL_UNEXPECTED_ERROR` |
 
+### AUTH_ コード一覧
+
+クライアントは**メッセージ文字列ではなくコードで**分岐する（`AUTH_TOKEN_EXPIRED` は refresh を試す、`AUTH_INVALID_TOKEN` はログアウトして再ログイン、のように挙動が異なるため）。
+
+| コード | HTTP | 発生条件 |
+|--------|------|---------|
+| `AUTH_HEADER_MISSING` | 401 | `Authorization` ヘッダが無い |
+| `AUTH_INVALID_FORMAT` | 401 | `Bearer ` で始まらない |
+| `AUTH_TOKEN_EXPIRED` | 401 | アクセストークンの有効期限切れ（refresh 可能） |
+| `AUTH_INVALID_TOKEN` | 401 | 署名不正・`sub` 欠落（再ログインが必要） |
+| `AUTH_USER_NOT_FOUND` | 401 | トークンは正当だがユーザーが存在しない |
+| `AUTH_PLAYER_NOT_FOUND` | 404 | ユーザーに対応する Player が無い |
+| `AUTH_INVALID_CREDENTIALS` | 401 | ログインのメール／パスワード不一致（どちらが誤りかは返さない） |
+| `AUTH_REFRESH_INVALID` | 401 | リフレッシュトークンが不正・再利用検知 |
+| `AUTH_EMAIL_TAKEN` | 409 | 登録・アカウント移行でメールが使用済み |
+| `AUTH_ALREADY_REGISTERED` | 400 | 本登録済みアカウントへの移行要求 |
+| `AUTH_LINK_PAYLOAD_INVALID` | 400 | 移行要求に `email`+`password` も `googleAuthCode` も無い |
+| `AUTH_VERIFICATION_INVALID` | 400 | メール確認トークンが不正・期限切れ・用途違い |
+| `AUTH_RESET_TOKEN_INVALID` | 400 | パスワードリセットトークンが不正・期限切れ・用途違い |
+| `AUTH_GOOGLE_NOT_CONFIGURED` | 501 | `GOOGLE_CLIENT_ID` 未設定 |
+| `AUTH_GOOGLE_NOT_IMPLEMENTED` | 501 | Google OAuth 未実装 |
+
 ### グローバル例外ハンドラ
 
 FastAPIの例外ハンドラで未捕捉例外を捕捉し、以下を実行する:

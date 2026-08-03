@@ -34,8 +34,8 @@ class TestRollDrop:
             captured["range"] = (a, b)
             return 0.15
 
-        monkeypatch.setattr(me.random, "uniform", fake_uniform)
-        monkeypatch.setattr(me.random, "random", lambda: 0.10)  # 率 0.15 未満 → ドロップ
+        monkeypatch.setattr(me.DEFAULT_RNG, "uniform", fake_uniform)
+        monkeypatch.setattr(me.DEFAULT_RNG, "random", lambda: 0.10)  # 率 0.15 未満 → ドロップ
         assert me._roll_drop(is_boss=False) is True
         assert captured["range"] == me.NORMAL_ENEMY_DROP_RATE
 
@@ -46,29 +46,29 @@ class TestRollDrop:
             captured["range"] = (a, b)
             return 0.6
 
-        monkeypatch.setattr(me.random, "uniform", fake_uniform)
-        monkeypatch.setattr(me.random, "random", lambda: 0.6)  # 率ちょうど → ドロップしない
+        monkeypatch.setattr(me.DEFAULT_RNG, "uniform", fake_uniform)
+        monkeypatch.setattr(me.DEFAULT_RNG, "random", lambda: 0.6)  # 率ちょうど → ドロップしない
         assert me._roll_drop(is_boss=True) is False
         assert captured["range"] == me.BOSS_ENEMY_DROP_RATE
 
 
 class TestRollRarity:
     def test_全ての抽選に外れるとコモンになる(self, monkeypatch):
-        monkeypatch.setattr(me.random, "random", lambda: 1.0)
+        monkeypatch.setattr(me.DEFAULT_RNG, "random", lambda: 1.0)
         assert me._roll_rarity(floor=1) == "common"
 
     def test_最初の抽選に当たると最上位レアリティになる(self, monkeypatch):
-        monkeypatch.setattr(me.random, "random", lambda: 0.0)
+        monkeypatch.setattr(me.DEFAULT_RNG, "random", lambda: 0.0)
         assert me._roll_rarity(floor=1) == "legendary"
 
     def test_上位を外して途中の抽選に当たるとその段階になる(self, monkeypatch):
         # floor=0 は補正なし: legendary(0.005) は外れ、epic(0.04) に当たる
-        monkeypatch.setattr(me.random, "random", lambda: 0.01)
+        monkeypatch.setattr(me.DEFAULT_RNG, "random", lambda: 0.01)
         assert me._roll_rarity(floor=0) == "epic"
 
     def test_高層階では階層補正で上位が出やすくなる(self, monkeypatch):
         # 0.007 は legendary 基礎率 0.005 を上回るが、20階では 0.005×(1+0.05×20)=0.01 を下回る
-        monkeypatch.setattr(me.random, "random", lambda: 0.007)
+        monkeypatch.setattr(me.DEFAULT_RNG, "random", lambda: 0.007)
         assert me._roll_rarity(floor=0) == "epic"
         assert me._roll_rarity(floor=20) == "legendary"
 
@@ -81,7 +81,7 @@ class TestRollStats:
             captured["range"] = (a, b)
             return 4
 
-        monkeypatch.setattr(me.random, "randint", fake_randint)
+        monkeypatch.setattr(me.DEFAULT_RNG, "randint", fake_randint)
         result = me._roll_stats("common", enemy_level=10)
         # 基礎値 floor(10×1.5+2)=17、コモン倍率1.0、修正 atk1.0 / def0.7 / hp5.0 / spd0.3
         assert result == {"stat_atk": 17, "stat_def": 11, "stat_hp": 85, "stat_spd": 5}
@@ -89,13 +89,13 @@ class TestRollStats:
         assert captured["range"] == (tier["stats_min"], tier["stats_max"])
 
     def test_抽選数が4未満なら選ばれなかった枠はNoneになる(self, monkeypatch):
-        monkeypatch.setattr(me.random, "randint", lambda a, b: 1)
-        monkeypatch.setattr(me.random, "sample", lambda seq, k: ["hp"])
+        monkeypatch.setattr(me.DEFAULT_RNG, "randint", lambda a, b: 1)
+        monkeypatch.setattr(me.DEFAULT_RNG, "sample", lambda seq, k: ["hp"])
         result = me._roll_stats("common", enemy_level=10)
         assert result == {"stat_atk": None, "stat_def": None, "stat_hp": 85, "stat_spd": None}
 
     def test_計算値が1未満なら1にクランプされる(self, monkeypatch):
-        monkeypatch.setattr(me.random, "randint", lambda a, b: 4)
+        monkeypatch.setattr(me.DEFAULT_RNG, "randint", lambda a, b: 4)
         result = me._roll_stats("common", enemy_level=1)
         # spd = floor(floor(1×1.5+2) × 1.0 × 0.3) = floor(0.9) = 0 → 1 にクランプ
         assert result["stat_spd"] == 1
@@ -105,12 +105,12 @@ class TestGenerateEquipmentDrop:
     @pytest.fixture
     def fixed_rolls(self, monkeypatch):
         """ドロップ判定・レアリティ・ステータス抽選を固定する"""
-        monkeypatch.setattr(me, "_roll_drop", lambda is_boss: True)
-        monkeypatch.setattr(me, "_roll_rarity", lambda floor: "rare")
+        monkeypatch.setattr(me, "_roll_drop", lambda is_boss, rng: True)
+        monkeypatch.setattr(me, "_roll_rarity", lambda floor, rng: "rare")
         monkeypatch.setattr(
             me,
             "_roll_stats",
-            lambda rarity, enemy_level: {
+            lambda rarity, enemy_level, rng: {
                 "stat_atk": 9,
                 "stat_def": None,
                 "stat_hp": None,
@@ -119,13 +119,13 @@ class TestGenerateEquipmentDrop:
         )
 
     def test_ドロップ判定に外れるとNoneを返す(self, monkeypatch):
-        monkeypatch.setattr(me, "_roll_drop", lambda is_boss: False)
+        monkeypatch.setattr(me, "_roll_drop", lambda is_boss, rng: False)
         assert me.generate_equipment_drop(enemy_level=5, floor=3, is_boss=False) is None
 
     def test_HP吸収の抽選に当たると吸収率が付与される(self, fixed_rolls, monkeypatch):
-        monkeypatch.setattr(me.random, "choice", lambda seq: seq[0])  # slot=weapon → 剣
-        monkeypatch.setattr(me.random, "random", lambda: 0.0)  # LIFESTEAL_CHANCE 未満
-        monkeypatch.setattr(me.random, "uniform", lambda a, b: 0.05)
+        monkeypatch.setattr(me.DEFAULT_RNG, "choice", lambda seq: seq[0])  # slot=weapon → 剣
+        monkeypatch.setattr(me.DEFAULT_RNG, "random", lambda: 0.0)  # LIFESTEAL_CHANCE 未満
+        monkeypatch.setattr(me.DEFAULT_RNG, "uniform", lambda a, b: 0.05)
         drop = me.generate_equipment_drop(enemy_level=5, floor=3, is_boss=True)
         assert drop == {
             "base_id": "sword",
@@ -142,8 +142,8 @@ class TestGenerateEquipmentDrop:
         }
 
     def test_HP吸収の抽選に外れると吸収率は付かない(self, fixed_rolls, monkeypatch):
-        monkeypatch.setattr(me.random, "choice", lambda seq: seq[-1])  # slot=ring → 指輪
-        monkeypatch.setattr(me.random, "random", lambda: 1.0)
+        monkeypatch.setattr(me.DEFAULT_RNG, "choice", lambda seq: seq[-1])  # slot=ring → 指輪
+        monkeypatch.setattr(me.DEFAULT_RNG, "random", lambda: 1.0)
         drop = me.generate_equipment_drop(enemy_level=5, floor=3, is_boss=False)
         assert drop["lifesteal"] is None
         assert (drop["base_id"], drop["slot"]) == ("ring", "ring")
@@ -154,8 +154,8 @@ class TestGenerateEquipmentDrop:
                 return "weapon"  # スロット抽選
             return next(b for b in seq if b.is_two_handed)  # 両手武器（大剣）
 
-        monkeypatch.setattr(me.random, "choice", pick)
-        monkeypatch.setattr(me.random, "random", lambda: 1.0)
+        monkeypatch.setattr(me.DEFAULT_RNG, "choice", pick)
+        monkeypatch.setattr(me.DEFAULT_RNG, "random", lambda: 1.0)
         drop = me.generate_equipment_drop(enemy_level=5, floor=1, is_boss=False)
         assert drop["is_two_handed"] is True
         assert drop["base_id"] == "greatsword"

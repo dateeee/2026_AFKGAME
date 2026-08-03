@@ -32,8 +32,8 @@ erDiagram
 
     InventoryItem {
         uuid id PK
-        uuid player_id FK "references Player.id"
-        string item_id FK "references ItemMaster.id"
+        uuid player_id FK, UK "references Player.id（item_id と複合一意）"
+        string item_id FK, UK "references ItemMaster.id"
         int quantity "所持数"
     }
 
@@ -63,7 +63,7 @@ erDiagram
 
     ShopDailyState {
         uuid id PK
-        uuid player_id FK "references Player.id"
+        uuid player_id FK, UK "references Player.id（プレイヤーごとに1件）"
         datetime reset_at "次回リセット時刻 (00:00 UTC)"
     }
 

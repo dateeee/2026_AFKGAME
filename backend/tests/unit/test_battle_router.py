@@ -24,6 +24,11 @@ def _set_elapsed(db, player, seconds: float, *, aware: bool = False) -> None:
     db.commit()
 
 
+def _as_utc(dt: datetime) -> datetime:
+    """SQLite から読み戻した naive な値を UTC として比較できるようにする"""
+    return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
+
+
 @pytest.fixture
 def fake_tick(monkeypatch):
     """process_tick を差し替え、1tickあたりの結果を固定するファクトリ"""
@@ -31,7 +36,7 @@ def fake_tick(monkeypatch):
     def _install(logs_per_tick: int = 1, **counters):
         state = {"calls": 0}
 
-        def _fake(player, character, db):
+        def _fake(player, character, db, rng, potion_item):
             state["calls"] += 1
             result = TickResult(**counters)
             result.battle_logs = [
@@ -124,6 +129,16 @@ class TestTickNormalCalc:
 
         assert player.last_tick_at > before.replace(tzinfo=timezone.utc)
 
+    def test_1tick未満の端数は次回へ繰り越す(self, db, player, client, fake_tick):
+        """tech_tick.md §1 — last_tick_at には now ではなく「処理したtick分」だけ加算する"""
+        fake_tick()
+        _set_elapsed(db, player, TICK_INTERVAL_SECONDS + 59)
+        before = player.last_tick_at.replace(tzinfo=timezone.utc)
+
+        client.post("/api/battle/tick")
+
+        assert _as_utc(player.last_tick_at) == before + timedelta(seconds=TICK_INTERVAL_SECONDS)
+
 
 class TestTickLogLimit:
     def test_上限を超えたログは新しいものだけ返す(self, db, player, client, fake_tick):
@@ -186,6 +201,16 @@ class TestTickSimplifiedCalc:
         summary = client.post("/api/battle/tick").json()["offlineSummary"]
 
         assert summary["processedTicks"] == MAX_OFFLINE_HOURS * 3600 // TICK_INTERVAL_SECONDS
+
+    def test_上限クランプ時は超過分を繰り越さない(self, db, player, client, fake_tick):
+        """tech_tick.md §2 — クランプ時のみ端数繰り越しの例外として last_tick_at ← now"""
+        fake_tick()
+        _set_elapsed(db, player, (MAX_OFFLINE_HOURS + 24) * 3600)
+
+        client.post("/api/battle/tick")
+
+        elapsed = (datetime.now(timezone.utc) - _as_utc(player.last_tick_at)).total_seconds()
+        assert elapsed < TICK_INTERVAL_SECONDS  # 24時間の超過分は破棄されている
 
 
 class TestTickEquipmentResult:

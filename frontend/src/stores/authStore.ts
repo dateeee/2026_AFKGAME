@@ -120,6 +120,29 @@ export const useAuthStore = defineStore('auth', () => {
     useEquipmentStore().reset()
   }
 
+  /**
+   * セッション失効（リフレッシュ不能）の後始末。
+   * ログアウトAPIは呼べない（トークンが無効）ため、ローカルだけを片付けて
+   * ログイン画面へ送る。放置すると `user` が残ったままガードを通過し、
+   * ポーリングが60秒ごとに失敗して赤バナーが出続ける。
+   */
+  async function expireSession(): Promise<void> {
+    stopActivePolling()
+    clearTokens()
+    user.value = null
+    error.value = null
+
+    useGameStore().reset()
+    usePlayerStore().reset()
+    useBattleStore().reset()
+    useEquipmentStore().reset()
+
+    const { default: router } = await import('@/router')
+    if (router.currentRoute.value.name !== 'login') {
+      await router.push({ name: 'login' })
+    }
+  }
+
   /** ゲスト→本登録移行 */
   async function linkAccount(email: string, password: string): Promise<void> {
     loading.value = true
@@ -149,6 +172,7 @@ export const useAuthStore = defineStore('auth', () => {
     register,
     loginWithEmail,
     logout,
+    expireSession,
     linkAccount,
   }
 })

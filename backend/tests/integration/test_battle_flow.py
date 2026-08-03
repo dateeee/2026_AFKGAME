@@ -4,8 +4,6 @@
 不変条件: サーバー権威（計算結果と保存後の状態が一致する）、60秒固定tick。
 """
 
-import random
-
 import pytest
 
 from app.config import MAX_OFFLINE_HOURS, TICK_INTERVAL_SECONDS
@@ -135,7 +133,7 @@ class TestScenario04オフライン復帰の一括計算:
         assert summary["elapsedSeconds"] >= 30 * 3600
         assert summary["processedTicks"] == MAX_OFFLINE_TICKS  # 24時間 = 1440tick
 
-    def test_一括処理と逐次処理でtickの結果が一致する(self, api, db, rewind):
+    def test_一括処理と逐次処理でtickの結果が一致する(self, api, db, rewind, fixed_rng):
         """ハイブリッドtick制: オンラインのポーリングとオフラインの一括計算で結果が変わらない"""
 
         def _run(batched: bool) -> dict:
@@ -144,7 +142,7 @@ class TestScenario04オフライン復帰の一括計算:
             player = db.query(Player).filter_by(user_id=auth["user"]["id"]).one()
             _enter_tower(api)
 
-            random.seed(INTEGRATION_SEED)  # 双方の戦闘を同じ乱数列で回す
+            fixed_rng.seed(INTEGRATION_SEED)  # 双方の戦闘を同じ乱数列で回す
             if batched:
                 rewind(player, 5 * TICK_INTERVAL_SECONDS)
                 api.post("/api/battle/tick")
@@ -162,10 +160,7 @@ class TestScenario04オフライン復帰の一括計算:
                 "potions": state["potions"],
             }
 
-        try:
-            assert _run(batched=True) == _run(batched=False)
-        finally:
-            random.seed()
+        assert _run(batched=True) == _run(batched=False)
 
     def test_復帰処理の直後に再度tickしても二重加算されない(
         self, api, guest, guest_player, rewind, fixed_rng

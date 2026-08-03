@@ -19,8 +19,8 @@ pytestmark = pytest.mark.unit
 @pytest.fixture
 def no_variance(monkeypatch):
     """ダメージ分散・クリティカル・装備ドロップを固定する"""
-    monkeypatch.setattr(bs.random, "uniform", lambda a, b: 0.0)
-    monkeypatch.setattr(bs.random, "random", lambda: 1.0)  # クリティカル発生せず
+    monkeypatch.setattr(bs.DEFAULT_RNG, "uniform", lambda a, b: 0.0)
+    monkeypatch.setattr(bs.DEFAULT_RNG, "random", lambda: 1.0)  # クリティカル発生せず
     monkeypatch.setattr(bs, "try_drop", lambda *a, **kw: (None, None))
 
 
@@ -35,7 +35,7 @@ def one_shot(monkeypatch, no_variance):
 
     def _set(is_boss: bool = False) -> EnemyData:
         enemy = _weak_enemy(is_boss)
-        monkeypatch.setattr(bs, "roll_encounter", lambda tower_id, floor: enemy)
+        monkeypatch.setattr(bs, "roll_encounter", lambda tower_id, floor, rng: enemy)
         monkeypatch.setattr(bs, "get_enemy", lambda enemy_id: enemy)
         return enemy
 
@@ -44,25 +44,25 @@ def one_shot(monkeypatch, no_variance):
 
 class TestCalcDamage:
     def test_プレイヤーの最低ダメージは1(self, monkeypatch):
-        monkeypatch.setattr(bs.random, "uniform", lambda a, b: 0.0)
-        monkeypatch.setattr(bs.random, "random", lambda: 1.0)
+        monkeypatch.setattr(bs.DEFAULT_RNG, "uniform", lambda a, b: 0.0)
+        monkeypatch.setattr(bs.DEFAULT_RNG, "random", lambda: 1.0)
         # atk=1, def=100 → 生値は負。味方は1保証（game_spec §2.2）
         assert bs._calc_damage(1, 100, is_player=True) == (1, False)
 
     def test_敵の最低ダメージは0(self, monkeypatch):
-        monkeypatch.setattr(bs.random, "uniform", lambda a, b: 0.0)
-        monkeypatch.setattr(bs.random, "random", lambda: 1.0)
+        monkeypatch.setattr(bs.DEFAULT_RNG, "uniform", lambda a, b: 0.0)
+        monkeypatch.setattr(bs.DEFAULT_RNG, "random", lambda: 1.0)
         assert bs._calc_damage(1, 100, is_player=False) == (0, False)
 
     def test_クリティカルで1_5倍になる(self, monkeypatch):
-        monkeypatch.setattr(bs.random, "uniform", lambda a, b: 0.0)
-        monkeypatch.setattr(bs.random, "random", lambda: 0.0)  # < 0.05 → クリティカル
+        monkeypatch.setattr(bs.DEFAULT_RNG, "uniform", lambda a, b: 0.0)
+        monkeypatch.setattr(bs.DEFAULT_RNG, "random", lambda: 0.0)  # < 0.05 → クリティカル
         damage, is_crit = bs._calc_damage(100, 0, is_player=True)
         assert (damage, is_crit) == (150, True)
 
     def test_分散が下振れすると減る(self, monkeypatch):
-        monkeypatch.setattr(bs.random, "uniform", lambda a, b: -0.1)
-        monkeypatch.setattr(bs.random, "random", lambda: 1.0)
+        monkeypatch.setattr(bs.DEFAULT_RNG, "uniform", lambda a, b: -0.1)
+        monkeypatch.setattr(bs.DEFAULT_RNG, "random", lambda: 1.0)
         assert bs._calc_damage(100, 0, is_player=True)[0] == 90
 
 
@@ -92,24 +92,24 @@ class TestUsePotion:
     def test_所持していなければ使用しない(self, db, player, character):
         db.query(InventoryItem).filter_by(player_id=player.id).delete()
         db.commit()
-        assert bs._use_potion(player, character, 100, db) is False
+        assert bs._use_potion(character, 100, bs._get_potion_item(player, db)) is False
 
     def test_所持数0なら使用しない(self, db, player, character):
-        item = db.query(InventoryItem).filter_by(player_id=player.id, item_id="hp_potion").first()
+        item = bs._get_potion_item(player, db)
         item.quantity = 0
         db.commit()
-        assert bs._use_potion(player, character, 100, db) is False
+        assert bs._use_potion(character, 100, item) is False
 
     def test_回復し所持数が減る(self, db, player, character):
         character.hp = 10
-        assert bs._use_potion(player, character, 100, db) is True
+        item = bs._get_potion_item(player, db)
+        assert bs._use_potion(character, 100, item) is True
         assert character.hp > 10
-        item = db.query(InventoryItem).filter_by(player_id=player.id, item_id="hp_potion").first()
         assert item.quantity == 4
 
     def test_最大HPを超えて回復しない(self, db, player, character):
         character.hp = 99
-        bs._use_potion(player, character, 100, db)
+        bs._use_potion(character, 100, bs._get_potion_item(player, db))
         assert character.hp == 100
 
 
@@ -237,8 +237,9 @@ class TestProcessTickProgression:
         assert player.current_tower_id == "goblin_tower"
 
     def test_全滅でペナルティを受け塔を出る(self, db, player, character, monkeypatch, no_variance):
+        """分岐: tech_battle.md §5 #4 — 味方のHPが0になったら以降のアクターは行動しない"""
         strong = EnemyData("boss", "強敵", 99, 9999, 9999, 9999, 9999, 0, 0)
-        monkeypatch.setattr(bs, "roll_encounter", lambda tower_id, floor: strong)
+        monkeypatch.setattr(bs, "roll_encounter", lambda tower_id, floor, rng: strong)
         monkeypatch.setattr(bs, "get_enemy", lambda enemy_id: strong)
 
         player.current_tower_id = "goblin_tower"
@@ -456,8 +457,9 @@ class TestProcessTickLifesteal:
 
 class TestProcessTickEnemySurvives:
     def test_敵が生き残れば敵の反撃に移る(self, db, player, character, monkeypatch, no_variance):
+        """分岐: tech_battle.md §5 #1,3 — 味方先行（同速以上）で双方生存なら両者が行動する"""
         tanky = EnemyData("tanky", "硬い敵", 5, 1000, 1, 0, 0, 10, 5)
-        monkeypatch.setattr(bs, "roll_encounter", lambda tower_id, floor: tanky)
+        monkeypatch.setattr(bs, "roll_encounter", lambda tower_id, floor, rng: tanky)
         monkeypatch.setattr(bs, "get_enemy", lambda enemy_id: tanky)
         _enter_tower(player)
 
@@ -468,6 +470,37 @@ class TestProcessTickEnemySurvives:
         assert types.count("attack") == 6  # 3ターン × (プレイヤー + 敵)
         assert player.current_enemy_hp == 1000 - 10 * 3
         assert character.hp == 100  # 敵ATK1 vs DEF5 → 0ダメージ
+
+    def test_敵の方が速ければ敵が先行する(self, db, player, character, monkeypatch, no_variance):
+        """分岐: tech_battle.md §5 #2 — 敵SPDが上回るとログの先頭が敵の攻撃になる"""
+        fast = EnemyData("fast", "俊敏な敵", 5, 1000, 20, 0, 999, 10, 5)
+        monkeypatch.setattr(bs, "roll_encounter", lambda tower_id, floor, rng: fast)
+        monkeypatch.setattr(bs, "get_enemy", lambda enemy_id: fast)
+        _enter_tower(player)
+
+        result = bs.process_tick(player, character, db)
+
+        attacks = [e for log in result.battle_logs for e in log if e["type"] == "attack"]
+        assert attacks[0]["actor"] == "俊敏な敵"
+
+
+class TestProcessTickEnemyDefeated:
+    """撃破済み・不在の敵が行動しないこと（tech_battle.md §3.1 手順2-i）"""
+
+    def test_プレイヤー先行で敵を倒したら同ターンの敵の攻撃は発生しない(
+        self, db, player, character, one_shot
+    ):
+        """分岐: tech_battle.md §5 #5 — 階クリアで敵が場から除かれた直後に敵が反撃しない"""
+        enemy = one_shot()
+        _enter_tower(player, floor=1, target=20)
+
+        result = bs.process_tick(player, character, db)
+
+        entries = [e for log in result.battle_logs for e in log]
+        assert [e for e in entries if e["type"] == "defeat"], "敵を撃破していない"
+        assert [
+            e for e in entries if e["type"] == "attack" and e["actor"] == enemy.name
+        ] == [], "撃破済みの敵が同一ターン内に反撃している"
 
 
 class TestProcessTickEquipmentDrop:

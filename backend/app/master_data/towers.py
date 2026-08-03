@@ -4,6 +4,7 @@ import random
 from dataclasses import dataclass
 
 from app.master_data.enemies import EnemyData, get_enemy
+from app.rng import DEFAULT_RNG
 
 
 @dataclass(frozen=True)
@@ -99,11 +100,13 @@ def get_tower(tower_id: str) -> TowerData:
     return TOWERS[tower_id]
 
 
-def roll_encounter(tower_id: str, floor: int) -> EnemyData:
+def roll_encounter(
+    tower_id: str, floor: int, rng: random.Random = DEFAULT_RNG
+) -> EnemyData:
     """フロアのエンカウントプールからランダムに敵を選出"""
     tower = TOWERS[tower_id]
     pool = tower.floor_encounters[floor]
     enemy_ids = [e[0] for e in pool]
     weights = [e[1] for e in pool]
-    chosen_id = random.choices(enemy_ids, weights=weights, k=1)[0]
+    chosen_id = rng.choices(enemy_ids, weights=weights, k=1)[0]
     return get_enemy(chosen_id)

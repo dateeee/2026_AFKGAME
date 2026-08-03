@@ -1,8 +1,9 @@
 """装備サービス — 装着・売却・ロック・ステータス計算"""
 
 import math
+import random
 
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.config import RARITY_ORDER, RARITY_TIERS, SELL_PRICE_BASE
 from app.master_data.equipment import (
@@ -13,6 +14,7 @@ from app.master_data.equipment import (
 from app.models.character import Character
 from app.models.equipment import CharacterEquipSlot, Equipment
 from app.models.player import Player
+from app.rng import DEFAULT_RNG
 
 
 def create_equip_slots(character_id: str, db: Session) -> None:
@@ -27,11 +29,12 @@ def try_drop(
     floor: int,
     is_boss: bool,
     db: Session,
+    rng: random.Random = DEFAULT_RNG,
 ) -> tuple[Equipment | None, dict | None]:
     """装備ドロップを試行。
     戻り値: (equipment_or_none, auto_sold_info_or_none)
     """
-    drop = generate_equipment_drop(enemy_level, floor, is_boss)
+    drop = generate_equipment_drop(enemy_level, floor, is_boss, rng)
     if drop is None:
         return None, None
 
@@ -43,6 +46,9 @@ def try_drop(
         if drop_idx <= threshold_idx:
             sell_price = calc_sell_price_from_dict(drop)
             player.gold += sell_price
+            # 塔内取得ゴールドにも計上する。全滅ペナルティの没収額（run_gold）が
+            # 敵撃破ゴールドだけを対象にすると、取得経路で非対称になる（ISSUE-106）
+            player.run_gold += sell_price
             base = get_equipment_base(drop["base_id"])
             return None, {
                 "name": base.name,
@@ -186,9 +192,14 @@ def get_effective_stats(character: Character, db: Session) -> dict:
         "lifesteal": 0.0,
     }
 
-    slots = db.query(CharacterEquipSlot).filter_by(
-        character_id=character.id
-    ).all()
+    # tick毎・レベルアップ毎に呼ばれるため、装備は一括ロードする
+    # （スロットごとの遅延ロードだと装着数だけクエリが増える。ISSUE-110）
+    slots = (
+        db.query(CharacterEquipSlot)
+        .options(selectinload(CharacterEquipSlot.equipment))
+        .filter_by(character_id=character.id)
+        .all()
+    )
 
     for slot in slots:
         if not slot.equipment_id:

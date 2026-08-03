@@ -5,6 +5,7 @@ import { useGameLoop } from '@/composables/useGameLoop'
 import { useAuthStore } from '@/stores/authStore'
 import AppShell from '@/components/layout/AppShell.vue'
 import ConnectionBanner from '@/components/layout/ConnectionBanner.vue'
+import GuestUpgradeBanner from '@/components/layout/GuestUpgradeBanner.vue'
 
 const route = useRoute()
 const authStore = useAuthStore()
@@ -29,6 +30,7 @@ const shellWidth = computed(() => (route.name === 'game' ? 'wide' : 'content'))
   </main>
 
   <AppShell v-else :width="shellWidth">
+    <GuestUpgradeBanner />
     <div v-if="isLoading" class="loading">
       <span class="loading-text">読み込み中...</span>
     </div>

@@ -27,7 +27,12 @@ from app.config import (
     RECOVERY_HP_RATIO,
     TURNS_PER_TICK,
 )
+from app.rng import DEFAULT_RNG
 from app.services.equipment_service import get_effective_stats, try_drop
+
+
+#: `process_tick` の `potion_item` が省略されたことを表す番兵（None は「未所持」を意味するため）
+_NOT_FETCHED = object()
 
 
 @dataclass
@@ -57,11 +62,13 @@ class TickResult:
             self.defeated = True
 
 
-def _calc_damage(atk: int, target_def: int, is_player: bool) -> tuple[int, bool]:
+def _calc_damage(
+    atk: int, target_def: int, is_player: bool, rng: random.Random = DEFAULT_RNG
+) -> tuple[int, bool]:
     """ダメージ計算。戻り値: (damage, is_crit)"""
-    variance = random.uniform(-DAMAGE_VARIANCE, DAMAGE_VARIANCE)
+    variance = rng.uniform(-DAMAGE_VARIANCE, DAMAGE_VARIANCE)
     raw = atk * (1 + variance) - target_def * DEFENSE_FACTOR
-    is_crit = random.random() < CRIT_RATE
+    is_crit = rng.random() < CRIT_RATE
     if is_crit:
         raw *= CRIT_MULTIPLIER
     min_dmg = 1 if is_player else 0
@@ -85,18 +92,20 @@ def _check_level_up(character: Character) -> int:
     return levels
 
 
-def _get_potion_count(player: Player, db: Session) -> int:
-    item = db.query(InventoryItem).filter_by(
+def _get_potion_item(player: Player, db: Session) -> InventoryItem | None:
+    """HPポーションの所持レコードを引く。tick毎に引き直さないよう呼び出し元で保持する"""
+    return db.query(InventoryItem).filter_by(
         player_id=player.id, item_id="hp_potion"
     ).first()
+
+
+def _get_potion_count(player: Player, db: Session) -> int:
+    item = _get_potion_item(player, db)
     return item.quantity if item else 0
 
 
-def _use_potion(player: Player, character: Character, effective_max_hp: int, db: Session) -> bool:
+def _use_potion(character: Character, effective_max_hp: int, item: InventoryItem | None) -> bool:
     """ポーションを使用。使用したらTrue"""
-    item = db.query(InventoryItem).filter_by(
-        player_id=player.id, item_id="hp_potion"
-    ).first()
     if not item or item.quantity <= 0:
         return False
     potion = get_item("hp_potion")
@@ -176,10 +185,22 @@ def _recover_hp(character: Character, effective_max_hp: int, effective_def: int)
     return character.hp - old_hp
 
 
-def process_tick(player: Player, character: Character, db: Session) -> TickResult:
-    """1tick（3ターン）を処理"""
+def process_tick(
+    player: Player,
+    character: Character,
+    db: Session,
+    rng: random.Random = DEFAULT_RNG,
+    potion_item: InventoryItem | None | object = _NOT_FETCHED,
+) -> TickResult:
+    """1tick（3ターン）を処理。乱数は呼び出し元から受け取る（tech_rng.md §2）。
+
+    `potion_item` は一括処理で毎tick引き直さないための持ち回り（ISSUE-110）。
+    省略時のみ本関数が引く。
+    """
     result = TickResult()
     tick_logs: list[dict] = []
+    if potion_item is _NOT_FETCHED:
+        potion_item = _get_potion_item(player, db)
 
     # 装備込み実効ステータス
     eff = get_effective_stats(character, db)
@@ -210,7 +231,9 @@ def process_tick(player: Player, character: Character, db: Session) -> TickResul
     for turn in range(TURNS_PER_TICK):
         # 敵がいなければロール
         if not player.current_enemy_id or player.current_enemy_hp is None or player.current_enemy_hp <= 0:
-            enemy_data = roll_encounter(player.current_tower_id, player.current_floor or 1)
+            enemy_data = roll_encounter(
+                player.current_tower_id, player.current_floor or 1, rng
+            )
             player.current_enemy_id = enemy_data.id
             player.current_enemy_hp = enemy_data.hp
             tick_logs.append({
@@ -227,7 +250,7 @@ def process_tick(player: Player, character: Character, db: Session) -> TickResul
         if player.settings:
             threshold = player.settings.potion_threshold
         if character.hp <= effective_max_hp * threshold:
-            if _use_potion(player, character, effective_max_hp, db):
+            if _use_potion(character, effective_max_hp, potion_item):
                 result.potions_used += 1
                 tick_logs.append({
                     "type": "potion",
@@ -246,11 +269,18 @@ def process_tick(player: Player, character: Character, db: Session) -> TickResul
             actors = ["enemy", "player"]
 
         for actor in actors:
-            if character.hp <= 0 or (player.current_enemy_hp is not None and player.current_enemy_hp <= 0):
+            # 撃破済み・場から除かれた敵は行動しない（tech_battle.md §5 #4・#5）。
+            # 階クリア／周回リスタート／撤退は current_enemy_id・current_enemy_hp を
+            # ともに None にするため、敵HPだけを見る判定では捕捉できない。
+            if (
+                character.hp <= 0
+                or player.current_enemy_id is None
+                or (player.current_enemy_hp is not None and player.current_enemy_hp <= 0)
+            ):
                 break
 
             if actor == "player":
-                dmg, crit = _calc_damage(effective_atk, enemy_data.def_, is_player=True)
+                dmg, crit = _calc_damage(effective_atk, enemy_data.def_, True, rng)
                 player.current_enemy_hp = max(0, (player.current_enemy_hp or 0) - dmg)
                 tick_logs.append({
                     "type": "attack",
@@ -296,7 +326,7 @@ def process_tick(player: Player, character: Character, db: Session) -> TickResul
                     dropped, auto_sold = try_drop(
                         player, enemy_data.level,
                         player.current_floor or 1,
-                        enemy_data.is_boss, db,
+                        enemy_data.is_boss, db, rng,
                     )
                     if dropped:
                         result.equipment_drops.append(dropped)
@@ -400,7 +430,7 @@ def process_tick(player: Player, character: Character, db: Session) -> TickResul
                         player.current_enemy_hp = None
 
             else:  # enemy
-                dmg, crit = _calc_damage(enemy_data.atk, effective_def, is_player=False)
+                dmg, crit = _calc_damage(enemy_data.atk, effective_def, False, rng)
                 character.hp = max(0, character.hp - dmg)
                 tick_logs.append({
                     "type": "attack",
@@ -447,7 +477,11 @@ def process_tick(player: Player, character: Character, db: Session) -> TickResul
 
 
 def process_pending_ticks(
-    player: Player, character: Character, pending_ticks: int, db: Session
+    player: Player,
+    character: Character,
+    pending_ticks: int,
+    db: Session,
+    rng: random.Random = DEFAULT_RNG,
 ) -> tuple[TickResult, str]:
     """未処理tickをまとめて処理し、(結果, 計算方式) を返す。
 
@@ -457,20 +491,26 @@ def process_pending_ticks(
     注意: 簡易計算の実装は tech_offline.md §4.1（乱数を使わない期待値計算）と乖離している
     （known_issues.md）。本関数はルーターからロジックを移設しただけで、算出方法は変えていない。
     """
+    # ポーションの所持レコードはtickをまたいで同一。最大100tick分を引き直さない（ISSUE-110）
+    potion_item = _get_potion_item(player, db)
+
     if pending_ticks <= FAST_CALC_THRESHOLD:
         accumulated = TickResult()
         for _ in range(pending_ticks):
-            accumulated.accumulate(process_tick(player, character, db))
+            accumulated.accumulate(process_tick(player, character, db, rng, potion_item))
         return accumulated, "normal"
 
     sample_count = min(OFFLINE_SAMPLE_TICKS, pending_ticks)
     sample_result = TickResult()
     for _ in range(sample_count):
-        sample_result.accumulate(process_tick(player, character, db))
+        sample_result.accumulate(process_tick(player, character, db, rng, potion_item))
 
     remaining = pending_ticks - sample_count
     if remaining > 0:
         multiplier = remaining / sample_count
+        # 外挿分は run_gold に計上しない（塔外での一括受け取り扱い）。
+        # 簡略計算そのものが tech_offline.md §4.1 と乖離しており（known_issues.md）、
+        # 是正時に外挿の会計もあわせて見直す（ISSUE-106）
         player.gold += int(sample_result.total_gold * multiplier)
         character.exp += int(sample_result.total_exp * multiplier)
         extra_levels = _check_level_up(character)

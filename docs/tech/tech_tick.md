@@ -95,7 +95,8 @@ C1網羅の対象分岐。[phases.md §3.4](../process/phases.md) のテスト�
 
 | 箇所 | 現行実装 | 本仕様 |
 |------|---------|-------|
-| [battle.py:102](../../backend/app/routers/battle.py) | `last_tick_at = now`（端数を毎回破棄） | §1 端数繰り越し |
-| [battle.py:40](../../backend/app/routers/battle.py) | 24時間超を無言で切り詰め | §2 `capped` をサマリーに含める |
-| [battle.py:29](../../backend/app/routers/battle.py) | 行ロックなし（二重tickが成立する） | §3 排他ロック |
-| [battle.py:66](../../backend/app/routers/battle.py) | 簡略計算 = 10tickサンプルの平均 × 残り | [tech_offline.md §4](tech_offline.md) の期待値計算 |
+| [battle.py:41](../../backend/app/routers/battle.py) | 24時間超を無言で切り詰め（クランプ自体は §2 どおり） | §2 `capped` をサマリーに含める |
+| [battle.py:28](../../backend/app/routers/battle.py) | 行ロックなし（二重tickが成立する） | §3 排他ロック |
+| [battle.py:57](../../backend/app/routers/battle.py) | 簡略計算 = 10tickサンプルの平均 × 残り | [tech_offline.md §4](tech_offline.md) の期待値計算 |
+
+§1 の端数繰り越しは実装済み（[battle.py:73](../../backend/app/routers/battle.py)。backend-review ISSUE-102）。
