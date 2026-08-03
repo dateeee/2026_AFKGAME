@@ -59,6 +59,10 @@ watch(selectedTower, (tower) => {
 
 const hero = computed(() => playerStore.characters[0] ?? null)
 const effectiveMaxHp = computed(() => hero.value?.effectiveMaxHp ?? hero.value?.maxHp ?? 1)
+// 必要EXPの式の正はサーバー（backend/app/master_data/characters.py の required_exp、
+// 数値の正は docs/data/master/character.md）。ここは表示用の複製なので、
+// バランス調整でサーバー式を変えたら必ず合わせること
+// （恒久策の CharacterResponse.expRequired 追加は API 変更を伴うため full-review の管轄）。
 const expRequired = computed(() => hero.value ? Math.floor(100 * Math.pow(hero.value.level, 1.5)) : 100)
 const potionCount = computed(() => playerStore.potions['hp_potion'] ?? 0)
 const isInTower = computed(() => !!gameStore.currentTowerId)
@@ -86,7 +90,7 @@ async function enterTower() {
     gameStore.loadFromState(state)
     playerStore.loadFromState(state)
   } catch (e) {
-    gameStore.setConnectionError((e as Error).message)
+    gameStore.reportActionFailure(e)
   }
 }
 
@@ -97,7 +101,7 @@ async function retireFromTower() {
     gameStore.loadFromState(state)
     playerStore.loadFromState(state)
   } catch (e) {
-    gameStore.setConnectionError((e as Error).message)
+    gameStore.reportActionFailure(e)
   }
 }
 
@@ -107,7 +111,7 @@ async function toggleMode() {
     await putTowerMode(newMode)
     gameStore.towerMode = newMode
   } catch (e) {
-    gameStore.setConnectionError((e as Error).message)
+    gameStore.reportActionFailure(e)
   }
 }
 
@@ -155,6 +159,10 @@ function dismissOffline() {
 
 <template>
   <div class="home-grid">
+    <p v-if="gameStore.actionError" class="action-error" role="alert">
+      {{ gameStore.actionError }}
+    </p>
+
     <!-- オフライン報酬 -->
     <BaseModal :open="!!battleStore.offlineSummary" title="オフライン報酬" @close="dismissOffline">
       <template v-if="battleStore.offlineSummary">
@@ -352,6 +360,18 @@ function dismissOffline() {
   display: grid;
   grid-template-columns: 1fr;
   gap: 1rem;
+}
+
+/* 業務エラー（塔進入・撤退の拒否など）。通信断は ConnectionBanner が担当する */
+.action-error {
+  margin: 0;
+  padding: 0.625rem 0.875rem;
+  background-color: var(--color-surface-2);
+  border: 1px solid var(--color-line-soft);
+  border-left: 3px solid var(--color-danger);
+  border-radius: var(--radius-md);
+  font-size: var(--text-label);
+  color: var(--color-content);
 }
 
 /* --- キャラクター --- */

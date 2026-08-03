@@ -1,7 +1,6 @@
 """AFK Game - 統一エラーレスポンス・グローバル例外ハンドラ"""
 
 import logging
-import traceback
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError

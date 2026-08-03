@@ -34,7 +34,8 @@ class TestScenario06常設ショップの購入:
 
         res = api.post("/api/shop/buy", json={"itemId": "hp_potion", "quantity": 1})
         assert res.status_code == 400
-        assert res.json()["error"]["code"] == "HTTP_400"
+        # 常設枠・日替わり枠で同じエラーコード体系を返す（tech_logging.md §エラーコード体系）
+        assert res.json()["error"]["code"] == "SHOP_INSUFFICIENT_GOLD"
 
         # 塔でゴールドを稼ぐ
         assert api.post(

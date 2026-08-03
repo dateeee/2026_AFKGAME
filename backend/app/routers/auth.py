@@ -10,14 +10,14 @@ from app.config import (
     GOOGLE_CLIENT_ID,
     INITIAL_CHARACTER,
     INITIAL_POTIONS,
-    PASSWORD_MIN_LENGTH,
 )
 from app.db.database import get_db
 from app.dependencies import get_current_user
 from app.models.character import Character
 from app.models.item import InventoryItem
 from app.models.player import Player, PlayerSettings
-from app.models.user import User
+from app.models.user import TOKEN_PURPOSE_PASSWORD_RESET, User, new_guest_id
+from app.schemas.common import MessageResponse, StatusResponse
 from app.schemas.auth import (
     AuthResponse,
     GoogleAuthRequest,
@@ -30,12 +30,14 @@ from app.schemas.auth import (
     UserInfo,
 )
 from app.services.auth_service import (
+    consume_password_reset_token,
     create_access_token,
     create_email_verification_token,
     create_refresh_token,
     hash_password,
     refresh_tokens,
     revoke_all_tokens,
+    revoke_refresh_token,
     verify_email_token,
     verify_password,
 )
@@ -96,9 +98,7 @@ def _build_auth_response(user: User, access_token: str, raw_refresh_token: str) 
 @router.post("/guest", response_model=AuthResponse)
 def create_guest(db: Session = Depends(get_db)) -> AuthResponse:
     """ゲストアカウントを作成し、JWTを返す。"""
-    from app.models.user import _new_guest_id
-
-    user = User(id=_new_guest_id(), is_guest=True, display_name="冒険者")
+    user = User(id=new_guest_id(), is_guest=True, display_name="冒険者")
     db.add(user)
     db.flush()
 
@@ -115,13 +115,10 @@ def create_guest(db: Session = Depends(get_db)) -> AuthResponse:
 
 @router.post("/register", response_model=AuthResponse)
 def register(body: RegisterRequest, db: Session = Depends(get_db)) -> AuthResponse:
-    """メール+パスワードでアカウント登録。"""
-    if len(body.password) < PASSWORD_MIN_LENGTH:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Password must be at least {PASSWORD_MIN_LENGTH} characters",
-        )
+    """メール+パスワードでアカウント登録。
 
+    メール形式・パスワード最短長は RegisterRequest が検証する（違反は 422）。
+    """
     existing = db.query(User).filter(User.email == body.email).first()
     if existing:
         raise HTTPException(
@@ -191,30 +188,22 @@ def refresh(body: RefreshRequest, db: Session = Depends(get_db)) -> AuthResponse
     return _build_auth_response(user, new_access, new_refresh)
 
 
-@router.post("/logout")
+@router.post("/logout", response_model=StatusResponse)
 def logout(
     body: RefreshRequest,
     db: Session = Depends(get_db),
-) -> dict:
+) -> StatusResponse:
     """リフレッシュトークンを無効化してログアウト。"""
-    import hashlib
-
-    token_hash = hashlib.sha256(body.refresh_token.encode()).hexdigest()
-    from app.models.user import RefreshToken
-
-    record = db.query(RefreshToken).filter(RefreshToken.token_hash == token_hash).first()
-    if record:
-        record.revoked = True
-        db.commit()
-
-    return {"status": "ok"}
+    revoke_refresh_token(body.refresh_token, db)
+    db.commit()
+    return StatusResponse()
 
 
-@router.get("/verify-email")
+@router.get("/verify-email", response_model=MessageResponse)
 def verify_email(
     token: str = Query(...),
     db: Session = Depends(get_db),
-) -> dict:
+) -> MessageResponse:
     """メール確認トークンを検証。"""
     try:
         user = verify_email_token(token, db)
@@ -223,7 +212,7 @@ def verify_email(
 
     db.commit()
     logger.info("メール確認完了", extra={"user_id": user.id})
-    return {"status": "ok", "message": "Email verified"}
+    return MessageResponse(message="Email verified")
 
 
 @router.post("/google", response_model=AuthResponse)
@@ -257,12 +246,6 @@ def link_account(
         )
 
     if body.email and body.password:
-        if len(body.password) < PASSWORD_MIN_LENGTH:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Password must be at least {PASSWORD_MIN_LENGTH} characters",
-            )
-
         existing = db.query(User).filter(User.email == body.email).first()
         if existing:
             raise HTTPException(
@@ -308,15 +291,18 @@ def link_account(
     return _build_auth_response(current_user, access_token, raw_refresh)
 
 
-@router.post("/password-reset/request")
+@router.post("/password-reset/request", response_model=MessageResponse)
 def password_reset_request(
     body: PasswordResetRequest,
     db: Session = Depends(get_db),
-) -> dict:
+) -> MessageResponse:
     """パスワードリセットメール送信。"""
     user = db.query(User).filter(User.email == body.email).first()
     if user and user.password_hash:
-        token = create_email_verification_token(user.id, db)
+        # メール確認とは用途を分けたトークンを発行する（流用防止 / tech_auth.md §6）
+        token = create_email_verification_token(
+            user.id, db, purpose=TOKEN_PURPOSE_PASSWORD_RESET
+        )
         logger.info(
             "パスワードリセットトークン発行（開発用ログ出力）",
             extra={"user_id": user.id, "reset_token": token},
@@ -324,23 +310,17 @@ def password_reset_request(
         db.commit()
 
     # セキュリティ: ユーザー存在有無に関わらず同じレスポンス
-    return {"status": "ok", "message": "If the email exists, a reset link has been sent"}
+    return MessageResponse(message="If the email exists, a reset link has been sent")
 
 
-@router.post("/password-reset/confirm")
+@router.post("/password-reset/confirm", response_model=MessageResponse)
 def password_reset_confirm(
     body: PasswordResetConfirm,
     db: Session = Depends(get_db),
-) -> dict:
-    """パスワードリセット実行。"""
-    if len(body.new_password) < PASSWORD_MIN_LENGTH:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Password must be at least {PASSWORD_MIN_LENGTH} characters",
-        )
-
+) -> MessageResponse:
+    """パスワードリセット実行。パスワード最短長は PasswordResetConfirm が検証する（違反は 422）。"""
     try:
-        user = verify_email_token(body.token, db)
+        user = consume_password_reset_token(body.token, db)
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
@@ -349,4 +329,4 @@ def password_reset_confirm(
     db.commit()
 
     logger.info("パスワードリセット完了", extra={"user_id": user.id})
-    return {"status": "ok", "message": "Password has been reset"}
+    return MessageResponse(message="Password has been reset")

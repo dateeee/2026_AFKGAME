@@ -2,22 +2,27 @@
 
 import logging
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-
-logger = logging.getLogger("afkgame.tower")
 
 from app.db.database import get_db
 from app.dependencies import get_current_player
 from app.models.player import Player, TowerClearRecord
 from app.master_data.towers import TOWERS, get_tower
 from app.services.battle_service import get_tower_highest_floor, target_floor_cap
+from app.exceptions import AppError
+from app.schemas.common import StatusResponse
 from app.schemas.tower import (
     TowerSelectRequest,
     TowerModeRequest,
     RetreatConditionsRequest,
+    RetreatConditionsResponse,
     TowerInfo,
+    TowerModeResponse,
+    TowerSelectResponse,
 )
+
+logger = logging.getLogger("afkgame.tower")
 
 router = APIRouter(prefix="/api/tower", tags=["tower"])
 
@@ -57,29 +62,27 @@ def list_towers(
     return [_info(t) for t in TOWERS.values()]
 
 
-@router.post("/select")
+@router.post("/select", response_model=TowerSelectResponse)
 def select_tower(
     req: TowerSelectRequest,
     player: Player = Depends(get_current_player),
     db: Session = Depends(get_db),
-):
+) -> TowerSelectResponse:
     if player.current_tower_id:
-        raise HTTPException(status_code=400, detail="Already in a tower")
+        raise AppError("TOWER_ALREADY_IN_TOWER", "すでに塔に入っています", 400)
     if req.tower_id not in TOWERS:
-        raise HTTPException(status_code=404, detail="Tower not found")
+        raise AppError("TOWER_NOT_FOUND", "塔が見つかりません", 404)
 
     tower = get_tower(req.tower_id)
     if not _is_tower_unlocked(req.tower_id, _get_cleared_tower_ids(player, db)):
-        raise HTTPException(status_code=403, detail="Tower is locked")
+        raise AppError("TOWER_NOT_UNLOCKED", "この塔はまだ解放されていません", 403)
     # 目標階の上限は塔ごとに個別管理（systems/battle.md 目標階設定）
     cap = target_floor_cap(
         get_tower_highest_floor(player, req.tower_id, db), tower.total_floors
     )
-    if req.target_floor < 1 or req.target_floor > cap:
-        raise HTTPException(status_code=400, detail="Invalid target floor")
-
-    if req.mode not in ("auto_repeat", "stop_on_clear"):
-        raise HTTPException(status_code=400, detail="Invalid mode")
+    # 下限（>=1）とモードの値域はスキーマが検証済み。上限は到達状況に依存するためここで判定
+    if req.target_floor > cap:
+        raise AppError("TOWER_INVALID_FLOOR", f"目標階は{cap}階までです", 400)
 
     player.current_tower_id = req.tower_id
     player.current_floor = 1
@@ -92,16 +95,16 @@ def select_tower(
 
     logger.info("塔選択", extra={"player_id": str(player.id), "tower_id": req.tower_id})
 
-    return {"status": "ok", "tower_id": req.tower_id, "target_floor": req.target_floor}
+    return TowerSelectResponse(tower_id=req.tower_id, target_floor=req.target_floor)
 
 
-@router.post("/retire")
+@router.post("/retire", response_model=StatusResponse)
 def retire_tower(
     player: Player = Depends(get_current_player),
     db: Session = Depends(get_db),
-):
+) -> StatusResponse:
     if not player.current_tower_id:
-        raise HTTPException(status_code=400, detail="Not in a tower")
+        raise AppError("TOWER_NOT_IN_TOWER", "塔に入っていません", 400)
 
     # リタイア: 獲得済み報酬は保持（game_spec §2.2、ペナルティなし）
     player.current_tower_id = None
@@ -114,36 +117,32 @@ def retire_tower(
 
     logger.info("塔リタイア", extra={"player_id": str(player.id)})
 
-    return {"status": "ok"}
+    return StatusResponse()
 
 
-@router.put("/mode")
+@router.put("/mode", response_model=TowerModeResponse)
 def set_tower_mode(
     req: TowerModeRequest,
     player: Player = Depends(get_current_player),
     db: Session = Depends(get_db),
-):
-    if req.mode not in ("auto_repeat", "stop_on_clear"):
-        raise HTTPException(status_code=400, detail="Invalid mode")
+) -> TowerModeResponse:
     player.tower_mode = req.mode
     db.commit()
 
     logger.info("塔モード変更", extra={"player_id": str(player.id), "mode": req.mode})
 
-    return {"status": "ok", "mode": req.mode}
+    return TowerModeResponse(mode=req.mode)
 
 
-@router.put("/retreat-conditions")
+@router.put("/retreat-conditions", response_model=RetreatConditionsResponse)
 def set_retreat_conditions(
     req: RetreatConditionsRequest,
     player: Player = Depends(get_current_player),
     db: Session = Depends(get_db),
-):
-    if not (0.0 <= req.hp_threshold <= 1.0):
-        raise HTTPException(status_code=400, detail="Invalid threshold")
+) -> RetreatConditionsResponse:
     player.hp_threshold = req.hp_threshold
     db.commit()
 
     logger.info("撤退条件変更", extra={"player_id": str(player.id), "hp_threshold": req.hp_threshold})
 
-    return {"status": "ok", "hp_threshold": req.hp_threshold}
+    return RetreatConditionsResponse(hp_threshold=req.hp_threshold)

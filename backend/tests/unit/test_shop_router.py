@@ -3,7 +3,7 @@
 仕様: design/systems/economy.md「ショップ」、tech/tech_api.md `/api/shop/*`
 分岐観点:
   - ラインナップは potion カテゴリのみ・所持数は在庫レコードの有無で 0 起点
-  - 購入は 未知ID(404) / 数量0以下 / ゴールド不足 / スタック上限超過 で各4xx
+  - 購入は 未知ID(404) / 数量0以下(422) / ゴールド不足(400) / スタック上限超過(400)
   - 在庫レコードの有無で数量加算 / 新規作成に分かれる
   - 境界: ゴールドちょうど・スタック上限ちょうどは成功
 """
@@ -12,7 +12,7 @@ import pytest
 
 from app.master_data.items import ITEMS, ItemData
 from app.models.item import InventoryItem
-from tests.helpers import error_message
+from tests.helpers import error_code
 
 pytestmark = pytest.mark.unit
 
@@ -72,7 +72,7 @@ class TestBuy:
     def test_存在しないアイテムは404(self, client):
         res = self._buy(client, item_id="elixir")
         assert res.status_code == 404
-        assert error_message(res) == "Item not found"
+        assert error_code(res) == "SHOP_ITEM_NOT_FOUND"
 
     @pytest.mark.parametrize(
         "quantity",
@@ -81,15 +81,15 @@ class TestBuy:
             -1,  # 負数
         ],
     )
-    def test_数量0以下は400(self, client, quantity):
+    def test_数量0以下は422(self, client, quantity):
+        # 下限はスキーマ検証（tech_api.md §エラー: 型・範囲違反は 422）
         res = self._buy(client, quantity=quantity)
-        assert res.status_code == 400
-        assert error_message(res) == "Invalid quantity"
+        assert res.status_code == 422
 
     def test_ゴールド不足は400(self, client):
         res = self._buy(client, quantity=41)  # 25×41 = 1025 > 1000
         assert res.status_code == 400
-        assert error_message(res) == "Not enough gold"
+        assert error_code(res) == "SHOP_INSUFFICIENT_GOLD"
 
     def test_ゴールドちょうどなら購入できる(self, client):
         res = self._buy(client, quantity=40)  # 25×40 = 1000 = 所持ゴールド
@@ -101,7 +101,7 @@ class TestBuy:
         db.commit()
         res = self._buy(client, quantity=95)  # 5 + 95 = 100 > 99
         assert res.status_code == 400
-        assert error_message(res) == "Exceeds stack limit"
+        assert error_code(res) == "SHOP_STACK_LIMIT"
 
     def test_スタック上限ちょうどまでは購入できる(self, client, db, player):
         player.gold = 10_000

@@ -15,7 +15,10 @@ class ShopDailyState(Base):
     __tablename__ = "shop_daily_states"
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_new_uuid)
-    player_id: Mapped[str] = mapped_column(String(36), ForeignKey("players.id"), nullable=False)
+    # 同時リクエストで重複 state が作られると、以後どちらが読まれるか不定になるため一意にする
+    player_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("players.id"), nullable=False, unique=True
+    )
     reset_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
 

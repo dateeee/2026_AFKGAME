@@ -6,6 +6,11 @@ from datetime import datetime, timezone
 from sqlalchemy import BigInteger, Boolean, DateTime, Float, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from app.config import (
+    DEFAULT_BATTLE_LOG_COUNT,
+    DEFAULT_POTION_THRESHOLD,
+    DEFAULT_TOAST_ENABLED,
+)
 from app.db.database import Base
 
 
@@ -49,9 +54,13 @@ class PlayerSettings(Base):
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_new_uuid)
     player_id: Mapped[str] = mapped_column(String(36), ForeignKey("players.id"), nullable=False)
-    potion_threshold: Mapped[float] = mapped_column(Float, default=0.3)
-    battle_log_count: Mapped[int] = mapped_column(Integer, default=50)
-    toast_enabled: Mapped[bool] = mapped_column(Boolean, default=True)
+    potion_threshold: Mapped[float] = mapped_column(
+        Float, default=DEFAULT_POTION_THRESHOLD
+    )
+    battle_log_count: Mapped[int] = mapped_column(
+        Integer, default=DEFAULT_BATTLE_LOG_COUNT
+    )
+    toast_enabled: Mapped[bool] = mapped_column(Boolean, default=DEFAULT_TOAST_ENABLED)
     auto_sell_rarity: Mapped[str | None] = mapped_column(String(20), nullable=True)
 
     player: Mapped["Player"] = relationship(back_populates="settings")

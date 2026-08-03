@@ -10,7 +10,7 @@ class BuyRequest(CamelModel):
     """常設購入は itemId、日替わり購入は dailySlotIndex を指定する（tech_shop.md §4）"""
 
     item_id: str | None = None
-    quantity: int = 1
+    quantity: int = Field(default=1, ge=1)
     daily_slot_index: int | None = Field(default=None, ge=0, le=4)
 
     @model_validator(mode="after")

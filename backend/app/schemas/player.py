@@ -2,6 +2,11 @@
 
 from __future__ import annotations
 
+from typing import Literal
+
+from pydantic import Field
+
+from app.config import POTION_THRESHOLD_MAX, POTION_THRESHOLD_MIN
 from app.schemas import CamelModel
 from app.schemas.equipment import EquipmentResponse
 
@@ -50,10 +55,19 @@ class SettingsResponse(CamelModel):
 
 
 class SettingsUpdate(CamelModel):
-    potion_threshold: float | None = None
-    battle_log_count: int | None = None
+    """設定更新。値域の正は ui.md §設定画面（範囲外は 422 / tech_api.md §エラー）"""
+
+    # ポーション自動使用閾値: 10%〜50%（systems/battle.md §213）
+    potion_threshold: float | None = Field(
+        default=None, ge=POTION_THRESHOLD_MIN, le=POTION_THRESHOLD_MAX
+    )
+    # 戦闘ログ表示件数: 20 / 50 / 100（上限はDB保存件数100件）
+    battle_log_count: Literal[20, 50, 100] | None = None
     toast_enabled: bool | None = None
-    auto_sell_rarity: str | None = None
+    # 空文字・null はオートセル無効へのリセット（routers/game.py で None へ正規化）
+    auto_sell_rarity: (
+        Literal["common", "uncommon", "rare", "epic", "legendary", ""] | None
+    ) = None
 
 
 class TowerClearInfo(CamelModel):

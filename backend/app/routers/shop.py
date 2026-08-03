@@ -2,13 +2,12 @@
 
 import logging
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-
-logger = logging.getLogger("afkgame.shop")
 
 from app.db.database import get_db
 from app.dependencies import get_current_player
+from app.exceptions import AppError
 from app.models.player import Player
 from app.models.item import InventoryItem
 from app.master_data.equipment import get_equipment_base
@@ -22,6 +21,8 @@ from app.schemas.shop import (
     ShopLineupResponse,
 )
 from app.services import shop_daily_service
+
+logger = logging.getLogger("afkgame.shop")
 
 router = APIRouter(prefix="/api/shop", tags=["shop"])
 
@@ -89,20 +90,20 @@ def buy_item(
             equipment=EquipmentResponse.model_validate(equipment),
         )
 
+    # 業務エラーは AppError に統一する（日替わり枠と同じ error.code 体系 / tech_logging.md）。
+    # quantity の下限はスキーマが検証済み（違反は 422）
     if req.item_id not in ITEMS:
-        raise HTTPException(status_code=404, detail="Item not found")
+        raise AppError("SHOP_ITEM_NOT_FOUND", "商品が見つかりません", 404)
 
     item_data = get_item(req.item_id)
     total_cost = item_data.price * req.quantity
 
-    if req.quantity <= 0:
-        raise HTTPException(status_code=400, detail="Invalid quantity")
     if player.gold < total_cost:
         logger.warning(
             "ゴールド不足",
             extra={"player_id": str(player.id), "item_id": req.item_id, "gold": player.gold},
         )
-        raise HTTPException(status_code=400, detail="Not enough gold")
+        raise AppError("SHOP_INSUFFICIENT_GOLD", "ゴールドが足りません", 400)
 
     inv = db.query(InventoryItem).filter_by(
         player_id=player.id, item_id=req.item_id
@@ -110,7 +111,11 @@ def buy_item(
     current_qty = inv.quantity if inv else 0
 
     if current_qty + req.quantity > item_data.stack_limit:
-        raise HTTPException(status_code=400, detail="Exceeds stack limit")
+        raise AppError(
+            "SHOP_STACK_LIMIT",
+            f"所持上限（{item_data.stack_limit}個）を超えます",
+            400,
+        )
 
     player.gold -= total_cost
 

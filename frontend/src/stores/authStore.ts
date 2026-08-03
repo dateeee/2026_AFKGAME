@@ -10,6 +10,12 @@ import { defineStore } from 'pinia'
 import type { UserInfo } from '@/types/game'
 import * as authApi from '@/api/auth'
 import { setTokens, clearTokens, getRefreshToken, tryRefresh } from '@/api/client'
+import { errorMessage } from '@/api/errors'
+import { stopActivePolling } from '@/composables/usePolling'
+import { useGameStore } from '@/stores/gameStore'
+import { usePlayerStore } from '@/stores/playerStore'
+import { useBattleStore } from '@/stores/battleStore'
+import { useEquipmentStore } from '@/stores/equipmentStore'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<UserInfo | null>(null)
@@ -51,7 +57,7 @@ export const useAuthStore = defineStore('auth', () => {
       const data = await authApi.createGuest()
       _handleAuthResponse(data)
     } catch (e) {
-      error.value = (e as Error).message
+      error.value = errorMessage(e)
       throw e
     } finally {
       loading.value = false
@@ -66,7 +72,7 @@ export const useAuthStore = defineStore('auth', () => {
       const data = await authApi.register(email, password, displayName)
       _handleAuthResponse(data)
     } catch (e) {
-      error.value = (e as Error).message
+      error.value = errorMessage(e)
       throw e
     } finally {
       loading.value = false
@@ -81,14 +87,18 @@ export const useAuthStore = defineStore('auth', () => {
       const data = await authApi.login(email, password)
       _handleAuthResponse(data)
     } catch (e) {
-      error.value = (e as Error).message
+      error.value = errorMessage(e)
       throw e
     } finally {
       loading.value = false
     }
   }
 
-  /** ログアウト */
+  /**
+   * ログアウト。
+   * トークン破棄だけでは (1) ポーリングが動き続けて401バナーが出る、
+   * (2) 前アカウントのゲーム状態が画面に残る、ため両方まとめて後始末する。
+   */
   async function logout(): Promise<void> {
     const rt = getRefreshToken()
     if (rt) {
@@ -98,8 +108,16 @@ export const useAuthStore = defineStore('auth', () => {
         // ログアウトAPIが失敗してもローカルはクリア
       }
     }
+
+    stopActivePolling()
     clearTokens()
     user.value = null
+    error.value = null
+
+    useGameStore().reset()
+    usePlayerStore().reset()
+    useBattleStore().reset()
+    useEquipmentStore().reset()
   }
 
   /** ゲスト→本登録移行 */
@@ -113,7 +131,7 @@ export const useAuthStore = defineStore('auth', () => {
       const data = await authApi.linkAccount(at, email, password)
       _handleAuthResponse(data)
     } catch (e) {
-      error.value = (e as Error).message
+      error.value = errorMessage(e)
       throw e
     } finally {
       loading.value = false

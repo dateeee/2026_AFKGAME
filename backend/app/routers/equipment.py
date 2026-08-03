@@ -2,17 +2,20 @@
 
 import logging
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.db.database import get_db
 from app.dependencies import get_current_player
+from app.exceptions import AppError
 from app.models.player import Player
 from app.models.equipment import Equipment
+from app.schemas.common import StatusResponse
 from app.schemas.equipment import (
     EquipmentResponse,
     EquipRequest,
     LockRequest,
+    LockResponse,
     SellRequest,
     SellResponse,
 )
@@ -33,20 +36,20 @@ def list_equipment(
     return [EquipmentResponse.model_validate(e) for e in items]
 
 
-@router.post("/equip")
+@router.post("/equip", response_model=StatusResponse)
 def equip(
     req: EquipRequest,
     player: Player = Depends(get_current_player),
     db: Session = Depends(get_db),
-):
+) -> StatusResponse:
     """装備を装着/解除"""
     try:
         equip_item(player, req.character_id, req.slot, req.equipment_id, db)
     except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+        raise AppError("EQUIP_INVALID_OPERATION", str(e), 400)
     db.commit()
     logger.info("装備変更", extra={"player_id": str(player.id), "slot": req.slot})
-    return {"status": "ok"}
+    return StatusResponse()
 
 
 @router.post("/sell", response_model=SellResponse)
@@ -66,16 +69,16 @@ def sell(
     return SellResponse(gold_earned=gold_earned, items_sold=items_sold)
 
 
-@router.post("/lock")
+@router.post("/lock", response_model=LockResponse)
 def lock(
     req: LockRequest,
     player: Player = Depends(get_current_player),
     db: Session = Depends(get_db),
-):
+) -> LockResponse:
     """装備のロック切替"""
     try:
         new_state = toggle_lock(player, req.equipment_id, db)
     except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+        raise AppError("EQUIP_NOT_FOUND", str(e), 404)
     db.commit()
-    return {"locked": new_state}
+    return LockResponse(locked=new_state)

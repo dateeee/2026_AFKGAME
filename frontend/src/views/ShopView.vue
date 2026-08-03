@@ -1,27 +1,19 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useGameStore } from '@/stores/gameStore'
 import { usePlayerStore } from '@/stores/playerStore'
 import { RARITY_COLORS, RARITY_LABELS, SLOT_LABELS } from '@/stores/equipmentStore'
 import { getShopLineup, postShopBuy, postShopBuyDaily, getGameState } from '@/api/client'
+import { errorMessage } from '@/api/errors'
 import { formatGold, formatTime } from '@/utils/format'
 import BaseCard from '@/components/ui/BaseCard.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import BaseBadge from '@/components/ui/BaseBadge.vue'
 import BaseSelect from '@/components/ui/BaseSelect.vue'
-import type { ShopDailyItem } from '@/types/game'
+import type { ShopDailyItem, ShopItem } from '@/types/game'
 
 const gameStore = useGameStore()
 const playerStore = usePlayerStore()
-
-interface ShopItem {
-  itemId: string
-  name: string
-  price: number
-  healRatio: number
-  quantityOwned: number
-  stackLimit: number
-}
 
 const QUANTITY_OPTIONS: Array<{ value: number; label: string }> = [
   { value: 1, label: '1個' },
@@ -53,6 +45,15 @@ const remainingLabel = computed(() => {
   if (!dailyResetAt.value) return ''
   const diff = Math.floor((new Date(dailyResetAt.value).getTime() - nowMs.value) / 1000)
   return diff > 0 ? formatTime(diff) : 'まもなく更新'
+})
+
+// 画面を開いたままリセット時刻を跨いだら品揃えを取り直す。
+// 旧品揃えのまま購入すると、実際には新しい品揃えに対する購入になってしまうため。
+// 鮮度判定はサーバー（ensure_fresh_lineup）が行うので、呼ぶだけでよい。
+watch(remainingLabel, (label, previous) => {
+  if (label === 'まもなく更新' && previous !== 'まもなく更新') {
+    loadShop()
+  }
 })
 
 function statLines(item: ShopDailyItem): string[] {
@@ -93,7 +94,7 @@ async function buyItem(itemId: string) {
     await refreshPlayer()
     flash(`${buyQuantity.value}個購入しました！`)
   } catch (e) {
-    message.value = (e as Error).message
+    message.value = errorMessage(e)
   }
 }
 
@@ -106,7 +107,7 @@ async function buyDaily(item: ShopDailyItem) {
     await refreshPlayer()
     flash(`${item.name}を購入しました！`)
   } catch (e) {
-    message.value = (e as Error).message
+    message.value = errorMessage(e)
   }
 }
 </script>

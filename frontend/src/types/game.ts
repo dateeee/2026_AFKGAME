@@ -168,6 +168,23 @@ export interface ShopDailyItem {
   soldOut: boolean
 }
 
+/** 常設ショップの商品（ポーション等。在庫無制限） */
+export interface ShopItem {
+  itemId: string
+  name: string
+  price: number
+  healRatio: number
+  quantityOwned: number
+  stackLimit: number
+}
+
+/** GET /api/shop/lineup の応答 */
+export interface ShopLineupResponse {
+  lineup: ShopItem[]
+  daily: ShopDailyItem[]
+  dailyResetAt: string
+}
+
 /** ユーザー情報 */
 export interface UserInfo {
   id: string

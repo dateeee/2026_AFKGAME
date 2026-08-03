@@ -1,7 +1,7 @@
 """塔マスターデータ"""
 
 import random
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from app.master_data.enemies import EnemyData, get_enemy
 

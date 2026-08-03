@@ -23,6 +23,7 @@ from pydantic import BaseModel
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session
 
+from app import config, main
 from app.config import APP_VERSION
 from app.db.database import get_db
 from app.exceptions import AppError, register_exception_handlers
@@ -283,25 +284,22 @@ class TestSetupLogging:
         logger.setLevel(level)
         logger.propagate = propagate
 
-    def test_既定はテキストフォーマッター(self, monkeypatch):
-        monkeypatch.delenv("LOG_FORMAT", raising=False)
-        monkeypatch.delenv("LOG_LEVEL", raising=False)
+    # 環境変数の参照は config.py に集約したため、上書きは引数で行う（config.LOG_* が既定）
+
+    def test_既定はテキストフォーマッター(self):
         setup_logging()
         logger = logging.getLogger("afkgame")
         assert isinstance(logger.handlers[0].formatter, TextFormatter)
         assert logger.level == logging.INFO
         assert logger.propagate is False
 
-    def test_json指定でJSONフォーマッターになる(self, monkeypatch):
-        monkeypatch.setenv("LOG_FORMAT", "json")
-        setup_logging()
+    def test_json指定でJSONフォーマッターになる(self):
+        setup_logging(fmt="json")
         logger = logging.getLogger("afkgame")
         assert isinstance(logger.handlers[0].formatter, JsonFormatter)
 
-    def test_不正なLOG_LEVELはINFOにフォールバックする(self, monkeypatch):
-        monkeypatch.delenv("LOG_FORMAT", raising=False)
-        monkeypatch.setenv("LOG_LEVEL", "verbose")
-        setup_logging()
+    def test_不正なLOG_LEVELはINFOにフォールバックする(self):
+        setup_logging(level="verbose")
         assert logging.getLogger("afkgame").level == logging.INFO
 
 
@@ -333,6 +331,54 @@ class TestConfig:
     def test_DATABASE_URLの既定値はローカルのSQLite(self, monkeypatch):
         monkeypatch.delenv("DATABASE_URL", raising=False)
         assert self._reload_config().DATABASE_URL == "sqlite:///./afkgame.db"
+
+    def test_JWT_SECRETの既定値はHS256の推奨鍵長を満たす(self):
+        # RFC 7518 §3.2: HS256 の鍵は 32 バイト以上
+        assert len(config.DEFAULT_JWT_SECRET.encode()) >= 32
+
+
+class TestValidateProductionSettings:
+    """tech_operations.md §12.2 起動時バリデーション
+
+    分岐観点: 本番 × 既定値（起動中止）/ 本番 × 設定済み / 非本番（既定値でも起動可）
+    """
+
+    def test_本番でJWT_SECRETが既定値のままなら起動を中止する(self, monkeypatch):
+        monkeypatch.setattr(config, "IS_PRODUCTION", True)
+        monkeypatch.setattr(config, "JWT_SECRET", config.DEFAULT_JWT_SECRET)
+        with pytest.raises(RuntimeError, match="JWT_SECRET"):
+            config.validate_production_settings()
+
+    def test_本番でもJWT_SECRETが設定済みなら起動できる(self, monkeypatch):
+        monkeypatch.setattr(config, "IS_PRODUCTION", True)
+        monkeypatch.setattr(config, "JWT_SECRET", "x" * 32)
+        config.validate_production_settings()
+
+    def test_非本番は既定値のままでも起動できる(self, monkeypatch):
+        monkeypatch.setattr(config, "IS_PRODUCTION", False)
+        monkeypatch.setattr(config, "JWT_SECRET", config.DEFAULT_JWT_SECRET)
+        config.validate_production_settings()
+
+
+class TestInitSchema:
+    """スキーマの正は alembic/versions。create_all は開発・テスト用のフォールバック
+
+    分岐観点: 非本番（create_all する）/ 本番（しない）
+    """
+
+    def test_非本番ではcreate_allでテーブルを生成する(self, monkeypatch):
+        called = []
+        monkeypatch.setattr(main, "IS_PRODUCTION", False)
+        monkeypatch.setattr(main.Base.metadata, "create_all", lambda **kw: called.append(kw))
+        main.init_schema()
+        assert len(called) == 1
+
+    def test_本番ではcreate_allを実行しない(self, monkeypatch):
+        called = []
+        monkeypatch.setattr(main, "IS_PRODUCTION", True)
+        monkeypatch.setattr(main.Base.metadata, "create_all", lambda **kw: called.append(kw))
+        main.init_schema()
+        assert called == []
 
 
 class TestHealthCheck:

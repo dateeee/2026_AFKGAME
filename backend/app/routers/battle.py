@@ -6,21 +6,20 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-logger = logging.getLogger("afkgame.battle")
-
 from app.db.database import get_db
 from app.dependencies import get_current_player
 from app.models.player import Player
 from app.schemas.battle import OfflineSummary, TickResponse
 from app.schemas.equipment import EquipmentResponse
-from app.services.battle_service import TickResult, process_tick
+from app.services.battle_service import process_pending_ticks
 from app.services.game_state_builder import build_game_state
 from app.config import (
-    FAST_CALC_THRESHOLD,
     MAX_LOG_PER_RESPONSE,
     MAX_OFFLINE_HOURS,
     TICK_INTERVAL_SECONDS,
 )
+
+logger = logging.getLogger("afkgame.battle")
 
 router = APIRouter(prefix="/api/battle", tags=["battle"])
 
@@ -55,40 +54,7 @@ def tick_endpoint(
             updated_state=build_game_state(player, db),
         )
 
-    accumulated = TickResult()
-
-    if pending_ticks <= FAST_CALC_THRESHOLD:
-        # フルシミュレーション
-        for _ in range(pending_ticks):
-            tick_result = process_tick(player, character, db)
-            accumulated.accumulate(tick_result)
-        calc_method = "normal"
-    else:
-        # 簡易計算: 10サンプルtickの平均 × 残り
-        sample_count = min(10, pending_ticks)
-        sample_result = TickResult()
-        for _ in range(sample_count):
-            tick_result = process_tick(player, character, db)
-            sample_result.accumulate(tick_result)
-
-        remaining = pending_ticks - sample_count
-        if sample_count > 0 and remaining > 0:
-            multiplier = remaining / sample_count
-            player.gold += int(sample_result.total_gold * multiplier)
-            character.exp += int(sample_result.total_exp * multiplier)
-
-            from app.services.battle_service import _check_level_up
-            extra_levels = _check_level_up(character)
-
-            sample_result.total_gold += int(sample_result.total_gold * multiplier)
-            sample_result.total_exp += int(sample_result.total_exp * multiplier)
-            sample_result.enemies_defeated += int(sample_result.enemies_defeated * multiplier)
-            sample_result.potions_used += int(sample_result.potions_used * multiplier)
-            sample_result.levels_gained += extra_levels
-            sample_result.floors_cleared += int(sample_result.floors_cleared * multiplier)
-
-        accumulated = sample_result
-        calc_method = "simplified"
+    accumulated, calc_method = process_pending_ticks(player, character, pending_ticks, db)
 
     logger.info(
         "tick処理完了",

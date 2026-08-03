@@ -1,7 +1,11 @@
 fastapi>=0.110.0
 uvicorn[standard]>=0.27.0
 sqlalchemy>=2.0.25
-pydantic>=2.5.0
+pydantic[email]>=2.5.0
 alembic>=1.13.0
 PyJWT>=2.8.0
 bcrypt>=4.1.0
+
+# 静的チェック（未使用import・E402・print混入の検出）
+# 実行: python -m ruff check app tests --select F401,E402,F811,T201
+ruff>=0.6.0

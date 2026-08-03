@@ -22,8 +22,14 @@ export const useBattleStore = defineStore('battle', () => {
     offlineSummary.value = summary
   }
 
+  /** ログアウト時に前アカウントの状態を残さないためのリセット */
+  function reset() {
+    battleLogs.value = []
+    offlineSummary.value = null
+  }
+
   return {
     battleLogs, offlineSummary,
-    addBattleLogs, clearOfflineSummary, setOfflineSummary,
+    addBattleLogs, clearOfflineSummary, setOfflineSummary, reset,
   }
 })

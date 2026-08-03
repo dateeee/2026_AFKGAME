@@ -11,10 +11,22 @@ from app.models.character import Character
 from app.models.equipment import Equipment
 from app.models.item import InventoryItem
 from app.master_data.characters import calc_stats_for_level, required_exp
-from app.master_data.enemies import EnemyData, get_enemy
+from app.master_data.enemies import get_enemy
 from app.master_data.towers import get_tower, roll_encounter
 from app.master_data.items import get_item
-from app.config import TURNS_PER_TICK
+from app.config import (
+    CRIT_MULTIPLIER,
+    CRIT_RATE,
+    DAMAGE_VARIANCE,
+    FAST_CALC_THRESHOLD,
+    OFFLINE_SAMPLE_TICKS,
+    DEFAULT_POTION_THRESHOLD,
+    DEFEAT_EXP_PENALTY,
+    DEFENSE_FACTOR,
+    RECOVERY_DEF_FACTOR,
+    RECOVERY_HP_RATIO,
+    TURNS_PER_TICK,
+)
 from app.services.equipment_service import get_effective_stats, try_drop
 
 
@@ -47,11 +59,11 @@ class TickResult:
 
 def _calc_damage(atk: int, target_def: int, is_player: bool) -> tuple[int, bool]:
     """ダメージ計算。戻り値: (damage, is_crit)"""
-    variance = random.uniform(-0.1, 0.1)
-    raw = atk * (1 + variance) - target_def * 0.5
-    is_crit = random.random() < 0.05
+    variance = random.uniform(-DAMAGE_VARIANCE, DAMAGE_VARIANCE)
+    raw = atk * (1 + variance) - target_def * DEFENSE_FACTOR
+    is_crit = random.random() < CRIT_RATE
     if is_crit:
-        raw *= 1.5
+        raw *= CRIT_MULTIPLIER
     min_dmg = 1 if is_player else 0
     damage = max(min_dmg, math.floor(raw))
     return damage, is_crit
@@ -94,16 +106,17 @@ def _use_potion(player: Player, character: Character, effective_max_hp: int, db:
     return True
 
 
-def target_floor_cap(highest_floor: int, total_floors: int | None) -> int:
+def target_floor_cap(highest_floor: int, total_floors: int) -> int:
     """目標階の選択上限 = min(到達済み最高階 + 1, 総階数)。
 
     +1 は「未到達の次の階を1階ずつ開拓できるようにする」ため（systems/battle.md 目標階設定）。
-    total_floors=None は総階数を持たない無限塔（深淵の塔、Phase 5〜）を表し、上限は +1 のみ。
+
+    不変条件: `TowerData.total_floors` は常に非 None（型どおり）。総階数を持たない無限塔
+    （深淵の塔、endgame.md §2.14）は Phase 5 で追加されるため、その際に本関数・
+    `process_tick` の目標到達判定・`schemas.TowerInfo` をまとめて None 対応させる
+    （known_issues.md）。片側だけ None 対応を持たせると判定が非対称になる。
     """
-    cap = highest_floor + 1
-    if total_floors is not None:
-        cap = min(cap, total_floors)
-    return cap
+    return min(highest_floor + 1, total_floors)
 
 
 def get_tower_highest_floor(player: Player, tower_id: str, db: Session) -> int:
@@ -136,7 +149,7 @@ def _update_tower_record(player: Player, tower_id: str, floor: int, is_boss: boo
 
 
 def _follow_target_floor(
-    player: Player, total_floors: int | None, old_highest: int, cleared_floor: int
+    player: Player, total_floors: int, old_highest: int, cleared_floor: int
 ) -> int | None:
     """上限追従: 目標階が上限と一致している状態で新しい階をクリアしたら目標階を +1 する。
 
@@ -155,7 +168,9 @@ def _follow_target_floor(
 
 def _recover_hp(character: Character, effective_max_hp: int, effective_def: int) -> int:
     """塔外HP自然回復。回復量を返す"""
-    recovery = math.floor(effective_max_hp * 0.02 + effective_def * 0.5)
+    recovery = math.floor(
+        effective_max_hp * RECOVERY_HP_RATIO + effective_def * RECOVERY_DEF_FACTOR
+    )
     old_hp = character.hp
     character.hp = min(effective_max_hp, character.hp + recovery)
     return character.hp - old_hp
@@ -208,7 +223,7 @@ def process_tick(player: Player, character: Character, db: Session) -> TickResul
         enemy_data = get_enemy(player.current_enemy_id)
 
         # ポーション自動使用チェック
-        threshold = 0.5  # デフォルト
+        threshold = DEFAULT_POTION_THRESHOLD
         if player.settings:
             threshold = player.settings.potion_threshold
         if character.hp <= effective_max_hp * threshold:
@@ -400,7 +415,7 @@ def process_tick(player: Player, character: Character, db: Session) -> TickResul
                 if character.hp <= 0:
                     result.defeated = True
                     # ペナルティ: 現在レベル内の蓄積EXPの50%失、走行Gold失（game_spec §2.2 全滅時の処理）
-                    exp_penalty = math.floor(character.exp * 0.5)
+                    exp_penalty = math.floor(character.exp * DEFEAT_EXP_PENALTY)
                     character.exp = character.exp - exp_penalty
                     gold_penalty = player.run_gold
                     player.gold = max(0, player.gold - gold_penalty)
@@ -429,3 +444,42 @@ def process_tick(player: Player, character: Character, db: Session) -> TickResul
     if tick_logs:
         result.battle_logs.append(tick_logs)
     return result
+
+
+def process_pending_ticks(
+    player: Player, character: Character, pending_ticks: int, db: Session
+) -> tuple[TickResult, str]:
+    """未処理tickをまとめて処理し、(結果, 計算方式) を返す。
+
+    tick数が FAST_CALC_THRESHOLD 以下ならフルシミュレーション、超える場合は
+    OFFLINE_SAMPLE_TICKS 件のサンプル平均を残りtickへ外挿する簡易計算を使う。
+
+    注意: 簡易計算の実装は tech_offline.md §4.1（乱数を使わない期待値計算）と乖離している
+    （known_issues.md）。本関数はルーターからロジックを移設しただけで、算出方法は変えていない。
+    """
+    if pending_ticks <= FAST_CALC_THRESHOLD:
+        accumulated = TickResult()
+        for _ in range(pending_ticks):
+            accumulated.accumulate(process_tick(player, character, db))
+        return accumulated, "normal"
+
+    sample_count = min(OFFLINE_SAMPLE_TICKS, pending_ticks)
+    sample_result = TickResult()
+    for _ in range(sample_count):
+        sample_result.accumulate(process_tick(player, character, db))
+
+    remaining = pending_ticks - sample_count
+    if remaining > 0:
+        multiplier = remaining / sample_count
+        player.gold += int(sample_result.total_gold * multiplier)
+        character.exp += int(sample_result.total_exp * multiplier)
+        extra_levels = _check_level_up(character)
+
+        sample_result.total_gold += int(sample_result.total_gold * multiplier)
+        sample_result.total_exp += int(sample_result.total_exp * multiplier)
+        sample_result.enemies_defeated += int(sample_result.enemies_defeated * multiplier)
+        sample_result.potions_used += int(sample_result.potions_used * multiplier)
+        sample_result.levels_gained += extra_levels
+        sample_result.floors_cleared += int(sample_result.floors_cleared * multiplier)
+
+    return sample_result, "simplified"

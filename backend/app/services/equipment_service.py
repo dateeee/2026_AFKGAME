@@ -4,7 +4,7 @@ import math
 
 from sqlalchemy.orm import Session
 
-from app.config import RARITY_ORDER, RARITY_TIERS
+from app.config import RARITY_ORDER, RARITY_TIERS, SELL_PRICE_BASE
 from app.master_data.equipment import (
     EQUIPMENT_SLOTS,
     generate_equipment_drop,
@@ -106,7 +106,7 @@ def equip_item(
             character_id=character_id, slot="weapon"
         ).first()
         if weapon_slot and weapon_slot.equipment_id:
-            weapon = db.query(Equipment).get(weapon_slot.equipment_id)
+            weapon = db.get(Equipment, weapon_slot.equipment_id)
             if weapon and weapon.is_two_handed:
                 raise ValueError("両手武器を装備中は盾を装着できません")
 
@@ -168,12 +168,12 @@ def toggle_lock(player: Player, equipment_id: str, db: Session) -> bool:
 
 def calc_sell_price(equip: Equipment) -> int:
     multiplier = RARITY_TIERS[equip.rarity]["multiplier"]
-    return math.floor(5 * multiplier * equip.level)
+    return math.floor(SELL_PRICE_BASE * multiplier * equip.level)
 
 
 def calc_sell_price_from_dict(drop: dict) -> int:
     multiplier = RARITY_TIERS[drop["rarity"]]["multiplier"]
-    return math.floor(5 * multiplier * drop["level"])
+    return math.floor(SELL_PRICE_BASE * multiplier * drop["level"])
 
 
 def get_effective_stats(character: Character, db: Session) -> dict:
@@ -194,8 +194,6 @@ def get_effective_stats(character: Character, db: Session) -> dict:
         if not slot.equipment_id:
             continue
         equip = slot.equipment
-        if not equip:
-            equip = db.get(Equipment, slot.equipment_id)
         if not equip:
             continue
         if equip.stat_atk:

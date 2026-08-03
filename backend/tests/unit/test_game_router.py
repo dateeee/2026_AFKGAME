@@ -36,7 +36,7 @@ class TestUpdateSettings:
             "/api/game/settings",
             json={
                 "potionThreshold": 0.5,
-                "battleLogCount": 30,
+                "battleLogCount": 100,
                 "toastEnabled": False,
                 "autoSellRarity": "rare",
             },
@@ -44,7 +44,7 @@ class TestUpdateSettings:
         assert res.status_code == 200
         body = res.json()
         assert body["potionThreshold"] == 0.5
-        assert body["battleLogCount"] == 30
+        assert body["battleLogCount"] == 100
         assert body["toastEnabled"] is False
         assert body["autoSellRarity"] == "rare"
         assert player.settings.potion_threshold == 0.5
@@ -67,7 +67,7 @@ class TestUpdateSettings:
         db.query(PlayerSettings).filter_by(player_id=player.id).delete()
         db.commit()
         db.expire(player)
-        res = client.put("/api/game/settings", json={"potionThreshold": 0.7})
+        res = client.put("/api/game/settings", json={"potionThreshold": 0.4})
         assert res.status_code == 200
-        assert res.json()["potionThreshold"] == 0.7
+        assert res.json()["potionThreshold"] == 0.4
         assert db.query(PlayerSettings).filter_by(player_id=player.id).count() == 1

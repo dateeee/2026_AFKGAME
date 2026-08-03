@@ -40,7 +40,7 @@ async function onEquip() {
     await equipmentStore.equipItem(character.id, selectedSlot.value, compareItem.value.id)
     compareItem.value = null
   } catch (e) {
-    gameStore.setConnectionError((e as Error).message)
+    gameStore.reportActionFailure(e)
   }
 }
 
@@ -50,7 +50,7 @@ async function onUnequip(slot: EquipmentSlot) {
   try {
     await equipmentStore.equipItem(character.id, slot, null)
   } catch (e) {
-    gameStore.setConnectionError((e as Error).message)
+    gameStore.reportActionFailure(e)
   }
 }
 </script>
@@ -58,6 +58,10 @@ async function onUnequip(slot: EquipmentSlot) {
 <template>
   <div class="equipment-view">
     <h1>装備</h1>
+
+    <p v-if="gameStore.actionError" class="action-error" role="alert">
+      {{ gameStore.actionError }}
+    </p>
 
     <BaseCard title="装備中">
       <EquipmentSlotGrid @select-slot="onSelectSlot" />
@@ -103,6 +107,18 @@ async function onUnequip(slot: EquipmentSlot) {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+}
+
+/* 業務エラー（装着拒否など）。通信断は ConnectionBanner が担当する */
+.action-error {
+  margin: 0;
+  padding: 0.625rem 0.875rem;
+  background-color: var(--color-surface-2);
+  border: 1px solid var(--color-line-soft);
+  border-left: 3px solid var(--color-danger);
+  border-radius: var(--radius-md);
+  font-size: var(--text-label);
+  color: var(--color-content);
 }
 
 .unequip-btn {

@@ -10,7 +10,12 @@ from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
-from app.config import APP_VERSION, CORS_ORIGINS
+from app.config import (
+    APP_VERSION,
+    CORS_ORIGINS,
+    IS_PRODUCTION,
+    validate_production_settings,
+)
 from app.db.database import Base, engine, get_db
 from app.exceptions import register_exception_handlers
 from app.logging_config import setup_logging
@@ -21,10 +26,25 @@ from app.routers import auth, battle, equipment, game, shop, tower
 # ログシステム初期化
 setup_logging()
 
+# 本番で必須の秘密情報が既定値のままなら、ここで起動を中止する（fail-fast）
+validate_production_settings()
+
+
+def init_schema() -> None:
+    """起動時のテーブル生成（開発・テスト用のフォールバック）。
+
+    スキーマの正は alembic/versions で、本番は `alembic upgrade head` で適用する
+    （運用手順は tech_operations.md §12）。本番でも create_all すると
+    マイグレーションの書き漏れが隠れてしまうため、production では実行しない。
+    """
+    if IS_PRODUCTION:
+        return
+    Base.metadata.create_all(bind=engine)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    Base.metadata.create_all(bind=engine)
+    init_schema()
     yield
 
 

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import type { Settings } from '@/types/game'
 import { useGameStore } from '@/stores/gameStore'
 import { putSettings, USE_API } from '@/api/client'
 import BaseCard from '@/components/ui/BaseCard.vue'
@@ -16,11 +17,11 @@ const POTION_THRESHOLD_OPTIONS: Array<{ value: number; label: string }> = [
   { value: 0.5, label: '50%' },
 ]
 
+// 選択肢の正は ui.md §設定画面（20/50/100）。上限はDB保存件数100件のためそれ以上は持たない
 const LOG_COUNT_OPTIONS: Array<{ value: number; label: string }> = [
   { value: 20, label: '20件' },
   { value: 50, label: '50件' },
   { value: 100, label: '100件' },
-  { value: 200, label: '200件' },
 ]
 
 const AUTO_SELL_OPTIONS: Array<{ value: string; label: string }> = [
@@ -35,38 +36,52 @@ const autoSellRarity = computed({
   set: (value: string) => updateAutoSellRarity(value),
 })
 
-async function updatePotionThreshold(value: number) {
-  gameStore.settings.potionThreshold = value
-  if (USE_API) {
-    await putSettings({ potionThreshold: value })
+/**
+ * 画面を先に更新（楽観更新）してからサーバーへ送る。
+ * 失敗したら元の値へ戻し、エラーを表示する（表示とサーバーが食い違ったまま残らないように）。
+ */
+async function persistSetting<K extends keyof Settings>(
+  key: K,
+  value: Settings[K],
+  payload: Partial<Settings>,
+) {
+  const previous = gameStore.settings[key]
+  gameStore.settings[key] = value
+  if (!USE_API) return
+
+  try {
+    await putSettings(payload)
+    gameStore.clearActionError()
+  } catch (error) {
+    gameStore.settings[key] = previous
+    gameStore.reportActionFailure(error)
   }
+}
+
+async function updatePotionThreshold(value: number) {
+  await persistSetting('potionThreshold', value, { potionThreshold: value })
 }
 
 async function updateBattleLogCount(value: number) {
-  gameStore.settings.battleLogCount = value
-  if (USE_API) {
-    await putSettings({ battleLogCount: value })
-  }
+  await persistSetting('battleLogCount', value, { battleLogCount: value })
 }
 
 async function updateToastEnabled(value: boolean) {
-  gameStore.settings.toastEnabled = value
-  if (USE_API) {
-    await putSettings({ toastEnabled: value })
-  }
+  await persistSetting('toastEnabled', value, { toastEnabled: value })
 }
 
 async function updateAutoSellRarity(value: string) {
-  gameStore.settings.autoSellRarity = value || null
-  if (USE_API) {
-    await putSettings({ autoSellRarity: value })
-  }
+  await persistSetting('autoSellRarity', value || null, { autoSellRarity: value })
 }
 </script>
 
 <template>
   <div class="settings">
     <h1>設定</h1>
+
+    <p v-if="gameStore.actionError" class="setting-error" role="alert">
+      {{ gameStore.actionError }}
+    </p>
 
     <BaseCard title="戦闘">
       <div class="setting-list">
@@ -139,6 +154,18 @@ async function updateAutoSellRarity(value: string) {
   display: flex;
   flex-direction: column;
   gap: 1.125rem;
+}
+
+/* 業務エラー（設定の保存失敗）。通信断は ConnectionBanner が担当する */
+.setting-error {
+  margin: 0;
+  padding: 0.625rem 0.875rem;
+  background-color: var(--color-surface-2);
+  border: 1px solid var(--color-line-soft);
+  border-left: 3px solid var(--color-danger);
+  border-radius: var(--radius-md);
+  font-size: var(--text-label);
+  color: var(--color-content);
 }
 
 /* --- スイッチ --- */

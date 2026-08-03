@@ -3,15 +3,27 @@
  * - アクセストークンはメモリ保持（authStore経由）
  * - 401時にリフレッシュトークンで自動再取得
  * - USE_API=false でバックエンド未起動時のフォールバック
- * - 指数バックオフリトライ（最大3回）
+ * - リトライはネットワークエラー時のみ・冪等なリクエストに限る（下記 fetchWithRetry）
  */
 
-import type { Equipment, GameState, Settings, ShopDailyItem, TickResponse, TowerInfo } from '@/types/game'
+import type {
+  Equipment,
+  GameState,
+  Settings,
+  ShopDailyItem,
+  ShopLineupResponse,
+  TickResponse,
+  TowerInfo,
+} from '@/types/game'
 import { refreshToken as refreshTokenApi } from '@/api/auth'
+import { ApiError, networkError, toApiError } from '@/api/errors'
 
 const USE_API = import.meta.env.VITE_USE_API !== 'false'
 const MAX_RETRIES = 3
 const BASE_DELAY_MS = 1000
+
+/** 再送しても副作用が増えないメソッド。これ以外は自動リトライしない */
+const IDEMPOTENT_METHODS = new Set(['GET', 'HEAD'])
 
 // ── トークン管理（メモリ） ──
 
@@ -79,42 +91,66 @@ async function tryRefresh(): Promise<boolean> {
 
 // ── API呼び出し ──
 
-async function fetchWithRetry<T>(url: string, options: RequestInit = {}): Promise<T> {
+/** 送信時のヘッダを組み立てる（アクセストークンは毎回最新を読む） */
+function buildHeaders(options: RequestInit): Record<string, string> {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     ...(options.headers as Record<string, string> || {}),
   }
-
-  let lastError: Error | null = null
-  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-    // 最新のアクセストークンを毎回取得
-    const token = getAccessToken()
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`
-    }
-
-    try {
-      const response = await fetch(url, { ...options, headers })
-
-      // 401 → リフレッシュ試行して1回だけリトライ
-      if (response.status === 401 && attempt === 0) {
-        const refreshed = await tryRefresh()
-        if (refreshed) continue
-        throw new Error('認証に失敗しました')
-      }
-
-      if (!response.ok) {
-        throw new Error(`サーバーエラー (${response.status})`)
-      }
-      return await response.json() as T
-    } catch (error) {
-      lastError = error as Error
-      if (attempt < MAX_RETRIES - 1) {
-        await new Promise(resolve => setTimeout(resolve, BASE_DELAY_MS * Math.pow(2, attempt)))
-      }
-    }
+  const token = getAccessToken()
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`
   }
-  throw lastError!
+  return headers
+}
+
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+
+/** 1回送信する。401 ならリフレッシュして1度だけ再送する（リトライ回数とは別枠） */
+async function sendWithAuth(url: string, options: RequestInit): Promise<Response> {
+  const response = await fetch(url, { ...options, headers: buildHeaders(options) })
+  if (response.status !== 401) return response
+
+  if (!await tryRefresh()) {
+    // リフレッシュ不可＝再送しても結果は変わらないので即時失敗させる
+    throw new ApiError('認証に失敗しました', 'AUTH_REFRESH_FAILED', 401)
+  }
+  return await fetch(url, { ...options, headers: buildHeaders(options) })
+}
+
+/**
+ * APIを呼び出す。
+ *
+ * リトライはネットワークエラー（サーバーに届かなかった場合）に限る。
+ * 4xx/5xx はサーバーが応答を確定させているので再送せず即座に ApiError を投げる
+ * （業務エラーの表示が遅れないようにするため）。
+ * また非冪等な POST/PUT は、応答だけ喪失したケースで二重購入・二重売却になりうるため
+ * ネットワークエラーでも再送しない。
+ */
+async function fetchWithRetry<T>(url: string, options: RequestInit = {}): Promise<T> {
+  const method = (options.method ?? 'GET').toUpperCase()
+  const maxAttempts = IDEMPOTENT_METHODS.has(method) ? MAX_RETRIES : 1
+
+  let lastCause: unknown = null
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    if (attempt > 0) {
+      await delay(BASE_DELAY_MS * Math.pow(2, attempt - 1))
+    }
+
+    let response: Response
+    try {
+      response = await sendWithAuth(url, options)
+    } catch (error) {
+      // ApiError（認証失敗）は確定した結果なので再送しない
+      if (error instanceof ApiError) throw error
+      lastCause = error
+      continue
+    }
+
+    if (!response.ok) throw await toApiError(response)
+    return await response.json() as T
+  }
+  throw networkError(lastCause)
 }
 
 // ── 公開API関数 ──
@@ -174,19 +210,8 @@ export async function putRetreatConditions(hpThreshold: number) {
 }
 
 /** ショップ商品一覧（常設 + 日替わり） */
-export async function getShopLineup() {
-  return fetchWithRetry<{
-    lineup: Array<{
-      itemId: string
-      name: string
-      price: number
-      healRatio: number
-      quantityOwned: number
-      stackLimit: number
-    }>
-    daily: ShopDailyItem[]
-    dailyResetAt: string
-  }>('/api/shop/lineup')
+export async function getShopLineup(): Promise<ShopLineupResponse> {
+  return fetchWithRetry<ShopLineupResponse>('/api/shop/lineup')
 }
 
 /** ショップ購入（常設商品） */

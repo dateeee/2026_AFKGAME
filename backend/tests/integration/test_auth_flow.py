@@ -65,11 +65,11 @@ class TestScenario01認証からゲーム状態取得:
         assert snake_keys == []
 
     def test_設定更新がゲーム状態へ反映され再取得しても保たれる(self, api, guest):
-        res = api.put("/api/game/settings", json={"potionThreshold": 0.6, "autoSellRarity": "common"})
+        res = api.put("/api/game/settings", json={"potionThreshold": 0.4, "autoSellRarity": "common"})
         assert res.status_code == 200
 
         settings = api.get("/api/game/state").json()["settings"]
-        assert settings["potionThreshold"] == 0.6
+        assert settings["potionThreshold"] == 0.4
         assert settings["autoSellRarity"] == "common"
         assert settings["battleLogCount"] == 50  # 未指定の項目は変わらない
 

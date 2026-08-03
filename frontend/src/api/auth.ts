@@ -4,6 +4,7 @@
  */
 
 import type { AuthResponse } from '@/types/game'
+import { networkError, toApiError } from '@/api/errors'
 
 const BASE = '/api/auth'
 
@@ -12,10 +13,17 @@ async function authFetch<T>(url: string, options: RequestInit = {}): Promise<T> 
     'Content-Type': 'application/json',
     ...(options.headers as Record<string, string> || {}),
   }
-  const response = await fetch(url, { ...options, headers })
+
+  let response: Response
+  try {
+    response = await fetch(url, { ...options, headers })
+  } catch (error) {
+    throw networkError(error)
+  }
+
+  // サーバーの統一エラー形式 {error: {code, message}} をそのまま画面へ届ける
   if (!response.ok) {
-    const body = await response.json().catch(() => ({}))
-    throw new Error(body.detail || `HTTP ${response.status}`)
+    throw await toApiError(response)
   }
   return await response.json() as T
 }

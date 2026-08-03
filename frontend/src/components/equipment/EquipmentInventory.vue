@@ -5,6 +5,7 @@ import { useGameStore } from '@/stores/gameStore'
 import EquipmentCard from './EquipmentCard.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import BaseSelect from '@/components/ui/BaseSelect.vue'
+import { errorMessage } from '@/api/errors'
 import type { Equipment, EquipmentSlot, Rarity } from '@/types/game'
 
 const props = defineProps<{
@@ -22,6 +23,7 @@ const filterRarity = ref<Rarity | ''>('')
 const sortKey = ref<'level' | 'rarity'>('level')
 const selectedIds = ref<Set<string>>(new Set())
 const selectionMode = ref(false)
+const sellError = ref('')
 
 const RARITY_ORDER: Rarity[] = ['common', 'uncommon', 'rare', 'epic', 'legendary']
 
@@ -65,15 +67,23 @@ function toggleSelect(id: string) {
 function toggleSelectionMode() {
   selectionMode.value = !selectionMode.value
   selectedIds.value.clear()
+  sellError.value = ''
 }
 
 async function sellSelected() {
   const ids = Array.from(selectedIds.value)
   if (ids.length === 0) return
-  const result = await equipmentStore.sellItems(ids)
-  gameStore.gold += result.goldEarned
-  selectedIds.value.clear()
-  selectionMode.value = false
+
+  sellError.value = ''
+  try {
+    const result = await equipmentStore.sellItems(ids)
+    gameStore.gold += result.goldEarned
+    selectedIds.value.clear()
+    selectionMode.value = false
+  } catch (e) {
+    // 失敗時は選択状態を保持したままエラーを出す（選び直しの手間を増やさない）
+    sellError.value = errorMessage(e)
+  }
 }
 
 function handleClick(item: Equipment) {
@@ -109,6 +119,8 @@ function handleClick(item: Equipment) {
         {{ selectionMode ? 'キャンセル' : '売却' }}
       </BaseButton>
     </div>
+
+    <p v-if="sellError" class="sell-error" role="alert">{{ sellError }}</p>
 
     <!-- 選択中の操作バー。ナビの上に固定して、一覧を下までたどっても押せるようにする -->
     <div v-if="selectionMode && selectedIds.size > 0" class="sell-bar">
@@ -146,6 +158,18 @@ function handleClick(item: Equipment) {
 
 .controls-sell {
   margin-left: auto;
+}
+
+/* 売却失敗の業務エラー。通信断は ConnectionBanner が担当する */
+.sell-error {
+  margin: 0;
+  padding: 0.625rem 0.875rem;
+  background-color: var(--color-surface-2);
+  border: 1px solid var(--color-line-soft);
+  border-left: 3px solid var(--color-danger);
+  border-radius: var(--radius-md);
+  font-size: var(--text-label);
+  color: var(--color-content);
 }
 
 .sell-bar {

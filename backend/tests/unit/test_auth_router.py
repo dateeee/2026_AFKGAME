@@ -18,13 +18,18 @@ from datetime import datetime
 import pytest
 from fastapi.testclient import TestClient
 
-from app.config import INITIAL_CHARACTER, INITIAL_POTIONS, PASSWORD_MIN_LENGTH
+from app.config import INITIAL_CHARACTER, INITIAL_POTIONS
 from app.db.database import get_db
 from app.main import app
 from app.models.character import Character
 from app.models.item import InventoryItem
 from app.models.player import Player, PlayerSettings
-from app.models.user import EmailVerificationToken, RefreshToken, User
+from app.models.user import (
+    TOKEN_PURPOSE_PASSWORD_RESET,
+    EmailVerificationToken,
+    RefreshToken,
+    User,
+)
 from app.services import auth_service
 from app.services.auth_service import create_email_verification_token
 from tests.helpers import error_message
@@ -98,15 +103,14 @@ class TestRegister:
     @pytest.mark.parametrize(
         ("password", "expected_status"),
         [
-            ("1234567", 400),   # 7文字 → 最低長未満
+            # 最低長はスキーマ検証（tech_api.md §エラー: 型・範囲違反は 422）
+            ("1234567", 422),   # 7文字 → 最低長未満
             ("12345678", 200),  # 8文字ちょうど → 境界で許可
         ],
     )
     def test_パスワード最低長の境界(self, client, password, expected_status):
         res = _register(client, password=password)
         assert res.status_code == expected_status
-        if expected_status == 400:
-            assert error_message(res) == f"Password must be at least {PASSWORD_MIN_LENGTH} characters"
 
     def test_登録済みメールは409(self, client):
         _register(client)
@@ -257,11 +261,10 @@ class TestLinkAccount:
         assert res.status_code == 400
         assert error_message(res) == "Account is already registered"
 
-    def test_8文字未満のパスワードは400(self, client):
+    def test_8文字未満のパスワードは422(self, client):
         headers, _ = _guest_headers(client)
         res = self._link(client, headers, email="a@example.com", password="1234567")
-        assert res.status_code == 400
-        assert error_message(res) == f"Password must be at least {PASSWORD_MIN_LENGTH} characters"
+        assert res.status_code == 422
 
     def test_登録済みメールへの連携は409(self, client):
         _register(client, email="taken@example.com")
@@ -332,7 +335,9 @@ class TestPasswordResetConfirm:
 
     def test_リセット成功で全トークン無効化後に新パスワードでログインできる(self, client, db):
         user_id = _register(client).json()["user"]["id"]
-        raw = create_email_verification_token(user_id, db)
+        raw = create_email_verification_token(
+            user_id, db, purpose=TOKEN_PURPOSE_PASSWORD_RESET
+        )
         db.commit()
 
         res = self._confirm(client, raw)
@@ -341,10 +346,42 @@ class TestPasswordResetConfirm:
         assert all(r.revoked for r in db.query(RefreshToken).filter_by(user_id=user_id))
         assert _login(client, password="newpassword456").status_code == 200
 
-    def test_8文字未満の新パスワードは400(self, client):
-        res = self._confirm(client, "any-token", new_password="1234567")
+    def test_メール確認トークンではリセットできない(self, client, db):
+        """用途の異なるトークンは流用できない（tech_auth.md §6 の用途分離）"""
+        user_id = _register(client).json()["user"]["id"]
+        raw = create_email_verification_token(user_id, db)  # 既定 = verify_email
+        db.commit()
+
+        res = self._confirm(client, raw)
         assert res.status_code == 400
-        assert error_message(res) == f"Password must be at least {PASSWORD_MIN_LENGTH} characters"
+        assert error_message(res) == "Invalid verification token"
+        # 副作用でパスワードが変わっていないこと
+        assert _login(client).status_code == 200
+
+    def test_リセットトークンではメール確認できない(self, client, db):
+        user_id = _register(client).json()["user"]["id"]
+        raw = create_email_verification_token(
+            user_id, db, purpose=TOKEN_PURPOSE_PASSWORD_RESET
+        )
+        db.commit()
+
+        res = client.get("/api/auth/verify-email", params={"token": raw})
+        assert res.status_code == 400
+        assert error_message(res) == "Invalid verification token"
+
+    def test_リセット完了でメール確認済みにはならない(self, client, db):
+        user_id = _register(client).json()["user"]["id"]
+        raw = create_email_verification_token(
+            user_id, db, purpose=TOKEN_PURPOSE_PASSWORD_RESET
+        )
+        db.commit()
+
+        assert self._confirm(client, raw).status_code == 200
+        assert db.query(User).filter_by(id=user_id).first().email_verified is False
+
+    def test_8文字未満の新パスワードは422(self, client):
+        res = self._confirm(client, "any-token", new_password="1234567")
+        assert res.status_code == 422
 
     def test_無効なトークンは400(self, client):
         res = self._confirm(client, "bogus")

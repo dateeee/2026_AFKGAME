@@ -5,7 +5,7 @@
   - /list: 所持ゼロ / 所持あり / 他プレイヤーの装備を含めない / 未認証
   - /equip: 正常系（装着・解除）/ サービスの ValueError を400へ変換
   - /sell: 売却成立 / 対象なし
-  - /lock: 切替成功 / サービスの ValueError を400へ変換
+  - /lock: 切替成功 / サービスの ValueError を404（EQUIP_NOT_FOUND）へ変換
 """
 
 import pytest
@@ -173,7 +173,7 @@ class TestLock:
         db.refresh(equip)
         assert equip.locked is False
 
-    def test_存在しない装備は400(self, client):
+    def test_存在しない装備は404(self, client):
         res = client.post("/api/equipment/lock", json={"equipmentId": "no-such-equipment"})
-        assert res.status_code == 400
+        assert res.status_code == 404
         assert error_message(res) == "装備が見つかりません"

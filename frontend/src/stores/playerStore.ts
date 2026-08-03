@@ -18,8 +18,14 @@ export const usePlayerStore = defineStore('player', () => {
     }
   }
 
+  /** ログアウト時に前アカウントの状態を残さないためのリセット */
+  function reset() {
+    characters.value = []
+    potions.value = {}
+  }
+
   return {
     characters, potions,
-    loadFromState, updateCharacter,
+    loadFromState, updateCharacter, reset,
   }
 })

@@ -1,7 +1,7 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import type { Equipment, EquipmentSlot, GameState } from '@/types/game'
-import { postEquip, postEquipmentSell, postEquipmentLock } from '@/api/client'
+import { getGameState, postEquip, postEquipmentSell, postEquipmentLock } from '@/api/client'
 
 /** レアリティ表示名 */
 export const RARITY_LABELS: Record<string, string> = {
@@ -56,8 +56,10 @@ export const useEquipmentStore = defineStore('equipment', () => {
     equipped.value = state.equipped ?? {}
   }
 
-  function addDrops(drops: Equipment[]) {
-    items.value.push(...drops)
+  /** ログアウト時に前アカウントの状態を残さないためのリセット */
+  function reset() {
+    items.value = []
+    equipped.value = {}
   }
 
   const equippedItems = computed(() => {
@@ -72,9 +74,15 @@ export const useEquipmentStore = defineStore('equipment', () => {
     items.value.filter(e => !Object.values(equipped.value).includes(e.id))
   )
 
+  /**
+   * 装備を装着/解除する。
+   * サーバー側は両手武器の装着時に盾スロットを自動解除するなど、対象スロット以外も動く。
+   * 応答は {status:"ok"} だけなので、装備状態はサーバーから取り直して全量で反映する
+   * （そうしないと次の tick まで最大60秒ずれたまま表示される）。
+   */
   async function equipItem(characterId: string, slot: EquipmentSlot, equipmentId: string | null) {
     await postEquip(characterId, slot, equipmentId)
-    equipped.value[slot] = equipmentId
+    loadFromState(await getGameState())
   }
 
   async function sellItems(equipmentIds: string[]) {
@@ -95,6 +103,6 @@ export const useEquipmentStore = defineStore('equipment', () => {
   return {
     items, equipped,
     equippedItems, inventory,
-    loadFromState, addDrops, equipItem, sellItems, toggleLock,
+    loadFromState, reset, equipItem, sellItems, toggleLock,
   }
 })

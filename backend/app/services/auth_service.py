@@ -17,7 +17,13 @@ from app.config import (
     JWT_SECRET,
     REFRESH_TOKEN_EXPIRE_DAYS,
 )
-from app.models.user import EmailVerificationToken, RefreshToken, User
+from app.models.user import (
+    TOKEN_PURPOSE_PASSWORD_RESET,
+    TOKEN_PURPOSE_VERIFY_EMAIL,
+    EmailVerificationToken,
+    RefreshToken,
+    User,
+)
 
 logger = logging.getLogger("afkgame.auth")
 
@@ -117,17 +123,34 @@ def revoke_all_tokens(user_id: str, db: Session) -> None:
     ).update({"revoked": True})
 
 
-# ── メール確認トークン ──
+def revoke_refresh_token(raw_token: str, db: Session) -> None:
+    """指定のリフレッシュトークン1件を無効化する（ログアウト）。
+
+    未知のトークンは何もしない（存在の有無を呼び出し元へ漏らさない）。
+    """
+    record = (
+        db.query(RefreshToken)
+        .filter(RefreshToken.token_hash == _hash_token(raw_token))
+        .first()
+    )
+    if record:
+        record.revoked = True
 
 
-def create_email_verification_token(user_id: str, db: Session) -> str:
-    """メール確認トークンを生成。生トークンを返す。"""
+# ── メール確認・パスワードリセットトークン ──
+
+
+def create_email_verification_token(
+    user_id: str, db: Session, purpose: str = TOKEN_PURPOSE_VERIFY_EMAIL
+) -> str:
+    """用途付きのワンタイムトークンを生成する。生トークンを返す。"""
     raw_token = secrets.token_urlsafe(32)
     token_hash = _hash_token(raw_token)
 
     record = EmailVerificationToken(
         user_id=user_id,
         token_hash=token_hash,
+        purpose=purpose,
         expires_at=datetime.now(timezone.utc) + timedelta(hours=EMAIL_VERIFICATION_EXPIRE_HOURS),
     )
     db.add(record)
@@ -135,12 +158,19 @@ def create_email_verification_token(user_id: str, db: Session) -> str:
     return raw_token
 
 
-def verify_email_token(raw_token: str, db: Session) -> User:
-    """メール確認トークンを検証し、ユーザーのemail_verifiedをtrueにする。"""
+def _consume_token(raw_token: str, purpose: str, db: Session) -> User:
+    """用途を照合してワンタイムトークンを消費し、対象ユーザーを返す。
+
+    用途が一致しないトークンは「存在しない」として扱い、メール確認トークンで
+    パスワードリセットを実行するといった流用を防ぐ。
+    """
     token_hash = _hash_token(raw_token)
     record = (
         db.query(EmailVerificationToken)
-        .filter(EmailVerificationToken.token_hash == token_hash)
+        .filter(
+            EmailVerificationToken.token_hash == token_hash,
+            EmailVerificationToken.purpose == purpose,
+        )
         .first()
     )
 
@@ -158,5 +188,19 @@ def verify_email_token(raw_token: str, db: Session) -> User:
     if not user:
         raise ValueError("User not found")
 
+    return user
+
+
+def verify_email_token(raw_token: str, db: Session) -> User:
+    """メール確認トークンを検証し、ユーザーのemail_verifiedをtrueにする。"""
+    user = _consume_token(raw_token, TOKEN_PURPOSE_VERIFY_EMAIL, db)
     user.email_verified = True
     return user
+
+
+def consume_password_reset_token(raw_token: str, db: Session) -> User:
+    """パスワードリセットトークンを検証して対象ユーザーを返す。
+
+    メール確認とは用途が異なるため、email_verified は変更しない。
+    """
+    return _consume_token(raw_token, TOKEN_PURPOSE_PASSWORD_RESET, db)

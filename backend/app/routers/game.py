@@ -5,8 +5,6 @@ import logging
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-logger = logging.getLogger("afkgame.game")
-
 from app.db.database import get_db
 from app.dependencies import get_current_player
 from app.models.player import Player
@@ -16,6 +14,8 @@ from app.schemas.player import (
     SettingsUpdate,
 )
 from app.services.game_state_builder import build_game_state
+
+logger = logging.getLogger("afkgame.game")
 
 router = APIRouter(prefix="/api/game", tags=["game"])
 

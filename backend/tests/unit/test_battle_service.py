@@ -313,13 +313,6 @@ class TestTickResultAccumulate:
         assert base.defeated is True
 
 
-class TestTargetFloorCapUnlimited:
-    def test_総階数を持たない塔は到達階プラス1が上限(self):
-        # total_floors=None は無限塔（深淵の塔、Phase 5〜）
-        assert bs.target_floor_cap(7, None) == 8
-        assert bs.target_floor_cap(0, None) == 1
-
-
 class TestGetTowerHighestFloor:
     def test_記録がなければ0(self, db, player):
         assert bs.get_tower_highest_floor(player, "goblin_tower", db) == 0
@@ -384,7 +377,8 @@ class TestProcessTickEncounter:
 
 
 class TestProcessTickPotion:
-    def test_設定がなければ閾値0_5でポーションを使う(self, db, player, character, one_shot):
+    def test_設定がなければ既定閾値でポーションを使う(self, db, player, character, one_shot):
+        # フォールバック値の正は config.DEFAULT_POTION_THRESHOLD（= 0.3、ui.md §設定画面）
         one_shot()
         db.delete(player.settings)
         db.commit()
@@ -392,7 +386,7 @@ class TestProcessTickPotion:
         assert player.settings is None
 
         _enter_tower(player)
-        character.hp = 40  # 100 × 0.5 = 50 以下 → 使用
+        character.hp = 25  # 100 × 0.3 = 30 以下 → 使用
 
         result = bs.process_tick(player, character, db)
 

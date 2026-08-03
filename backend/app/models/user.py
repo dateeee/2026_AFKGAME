@@ -17,7 +17,8 @@ def _new_user_id() -> str:
     return f"user_{uuid.uuid4()}"
 
 
-def _new_guest_id() -> str:
+def new_guest_id() -> str:
+    """ゲストユーザーのIDを採番する（routers から利用するため公開名）"""
     return f"guest_{uuid.uuid4()}"
 
 
@@ -51,12 +52,20 @@ class RefreshToken(Base):
     user: Mapped["User"] = relationship(back_populates="refresh_tokens")
 
 
+# トークンの用途（tech_auth.md §6）。用途をまたいだ流用を防ぐため、発行・検証の双方で一致を要求する
+TOKEN_PURPOSE_VERIFY_EMAIL = "verify_email"
+TOKEN_PURPOSE_PASSWORD_RESET = "password_reset"
+
+
 class EmailVerificationToken(Base):
     __tablename__ = "email_verification_tokens"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     user_id: Mapped[str] = mapped_column(String(50), ForeignKey("users.id"), nullable=False)
     token_hash: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
+    purpose: Mapped[str] = mapped_column(
+        String(20), nullable=False, default=TOKEN_PURPOSE_VERIFY_EMAIL
+    )
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     used: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)

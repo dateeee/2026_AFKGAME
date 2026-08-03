@@ -24,15 +24,42 @@ MAX_LOG_PER_RESPONSE = 50
 MAX_PLAYER_LEVEL = 9999
 MAX_GOLD = 9_223_372_036_854_775_807
 
+# ── プレイヤー設定の既定値・値域（正: ui.md §設定画面、systems/battle.md §213）──
+# モデル default / API 応答 / 戦闘判定のフォールバックはすべて本定数を参照する
+DEFAULT_POTION_THRESHOLD = 0.3
+POTION_THRESHOLD_MIN = 0.1
+POTION_THRESHOLD_MAX = 0.5
+DEFAULT_BATTLE_LOG_COUNT = 50
+BATTLE_LOG_COUNT_CHOICES = (20, 50, 100)
+DEFAULT_TOAST_ENABLED = True
+
+# ── 戦闘計算の定数（正: tech_battle.md §3 ダメージ計算）──
+DAMAGE_VARIANCE = 0.1        # 通常攻撃のダメージ分散 ±10%
+CRIT_RATE = 0.05             # 基礎クリティカル率
+CRIT_MULTIPLIER = 1.5        # クリティカル倍率
+DEFENSE_FACTOR = 0.5         # DEF の減算係数
+RECOVERY_HP_RATIO = 0.02     # 非戦闘時のHP自然回復率（maxHP比）
+RECOVERY_DEF_FACTOR = 0.5    # 自然回復量へのDEF寄与係数
+DEFEAT_EXP_PENALTY = 0.5     # 全滅時に持ち帰れるEXPの割合
+
+# オフライン簡易計算のサンプルtick数（tech_offline.md §4）
+OFFLINE_SAMPLE_TICKS = 10
+
+# 実行環境（tech_operations.md §12.2）。production では必須変数の既定値使用を起動時に拒否する
+APP_ENV = os.environ.get("APP_ENV", "development")
+IS_PRODUCTION = APP_ENV == "production"
+
 # DB（tech_operations.md §12.2）
 DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite:///./afkgame.db")
 
 # アプリケーションログ
-LOG_LEVEL = "INFO"   # 環境変数 LOG_LEVEL で上書き可
-LOG_FORMAT = "text"  # text / json、環境変数 LOG_FORMAT で上書き可
+LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO")   # 参照は logging_config.setup_logging
+LOG_FORMAT = os.environ.get("LOG_FORMAT", "text")  # text / json
 
 # ── 認証 (Phase 2) ──
-JWT_SECRET = os.environ.get("JWT_SECRET", "dev-secret-change-in-production")
+# 開発用の既定値。HS256 の鍵長は 32 バイト以上が必要（RFC 7518 §3.2）
+DEFAULT_JWT_SECRET = "afkgame-dev-secret-change-in-production"
+JWT_SECRET = os.environ.get("JWT_SECRET", DEFAULT_JWT_SECRET)
 JWT_ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 REFRESH_TOKEN_EXPIRE_DAYS = 30
@@ -49,6 +76,14 @@ GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", "")
 CORS_ORIGINS = [
     "http://localhost:5173",
 ]
+
+
+def validate_production_settings() -> None:
+    """本番起動時に必須の秘密情報が既定値のままなら起動を中止する（tech_operations.md §12.2）"""
+    if IS_PRODUCTION and JWT_SECRET == DEFAULT_JWT_SECRET:
+        raise RuntimeError(
+            "APP_ENV=production では JWT_SECRET の設定が必須です（既定値のまま起動はできません）"
+        )
 
 # 初期キャラクターステータス
 INITIAL_CHARACTER = {
@@ -109,6 +144,9 @@ LIFESTEAL_RANGE = (0.03, 0.08)
 
 # レアリティ順序 (オートセル比較用)
 RARITY_ORDER = ["common", "uncommon", "rare", "epic", "legendary"]
+
+# 売却価格の基準値: floor(SELL_PRICE_BASE × レアリティ倍率 × 装備レベル)
+SELL_PRICE_BASE = 5
 
 # ── 日替わりショップ (Phase 2) ──
 # 仕様: tech_shop.md、数値の正: economy.md §2.5

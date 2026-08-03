@@ -1,6 +1,5 @@
 """キャラクター成長・レベル計算"""
 
-import math
 from dataclasses import dataclass
 
 

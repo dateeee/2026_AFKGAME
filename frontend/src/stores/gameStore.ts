@@ -2,6 +2,15 @@ import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import type { EnemyInfo, GameState, Settings, TowerClearInfo, TowerInfo } from '@/types/game'
 import { getTowerList } from '@/api/client'
+import { ApiError, errorMessage as errorMessage_ } from '@/api/errors'
+
+/** 設定の既定値（正はサーバー: backend/app/config.py の DEFAULT_* / ui.md §設定画面） */
+const DEFAULT_SETTINGS: Settings = {
+  potionThreshold: 0.3,
+  battleLogCount: 50,
+  toastEnabled: true,
+  autoSellRarity: null,
+}
 
 export const useGameStore = defineStore('game', () => {
   const gold = ref(0)
@@ -12,17 +21,15 @@ export const useGameStore = defineStore('game', () => {
   const hpThreshold = ref(0.3)
   const highestFloor = ref(0)
   const currentEnemy = ref<EnemyInfo | null>(null)
-  const settings = ref<Settings>({
-    potionThreshold: 0.3,
-    battleLogCount: 50,
-    toastEnabled: true,
-    autoSellRarity: null,
-  })
+  const settings = ref<Settings>({ ...DEFAULT_SETTINGS })
   const towersCleared = ref<Record<string, TowerClearInfo>>({})
   const towers = ref<TowerInfo[]>([])
   const isConnected = ref(true)
   const isLoading = ref(false)
+  // 通信断の告知（ConnectionBanner に固定表示される）
   const errorMessage = ref<string | null>(null)
+  // 操作が拒否された業務エラー（ゴールド不足・不正な目標階など）。通信断とは分けて出す
+  const actionError = ref<string | null>(null)
 
   function loadFromState(state: GameState) {
     gold.value = state.player.gold
@@ -51,10 +58,49 @@ export const useGameStore = defineStore('game', () => {
     errorMessage.value = null
   }
 
+  function setActionError(message: string) {
+    actionError.value = message
+  }
+
+  function clearActionError() {
+    actionError.value = null
+  }
+
+  /**
+   * 操作の失敗を種別に応じて振り分ける。
+   * 通信断は ConnectionBanner、業務エラーはインライン表示（actionError）へ。
+   */
+  function reportActionFailure(error: unknown) {
+    if (error instanceof ApiError && !error.isNetworkError) {
+      setActionError(error.message)
+      return
+    }
+    setConnectionError(errorMessage_(error))
+  }
+
+  /** ログアウト時に前アカウントの状態を残さないためのリセット */
+  function reset() {
+    gold.value = 0
+    currentTowerId.value = null
+    currentFloor.value = null
+    targetFloor.value = null
+    towerMode.value = 'auto_repeat'
+    hpThreshold.value = 0.3
+    highestFloor.value = 0
+    currentEnemy.value = null
+    settings.value = { ...DEFAULT_SETTINGS }
+    towersCleared.value = {}
+    towers.value = []
+    isLoading.value = false
+    clearError()
+    clearActionError()
+  }
+
   return {
     gold, currentTowerId, currentFloor, targetFloor, towerMode, hpThreshold,
     highestFloor, currentEnemy,
-    settings, towersCleared, towers, isConnected, isLoading, errorMessage,
+    settings, towersCleared, towers, isConnected, isLoading, errorMessage, actionError,
     loadFromState, loadTowers, setConnectionError, clearError,
+    setActionError, clearActionError, reportActionFailure, reset,
   }
 })

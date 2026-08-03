@@ -2,6 +2,11 @@
 
 from sqlalchemy.orm import Session
 
+from app.config import (
+    DEFAULT_BATTLE_LOG_COUNT,
+    DEFAULT_POTION_THRESHOLD,
+    DEFAULT_TOAST_ENABLED,
+)
 from app.master_data.enemies import get_enemy
 from app.models.player import Player
 from app.schemas.equipment import EquipmentResponse
@@ -57,7 +62,10 @@ def build_game_state(player: Player, db: Session) -> GameStateResponse:
         player=PlayerResponse.model_validate(player),
         characters=characters,
         settings=SettingsResponse.model_validate(player.settings) if player.settings else SettingsResponse(
-            potion_threshold=0.3, battle_log_count=50, toast_enabled=True, auto_sell_rarity=None
+            potion_threshold=DEFAULT_POTION_THRESHOLD,
+            battle_log_count=DEFAULT_BATTLE_LOG_COUNT,
+            toast_enabled=DEFAULT_TOAST_ENABLED,
+            auto_sell_rarity=None,
         ),
         potions=potions,
         towers_cleared=towers_cleared,

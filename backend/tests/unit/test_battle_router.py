@@ -11,7 +11,7 @@ import pytest
 from app.config import MAX_LOG_PER_RESPONSE, MAX_OFFLINE_HOURS, TICK_INTERVAL_SECONDS
 from app.models.character import Character
 from app.models.equipment import Equipment
-from app.routers import battle as battle_router
+from app.services import battle_service
 from app.services.battle_service import TickResult
 
 pytestmark = pytest.mark.unit
@@ -39,7 +39,7 @@ def fake_tick(monkeypatch):
             ]
             return result
 
-        monkeypatch.setattr(battle_router, "process_tick", _fake)
+        monkeypatch.setattr(battle_service, "process_tick", _fake)
         return state
 
     return _install
@@ -167,7 +167,7 @@ class TestTickSimplifiedCalc:
         assert player.gold == 1000 + 100 * 17
 
     def test_残tickがなければ外挿しない(self, db, player, client, fake_tick, monkeypatch):
-        monkeypatch.setattr(battle_router, "FAST_CALC_THRESHOLD", 2)
+        monkeypatch.setattr(battle_service, "FAST_CALC_THRESHOLD", 2)
         state = fake_tick(total_gold=10)
         _set_elapsed(db, player, TICK_INTERVAL_SECONDS * 5 + 5)
 

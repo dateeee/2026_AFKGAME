@@ -2,8 +2,11 @@
 
 仕様: design/systems/battle.md「目標階設定」、tech/tech_api.md `/api/tower/select`
 分岐観点:
-  - 上限 = min(到達済み最高階 + 1, 総階数)、無限塔（total_floors=None）は +1 のみ
+  - 上限 = min(到達済み最高階 + 1, 総階数)
   - 上限追従は「目標階 == 旧上限」かつ「新しい階をクリアした」場合のみ発生
+
+不変条件: `TowerData.total_floors` は常に非 None。総階数を持たない無限塔（深淵の塔）は
+Phase 5 で追加される（known_issues.md）ため、本工程では None 入力を扱わない。
 """
 
 import pytest
@@ -31,11 +34,6 @@ class TestTargetFloorCap:
     )
     def test_有限塔は総階数でクランプされる(self, highest, total, expected):
         assert target_floor_cap(highest, total) == expected
-
-    @pytest.mark.parametrize(("highest", "expected"), [(0, 1), (87, 88), (9999, 10000)])
-    def test_無限塔はクランプせず常に最高階プラス1(self, highest, expected):
-        # total_floors=None は深淵の塔（Phase 5〜）
-        assert target_floor_cap(highest, None) == expected
 
 
 class TestGetTowerHighestFloor:
@@ -73,11 +71,6 @@ class TestFollowTargetFloor:
         player.target_floor = 20  # 旧上限 = min(19+1, 20) = 20、新上限も 20
         assert _follow_target_floor(player, 20, old_highest=19, cleared_floor=20) is None
         assert player.target_floor == 20
-
-    def test_無限塔では最上階が存在せず追従し続ける(self, player):
-        player.target_floor = 88
-        assert _follow_target_floor(player, None, old_highest=87, cleared_floor=88) == 89
-        assert player.target_floor == 89
 
     def test_目標階が未設定なら追従しない(self, player):
         player.target_floor = None

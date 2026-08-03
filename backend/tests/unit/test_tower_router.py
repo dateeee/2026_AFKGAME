@@ -5,7 +5,7 @@
 
 import pytest
 
-from tests.helpers import error_message
+from tests.helpers import error_code
 
 pytestmark = pytest.mark.unit
 
@@ -51,7 +51,7 @@ class TestSelectTower:
     def test_未挑戦の塔で2階を指定すると400(self, client):
         res = self._select(client, target_floor=2)
         assert res.status_code == 400
-        assert error_message(res) == "Invalid target floor"
+        assert error_code(res) == "TOWER_INVALID_FLOOR"
 
     def test_到達済み最高階プラス1まで選択できる(self, client, tower_record):
         tower_record("goblin_tower", highest_floor=5)
@@ -69,8 +69,9 @@ class TestSelectTower:
         tower_record("goblin_tower", highest_floor=20, cleared=True)
         assert self._select(client, target_floor=21).status_code == 400
 
-    def test_0階以下は400(self, client):
-        assert self._select(client, target_floor=0).status_code == 400
+    def test_0階以下は422(self, client):
+        # 下限はスキーマ検証（tech_api.md §エラー: 型・範囲違反は 422）
+        assert self._select(client, target_floor=0).status_code == 422
 
     def test_他の塔の到達階は上限に影響しない(self, client, tower_record):
         tower_record("goblin_tower", highest_floor=20, cleared=True)
@@ -88,12 +89,11 @@ class TestSelectTower:
         assert self._select(client).status_code == 200
         res = self._select(client)
         assert res.status_code == 400
-        assert error_message(res) == "Already in a tower"
+        assert error_code(res) == "TOWER_ALREADY_IN_TOWER"
 
-    def test_不正なモードは400(self, client):
+    def test_不正なモードは422(self, client):
         res = self._select(client, mode="invalid_mode")
-        assert res.status_code == 400
-        assert error_message(res) == "Invalid mode"
+        assert res.status_code == 422
 
     def test_入塔時に進行状態が初期化される(self, client, db, player):
         assert self._select(client, target_floor=1, mode="stop_on_clear").status_code == 200
@@ -118,7 +118,7 @@ class TestRetireTower:
     def test_塔外でのリタイアは400(self, client):
         res = client.post("/api/tower/retire")
         assert res.status_code == 400
-        assert error_message(res) == "Not in a tower"
+        assert error_code(res) == "TOWER_NOT_IN_TOWER"
 
     def test_リタイアで進行状態がクリアされる(self, client, db, player):
         client.post("/api/tower/select", json={"towerId": "goblin_tower", "targetFloor": 1})
@@ -137,8 +137,8 @@ class TestTowerMode:
         db.refresh(player)
         assert player.tower_mode == mode
 
-    def test_不正なモードは400(self, client):
-        assert client.put("/api/tower/mode", json={"mode": "turbo"}).status_code == 400
+    def test_不正なモードは422(self, client):
+        assert client.put("/api/tower/mode", json={"mode": "turbo"}).status_code == 422
 
 
 class TestRetreatConditions:
@@ -150,6 +150,6 @@ class TestRetreatConditions:
         assert player.hp_threshold == threshold
 
     @pytest.mark.parametrize("threshold", [-0.1, 1.1])
-    def test_範囲外の閾値は400(self, client, threshold):
+    def test_範囲外の閾値は422(self, client, threshold):
         res = client.put("/api/tower/retreat-conditions", json={"hpThreshold": threshold})
-        assert res.status_code == 400
+        assert res.status_code == 422

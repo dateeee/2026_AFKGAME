@@ -81,19 +81,19 @@ graph LR
 | 単体テストゲート | 製造完了後 | 全PASS + C1カバレッジ100% |
 | Phase完了ゲート | 結合テスト完了時 | API統合テスト・E2E全PASS + `full-review` で仕様との乖離ゼロ |
 
-## 5. 現在の工程状況（2026-08-02時点）
+## 5. 現在の工程状況（2026-08-03時点）
 
 | Phase | 詳細設計 | 製造 | 単体テスト | 結合テスト |
 |-------|---------|------|-----------|-----------|
 | Phase 1 (MVP) | 完了 | 完了 | **完了（C1 100%）** | **完了（L1・L2）** |
-| Phase 2 | 完了 | 実装完了（日替わりショップ含む全機能。製造完了ゲートは backend-review / frontend-review 初回指摘の対応中） | **完了（C1 100%）** | **完了（実装済み範囲）** |
+| Phase 2 | 完了 | **完了**（日替わりショップ含む全機能。製造完了ゲートの初回レビュー指摘 backend 18件・frontend 12件を反映済み） | **完了（C1 100%）** | L1完了・**L2に既存の失敗1件**（[known_issues.md](known_issues.md) #9） |
 | Phase 3〜5 | 完了（数値は仮置き） | 未着手 | — | — |
 
 - テスト基盤は導入済み（pytest / pytest-cov、Playwright）。Phase 1〜2 は**遡及整備**で完了
 
 ### 5.1 単体テストの整備状況（C1カバレッジ）
 
-**単体テストゲート通過（2026-08-03再測定）**: `app/` 全41モジュールが C1 100%、398件 PASS、1,770 stmts / 322 branches。`# pragma: no cover` の使用はゼロ。
+**単体テストゲート通過（2026-08-03 レビュー指摘反映後に再測定）**: `app/` 全42モジュールが C1 100%、402件 PASS（単体373・結合29）、1,819 stmts / 308 branches。`# pragma: no cover` の使用はゼロ。
 
 - 数値は `pytest` 実行時に更新する。製造の追加・変更時は同一変更内で100%を維持する
 
@@ -105,7 +105,9 @@ graph LR
 
 ### 5.3 結合テストの整備状況
 
-**L1（API統合）29件・L2（E2E）13件 PASS（2026-08-02）**。必須シナリオ7件（[.claude/project/integration-test.md](../.claude/project/integration-test.md) §3）を全てカバー。
+**L1（API統合）29件 PASS・L2（E2E）12件 PASS / 1件 FAIL（2026-08-03）**。必須シナリオ7件（[.claude/project/integration-test.md](../.claude/project/integration-test.md) §3）を全てカバー。
+
+- L2 の失敗は「未解放の塔は選べず解放条件が表示される」1件。製造完了ゲートの修正**前から再現する既存の失敗**で、原因と対応方針は [known_issues.md](known_issues.md) #9
 
 - L1 は実装済み25エンドポイントのうち24へ到達（未到達は501を返す `POST /api/auth/google` のみ）、L2 は全6ルートへ到達
 - 外部要因は固定する（乱数=固定シード、時刻=`last_tick_at` の巻き戻し）。スリープで待たない

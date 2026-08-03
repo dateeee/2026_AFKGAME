@@ -32,6 +32,10 @@ class SellRequest(CamelModel):
     equipment_ids: list[str]
 
 
+class LockResponse(CamelModel):
+    locked: bool
+
+
 class SellResponse(CamelModel):
     gold_earned: int
     items_sold: int
