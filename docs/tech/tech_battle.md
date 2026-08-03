@@ -112,30 +112,30 @@ def calc_final_stat(base, growth, lv, limit_break_pct, rebirth_pct, equip_val, p
 ```python
 def select_target_with_taunt(enemies_or_allies, taunters):
     """taunters: [{char, taunt_rate}, ...]"""
+    TAUNT_CAP = 0.8  # 合算上限（systems/battle.md「確率・軽減率の上限」）
     total_taunt = sum(t.taunt_rate for t in taunters)
 
-    if total_taunt >= 1.0:
-        # 合算100%超え → 挑発者間で按分
-        roll = random()
-        cumulative = 0
+    roll = random()
+    cumulative = 0
+    if total_taunt > TAUNT_CAP:
+        # 合算80%超え → 上限80%を挑発率の比率で按分（残り20%はランダム）
         for t in taunters:
-            cumulative += t.taunt_rate / total_taunt
+            cumulative += TAUNT_CAP * (t.taunt_rate / total_taunt)
             if roll < cumulative:
                 return t.char
     else:
-        # 合算100%以下 → 各挑発者 or ランダム
-        roll = random()
-        cumulative = 0
+        # 合算80%以下 → 各挑発者の挑発率をそのまま適用
         for t in taunters:
             cumulative += t.taunt_rate
             if roll < cumulative:
                 return t.char
-        # 残り確率 → 通常ランダム
-        return random.choice([a for a in enemies_or_allies if a.hp > 0])
+    # 残り確率（常に20%以上） → 通常ランダム
+    return random.choice([a for a in enemies_or_allies if a.hp > 0])
 ```
 
 - 挑発は範囲攻撃には無効（範囲攻撃は全体に当たるため）
-- 挑発率はスキルレベルで変動: 段階2=50%、段階3=60%、段階4=70%、最大80%
+- 挑発率はスキルレベルで変動: 段階1=50%、段階2=60%、段階3=70%、段階4=80%
+- 合算しても上限は80%で、常に20%はランダムターゲットに抜ける（正は [systems/battle.md](../design/systems/battle.md)「確率・軽減率の上限」）
 
 ### 3.1.4 ボスラッシュのウェーブ間処理
 

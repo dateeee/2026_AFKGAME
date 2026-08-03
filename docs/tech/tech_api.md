@@ -61,6 +61,7 @@
 | POST | `/api/auth/link-account` | ゲストアカウントをメール/Googleに紐づけ（ゲスト→本登録） |
 | POST | `/api/auth/password-reset/request` | パスワードリセットメール送信 |
 | POST | `/api/auth/password-reset/confirm` | パスワードリセット実行 |
+| POST | `/api/auth/delete-account` | 退会（アカウント削除）。**再認証必須**（`password` または Google の `idToken`）。ユーザー・プレイヤーデータ・全トークンをカスケード削除し、以後ログイン不可。再認証失敗は401 |
 
 ## ゲーム状態
 | メソッド | パス | 説明 |
@@ -87,7 +88,7 @@
 | POST | `/api/equipment/equip` | 装備の変更（Phase 2〜） |
 | POST | `/api/equipment/sell` | 装備売却（`equipmentIds`）。装備を消費してゴールドを獲得（売却価格 = 5 × レアリティ倍率 × 装備レベル）（Phase 2〜） |
 | POST | `/api/equipment/lock` | 装備のロック/アンロック切替（`equipmentId`）（Phase 2〜） |
-| POST | `/api/item/sell` | アイテム売却（`itemId`, `quantity`）。換金アイテム・素材を売却してゴールドを獲得（Phase 4〜） |
+| POST | `/api/item/sell` | アイテム売却（`itemId`, `quantity`）。**換金アイテムは Phase 2〜**（同Phaseからドロップするため。[master/item.md §5](../data/master/item.md)）、**素材は Phase 4〜**（生産システムと同時）。売却価格はアイテムごとの定義値 × `quantity` |
 
 > **`targetFloor` の検証範囲**: `1 <= targetFloor <= min(その塔の TowerClearRecord.highestFloor + 1, totalFloors)`。塔ごとに個別判定し、範囲外は 400。深淵の塔（`abyss_tower`）は総階数を持たないため `highestFloor + 1` のみで判定する。この上限は `/api/tower/list` が塔ごとに `targetFloorCap` として返すため、クライアントは式を再実装しない。
 > **上限追従**: 目標階が上限と一致している状態で新しい階をクリアした場合、サーバーが tick 処理内で `targetFloor` を +1 する（クライアントからの再設定は不要）。目標階が上限未満なら追従しない。
@@ -96,7 +97,7 @@
 ## パーティ・スキル（Phase 3〜）
 | メソッド | パス | 説明 |
 |---------|------|------|
-| PUT | `/api/party/edit` | パーティ編成の変更（`memberIds`: キャラID配列、最大4人） |
+| PUT | `/api/party/edit` | パーティ編成の変更（`memberIds`: キャラID配列、最大4人）。**入塔中の変更は400**（入れ替えは塔外限定。[systems/character.md §2.7](../design/systems/character.md)）。未所持・重複するキャラIDは422 |
 | POST | `/api/skill/learn` | スキル習得（`characterId`, `skillId`）。SP消費。前提スキル未習得時はエラー |
 | PUT | `/api/skill/set-active` | アクティブスキルのセット変更（`characterId`, `activeSlots`: スキルID配列、最大2） |
 | POST | `/api/skill/reset` | スキル全リセット（`characterId`）。ゴールド消費（LV×50G）。全SP返却 |

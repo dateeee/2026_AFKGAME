@@ -33,6 +33,9 @@
 | リフレッシュトークンの保管先 | `docs/tech/tech_auth.md` | `docs/tech/tech_architecture.md`, `docs/tech/tech_security.md` | `httpOnly` | §7 が正。LocalStorage で確定（ISSUE-704）。XSSリスクの受容判断は `tech_security.md` §11.7 |
 | 未確定仕様・調整待ち数値の管理ルール | `docs/development_process.md` | `docs/open_specs.md`, `docs/balance_backlog.md`, `CLAUDE.md` | — | §6 が正。台帳は open_specs / balance_backlog、振り分けと解消フローの正はプロセス側（ISSUE-701〜703） |
 | コスト規律（サブエージェント運用・読み方・工程区切り） | `.claude/project/profile.md` | `CLAUDE.md`, `.claude/references/review-procedure.md` | `同時最大4体` | §6 が正。CLAUDE.md は常時読込のため要約 + リンクを残す。review-procedure.md は一般手順としての原則再掲のみ可（固有値は持たない）。ISSUE-901 で確定（2026-08-03） |
+| 確率・軽減率の上限（挑発率・状態異常付与率の合算80%） | `docs/design/systems/battle.md` | `docs/design/systems/character.md`, `docs/tech/tech_battle.md`, `docs/data/skills/006_生存術系統.md` | — | 「確率・軽減率の上限（キャップ）」が正。合算80%・残り20%は必ずランダム。按分の実装式は `tech_battle.md` §3.1.3（ISSUE-1001・1002 で確定） |
+| Phaseごとの開発進捗（工程の完了状況） | `docs/development_process.md` | — | — | §5 が正。README.md は Phase の**内容**のみを持ち、状況列は持たない（ISSUE-1019 で確定） |
+| キャラクター成長式と LV 別ステータス | `docs/data/master/character.md` | `docs/design/systems/character.md`, `docs/data/towers/*.md` | — | §1.2 の `base + growth × (LV - 1)` が正。塔ファイル §4 の勇者参考値は導出値（ISSUE-1008 で確定） |
 
 ## 3. 境界の一般原則
 

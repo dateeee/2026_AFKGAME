@@ -37,9 +37,9 @@
 | 項目 | 内容 |
 |------|------|
 | 確定している範囲 | 難易度ごとに到達済み最高階を個別管理する（[design/systems/endgame.md](design/systems/endgame.md)）。到達記録の保持先は `towersCleared`（[tech/tech_data.md](tech/tech_data.md)） |
-| 未確定な範囲 | 難易度を `towersCleared` のキーへどう畳み込むか（`"{towerId}_{difficulty}"` 形式 / 値をオブジェクト化 など） |
-| 背景 | 難易度は Phase 5（エンドコンテンツ）で追加される。Phase 1〜4 のセーブデータとの後方互換が要る |
-| 決定時にすること | `tech_data.md` のセーブデータ構造へキー体系を定義し、[tech/tech_api.md](tech/tech_api.md)「イベントダンジョン」節へ反映し、本書の行を削除する |
+| 未確定な範囲 | ① 難易度を `towersCleared` のキーへどう畳み込むか（`"{towerId}_{difficulty}"` 形式 / 値をオブジェクト化 など）／② 難易度パラメータを `/api/tower/select` へどう渡すか（追加パラメータ / `towerId` に畳み込む） |
+| 背景 | 難易度は Phase 5（エンドコンテンツ）で追加される。Phase 1〜4 のセーブデータとの後方互換が要る。専用エンドポイントを設けず `/api/tower/*` を再利用する方針までは確定済み |
+| 決定時にすること | `tech_data.md` のセーブデータ構造へキー体系を定義し、[tech/tech_api.md](tech/tech_api.md)「イベントダンジョン」節と [diagrams/api_sequence/endgame.md](../diagrams/api_sequence/endgame.md) §11.5 へ反映し、本書の行を削除する |
 
 ## 4. ボスラッシュ・イベントダンジョンへの導線
 

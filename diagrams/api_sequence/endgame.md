@@ -51,8 +51,8 @@ sequenceDiagram
 
 > イベントダンジョン（試練の迷宮・宝物庫・修練場）は通常の塔と同じデータ構造で管理される。
 > 難易度（初級/中級/上級）は `Modifier`（bonus型: 報酬倍率 ×1/2/4）で実装し、
-> 塔選択API `/api/tower/select` で同一のフローを使用する。
-> 専用APIエンドポイントは不要。
+> **専用エンドポイントは設けず `/api/tower/*` を再利用する方針**。
+> ただし**難易度パラメータの受け渡し方法（`/api/tower/select` への追加パラメータかキー体系か）は未確定**で、Phase 5 の基本設計で確定する（[open_specs.md](../../docs/open_specs.md) #3、正は [tech_api.md](../../docs/tech/tech_api.md)「イベントダンジョン」）。
 
 ## 11.7. 深淵の塔ランキング（Phase 5）
 

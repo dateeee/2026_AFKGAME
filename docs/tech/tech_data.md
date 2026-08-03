@@ -33,15 +33,19 @@
       "baseAtk": 25,                   // 基礎ATK
       "baseDef": 12,                   // 基礎DEF
       "baseSpd": 10,                   // 基礎SPD
-      "effectiveMaxHp": 150            // 装備込み最大HP（装備未装着時はmaxHpと同値）
+      "effectiveMaxHp": 150            // 装備込み最大HP（装備未装着時はmaxHpと同値）。Phase 3〜はレアリティ・限界突破も込み
+      // "rarity": "common",           // Phase 3〜: キャラのレアリティ（common〜legendary）
       // "limitBreak": 0,              // Phase 3〜: 限界突破回数（0-5）
+      // "effectiveAtk": 25,           // Phase 3〜: 実効ATK（基礎 × レアリティ倍率 × 限界突破ボーナス + 装備）
+      // "effectiveDef": 12,           // Phase 3〜: 実効DEF（同上）
+      // "effectiveSpd": 10,           // Phase 3〜: 実効SPD（同上）
       // "skills": { ... },            // Phase 3〜: スキル情報
       // "prestige": { ... }           // Phase 5〜: 転生データ
     }
   ],
   "settings": {
     "potionThreshold": 0.3,            // ポーション自動使用閾値（0.1〜0.5、0.1刻み。デフォルト0.3）
-    "battleLogCount": 50,              // 戦闘ログ表示件数（20/50/100/200）
+    "battleLogCount": 50,              // 戦闘ログ表示件数（20/50/100）
     "toastEnabled": true,              // トースト通知ON/OFF
     "autoSellRarity": null             // Phase 2〜: 自動売却レアリティ（null/common/uncommon）
   },

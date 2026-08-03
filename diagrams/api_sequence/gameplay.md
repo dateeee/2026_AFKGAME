@@ -14,7 +14,7 @@ sequenceDiagram
     B->>API: GET /api/tower/list
     API->>DB: TowerClearRecord取得
     DB-->>API: 塔別クリア状況
-    API-->>B: [{<br/>  id, name, dungeonName, totalFloors,<br/>  unlockTowerId, unlocked, cleared, highestFloor<br/>}, ...]
+    API-->>B: [{<br/>  id, name, dungeonName, totalFloors,<br/>  unlockTowerId, unlocked, cleared, highestFloor,<br/>  targetFloorCap<br/>}, ...]
 
     B->>API: POST /api/tower/select<br/>{<br/>  towerId: "forest_tower",<br/>  targetFloor: 15,<br/>  mode: "auto_repeat"<br/>}
 
@@ -32,9 +32,11 @@ sequenceDiagram
     else 検証OK
         API->>DB: Player更新:<br/>currentTower = forest_tower<br/>currentFloor = 1<br/>targetFloor = 15<br/>towerMode = auto_repeat
 
-        API-->>B: { status: "ok", updatedState }
+        API-->>B: { status: "ok", towerId, targetFloor }
 
-        B->>B: gameStore更新
+        B->>API: GET /api/game/state
+        API-->>B: ゲーム状態JSON
+        B->>B: gameStore更新 (loadFromState)
         B->>B: TowerInfo.vue 再描画<br/>「森の塔 1F / 目標: 15F」
 
         Note over B,API: 次のtickから森の塔1Fで戦闘開始

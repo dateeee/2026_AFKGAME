@@ -88,4 +88,23 @@ sequenceDiagram
     API->>API: bcryptハッシュ生成
     API->>DB: password_hash更新<br/>トークンを使用済みに
     API-->>B: { status: "ok" }
+
+    Note over B,Google: === 退会（アカウント削除） ===
+
+    B->>B: 設定画面 → 退会確認<br/>(再認証 → 削除確認)
+    B->>API: POST /api/auth/delete-account<br/>{ password } または { idToken }<br/>Authorization: Bearer {access_token}
+    API->>DB: 再認証（password_hash照合 / Google検証）
+
+    alt 再認証失敗
+        API-->>B: 401 AUTH_REAUTH_REQUIRED
+    else 再認証成功
+        API->>DB: Player配下（装備・インベントリ・塔記録・<br/>ショップ状態・設定）を削除
+        API->>DB: RefreshToken・EmailVerificationToken を全削除
+        API->>DB: User を削除
+        API-->>B: { status: "ok" }
+        B->>B: 保持中のトークンを破棄<br/>ログイン画面へ遷移
+    end
 ```
+
+- 退会は**再認証を必須**とし、削除確認で復旧不可を明示してから実行する（画面遷移は [screen_transition/main_nav.md](../screen_transition/main_nav.md) の `退会確認`）
+- 削除は1トランザクションで行い、途中失敗時は全件ロールバックする

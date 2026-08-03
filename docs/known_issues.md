@@ -23,6 +23,10 @@
 | 8 | `composables/useBattleLocal.ts` | 開発時フォールバック（[CLAUDE.md](../CLAUDE.md) アーキテクチャ不変条件4「バックエンド未起動でもフロント単体で動作可」）が実質未実装のスタブで、どこからも import されていない。`VITE_USE_API=false` では初期化がスキップされ、空の画面になる（クラッシュはしない）。**不変条件が求める水準の確定が先**（ダミー状態＋簡易ローカルtickを実装するか、不変条件を「クラッシュせず起動する」へ緩めるか） | 中（不変条件と実装の乖離） | コードレビュー |
 | 10 | `master_data/towers.py`, `services/battle_service.py`, `schemas/tower.py` | 深淵の塔（[endgame.md](design/systems/endgame.md) §2.14 の無限塔）は総階数を持たないが、`TowerData.total_floors` は `int` 固定。Phase 5 着手時に `target_floor_cap` / `process_tick` の目標到達判定 / `TowerInfo.total_floors` をまとめて `None` 対応させる（片側だけ対応すると判定が非対称になるため、現在は全て非 None を不変条件としている） | 低（Phase 5 の前提条件） | コードレビュー |
 
+| 11 | `services/battle_service.py`, `services/equipment_service.py` | 全滅ペナルティ「**塔内取得アイテム全ロスト**」が未実装（[battle.md](design/systems/battle.md)「全滅時の処理」3項目のうちEXP・ゴールドのみ実装）。`equipment_service.try_drop()` がドロップ装備を即座に永続化し、オートセル益も即 `player.gold` へ加算するため、取り消し対象として管理されていない。仕様・[battle_flow/overview.md](../diagrams/battle_flow/overview.md) が正 | 中（仕様乖離） | diagrams-review ISSUE-515 |
+| 12 | `routers/item.py`（未作成） | 換金アイテムが**ドロップも売却APIも未実装**。仕様では [item.md §5](data/master/item.md) の換金アイテムが Phase 2〜 ドロップし、[tech_api.md](tech/tech_api.md) の `POST /api/item/sell` で Phase 2〜 売却できる（素材分は Phase 4〜）。現状は塔ファイル §7.4 のドロップテーブルが実装に反映されていない | 中（Phase 2 の機能欠落） | doc-review ISSUE-1020 |
+| 13 | `routers/auth.py` | 退会（アカウント削除）`POST /api/auth/delete-account` が未実装。[main_nav.md](../diagrams/screen_transition/main_nav.md) は退会導線を Phase 2〜 として描き、[tech_api.md](tech/tech_api.md)・[api_sequence/auth.md](../diagrams/api_sequence/auth.md) §14 に再認証つきの削除フローを定義済み | 中（Phase 2 の機能欠落） | diagrams-review ISSUE-509 |
+
 - 単体テストは**現状の実装に合わせて**作成済み。上記を修正する場合は該当テストの期待値も併せて更新すること
 
 ## 3. 対応済みの項目

@@ -38,7 +38,7 @@ classDiagram
 
     class Settings {
         +float potionThreshold  0.1-0.5
-        +int battleLogCount  20/50/100/200
+        +int battleLogCount  20/50/100
         +bool toastEnabled
         +Rarity autoSellRarity  nullable
     }
@@ -116,9 +116,25 @@ classDiagram
         +datetime highestFloorAt  nullable ランキングのタイブレーク用
     }
 
-    Player "1" --> "1" Settings
-    Player "1" --> "1" Party
+    class CharacterType {
+        <<enumeration>>
+        melee  近接型
+        magic  魔力型
+        holy  神聖型
+        agile  敏捷型
+    }
+
+    class TowerMode {
+        <<enumeration>>
+        auto_repeat  自動周回
+        stop_on_clear  クリア後停止
+    }
+
+    Player "1" --> "0..1" Settings
+    Player "1" --> "0..*" Party
     Player "1" --> "*" TowerClearRecord
+    Player --> TowerMode
+    Character --> CharacterType
     Party "1" --> "1..4" Character
     Character "1" --> "1" Stats : baseStats
     Character "1" --> "0..1" PrestigeData

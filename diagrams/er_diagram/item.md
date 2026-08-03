@@ -49,6 +49,8 @@ erDiagram
     }
 ```
 
+> **注**: `ItemMaster` はDBテーブルではなく、コード内定義のマスターデータ（`backend/app/master_data/items.py`）。`InventoryItem.item_id` の FK 表記は論理参照を示す（DBレベルのFK制約はない）。`InventoryItem` 側は `category` を列として持たず、`item_id` から `ItemMaster` を引いて得る。
+
 ## ショップ・施設系
 
 ```mermaid
@@ -82,7 +84,7 @@ erDiagram
     }
 
     Facility {
-        uuid id PK
+        uuid id PK "Phase 4〜 (未実装)"
         uuid player_id FK "references Player.id"
         enum facility_type "tavern/forge/training_ground/warehouse/market"
         int level "0-10 (0=未建設)"

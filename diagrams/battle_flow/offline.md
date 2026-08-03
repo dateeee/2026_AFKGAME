@@ -46,3 +46,5 @@ flowchart TD
 
     NaturalHeal --> Result["結果返却:\n- offlineSummary\n- updatedState\n→ フロントでモーダル表示"]
 ```
+
+> **※ 簡略計算（FastCalc）は現行実装と乖離している**。図・[tech_offline.md §4](../../docs/tech/tech_offline.md) が正で、乱数を使わない期待値算出・確定的な全滅判定を定めるが、実装（`battle_service.process_pending_ticks()`）は先頭10tickだけ乱数ありの実戦闘を回して残りを線形外挿する方式。是正は [known_issues.md](../../docs/known_issues.md) で追跡する。

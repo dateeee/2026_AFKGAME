@@ -16,13 +16,14 @@ classDiagram
         +Rarity rarity
         +int level  ドロップ=敵LV / ショップ=最高到達階層
         +int enhanceLevel  0-10
-        +int atk  nullable
-        +int def  nullable
-        +int hp  nullable
-        +int spd  nullable
+        +int statAtk  nullable
+        +int statDef  nullable
+        +int statHp  nullable
+        +int statSpd  nullable
         +float lifesteal  nullable 0.03-0.08
         +bool isTwoHanded
         +bool locked
+        +datetime acquiredAt
         +calcEffectiveStats() Stats
         +calcEnhancedStats() Stats
         +calcSellPrice() int
@@ -56,7 +57,6 @@ classDiagram
 
     class InventoryItem {
         +string itemId
-        +ItemCategory category
         +int quantity
         +add(amount)
         +remove(amount) bool
@@ -79,8 +79,11 @@ classDiagram
 
     Equipment --> EquipSlot
     Equipment --> Rarity
-    InventoryItem --> ItemCategory
+    InventoryItem ..> ItemCategory : itemId から ItemMaster 経由で参照
 ```
+
+- `InventoryItem` は `category` を**自身の列として持たない**。カテゴリは `itemId` から `ItemMaster`（コード内マスターデータ）を引いて得る派生値（[er_diagram/item.md](../er_diagram/item.md)）
+- `Equipment` のステータス列名は ER図・[tech_data.md](../../docs/tech/tech_data.md) と揃えて `statAtk` / `statDef` / `statHp` / `statSpd`（`Stats.atk` 等のキャラクター側ステータスと区別する）
 
 ## ショップ
 

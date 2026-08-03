@@ -8,6 +8,38 @@
 
 ---
 
+## 2026-08-04
+
+| ファイル | 内容 |
+|---------|------|
+| `docs/design/systems/battle.md` 他3件 | 挑発の合算上限を80%へ統一（`006_生存術系統.md` §4 の按分表、`tech_battle.md` §3.1.3 の擬似コードを `TAUNT_CAP=0.8` ベースへ修正、段階別挑発率を 段階1=50%〜段階4=80% に統一）。正を `spec_ownership.md` へ登録（doc-review ISSUE-1001・1002） |
+| `docs/design/systems/equipment.md` | レアリティ出現率の階層補正に100%上限と順次独立判定（レジェンダリー→アンコモンの順、外れたらコモン）を明記。高階層で確率が破綻しないことを追記（ISSUE-1003）。HP吸収の例示を `floor()` 適用後の1HPへ修正（ISSUE-1006） |
+| `docs/tech/tech_data.md` ほか3件 | `battleLogCount` の選択肢から200を削除。`tech_polling.md`・`class_diagram/player.md`・`er_diagram/player.md` にも伝播（ISSUE-1004）。`characters` に Phase 3〜 の `rarity` / `effectiveAtk` / `effectiveDef` / `effectiveSpd` を追加（ISSUE-1017） |
+| `docs/data/towers/003〜010` | 勇者ステータス参考値を `character.md` §1.2 の成長式（ATK=10+3×(LV-1) / DEF=5+2×(LV-1)）へ揃え、期待ダメージ・撃破ターン数を再計算（8ファイル・97行）。正を `spec_ownership.md` へ登録（ISSUE-1008） |
+| `docs/data/towers/010_天空の塔.md` | 神話級装備の実効ドロップ率を式どおり「最大約4%（59F時）」へ修正（ISSUE-1009） |
+| `docs/data/towers/TOWERS_OVERVIEW.md` | 設計方針の適用範囲を塔003以降に限定し、序盤（塔001・002）の例外を注記。報酬倍率を実データに合わせ1.8〜2.8倍へ修正（ISSUE-1010・1011） |
+| `docs/data/towers/007・008` | ドロップテーブル見出しのPhase表記を他塔と同じ「（Phase 2〜）」へ統一（ISSUE-1012） |
+| `docs/data/master/item.md` | 換金アイテムのドロップ率を「通常敵5-15%、ボスは最大30%」へ実態反映（ISSUE-1013） |
+| `docs/design/systems/character.md` | スキル系統表を確定スキルのみへ修正（魔法=ファイアボルト/アイスストーム・パッシブはスキルダメージ+%、剣術/強化/弱体から拡張候補の効果を削除、反撃をパッシブへ移動）。Tier4のCD注記を追加。限界突破を Phase 4〜 へ変更（ISSUE-1014〜1016・1021） |
+| `docs/data/skills/SKILLS_OVERVIEW.md` | クールダウン目安に「Tier4は目安+2〜3ターン」を注記（ISSUE-1016） |
+| `docs/tech/tech_offline.md` | 簡略計算のBREAK時に全滅ペナルティ（EXP50%減・報酬ゴールド0・アイテム空・強制撤退・残tick破棄）を適用する手順を追加（ISSUE-1007） |
+| `docs/tech/tech_api.md` | `/api/item/sell` を換金アイテム Phase 2〜／素材 Phase 4〜 に分割（ISSUE-1020）。`/api/party/edit` に塔外限定の制約を追記（ISSUE-1018）。退会 `/api/auth/delete-account` を追加（diagrams-review ISSUE-509） |
+| `README.md` / `CLAUDE.md` | README の開発フェーズ表から状況列を削除し進捗の正を `development_process.md` §5 に一本化（ISSUE-1019）。CLAUDE.md の索引へ非機能設計3件（performance / security / operations）を追加（ISSUE-1022） |
+| `docs/tech/tech_shop.md` | 1行のみの分岐点が単一経路である旨を §7・§8 へ注記（ISSUE-1023）。§5 のカラム表を圧縮し正をER図へ寄せて文字数上限内に収めた（ISSUE-1024） |
+| `diagrams/battle_flow/overview.md` | tick のターンループ終了条件を実装（塔から離脱時のみ）へ修正し、階クリアでは打ち切らない旨を追記。`highestFloor` 更新を階クリア時の無条件実行へ整理し重複ノードを削除。全滅時アイテムロストが実装未反映である旨を注記（ISSUE-515・516・518） |
+| `diagrams/battle_flow/offline.md` | 簡略計算が実装（サンプリング外挿）と乖離している旨を注記（ISSUE-517） |
+| `diagrams/api_sequence/auth.md` | 退会（アカウント削除）シーケンスを §14 へ追加（ISSUE-509） |
+| `diagrams/api_sequence/gameplay.md` | `/api/tower/list` の例に `targetFloorCap` を追加。`/api/tower/select` のレスポンスを実装に合わせ、直後の `GET /api/game/state` の2往復として描き直し（ISSUE-510・511） |
+| `diagrams/api_sequence/endgame.md` | イベントダンジョンの難易度パラメータ受け渡しが未確定である旨を明記し `tech_api.md` と整合（ISSUE-512） |
+| `diagrams/er_diagram/` 3件 | `EmailVerificationToken.purpose` を追加、`ItemMaster` が非DBテーブルである旨を注記、未実装エンティティ（PrestigeBonus / Facility / BossRushState / BossRushMilestone）へPhase注記を追加（ISSUE-501・505・508） |
+| `diagrams/class_diagram/` 2件 | `InventoryItem.category` を削除し派生値として整理、`Equipment` に `acquiredAt` 追加・ステータス名を `statAtk` 等へ統一、Player→Settings/Party のカーディナリティを修正、`CharacterType`・`TowerMode` の enumeration を追加（ISSUE-502〜504・506・507） |
+| `diagrams/screen_transition/` 2件 | 登録を「ログイン画面内のタブ」として描き直し確認メール送信状態を削除（`ui_onboarding.md`・`ui.md` も追随）。装備一覧フィルターに「装備可否」を追加。退会が呼ぶAPIを明記（ISSUE-509・513・514） |
+| `docs/spec_ownership.md` | 挑発率キャップ・Phase進捗・キャラ成長式の3トピックを登録 |
+| `docs/known_issues.md` | 実装未対応3件を追加（全滅時アイテムロスト・換金アイテムのドロップ/売却API・退会API） |
+| `docs/open_specs.md` | #3 の未確定範囲へ「難易度パラメータの受け渡し方法」を追加し、反映先に `api_sequence/endgame.md` を追記 |
+
+---
+
 ## 2026-08-03
 
 | ファイル | 内容 |

@@ -56,7 +56,7 @@ stateDiagram-v2
             note right of 装備画面 : Phase 2~
             [*] --> 装備一覧
             装備一覧 : ソート (レアリティ/LV/ステータス)
-            装備一覧 : フィルター (レアリティ/スロット)
+            装備一覧 : フィルター (レアリティ/スロット/装備可否)
             装備一覧 : ロック機能
             装備一覧 --> 装備比較ポップアップ : タップ/ホバー
             装備一覧 --> 一括売却確認 : 一括売却ボタン\n（Phase 2 未実装）
@@ -160,5 +160,5 @@ stateDiagram-v2
 - Phase 1 ではホーム + ショップ + 設定のみ表示
 - 塔タブ・ダンジョン選択はPhase 2時点ではホーム画面内セクションとして実装中（タブ分離は製造残。構成自体は仕様準拠のため変更なし）
 - お知らせはタブではなくヘッダ導線（[systems/ui.md](../../docs/design/systems/ui.md)「お知らせ（Phase 3〜）」）
-- 退会確認で削除を実行した後、およびログアウト実行後は、メインナビの外にある認証フロー（[auth.md](auth.md)）のログイン画面へ戻る。ログアウトは `POST /api/auth/logout`（[api_sequence/auth.md](../api_sequence/auth.md) §14）を呼ぶ
+- 退会確認で削除を実行した後、およびログアウト実行後は、メインナビの外にある認証フロー（[auth.md](auth.md)）のログイン画面へ戻る。ログアウトは `POST /api/auth/logout`、退会は再認証のうえ `POST /api/auth/delete-account` を呼ぶ（いずれも [api_sequence/auth.md](../api_sequence/auth.md) §14）
 - ボスラッシュ・イベントダンジョンの導線（タブ追加かホーム内セクションか）は未確定（[open_specs.md](../../docs/open_specs.md) #4 で管理。正は [systems/ui.md](../../docs/design/systems/ui.md) ナビゲーション構造）

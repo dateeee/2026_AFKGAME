@@ -36,6 +36,7 @@ erDiagram
         int id PK "auto increment"
         string user_id FK "references User.id"
         string token_hash UK
+        string purpose "verify_email / password_reset, default verify_email"
         datetime expires_at "24時間後"
         boolean used "default false"
         datetime created_at
@@ -83,7 +84,7 @@ erDiagram
         uuid id PK
         uuid player_id FK "references Player.id"
         float potion_threshold "0.1-0.5, default 0.3"
-        int battle_log_count "20/50/100/200, default 50"
+        int battle_log_count "20/50/100, default 50"
         boolean toast_enabled "default true"
         enum auto_sell_rarity "null/common/uncommon, default null"
     }
@@ -107,7 +108,7 @@ erDiagram
     }
 
     PrestigeBonus {
-        uuid id PK
+        uuid id PK "Phase 5〜 (未実装)"
         uuid character_id FK "references Character.id"
         int prestige_count "転生回数"
         int prestige_points "未使用転生ポイント"
