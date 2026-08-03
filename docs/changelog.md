@@ -12,6 +12,7 @@
 
 | ファイル | 内容 |
 |---------|------|
+| `docs/reviews/full-review/` | Phase 2 完了ゲートの `full-review` を実施（12件・高2/中8/低2）。機械的検証（エンドポイント24件・型15ペア・数値ハードコード・tick間隔）は指摘ゼロ。高は「設定画面アカウント欄5項目の未実装（ISSUE-104）」「`tech_polling.md` §6 の是正対象5件が未着手のまま製造完了と判定（ISSUE-111）」。12件中6件が「`ui.md` の Phase 列と実装の突き合わせ漏れ」に起因するため、`dev` の工程内検証への追加と `check_phase_scope.py` の常設化を提案 |
 | `frontend/tests/e2e/tower.spec.ts` / `docs/known_issues.md` / `docs/development_process.md` | known_issues #9（L2の既存失敗）を解消。未解放の塔カードの `role="radio"` + `aria-disabled="true"` + `tabindex="-1"` は正しい表現のため実装は変えず、テスト側で無効であることを属性検証し、ハンドラのガードは `click({ force: true })` で確認する形にした。§5 の Phase 2 結合テストを「完了（L1・L2）」、§5.3 を L1 29件・L2 13件 PASS へ更新 |
 | `docs/known_issues.md` / `docs/development_process.md` | 製造完了ゲートのレビュー指摘を反映（backend 18件・frontend 12件）。known_issues は解消4件（トークン用途分離・`Query.get()`・オートセル未知値・ログ設定の環境変数）を §3 へ移し、判断待ち4件（オフライン簡易計算の仕様乖離・`AUTH_*` コード移行・開発時フォールバックの水準確定・深淵の塔の `None` 対応）とE2Eの既存失敗1件を §2 へ登録。§5 は Phase 2 製造を「完了」、単体402件 PASS / C1 100%、L2 は12件PASS/1件FAILへ更新 |
 | `docs/reviews/backend-review/` / `docs/reviews/frontend-review/` | 製造完了ゲートの初回コードレビューを実施（backend 18件・frontend 12件の指摘） |
