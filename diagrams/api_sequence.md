@@ -7,7 +7,7 @@
 
 | 節 | フロー | ファイル |
 |----|-------|---------|
-| 1. 初回アクセス（ゲスト作成）<br>2. 再訪問（オフライン復帰）<br>3. オンライン中（ポーリングループ）<br>3.5. 設定変更<br>13. 通信エラー時（リトライ） | 基本ループ | [api_sequence/core.md](api_sequence/core.md) |
+| 1. 初回アクセス（ゲスト作成）<br>2. 再訪問（オフライン復帰）<br>3. オンライン中（ポーリングループ）<br>3.5. 設定変更<br>3.7. お知らせ確認（Phase 3〜）<br>13. 通信エラー時（リトライ） | 基本ループ | [api_sequence/core.md](api_sequence/core.md) |
 | 14. 認証フロー概要 | 認証（Phase 2〜） | [api_sequence/auth.md](api_sequence/auth.md) |
 | 4. 塔選択<br>5. ショップ購入<br>6. 装備変更 | 塔・ショップ・装備 | [api_sequence/gameplay.md](api_sequence/gameplay.md) |
 | 6.5. パーティ編成<br>7. スキル習得・リセット<br>8. 限界突破 | パーティ・スキル・限界突破（Phase 3） | [api_sequence/character.md](api_sequence/character.md) |

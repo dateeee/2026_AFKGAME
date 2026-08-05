@@ -10,7 +10,8 @@
 | 技術仕様（索引） | `docs/tech/tech_spec.md` | 個別ファイルへの索引 |
 | データ設計 | `docs/tech/tech_data.md` | DBスキーマ・JSON構造 |
 | 実装配置 | `docs/tech/tech_structure.md` | ディレクトリ構成・モジュール責務 |
-| API設計 | `docs/tech/tech_api.md` | エンドポイント一覧・共通仕様 |
+| API設計 | `docs/tech/tech_api.md` | エンドポイント一覧 |
+| API共通仕様 | `docs/tech/tech_api_common.md` | 規約・共通ヘッダ・ステータスコード |
 | アーキテクチャ | `docs/tech/tech_architecture.md` | 層構成・依存方向 |
 | ログ設計 | `docs/tech/tech_logging.md` | ログレベル・出力項目 |
 | 認証方式 | `docs/tech/tech_auth.md` | 認証フロー・トークン |

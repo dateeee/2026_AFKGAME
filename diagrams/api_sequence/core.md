@@ -155,6 +155,32 @@ sequenceDiagram
 
 - 設定はサーバー側に保存する（[systems/ui.md](../../docs/design/systems/ui.md) 設定画面）。画面遷移は [screen_transition/main_nav.md](../screen_transition/main_nav.md) の設定画面
 
+## 3.7. お知らせ確認（Phase 3〜）
+
+```mermaid
+%%{init: {'theme': 'default', 'sequence': {'actorFontSize': 18, 'messageFontSize': 16, 'noteFontSize': 14}} }%%
+sequenceDiagram
+    participant B as ブラウザ
+    participant LS as LocalStorage
+    participant API as FastAPI
+
+    Note over B: 起動時 (GET /api/game/state 後) に1回だけ取得
+
+    B->>API: GET /api/notice/list<br/>Authorization: Bearer {token}
+    Note over API: マスターデータから返す<br/>(DBテーブルなし)
+    API-->>B: { notices: [{ noticeId, title,<br/>body, publishedAt }] }<br/>publishedAt 降順
+
+    B->>LS: 既読 noticeId 一覧を取得
+    B->>B: 未読件数 = 一覧 − 既読<br/>ヘッダの お知らせ にバッジ表示
+
+    B->>B: ヘッダの お知らせ をタップ<br/>一覧表示 (新しい順)
+    B->>LS: 表示中の全 noticeId を<br/>既読として保存
+    B->>B: バッジ消灯
+```
+
+- API定義は [tech_api.md](../../docs/tech/tech_api.md)「お知らせ」。要件・既読保持先の正は [operation_requirements.md](../../docs/design/operation_requirements.md) §3.1（サーバーは既読状態を持たない）
+- 画面遷移は [screen_transition/main_nav.md](../screen_transition/main_nav.md) の お知らせ画面
+
 ## 13. 通信エラー時（リトライ）
 
 ```mermaid

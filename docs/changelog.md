@@ -12,6 +12,12 @@
 
 | ファイル | 内容 |
 |---------|------|
+| `docs/tech/tech_api.md` | **お知らせAPI定義を確定（Phase 3 基本設計の残分）**: `GET /api/notice/list`（`noticeId`・`title`・`body`・`publishedAt` を新しい順、マスターデータ配信・ページングなし）。未読件数の算出と既読化タイミングを注記 |
+| `docs/tech/tech_api_common.md` | **新規（分割）**: 文字数上限超過のため `tech_api.md` §5.0 共通仕様（規約・共通ヘッダ・ステータスコード）をレイヤー分割で切り出し（documentation_rules §6.3）。索引 `tech_spec.md`・参照元 `tech_security.md`・`CLAUDE.md`・`.claude/project/basic-design.md` を追随 |
+| `docs/tech/tech_structure.md` | 文字数上限対応: 認証系定数の列挙を削除し `tech_auth.md` への参照に置換（重複解消）。コメント2件を圧縮 |
+| `docs/tech/tech_structure.md` | `routers/notice.py`・`master_data/notices.py` を追加（お知らせ、Phase 3〜） |
+| `diagrams/api_sequence/core.md` | §3.7 お知らせ確認フローを新設（起動時取得・バッジ表示・既読保存）。索引 `api_sequence.md` にも登録 |
+| `docs/development_process.md` | §5 現況表: Phase 3 のお知らせ注記を「API定義済み・マスター項目定義と分岐一覧の追補のみ残」へ更新 |
 | `docs/tech/tech_skill.md` | **新規（Phase 3 詳細設計）**: 戦闘内のスキル・状態異常・環境効果処理の一意化11項目（スキル攻撃の乱数なし・スキルダメージ+%の適用位置・多段/範囲攻撃・反撃の連鎖防止 等）と分岐一覧95件（§2〜§8。エンカウント敵数・EXP配分を含む） |
 | `docs/tech/tech_party.md` | **新規（Phase 3 詳細設計）**: パーティ編成・キャラ獲得（塔クリア報酬）・スキル習得/セット/リセット・SP獲得の処理仕様と分岐一覧43件、新設エラーコード10件 |
 | `docs/tech/tech_battle.md` | §3.1.1 にレアリティ倍率を明記（`master/character.md` §7.2 との欠落解消）、§3.1 k の範囲攻撃を「倍率織り込み済み・実行時×0.7なし」へ是正、§3.1.5 報酬付与（EXPはパーティ全員へ全額）を新設（分岐一覧は `tech_skill.md` §8） |

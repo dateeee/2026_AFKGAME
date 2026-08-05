@@ -87,7 +87,7 @@
 | 対象ID | `equipmentId`, `characterId`, `itemId`, `facilityId`, `materialCharacterId` |
 | 他人のリソース指定時 | **404 を返す**（403 だと「存在すること」を漏らすため） |
 | 状態依存の拒否 | ロック中装備の売却・分解、パーティ編成中キャラの限界突破素材化は 400 で拒否 |
-| 認証必須の既定 | 全エンドポイントで認証必須。例外は [tech_api.md](tech_api.md) の共通仕様に一覧化する |
+| 認証必須の既定 | 全エンドポイントで認証必須。例外は [tech_api_common.md](tech_api_common.md) に一覧化する |
 
 - 検証は `dependencies.py` の共通依存で行い、各ルーターに実装を散らさない
 

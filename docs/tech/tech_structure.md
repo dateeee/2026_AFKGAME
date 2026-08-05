@@ -42,7 +42,7 @@
 │   │   │       └── EquipmentSlotGrid.vue  # 装備スロット一覧
 │   │   ├── views/                 # ページコンポーネント
 │   │   │   ├── GameView.vue       # メインゲーム画面
-│   │   │   ├── LoginView.vue      # ログイン・登録統合画面（Phase 2〜。モード切替でログイン/登録を切り替え）
+│   │   │   ├── LoginView.vue      # ログイン・登録統合画面（Phase 2〜）
 │   │   │   ├── RegisterView.vue   # /register → LoginView?mode=register へリダイレクト（Phase 2〜）
 │   │   │   ├── SettingsView.vue   # 設定画面
 │   │   │   ├── ShopView.vue       # ショップ画面（Phase 1〜）
@@ -97,6 +97,7 @@
 │   │   │   ├── shop.py            # ショップ商品一覧・購入
 │   │   │   ├── equipment.py       # 装備一覧・装着・売却・ロック（Phase 2〜）
 │   │   │   ├── party.py           # パーティ編成・スキル・限界突破（Phase 3〜）
+│   │   │   ├── notice.py          # お知らせ一覧（Phase 3〜）
 │   │   │   ├── base.py            # 施設建設・レベルアップ（Phase 4〜）
 │   │   │   ├── forge.py           # 装備強化・製作・分解（Phase 4〜）
 │   │   │   ├── boss_rush.py       # ボスラッシュ・ランキング（Phase 5〜）
@@ -115,7 +116,8 @@
 │   │   │   ├── towers.py          # 塔データ
 │   │   │   ├── items.py           # アイテムデータ
 │   │   │   ├── equipment.py       # 装備ベースデータ
-│   │   │   └── characters.py      # キャラクター成長データ
+│   │   │   ├── characters.py      # キャラクター成長データ
+│   │   │   └── notices.py         # お知らせデータ（Phase 3〜）
 │   │   └── db/
 │   │       └── database.py        # DB接続設定
 │   ├── requirements.txt
@@ -173,7 +175,7 @@
 ```python
 # backend/app/config.py
 TICK_INTERVAL_SECONDS = 60      # 1 tick の間隔（秒）
-TURNS_PER_TICK = 3              # 1 tick あたりのターン数（20秒/ターン × 3 = 60秒）
+TURNS_PER_TICK = 3              # 1 tick あたりのターン数
 OFFLINE_EFFICIENCY = 1.0        # オフライン時の報酬効率（オンラインと同一）
 MAX_OFFLINE_HOURS = 24          # オフライン報酬の最大蓄積時間
 FAST_CALC_THRESHOLD = 100       # これを超える（101以上の）未処理tickは簡略計算に切り替え
@@ -181,12 +183,6 @@ MAX_BATTLE_LOG_RECORDS = 100    # DB保持ログ件数上限
 MAX_LOG_PER_RESPONSE = 50       # 1レスポンスあたりのログ件数上限
 MAX_PLAYER_LEVEL = 9999         # プレイヤーLV上限
 MAX_GOLD = 9_223_372_036_854_775_807  # ゴールド上限（64bit符号付き整数最大値）
-
-# 認証設定（Phase 2〜）
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
-REFRESH_TOKEN_EXPIRE_DAYS = 30
-BCRYPT_COST_FACTOR = 12
-EMAIL_VERIFY_TOKEN_EXPIRE_HOURS = 24
-GUEST_ACCOUNT_EXPIRE_DAYS = 90
-PASSWORD_MIN_LENGTH = 8
 ```
+
+- 認証系の定数（トークン期限・bcrypt cost・パスワード要件・ゲスト期限）も `config.py` に置く（値の正は [tech_auth.md](tech_auth.md)。重複を避け本書では列挙しない）

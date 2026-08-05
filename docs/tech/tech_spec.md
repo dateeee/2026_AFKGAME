@@ -12,6 +12,7 @@
 | 1. データ設計 | ゲーム状態JSON・敵／塔／環境効果・戦闘ログ・施設／装備強化のデータ構造 | [tech_data.md](tech_data.md) |
 | 2. ディレクトリ構成<br>3. フロントエンド構成<br>4. バックエンド構成 | リポジトリ構成、Vue 3 / FastAPI の内部構成・設定値 | [tech_structure.md](tech_structure.md) |
 | 5. API設計 | 全エンドポイント一覧（認証・ゲーム状態・tick・操作系・Phase 3〜5） | [tech_api.md](tech_api.md) |
+| 5.0 API共通仕様 | 規約（パス・ボディ・日時・認証）・共通ヘッダ・ステータスコードの使い分け | [tech_api_common.md](tech_api_common.md) |
 | 6. アーキテクチャ方針<br>7. ゲームループ | サーバー権威・ゲスト永続化・エラーハンドリング・ハイブリッドtick制 | [tech_architecture.md](tech_architecture.md) |
 | 6. ログ設計 | ログレベル・フォーマット・マスク規則・統一エラーレスポンス | [tech_logging.md](tech_logging.md) |
 | 10. 性能・容量設計 | 負荷見積り・平滑化・容量見積り・劣化時の対処順序・検証方法 | [tech_performance.md](tech_performance.md) |
