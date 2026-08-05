@@ -21,13 +21,7 @@
             "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/stop-commit.sh\"",
             "timeout": 15,
             "statusMessage": "未コミットの変更を確認中..."
-          }
-        ]
-      }
-    ],
-    "SessionEnd": [
-      {
-        "hooks": [
+          },
           {
             "type": "command",
             "command": "python \"$CLAUDE_PROJECT_DIR/scripts/log_token_usage.py\"",

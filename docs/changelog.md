@@ -18,7 +18,7 @@
 | `docs/tech/tech_api.md` | 「お知らせ」節を既読 localStorage 保持の確定に追随（エンドポイントは一覧取得のみ） |
 | `docs/spec_ownership.md` | ナビ「その他」行の備考を確定済みへ更新、「お知らせの既読管理（保持先）」行を追加 |
 | `docs/open_specs.md` | #1 モバイルナビ「その他」対象タブ・#2 お知らせ既読保持先を確定し行を削除（残り2件は Phase 5 期限） |
-| `.claude/project/profile.md` | §4 にトークン使用量ログの行を追加（SessionEnd フック + `scripts/log_token_usage.py` の新設に伴う） |
+| `.claude/project/profile.md` | §4 にトークン使用量ログの行を追加（Stop フック + `scripts/log_token_usage.py` の新設に伴う。記録タイミングを SessionEnd から Stop（やり取りごと）へ変更） |
 
 ## 2026-08-04
 

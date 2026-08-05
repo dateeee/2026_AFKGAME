@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
-"""SessionEnd フック — セッションのトークン使用量を logs/token_usage.csv へ記録する。
+"""Stop フック — セッションのトークン使用量を logs/token_usage.csv へ記録する。
 
 起動方法:
-  1. フック起動（通常）: Claude Code の SessionEnd フックから呼ばれ、stdin の JSON
-     （session_id / transcript_path / reason）を受け取って1セッション分を記録する。
+  1. フック起動（通常）: Claude Code の Stop フック（応答完了ごと）から呼ばれ、
+     stdin の JSON（session_id / transcript_path）を受け取り、そのセッションの
+     累計を再集計して記録する。毎ターン上書きされるため常に最新の値になり、
+     クラッシュや強制終了でも直前のやり取りまでは記録が残る。
   2. 一括取り込み: python scripts/log_token_usage.py --all
      ~/.claude/projects/<プロジェクトslug>/ の全トランスクリプトのうち、
-     未記録のセッションをまとめて記録する（クラッシュ等での記録漏れの救済用）。
+     未記録のセッションをまとめて記録する（過去分の取り込み用）。
 
 記録先: logs/token_usage.csv（1行 = 1セッション × 1モデル。同一 session_id は上書き）
 サブエージェント分（<セッションID>/subagents/*.jsonl）も同セッションの消費に合算する。
@@ -209,9 +211,11 @@ def main():
         backfill()
         return
     data = json.load(sys.stdin)
+    # Stop フックの stdin に reason は無い（SessionEnd 互換で残しつつ既定は "stop"）
+    reason = data.get("reason") or "stop"
     log_session(data.get("transcript_path", ""),
                 data.get("session_id", ""),
-                data.get("reason", ""))
+                reason)
 
 
 if __name__ == "__main__":

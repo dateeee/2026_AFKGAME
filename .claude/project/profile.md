@@ -54,7 +54,7 @@
 | ドキュメント規約チェック | `python scripts/check_doc_size.py`（`--list` / `--sections`。上限90%超は残量WARN） |
 | ドキュメント機械検証 | `python scripts/check_docs.py`（リンク・索引到達性・曖昧語・正の逸脱・決定先送り・台帳存否。`--links` 等で個別実行） |
 | 分岐一覧の検証 | `python scripts/check_branch_list.py`（構造検証。`--tests` でテストとの対応照合） |
-| トークン使用量ログ | `logs/token_usage.csv`（SessionEnd フックがセッション単位で自動記録。記録漏れの一括取り込みは `python scripts/log_token_usage.py --all`） |
+| トークン使用量ログ | `logs/token_usage.csv`（Stop フックがやり取りごとにセッション累計を自動更新。過去分の一括取り込みは `python scripts/log_token_usage.py --all`） |
 
 ## 5. アーキテクチャ不変条件
 
