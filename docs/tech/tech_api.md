@@ -137,7 +137,7 @@
 
 ## お知らせ（Phase 3〜）
 
-要件は [operation_requirements.md](../design/operation_requirements.md) §3.1（マスターデータ配信・既読はクライアント保持）。エンドポイントの定義は Phase 3 の基本設計で行う（既読状態のクライアント保持先の未確定は [open_specs.md](../open_specs.md) で管理）。
+要件は [operation_requirements.md](../design/operation_requirements.md) §3.1（マスターデータ配信・既読はクライアントの localStorage 保持。保持先の正は同節）。サーバーは既読状態を持たないため、エンドポイントはお知らせ一覧の取得のみ。定義は Phase 3 の基本設計で行う。
 
 ## 転生（Phase 5〜）
 | メソッド | パス | 説明 |

@@ -28,7 +28,8 @@
 | ダメージ計算式 | `docs/tech/tech_battle.md` | `docs/design/systems/battle.md` | — | 図（`battle_flow/`）は視覚化として再掲可、値の変更は正から |
 | ヘッダの構成要素 | `docs/design/systems/ui.md` | `docs/tech/tech_design_system.md` | — | ISSUE-601 で確定（2026-08-02） |
 | モーダルの表示位置・閉じ方 | `docs/tech/tech_design_system.md` | `docs/design/systems/ui.md` | — | ISSUE-502 で確定（2026-08-02） |
-| ナビゲーション項目と「その他」まとめ | `docs/design/systems/ui.md` | `docs/tech/tech_design_system.md` | — | ISSUE-603 で確定（対象項目は `open_specs.md` 管理） |
+| ナビゲーション項目と「その他」まとめ | `docs/design/systems/ui.md` | `docs/tech/tech_design_system.md`, `diagrams/screen_transition/main_nav.md` | — | ISSUE-603 で確定。「その他」対象タブは 2026-08-05 に確定（Phase 5 の導線のみ `open_specs.md` #4 管理） |
+| お知らせの既読管理（保持先） | `docs/design/operation_requirements.md` | `docs/tech/tech_api.md`, `docs/design/systems/ui.md` | — | §3.1 が正。localStorage 保持で確定（2026-08-05） |
 | ログアウトの挙動（フロー・トークン失効） | `docs/tech/tech_auth.md` | `docs/design/systems/ui.md`, `docs/tech/tech_api.md` | — | エンドポイント定義そのものは `tech_api.md` が正（ISSUE-602） |
 | リフレッシュトークンの保管先 | `docs/tech/tech_auth.md` | `docs/tech/tech_architecture.md`, `docs/tech/tech_security.md` | `httpOnly` | §7 が正。LocalStorage で確定（ISSUE-704）。XSSリスクの受容判断は `tech_security.md` §11.7 |
 | 未確定仕様・調整待ち数値の管理ルール | `docs/development_process.md` | `docs/open_specs.md`, `docs/balance_backlog.md`, `CLAUDE.md` | — | §6 が正。台帳は open_specs / balance_backlog、振り分けと解消フローの正はプロセス側（ISSUE-701〜703） |

@@ -9,28 +9,10 @@
 
 | # | 項目 | 正となる仕様書 | 決定期限 |
 |---|------|--------------|---------|
-| 1 | Phase 3 以降のモバイルナビで「その他」へまとめる対象タブ | [design/systems/ui.md](design/systems/ui.md) ナビゲーション構造 | Phase 3 の基本設計 |
-| 2 | お知らせの既読状態のクライアント保持先 | [design/operation_requirements.md](design/operation_requirements.md) §3.1 | Phase 3 の基本設計 |
 | 3 | 難易度別到達記録（`towersCleared`）のキー体系 | [tech/tech_data.md](tech/tech_data.md) | Phase 5 の基本設計 |
 | 4 | ボスラッシュ・イベントダンジョンへの導線 | [design/systems/ui.md](design/systems/ui.md) ナビゲーション構造 | Phase 5 の基本設計 |
 
-## 1. モバイルナビ「その他」の対象タブ
-
-| 項目 | 内容 |
-|------|------|
-| 確定している範囲 | モバイルは5枠が上限（[tech/tech_design_system.md](tech/tech_design_system.md) §3）。5項目を超えたら末尾を「その他」へまとめる。PCは全項目を並べる |
-| 未確定な範囲 | 「その他」へ入れるタブの組み合わせ |
-| 背景 | タブは Phase 1: 3項目 → Phase 2: 5項目 → Phase 3: 6項目 → Phase 4: 7項目 と増える。超過が起きるのは Phase 3 から |
-| 決定時にすること | `ui.md` ナビゲーション構造に対象タブを追記し、本書の行を削除する。実装は `navItems.ts` の1箇所 |
-
-## 2. お知らせの既読状態のクライアント保持先
-
-| 項目 | 内容 |
-|------|------|
-| 確定している範囲 | 既読状態はクライアント側で保持し、サーバーはプレイヤーごとの既読状態を持たない（[design/operation_requirements.md](design/operation_requirements.md) §3.1）。ヘッダに未読件数を表示する（[design/systems/ui.md](design/systems/ui.md)） |
-| 未確定な範囲 | クライアントのどこへ保持するか（LocalStorage / Pinia の永続化 / セーブデータ同梱） |
-| 背景 | お知らせは Phase 3 実装。保持先によって機種変更・ブラウザ変更時に既読が引き継がれるかが変わる |
-| 決定時にすること | `operation_requirements.md` §3.1、[tech/tech_state.md](tech/tech_state.md)、[tech/tech_api.md](tech/tech_api.md)「お知らせ」節へ保持先を明記し、本書の行を削除する |
+> 項目番号は確定済みの行を削除しても振り直さない（他ドキュメントからの参照を保つ）。
 
 ## 3. 難易度別到達記録（`towersCleared`）のキー体系
 

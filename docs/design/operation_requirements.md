@@ -55,10 +55,10 @@
 | 配信内容 | 計画メンテナンス告知・バランス改定の予告・補填の実施報告 |
 | データ保持 | お知らせ本文はマスターデータとして持つ。DBテーブル・管理画面は設けず、更新はデプロイで行う |
 | 掲示 | 全画面共通のヘッダから参照でき、未読件数がわかること（[systems/ui.md](systems/ui.md)） |
-| 既読管理 | クライアント側で保持する。サーバーはプレイヤーごとの既読状態を持たない |
+| 既読管理 | クライアントの localStorage 専用キーで保持する（**本行が正**。Pinia ストアはメモリ上の参照のみで永続化プラグインは使わない）。サーバーはプレイヤーごとの既読状態を持たない。機種変更・ブラウザ変更で既読が引き継がれないことは許容する |
 | 保持件数 | 掲示件数に上限を設け、古いものはマスターデータから削除する（[non_functional_requirements.md](non_functional_requirements.md) §2「上限のないデータを新設しない」） |
 
-- お知らせマスターの項目定義は Phase 3 の詳細設計で [master_data.md](../data/master_data.md) へ定義する。掲示件数の上限値は [balance_backlog.md](../balance_backlog.md)、既読状態のクライアント保持先は [open_specs.md](../open_specs.md) で管理する
+- お知らせマスターの項目定義は Phase 3 の詳細設計で [master_data.md](../data/master_data.md) へ定義する。掲示件数の上限値は [balance_backlog.md](../balance_backlog.md) で管理する
 - Phase 3 の実装完了までは告知手段を持たないため、**下方修正を伴う改定は行わない**
 - ゲスト削除の事前告知には使えない（**一定期間アクセスのないプレイヤー**には届かないため。期限は [tech_auth.md](../tech/tech_auth.md) が正）。緩和策は [non_functional_requirements.md](non_functional_requirements.md) §5 が正
 

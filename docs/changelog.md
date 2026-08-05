@@ -12,6 +12,12 @@
 
 | ファイル | 内容 |
 |---------|------|
+| `docs/design/systems/ui.md` | ナビゲーション構造にモバイル「その他」の対象タブ表を追加（Phase 3: ショップ・設定 / Phase 4: 塔・ショップ・設定。本表が正）。open_specs #1 の確定に伴う |
+| `diagrams/screen_transition/main_nav.md` | モバイルの「その他」まとめの注記を追加（正は `systems/ui.md`） |
+| `docs/design/operation_requirements.md` | §3.1 既読管理の保持先を localStorage 専用キーに確定（本行が正。永続化プラグイン不使用・機種変更での引き継ぎなしを許容）。open_specs #2 の確定に伴う |
+| `docs/tech/tech_api.md` | 「お知らせ」節を既読 localStorage 保持の確定に追随（エンドポイントは一覧取得のみ） |
+| `docs/spec_ownership.md` | ナビ「その他」行の備考を確定済みへ更新、「お知らせの既読管理（保持先）」行を追加 |
+| `docs/open_specs.md` | #1 モバイルナビ「その他」対象タブ・#2 お知らせ既読保持先を確定し行を削除（残り2件は Phase 5 期限） |
 | `.claude/project/profile.md` | §4 にトークン使用量ログの行を追加（SessionEnd フック + `scripts/log_token_usage.py` の新設に伴う） |
 
 ## 2026-08-04
