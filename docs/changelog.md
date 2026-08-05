@@ -12,6 +12,18 @@
 
 | ファイル | 内容 |
 |---------|------|
+| `docs/tech/tech_skill.md` | **新規（Phase 3 詳細設計）**: 戦闘内のスキル・状態異常・環境効果処理の一意化11項目（スキル攻撃の乱数なし・スキルダメージ+%の適用位置・多段/範囲攻撃・反撃の連鎖防止 等）と分岐一覧95件（§2〜§8。エンカウント敵数・EXP配分を含む） |
+| `docs/tech/tech_party.md` | **新規（Phase 3 詳細設計）**: パーティ編成・キャラ獲得（塔クリア報酬）・スキル習得/セット/リセット・SP獲得の処理仕様と分岐一覧43件、新設エラーコード10件 |
+| `docs/tech/tech_battle.md` | §3.1.1 にレアリティ倍率を明記（`master/character.md` §7.2 との欠落解消）、§3.1 k の範囲攻撃を「倍率織り込み済み・実行時×0.7なし」へ是正、§3.1.5 報酬付与（EXPはパーティ全員へ全額）を新設（分岐一覧は `tech_skill.md` §8） |
+| `docs/tech/tech_offline.md` | §5 分岐一覧（処理方式選択・全滅判定・ポーション枯渇・レベルアップ・上限追従・残tick・周回ループ）15件を新設 |
+| `docs/tech/tech_numeric.md` | 範囲攻撃の丸め行を「スキル倍率適用後（×0.7は倍率に織り込み済み）」へ是正 |
+| `docs/design/systems/battle.md` | 範囲攻撃×0.7を「倍率への設計織り込み」として明確化（実行時補正なし） |
+| `docs/design/systems/character.md` | §2.7 にEXP配分の正を追加（在籍メンバー全員が全額獲得・分割なし・戦闘不能中も獲得） |
+| `docs/data/master/character.md` | §7.1 に加入時の初期状態（LV1 仮置き・SP0・スキル未習得）と再クリア時の非重複付与を明記 |
+| `docs/tech/tech_logging.md` | エラーコード体系に `PARTY_`・`CHARACTER_` プレフィックスを追加 |
+| `docs/tech/tech_spec.md`・`CLAUDE.md`・`.claude/project/detail-design.md` | 索引・成果物表に `tech_skill.md`・`tech_party.md` を登録 |
+| `docs/balance_backlog.md` | B-2 に状態異常の付与率/持続を追記、B-8（確定入手キャラの加入時LV）を追加 |
+| `docs/development_process.md` | §5 を Phase 3 分岐一覧整備済みへ更新（お知らせAPI定義のみ基本設計待ち）。`.claude/project/profile.md` の開発段階も Phase 3 実装準備中へ更新 |
 | `docs/design/systems/ui.md` | ナビゲーション構造にモバイル「その他」の対象タブ表を追加（Phase 3: ショップ・設定 / Phase 4: 塔・ショップ・設定。本表が正）。open_specs #1 の確定に伴う |
 | `diagrams/screen_transition/main_nav.md` | モバイルの「その他」まとめの注記を追加（正は `systems/ui.md`） |
 | `docs/design/operation_requirements.md` | §3.1 既読管理の保持先を localStorage 専用キーに確定（本行が正。永続化プラグイン不使用・機種変更での引き継ぎなしを許容）。open_specs #2 の確定に伴う |

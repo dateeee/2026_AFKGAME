@@ -9,7 +9,7 @@
 | 種別 | 放置系ファンタジーRPG（Webブラウザゲーム） |
 | 構成 | フロントエンド（Vue 3 SPA）+ バックエンド（FastAPI）の2層 |
 | プレイ形態 | **シングルプレイ専用**（マルチプレイは想定しない） |
-| 開発段階 | Phase 1 完了、Phase 2 進行中。仕様は Phase 1〜5 まで確定済み |
+| 開発段階 | Phase 1〜2 完了、Phase 3 実装準備中。仕様は Phase 1〜5 まで確定済み |
 | 開発工程 | 7工程（[docs/development_process.md](../../docs/development_process.md)） |
 
 ## 2. ディレクトリ

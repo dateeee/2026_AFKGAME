@@ -77,9 +77,10 @@
       - HP吸収装備の回復
       - パッシブ「反撃」の判定（被攻撃時）
 
-   k. 範囲攻撃の場合: 全敵にダメージ × 0.7
+   k. 範囲攻撃の場合: 全生存敵にスキル倍率をそのまま適用
+      - 範囲補正（単体比0.7倍目安）はスキル倍率の設計値に織り込み済み。実行時に×0.7を掛けない（tech_skill.md §1）
 
-   l. 敵撃破判定 → 報酬付与
+   l. 敵撃破判定 → 報酬付与（EXPの配分は §3.4）
 
 3. 全キャラのCDカウンターを-1
 4. バフ/デバフの残りターンを-1（0になったら解除）
@@ -90,8 +91,8 @@
 ### 3.1.1 ステータス計算の適用順序
 
 ```python
-def calc_final_stat(base, growth, lv, limit_break_pct, rebirth_pct, equip_val, passive_pct, buff_pct, debuff_pct, env_pct):
-    raw = base + growth * (lv - 1)                          # ① 素ステータス
+def calc_final_stat(base, growth, lv, rarity_mult, limit_break_pct, rebirth_pct, equip_val, passive_pct, buff_pct, debuff_pct, env_pct):
+    raw = (base + growth * (lv - 1)) * rarity_mult          # ① 素ステータス × レアリティ倍率（master/character.md §7.2）
     enhanced = raw * (1 + limit_break_pct) * (1 + rebirth_pct)  # ② 限界突破・転生
     with_equip = enhanced + equip_val                        # ③ 装備（加算）
     with_passive = with_equip * (1 + passive_pct)            # ④ パッシブスキル（乗算）
@@ -148,6 +149,12 @@ def select_target_with_taunt(enemies_or_allies, taunters):
 5. ポーションは通常通り使用可能（所持数消費）
 ```
 
+### 3.1.5 報酬付与（Phase 3〜: パーティへのEXP配分）
+
+- 敵撃破・階クリアのEXPは**在籍パーティ全員に全額付与**する（人数で分割しない。戦闘不能（HP0）のメンバーにも付与する）。正は [systems/character.md §2.7](../design/systems/character.md)
+- ゴールド・ドロップはプレイヤー共通の所持へ加算する（Phase 1〜2 と同じ）
+- 分岐一覧は [tech_skill.md §8](tech_skill.md) が持つ
+
 ### 3.2 エンカウント抽選と複数敵の処理
 
 #### エンカウント抽選ロジック
@@ -156,6 +163,8 @@ def select_target_with_taunt(enemies_or_allies, taunters):
 - Phase 3+: 階層定義の `enemyCountMin` 〜 `enemyCountMax` 範囲で均等確率抽選
   - 例: `1-2体` → 各50%、`2-3体` → 各50%
 - ボス階: 出現数1体固定、重み100%
+
+敵数抽選の分岐一覧は [tech_skill.md §8](tech_skill.md) が持つ。
 
 #### 複数敵の処理
 - 各階に1-3体の敵が出現（階層データの `floorEncounters` で定義）
@@ -192,7 +201,7 @@ def select_target(actor, action_type, allies, enemies):
 
 ## 5. 分岐一覧（1tick内のターン処理）
 
-C1網羅の対象分岐。tick の外枠（何tick処理するか）は [tech_tick.md §5](tech_tick.md)、乱数の分岐は [tech_rng.md §5](tech_rng.md) が持つ。本節は**1ターン内のアクター進行**（§3.1 手順2）を対象とする。
+C1網羅の対象分岐。tick の外枠（何tick処理するか）は [tech_tick.md §5](tech_tick.md)、乱数の分岐は [tech_rng.md §5](tech_rng.md)、スキル発動・状態異常・環境効果の分岐は [tech_skill.md](tech_skill.md)、パーティ・スキル操作APIの分岐は [tech_party.md](tech_party.md) が持つ。本節は**1ターン内のアクター進行**（§3.1 手順2）を対象とする。
 
 | # | 分岐点 | 条件 | 期待する振る舞い |
 |---|-------|------|----------------|

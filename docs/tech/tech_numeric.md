@@ -20,7 +20,7 @@
 | 最終ステータス（HP/ATK/DEF/SPD） | `floor` | 下限1 | tech_battle §3.1.1 |
 | 与ダメージ（味方→敵） | `floor` | 下限1 | tech_battle §3.1 |
 | 与ダメージ（敵→味方） | `floor` | 下限0 | tech_battle §3.1 |
-| 範囲攻撃の各対象ダメージ | `floor`（×0.7 適用後） | 上と同じ | tech_battle §3.1 |
+| 範囲攻撃の各対象ダメージ | `floor`（スキル倍率適用後。範囲補正は倍率に織り込み済み） | 上と同じ | tech_battle §3.1 |
 | DOT（毒・環境毒霧） | `floor` | 下限1 | [tech_data.md §1.5](tech_data.md) |
 | 回復量（スキル・リジェネ・ポーション） | `floor` | 下限1 / HPは maxHP まで | tech_battle §3.1 |
 | 獲得ゴールド・EXP | `floor` | 下限0 | — |
