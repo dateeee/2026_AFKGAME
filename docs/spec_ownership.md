@@ -37,6 +37,7 @@
 | 確率・軽減率の上限（挑発率・状態異常付与率の合算80%） | `docs/design/systems/battle.md` | `docs/design/systems/character.md`, `docs/tech/detail/tech_battle.md`, `docs/data/skills/006_生存術系統.md` | — | 「確率・軽減率の上限（キャップ）」が正。合算80%・残り20%は必ずランダム。按分の実装式は `tech_battle.md` §3.1.3（ISSUE-1001・1002 で確定） |
 | Phaseごとの開発進捗（工程の完了状況） | `docs/development_process.md` | — | — | §5 が正。README.md は Phase の**内容**のみを持ち、状況列は持たない（ISSUE-1019 で確定） |
 | キャラクター成長式と LV 別ステータス | `docs/data/master/character.md` | `docs/design/systems/character.md`, `docs/data/towers/*.md` | — | §1.2 の `base + growth × (LV - 1)` が正。塔ファイル §4 の勇者参考値は導出値（ISSUE-1008 で確定） |
+| 次セッションの開始タスク（引き継ぎ） | `docs/next_session.md` | — | — | ポインタ専用（「次回」1件 + 候補キュー最大5行）。Phase 進捗の正は `development_process.md` §5、書式の正は `.claude/project/next.md` |
 
 ## 3. 境界の一般原則
 

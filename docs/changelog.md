@@ -13,6 +13,7 @@
 | ファイル | 内容 |
 |---------|------|
 | `.claude/project/profile.md` `CLAUDE.md` | コスト規律へ規律7を追加（大きな出力は context-mode で処理し生出力を会話に持ち込まない）、規律4へ運用手順の表を追加（索引→該当ファイルのみ・レビューは差分先行・同一ファイルの再Read禁止）。CLAUDE.md「コスト規律」要約を突合更新 |
+| `.claude/skills/next/` `.claude/project/next.md` `docs/next_session.md` ほか | **`/next` スキルを新設**: 引き継ぎファイル（次回開始プロンプト + 候補キュー）から次タスクを特定し、鮮度確認のうえ工程スキルへ委譲。`stop-commit.sh` へ引き継ぎ更新のリマインドを追加、`spec_ownership.md` へ役割宣言、CLAUDE.md の支援スキル数を8件へ |
 
 ## 2026-08-05
 

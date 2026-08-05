@@ -40,6 +40,7 @@
 | `frontend-review` | [review-code.md](review-code.md) | フロントエンドのコードレビュー |
 | `full-review` | [review-fullstack.md](review-fullstack.md) | 仕様↔コード・フロント↔バックの統合レビュー |
 | `resolve-specs` | [requirements.md](requirements.md) | 未確定仕様の確定（要件定義工程の一部） |
+| `next` | [next.md](next.md) | 新セッション冒頭で引き継ぎファイルから次タスクを特定し工程スキルへ委譲 |
 
 ## 補助プロファイル
 

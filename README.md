@@ -68,7 +68,7 @@ VS Code は実行構成 **Full Stack** で同時起動できる（[.vscode/launc
 ├── README.md                    # 本ファイル（概要・セットアップ）
 ├── CLAUDE.md                    # AIエージェント向け開発ルール
 ├── .claude/                     # エージェント定義
-│   ├── skills/                  # 工程7件 + 支援7件（プロジェクト非依存）
+│   ├── skills/                  # 工程7件 + 支援8件（プロジェクト非依存）
 │   ├── references/              # スキル共通リファレンス（同上）
 │   └── project/                 # プロジェクト固有プロファイル（索引: INDEX.md）
 ├── docs/                        # 仕様書（*.md プロセス・規約 / design/ tech/ data/。索引は後述）
@@ -116,6 +116,7 @@ VS Code は実行構成 **Full Stack** で同時起動できる（[.vscode/launc
 - [docs/balance_backlog.md](docs/balance_backlog.md) — バランス調整（見直す数値）
 - [docs/open_specs.md](docs/open_specs.md) — 未確定仕様（確定後に削除）
 - [docs/known_issues.md](docs/known_issues.md) — 実装の疑義
+- [docs/next_session.md](docs/next_session.md) — 次回セッションの開始プロンプト（`/next` の引き継ぎ）
 
 大きな仕様書は **索引 + 個別ファイル** 構成。索引から辿ること。
 
