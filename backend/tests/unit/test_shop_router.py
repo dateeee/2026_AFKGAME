@@ -1,6 +1,6 @@
 """単体テスト: ショップルーター（routers/shop.py）
 
-仕様: design/systems/economy.md「ショップ」、tech/tech_api.md `/api/shop/*`
+仕様: design/systems/economy.md「ショップ」、tech/basic/tech_api.md `/api/shop/*`
 分岐観点:
   - ラインナップは potion カテゴリのみ・所持数は在庫レコードの有無で 0 起点
   - 購入は 未知ID(404) / 数量0以下(422) / ゴールド不足(400) / スタック上限超過(400)

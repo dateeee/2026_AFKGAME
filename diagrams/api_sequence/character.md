@@ -1,6 +1,6 @@
 # APIシーケンス図 — パーティ・スキル・限界突破（Phase 3）
 
-> 親: [api_sequence.md](../api_sequence.md)。API定義は [tech_api.md](../../docs/tech/tech_api.md)。
+> 親: [api_sequence.md](../api_sequence.md)。API定義は [tech_api.md](../../docs/tech/basic/tech_api.md)。
 
 ## 6.5. パーティ編成フロー（Phase 3）
 

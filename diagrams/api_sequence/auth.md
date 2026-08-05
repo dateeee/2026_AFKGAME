@@ -1,6 +1,6 @@
 # APIシーケンス図 — 認証（Phase 2〜）
 
-> 親: [api_sequence.md](../api_sequence.md)。認証仕様は [tech_auth.md](../../docs/tech/tech_auth.md)。
+> 親: [api_sequence.md](../api_sequence.md)。認証仕様は [tech_auth.md](../../docs/tech/detail/tech_auth.md)。
 
 ## 14. 認証フロー概要（Phase 2〜）
 

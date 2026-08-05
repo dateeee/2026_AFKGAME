@@ -1,7 +1,7 @@
 # AFK GAME — API共通仕様
 
-> 親: [tech_api.md](tech_api.md)（[tech_spec.md](tech_spec.md) §5）。本書は §5.0 共通仕様を担当する。
-> エラー形式・エラーコードは [tech_logging.md](tech_logging.md)、レート制限・認可は [tech_security.md](tech_security.md)。
+> 親: [tech_api.md](tech_api.md)（[tech_spec.md](../tech_spec.md) §5）。本書は §5.0 共通仕様を担当する。
+> エラー形式・エラーコードは [tech_logging.md](tech_logging.md)、レート制限・認可は [tech_security.md](../nonfunctional/tech_security.md)。
 
 ## 5.0 共通仕様
 
@@ -36,9 +36,9 @@
 | 403 | 認証済みだが権限・解放条件を満たさない | 未解放の塔を選択 |
 | 404 | 対象が存在しない／**他ユーザーのリソース** | 存在秘匿のため 403 ではなく 404 |
 | 422 | 型・範囲・必須のバリデーション違反 | `quantity` が範囲外 |
-| 429 | レート制限超過 | `RATE_LIMIT_EXCEEDED`（[tech_security.md](tech_security.md) §11.6） |
+| 429 | レート制限超過 | `RATE_LIMIT_EXCEEDED`（[tech_security.md](../nonfunctional/tech_security.md) §11.6） |
 | 500 | サーバー内部エラー | `INTERNAL_UNEXPECTED_ERROR` |
-| 503 | 一時的に処理不能 | `BATTLE_TICK_BUSY`（tick処理のロック競合。[tech_tick.md](tech_tick.md) §3.1） |
+| 503 | 一時的に処理不能 | `BATTLE_TICK_BUSY`（tick処理のロック競合。[tech_tick.md](../detail/tech_tick.md) §3.1） |
 
 - 201・204 は使わない（作成系も更新後の状態を 200 で返す方針に統一）
 - エラーボディは全コード共通で `{"error": {"code", "message", "requestId"}}`（[tech_logging.md](tech_logging.md)）

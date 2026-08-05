@@ -1,6 +1,6 @@
 # システム構成図
 
-> 技術仕様: [tech_spec.md](../docs/tech/tech_spec.md) / 運用設計: [tech_operations.md](../docs/tech/tech_operations.md)
+> 技術仕様: [tech_spec.md](../docs/tech/tech_spec.md) / 運用設計: [tech_operations.md](../docs/tech/nonfunctional/tech_operations.md)
 > 本書は索引。各図は [system_architecture/](system_architecture/) 配下の個別ファイルに分割している。
 
 ## 索引

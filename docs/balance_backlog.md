@@ -28,9 +28,9 @@
 | B-3 | 転生ポイント獲得量 | **10pt** / 転生1回 | [master/endgame.md §16.1](data/master/endgame.md) | 全ボーナス上限（累計260pt = 26回転生）までの周回数が現実的か |
 | B-4 | 転生ボーナスリセットコスト | `転生回数 × 1,000G` | [master/endgame.md §16.2](data/master/endgame.md) | 高転生回数帯でコストが無視できる額にならないか |
 | B-5 | 深淵の塔のスケーリング係数 | 敵 `×1.08^(階/10)` / 報酬 `×1.20^(階/10)` | [master/endgame.md §18.2](data/master/endgame.md) | LV9999 到達までの想定日数（設計時試算: 装備補正なしで約115日）。装備・限界突破・転生ボーナスを含めた実測とのズレ |
-| B-6 | 日替わりショップの帯内レアリティ出現率 | 5F未満 コモン100% / 5〜14F **70:30** / 15F〜 **55:30:15** | [tech_shop.md §2.3](tech/tech_shop.md) | レア枠が出る頻度。ドロップ品との住み分け（ショップは「つなぎ」の位置づけ）が保てているか |
+| B-6 | 日替わりショップの帯内レアリティ出現率 | 5F未満 コモン100% / 5〜14F **70:30** / 15F〜 **55:30:15** | [tech_shop.md §2.3](tech/detail/tech_shop.md) | レア枠が出る頻度。ドロップ品との住み分け（ショップは「つなぎ」の位置づけ）が保てているか |
 | B-7 | お知らせの掲示件数の上限値（Phase 3） | **未設定**（Phase 3 の詳細設計で仮置きし [master_data.md](data/master_data.md) へ定義） | [operation_requirements.md §3.1](design/operation_requirements.md) | 配信頻度に対して古い告知が流れすぎないか。未読件数が過大にならないか |
-| B-8 | 確定入手キャラの加入時LV（Phase 3） | **LV1** | [master/character.md §7.1](data/master/character.md) | 加入階（森の塔15F=推奨LV20前後）で即戦力になるか。EXP全額付与（[tech_battle.md §3.1.5](tech/tech_battle.md)）での追いつき速度をプレイテストで確認 |
+| B-8 | 確定入手キャラの加入時LV（Phase 3） | **LV1** | [master/character.md §7.1](data/master/character.md) | 加入階（森の塔15F=推奨LV20前後）で即戦力になるか。EXP全額付与（[tech_battle.md §3.1.5](tech/detail/tech_battle.md)）での追いつき速度をプレイテストで確認 |
 
 ## 3. 調整の進め方
 

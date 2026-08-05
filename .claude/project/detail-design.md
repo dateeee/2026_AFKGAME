@@ -9,20 +9,20 @@
 
 | 成果物 | パス | 内容 |
 |-------|------|------|
-| 戦闘処理 | `docs/tech/tech_battle.md` | ダメージ計算・ターン進行 |
-| スキル・状態異常・環境効果 | `docs/tech/tech_skill.md` | 発動判定・効果適用の一意化と分岐一覧 |
-| パーティ・スキル操作 | `docs/tech/tech_party.md` | 編成・キャラ獲得・習得/セット/リセット |
-| オフライン計算 | `docs/tech/tech_offline.md` | 復帰時の一括計算 |
-| tick進行制御 | `docs/tech/tech_tick.md` | 60秒tickの進行判定 |
-| フロントtick制御 | `docs/tech/tech_polling.md` | ポーリング間隔・停止条件 |
+| 戦闘処理 | `docs/tech/detail/tech_battle.md` | ダメージ計算・ターン進行 |
+| スキル・状態異常・環境効果 | `docs/tech/detail/tech_skill.md` | 発動判定・効果適用の一意化と分岐一覧 |
+| パーティ・スキル操作 | `docs/tech/detail/tech_party.md` | 編成・キャラ獲得・習得/セット/リセット |
+| オフライン計算 | `docs/tech/detail/tech_offline.md` | 復帰時の一括計算 |
+| tick進行制御 | `docs/tech/detail/tech_tick.md` | 60秒tickの進行判定 |
+| フロントtick制御 | `docs/tech/detail/tech_polling.md` | ポーリング間隔・停止条件 |
 
 ### 横断規約
 
 | 成果物 | パス | 内容 |
 |-------|------|------|
-| 乱数 | `docs/tech/tech_rng.md` | シード管理・抽選方式 |
-| 数値・丸め | `docs/tech/tech_numeric.md` | 丸め方向・桁・オーバーフロー |
-| 進行状態 | `docs/tech/tech_state.md` | 状態遷移と操作可否 |
+| 乱数 | `docs/tech/detail/tech_rng.md` | シード管理・抽選方式 |
+| 数値・丸め | `docs/tech/detail/tech_numeric.md` | 丸め方向・桁・オーバーフロー |
+| 進行状態 | `docs/tech/detail/tech_state.md` | 状態遷移と操作可否 |
 
 ### 数値（マスターデータ）
 
@@ -38,8 +38,8 @@
 | 順 | 参照先 | 読む範囲 |
 |----|--------|---------|
 | 1 | `docs/design/systems/<対象>.md` | 対象機能のセクションのみ |
-| 2 | `docs/tech/tech_api.md`・`tech_data.md` | 対象エンドポイント・テーブルの行のみ |
-| 3 | `docs/tech/tech_rng.md`・`tech_numeric.md`・`tech_state.md` | 乱数・丸め・状態を扱う場合のみ |
+| 2 | `docs/tech/basic/tech_api.md`・`tech_data.md` | 対象エンドポイント・テーブルの行のみ |
+| 3 | `docs/tech/detail/tech_rng.md`・`tech_numeric.md`・`tech_state.md` | 乱数・丸め・状態を扱う場合のみ |
 | 4 | `docs/data/master/` | 対象の数値定義のみ |
 | 5 | `diagrams/battle_flow/`・`api_sequence/` | 対象処理の図のみ |
 

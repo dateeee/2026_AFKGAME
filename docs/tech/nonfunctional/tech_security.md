@@ -1,9 +1,9 @@
 # AFK GAME — セキュリティ設計
 
-> [tech_spec.md](tech_spec.md) §11。認証方式そのものは [tech_auth.md](tech_auth.md)、ログのマスク規則・統一エラー形式は [tech_logging.md](tech_logging.md)、環境変数の管理は [tech_operations.md](tech_operations.md) を参照。
+> [tech_spec.md](../tech_spec.md) §11。認証方式そのものは [tech_auth.md](../detail/tech_auth.md)、ログのマスク規則・統一エラー形式は [tech_logging.md](../basic/tech_logging.md)、環境変数の管理は [tech_operations.md](tech_operations.md) を参照。
 >
 > 本書は **認証方式以外**のセキュリティ方針（通信・入力検証・認可・レート制限・秘密情報）を扱う。
-> **守るべき要件（何を防ぐか）は [non_functional_requirements.md](../design/non_functional_requirements.md) §4 が正**。本書はその実現方式を定める。
+> **守るべき要件（何を防ぐか）は [non_functional_requirements.md](../../design/non_functional_requirements.md) §4 が正**。本書はその実現方式を定める。
 
 ---
 
@@ -14,13 +14,13 @@
 | 脅威（要件 §4） | 実現方式 |
 |----------------|---------|
 | 戦闘結果の偽装 | §11.4 サーバー権威の徹底 |
-| 端末時計の改ざん | §11.4（時刻はサーバーUTCのみ）＋ [tech_tick.md](tech_tick.md) §1 |
-| tick連打・多重タブによる多重取得 | [tech_tick.md](tech_tick.md) §3 排他ロック／§11.6 レート制限 |
+| 端末時計の改ざん | §11.4（時刻はサーバーUTCのみ）＋ [tech_tick.md](../detail/tech_tick.md) §1 |
+| tick連打・多重タブによる多重取得 | [tech_tick.md](../detail/tech_tick.md) §3 排他ロック／§11.6 レート制限 |
 | API直接呼び出し | §11.5 認可（オーナーシップ検証） |
 | 入力値の改ざん | §11.3 入力バリデーション方針 |
-| 認証情報への攻撃 | §11.6 レート制限 ＋ [tech_auth.md](tech_auth.md) |
+| 認証情報への攻撃 | §11.6 レート制限 ＋ [tech_auth.md](../detail/tech_auth.md) |
 | 秘密情報の露出 | §11.8 ＋ [tech_operations.md](tech_operations.md) §12.2（起動時バリデーション） |
-| ログからの漏洩 | [tech_logging.md](tech_logging.md) 機密情報のマスク規則 |
+| ログからの漏洩 | [tech_logging.md](../basic/tech_logging.md) 機密情報のマスク規則 |
 
 要件に明示がないが本書で扱う脅威:
 
@@ -55,7 +55,7 @@
 | 対象 | 制約 |
 |------|------|
 | `quantity`（購入・売却） | 1〜99 の整数 |
-| `targetFloor` | `1 <= targetFloor <= min(塔別 highestFloor + 1, 総階数)`（[tech_api.md](tech_api.md)「操作系」が正） |
+| `targetFloor` | `1 <= targetFloor <= min(塔別 highestFloor + 1, 総階数)`（[tech_api.md](../basic/tech_api.md)「操作系」が正） |
 | `hpThreshold` / `potionThreshold` | 0〜1 の小数（刻みは仕様どおり） |
 | `memberIds` | 配列長 ≤ 4、重複禁止 |
 | `activeSlots` | 配列長 ≤ 2 |
@@ -72,7 +72,7 @@
 |--------------|------|
 | ダメージ量・戦闘結果・撃破数 | 戦闘計算はサーバーのみ（アーキテクチャ不変条件） |
 | 獲得ゴールド・EXP・ドロップ品 | 報酬付与は tick 処理内のみ |
-| 経過時間・タイムスタンプ | 時刻はサーバーの UTC のみを基準にする（[tech_architecture.md](tech_architecture.md) 同時実行制御） |
+| 経過時間・タイムスタンプ | 時刻はサーバーの UTC のみを基準にする（[tech_architecture.md](../basic/tech_architecture.md) 同時実行制御） |
 | プレイヤーLV・ステータス値 | すべて派生値としてサーバーで再計算する |
 | 価格・必要素材数 | マスターデータをサーバー側で参照する |
 
@@ -87,7 +87,7 @@
 | 対象ID | `equipmentId`, `characterId`, `itemId`, `facilityId`, `materialCharacterId` |
 | 他人のリソース指定時 | **404 を返す**（403 だと「存在すること」を漏らすため） |
 | 状態依存の拒否 | ロック中装備の売却・分解、パーティ編成中キャラの限界突破素材化は 400 で拒否 |
-| 認証必須の既定 | 全エンドポイントで認証必須。例外は [tech_api_common.md](tech_api_common.md) に一覧化する |
+| 認証必須の既定 | 全エンドポイントで認証必須。例外は [tech_api_common.md](../basic/tech_api_common.md) に一覧化する |
 
 - 検証は `dependencies.py` の共通依存で行い、各ルーターに実装を散らさない
 

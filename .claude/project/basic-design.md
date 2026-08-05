@@ -8,16 +8,16 @@
 | 成果物 | パス | 役割 |
 |-------|------|------|
 | 技術仕様（索引） | `docs/tech/tech_spec.md` | 個別ファイルへの索引 |
-| データ設計 | `docs/tech/tech_data.md` | DBスキーマ・JSON構造 |
-| 実装配置 | `docs/tech/tech_structure.md` | ディレクトリ構成・モジュール責務 |
-| API設計 | `docs/tech/tech_api.md` | エンドポイント一覧 |
-| API共通仕様 | `docs/tech/tech_api_common.md` | 規約・共通ヘッダ・ステータスコード |
-| アーキテクチャ | `docs/tech/tech_architecture.md` | 層構成・依存方向 |
-| ログ設計 | `docs/tech/tech_logging.md` | ログレベル・出力項目 |
-| 認証方式 | `docs/tech/tech_auth.md` | 認証フロー・トークン |
-| 性能・容量 | `docs/tech/tech_performance.md` | 非機能要件の実現方式 |
-| セキュリティ | `docs/tech/tech_security.md` | 非機能要件の実現方式 |
-| 運用 | `docs/tech/tech_operations.md` | 運用要件の実現方式 |
+| データ設計 | `docs/tech/basic/tech_data.md` | DBスキーマ・JSON構造 |
+| 実装配置 | `docs/tech/basic/tech_structure.md` | ディレクトリ構成・モジュール責務 |
+| API設計 | `docs/tech/basic/tech_api.md` | エンドポイント一覧 |
+| API共通仕様 | `docs/tech/basic/tech_api_common.md` | 規約・共通ヘッダ・ステータスコード |
+| アーキテクチャ | `docs/tech/basic/tech_architecture.md` | 層構成・依存方向 |
+| ログ設計 | `docs/tech/basic/tech_logging.md` | ログレベル・出力項目 |
+| 認証方式 | `docs/tech/detail/tech_auth.md` | 認証フロー・トークン |
+| 性能・容量 | `docs/tech/nonfunctional/tech_performance.md` | 非機能要件の実現方式 |
+| セキュリティ | `docs/tech/nonfunctional/tech_security.md` | 非機能要件の実現方式 |
+| 運用 | `docs/tech/nonfunctional/tech_operations.md` | 運用要件の実現方式 |
 
 ### 設計図（6点・索引 + 同名ディレクトリ構成）
 

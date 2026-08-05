@@ -1,6 +1,6 @@
 """単体テスト: ゲーム状態構築サービス（services/game_state_builder.py）
 
-仕様: tech/tech_api.md ゲーム状態レスポンス（GET /api/game/state と共通）
+仕様: tech/basic/tech_api.md ゲーム状態レスポンス（GET /api/game/state と共通）
 分岐観点:
   - ポーション判定: item_id が "_potion" で終わる所持品のみ集計
   - 塔クリア記録の有無

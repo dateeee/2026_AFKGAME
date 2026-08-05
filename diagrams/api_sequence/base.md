@@ -1,6 +1,6 @@
 # APIシーケンス図 — 施設・鍛冶屋（Phase 4）
 
-> 親: [api_sequence.md](../api_sequence.md)。API定義は [tech_api.md](../../docs/tech/tech_api.md)。
+> 親: [api_sequence.md](../api_sequence.md)。API定義は [tech_api.md](../../docs/tech/basic/tech_api.md)。
 
 ## 9. 施設建設・レベルアップ（Phase 4）
 

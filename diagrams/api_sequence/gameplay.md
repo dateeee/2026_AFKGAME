@@ -1,6 +1,6 @@
 # APIシーケンス図 — 塔・ショップ・装備
 
-> 親: [api_sequence.md](../api_sequence.md)。API定義は [tech_api.md](../../docs/tech/tech_api.md)。
+> 親: [api_sequence.md](../api_sequence.md)。API定義は [tech_api.md](../../docs/tech/basic/tech_api.md)。
 
 ## 4. 塔選択フロー
 

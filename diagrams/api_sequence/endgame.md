@@ -1,6 +1,6 @@
 # APIシーケンス図 — ボスラッシュ・イベント・深淵の塔・転生（Phase 5）
 
-> 親: [api_sequence.md](../api_sequence.md)。API定義は [tech_api.md](../../docs/tech/tech_api.md)。
+> 親: [api_sequence.md](../api_sequence.md)。API定義は [tech_api.md](../../docs/tech/basic/tech_api.md)。
 
 ## 11. ボスラッシュフロー（Phase 5）
 
@@ -52,11 +52,11 @@ sequenceDiagram
 > イベントダンジョン（試練の迷宮・宝物庫・修練場）は通常の塔と同じデータ構造で管理される。
 > 難易度（初級/中級/上級）は `Modifier`（bonus型: 報酬倍率 ×1/2/4）で実装し、
 > **専用エンドポイントは設けず `/api/tower/*` を再利用する方針**。
-> ただし**難易度パラメータの受け渡し方法（`/api/tower/select` への追加パラメータかキー体系か）は未確定**で、Phase 5 の基本設計で確定する（[open_specs.md](../../docs/open_specs.md) #3、正は [tech_api.md](../../docs/tech/tech_api.md)「イベントダンジョン」）。
+> ただし**難易度パラメータの受け渡し方法（`/api/tower/select` への追加パラメータかキー体系か）は未確定**で、Phase 5 の基本設計で確定する（[open_specs.md](../../docs/open_specs.md) #3、正は [tech_api.md](../../docs/tech/basic/tech_api.md)「イベントダンジョン」）。
 
 ## 11.7. 深淵の塔ランキング（Phase 5）
 
-> 入塔・目標階設定・リタイアは通常の塔と同じ `/api/tower/*` を `towerId: "abyss_tower"` で使用する（[gameplay.md](gameplay.md) §4）。専用エンドポイントはランキング取得のみで、`routers/abyss.py` が担当する（[tech_structure.md](../../docs/tech/tech_structure.md) §2）。
+> 入塔・目標階設定・リタイアは通常の塔と同じ `/api/tower/*` を `towerId: "abyss_tower"` で使用する（[gameplay.md](gameplay.md) §4）。専用エンドポイントはランキング取得のみで、`routers/abyss.py` が担当する（[tech_structure.md](../../docs/tech/basic/tech_structure.md) §2）。
 
 ```mermaid
 %%{init: {'theme': 'default', 'sequence': {'actorFontSize': 18, 'messageFontSize': 16, 'noteFontSize': 14}} }%%

@@ -1,6 +1,6 @@
 """単体テスト: 日替わりショップAPI（routers/shop.py）
 
-仕様: tech/tech_shop.md §6 API、§8 分岐一覧（購入・取得）の #1-#6 / #15-#18
+仕様: tech/detail/tech_shop.md §6 API、§8 分岐一覧（購入・取得）の #1-#6 / #15-#18
 
 分岐観点:
   - リクエストの排他: itemId のみ / dailySlotIndex のみ / 両方 / どちらも未指定

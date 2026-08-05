@@ -45,7 +45,7 @@
 |----|--------|---------|
 | 1 | `diagrams/screen_transition.md` | 対象Phaseの画面遷移のみ |
 | 2 | `diagrams/api_sequence.md` → `api_sequence/` | 対象シーケンスの子ファイルのみ |
-| 3 | `docs/tech/tech_api.md` | 対象エンドポイントの行のみ |
+| 3 | `docs/tech/basic/tech_api.md` | 対象エンドポイントの行のみ |
 | 4 | `docs/design/systems/ui*.md` | 対象画面のセクションのみ |
 
 **単体テストの分岐一覧からシナリオを作らない**。結合テストが検証するのは**基本設計**（API設計・画面遷移・データ構造）であって、詳細設計の分岐ではない。

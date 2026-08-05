@@ -34,9 +34,9 @@
 |----|--------|------|
 | 1 | `docs/design/game_spec.md` → `design/systems/` | ゲームシステム・バランス仕様 |
 | 2 | `docs/tech/tech_spec.md` → `tech_api.md` / `tech_data.md` / `tech_structure.md` | API設計・データ構造・実装配置 |
-| 3 | `docs/tech/tech_battle.md`・`tech_offline.md` | 戦闘処理・オフライン計算（戦闘関連の場合） |
-| 4 | `docs/tech/tech_auth.md` | 認証システム（認証関連の場合） |
-| 5 | `docs/tech/tech_rng.md`・`tech_numeric.md`・`tech_state.md` | 乱数・丸め・状態（該当する場合） |
+| 3 | `docs/tech/detail/tech_battle.md`・`tech_offline.md` | 戦闘処理・オフライン計算（戦闘関連の場合） |
+| 4 | `docs/tech/detail/tech_auth.md` | 認証システム（認証関連の場合） |
+| 5 | `docs/tech/detail/tech_rng.md`・`tech_numeric.md`・`tech_state.md` | 乱数・丸め・状態（該当する場合） |
 | 6 | `docs/data/master_data.md` → `data/master/` | マスターデータ（数値定義） |
 | 7 | `docs/data/towers/`・`docs/data/skills/` | 塔・スキルの個別データ（該当する場合のみ） |
 | 8 | `diagrams/` | ER図・クラス図・APIシーケンス図等 |

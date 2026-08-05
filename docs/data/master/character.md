@@ -96,7 +96,7 @@
 | `scout_001` | ハヤテ | 敏捷型 (agile) | レア | 獣の塔10Fクリア |
 
 - 加入時の初期状態: **LV1**・EXP0・SP0・スキル未習得・装備なし・HP=maxHP（加入時LVは**仮置き**。調整は [balance_backlog.md](../../balance_backlog.md) B-8）
-- 既所持での再クリア（周回）では重複付与しない（重複・限界突破素材の発生は Phase 4 の酒場ガチャから。処理の詳細は [tech_party.md §2](../../tech/tech_party.md)）
+- 既所持での再クリア（周回）では重複付与しない（重複・限界突破素材の発生は Phase 4 の酒場ガチャから。処理の詳細は [tech_party.md §2](../../tech/detail/tech_party.md)）
 
 ### 7.2 キャラクターレアリティ
 

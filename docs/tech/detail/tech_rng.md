@@ -1,6 +1,6 @@
 # AFK GAME — 乱数設計
 
-> 技術仕様の索引は [tech_spec.md](tech_spec.md)。戦闘処理は [tech_battle.md](tech_battle.md)、丸め規約は [tech_numeric.md](tech_numeric.md)、tick制御は [tech_tick.md](tech_tick.md)。
+> 技術仕様の索引は [tech_spec.md](../tech_spec.md)。戦闘処理は [tech_battle.md](tech_battle.md)、丸め規約は [tech_numeric.md](tech_numeric.md)、tick制御は [tech_tick.md](tech_tick.md)。
 > 戦闘結果はサーバー権威で確定するため、乱数の扱いは **再現性**（バグ調査）と **テスト容易性**（C1網羅100%）の両立が要件となる。
 
 ---
@@ -14,14 +14,14 @@
 | 3 | 通常攻撃のターゲット | 離散一様 | 生存者から1体 | tech_battle §3.3 |
 | 4 | 挑発 | 一様 `[0,1)` | 累積確率比較 | tech_battle §3.1.3 |
 | 5 | 麻痺による行動不能 | 一様 `[0,1)` | `r < 0.3` | tech_battle §3.1 |
-| 6 | 状態異常の付与 | 一様 `[0,1)` | `r < 付与率` | [master_data.md §9](../data/master_data.md) |
+| 6 | 状態異常の付与 | 一様 `[0,1)` | `r < 付与率` | [master_data.md §9](../../data/master_data.md) |
 | 7 | エンカウント抽選 | 重み付き | `weight` に比例 | tech_battle §3.2 |
 | 8 | 敵の出現数 | 離散一様 | min〜max | tech_battle §3.2 |
-| 9 | 装備ドロップ判定 | 一様 `[0,1)` | `r < drop_rate` | [master/equipment.md](../data/master/equipment.md) |
-| 10 | 装備レアリティ（ドロップ） | 順次独立判定 | レジェンダリー→アンコモンの順に `r < 補正後確率` | [systems/equipment.md](../design/systems/equipment.md) |
+| 9 | 装備ドロップ判定 | 一様 `[0,1)` | `r < drop_rate` | [master/equipment.md](../../data/master/equipment.md) |
+| 10 | 装備レアリティ（ドロップ） | 順次独立判定 | レジェンダリー→アンコモンの順に `r < 補正後確率` | [systems/equipment.md](../../design/systems/equipment.md) |
 | 11 | 装備のステータス種別・値 | 離散一様 / 一様 | — | master/equipment.md |
 | 12 | HP吸収の付与 | 一様 `[0,1)` | `r < 0.10` | master/equipment.md |
-| 13 | アイテムドロップ | 一様 `[0,1)` | `r < rate` | [tech_data.md §1.2](tech_data.md) |
+| 13 | アイテムドロップ | 一様 `[0,1)` | `r < rate` | [tech_data.md §1.2](../basic/tech_data.md) |
 | 14 | 酒場スカウト | 累積確率 | レアリティ順 | master_data §7.3 |
 
 **境界の統一規約**: 確率判定はすべて **`r < p`** とする（`r <= p` は使わない）。これにより `p = 0` は決して発生せず、`p = 1` は必ず発生する。
@@ -45,7 +45,7 @@
 | 対象 | 再現性 | 理由 |
 |------|-------|------|
 | 同一プロセス・同一シード・同一入力 | **完全に再現する** | 消費順序を固定しているため |
-| 本番の戦闘結果の事後再現 | 再現しない | シードを保存しないため。調査は戦闘ログ（[tech_data.md §1.3](tech_data.md)）で行う |
+| 本番の戦闘結果の事後再現 | 再現しない | シードを保存しないため。調査は戦闘ログ（[tech_data.md §1.3](../basic/tech_data.md)）で行う |
 | ロールバック後の再計算 | 結果は変わる | クライアント未返却の区間のため差異は観測されない（[tech_tick.md §4](tech_tick.md)） |
 
 **消費順序の固定**: 乱数は §1 の番号順ではなく、[tech_battle.md §3.1](tech_battle.md) の**ターン処理フローの記述順**で消費する。分岐によって消費数が変わる場合も「消費しない分岐では消費しない」を守り、数合わせのダミー消費は行わない。
@@ -78,6 +78,6 @@
 
 | 箇所 | 現行実装 | 本仕様 |
 |------|---------|-------|
-| [battle_service.py](../../backend/app/services/battle_service.py) | クリティカル率はプレイヤー・敵で共通の定数（`config.CRIT_RATE`） | Phase 3〜 はキャラクターごとの `crit_rate`（装備・スキルの合算）を参照する |
+| [battle_service.py](../../../backend/app/services/battle_service.py) | クリティカル率はプレイヤー・敵で共通の定数（`config.CRIT_RATE`） | Phase 3〜 はキャラクターごとの `crit_rate`（装備・スキルの合算）を参照する |
 
-§2 のインスタンス注入は実装済み（[app/rng.py](../../backend/app/rng.py)。`routers/battle.py` が1リクエストにつき1つ生成し、戦闘・エンカウント・ドロップ・装備生成へ引き渡す。backend-review ISSUE-109）。
+§2 のインスタンス注入は実装済み（[app/rng.py](../../../backend/app/rng.py)。`routers/battle.py` が1リクエストにつき1つ生成し、戦闘・エンカウント・ドロップ・装備生成へ引き渡す。backend-review ISSUE-109）。

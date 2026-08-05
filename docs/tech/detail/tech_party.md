@@ -1,7 +1,7 @@
 # AFK GAME — パーティ・スキル操作の処理仕様（Phase 3〜）
 
-> エンドポイント定義の正は [tech_api.md](tech_api.md)「パーティ・スキル」、状態×操作可否の正は [tech_state.md §4](tech_state.md)、データ構造は [tech_data.md](tech_data.md) と [er_diagram/player.md](../../diagrams/er_diagram/player.md)、数値の正は [master/character.md](../data/master/character.md)・[skills/](../data/skills/SKILLS_OVERVIEW.md)。
-> エラーコードの体系は [tech_logging.md](tech_logging.md)。本書の各表に個別コードを定義する。
+> エンドポイント定義の正は [tech_api.md](../basic/tech_api.md)「パーティ・スキル」、状態×操作可否の正は [tech_state.md §4](tech_state.md)、データ構造は [tech_data.md](../basic/tech_data.md) と [er_diagram/player.md](../../../diagrams/er_diagram/player.md)、数値の正は [master/character.md](../../data/master/character.md)・[skills/](../../data/skills/SKILLS_OVERVIEW.md)。
+> エラーコードの体系は [tech_logging.md](../basic/tech_logging.md)。本書の各表に個別コードを定義する。
 
 ## 1. パーティ編成変更（PUT /api/party/edit）
 
@@ -25,9 +25,9 @@
 
 ## 2. キャラクター獲得（塔クリア報酬・tick処理内）
 
-階クリア処理で、確定入手キャラ（[master/character.md §7.1](../data/master/character.md)）の入手条件（塔・階）に一致するかを判定する。
+階クリア処理で、確定入手キャラ（[master/character.md §7.1](../../data/master/character.md)）の入手条件（塔・階）に一致するかを判定する。
 
-1. 対象階のクリア時、該当キャラを**未所持なら**付与する。初期状態は LV1・EXP0・SP0・スキル未習得・装備なし・HP=maxHP（**加入時LVは仮置き**。調整は [balance_backlog.md](../balance_backlog.md)）
+1. 対象階のクリア時、該当キャラを**未所持なら**付与する。初期状態は LV1・EXP0・SP0・スキル未習得・装備なし・HP=maxHP（**加入時LVは仮置き**。調整は [balance_backlog.md](../../balance_backlog.md)）
 2. 既所持（周回・再クリア）なら何もしない（Phase 3 に重複の概念はない。重複→限界突破素材は Phase 4 の酒場ガチャのみ）
 3. 付与してもパーティへ自動編入しない（控えとして加入。編成はプレイヤー操作）
 4. 戦闘ログに `type: "character_join"` の行を追加する（生JSON・snake_case。[tech_battle §1](tech_battle.md)）
@@ -48,7 +48,7 @@
 1. `characterId` の所持を確認する。未所持・不存在は `404 CHARACTER_NOT_FOUND`
 2. `skillId` がスキルマスターに存在するか確認する。未知IDは `422 SKILL_UNKNOWN`
 3. 習得済みなら `400 SKILL_ALREADY_LEARNED`
-4. 前提スキル（ツリー上の直前スキル。[skills/](../data/skills/SKILLS_OVERVIEW.md) 各系統ファイル §2）が未習得なら `400 SKILL_PREREQUISITE_NOT_MET`
+4. 前提スキル（ツリー上の直前スキル。[skills/](../../data/skills/SKILLS_OVERVIEW.md) 各系統ファイル §2）が未習得なら `400 SKILL_PREREQUISITE_NOT_MET`
 5. 必要SPが未使用SP（`Character.skill_points`）を超えるなら `400 SKILL_INSUFFICIENT_SP`
 6. `LearnedSkill` を追加し `skill_points` を減算して `200`
 
@@ -112,7 +112,7 @@ CDカウンターは**習得スキルごとに保持**し、セット変更で�
 
 ## 6. SP獲得（戦闘処理・オフライン簡略計算内）
 
-レベルアップ1回につき `skill_points` を+1する（[character.md §2.8](../design/systems/character.md)）。付与タイミングは戦闘処理のレベルアップ確定時（オンライン・オフラインの双方）。
+レベルアップ1回につき `skill_points` を+1する（[character.md §2.8](../../design/systems/character.md)）。付与タイミングは戦闘処理のレベルアップ確定時（オンライン・オフラインの双方）。
 
 ### 6. 分岐一覧（SP獲得）
 
@@ -139,4 +139,4 @@ CDカウンターは**習得スキルごとに保持**し、セット変更で�
 | `SKILL_NOTHING_TO_RESET` | 400 | §5 |
 | `SKILL_INSUFFICIENT_GOLD` | 400 | §5 |
 
-既存コード `PARTY_LOCKED_IN_TOWER`・`SKILL_INSUFFICIENT_SP`・`SKILL_PREREQUISITE_NOT_MET` は [tech_state.md](tech_state.md)・[tech_logging.md](tech_logging.md) を参照。
+既存コード `PARTY_LOCKED_IN_TOWER`・`SKILL_INSUFFICIENT_SP`・`SKILL_PREREQUISITE_NOT_MET` は [tech_state.md](tech_state.md)・[tech_logging.md](../basic/tech_logging.md) を参照。

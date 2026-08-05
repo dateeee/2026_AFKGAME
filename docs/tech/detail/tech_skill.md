@@ -1,6 +1,6 @@
 # AFK GAME — スキル・状態異常・環境効果の戦闘内処理（Phase 3〜）
 
-> 技術仕様の全体は [tech_spec.md](tech_spec.md)。戦闘フローの正は [tech_battle.md §3](tech_battle.md)、スキル数値の正は [docs/data/skills/](../data/skills/SKILLS_OVERVIEW.md)、状態異常定義の正は [SKILLS_OVERVIEW.md §3](../data/skills/SKILLS_OVERVIEW.md)、環境効果定義の正は [tech_data.md §1.5](tech_data.md)。
+> 技術仕様の全体は [tech_spec.md](../tech_spec.md)。戦闘フローの正は [tech_battle.md §3](tech_battle.md)、スキル数値の正は [docs/data/skills/](../../data/skills/SKILLS_OVERVIEW.md)、状態異常定義の正は [SKILLS_OVERVIEW.md §3](../../data/skills/SKILLS_OVERVIEW.md)、環境効果定義の正は [tech_data.md §1.5](../basic/tech_data.md)。
 > 本書はフロー記述だけでは実装が割れる点の**一意化（§1）**と、Phase 3 実装対象の**分岐一覧（§2〜§8）**を持つ。ポーション自動使用・敵撃破・報酬付与など Phase 1〜2 実装済みの分岐は既存テストが正であり、本書には含めない。
 
 ## 1. 適用の一意化（フロー記述の補足）
@@ -9,7 +9,7 @@
 |---|------|------|
 | 1 | スキル攻撃の乱数分散 | なし。`ATK×倍率 − DEF×0.5` に `random(-0.1, 0.1)` は掛けない（通常攻撃のみ分散あり） |
 | 2 | スキルダメージ+%（魔力増幅）の適用位置 | DEF減算後に乗算: `(ATK×倍率 − DEF×0.5) × (1 + skill_dmg_pct)`。物理・魔法スキル共通。通常攻撃には適用しない |
-| 3 | クリティカルのスキル適用 | スキル攻撃にも適用する。クリ率 = 基礎5% + パッシブ + バフ + スキル固有（合算上限100%。[battle.md](../design/systems/battle.md)「確率・軽減率の上限」） |
+| 3 | クリティカルのスキル適用 | スキル攻撃にも適用する。クリ率 = 基礎5% + パッシブ + バフ + スキル固有（合算上限100%。[battle.md](../../design/systems/battle.md)「確率・軽減率の上限」） |
 | 4 | 多段攻撃（連続斬り） | ヒットごとに独立して対象抽選・クリティカル判定・丸めを行う（同一対象に2回ヒットもあり得る） |
 | 5 | 回復量+%（回復の心得） | ATK係数の回復スキル（`heal_1`・`heal_2`）にのみ乗算。蘇生の復活HP30%・リジェネ・ポーションには適用しない |
 | 6 | ターゲット規則の優先順位 | スキル詳細の「対象」欄が正（例: 連続斬り=ランダム2体、威圧=ATK最高の敵）。[tech_battle §3.3](tech_battle.md) の既定則は対象欄が「単体」「味方1体」等の一般表記の場合に適用する |
@@ -134,7 +134,7 @@
 
 ## 7. 分岐一覧（環境効果の適用）
 
-定義・適用タイミングの正は [tech_data.md §1.5](tech_data.md)、塔別の値は [towers/](../data/towers/TOWERS_OVERVIEW.md) 003〜005。
+定義・適用タイミングの正は [tech_data.md §1.5](../basic/tech_data.md)、塔別の値は [towers/](../../data/towers/TOWERS_OVERVIEW.md) 003〜005。
 
 | # | 分岐点 | 条件 | 期待する振る舞い |
 |---|-------|------|----------------|

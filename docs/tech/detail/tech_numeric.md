@@ -1,6 +1,6 @@
 # AFK GAME — 数値・丸め規約
 
-> 技術仕様の索引は [tech_spec.md](tech_spec.md)。ステータス計算式は [tech_battle.md §3.1.1](tech_battle.md)、上限値のゲーム仕様は [game_spec.md](../design/game_spec.md) §2.2、画面表示フォーマットは [ui.md](../design/systems/ui.md)。
+> 技術仕様の索引は [tech_spec.md](../tech_spec.md)。ステータス計算式は [tech_battle.md §3.1.1](tech_battle.md)、上限値のゲーム仕様は [game_spec.md](../../design/game_spec.md) §2.2、画面表示フォーマットは [ui.md](../../design/systems/ui.md)。
 > 本書は「どこで整数へ丸めるか」「どこで頭打ちにするか」をプロジェクト全体で一意に定める。個別の計算式は各仕様書が正であり、本書は丸めとキャップのみを扱う。
 
 ---
@@ -21,15 +21,15 @@
 | 与ダメージ（味方→敵） | `floor` | 下限1 | tech_battle §3.1 |
 | 与ダメージ（敵→味方） | `floor` | 下限0 | tech_battle §3.1 |
 | 範囲攻撃の各対象ダメージ | `floor`（スキル倍率適用後。範囲補正は倍率に織り込み済み） | 上と同じ | tech_battle §3.1 |
-| DOT（毒・環境毒霧） | `floor` | 下限1 | [tech_data.md §1.5](tech_data.md) |
+| DOT（毒・環境毒霧） | `floor` | 下限1 | [tech_data.md §1.5](../basic/tech_data.md) |
 | 回復量（スキル・リジェネ・ポーション） | `floor` | 下限1 / HPは maxHP まで | tech_battle §3.1 |
 | 獲得ゴールド・EXP | `floor` | 下限0 | — |
 | 報酬倍率適用後の報酬 | `floor`（倍率適用後に1回） | 下限0 | tech_data §1.5 `bonus` |
-| 装備ステータス | `floor` | 下限1 | [master/equipment.md](../data/master/equipment.md) |
-| 売却価格・強化費用・スキルリセット費用 | `floor` | 下限1 | [tech_api.md](tech_api.md) |
+| 装備ステータス | `floor` | 下限1 | [master/equipment.md](../../data/master/equipment.md) |
+| 売却価格・強化費用・スキルリセット費用 | `floor` | 下限1 | [tech_api.md](../basic/tech_api.md) |
 | 撃破ターン数・必要tick数 | `ceil` | 下限1 | [tech_offline.md §4.1](tech_offline.md) |
 | ポーション消費数 | `ceil` | 下限0 | tech_offline §4.1 |
-| 転生ポイント・SP | 整数演算のみ（丸め発生せず） | 下限0 | [master/endgame.md](../data/master/endgame.md) |
+| 転生ポイント・SP | 整数演算のみ（丸め発生せず） | 下限0 | [master/endgame.md](../../data/master/endgame.md) |
 
 ## 3. キャップ・下限一覧
 
@@ -43,9 +43,9 @@
 | バフ／デバフの加算 | — | なし | 上限を設けない（tech_battle §3.1.2） |
 | ゴールド | 0 | `MAX_GOLD`（2^63−1） | **飽和**（上限で止め、例外を送出しない） |
 | アイテム所持数 | 0 | 倉庫LVによる上限 | 上限超過分は取得しない・INFOログに記録 |
-| ポーション自動使用閾値 | 0.1 | 0.5 | 0.1刻み（[tech_data.md §1.1](tech_data.md)） |
+| ポーション自動使用閾値 | 0.1 | 0.5 | 0.1刻み（[tech_data.md §1.1](../basic/tech_data.md)） |
 | 撤退HP閾値 | 0.0 | 1.0 | 範囲外は `422` |
-| 目標階 | 1 | `min(塔別 highestFloor + 1, 総階数)` | 範囲外は `400`（[tech_api.md](tech_api.md)「操作系」） |
+| 目標階 | 1 | `min(塔別 highestFloor + 1, 総階数)` | 範囲外は `400`（[tech_api.md](../basic/tech_api.md)「操作系」） |
 
 - ゴールドを**飽和**とするのは、加算のたびに上限超過を例外扱いするより実装が単純で、上限到達時にプレイが停止しないため
 

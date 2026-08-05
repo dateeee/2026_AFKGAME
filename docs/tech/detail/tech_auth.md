@@ -1,6 +1,6 @@
 # AFK GAME — 認証システム仕様
 
-> 技術仕様の全体は [tech_spec.md](tech_spec.md)、ゲーム仕様は [game_spec.md](../design/game_spec.md) を参照。
+> 技術仕様の全体は [tech_spec.md](../tech_spec.md)、ゲーム仕様は [game_spec.md](../../design/game_spec.md) を参照。
 
 ---
 
@@ -54,10 +54,10 @@ JWT（JSON Web Token）によるステートレス認証。アクセストーク
 4. 新しいトークンペアを発行
 
 ### ログアウト
-1. `POST /api/auth/logout` でリフレッシュトークンを `revoked = true` にする（API定義は [tech_api.md](tech_api.md) が正）
+1. `POST /api/auth/logout` でリフレッシュトークンを `revoked = true` にする（API定義は [tech_api.md](../basic/tech_api.md) が正）
 2. フロントはメモリ上のアクセストークンと LocalStorage のリフレッシュトークンを破棄し（保管先は §7）、ログイン画面へ戻る
 3. ゲストの場合は併せて LocalStorage のゲストIDを破棄する。次回アクセス時は「ゲストプレイ」1. により**新しいゲストアカウントが生成される**ため、元のゲームデータには戻れない
-4. 元データは90日の有効期限（「ゲストプレイ」5.）まで残るが、復旧の導線は設けない。UI側の警告文は [systems/ui.md](../design/systems/ui.md) アカウント欄
+4. 元データは90日の有効期限（「ゲストプレイ」5.）まで残るが、復旧の導線は設けない。UI側の警告文は [systems/ui.md](../../design/systems/ui.md) アカウント欄
 
 ## 4. JWT構造
 
@@ -170,7 +170,7 @@ JWT（JSON Web Token）によるステートレス認証。アクセストーク
 
 **トークン管理:**
 - アクセストークン: メモリ上に保持（Piniaストア）。リロード時は消失
-- リフレッシュトークン: LocalStorage に保持（キー: `refresh_token`）。`httpOnly` Cookie は採らない — ログアウト・ゲストID破棄をフロント側で完結させるため（XSS リスクの受容判断は [tech_security.md](tech_security.md) §11.7）
+- リフレッシュトークン: LocalStorage に保持（キー: `refresh_token`）。`httpOnly` Cookie は採らない — ログアウト・ゲストID破棄をフロント側で完結させるため（XSS リスクの受容判断は [tech_security.md](../nonfunctional/tech_security.md) §11.7）
 - API呼び出し時にアクセストークンを `Authorization: Bearer <token>` ヘッダーに付与
 - 401レスポンス受信時にリフレッシュトークンで自動再取得を試行
 - リフレッシュも失敗した場合はログイン画面にリダイレクト（ゲストの場合は新規ゲスト作成）

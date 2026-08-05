@@ -1,6 +1,6 @@
 # ゲーム仕様 — 認証画面・チュートリアル
 
-> [ui.md](ui.md) から分割（[game_spec.md](../game_spec.md) §3）。認証の仕組みは [tech_auth.md](../../tech/tech_auth.md)。
+> [ui.md](ui.md) から分割（[game_spec.md](../game_spec.md) §3）。認証の仕組みは [tech_auth.md](../../tech/detail/tech_auth.md)。
 
 ## 認証画面（Phase 2〜）
 

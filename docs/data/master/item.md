@@ -77,8 +77,8 @@ Phase 1ではショップ購入のみ。敵ドロップは Phase 2以降。
 | 対象 | 正 |
 |------|-----|
 | 抽選対象（ベース装備15種） | [master/equipment.md §6.0](equipment.md) |
-| 生成手順（枠構成・ベース抽選・レアリティ抽選） | [tech_shop.md §2](../../tech/tech_shop.md) |
-| ステータス・価格の算出 | [tech_shop.md §3.1](../../tech/tech_shop.md)（基礎値は [master/equipment.md §6.1](equipment.md)） |
+| 生成手順（枠構成・ベース抽選・レアリティ抽選） | [tech_shop.md §2](../../tech/detail/tech_shop.md) |
+| ステータス・価格の算出 | [tech_shop.md §3.1](../../tech/detail/tech_shop.md)（基礎値は [master/equipment.md §6.1](equipment.md)） |
 | 設計方針（ショップ装備の位置づけ） | [systems/economy.md §2.5](../../design/systems/economy.md) |
 
 - スロットとカテゴリの対応は [systems/equipment.md §2.4](../../design/systems/equipment.md) が正

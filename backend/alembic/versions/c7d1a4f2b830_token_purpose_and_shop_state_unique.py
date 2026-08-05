@@ -2,9 +2,9 @@
 
 製造完了ゲート（backend-review 2026-08-03）の指摘対応:
   - ISSUE-004: email_verification_tokens に purpose を追加し、メール確認と
-    パスワードリセットのトークンを用途分離する（仕様: docs/tech/tech_auth.md §6）
+    パスワードリセットのトークンを用途分離する（仕様: docs/tech/detail/tech_auth.md §6）
   - ISSUE-015: shop_daily_states.player_id を一意にする（プレイヤーごとに1件。
-    仕様: docs/tech/tech_shop.md §5）
+    仕様: docs/tech/detail/tech_shop.md §5）
 
 Revision ID: c7d1a4f2b830
 Revises: 36e28dd936bc

@@ -1,6 +1,6 @@
 """単体テスト: 装備ルーター（/api/equipment/*）
 
-仕様: tech/tech_api.md 装備操作、design/systems/equipment.md「装備スロット（9スロット）」「売却価格」
+仕様: tech/basic/tech_api.md 装備操作、design/systems/equipment.md「装備スロット（9スロット）」「売却価格」
 分岐観点:
   - /list: 所持ゼロ / 所持あり / 他プレイヤーの装備を含めない / 未認証
   - /equip: 正常系（装着・解除）/ サービスの ValueError を400へ変換

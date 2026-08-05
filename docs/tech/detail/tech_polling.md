@@ -1,6 +1,6 @@
 # AFK GAME — フロントエンドのtick制御
 
-> 技術仕様の索引は [tech_spec.md](tech_spec.md)。サーバー側のtick制御は [tech_tick.md](tech_tick.md)、ゲームループ全体像とリトライ方針は [tech_architecture.md](tech_architecture.md)、ファイル構成は [tech_structure.md](tech_structure.md)。
+> 技術仕様の索引は [tech_spec.md](../tech_spec.md)。サーバー側のtick制御は [tech_tick.md](tech_tick.md)、ゲームループ全体像とリトライ方針は [tech_architecture.md](../basic/tech_architecture.md)、ファイル構成は [tech_structure.md](../basic/tech_structure.md)。
 > 本書は `usePolling.ts` / `useGameLoop.ts` の詳細設計（タイマー制御・多重実行の抑止・ストア反映）を定義する。
 
 ---
@@ -17,7 +17,7 @@
 | プレイヤー操作API成功時 | レスポンスの最新状態で上書き。tickは追加発火しない |
 | ログアウト・コンポーネント破棄 | タイマー停止・イベントリスナー解除 |
 
-- 通信エラー時のリトライ（3回・指数バックオフ）は [tech_architecture.md](tech_architecture.md) が正。本書では重複定義しない
+- 通信エラー時のリトライ（3回・指数バックオフ）は [tech_architecture.md](../basic/tech_architecture.md) が正。本書では重複定義しない
 - `401` はトークンリフレッシュ後に1回だけ再試行する（[tech_auth.md](tech_auth.md)）。リフレッシュ失敗時はポーリングを停止しログイン画面へ
 
 ## 2. 多重tickの抑止
@@ -78,7 +78,7 @@ tickレスポンスの反映順序を固定し、部分反映による表示不�
 
 ## 5. 分岐一覧（テスト観点）
 
-単体レベルの検証はE2E（Playwright）に統合する（[phases.md §3.6](../process/phases.md)）。
+単体レベルの検証はE2E（Playwright）に統合する（[phases.md §3.6](../../process/phases.md)）。
 
 | # | 分岐 | 期待結果 |
 |---|------|---------|
@@ -97,8 +97,8 @@ tickレスポンスの反映順序を固定し、部分反映による表示不�
 
 | 箇所 | 現行実装 | 本仕様 |
 |------|---------|-------|
-| [usePolling.ts:14](../../frontend/src/composables/usePolling.ts) | in-flightフラグなし（再入可能） | §2 再入抑止 |
-| [usePolling.ts:50](../../frontend/src/composables/usePolling.ts) | `visible` のたびに無条件で即時tick | §2 5秒以内は抑止 |
-| [usePolling.ts](../../frontend/src/composables/usePolling.ts) | 多重タブ制御なし | §2.1 リーダー選出 |
-| [usePolling.ts](../../frontend/src/composables/usePolling.ts) | `focus` 未購読（スリープ復帰で取りこぼす） | §3 `focus` でも即時tick |
-| [usePolling.ts:18](../../frontend/src/composables/usePolling.ts) | 検証なしで逐次ストアへ代入 | §4 検証してから反映 |
+| [usePolling.ts:14](../../../frontend/src/composables/usePolling.ts) | in-flightフラグなし（再入可能） | §2 再入抑止 |
+| [usePolling.ts:50](../../../frontend/src/composables/usePolling.ts) | `visible` のたびに無条件で即時tick | §2 5秒以内は抑止 |
+| [usePolling.ts](../../../frontend/src/composables/usePolling.ts) | 多重タブ制御なし | §2.1 リーダー選出 |
+| [usePolling.ts](../../../frontend/src/composables/usePolling.ts) | `focus` 未購読（スリープ復帰で取りこぼす） | §3 `focus` でも即時tick |
+| [usePolling.ts:18](../../../frontend/src/composables/usePolling.ts) | 検証なしで逐次ストアへ代入 | §4 検証してから反映 |

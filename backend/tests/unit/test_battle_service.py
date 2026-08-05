@@ -1,6 +1,6 @@
 """単体テスト: 戦闘サービス（services/battle_service.py）
 
-仕様: tech/tech_battle.md（戦闘処理）、design/systems/battle.md
+仕様: tech/detail/tech_battle.md（戦闘処理）、design/systems/battle.md
 乱数を含むロジックは monkeypatch で固定して分岐を網羅する（development_process.md §3.5）。
 """
 

@@ -1,6 +1,6 @@
 # システム構成図 — 全体アーキテクチャ
 
-> 親: [system_architecture.md](../system_architecture.md)。技術仕様は [tech_spec.md](../../docs/tech/tech_spec.md)、モジュール構成は [tech_structure.md](../../docs/tech/tech_structure.md)。
+> 親: [system_architecture.md](../system_architecture.md)。技術仕様は [tech_spec.md](../../docs/tech/tech_spec.md)、モジュール構成は [tech_structure.md](../../docs/tech/basic/tech_structure.md)。
 
 ## 全体アーキテクチャ
 
@@ -139,6 +139,6 @@ flowchart TB
     style DB fill:#fff3e0
 ```
 
-- DB の移行判断ライン（§12.4）とデプロイ構成は [tech_operations.md](../../docs/tech/tech_operations.md) §12 が正。デプロイ構成の図は [deployment.md](deployment.md)
-- Components の3層構成（トークン / UIプリミティブ / アプリシェル）と各層の責務は [tech_design_system.md](../../docs/tech/tech_design_system.md) が正。UIプリミティブはトークンだけを参照し、ストアには触れない
-- Schemas は `backend/app/schemas/` の実装済みファイルのみを描く。Phase 3〜5 で追加するスキーマ（`PartyEdit` 等）は Routers の Phase 注記と [tech_structure.md](../../docs/tech/tech_structure.md) §2 を参照
+- DB の移行判断ライン（§12.4）とデプロイ構成は [tech_operations.md](../../docs/tech/nonfunctional/tech_operations.md) §12 が正。デプロイ構成の図は [deployment.md](deployment.md)
+- Components の3層構成（トークン / UIプリミティブ / アプリシェル）と各層の責務は [tech_design_system.md](../../docs/tech/detail/tech_design_system.md) が正。UIプリミティブはトークンだけを参照し、ストアには触れない
+- Schemas は `backend/app/schemas/` の実装済みファイルのみを描く。Phase 3〜5 で追加するスキーマ（`PartyEdit` 等）は Routers の Phase 注記と [tech_structure.md](../../docs/tech/basic/tech_structure.md) §2 を参照

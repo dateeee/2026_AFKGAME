@@ -83,7 +83,7 @@ classDiagram
 ```
 
 - `InventoryItem` は `category` を**自身の列として持たない**。カテゴリは `itemId` から `ItemMaster`（コード内マスターデータ）を引いて得る派生値（[er_diagram/item.md](../er_diagram/item.md)）
-- `Equipment` のステータス列名は ER図・[tech_data.md](../../docs/tech/tech_data.md) と揃えて `statAtk` / `statDef` / `statHp` / `statSpd`（`Stats.atk` 等のキャラクター側ステータスと区別する）
+- `Equipment` のステータス列名は ER図・[tech_data.md](../../docs/tech/basic/tech_data.md) と揃えて `statAtk` / `statDef` / `statHp` / `statSpd`（`Stats.atk` 等のキャラクター側ステータスと区別する）
 
 ## ショップ
 
@@ -137,7 +137,7 @@ classDiagram
     DailyItem --> EquipCategory
 ```
 
-- 抽選結果（レアリティ・レベル・ステータス）は生成時に確定して保存する（[tech_shop.md §5](../../docs/tech/tech_shop.md)）
+- 抽選結果（レアリティ・レベル・ステータス）は生成時に確定して保存する（[tech_shop.md §5](../../docs/tech/detail/tech_shop.md)）
 - `EquipCategory`（3値）は `EquipSlot`（9値）とは別概念。カテゴリ→スロットの対応は [systems/equipment.md §2.4](../../docs/design/systems/equipment.md)
 
 ## 施設・ボスラッシュ

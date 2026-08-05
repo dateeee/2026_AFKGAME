@@ -1,7 +1,7 @@
 # AFK GAME — API設計
 
-> [tech_spec.md](tech_spec.md) §5。呼び出しシーケンスは [api_sequence.md](../../diagrams/api_sequence.md)、認証は [tech_auth.md](tech_auth.md)。
-> エラー形式・エラーコードは [tech_logging.md](tech_logging.md)、レート制限・認可は [tech_security.md](tech_security.md)。
+> [tech_spec.md](../tech_spec.md) §5。呼び出しシーケンスは [api_sequence.md](../../../diagrams/api_sequence.md)、認証は [tech_auth.md](../detail/tech_auth.md)。
+> エラー形式・エラーコードは [tech_logging.md](tech_logging.md)、レート制限・認可は [tech_security.md](../nonfunctional/tech_security.md)。
 
 ## 5.0 共通仕様
 
@@ -10,7 +10,7 @@
 ## 運用（認証不要）
 | メソッド | パス | 説明 |
 |---------|------|------|
-| GET | `/health` | 死活監視。DB疎通を含む。正常 200 / DB異常 503（[tech_operations.md](tech_operations.md) §12.3） |
+| GET | `/health` | 死活監視。DB疎通を含む。正常 200 / DB異常 503（[tech_operations.md](../nonfunctional/tech_operations.md) §12.3） |
 
 ## 認証（Phase 2〜）
 | メソッド | パス | 説明 |
@@ -46,22 +46,22 @@
 | POST | `/api/tower/retire` | 塔からリタイア（獲得済み報酬は保持・ペナルティなし） |
 | PUT | `/api/tower/mode` | 進行モードの切り替え（進行中でも変更可） |
 | PUT | `/api/tower/retreat-conditions` | 撤退条件の更新（`hpThreshold`: 0〜1） |
-| GET | `/api/shop/lineup` | ショップの現在の品揃えを取得。Phase 1: 常設のみ。Phase 2〜: 常設＋日替わり5枠＋次回更新時刻（[tech_shop.md §6](tech_shop.md)） |
-| POST | `/api/shop/buy` | ショップでアイテム購入。常設商品: `itemId` + `quantity`（ポーションID等は常設扱い、在庫無制限）。Phase 2〜: 日替わり商品は `dailySlotIndex`（枠番号指定、各1個限り）を追加。両方の指定・どちらも未指定は 422（[tech_shop.md §4](tech_shop.md)） |
+| GET | `/api/shop/lineup` | ショップの現在の品揃えを取得。Phase 1: 常設のみ。Phase 2〜: 常設＋日替わり5枠＋次回更新時刻（[tech_shop.md §6](../detail/tech_shop.md)） |
+| POST | `/api/shop/buy` | ショップでアイテム購入。常設商品: `itemId` + `quantity`（ポーションID等は常設扱い、在庫無制限）。Phase 2〜: 日替わり商品は `dailySlotIndex`（枠番号指定、各1個限り）を追加。両方の指定・どちらも未指定は 422（[tech_shop.md §4](../detail/tech_shop.md)） |
 | GET | `/api/equipment/list` | プレイヤーの全装備一覧を取得（Phase 2〜） |
 | POST | `/api/equipment/equip` | 装備の変更（Phase 2〜） |
 | POST | `/api/equipment/sell` | 装備売却（`equipmentIds`）。装備を消費してゴールドを獲得（売却価格 = 5 × レアリティ倍率 × 装備レベル）（Phase 2〜） |
 | POST | `/api/equipment/lock` | 装備のロック/アンロック切替（`equipmentId`）（Phase 2〜） |
-| POST | `/api/item/sell` | アイテム売却（`itemId`, `quantity`）。**換金アイテムは Phase 2〜**（同Phaseからドロップするため。[master/item.md §5](../data/master/item.md)）、**素材は Phase 4〜**（生産システムと同時）。売却価格はアイテムごとの定義値 × `quantity` |
+| POST | `/api/item/sell` | アイテム売却（`itemId`, `quantity`）。**換金アイテムは Phase 2〜**（同Phaseからドロップするため。[master/item.md §5](../../data/master/item.md)）、**素材は Phase 4〜**（生産システムと同時）。売却価格はアイテムごとの定義値 × `quantity` |
 
 > **`targetFloor` の検証範囲**: `1 <= targetFloor <= min(その塔の TowerClearRecord.highestFloor + 1, totalFloors)`。塔ごとに個別判定し、範囲外は 400。深淵の塔（`abyss_tower`）は総階数を持たないため `highestFloor + 1` のみで判定する。この上限は `/api/tower/list` が塔ごとに `targetFloorCap` として返すため、クライアントは式を再実装しない。
 > **上限追従**: 目標階が上限と一致している状態で新しい階をクリアした場合、サーバーが tick 処理内で `targetFloor` を +1 する（クライアントからの再設定は不要）。目標階が上限未満なら追従しない。
-> 仕様は [systems/battle.md](../design/systems/battle.md) 「目標階設定」・[systems/endgame.md](../design/systems/endgame.md) §2.14 を参照。
+> 仕様は [systems/battle.md](../../design/systems/battle.md) 「目標階設定」・[systems/endgame.md](../../design/systems/endgame.md) §2.14 を参照。
 
 ## パーティ・スキル（Phase 3〜）
 | メソッド | パス | 説明 |
 |---------|------|------|
-| PUT | `/api/party/edit` | パーティ編成の変更（`memberIds`: キャラID配列、最大4人）。**入塔中の変更は400**（入れ替えは塔外限定。[systems/character.md §2.7](../design/systems/character.md)）。未所持・重複するキャラIDは422 |
+| PUT | `/api/party/edit` | パーティ編成の変更（`memberIds`: キャラID配列、最大4人）。**入塔中の変更は400**（入れ替えは塔外限定。[systems/character.md §2.7](../../design/systems/character.md)）。未所持・重複するキャラIDは422 |
 | POST | `/api/skill/learn` | スキル習得（`characterId`, `skillId`）。SP消費。前提スキル未習得時はエラー |
 | PUT | `/api/skill/set-active` | アクティブスキルのセット変更（`characterId`, `activeSlots`: スキルID配列、最大2） |
 | POST | `/api/skill/reset` | スキル全リセット（`characterId`）。ゴールド消費（LV×50G）。全SP返却 |
@@ -97,20 +97,20 @@
 
 ## イベントダンジョン（Phase 5〜）
 
-機能仕様は [systems/endgame.md §2.13](../design/systems/endgame.md)（常設3種 × 固定難易度3段階）。進行は通常の塔と同じ階層制のため、**`/api/tower/*` に難易度パラメータを足して再利用する方針**とする。エンドポイントと、難易度別の到達記録を `towersCleared`（[tech_data.md](tech_data.md)）へ保持するキー体系の確定、および本節への追記は Phase 5 の基本設計で行う（キー体系の未確定は [open_specs.md](../open_specs.md) で管理）。
+機能仕様は [systems/endgame.md §2.13](../../design/systems/endgame.md)（常設3種 × 固定難易度3段階）。進行は通常の塔と同じ階層制のため、**`/api/tower/*` に難易度パラメータを足して再利用する方針**とする。エンドポイントと、難易度別の到達記録を `towersCleared`（[tech_data.md](tech_data.md)）へ保持するキー体系の確定、および本節への追記は Phase 5 の基本設計で行う（キー体系の未確定は [open_specs.md](../../open_specs.md) で管理）。
 
 ## お知らせ（Phase 3〜）
 | メソッド | パス | 説明 |
 |---------|------|------|
 | GET | `/api/notice/list` | お知らせ一覧の取得。`notices`: `noticeId`・`title`・`body`・`publishedAt` の配列を `publishedAt` 降順（新しい順）で返す。本文はマスターデータ配信（DBテーブルなし・更新はデプロイ）。掲示件数はマスター側の上限で抑えるためページングなし |
 
-> 要件は [operation_requirements.md](../design/operation_requirements.md) §3.1（既読はクライアントの localStorage 保持。保持先の正は同節）。サーバーは既読状態を持たないため、エンドポイントは一覧取得のみ。未読件数はクライアントが一覧と既読 `noticeId` の突合で算出し、一覧を開いた時点で表示中の全件を既読として保存する。
-> 取得は起動時（`GET /api/game/state` 後）の1回のみ（内容の更新はデプロイでしか起きないため。フローは [api_sequence/core.md §3.7](../../diagrams/api_sequence/core.md)）。マスターの項目定義は Phase 3 の詳細設計で [master_data.md](../data/master_data.md) へ定義する。
+> 要件は [operation_requirements.md](../../design/operation_requirements.md) §3.1（既読はクライアントの localStorage 保持。保持先の正は同節）。サーバーは既読状態を持たないため、エンドポイントは一覧取得のみ。未読件数はクライアントが一覧と既読 `noticeId` の突合で算出し、一覧を開いた時点で表示中の全件を既読として保存する。
+> 取得は起動時（`GET /api/game/state` 後）の1回のみ（内容の更新はデプロイでしか起きないため。フローは [api_sequence/core.md §3.7](../../../diagrams/api_sequence/core.md)）。マスターの項目定義は Phase 3 の詳細設計で [master_data.md](../../data/master_data.md) へ定義する。
 
 ## 転生（Phase 5〜）
 | メソッド | パス | 説明 |
 |---------|------|------|
-| POST | `/api/prestige` | 転生実行（`characterId`）。LV9999チェック後、LV/EXP/SPリセット・転生ポイントを付与（付与量は [master/endgame.md §16.1](../data/master/endgame.md)） |
+| POST | `/api/prestige` | 転生実行（`characterId`）。LV9999チェック後、LV/EXP/SPリセット・転生ポイントを付与（付与量は [master/endgame.md §16.1](../../data/master/endgame.md)） |
 | PUT | `/api/prestige/invest` | 転生ポイント投資（`characterId`, `stat`, `points`）。指定のボーナスにポイントを割り振る |
 | POST | `/api/prestige/reset` | 転生ボーナス全リセット（`characterId`）。ゴールド消費で全ポイント返還 |
 

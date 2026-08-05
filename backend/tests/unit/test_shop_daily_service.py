@@ -1,6 +1,6 @@
 """単体テスト: 日替わりショップ（services/shop_daily_service.py）
 
-仕様: tech/tech_shop.md §7 分岐一覧（品揃えの生成）、§8 分岐一覧（購入・取得）の #7-#14 / #19
+仕様: tech/detail/tech_shop.md §7 分岐一覧（品揃えの生成）、§8 分岐一覧（購入・取得）の #7-#14 / #19
       数値の正: data/master/equipment.md §6.1、design/systems/economy.md §2.5「倉庫」
 
 分岐観点:

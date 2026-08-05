@@ -1,6 +1,6 @@
 # AFK GAME — ディレクトリ・フロント／バック構成
 
-> [tech_spec.md](tech_spec.md) §2〜§4。
+> [tech_spec.md](../tech_spec.md) §2〜§4。
 
 ## 2. ディレクトリ構成
 
@@ -141,7 +141,7 @@
 | ルーティング | Vue Router | 画面遷移（`router/index.ts` の定義が正） |
 | API通信 | Axios or fetch | FastAPI との REST 通信 |
 | 言語 | TypeScript | 型安全な開発 |
-| スタイル | Tailwind CSS v4 | ユーティリティCSS。色・寸法・部品の定義は [tech_design_system.md](tech_design_system.md) が正（トークンは `assets/styles/tokens.css` の `@theme`） |
+| スタイル | Tailwind CSS v4 | ユーティリティCSS。色・寸法・部品の定義は [tech_design_system.md](../detail/tech_design_system.md) が正（トークンは `assets/styles/tokens.css` の `@theme`） |
 
 ### レスポンシブ設計
 
@@ -154,7 +154,7 @@
 | タッチ対応 | ホバー依存のUIは避ける。`:hover` は `@media (hover: hover)` で囲む（タップ後にホバーが残るため） |
 | タップ領域・入力 | タップ対象44px以上。入力部品は16px固定（下回ると iOS Safari が自動拡大する） |
 | セーフエリア | `viewport-fit=cover` + `env(safe-area-inset-*)`。`AppShell` が引き受ける |
-| 数値表示ユーティリティ | 大きな数値を短縮表記する関数を `src/utils/format.ts` に実装。表記ルールは [ui.md](../design/systems/ui.md)「数値表示フォーマット」が正 |
+| 数値表示ユーティリティ | 大きな数値を短縮表記する関数を `src/utils/format.ts` に実装。表記ルールは [ui.md](../../design/systems/ui.md)「数値表示フォーマット」が正 |
 
 ---
 
@@ -185,4 +185,4 @@ MAX_PLAYER_LEVEL = 9999         # プレイヤーLV上限
 MAX_GOLD = 9_223_372_036_854_775_807  # ゴールド上限（64bit符号付き整数最大値）
 ```
 
-- 認証系の定数（トークン期限・bcrypt cost・パスワード要件・ゲスト期限）も `config.py` に置く（値の正は [tech_auth.md](tech_auth.md)。重複を避け本書では列挙しない）
+- 認証系の定数（トークン期限・bcrypt cost・パスワード要件・ゲスト期限）も `config.py` に置く（値の正は [tech_auth.md](../detail/tech_auth.md)。本書では列挙しない）

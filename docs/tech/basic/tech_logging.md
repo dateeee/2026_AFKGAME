@@ -1,6 +1,6 @@
 # AFK GAME — ログ設計・エラーハンドリング
 
-> [tech_spec.md](tech_spec.md) §6「ログ設計」。アーキテクチャ方針は [tech_architecture.md](tech_architecture.md)。
+> [tech_spec.md](../tech_spec.md) §6「ログ設計」。アーキテクチャ方針は [tech_architecture.md](tech_architecture.md)。
 
 ## ログライブラリ
 Python標準 `logging` モジュールを使用。Uvicornのアクセスログと連携する。
@@ -106,7 +106,7 @@ Python標準 `logging` モジュールを使用。Uvicornのアクセスログ�
 | `SHOP_` | ショップ関連 | `SHOP_INSUFFICIENT_GOLD`, `SHOP_ITEM_SOLD_OUT`, `SHOP_INVENTORY_FULL` |
 | `TOWER_` | 塔関連 | `TOWER_NOT_UNLOCKED`, `TOWER_INVALID_FLOOR` |
 | `EQUIP_` | 装備関連 | `EQUIP_NOT_FOUND`, `EQUIP_SLOT_MISMATCH` |
-| `SKILL_` | スキル関連 | `SKILL_INSUFFICIENT_SP`, `SKILL_PREREQUISITE_NOT_MET`（一覧は [tech_party.md §7](tech_party.md)） |
+| `SKILL_` | スキル関連 | `SKILL_INSUFFICIENT_SP`, `SKILL_PREREQUISITE_NOT_MET`（一覧は [tech_party.md §7](../detail/tech_party.md)） |
 | `PARTY_` | パーティ関連 | `PARTY_LOCKED_IN_TOWER`, `PARTY_MEMBER_NOT_OWNED` |
 | `CHARACTER_` | キャラクター関連 | `CHARACTER_NOT_FOUND` |
 | `BASE_` | 施設関連 | `BASE_INSUFFICIENT_MATERIALS`, `BASE_MAX_LEVEL` |

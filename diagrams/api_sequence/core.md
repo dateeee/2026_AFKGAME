@@ -1,6 +1,6 @@
 # APIシーケンス図 — 基本ループ
 
-> 親: [api_sequence.md](../api_sequence.md)。API定義は [tech_api.md](../../docs/tech/tech_api.md)。
+> 親: [api_sequence.md](../api_sequence.md)。API定義は [tech_api.md](../../docs/tech/basic/tech_api.md)。
 
 ## 1. 初回アクセス（ゲスト作成 — Phase 1）
 
@@ -178,7 +178,7 @@ sequenceDiagram
     B->>B: バッジ消灯
 ```
 
-- API定義は [tech_api.md](../../docs/tech/tech_api.md)「お知らせ」。要件・既読保持先の正は [operation_requirements.md](../../docs/design/operation_requirements.md) §3.1（サーバーは既読状態を持たない）
+- API定義は [tech_api.md](../../docs/tech/basic/tech_api.md)「お知らせ」。要件・既読保持先の正は [operation_requirements.md](../../docs/design/operation_requirements.md) §3.1（サーバーは既読状態を持たない）
 - 画面遷移は [screen_transition/main_nav.md](../screen_transition/main_nav.md) の お知らせ画面
 
 ## 13. 通信エラー時（リトライ）

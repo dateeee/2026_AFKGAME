@@ -1,6 +1,6 @@
 # 画面遷移図 — 認証・エントリーフロー
 
-> 親: [screen_transition.md](../screen_transition.md)。UI仕様は [systems/ui.md](../../docs/design/systems/ui.md) §3、認証仕様は [tech_auth.md](../../docs/tech/tech_auth.md)。
+> 親: [screen_transition.md](../screen_transition.md)。UI仕様は [systems/ui.md](../../docs/design/systems/ui.md) §3、認証仕様は [tech_auth.md](../../docs/tech/detail/tech_auth.md)。
 
 ## 認証・エントリーフロー
 

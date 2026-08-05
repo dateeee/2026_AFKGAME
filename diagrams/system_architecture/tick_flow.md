@@ -1,6 +1,6 @@
 # システム構成図 — tick処理のデータフロー
 
-> 親: [system_architecture.md](../system_architecture.md)。tick仕様は [tech_tick.md](../../docs/tech/tech_tick.md)、戦闘計算は [tech_battle.md](../../docs/tech/tech_battle.md)。
+> 親: [system_architecture.md](../system_architecture.md)。tick仕様は [tech_tick.md](../../docs/tech/detail/tech_tick.md)、戦闘計算は [tech_battle.md](../../docs/tech/detail/tech_battle.md)。
 
 ## tick処理のデータフロー
 

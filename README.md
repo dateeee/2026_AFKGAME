@@ -124,9 +124,9 @@ VS Code は実行構成 **Full Stack** で同時起動できる（[.vscode/launc
   - [systems/](docs/design/systems/) — character / battle / equipment / economy / dungeon / endgame / ui / ui_onboarding
   - 要件: [product](docs/design/product_requirements.md) プロダクト / [nfr](docs/design/non_functional_requirements.md) 非機能 / [operation](docs/design/operation_requirements.md) 運用
 - [docs/tech/tech_spec.md](docs/tech/tech_spec.md) — 技術仕様の索引
-  - 基本設計: [data](docs/tech/tech_data.md) データ / [structure](docs/tech/tech_structure.md) 構成 / [api](docs/tech/tech_api.md) API / [architecture](docs/tech/tech_architecture.md) 方針 / [logging](docs/tech/tech_logging.md) ログ / [auth](docs/tech/tech_auth.md) 認証
-  - 非機能（設計）: [performance](docs/tech/tech_performance.md) 性能・容量 / [security](docs/tech/tech_security.md) セキュリティ / [operations](docs/tech/tech_operations.md) 運用
-  - 詳細設計: [battle](docs/tech/tech_battle.md) 戦闘 / [offline](docs/tech/tech_offline.md) オフライン / [tick](docs/tech/tech_tick.md) / [polling](docs/tech/tech_polling.md) フロント / [state](docs/tech/tech_state.md) 状態 / [rng](docs/tech/tech_rng.md) 乱数 / [numeric](docs/tech/tech_numeric.md) 数値 / [shop](docs/tech/tech_shop.md) ショップ / [design-system](docs/tech/tech_design_system.md)
+  - [basic/](docs/tech/basic/) 基本設計 — data / structure / api / api_common / architecture / logging
+  - [nonfunctional/](docs/tech/nonfunctional/) 非機能 — performance / security / operations
+  - [detail/](docs/tech/detail/) 詳細設計 — battle / offline / skill / party / tick / polling / state / rng / numeric / shop / design_system / auth
 - [docs/data/master_data.md](docs/data/master_data.md) — マスターデータの索引 + 塔データ一覧
   - [master/](docs/data/master/) — character / item / equipment / base / endgame
   - [TOWERS_OVERVIEW.md](docs/data/towers/TOWERS_OVERVIEW.md) 全塔概要一覧 / [SKILLS_OVERVIEW.md](docs/data/skills/SKILLS_OVERVIEW.md) スキルシステム概要

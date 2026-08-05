@@ -54,14 +54,14 @@
 | カテゴリ | 参照先 |
 |---------|--------|
 | キャラクター・成長・スキル | `design/systems/character.md`、`data/skills/` |
-| 戦闘・ダメージ計算 | `design/systems/battle.md`、`tech/tech_battle.md`、`tech/tech_rng.md` |
+| 戦闘・ダメージ計算 | `design/systems/battle.md`、`tech/detail/tech_battle.md`、`tech/detail/tech_rng.md` |
 | 装備・ドロップ | `design/systems/equipment.md`、`data/master/` |
 | 経済・ショップ | `design/systems/economy.md`、`data/master/` |
 | ダンジョン・塔 | `design/systems/dungeon.md`、`data/towers/` |
 | エンドゲーム | `design/systems/endgame.md`、`data/master/` |
 | UI・画面 | `design/systems/ui*.md`、`diagrams/screen_transition.md` |
-| オフライン・tick | `tech/tech_offline.md`、`tech/tech_tick.md`、`tech/tech_polling.md` |
-| 認証 | `tech/tech_auth.md` |
+| オフライン・tick | `tech/detail/tech_offline.md`、`tech/detail/tech_tick.md`、`tech/detail/tech_polling.md` |
+| 認証 | `tech/detail/tech_auth.md` |
 
 ### 確定後の反映先
 

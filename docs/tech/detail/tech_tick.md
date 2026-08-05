@@ -1,6 +1,6 @@
 # AFK GAME — tick進行制御仕様
 
-> 技術仕様の索引は [tech_spec.md](tech_spec.md)。1tick内の戦闘処理は [tech_battle.md](tech_battle.md)、101tick以上の簡略計算は [tech_offline.md](tech_offline.md)、丸め規約は [tech_numeric.md](tech_numeric.md)。
+> 技術仕様の索引は [tech_spec.md](../tech_spec.md)。1tick内の戦闘処理は [tech_battle.md](tech_battle.md)、101tick以上の簡略計算は [tech_offline.md](tech_offline.md)、丸め規約は [tech_numeric.md](tech_numeric.md)。
 > 本書は `POST /api/battle/tick` の**外枠**（何tick処理するか・いつコミットするか・二重実行をどう防ぐか）を定義する。戦闘の中身は扱わない。
 
 ---
@@ -74,7 +74,7 @@
 
 ## 5. 分岐一覧（単体テスト観点）
 
-C1網羅の対象分岐。[phases.md §3.4](../process/phases.md) のテストリストと §3.6 の基準に対応する。
+C1網羅の対象分岐。[phases.md §3.4](../../process/phases.md) のテストリストと §3.6 の基準に対応する。
 
 | # | 分岐 | 期待結果 |
 |---|------|---------|
@@ -95,8 +95,8 @@ C1網羅の対象分岐。[phases.md §3.4](../process/phases.md) のテスト�
 
 | 箇所 | 現行実装 | 本仕様 |
 |------|---------|-------|
-| [battle.py:41](../../backend/app/routers/battle.py) | 24時間超を無言で切り詰め（クランプ自体は §2 どおり） | §2 `capped` をサマリーに含める |
-| [battle.py:28](../../backend/app/routers/battle.py) | 行ロックなし（二重tickが成立する） | §3 排他ロック |
-| [battle.py:57](../../backend/app/routers/battle.py) | 簡略計算 = 10tickサンプルの平均 × 残り | [tech_offline.md §4](tech_offline.md) の期待値計算 |
+| [battle.py:41](../../../backend/app/routers/battle.py) | 24時間超を無言で切り詰め（クランプ自体は §2 どおり） | §2 `capped` をサマリーに含める |
+| [battle.py:28](../../../backend/app/routers/battle.py) | 行ロックなし（二重tickが成立する） | §3 排他ロック |
+| [battle.py:57](../../../backend/app/routers/battle.py) | 簡略計算 = 10tickサンプルの平均 × 残り | [tech_offline.md §4](tech_offline.md) の期待値計算 |
 
-§1 の端数繰り越しは実装済み（[battle.py:73](../../backend/app/routers/battle.py)。backend-review ISSUE-102）。
+§1 の端数繰り越しは実装済み（[battle.py:73](../../../backend/app/routers/battle.py)。backend-review ISSUE-102）。

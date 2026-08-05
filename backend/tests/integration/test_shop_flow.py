@@ -1,6 +1,6 @@
 """結合テスト: 常設ショップ購入 → 所持金・在庫の反映
 
-シナリオ導出元: diagrams/api_sequence/gameplay.md §5、docs/tech/tech_api.md 操作系
+シナリオ導出元: diagrams/api_sequence/gameplay.md §5、docs/tech/basic/tech_api.md 操作系
 検証内容: 戦闘で得たゴールドがショップで使え、購入結果が在庫とゲーム状態の双方へ反映されること。
 """
 

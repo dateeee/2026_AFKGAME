@@ -1,6 +1,6 @@
 """単体テスト: 目標階の選択上限と上限追従
 
-仕様: design/systems/battle.md「目標階設定」、tech/tech_api.md `/api/tower/select`
+仕様: design/systems/battle.md「目標階設定」、tech/basic/tech_api.md `/api/tower/select`
 分岐観点:
   - 上限 = min(到達済み最高階 + 1, 総階数)
   - 上限追従は「目標階 == 旧上限」かつ「新しい階をクリアした」場合のみ発生

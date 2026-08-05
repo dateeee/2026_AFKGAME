@@ -1,7 +1,7 @@
 # AFK GAME — 性能・容量設計
 
-> [tech_spec.md](tech_spec.md) §10。**目標値（どこまで満たすか）は [non_functional_requirements.md](../design/non_functional_requirements.md) §1〜§3 が正**。本書はそれを満たすための**実現方式**を扱い、目標値を再掲しない。
-> 運用面の監視・移行手順は [tech_operations.md](tech_operations.md)、tick処理そのものは [tech_tick.md](tech_tick.md)。
+> [tech_spec.md](../tech_spec.md) §10。**目標値（どこまで満たすか）は [non_functional_requirements.md](../../design/non_functional_requirements.md) §1〜§3 が正**。本書はそれを満たすための**実現方式**を扱い、目標値を再掲しない。
+> 運用面の監視・移行手順は [tech_operations.md](tech_operations.md)、tick処理そのものは [tech_tick.md](../detail/tech_tick.md)。
 
 ---
 
@@ -9,10 +9,10 @@
 
 | 項目 | 見積り | 根拠 |
 |------|--------|------|
-| 1ユーザーのリクエスト | tick 1回/60秒 + 操作系 平均0.5回/分 | ハイブリッドtick制（[tech_architecture.md](tech_architecture.md) §7） |
+| 1ユーザーのリクエスト | tick 1回/60秒 + 操作系 平均0.5回/分 | ハイブリッドtick制（[tech_architecture.md](../basic/tech_architecture.md) §7） |
 | 同時アクティブ100人時のRPS | 約 2.5 req/s | 100 × (1/60 + 0.5/60) |
 | オフライン復帰の集中 | 10 req/s（朝夕ピーク想定） | 復帰時tickは重いため別枠で見積もる |
-| ユーザー間のロック競合 | **発生しない** | シングルプレイ専用。競合は同一ユーザーの多重タブのみ（[tech_tick.md](tech_tick.md) §3） |
+| ユーザー間のロック競合 | **発生しない** | シングルプレイ専用。競合は同一ユーザーの多重タブのみ（[tech_tick.md](../detail/tech_tick.md) §3） |
 | 全ユーザー横断の重いクエリ | ランキング取得のみ | `/api/boss-rush/ranking`・`/api/abyss/ranking` |
 
 - スケール戦略は **垂直（1インスタンス）**。水平分割は想定規模に対して過剰なため行わない
@@ -23,15 +23,15 @@
 | 項目 | 設計 |
 |------|------|
 | ポーリングの同時集中 | クライアントごとに **0〜5秒のランダムジッター**を初回ポーリングに付与し、tickリクエストの位相をばらす |
-| リトライの集中 | 指数バックオフ（1/2/4秒）に **±20% のジッター**を加える（[tech_architecture.md](tech_architecture.md) エラーハンドリング） |
+| リトライの集中 | 指数バックオフ（1/2/4秒）に **±20% のジッター**を加える（[tech_architecture.md](../basic/tech_architecture.md) エラーハンドリング） |
 | 重い処理の扱い | 簡略計算（101tick以上）は**同期実行のまま**とする。復帰時に結果を画面へ返す必要があるため、非同期ジョブ化しない |
-| DB書き込み | 1リクエスト内でtick単位の書き込みを行わず、メモリ上で集計して一括反映する（[tech_tick.md](tech_tick.md) §4） |
+| DB書き込み | 1リクエスト内でtick単位の書き込みを行わず、メモリ上で集計して一括反映する（[tech_tick.md](../detail/tech_tick.md) §4） |
 
 - tick処理時間が **60秒（ポーリング周期）を超えると次tickと重なる**ため、これを超えた場合は体感の遅さとは別に即時の対処対象とする
 
 ## 10.3 データ容量の見積り
 
-保持上限そのものは [non_functional_requirements.md](../design/non_functional_requirements.md) §2 が正。本節はそこから導かれる**サイズ見積り**を示す。
+保持上限そのものは [non_functional_requirements.md](../../design/non_functional_requirements.md) §2 が正。本節はそこから導かれる**サイズ見積り**を示す。
 
 | データ | 上限 | 見積りサイズ |
 |--------|------|-------------|
@@ -70,9 +70,9 @@
 
 | 検証 | 内容 | 実施タイミング |
 |------|------|--------------|
-| 常時計測 | ミドルウェアの `duration_ms`（[tech_logging.md](tech_logging.md)）から p95 を確認 | 常時 |
+| 常時計測 | ミドルウェアの `duration_ms`（[tech_logging.md](../basic/tech_logging.md)）から p95 を確認 | 常時 |
 | 最悪ケース検証 | 24時間放置相当（1,440tick）の復帰を実データで計測 | 結合テスト（Phase単位） |
 | 負荷試験 | 同時100ユーザーのポーリングを再現（k6 または locust） | Phase 2 結合テストで初回実施 |
 | DB容量検証 | 1,000人相当のダミーデータを投入しサイズとクエリ時間を確認 | 負荷試験と同時 |
 
-- 検証は [phases.md](../process/phases.md) §3.7 結合テストの一部として扱い、Phase完了ゲートの判定材料にする
+- 検証は [phases.md](../../process/phases.md) §3.7 結合テストの一部として扱い、Phase完了ゲートの判定材料にする

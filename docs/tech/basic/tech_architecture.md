@@ -1,7 +1,7 @@
 # AFK GAME — アーキテクチャ方針
 
-> [tech_spec.md](tech_spec.md) §6〜§7。ログ設計は [tech_logging.md](tech_logging.md)、システム構成図は [system_architecture.md](../../diagrams/system_architecture.md)。
-> 性能・容量設計は [tech_performance.md](tech_performance.md)、セキュリティは [tech_security.md](tech_security.md)、運用は [tech_operations.md](tech_operations.md)、tick進行制御は [tech_tick.md](tech_tick.md)。
+> [tech_spec.md](../tech_spec.md) §6〜§7。ログ設計は [tech_logging.md](tech_logging.md)、システム構成図は [system_architecture.md](../../../diagrams/system_architecture.md)。
+> 性能・容量設計は [tech_performance.md](../nonfunctional/tech_performance.md)、セキュリティは [tech_security.md](../nonfunctional/tech_security.md)、運用は [tech_operations.md](../nonfunctional/tech_operations.md)、tick進行制御は [tech_tick.md](../detail/tech_tick.md)。
 
 ```
 [Vue.js SPA]  ←── REST API (polling) ──→  [FastAPI]  ←── ORM ──→  [DB]
@@ -20,7 +20,7 @@
 
 > **注**: Phase 1 の旧方式（UUID識別トークンを LocalStorage キー `guest_token` に保存）は、Phase 2 の認証実装により **JWT方式に置き換え済み**。以下は現行仕様。
 
-初回アクセス時にサーバーがゲストアカウントを自動作成し、JWT（[tech_auth.md](tech_auth.md) 参照）で識別する。
+初回アクセス時にサーバーがゲストアカウントを自動作成し、JWT（[tech_auth.md](../detail/tech_auth.md) 参照）で識別する。
 
 | 項目 | 仕様 |
 |------|------|
@@ -29,7 +29,7 @@
 | トークン保存先 | アクセストークン: メモリ保持 / リフレッシュトークン: LocalStorage（キー: `refresh_token`） |
 | APIリクエスト | `Authorization: Bearer <access_token>` ヘッダーで識別 |
 | サーバー側 | アカウントに紐づくプレイヤーデータをSQLiteに保存 |
-| 本登録移行 | ゲスト→本登録フロー（[tech_auth.md](tech_auth.md) 参照）で既存データを引き継ぎ |
+| 本登録移行 | ゲスト→本登録フロー（[tech_auth.md](../detail/tech_auth.md) 参照）で既存データを引き継ぎ |
 | データロスト | リフレッシュトークン消失時、ゲストのままではデータ復旧不可（本登録で回避可能） |
 
 ```
@@ -68,10 +68,10 @@
 
 ## 同時実行制御・tickの冪等性
 
-tick処理の排他・トランザクション境界・端数繰り越しは [tech_tick.md](tech_tick.md) を正とする。アーキテクチャ上の不変条件として、以下だけを本書で押さえる。
+tick処理の排他・トランザクション境界・端数繰り越しは [tech_tick.md](../detail/tech_tick.md) を正とする。アーキテクチャ上の不変条件として、以下だけを本書で押さえる。
 
 - **時刻の権威はサーバー（UTC）のみ**。クライアントが送る時刻・経過秒は一切採用しない
-- **`lastTickAt` は単調増加**し、その更新は排他される。巻き戻す処理を実装してはならない（バックアップ復元は例外。[tech_operations.md](tech_operations.md) §12.5）
+- **`lastTickAt` は単調増加**し、その更新は排他される。巻き戻す処理を実装してはならない（バックアップ復元は例外。[tech_operations.md](../nonfunctional/tech_operations.md) §12.5）
 - **tickの冪等性は `lastTickAt` の排他更新のみに依存する**。通信リトライ（前節）で同じtickが再送されても、先行リクエストのコミット後は `pending_ticks = 0` となり二重付与は起きない
 - 操作系API（装備変更・購入など）も同一プレイヤー行のロックを取得し、tick処理中の操作は待機後に更新済みの状態へ適用する
 

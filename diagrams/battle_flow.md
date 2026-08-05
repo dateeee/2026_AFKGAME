@@ -1,6 +1,6 @@
 # 戦闘ターン処理フロー図
 
-> 戦闘仕様: [systems/battle.md](../docs/design/systems/battle.md) / 処理詳細: [tech_battle.md](../docs/tech/tech_battle.md)
+> 戦闘仕様: [systems/battle.md](../docs/design/systems/battle.md) / 処理詳細: [tech_battle.md](../docs/tech/detail/tech_battle.md)
 > 本書は索引。各フローは [battle_flow/](battle_flow/) 配下の個別ファイルに分割している。
 
 ## 索引

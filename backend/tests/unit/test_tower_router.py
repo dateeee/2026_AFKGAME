@@ -1,6 +1,6 @@
 """単体テスト: 塔ルーター（/api/tower/*）
 
-仕様: tech/tech_api.md 塔操作、design/systems/battle.md「目標階設定」
+仕様: tech/basic/tech_api.md 塔操作、design/systems/battle.md「目標階設定」
 """
 
 import pytest

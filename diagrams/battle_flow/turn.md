@@ -1,6 +1,6 @@
 # 戦闘フロー — 1ターンの処理
 
-> 親: [battle_flow.md](../battle_flow.md)。処理詳細は [tech_battle.md](../../docs/tech/tech_battle.md)。
+> 親: [battle_flow.md](../battle_flow.md)。処理詳細は [tech_battle.md](../../docs/tech/detail/tech_battle.md)。
 
 ## 1ターンの処理フロー
 

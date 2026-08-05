@@ -1,6 +1,6 @@
 # AFK GAME — 進行状態と操作可否
 
-> 技術仕様の索引は [tech_spec.md](tech_spec.md)。API一覧は [tech_api.md](tech_api.md)、戦闘・撤退のゲーム仕様は [battle.md](../design/systems/battle.md)、画面遷移は [screen_transition.md](../../diagrams/screen_transition.md)。
+> 技術仕様の索引は [tech_spec.md](../tech_spec.md)。API一覧は [tech_api.md](../basic/tech_api.md)、戦闘・撤退のゲーム仕様は [battle.md](../../design/systems/battle.md)、画面遷移は [screen_transition.md](../../../diagrams/screen_transition.md)。
 > 本書はプレイヤーの**進行状態**を状態機械として定義し、各状態で許可される操作とデータの不変条件を確定する。
 
 ---
@@ -24,7 +24,7 @@
 | 塔の対 | `currentTowerId` / `currentFloor` / `targetFloor` は同時にnull、または同時に非null |
 | 敵の対 | `currentEnemyId` と `currentEnemyHp` は同時にnull、または同時に非null |
 | 敵の従属 | `currentEnemyId ≠ null` ならば `currentTowerId ≠ null` |
-| 階の範囲 | `1 ≤ currentFloor` かつ `targetFloor ≤ min(塔別 highestFloor + 1, 塔の総階数)`（[tech_api.md](tech_api.md)「操作系」が正。深淵の塔は総階数を持たないため `highestFloor + 1` のみ） |
+| 階の範囲 | `1 ≤ currentFloor` かつ `targetFloor ≤ min(塔別 highestFloor + 1, 塔の総階数)`（[tech_api.md](../basic/tech_api.md)「操作系」が正。深淵の塔は総階数を持たないため `highestFloor + 1` のみ） |
 | 排他 | `bossRush.active = true` ならば `currentTowerId = null` |
 | HP | 全キャラの `hp` は `0 ≤ hp ≤ effectiveMaxHp` |
 
@@ -54,11 +54,11 @@ stateDiagram-v2
 | 目標階クリア（`stop_on_clear`） | `currentFloor > targetFloor` | 塔・敵情報をクリアし `IDLE` へ |
 | 目標階クリア（`auto_repeat`） | 同上 | `currentFloor = 1` に戻し探索継続。探索セッションは継続する |
 
-- リタイアは**現在の戦闘が完了した時点**で成立する。戦闘途中での即時中断は行わない（[battle.md](../design/systems/battle.md) §戦闘の流れ）
+- リタイアは**現在の戦闘が完了した時点**で成立する。戦闘途中での即時中断は行わない（[battle.md](../../design/systems/battle.md) §戦闘の流れ）
 
 ## 3. 探索セッション（run）
 
-[battle.md §全滅時の処理](../design/systems/battle.md) のペナルティは「**今回の塔探索中に**取得したゴールド・アイテムをすべて失う」と定義されている。これを成立させるため、入塔から離脱までを1つの**探索セッション**として集計する。
+[battle.md §全滅時の処理](../../design/systems/battle.md) のペナルティは「**今回の塔探索中に**取得したゴールド・アイテムをすべて失う」と定義されている。これを成立させるため、入塔から離脱までを1つの**探索セッション**として集計する。
 
 | フィールド | 内容 |
 |-----------|------|

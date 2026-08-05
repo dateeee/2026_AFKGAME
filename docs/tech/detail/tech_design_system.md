@@ -1,6 +1,6 @@
 # 技術仕様 — デザインシステム
 
-> [tech_spec.md](tech_spec.md) 関連詳細仕様。画面構成の要件は [systems/ui.md](../design/systems/ui.md)。
+> [tech_spec.md](../tech_spec.md) 関連詳細仕様。画面構成の要件は [systems/ui.md](../../design/systems/ui.md)。
 > **画面を追加・改修する前に本書を読むこと。** ここに書かれた層より下に、色・寸法・部品を作らない。
 
 ## 設計方針
@@ -50,7 +50,7 @@ UI が使うのはセマンティックだけ。テーマ変更はプリミテ�
 
 - 面は**低彩度の深緑**でまとめ、彩度の高い色は情報にだけ与える
 - 古金は「報酬・主要導線・選択中」に限定する。装飾で使うと強調が効かなくなる
-- 選択・状態は色だけで示さず、**帯・アイコン・文言**を併用する（[systems/ui.md](../design/systems/ui.md) 色非依存）
+- 選択・状態は色だけで示さず、**帯・アイコン・文言**を併用する（[systems/ui.md](../../design/systems/ui.md) 色非依存）
 
 ## 2. UIプリミティブ（`components/ui/`）
 
@@ -75,11 +75,11 @@ UI が使うのはセマンティックだけ。テーマ変更はプリミテ�
 | 要素 | 役割 |
 |------|------|
 | `AppShell` | `100dvh` の grid。スクロールするのは `main` だけ（`minmax(0, 1fr)` + `overflow-y: auto`） |
-| `AppHeader` | ブランド（ホームへ戻る）・ゴールド・設定・お知らせ（Phase 3〜）。**ゴールドの表示場所はここ1箇所に固定する**。要素の一覧は [systems/ui.md](../design/systems/ui.md) ヘッダ表が正 |
+| `AppHeader` | ブランド（ホームへ戻る）・ゴールド・設定・お知らせ（Phase 3〜）。**ゴールドの表示場所はここ1箇所に固定する**。要素の一覧は [systems/ui.md](../../design/systems/ui.md) ヘッダ表が正 |
 | `AppNav` | 項目は `navItems.ts` の1箇所。モバイルはボトム、PC（768px〜）は左サイドに自動で切り替わる |
 | `ConnectionBanner` | 通信エラー。`position: fixed` でレイアウトの流れから外す（フローに置くと本体がずれる） |
 
-- 画面追加は `navItems.ts` に1行追加すれば両ナビに反映される。**5項目を超えたら**モバイルは1項目64px を割るため末尾を「その他」へまとめる（PCは全項目を並べる）。対象項目は [systems/ui.md](../design/systems/ui.md) ナビゲーション構造が正
+- 画面追加は `navItems.ts` に1行追加すれば両ナビに反映される。**5項目を超えたら**モバイルは1項目64px を割るため末尾を「その他」へまとめる（PCは全項目を並べる）。対象項目は [systems/ui.md](../../design/systems/ui.md) ナビゲーション構造が正
 - セーフエリアは `.pt-safe` / `.pb-safe` / `.px-safe`、`index.html` の `viewport-fit=cover` と対で機能する
 - 拡大操作は禁止しない（`maximum-scale` を指定しない）。入力欄の自動ズームは16px指定で回避する
 

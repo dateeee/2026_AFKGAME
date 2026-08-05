@@ -12,6 +12,7 @@
 
 | ファイル | 内容 |
 |---------|------|
+| `docs/tech/**` | **フォルダ構成を工程別に再編**: フラットな22ファイルを `basic/`（基本設計6件）・`nonfunctional/`（非機能3件）・`detail/`（詳細設計12件）へ移動（`tech_spec.md` は索引としてルートに残置、ファイル名は不変）。全ドキュメント・コードコメントの参照パスを更新、`check_branch_list.py` を再帰探索化 |
 | `docs/tech/tech_api.md` | **お知らせAPI定義を確定（Phase 3 基本設計の残分）**: `GET /api/notice/list`（`noticeId`・`title`・`body`・`publishedAt` を新しい順、マスターデータ配信・ページングなし）。未読件数の算出と既読化タイミングを注記 |
 | `docs/tech/tech_api_common.md` | **新規（分割）**: 文字数上限超過のため `tech_api.md` §5.0 共通仕様（規約・共通ヘッダ・ステータスコード）をレイヤー分割で切り出し（documentation_rules §6.3）。索引 `tech_spec.md`・参照元 `tech_security.md`・`CLAUDE.md`・`.claude/project/basic-design.md` を追随 |
 | `docs/tech/tech_structure.md` | 文字数上限対応: 認証系定数の列挙を削除し `tech_auth.md` への参照に置換（重複解消）。コメント2件を圧縮 |

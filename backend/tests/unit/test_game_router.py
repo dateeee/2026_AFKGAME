@@ -1,6 +1,6 @@
 """単体テスト: ゲーム状態ルーター（routers/game.py）
 
-仕様: tech/tech_api.md `/api/game/state` `/api/game/settings`
+仕様: tech/basic/tech_api.md `/api/game/state` `/api/game/settings`
 分岐観点:
   - 設定レコードの有無（無ければ新規作成して更新）
   - 各設定項目は「指定した項目のみ」更新される（未指定 = None は素通り）

@@ -37,7 +37,7 @@ MARKER = re.compile(r"分岐[:：]\s*(\S+?\.md)(?:\s*§(\d+))?\s*#([0-9,\s#]+)")
 def parse_tables() -> dict[tuple[str, str], dict]:
     """{(ファイル名, セクション番号): {rows, structured, path, line}} を返す。"""
     sections = {}
-    for path in sorted(TECH_DIR.glob("tech_*.md")):
+    for path in sorted(TECH_DIR.rglob("tech_*.md")):
         lines = path.read_text(encoding="utf-8").splitlines()
         current, header, in_code = None, None, False
         for no, line in enumerate(lines, 1):

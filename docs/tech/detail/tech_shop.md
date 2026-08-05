@@ -1,6 +1,6 @@
 # AFK GAME — 日替わりショップ処理
 
-> [tech_spec.md](tech_spec.md) 配下の詳細設計。ゲーム仕様は [systems/economy.md §2.5](../design/systems/economy.md)、装備カテゴリは [systems/equipment.md §2.4](../design/systems/equipment.md)、乱数規約は [tech_rng.md](tech_rng.md)、丸め規約は [tech_numeric.md](tech_numeric.md)。
+> [tech_spec.md](../tech_spec.md) 配下の詳細設計。ゲーム仕様は [systems/economy.md §2.5](../../design/systems/economy.md)、装備カテゴリは [systems/equipment.md §2.4](../../design/systems/equipment.md)、乱数規約は [tech_rng.md](tech_rng.md)、丸め規約は [tech_numeric.md](tech_numeric.md)。
 > 本書は Phase 2 の日替わりショップ（品揃えの生成・24時間更新・購入）を定める。常設商品（ポーション）の購入は本書の対象外。
 
 ---
@@ -9,13 +9,13 @@
 
 | 項目 | 仕様 |
 |------|------|
-| 更新方式 | **遅延評価**。定期ジョブを持たず、`GET /api/shop/lineup` と `POST /api/shop/buy` の入口で鮮度を判定する（[tech_operations.md §12.6](tech_operations.md)） |
+| 更新方式 | **遅延評価**。定期ジョブを持たず、`GET /api/shop/lineup` と `POST /api/shop/buy` の入口で鮮度を判定する（[tech_operations.md §12.6](../nonfunctional/tech_operations.md)） |
 | 更新境界 | UTC日付の変わり目（00:00 UTC） |
 | 枠数 | 5枠固定（武器2・防具2・アクセサリー1） |
 | 在庫 | 各枠1個。購入すると次の更新まで売り切れ |
 | 永続化 | 生成結果をDBへ保存する。RNGの内部状態は保存しない（[tech_rng.md §2](tech_rng.md)） |
 | RNG | `random.Random` のインスタンスを引数で受け取る（グローバル `random.*` の直呼び禁止） |
-| HP吸収 | 付与しない（ショップ販売なし。[systems/equipment.md §2.4](../design/systems/equipment.md)） |
+| HP吸収 | 付与しない（ショップ販売なし。[systems/equipment.md §2.4](../../design/systems/equipment.md)） |
 | 強化値 | 常に 0 |
 
 ## 2. 品揃えの生成
@@ -44,7 +44,7 @@
 
 ### 2.3 レアリティ抽選
 
-解放帯は到達階層で決まる（[economy.md §2.5](../design/systems/economy.md)）。帯の中の出現率を次のとおり定める（**仮置き**。調整は [balance_backlog.md](../balance_backlog.md)）。
+解放帯は到達階層で決まる（[economy.md §2.5](../../design/systems/economy.md)）。帯の中の出現率を次のとおり定める（**仮置き**。調整は [balance_backlog.md](../../balance_backlog.md)）。
 
 | 最高到達階層 | コモン | アンコモン | レア |
 |------------|-------|----------|------|
@@ -66,7 +66,7 @@
 3. 候補をベースID昇順に並べ、離散一様で1件選ぶ
 4. 選ばれたベースのスロットを、その枠のスロットとする
 
-- 候補数はカテゴリごとに 武器7・防具6・アクセサリー2（[master/equipment.md §6.0](../data/master/equipment.md) のベース装備一覧が正）で、いずれも枠数（2・2・1）を上回るため候補が尽きることはない
+- 候補数はカテゴリごとに 武器7・防具6・アクセサリー2（[master/equipment.md §6.0](../../data/master/equipment.md) のベース装備一覧が正）で、いずれも枠数（2・2・1）を上回るため候補が尽きることはない
 - 両手武器も抽選対象に含む（盾との排他は購入後の装備時に判定する）
 
 ## 3. ステータスと価格
@@ -76,19 +76,19 @@
 | # | 項目 | 式・規則 |
 |---|------|---------|
 | 1 | 装備レベル `L` | `max(1, 最高到達階層)` |
-| 2 | 基礎値 `B` | [master/equipment.md §6.1](../data/master/equipment.md) の基礎値の式に `L` を適用する（本書では式を再掲しない） |
+| 2 | 基礎値 `B` | [master/equipment.md §6.1](../../data/master/equipment.md) の基礎値の式に `L` を適用する（本書では式を再掲しない） |
 | 3 | 付与ステータス数 `N` | レアリティ別の付与数の範囲から離散一様で決める。**範囲の下限と上限が等しい場合は抽選せずその値を採る**（乱数を消費しない） |
 | 4 | 付与するステータス種 | `ATK → DEF → HP → SPD` の順に並べた候補から `N` 種を非復元で抽選する |
 | 5 | 各ステータス値 | `max(1, floor(B × レアリティ倍率 × ステータス補正 × 0.7))` |
 | 6 | 非付与のステータス | `null` |
 
-- レアリティ倍率と付与ステータス数の範囲は [systems/equipment.md §2.4](../design/systems/equipment.md) の「レアリティ」表、ステータス補正（ATK／DEF／HP／SPD）は [master/equipment.md §6.1](../data/master/equipment.md) が正。本書では値を再掲しない
+- レアリティ倍率と付与ステータス数の範囲は [systems/equipment.md §2.4](../../design/systems/equipment.md) の「レアリティ」表、ステータス補正（ATK／DEF／HP／SPD）は [master/equipment.md §6.1](../../data/master/equipment.md) が正。本書では値を再掲しない
 - `0.7` は**ショップ性能係数**。「ドロップ品の約70%の性能」（economy.md §2.5）を数値化したもの
 - 丸めは最後に1回だけ行う（[tech_numeric.md §1](tech_numeric.md)）。中間結果を丸めない
 
 ### 3.2 価格
 
-レアリティ×カテゴリの固定価格（[economy.md §2.5](../design/systems/economy.md) の価格テーブルが正）。装備レベル・到達階層には依存しない。価格は生成時に確定して枠へ保存する。
+レアリティ×カテゴリの固定価格（[economy.md §2.5](../../design/systems/economy.md) の価格テーブルが正）。装備レベル・到達階層には依存しない。価格は生成時に確定して枠へ保存する。
 
 ## 4. 購入処理
 
@@ -106,7 +106,7 @@
 
 出口条件: ゴールド減算・装備付与・売り切れ化の3つがすべて成立しているか、いずれも起きていないかのどちらか。
 
-- 所持枠の上限値と、上限到達時の入手経路ごとの扱いは [economy.md](../design/systems/economy.md)「倉庫」が正（Phase 2 の初期値は50枠）。判定は手順6の減算より前に行い、上限ちょうど（残り0枠）は購入不可とする
+- 所持枠の上限値と、上限到達時の入手経路ごとの扱いは [economy.md](../../design/systems/economy.md)「倉庫」が正（Phase 2 の初期値は50枠）。判定は手順6の減算より前に行い、上限ちょうど（残り0枠）は購入不可とする
 
 **リクエストの排他**:
 
@@ -119,7 +119,7 @@
 
 ## 5. データ構造
 
-親（更新サイクル）と子（5枠）の2テーブルで保存する。**列の型・制約の正は ER図** [er_diagram/item.md](../../diagrams/er_diagram/item.md)。
+親（更新サイクル）と子（5枠）の2テーブルで保存する。**列の型・制約の正は ER図** [er_diagram/item.md](../../../diagrams/er_diagram/item.md)。
 
 | テーブル | 件数 | 列 |
 |---------|------|-----|

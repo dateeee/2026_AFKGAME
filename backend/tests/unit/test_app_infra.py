@@ -1,6 +1,6 @@
 """単体テスト: アプリ基盤（db/database.py・dependencies.py・exceptions.py・logging_config.py・main.py）
 
-仕様: tech/tech_api.md「API共通仕様」（統一エラーレスポンス）、tech/tech_logging.md、tech/tech_auth.md
+仕様: tech/basic/tech_api.md「API共通仕様」（統一エラーレスポンス）、tech/basic/tech_logging.md、tech/detail/tech_auth.md
 分岐観点:
   - get_db: セッションの生成と終了時クローズ
   - 認証: ヘッダなし / Bearer形式でない / 期限切れ / 署名不正 / sub欠落 / ユーザー不在 / プレイヤー不在 / 正常

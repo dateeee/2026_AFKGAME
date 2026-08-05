@@ -1,6 +1,6 @@
 # ER図 — 認証・プレイヤー・キャラクター
 
-> 親: [er_diagram.md](../er_diagram.md)。データ構造は [tech_data.md](../../docs/tech/tech_data.md)、認証は [tech_auth.md](../../docs/tech/tech_auth.md)。
+> 親: [er_diagram.md](../er_diagram.md)。データ構造は [tech_data.md](../../docs/tech/basic/tech_data.md)、認証は [tech_auth.md](../../docs/tech/detail/tech_auth.md)。
 
 ## 認証・アカウント系
 

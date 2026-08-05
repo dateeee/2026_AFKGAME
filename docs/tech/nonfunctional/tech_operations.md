@@ -1,8 +1,8 @@
 # AFK GAME — 運用設計（環境・監視・データライフサイクル）
 
-> [tech_spec.md](tech_spec.md) §12。性能設計は [tech_performance.md](tech_performance.md)、秘密情報の扱いは [tech_security.md](tech_security.md) §11.8、ログ仕様は [tech_logging.md](tech_logging.md) を参照。
+> [tech_spec.md](../tech_spec.md) §12。性能設計は [tech_performance.md](tech_performance.md)、秘密情報の扱いは [tech_security.md](tech_security.md) §11.8、ログ仕様は [tech_logging.md](../basic/tech_logging.md) を参照。
 >
-> **運用「要件」（バランス改定ポリシー・補填・告知・サポート窓口）は [operation_requirements.md](../design/operation_requirements.md) が正**。本書はその実現方式（環境・設定・監視・ジョブ・手順）のみを扱う。
+> **運用「要件」（バランス改定ポリシー・補填・告知・サポート窓口）は [operation_requirements.md](../../design/operation_requirements.md) が正**。本書はその実現方式（環境・設定・監視・ジョブ・手順）のみを扱う。
 > デプロイ先は **AWS**（EC2 1台 + S3/CloudFront）。構成は §12.1 が正。
 
 ---
@@ -45,7 +45,7 @@
 | `LOG_FORMAT` | ログ形式（`text` / `json`） | `text` | ○ |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Google OAuth | なし | Phase 2〜 ○ |
 | `SMTP_HOST` / `SMTP_PORT` / `SMTP_USER` / `SMTP_PASSWORD` | 確認メール・パスワードリセット送信 | なし | Phase 2〜 ○ |
-| `BATTLE_RNG_SEED` | 戦闘乱数のシード固定（[tech_rng.md §2](tech_rng.md) の調査用。本番では未設定） | なし | — |
+| `BATTLE_RNG_SEED` | 戦闘乱数のシード固定（[tech_rng.md §2](../detail/tech_rng.md) の調査用。本番では未設定） | なし | — |
 
 - **起動時バリデーション**: `APP_ENV=production` かつ必須変数が未設定・既定値のままの場合は、起動を中止して ERROR ログを出す（設定漏れのまま本番稼働することを防ぐ）
 - 変数を追加したら `.env.example` と本表を同時に更新する
@@ -64,7 +64,7 @@
 | 指標 | しきい値の目安 | 取得元 |
 |------|--------------|--------|
 | 5xx 率 | 1% 超で調査 | ミドルウェアの `status_code` |
-| `POST /api/battle/tick` の p95 | [non_functional_requirements.md](../design/non_functional_requirements.md) §1 の目標超過で調査 | ミドルウェアの `duration_ms` |
+| `POST /api/battle/tick` の p95 | [non_functional_requirements.md](../../design/non_functional_requirements.md) §1 の目標超過で調査 | ミドルウェアの `duration_ms` |
 | ERROR ログ件数 | 1件でも出たら内容を確認 | ロガー `afkgame.*` |
 | DBファイル/テーブルサイズ | 850MB 接近で PostgreSQL 移行を検討 | 日次バッチ（§12.6）で記録 |
 
@@ -72,7 +72,7 @@
 
 ## 12.4 DBマイグレーション運用
 
-移行時に**満たすべき要件**（Phase進行時の既存データ引き継ぎ・マスタIDの再利用禁止・リセット禁止）は [operation_requirements.md](../design/operation_requirements.md) §2 が正。本節はその適用手順を定める。
+移行時に**満たすべき要件**（Phase進行時の既存データ引き継ぎ・マスタIDの再利用禁止・リセット禁止）は [operation_requirements.md](../../design/operation_requirements.md) §2 が正。本節はその適用手順を定める。
 
 | 項目 | 仕様 |
 |------|------|
@@ -97,11 +97,11 @@
 | 保持期間 | 14日（論理バックアップ・スナップショットとも） |
 | 保管先 | アプリ稼働ノードとは別のストレージ（論理バックアップは S3、スナップショットは EBS の保管領域） |
 | 検証 | 月1回、バックアップからのリストアを実施して復元可能性を確認する |
-| RPO / RTO | [non_functional_requirements.md](../design/non_functional_requirements.md) §3 に従う |
+| RPO / RTO | [non_functional_requirements.md](../../design/non_functional_requirements.md) §3 に従う |
 
 - 両方式を持つのは、稼働中ボリュームのスナップショットが書き込み途中の状態を含みうるのに対し、論理バックアップはDBの整合を保証できるため。**復旧は論理バックアップを第一手段**とし、ボリューム障害時にスナップショットから復元する
 
-**復元時の注意**: 復元すると `lastTickAt` が過去に巻き戻る。次回のtick処理で「復元時点〜現在」が未処理tickとして再計算されるため、**報酬の二重付与にはならず、消失もしない**（[tech_tick.md](tech_tick.md) §1）。ただし巻き戻し幅が `MAX_OFFLINE_HOURS`（24時間）を超える場合、超過分は切り捨てられる。
+**復元時の注意**: 復元すると `lastTickAt` が過去に巻き戻る。次回のtick処理で「復元時点〜現在」が未処理tickとして再計算されるため、**報酬の二重付与にはならず、消失もしない**（[tech_tick.md](../detail/tech_tick.md) §1）。ただし巻き戻し幅が `MAX_OFFLINE_HOURS`（24時間）を超える場合、超過分は切り捨てられる。
 
 ## 12.6 定期ジョブとデータライフサイクル
 
@@ -112,16 +112,16 @@
 | メール確認 / パスワードリセットトークン | 日次バッチ | 期限切れ（24時間）を物理削除 |
 | DBサイズ記録 | 日次バッチ | サイズをINFOログに出力（§12.3 の監視指標） |
 | 戦闘ログ | tick処理内 | 100件超を古い順に削除（バッチ不要） |
-| 日替わりショップ | 遅延評価 | `GET /api/shop/lineup` 取得時に 00:00 UTC を跨いだかを判定して再生成（[systems/economy.md](../design/systems/economy.md)。バッチ不要） |
+| 日替わりショップ | 遅延評価 | `GET /api/shop/lineup` 取得時に 00:00 UTC を跨いだかを判定して再生成（[systems/economy.md](../../design/systems/economy.md)。バッチ不要） |
 
 - 実行方式は本番 EC2 の OS cron（1日1回 03:00 UTC。§12.1）。実装は Phase 2 のテスト工程以降に行う
 - ジョブは **べき等**とし、二重実行しても結果が変わらないよう実装する（削除対象を条件で特定する形にする）
-- **ゲスト削除は事前告知できない**（連絡先を持たないため）。緩和策（本登録導線の常設・データ復旧不可の明示）は [non_functional_requirements.md](../design/non_functional_requirements.md) §5 が正
-- 退会（アカウント削除）要求も本節のジョブと同じ削除処理を用いる（**Phase 2** で実装。要件は [non_functional_requirements.md](../design/non_functional_requirements.md) §5）
+- **ゲスト削除は事前告知できない**（連絡先を持たないため）。緩和策（本登録導線の常設・データ復旧不可の明示）は [non_functional_requirements.md](../../design/non_functional_requirements.md) §5 が正
+- 退会（アカウント削除）要求も本節のジョブと同じ削除処理を用いる（**Phase 2** で実装。要件は [non_functional_requirements.md](../../design/non_functional_requirements.md) §5）
 
 ## 12.7 リリース時の技術チェックと障害対応
 
-リリースの**フロー**（仕様反映 → Phase完了ゲート → 告知 → バックアップ・マイグレーション・デプロイ → スモークテスト）は [operation_requirements.md](../design/operation_requirements.md) §4 が正。本節は各手順で実行する技術的な確認項目を補う。
+リリースの**フロー**（仕様反映 → Phase完了ゲート → 告知 → バックアップ・マイグレーション・デプロイ → スモークテスト）は [operation_requirements.md](../../design/operation_requirements.md) §4 が正。本節は各手順で実行する技術的な確認項目を補う。
 
 | 手順 | 技術チェック |
 |------|------------|
@@ -140,4 +140,4 @@
 | 応答が遅い | `duration_ms` の p95 | [tech_performance.md](tech_performance.md) §10.4 の劣化対処を順に適用 |
 | データ不整合 | 対象プレイヤーのtickログ | 該当プレイヤーのみバックアップから復元 |
 
-- 問い合わせ対応では `X-Request-ID`（[tech_logging.md](tech_logging.md)）を起点にログを追跡する。プレイヤーには画面上のエラー表示にリクエストIDを含めて伝える
+- 問い合わせ対応では `X-Request-ID`（[tech_logging.md](../basic/tech_logging.md)）を起点にログを追跡する。プレイヤーには画面上のエラー表示にリクエストIDを含めて伝える

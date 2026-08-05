@@ -1,6 +1,6 @@
 # AFK GAME — 戦闘ログ・戦闘処理仕様
 
-> 技術仕様の全体は [tech_spec.md](tech_spec.md)、ゲーム仕様は [game_spec.md](../design/game_spec.md) を参照。
+> 技術仕様の全体は [tech_spec.md](../tech_spec.md)、ゲーム仕様は [game_spec.md](../../design/game_spec.md) を参照。
 
 > 本書は **戦闘ログ保持ポリシー（§1）** と **戦闘処理フロー（§3）** を扱う。オフライン計算（§2 パフォーマンス対策・§4 簡略計算アルゴリズム）は [tech_offline.md](tech_offline.md) に分離した（節番号は分離前を維持）。
 
@@ -136,7 +136,7 @@ def select_target_with_taunt(enemies_or_allies, taunters):
 
 - 挑発は範囲攻撃には無効（範囲攻撃は全体に当たるため）
 - 挑発率はスキルレベルで変動: 段階1=50%、段階2=60%、段階3=70%、段階4=80%
-- 合算しても上限は80%で、常に20%はランダムターゲットに抜ける（正は [systems/battle.md](../design/systems/battle.md)「確率・軽減率の上限」）
+- 合算しても上限は80%で、常に20%はランダムターゲットに抜ける（正は [systems/battle.md](../../design/systems/battle.md)「確率・軽減率の上限」）
 
 ### 3.1.4 ボスラッシュのウェーブ間処理
 
@@ -151,7 +151,7 @@ def select_target_with_taunt(enemies_or_allies, taunters):
 
 ### 3.1.5 報酬付与（Phase 3〜: パーティへのEXP配分）
 
-- 敵撃破・階クリアのEXPは**在籍パーティ全員に全額付与**する（人数で分割しない。戦闘不能（HP0）のメンバーにも付与する）。正は [systems/character.md §2.7](../design/systems/character.md)
+- 敵撃破・階クリアのEXPは**在籍パーティ全員に全額付与**する（人数で分割しない。戦闘不能（HP0）のメンバーにも付与する）。正は [systems/character.md §2.7](../../design/systems/character.md)
 - ゴールド・ドロップはプレイヤー共通の所持へ加算する（Phase 1〜2 と同じ）
 - 分岐一覧は [tech_skill.md §8](tech_skill.md) が持つ
 
@@ -177,7 +177,7 @@ def select_target_with_taunt(enemies_or_allies, taunters):
 - 敵スキルの発動判定は味方スキルと同一フロー（CD判定 → 優先度順で1つ発動）
 - 敵スキルの優先度: デバフ > 状態異常 > 攻撃スキル > 通常攻撃
 - CD管理: 味方と同様にターン経過で減算、塔出発時CD=0
-- 敵スキルの詳細は [master_data.md §9A](../data/master_data.md) を参照
+- 敵スキルの詳細は [master_data.md §9A](../../data/master_data.md) を参照
 
 ### 3.3 ターゲット選択の実装
 

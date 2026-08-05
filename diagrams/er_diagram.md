@@ -1,6 +1,6 @@
 # ER図（エンティティ関連図）
 
-> データ構造: [tech_data.md](../docs/tech/tech_data.md) / 認証仕様: [tech_auth.md](../docs/tech/tech_auth.md)
+> データ構造: [tech_data.md](../docs/tech/basic/tech_data.md) / 認証仕様: [tech_auth.md](../docs/tech/detail/tech_auth.md)
 > 本書は索引。各系統は [er_diagram/](er_diagram/) 配下の個別ファイルに分割している。
 
 ## 索引

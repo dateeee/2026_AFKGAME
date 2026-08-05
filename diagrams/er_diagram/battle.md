@@ -1,6 +1,6 @@
 # ER図 — 戦闘・ボスラッシュ・マスターデータ
 
-> 親: [er_diagram.md](../er_diagram.md)。データ構造は [tech_data.md](../../docs/tech/tech_data.md)、数値は [master_data.md](../../docs/data/master_data.md)。
+> 親: [er_diagram.md](../er_diagram.md)。データ構造は [tech_data.md](../../docs/tech/basic/tech_data.md)、数値は [master_data.md](../../docs/data/master_data.md)。
 
 ## 戦闘・ボスラッシュ系
 

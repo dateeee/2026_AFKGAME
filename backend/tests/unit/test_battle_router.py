@@ -1,6 +1,6 @@
 """単体テスト: 戦闘ルーター（/api/battle/tick）
 
-仕様: tech/tech_api.md（tick API）、tech/tech_offline.md（オフライン一括計算・簡易計算）
+仕様: tech/basic/tech_api.md（tick API）、tech/detail/tech_offline.md（オフライン一括計算・簡易計算）
 時刻依存のため last_tick_at を直接操作し、process_tick は差し替えて tick 数と結果を固定する。
 """
 

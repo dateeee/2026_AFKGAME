@@ -1,6 +1,6 @@
 # APIシーケンス図
 
-> API定義: [tech_api.md](../docs/tech/tech_api.md) / ゲームループ: [tech_architecture.md](../docs/tech/tech_architecture.md)
+> API定義: [tech_api.md](../docs/tech/basic/tech_api.md) / ゲームループ: [tech_architecture.md](../docs/tech/basic/tech_architecture.md)
 > 本書は索引。各フローは [api_sequence/](api_sequence/) 配下の個別ファイルに分割している（節番号は維持）。
 
 ## 索引
