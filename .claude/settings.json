@@ -24,6 +24,18 @@
           }
         ]
       }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"$CLAUDE_PROJECT_DIR/scripts/log_token_usage.py\"",
+            "timeout": 20,
+            "statusMessage": "トークン使用量を記録中..."
+          }
+        ]
+      }
     ]
   }
 }

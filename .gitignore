@@ -45,6 +45,7 @@ frontend/.playwright/
 
 # Logs
 *.log
+logs/token_usage.csv
 
 # Coverage / Test
 htmlcov/
