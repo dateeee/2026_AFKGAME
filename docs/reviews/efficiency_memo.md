@@ -46,3 +46,8 @@
 - シグナル: long-turn(calls=83)
 - ターン概要: ツール83回・エラー1回・拒否0回。開始:「<command-message>next</command-message>」
 - 原因と改善案: 概ね誤検出（分岐一覧153行→161テスト・7モジュール新設で規模相応）。ただし前半20回超が「実装対象モジュールの表層（関数名・データ構造）が基本設計に無く、テスト側で決めるための探索」に費やされた。`test-list.md` §3「入力」に *対象モジュールが未作成の場合は分岐一覧に加えて `tech_structure.md` の services 一覧を確認し、無ければテストの docstring で表層を定義して製造工程へ申し送る* を明記すれば、探索を1回のRead に畳める
+
+## 2026-08-07 00:17 | session 10fd52fb | 自動検出
+- シグナル: long-turn(calls=33)
+- ターン概要: ツール33回・エラー0回・拒否0回。開始:「<ide_opened_file>The user opened the file c:\GIT\2026_AFKGAM」
+- 原因と改善案: 大半はフック修正と検証で規模相応だが、末尾6回はコミットのやり直し。(1) Bash ツールへ PowerShell のヒアストリング `@'...'@` を渡してコミットメッセージに `@` が混入、(2) `git status --short` の直後の `git add -A` が racily-clean な3ファイル（前セッションのDB設計積み残し）を巻き込んだ。`stop-commit.sh` の手順へ「メッセージは `git commit -F - <<'MSG'`（Bash ヒアドキュメント）で渡す」「ステージ後に `git diff --cached --name-only` で対象を確認してからコミットする」を追記すれば両方防げる
