@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 # Stop hook — 作業終了時に未コミットの変更が残っていれば Claude にコミットさせる。
 #
+# settings.json からは直接呼ばれず、`.claude/hooks/stop-chain.sh` が
+# efficiency_check.py の後に実行する（効率メモへの追記が済んだ状態で
+# git status を読むため、メモの変更も同じコミットに含まれる）。
+#
 # 動作:
 #   変更なし          → exit 0（何もしない）
 #   未コミット変更あり → exit 2 + stderr（応答をブロックし、Claude にコミットを指示）
@@ -42,15 +46,18 @@ count=$(printf '%s\n' "$changes" | grep -c .)
 cat >&2 <<EOF
 未コミットの変更が ${count} 件あります。作業を終える前にコミットしてください。
 
-1. git status --short と git diff --stat で変更内容を把握する
+1. 上に効率メモ（docs/reviews/efficiency_memo.md）への記入指示が出ている場合は、
+   コミットより先に記入を済ませる。その変更もこのコミットに含める
+   （メモだけを別コミットにしない。上の件数にはメモの変更も含まれている）
+2. git status --short と git diff --stat で変更内容を把握する
    1列目が空白でない行は既に index にステージ済み。git commit はこれも巻き込む
-2. 今回の作業による変更だけであれば git add -A ですべてをステージする
+3. 今回の作業による変更だけであれば git add -A ですべてをステージする
    無関係な変更（前セッションの残り・ステージ済みの別作業）が混ざっている場合は
    git add -A を使わず、git commit -- <path>... で対象パスを明示して範囲を限定する
-3. CLAUDE.md の変更履歴と同じ形式でコミットする
-   （docs: / feat: / fix: / chore: + 日本語の要約。必要なら本文で詳細を補足）
 4. タスクが完了した場合、コミット前に docs/next_session.md の「次回」を次のタスクへ
    更新する（書式は .claude/project/next.md。未確定なら「ユーザー判断待ち」+ 候補を残す）
+5. CLAUDE.md の変更履歴と同じ形式でコミットする
+   （docs: / feat: / fix: / chore: + 日本語の要約。必要なら本文で詳細を補足）
 
 変更が試行錯誤の残骸や一時ファイルでコミットすべきでない場合、
 または複数テーマにまたがっていて分割方針の判断が必要な場合は、

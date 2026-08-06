@@ -18,21 +18,15 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/stop-commit.sh\"",
-            "timeout": 15,
-            "statusMessage": "未コミットの変更を確認中..."
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/stop-chain.sh\"",
+            "timeout": 40,
+            "statusMessage": "効率シグナルと未コミットの変更を確認中..."
           },
           {
             "type": "command",
             "command": "python \"$CLAUDE_PROJECT_DIR/scripts/log_token_usage.py\"",
             "timeout": 20,
             "statusMessage": "トークン使用量を記録中..."
-          },
-          {
-            "type": "command",
-            "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/efficiency_check.py\"",
-            "timeout": 20,
-            "statusMessage": "効率シグナルを確認中..."
           }
         ]
       }

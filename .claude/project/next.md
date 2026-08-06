@@ -9,7 +9,7 @@
 |------|-----|
 | パス | `docs/next_session.md` |
 | 構成 | §1「次回（コピペ用）」1件 + §2 候補キュー最大5行（**ポインタ専用**。Phase 進捗は転記しない） |
-| 更新タイミング | タスク完了のコミット前（Stop フック `stop-commit.sh` がリマインドする） |
+| 更新タイミング | タスク完了のコミット前（Stop フック `stop-commit.sh`（`stop-chain.sh` 経由）がリマインドする） |
 | 役割の宣言 | [docs/spec_ownership.md](../../docs/spec_ownership.md) §2 |
 
 ## 2. 開始プロンプトの定型（5要素）

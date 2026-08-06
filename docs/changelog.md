@@ -12,6 +12,7 @@
 
 | ファイル | 内容 |
 |---------|------|
+| `.claude/hooks/stop-chain.sh`（新規）・`.claude/settings.json`・`.claude/hooks/efficiency_check.py`・`stop-commit.sh`・`.claude/project/retro.md`・`next.md` | Stop フックの実行順を固定。効率メモ追記（efficiency_check）とコミット指示（stop-commit）を settings.json へ個別登録すると並列実行され、コミット→メモ記入の順になって「メモだけの追いコミット」が発生していた。両者を `stop-chain.sh` で efficiency_check → stop-commit の順に直列化し、メモ追記後に `git status` を読むよう変更（作業ツリーが空でもメモの変更がコミット対象に含まれる）。指示文にも「記入が先・メモも同じコミットへ含める」を明記 |
 | `scripts/check_branch_list.py`・`docs/tech/detail/tech_skill.md`・`tech_party.md`・`tech_shop.md`・`.claude/project/detail-design.md` | 分岐一覧の WARN 16件を解消。(1) ループ検出が「周回」の"周"に誤反応していたため、判定を「分岐点に`ループ`を含む」または「数字+周の記載がある」へ厳密化（tech_offline §5 の4件・tech_party §2 の1件が誤検出だった）。(2) 条件分岐を持たない単一経路・回数固定ループ向けに注記による抑止記法 `> WARN許容 #21・#22: <理由>` を新設し、`detail-design.md` §4 の記載ルールへ追加。tech_skill §3/§7・tech_party §2/§4/§5 へ注記を新規追加、tech_shop §7/§8 の既存注記を同記法へ移行（`check_branch_list.py` が WARN 0件・exit 0） |
 
 ## 2026-08-06

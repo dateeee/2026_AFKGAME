@@ -7,7 +7,8 @@
 | 項目 | 値 |
 |------|----|
 | メモのパス | `docs/reviews/efficiency_memo.md`（追記型。文字数上限・doc検査・ローテーションの対象外） |
-| 自動追記フック | `.claude/hooks/efficiency_check.py`（Stop フック。settings.json に登録済み） |
+| 自動追記フック | `.claude/hooks/efficiency_check.py`（Stop フック。`stop-chain.sh` 経由で登録済み） |
+| 実行順 | `stop-chain.sh` が efficiency_check → stop-commit の順で実行。メモ記入をコミットより先に済ませ、メモの変更も同じコミットへ含める（メモだけの追いコミットを作らない） |
 | エントリの寿命 | 反映済み・対応不要になったら削除（`docs/open_specs.md` と同じ運用） |
 
 ## 検出シグナルとしきい値
@@ -24,7 +25,8 @@
 | correction | ターン冒頭の発話の手戻り語（「違う」「やり直し」等） | 1語 |
 
 検出時はフックが仮エントリを追記し、Claude が「原因と改善案」を記入して完成させる。
-一時的に止めたい場合は settings.json の該当フックを外す（`.claude/.no-auto-commit` 方式の無効化フラグは未実装）。
+一時的に止めたい場合は `stop-chain.sh` の efficiency_check 呼び出しを外す
+（settings.json の Stop フックごと外すとコミット確認も止まる。`.claude/.no-auto-commit` 方式の無効化フラグは未実装）。
 
 ## 反映先マップ（AFK GAME での例）
 
