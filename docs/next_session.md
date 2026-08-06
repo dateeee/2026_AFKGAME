@@ -5,20 +5,19 @@
 > **鮮度**: 開始側は「前提」のコミットIDと git log を突合し、完了済みに見えたら開始せずユーザーへ確認する。
 > 本ファイルは**ポインタ専用**。Phase 進捗の正は [development_process.md](development_process.md) §5、書式の正は [.claude/project/next.md](../.claude/project/next.md)。
 
-最終更新: 2026-08-06 / 対応コミット: a9ee9e7
+最終更新: 2026-08-06 / 対応コミット: eb8efcf の直後（doc-review レポートのコミット）
 
 ## 1. 次回（コピペ用）
 
 ```
-/doc-review Phase 3 詳細設計の仕様確定ゲート（差分モード: 前回 2026-08-03 以降の変更分）
-完了条件: レビューレポートを docs/reviews/doc-review/ へ出力してコミット
-参照: docs/reviews/doc-review/2026-08-03_234437.md（前回レポート。対象範囲の起点）
-前提: Phase 3 詳細設計・分岐一覧153件・お知らせAPI定義は確定済み（コミット 439c343・1fe9e07）
+/fix-specs docs/reviews/doc-review/2026-08-06_214230.md の指摘6件（高1・中1・低4）を仕様書へ反映
+完了条件: 高・中の反映必須（低は判断込み）・check_docs / check_doc_size 通過・コミット
+参照: docs/reviews/doc-review/2026-08-06_214230.md（指摘一覧。修正対象はここから特定）
+前提: Phase 3 仕様確定ゲートの doc-review（差分）完了。前回24件中22件は解消済み、残タスクは指摘1104〜1106 に集約
 ```
 
 ## 2. 候補キュー（最大5行・優先順）
 
 | 優先 | タスク | 工程スキル |
 |------|-------|-----------|
-| 1 | doc-review 指摘の修正適用（レポートが出た後・別セッション） | `fix-specs` |
-| 2 | Phase 3 テストリスト作成（分岐一覧 → 失敗するテスト） | `test-list` |
+| 1 | Phase 3 テストリスト作成（分岐一覧 → 失敗するテスト。fix-specs 完了後） | `test-list` |
