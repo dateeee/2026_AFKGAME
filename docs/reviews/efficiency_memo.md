@@ -57,3 +57,8 @@
 - ターン概要: ツール46回・エラー0回・拒否0回。開始:「データベース設計とER図作成を成果物に加えてください」
 - 原因と改善案: 前半20回超が「DB設計が既に成果物にあるか」の確認に費やされた。`basic-design.md` §1 が `tech_data.md` の役割を「DBスキーマ・JSON構造」と**実態と異なる記述**にしていたため表を信頼できず、tech_data 本文・ER図・models・テストまで開いて初めて欠落を確定できた。`review-docs.md` の観点へ「`.claude/project/*.md` の成果物表の役割列と `spec_ownership.md` の正が一致しているか」を追加すれば、次回は表1枚で判断できる
 - 追加: 未作成ファイル（別タスクへ切り出した成果物）を process 文書から Markdown リンクで参照して `check_docs.py` がリンク切れ2件で落ち、コード表記へ書き直す往復が発生。`documentation_rules.md` §6 へ「未作成の成果物はリンクではなくコード表記で書き、作成タスクで索引登録とセットにリンク化する」を足せば防げる
+
+## 2026-08-07 00:43 | session 06ef292c | 自動検出
+- シグナル: long-turn(calls=75)
+- ターン概要: ツール75回・エラー1回・拒否0回。開始:「<command-message>next</command-message>」
+- 原因と改善案: 大半は成果物新設1件を3セグメントへ分割して完遂した正当な作業だが、末尾で手戻りが2件出た。(1) player.md を書き上げてから 8,877字で上限超過が判明し認証系へ再分割 — `basic-design.md` へ「表形式の定義書は1テーブル約550字で見積もり、8,000字を超える構成は執筆前に分割する」を追記する。(2) commit の `-m @'...'@`（PowerShell here-string）を Bash ツールで使い commit message に `@` が混入して amend が必要 — `.claude/project/profile.md` §4 へ「複数行のコミットメッセージは Bash ツールでは `git commit -F - <<'EOF'`、PowerShell ツールでは `@'...'@` と使い分ける」を追記する
