@@ -38,6 +38,8 @@
 | Phaseごとの開発進捗（工程の完了状況） | `docs/development_process.md` | — | — | §5 が正。README.md は Phase の**内容**のみを持ち、状況列は持たない（ISSUE-1019 で確定） |
 | キャラクター成長式と LV 別ステータス | `docs/data/master/character.md` | `docs/design/systems/character.md`, `docs/data/towers/*.md` | — | §1.2 の `base + growth × (LV - 1)` が正。塔ファイル §4 の勇者参考値は導出値（ISSUE-1008 で確定） |
 | 次セッションの開始タスク（引き継ぎ） | `docs/next_session.md` | — | — | ポインタ専用（「次回」1件 + 候補キュー最大5行）。Phase 進捗の正は `development_process.md` §5、書式の正は `.claude/project/next.md` |
+| 回復量+%（回復の心得）の適用範囲 | `docs/tech/detail/tech_skill.md` | `docs/data/skills/003_回復系統.md` | — | §1 #5 が正。ATK係数の回復スキル（`heal_1`・`heal_2`）にのみ乗算し、maxHP基準の蘇生・リジェネとポーションには適用しない（ISSUE-1101 で確定） |
+| お知らせマスターの項目定義・掲示件数の上限 | `docs/data/master_data.md` | `docs/tech/basic/tech_api.md`, `docs/design/operation_requirements.md`, `docs/balance_backlog.md` | — | §17 が正。掲示件数20件・title 40字・body 400字は Phase 3 の仮置き（ISSUE-1104 で確定）。既読管理の保持先は別行（`operation_requirements.md` §3.1 が正） |
 
 ## 3. 境界の一般原則
 

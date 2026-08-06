@@ -12,6 +12,11 @@
 
 | ファイル | 内容 |
 |---------|------|
+| `docs/data/skills/003_回復系統.md` | ISSUE-1101: `heal_p1`（回復の心得）の適用範囲を tech_skill.md §1 #5 に揃え、**蘇生を対象外**へ修正（追加効果・設計メモ・§5 参考値行の3箇所）。蘇生・リジェネはともに maxHP 基準のため除外で一貫させた |
+| `docs/data/master_data.md` | ISSUE-1104: §17「お知らせ（Phase 3〜）」を新設。項目定義（`noticeId`・`title` 40字・`body` 400字・`publishedAt` は ISO 8601 UTC）と掲示件数の上限20件を確定（Phase 3 の仮置き値） |
+| `docs/tech/basic/tech_api.md` `docs/design/operation_requirements.md` `docs/balance_backlog.md` `docs/development_process.md` | ISSUE-1104: お知らせマスターの「Phase 3 の詳細設計で定義する」を `master_data.md §17` への参照へ置換。balance_backlog B-7 の現行値を20件へ、development_process §5 Phase 3 の残タスクを「分岐一覧の追補のみ」へ更新 |
+| `docs/tech/detail/tech_battle.md` | ISSUE-1103: §3.1 手順2-j のキャップ出典2箇所を「game_spec §2.2」（索引）から `systems/battle.md`「確率・軽減率の上限」（正）への直接リンクへ統一 |
+| `docs/spec_ownership.md` | ISSUE-1101・1104: 「回復量+%（回復の心得）の適用範囲」（正 = `tech_skill.md`）と「お知らせマスターの項目定義・掲示件数の上限」（正 = `master_data.md`）の2行を追加 |
 | `docs/reviews/doc-review/2026-08-06_214230.md` | **新規**: Phase 3 仕様確定ゲートの差分レビュー（前回 2026-08-03 以降の約55ファイル）。前回24件中22件の解消をペア両側で確認（塔参考値24値は式で再計算し全一致）。新規指摘6件（高1・中1・低4）: 回復の心得の適用範囲矛盾（1101・高）、APIパスのバックスラッシュ表記（1102・中）、キャップ参照の不統一（1103）、お知らせマスター未定義（1104）、分岐一覧WARN16件（1105・1023継続）、文字数残量WARN（1106・1024継続） |
 | `.claude/project/profile.md` `CLAUDE.md` | コスト規律へ規律7を追加（大きな出力は context-mode で処理し生出力を会話に持ち込まない）、規律4へ運用手順の表を追加（索引→該当ファイルのみ・レビューは差分先行・同一ファイルの再Read禁止）。CLAUDE.md「コスト規律」要約を突合更新 |
 | `.claude/skills/next/` `.claude/project/next.md` `docs/next_session.md` ほか | **`/next` スキルを新設**: 引き継ぎファイル（次回開始プロンプト + 候補キュー）から次タスクを特定し、鮮度確認のうえ工程スキルへ委譲。`stop-commit.sh` へ引き継ぎ更新のリマインドを追加、`spec_ownership.md` へ役割宣言、CLAUDE.md の支援スキル数を8件へ |

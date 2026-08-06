@@ -58,7 +58,7 @@
 | 既読管理 | クライアントの localStorage 専用キーで保持する（**本行が正**。Pinia ストアはメモリ上の参照のみで永続化プラグインは使わない）。サーバーはプレイヤーごとの既読状態を持たない。機種変更・ブラウザ変更で既読が引き継がれないことは許容する |
 | 保持件数 | 掲示件数に上限を設け、古いものはマスターデータから削除する（[non_functional_requirements.md](non_functional_requirements.md) §2「上限のないデータを新設しない」） |
 
-- お知らせマスターの項目定義は Phase 3 の詳細設計で [master_data.md](../data/master_data.md) へ定義する。掲示件数の上限値は [balance_backlog.md](../balance_backlog.md) で管理する
+- お知らせマスターの項目定義と掲示件数の上限値（20件）の正は [master_data.md §17](../data/master_data.md)。上限値は仮置きのため、調整対象としての管理は [balance_backlog.md](../balance_backlog.md) B-7 で続ける
 - Phase 3 の実装完了までは告知手段を持たないため、**下方修正を伴う改定は行わない**
 - ゲスト削除の事前告知には使えない（**一定期間アクセスのないプレイヤー**には届かないため。期限は [tech_auth.md](../tech/detail/tech_auth.md) が正）。緩和策は [non_functional_requirements.md](non_functional_requirements.md) §5 が正
 
