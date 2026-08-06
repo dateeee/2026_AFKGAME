@@ -12,6 +12,7 @@
 
 | ファイル | 内容 |
 |---------|------|
+| `.claude/hooks/efficiency_check.py` ほか | 効率メモの仕組みを新設。Stop フックが直近ターンの非効率シグナル（同一Read再読・同一コマンド連発・エラー多発・許可拒否・過大ターン・手戻り発話）を検出して `docs/reviews/efficiency_memo.md` へ自動追記し、`/retro` スキル（`.claude/skills/retro/` + `.claude/project/retro.md`）で改善へ反映する。CLAUDE.md の支援スキル数を9件へ更新 |
 | `docs/data/skills/003_回復系統.md` | ISSUE-1101: `heal_p1`（回復の心得）の適用範囲を tech_skill.md §1 #5 に揃え、**蘇生を対象外**へ修正（追加効果・設計メモ・§5 参考値行の3箇所）。蘇生・リジェネはともに maxHP 基準のため除外で一貫させた |
 | `docs/data/master_data.md` | ISSUE-1104: §17「お知らせ（Phase 3〜）」を新設。項目定義（`noticeId`・`title` 40字・`body` 400字・`publishedAt` は ISO 8601 UTC）と掲示件数の上限20件を確定（Phase 3 の仮置き値） |
 | `docs/tech/basic/tech_api.md` `docs/design/operation_requirements.md` `docs/balance_backlog.md` `docs/development_process.md` | ISSUE-1104: お知らせマスターの「Phase 3 の詳細設計で定義する」を `master_data.md §17` への参照へ置換。balance_backlog B-7 の現行値を20件へ、development_process §5 Phase 3 の残タスクを「分岐一覧の追補のみ」へ更新 |

@@ -27,6 +27,12 @@
             "command": "python \"$CLAUDE_PROJECT_DIR/scripts/log_token_usage.py\"",
             "timeout": 20,
             "statusMessage": "トークン使用量を記録中..."
+          },
+          {
+            "type": "command",
+            "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/efficiency_check.py\"",
+            "timeout": 20,
+            "statusMessage": "効率シグナルを確認中..."
           }
         ]
       }

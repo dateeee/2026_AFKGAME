@@ -41,6 +41,7 @@
 | `full-review` | [review-fullstack.md](review-fullstack.md) | 仕様↔コード・フロント↔バックの統合レビュー |
 | `resolve-specs` | [requirements.md](requirements.md) | 未確定仕様の確定（要件定義工程の一部） |
 | `next` | [next.md](next.md) | 新セッション冒頭で引き継ぎファイルから次タスクを特定し工程スキルへ委譲 |
+| `retro` | [retro.md](retro.md) | 効率メモ（Stop フックが自動追記）の振り返りとスキル・成果物への反映 |
 
 ## 補助プロファイル
 
