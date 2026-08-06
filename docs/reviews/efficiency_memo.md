@@ -51,3 +51,9 @@
 - シグナル: long-turn(calls=33)
 - ターン概要: ツール33回・エラー0回・拒否0回。開始:「<ide_opened_file>The user opened the file c:\GIT\2026_AFKGAM」
 - 原因と改善案: 大半はフック修正と検証で規模相応だが、末尾6回はコミットのやり直し。(1) Bash ツールへ PowerShell のヒアストリング `@'...'@` を渡してコミットメッセージに `@` が混入、(2) `git status --short` の直後の `git add -A` が racily-clean な3ファイル（前セッションのDB設計積み残し）を巻き込んだ。`stop-commit.sh` の手順へ「メッセージは `git commit -F - <<'MSG'`（Bash ヒアドキュメント）で渡す」「ステージ後に `git diff --cached --name-only` で対象を確認してからコミットする」を追記すれば両方防げる
+
+## 2026-08-07 00:21 | session 6ce8bb66 | 自動検出
+- シグナル: long-turn(calls=46)
+- ターン概要: ツール46回・エラー0回・拒否0回。開始:「データベース設計とER図作成を成果物に加えてください」
+- 原因と改善案: 前半20回超が「DB設計が既に成果物にあるか」の確認に費やされた。`basic-design.md` §1 が `tech_data.md` の役割を「DBスキーマ・JSON構造」と**実態と異なる記述**にしていたため表を信頼できず、tech_data 本文・ER図・models・テストまで開いて初めて欠落を確定できた。`review-docs.md` の観点へ「`.claude/project/*.md` の成果物表の役割列と `spec_ownership.md` の正が一致しているか」を追加すれば、次回は表1枚で判断できる
+- 追加: 未作成ファイル（別タスクへ切り出した成果物）を process 文書から Markdown リンクで参照して `check_docs.py` がリンク切れ2件で落ち、コード表記へ書き直す往復が発生。`documentation_rules.md` §6 へ「未作成の成果物はリンクではなくコード表記で書き、作成タスクで索引登録とセットにリンク化する」を足せば防げる

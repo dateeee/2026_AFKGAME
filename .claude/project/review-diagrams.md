@@ -25,7 +25,7 @@ python .claude/scripts/review_prep.py --dir docs/reviews/diagrams-review \
 
 | 担当 | 対象の図 | 主な照合先 |
 |------|---------|----------|
-| データ構造 | `er_diagram`、`class_diagram` | `tech_data.md`、`design/systems/`、`backend/app/models/`・`services/`、`frontend/src/stores/` |
+| データ構造 | `er_diagram`、`class_diagram` | `tech_db.md`（DBスキーマの正）、`tech_data.md`、`design/systems/`、`backend/app/models/`・`services/`、`frontend/src/stores/` |
 | 画面・API | `screen_transition`、`api_sequence` | `design/systems/ui*.md`、`tech_api.md`、`tech_architecture.md`、`backend/app/routers/`、`frontend/src/router/`・`api/` |
 | 処理・構成 | `battle_flow`、`system_architecture` | `tech_battle.md`、`tech_offline.md`、`tech_architecture.md`、[profile.md](profile.md) §5 |
 
@@ -37,8 +37,8 @@ python .claude/scripts/review_prep.py --dir docs/reviews/diagrams-review \
 
 | 分類 | 観点 |
 |------|------|
-| 仕様書との整合性 | ER図↔`tech_data.md` / クラス図↔`systems/`・`tech_data.md` / 画面遷移図↔`systems/ui*.md` / 戦闘フロー図↔`tech_battle.md`・`tech_offline.md` / APIシーケンス図↔`tech_api.md`・`tech_architecture.md` / システム構成図↔`tech_architecture.md`・不変条件 |
-| コードとの整合性 | ER図↔`backend/app/models/` / クラス図↔`services/`・`stores/` / 画面遷移図↔`frontend/src/router/` / APIシーケンス図↔`routers/`・`frontend/src/api/` |
+| 仕様書との整合性 | ER図↔`tech_db.md`（**正**。食い違いは常に定義書側へ揃える） / クラス図↔`systems/`・`tech_data.md` / 画面遷移図↔`systems/ui*.md` / 戦闘フロー図↔`tech_battle.md`・`tech_offline.md` / APIシーケンス図↔`tech_api.md`・`tech_architecture.md` / システム構成図↔`tech_architecture.md`・不変条件 |
+| コードとの整合性 | ER図↔`backend/app/models/`（定義書と併せた**三者一致**。判定は [basic-design.md](basic-design.md) §4） / クラス図↔`services/`・`stores/` / 画面遷移図↔`frontend/src/router/` / APIシーケンス図↔`routers/`・`frontend/src/api/` |
 | 設計図間の整合性 | ER図↔クラス図（属性・リレーション）、画面遷移図↔APIシーケンス図（遷移で発生する呼び出し）、戦闘フロー図↔APIシーケンス図（呼び出しタイミング） |
 | Mermaid構文 | [basic-design.md](basic-design.md) §4 の**機械検証**で判定する（目視しない） |
 | 網羅性 | 主要機能に対応する図があるか、未実装Phaseの追加仕様が反映されているか、図内に TODO/TBD が残っていないか、決定先送りが台帳へリンクしているか（`check_docs.py --pending` の出力をそのまま取り込む） |

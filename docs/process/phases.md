@@ -17,10 +17,24 @@
 | 項目 | 内容 |
 |------|------|
 | 目的 | システム構造・API・データモデル・画面構成と、非機能要件の実現方式を確定する |
-| 主な作業 | アーキテクチャ設計、API一覧・共通仕様の定義、DB設計、画面遷移設計、性能／セキュリティ／運用の実現方式の設計 |
-| 成果物 | [tech_spec.md](../tech/tech_spec.md)（索引）配下の**構造**（data / structure / api / architecture / logging / auth）と**非機能の実現方式**（performance / security / operations）、[diagrams/](../../diagrams/) 6点 |
-| 完了基準 | 仕様書・設計図間の矛盾がない（`diagrams-review` の指摘解消）。要件定義の非機能・運用要件がすべて、実現方式を定めたいずれかの成果物に対応づいている |
+| 主な作業 | アーキテクチャ設計、API一覧・共通仕様の定義、**DB設計（テーブル定義・キー・インデックス・制約）とER図作成**、画面遷移設計、性能／セキュリティ／運用の実現方式の設計 |
+| 成果物 | [tech_spec.md](../tech/tech_spec.md)（索引）配下の**構造**（data / **db** / structure / api / architecture / logging / auth）と**非機能の実現方式**（performance / security / operations）、[diagrams/](../../diagrams/) 6点 |
+| 完了基準 | 仕様書・設計図間の矛盾がない（`diagrams-review` の指摘解消）。要件定義の非機能・運用要件がすべて、実現方式を定めたいずれかの成果物に対応づいている。新規・変更テーブルが**テーブル定義書とER図の双方**へ反映されている（§3.2.1） |
 | レビュー | `diagrams-review` スキル、`doc-review` スキル |
+
+### 3.2.1 DB設計とER図
+
+DBスキーマは**テキスト（テーブル定義書）を正、ER図を視覚化**とする（[spec_ownership.md](../spec_ownership.md)）。両者は必ず同じ変更で更新する。
+
+| 成果物 | 内容 | 位置づけ |
+|-------|------|---------|
+| `docs/tech/basic/tech_db.md`（索引）+ `tech_db/` | 物理テーブル名・列の物理型・NULL/既定・主キー/外部キー/一意制約・インデックス・外部キー動作・命名規約・導入Phase | **正** |
+| [er_diagram.md](../../diagrams/er_diagram.md) + `er_diagram/` | エンティティ・関連・カーディナリティの一望図（属性は視覚化としての再掲） | 視覚化 |
+| `backend/app/models/*.py` + `backend/alembic/versions/` | 実装。製造（§3.5）で定義書どおりに作る | 実装 |
+
+- **差し戻しルール**: 詳細設計以降で「定義書にないテーブル・列が要る」と判明したら、実装を先に書かず**基本設計へ戻して定義書とER図を更新**してから進む（§3.4 の分岐一覧と同じ扱い）
+- インデックスは**それを使う検索パターンとセット**で書く。パターンの無いインデックスは作らない
+- 列の追加は `nullable` または `server_default` を付ける（前方互換。[tech_operations.md](../tech/nonfunctional/tech_operations.md) §12.4）
 
 ## 3.3 詳細設計（ローレベル設計）
 
@@ -52,9 +66,9 @@
 |------|------|
 | 目的 | §3.4 のテストを満たす実装をTDDで作る |
 | 主な作業 | backend/（FastAPI）は Red-Green-Refactor を1テストずつ回す。frontend/（Vue 3）は従来どおり実装 |
-| 成果物 | 実装コード一式 |
-| 規約 | 既存コード規約に従う（スキーマは CamelModel、スキーマは `schemas/` に配置、ロジックは `services/` に集約、ログは logging_config 準拠 等） |
-| 完了基準 | §3.4 の全テストがPASS、`backend-review`・`frontend-review` の指摘対応完了 |
+| 成果物 | 実装コード一式（テーブルの追加・変更を伴う場合は Alembic リビジョンを含む） |
+| 規約 | 既存コード規約に従う（スキーマは CamelModel、スキーマは `schemas/` に配置、ロジックは `services/` に集約、ログは logging_config 準拠 等）。`models/*.py` は §3.2.1 のテーブル定義書どおりに作り、定義書に無い列を足さない |
+| 完了基準 | §3.4 の全テストがPASS、`backend-review`・`frontend-review` の指摘対応完了。テーブル変更がある場合は Alembic リビジョンが存在し `alembic upgrade head` が通る |
 | レビュー | `backend-review` スキル、`frontend-review` スキル（仕様↔コードの統合整合は §3.7 の `full-review`） |
 
 - **TDDサイクル**: Red（テストが失敗する）→ Green（**最小の実装**で通す）→ Refactor（テストを保ったまま整理）

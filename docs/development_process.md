@@ -40,7 +40,7 @@ graph LR
 | 工程 | 適用単位 | 状態 |
 |------|---------|------|
 | 要件定義 | 全Phase一括 | 完了（未確定は `open_specs.md` 管理） |
-| 基本設計 | 全Phase一括 | 完了（変更時は差分更新） |
+| 基本設計 | 全Phase一括 | 完了（変更時は差分更新）。ただし**DB設計（テーブル定義書）は未着手** — 2026-08-07 に成果物へ追加（[process/phases.md](process/phases.md) §3.2.1）。Phase 3 製造の着手前に作成する |
 | 詳細設計 | Phase単位 | Phase単位で数値・アルゴリズムを確定 |
 | テストリスト作成 | 機能単位 | 分岐一覧を失敗するテストへ落とす（バックエンドのみ） |
 | 製造 | 機能単位 | TDDで実装。フロントエンドは従来どおり |
@@ -75,9 +75,9 @@ graph LR
 |-------|----------|---------|
 | 仕様確定ゲート | 要件・詳細設計の変更時 | `doc-review` 指摘ゼロ、`check_docs.py` exit 0、`open_specs.md` の未解消が対象Phaseの期限内 |
 | ドキュメント規約ゲート | 仕様書・設計図の変更時 | `python scripts/check_doc_size.py` が `違反 0`（exit 0） |
-| 設計整合ゲート | 基本設計の変更時 | `diagrams-review` 指摘ゼロ（仕様確定ゲートと並走し、修正は1パスに統合） |
+| 設計整合ゲート | 基本設計の変更時 | `diagrams-review` 指摘ゼロ（仕様確定ゲートと並走し、修正は1パスに統合）。DB変更時は**テーブル定義書 ↔ ER図 ↔ `models/*.py` の三者一致**（[process/phases.md](process/phases.md) §3.2.1） |
 | テストリストゲート | 製造着手前 | 分岐一覧の全項目にテストが存在し（`check_branch_list.py --tests` で照合）、実行して全件 FAIL（Red）を確認 |
-| 製造完了ゲート | 実装完了時 | テスト全PASS（Green）+ コードレビュー指摘対応 + `vue-tsc` 型チェックPASS |
+| 製造完了ゲート | 実装完了時 | テスト全PASS（Green）+ コードレビュー指摘対応 + `vue-tsc` 型チェックPASS + テーブル変更時は Alembic リビジョンが存在し `alembic upgrade head` が通る |
 | 単体テストゲート | 製造完了後 | 全PASS + C1カバレッジ100% |
 | Phase完了ゲート | 結合テスト完了時 | API統合テスト・E2E全PASS + `full-review` で仕様との乖離ゼロ |
 
