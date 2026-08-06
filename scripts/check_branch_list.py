@@ -8,7 +8,12 @@
     2. 空セル   条件・期待する振る舞いが空でない
     3. 両側網羅 標準形式（分岐点・条件列あり）で、同一分岐点に行が1つしかない場合は WARN
                 （真偽の片側欠落の可能性。例外経路なら許容されるため ERROR にはしない）
-    4. ループ   分岐点・条件に「ループ」を含むグループに 0周・1周・2周 が揃っているか（WARN）
+    4. ループ   分岐点に「ループ」を含む、または周回数（`0周` のような数字+周）を書いた
+                グループに 0周・1周・2周 が揃っているか（WARN）
+
+WARN の抑止（`WARN許容`）:
+    条件分岐を持たない単一経路・例外経路・回数固定のループは、表の直後に理由つきの注記を置くと
+    3・4 の WARN を出さない。書式: `> WARN許容 #21・#22: <理由>`（`#` 番号はコロンの前に列挙する）
 
 テスト対応照合（--tests）:
     backend/tests/unit/*.py の docstring / コメントにあるマーカーを集計し、分岐一覧の行と突き合わせる。
@@ -32,10 +37,12 @@ TEST_DIR = ROOT / "backend" / "tests" / "unit"
 
 HEADING = re.compile(r"^(#{2,4})\s*(?:(\d+(?:\.\d+)*)\.?\s*)?分岐一覧")
 MARKER = re.compile(r"分岐[:：]\s*(\S+?\.md)(?:\s*§(\d+))?\s*#([0-9,\s#]+)")
+ALLOW_WARN = re.compile(r"WARN許容\s*([#0-9,、・\s]+)[:：]")
+LAP_COUNT = re.compile(r"\d+\s*周")
 
 
 def parse_tables() -> dict[tuple[str, str], dict]:
-    """{(ファイル名, セクション番号): {rows, structured, path, line}} を返す。"""
+    """{(ファイル名, セクション番号): {rows, structured, allow_warn, path, line}} を返す。"""
     sections = {}
     for path in sorted(TECH_DIR.rglob("tech_*.md")):
         lines = path.read_text(encoding="utf-8").splitlines()
@@ -49,12 +56,17 @@ def parse_tables() -> dict[tuple[str, str], dict]:
             m = HEADING.match(line)
             if m:
                 key = (path.name, m.group(2) or "")
-                current = {"rows": [], "structured": False, "path": path.name, "line": no}
+                current = {"rows": [], "structured": False, "allow_warn": set(), "path": path.name, "line": no}
                 sections[key] = current
                 header = None
                 continue
             if line.startswith("#"):
                 current = None
+                continue
+            if current is not None and line.startswith(">"):
+                allow = ALLOW_WARN.search(line)
+                if allow:
+                    current["allow_warn"].update(int(n) for n in re.findall(r"\d+", allow.group(1)))
                 continue
             if current is None or not line.startswith("|"):
                 continue
@@ -91,9 +103,13 @@ def check_structure(sections) -> tuple[list[str], list[str]]:
             groups: dict[str, list[list[str]]] = {}
             for _, cells in rows:
                 groups.setdefault(cells[1], []).append(cells)
+            allowed = data["allow_warn"]
             for point, grp in groups.items():
+                # 注記（`> WARN許容 #N: 理由`）で全行が指定されたグループは網羅を求めない
+                if allowed and all(cells[0].isdigit() and int(cells[0]) in allowed for cells in grp):
+                    continue
                 joined = " ".join(c for cells in grp for c in cells)
-                if "ループ" in point or "周" in joined:
+                if "ループ" in point or LAP_COUNT.search(joined):
                     missing = [w for w in ("0周", "1周", "2周") if w not in joined]
                     if missing:
                         warns.append(f"WARN  {label}: ループ「{point}」に {'・'.join(missing)} の行がない")

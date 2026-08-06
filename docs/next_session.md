@@ -5,21 +5,22 @@
 > **鮮度**: 開始側は「前提」のコミットIDと git log を突合し、完了済みに見えたら開始せずユーザーへ確認する。
 > 本ファイルは**ポインタ専用**。Phase 進捗の正は [development_process.md](development_process.md) §5、書式の正は [.claude/project/next.md](../.claude/project/next.md)。
 
-最終更新: 2026-08-06 / 対応コミット: 7185f0e の直後（スキル全体リファクタ Stage 3 のコミット）
+最終更新: 2026-08-07 / 対応コミット: 6e7dff3 の直後（Phase 3 テストリスト作成のコミット）
 
 ## 1. 次回（コピペ用）
 
 ```
-/test-list Phase 3: 分岐一覧を失敗するテストへ展開する（tech_skill / tech_party / tech_offline）
-完了条件: 対象分岐がすべてテストとして存在し Red を確認・check_branch_list.py --tests の対応照合・コミット
-参照: docs/tech/detail/tech_skill.md §2〜§8（分岐一覧）、.claude/project/test-list.md（配置・記述規約）
-前提: Phase 3 仕様確定ゲート完了（doc-review 6件を fix-specs で反映）＋スキルリファクタ Stage 3 完了（レビュー準備スクリプト新設・コミット `7185f0e` の次）。分岐一覧の WARN 16件（例外経路の片側欠落の注記・ループの0周/1周/2周行・tech_shop 旧形式5件の標準形式移行）は本工程で解消する
+/dev Phase 3 製造①（パーティ・スキル操作の基盤）: models（LearnedSkill / ActiveSkillSlot / PartyMember）・master_data/skills.py・party_service・routers/party・routers/skill を実装して該当テストを Green にする
+完了条件: test_party_service.py（17件）・test_skill_progression.py（26件）・test_encounter_exp.py のEXP3件が Green・既存418件が Green のまま・コミット
+参照: docs/tech/detail/tech_party.md §1〜§7、backend/tests/unit/test_skill_progression.py（テストが実装の表層を定義済み）
+前提: Phase 3 テストリスト作成 完了（新規7モジュール161テストが ImportError で Red・check_branch_list.py --tests が exit 0・WARN 0件）。実装対象モジュール名はテストの docstring「本工程で定義する実装の表層」が正。tech_structure.md の services 一覧へ新規サービスの行を追加すること
 ```
 
 ## 2. 候補キュー（最大5行・優先順）
 
 | 優先 | タスク | 工程スキル |
 |------|-------|-----------|
-| 1 | Phase 3 製造（テストリスト完了後。Red → Green → Refactor） | `dev` |
-| 2 | 効率メモの反映（`check_doc_size.py --sections` の単一ファイル指定・`review_prep.py` の効果測定の記入） | `retro` |
-| 3 | 逼迫2ファイルの圧縮（tech_structure.md / tech_shop.md 残3字） | —（改稿時に随時） |
+| 1 | Phase 3 製造②（スキル戦闘処理: skill_service・environment_service。test_skill_service / test_skill_targeting / test_environment_service = 96件） | `dev` |
+| 2 | Phase 3 製造③（offline_service の期待値計算。test_offline_simplified 15件。既存 process_pending_ticks のサンプリング方式を置換＝ISSUE-106） | `dev` |
+| 3 | 効率メモの反映（`check_doc_size.py --sections` の単一ファイル指定・`review_prep.py` の効果測定の記入） | `retro` |
+| 4 | 逼迫2ファイルの圧縮（tech_structure.md 残3字 / tech_shop.md 残26字） | —（改稿時に随時） |
