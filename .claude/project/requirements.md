@@ -26,8 +26,6 @@
 | 4 | `docs/glossary.md` | 対象の用語のみ（Grepで行を特定） |
 | 5 | `docs/data/towers/` `docs/data/skills/` | 項目が名指しするファイルのみ |
 
-**全文Readは禁止**。Grepで見出し・キーワードの行番号を特定し、Read の offset/limit で該当セクション周辺（100行程度）のみ読む。
-
 ## 3. 固有の観点
 
 | # | 観点 | 判定基準 |

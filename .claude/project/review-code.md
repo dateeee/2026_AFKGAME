@@ -11,7 +11,8 @@
 | `backend-review` | `docs/reviews/backend-review/` | バックエンドコードレビュー結果 | コード品質 / セキュリティ / 一貫性 |
 | `frontend-review` | `docs/reviews/frontend-review/` | フロントエンドコードレビュー結果 | コード品質 / 状態管理 / エラーハンドリング・UX / パフォーマンス |
 
-ファイル名は `YYYY-MM-DD_HHMMSS.md`。保存後に `python scripts/rotate_reviews.py --apply` を実行する。
+ファイル名は `YYYY-MM-DD_HHMMSS.md`。
+ローテーションは `python scripts/rotate_reviews.py --apply`（直下を最新10件に保ち、超過分は `archive/` へ移動）。
 該当箇所は行番号（`xxx.py 行N〜M`）で示す。
 
 ## 1. 対象ファイル
@@ -21,7 +22,8 @@
 | `backend-review` | `backend/app/` 配下の全 `.py`（`__pycache__/` 除外） |
 | `frontend-review` | `frontend/src/` 配下の全 `.vue` `.ts` `.css` + `index.html`・`vite.config.ts`・`package.json`・`tsconfig.json` |
 
-**サブエージェントは使わずメインコンテキストで完結**させる（対象規模が小さいため）。
+**全量モードの分担: 分担なし＝1体全量**。対象規模が小さいため、複数体へ分割せずメインコンテキストで完結させる
+（[review-procedure.md](../references/review-procedure.md) §1 規律7 の「`sonnet` 1体へ全体委譲」は可）。
 
 ## 2. `backend-review` の観点
 

@@ -25,3 +25,8 @@
 - シグナル: long-turn(calls=55)
 - ターン概要: ツール55回・エラー0回・拒否0回。開始:「<task-notification>」
 - 原因と改善案: 誤検出: ユーザー依頼の「SKILLS全体の見直し」（35ファイル精査・敵対的検証・24編集・手順書作成）で、呼び出し数はタスク規模に比例した正当なもの。作業自体は Stage 分割済みで改善不要
+
+## 2026-08-06 23:21 | session f00467ad | 自動検出
+- シグナル: same-command('cd c:/GIT/2026_AFKGAME && pyth'×3) / long-turn(calls=125)
+- ターン概要: ツール125回・エラー0回・拒否0回。開始:「<command-message>next</command-message>」
+- 原因と改善案: `check_doc_size.py` の3回反復は、profile.md 痩身（4,995→4,482字）で削減量を見積もれず「削って測る」を繰り返したのが原因。`scripts/check_doc_size.py` に「H2セクション別の文字数」を単一ファイル指定で出す経路（現状 `--sections` はパス引数を無視して全量を出す）を足せば1回で削減対象を決められる。long-turn(125) は13項×26ファイルの一括適用で規模相応のため誤検出寄り

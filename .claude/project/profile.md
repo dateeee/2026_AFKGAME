@@ -8,24 +8,21 @@
 |------|-----|
 | 種別 | 放置系ファンタジーRPG（Webブラウザゲーム） |
 | 構成 | フロントエンド（Vue 3 SPA）+ バックエンド（FastAPI）の2層 |
-| プレイ形態 | **シングルプレイ専用**（マルチプレイは想定しない） |
-| 開発段階 | Phase 1〜2 完了、Phase 3 実装準備中。仕様は Phase 1〜5 まで確定済み |
-| 開発工程 | 7工程（[docs/development_process.md](../../docs/development_process.md)） |
+| 開発工程 | 7工程。工程の定義と**Phase進捗の正**は [development_process.md](../../docs/development_process.md)（進捗は §5） |
 
 ## 2. ディレクトリ
 
 | パス | 内容 |
 |------|------|
-| `backend/app/` | `models/` `schemas/` `services/` `routers/` `master_data/` `db/` + `config.py` `main.py` `dependencies.py` `exceptions.py` `logging_config.py` `middleware.py` |
-| `backend/tests/unit/` | 単体テスト（pytest）。`conftest.py` `helpers.py` は `backend/tests/` 直下 |
-| `backend/tests/integration/` | API統合テスト（**未整備**。結合テスト着手時に作成） |
+| `backend/app/` | `models/` `schemas/` `services/` `routers/` `master_data/` `db/` + 直下に `main.py` `config.py` `dependencies.py` `exceptions.py` `logging_config.py` `middleware.py` |
+| `backend/tests/` | `unit/`（単体・pytest）、`integration/`（API統合）。`conftest.py` `helpers.py` は直下 |
 | `frontend/src/` | `components/` `views/` `stores/` `api/` `types/` `composables/` `router/` `utils/` `assets/` |
-| `frontend/tests/e2e/` | E2Eテスト（**未整備**。Playwright は結合テスト着手時に導入） |
+| `frontend/tests/e2e/` | E2Eテスト（Playwright） |
 | `docs/design/` | 要件定義の成果物（`game_spec.md` 索引 + `systems/`） |
 | `docs/tech/` | 基本設計・詳細設計の成果物（`tech_spec.md` 索引 + `tech_*.md`） |
 | `docs/data/` | マスターデータ（`master_data.md` 索引 + `master/` `towers/` `skills/`） |
 | `diagrams/` | 設計図6点（各図は索引 + 同名ディレクトリ構成） |
-| `docs/reviews/` | レビュー結果の追記型アーカイブ（スキル名ごとのディレクトリ + `archive/`。ドキュメント規約の文字数対象外） |
+| `docs/reviews/` | レビュー結果の追記型アーカイブ（スキル名ごと + `archive/`。文字数上限の対象外） |
 
 ## 3. 技術スタック
 
@@ -39,22 +36,19 @@
 | UI | Vue 3 | `<script setup lang="ts">` + Composition API |
 | 状態管理 | Pinia | `defineStore` の **Setup Store 形式** |
 | 型 | TypeScript | 厳密な型定義。`any` を避ける |
-| テスト | pytest + pytest-cov | C1（分岐）カバレッジ100%。設定は `backend/pytest.ini` / `backend/.coveragerc` |
+| テスト | pytest + pytest-cov | C1（分岐）カバレッジ100%（設定は [unit-test.md](unit-test.md) §1） |
 
 ## 4. 常用コマンド
 
 | 目的 | コマンド |
 |------|---------|
 | バックエンド構文確認 | `cd backend && python -m py_compile app/main.py` |
-| 単体テスト（カバレッジ付き） | `cd backend && python -m pytest -q` |
-| C1 100% 判定 | `cd backend && python -m pytest --cov=app --cov-branch --cov-fail-under=100 -q` |
-| 未達分岐の特定 | `cd backend && python -m pytest --cov=app --cov-branch --cov-report=term-missing -q` |
-| HTMLカバレッジレポート | `backend/htmlcov/index.html`（未実行行=赤、部分分岐=黄） |
+| 単体テスト（C1計測つき） | `cd backend && python -m pytest -q`（判定・絞り込み・レポートは [unit-test.md](unit-test.md) §2） |
 | フロント型チェック | `cd frontend && npm run type-check`（`vue-tsc --noEmit`） |
 | ドキュメント規約チェック | `python scripts/check_doc_size.py`（`--list` / `--sections`。上限90%超は残量WARN） |
 | ドキュメント機械検証 | `python scripts/check_docs.py`（リンク・索引到達性・曖昧語・正の逸脱・決定先送り・台帳存否。`--links` 等で個別実行） |
 | 分岐一覧の検証 | `python scripts/check_branch_list.py`（構造検証。`--tests` でテストとの対応照合） |
-| トークン使用量ログ | `logs/token_usage.csv`（Stop フックがやり取りごとにセッション累計を自動更新。過去分の一括取り込みは `python scripts/log_token_usage.py --all`） |
+| トークン使用量ログ | `logs/token_usage.csv`（Stop フックが自動更新。過去分は `python scripts/log_token_usage.py --all`） |
 
 ## 5. アーキテクチャ不変条件
 
@@ -79,16 +73,16 @@
 | 2 | 機械的な作業（一括置換・リンク修正・定型データ生成・構文検証）は `model: sonnet` のサブエージェントか使い捨てスクリプトで処理する |
 | 3 | サブエージェントには**担当ファイルのみを列挙**し、「列挙外は読まない」「戻り値は結論のみ」を明示する |
 | 4 | 仕様書・コードは**必要なセクションだけ読む**（大きなファイルの全文読み込みを避ける） |
-| 5 | レビュー系スキルは**差分モードがデフォルト**。全量は `full` 指定時のみ |
-| 6 | 工程の区切り（レビュー完了・コミット後）で `/clear` を既定として提案する（同一タスクを続ける場合のみ `/compact`）。レビュー→修正適用は別セッションに分ける |
-| 7 | 大きな出力（ログ・テスト結果・git履歴・集計・検索）の処理は context-mode（`ctx_batch_execute` / `ctx_execute`）で行い、生出力を会話に持ち込まない。ファイルの分析・要約は `ctx_execute_file`。`Read` の全文読みは Edit 前提のときのみ |
+| 5 | 工程の区切り（レビュー完了・コミット後）で `/clear` を既定として提案する（同一タスクを続ける場合のみ `/compact`）。レビュー→修正適用は別セッションに分ける |
+| 6 | 大きな出力（ログ・テスト結果・git履歴・集計・検索）の処理は context-mode（`ctx_batch_execute` / `ctx_execute`）で行い、生出力を会話に持ち込まない。ファイルの分析・要約は `ctx_execute_file`。`Read` の全文読みは Edit 前提のときのみ |
+
+レビュー系スキル固有の規律（差分モード既定・分担・照合範囲）は [review-procedure.md](../references/review-procedure.md) §1 が正。
 
 規律4の運用手順:
 
 | 場面 | 手順 |
 |------|------|
 | 仕様書参照 | 索引（`tech_spec.md` 等）で担当ファイルを特定 → 該当ファイルのみ読む。大きいファイルは `Read` の offset/limit で節単位 |
-| レビュー系スキル | 先に `git diff --name-only` で対象を確定し、対応する個別ファイルのみ読む（差分モード厳守） |
 | 再読の禁止 | 同一セッション内で同じファイルを再 Read しない（Edit 失敗時の再確認を除く） |
 
 ## 7. ドキュメント規約
@@ -97,8 +91,8 @@
 |---|------|
 | 1 | 文字数上限は [docs/documentation_rules.md](../../docs/documentation_rules.md) §3（`.claude/**` は区分D = 5,000字） |
 | 2 | **変更履歴セクションを個々のファイルに置かない**。改稿時は [docs/changelog.md](../../docs/changelog.md) の先頭へ1行追記する（§5.1） |
-| 3 | ドキュメントの作成・改稿後は `python scripts/check_doc_size.py` と `python scripts/check_docs.py` を実行する（違反は exit 1） |
+| 3 | 作成・改稿後は §4 の規約チェックと機械検証を実行する（違反は exit 1） |
 | 4 | 同じ数値・仕様の正は1ファイル。トピックごとの正は [docs/spec_ownership.md](../../docs/spec_ownership.md) で宣言する |
-| 5 | 機械検証は常設スクリプト（§4）を優先する。使い捨てスクリプトは常設で賄えない検証のみ。同種の使い捨てを繰り返すなら常設化を提案する |
+| 5 | 機械検証は §4 の常設スクリプトを優先し、使い捨ては常設で賄えない検証のみ（繰り返すなら常設化を提案する） |
 | 6 | CLAUDE.md と `.claude/project/**` で重複するルールを改稿する際は、もう一方を必ず突合して同時に更新する |
 

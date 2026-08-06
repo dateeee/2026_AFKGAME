@@ -9,7 +9,8 @@
 |-------|-----------------|---------------|---------|
 | `doc-review` | `docs/reviews/doc-review/` | 仕様レビュー結果 | 整合性 / 網羅性 / 規約 |
 
-ファイル名は `YYYY-MM-DD_HHMMSS.md`。保存後に `python scripts/rotate_reviews.py --apply` を実行する（[review-format.md](../references/review-format.md)「保存先」）。
+ファイル名は `YYYY-MM-DD_HHMMSS.md`。
+ローテーションは `python scripts/rotate_reviews.py --apply`（直下を最新10件に保ち、超過分は `archive/` へ移動）。
 
 ## 1. 差分モードの照合先（`doc-review`）
 
@@ -30,8 +31,8 @@
 | 担当 | 対象ファイル |
 |------|------------|
 | 数値・計算式・定数 | `design/systems/`、`data/master/`、`tech_data.md`、`tech_battle.md`、`tech_offline.md` |
-| 塔データ | `TOWERS_OVERVIEW.md`、`towers/001〜010`、`data/master/`、`systems/dungeon.md`、`master_data.md`（塔一覧） |
-| スキル・API・データ構造 | `SKILLS_OVERVIEW.md`、`skills/001〜006`、`systems/character.md`、`tech_api.md`、`tech_data.md`、`tech_auth.md` |
+| 塔データ | `TOWERS_OVERVIEW.md`、`towers/NNN_*.md`（配下全件）、`data/master/`、`systems/dungeon.md`、`master_data.md`（塔一覧） |
+| スキル・API・データ構造 | `SKILLS_OVERVIEW.md`、`skills/NNN_*.md`（配下全件）、`systems/character.md`、`tech_api.md`、`tech_data.md`、`tech_auth.md` |
 | 網羅性・Phase整合・リンク | `README.md`、`CLAUDE.md`、`glossary.md`、`development_process.md`、`documentation_rules.md`、各索引 + 全ファイルへの grep（TBD・未定・Phase表記） |
 
 ## 3. `doc-review` の観点
@@ -68,18 +69,15 @@
 
 担当範囲の切り分けは [review-procedure.md](../references/review-procedure.md) §7 を参照。
 
-## 6. `fix-specs`（修正適用）の固有ルール
+## 6. 修正適用の固有ルール（`fix-specs`）
 
 | # | ルール |
 |---|-------|
-| 1 | 対象は `docs/reviews/doc-review/` 直下の最新（`archive/` は見ない。引数でパス指定も可） |
-| 2 | 重要度「高」から優先的に修正する |
-| 3 | 修正前に該当箇所を必ず読み、レビュー時点から内容が変わっていないか確認する |
-| 4 | 仕様書間の整合を保つため、関連する全ファイルをまとめて修正する |
-| 5 | 修正案が曖昧な場合は [profile.md](profile.md) §5 の不変条件に従って最も妥当な修正を行う |
-| 6 | 変更履歴は仕様書に書かず、`docs/changelog.md` の先頭へ `\| ファイル \| 内容 \|` 行を追記する |
-| 7 | 未確定仕様に関する指摘があれば `open_specs.md` も更新する（不在なら新規作成する） |
-| 8 | サブエージェントは「10ファイル以上にまたがる機械的修正」（最大2体）と「修正後の検証」（1体）のみ。`sonnet`・担当ファイル列挙を厳守 |
-| 9 | 同じファイルの組に2件以上の指摘 → ペア全体を突合して境界を確定し、決めた正を `spec_ownership.md` へ登録する |
-| 10 | 修正後の「新たな矛盾」検証は、修正ファイルと照合先を列挙した `sonnet` サブエージェント1体で行う（本人の再読で済ませない） |
-| 11 | 記述を別ファイルへ**移管**する・新規ファイルを作成する指摘は、対象トピックを**全文検索**し、レポートが挙げていない同種の記述も同時に処理する。検索範囲は `docs/**`（`reviews/` 除く）・`diagrams/**`・`CLAUDE.md`・`README.md`・`.claude/**`（プロファイルは仕様書と同じ優先度で更新する）。移管先が台帳の場合、台帳の「決定時にすること」へ言及元の全ファイルを列挙する |
+| 1 | 対象は `docs/reviews/doc-review/` 直下の最新（`archive/` は見ない） |
+| 2 | 修正案が曖昧な場合は [profile.md](profile.md) §5 の不変条件に従って最も妥当な修正を行う |
+| 3 | 変更履歴は仕様書に書かず、`docs/changelog.md` の先頭へ `\| ファイル \| 内容 \|` 行を追記する |
+| 4 | 未確定仕様に関する指摘があれば `open_specs.md` も更新する（不在なら新規作成する） |
+| 5 | サブエージェントは「10ファイル以上にまたがる機械的修正」（最大2体）と「修正後の検証」（1体）のみ。`sonnet`・担当ファイル列挙を厳守 |
+| 6 | `fix-specs` SKILL §3「修正の実行」#6 で確定した記述の境界（どちらが正か）を `spec_ownership.md` へ登録する |
+| 7 | 修正後の「新たな矛盾」検証は、修正ファイルと照合先を列挙した `sonnet` サブエージェント1体で行う（本人の再読で済ませない） |
+| 8 | 記述を別ファイルへ**移管**する・新規ファイルを作成する指摘は、対象トピックを**全文検索**し、レポートが挙げていない同種の記述も同時に処理する。検索範囲は `docs/**`（`reviews/` 除く）・`diagrams/**`・`CLAUDE.md`・`README.md`・`.claude/**`（プロファイルは仕様書と同じ優先度で更新する）。移管先が台帳の場合、台帳の「決定時にすること」へ言及元の全ファイルを列挙する |
