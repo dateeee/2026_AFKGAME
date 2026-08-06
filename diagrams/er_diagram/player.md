@@ -1,6 +1,6 @@
 # ER図 — 認証・プレイヤー・キャラクター
 
-> 親: [er_diagram.md](../er_diagram.md)。データ構造は [tech_data.md](../../docs/tech/basic/tech_data.md)、認証は [tech_auth.md](../../docs/tech/detail/tech_auth.md)。
+> 親: [er_diagram.md](../er_diagram.md)。**DBスキーマの正は** [tech_db/auth.md](../../docs/tech/basic/tech_db/auth.md)・[tech_db/player.md](../../docs/tech/basic/tech_db/player.md) であり、本図は視覚化として属性を再掲する（食い違いは定義書側へ揃える）。データ構造は [tech_data.md](../../docs/tech/basic/tech_data.md)、認証は [tech_auth.md](../../docs/tech/detail/tech_auth.md)。
 
 ## 認証・アカウント系
 
@@ -49,7 +49,7 @@ erDiagram
 %%{init: {'theme': 'default', 'themeVariables': {'fontSize': '16px'}} }%%
 erDiagram
     Player ||--|{ Character : "owns"
-    Player ||--o{ Party : "has"
+    Player ||--o{ PartyMember : "has"
     Player ||--o{ TowerClearRecord : "has"
     Player ||--o| PlayerSettings : "has"
     Player }o--o| Tower : "currentTower"
@@ -58,7 +58,7 @@ erDiagram
     Character ||--o{ LearnedSkill : "has"
     Character ||--o{ ActiveSkillSlot : "has max 2"
     Character ||--o| PrestigeBonus : "has"
-    Character ||--o{ Party : "is assigned to"
+    Character ||--o{ PartyMember : "is assigned to"
 
     LearnedSkill }o--|| SkillMaster : "references"
     ActiveSkillSlot }o--|| SkillMaster : "references"
@@ -67,7 +67,7 @@ erDiagram
         string id PK
         string user_id FK, UK "nullable, references User.id（1ユーザー1プレイヤー）"
         bigint gold "default 0, BIGINT(64bit)"
-        string current_tower_id FK "nullable, references Tower.id"
+        string current_tower_id "nullable, マスター参照 Tower.id（DB外部キーなし）"
         int current_floor "nullable, 塔外時null"
         int target_floor "nullable, 目標階（塔外時null）"
         enum tower_mode "auto_repeat / stop_on_clear"
@@ -120,9 +120,9 @@ erDiagram
         int bonus_skill_damage "スキルダメージ投資pt (上限30)"
     }
 
-    Party {
-        uuid id PK
-        uuid player_id FK "references Player.id"
+    PartyMember {
+        uuid id PK "Phase 3〜 (未実装)"
+        uuid player_id FK, UK "references Player.id（slot_index / character_id と各々複合一意）"
         int slot_index "0-3 パーティ内位置"
         uuid character_id FK "references Character.id"
     }
@@ -130,7 +130,7 @@ erDiagram
     TowerClearRecord {
         uuid id PK
         uuid player_id FK, UK "references Player.id（tower_id と複合一意）"
-        string tower_id FK, UK "references Tower.id"
+        string tower_id UK "マスター参照 Tower.id（DB外部キーなし）"
         boolean cleared "ボス討伐済みか"
         int highest_floor "最高到達階"
         datetime highest_floor_at "nullable, 最高到達階を更新した時刻（ランキングのタイブレーク用・Phase 5〜）"
@@ -143,17 +143,18 @@ erDiagram
     }
 
     LearnedSkill {
-        uuid id PK
-        uuid character_id FK "references Character.id"
-        string skill_id FK "references SkillMaster.id"
+        uuid id PK "Phase 3〜 (未実装)"
+        uuid character_id FK, UK "references Character.id（skill_id と複合一意）"
+        string skill_id "マスター参照 SkillMaster.id（DB外部キーなし）"
+        int cooldown_remaining "残CDターン数, default 0"
         datetime learned_at
     }
 
     ActiveSkillSlot {
-        uuid id PK
-        uuid character_id FK "references Character.id"
+        uuid id PK "Phase 3〜 (未実装)"
+        uuid character_id FK, UK "references Character.id（slot_index と複合一意）"
         int slot_index "0-1 セット枠番号"
-        string skill_id FK "references SkillMaster.id"
+        string skill_id "マスター参照 SkillMaster.id（DB外部キーなし）"
     }
 
     SkillMaster {

@@ -125,7 +125,7 @@ VS Code は実行構成 **Full Stack** で同時起動できる（[.vscode/launc
   - [systems/](docs/design/systems/) — character / battle / equipment / economy / dungeon / endgame / ui / ui_onboarding
   - 要件: [product](docs/design/product_requirements.md) プロダクト / [nfr](docs/design/non_functional_requirements.md) 非機能 / [operation](docs/design/operation_requirements.md) 運用
 - [docs/tech/tech_spec.md](docs/tech/tech_spec.md) — 技術仕様の索引
-  - [basic/](docs/tech/basic/) 基本設計 — data / structure / api / api_common / architecture / logging
+  - [basic/](docs/tech/basic/) 基本設計 — [db](docs/tech/basic/tech_db.md)（テーブル定義書の索引 + [tech_db/](docs/tech/basic/tech_db/)） / data / structure / api / api_common / architecture / logging
   - [nonfunctional/](docs/tech/nonfunctional/) 非機能 — performance / security / operations
   - [detail/](docs/tech/detail/) 詳細設計 — battle / offline / skill / party / tick / polling / state / rng / numeric / shop / design_system / auth
 - [docs/data/master_data.md](docs/data/master_data.md) — マスターデータの索引 + 塔データ一覧

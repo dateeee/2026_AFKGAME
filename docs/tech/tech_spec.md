@@ -10,6 +10,7 @@
 
 | 章 | 内容 | ファイル |
 |----|------|---------|
+| 0. DB設計 | 物理テーブル名・列の型・NULL／既定・キー・一意制約・インデックス・命名規約（**DBスキーマの正**） | [tech_db.md](basic/tech_db.md) |
 | 1. データ設計 | ゲーム状態JSON・敵／塔／環境効果・戦闘ログ・施設／装備強化のデータ構造 | [tech_data.md](basic/tech_data.md) |
 | 2. ディレクトリ構成<br>3. フロントエンド構成<br>4. バックエンド構成 | リポジトリ構成、Vue 3 / FastAPI の内部構成・設定値 | [tech_structure.md](basic/tech_structure.md) |
 | 5. API設計 | 全エンドポイント一覧（認証・ゲーム状態・tick・操作系・Phase 3〜5） | [tech_api.md](basic/tech_api.md) |

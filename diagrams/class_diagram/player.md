@@ -1,6 +1,7 @@
 # クラス図 — プレイヤー・パーティ・キャラクター・スキル
 
 > 親: [class_diagram.md](../class_diagram.md)。仕様は [systems/character.md](../../docs/design/systems/character.md)。
+> 本図はドメインの構造を表す。永続化スキーマの正は [tech_db/player.md](../../docs/tech/basic/tech_db/player.md) であり、集約 `Party` は `party_members` テーブル（1メンバー1行）として持つ。
 
 ## プレイヤー・パーティ・キャラクター
 
@@ -131,7 +132,7 @@ classDiagram
     }
 
     Player "1" --> "0..1" Settings
-    Player "1" --> "0..*" Party
+    Player "1" --> "0..1" Party
     Player "1" --> "*" TowerClearRecord
     Player --> TowerMode
     Character --> CharacterType
