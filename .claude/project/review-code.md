@@ -15,6 +15,19 @@
 ローテーションは `python scripts/rotate_reviews.py --apply`（直下を最新10件に保ち、超過分は `archive/` へ移動）。
 該当箇所は行番号（`xxx.py 行N〜M`）で示す。
 
+準備コマンド（モード判定・差分特定・ISSUE採番。全量時は `--full` を追加）:
+
+```bash
+python .claude/scripts/review_prep.py --dir docs/reviews/backend-review \
+    --paths backend/app --title バックエンドコードレビュー結果 \
+    --categories "コード品質 / セキュリティ / 一貫性"
+
+python .claude/scripts/review_prep.py --dir docs/reviews/frontend-review \
+    --paths frontend/src frontend/index.html frontend/vite.config.ts frontend/package.json frontend/tsconfig.json \
+    --title フロントエンドコードレビュー結果 \
+    --categories "コード品質 / 状態管理 / エラーハンドリング・UX / パフォーマンス"
+```
+
 ## 1. 対象ファイル
 
 | スキル | 対象 |

@@ -5,7 +5,7 @@
 
 ## 使い方
 
-1. `.claude/skills/` `.claude/references/` をコピーする（無改造）
+1. `.claude/skills/` `.claude/references/` `.claude/scripts/` をコピーする（無改造）
 2. `.claude/project/profile.md` を新プロジェクトの値で書く（全スキルが最初に読む）
 3. 工程ごとに `.claude/project/<スキル名>.md` を下記スキーマで書く
 4. `.claude/project/INDEX.md` の対応表を更新する
@@ -115,6 +115,20 @@
 - `description` には**特定の言語・フレームワーク名を書かない**（トリガー判定は意味マッチで機能する）。スタック名は本 `project/` 側に置く
 
 **一般層に残す固有前提の範囲**: テスト系スキル（`test-list` `unit-test`）の一般例は **pytest / pytest-cov 前提**で書かれている（`pytestmark`・`term-missing` の分岐表記など）。他のスタックへ持ち出す場合は、スキル本体ではなく `skills/<スキル名>/references/` の資料を差し替える。
+
+## 規約: スクリプトの配置
+
+判定・採番・雛形生成・一括置換など**決定的に決まる手順は LLM の手作業にせず**スクリプトへ寄せる。
+
+| 置き場所 | 用途 |
+|---------|------|
+| `.claude/scripts/` | 複数スキルが共有するもの（例: `review_prep.py` — レビュー系5スキルのモード判定・差分特定・採番・雛形生成） |
+| `.claude/skills/<スキル名>/scripts/` | そのスキル専用のもの |
+| `<リポジトリ>/scripts/` | プロジェクト固有の検証（`.claude/` の外。パス・対象を内蔵してよい） |
+
+- `.claude/` 配下のスクリプトは**プロジェクト非依存**にする。保存先・対象パス・タイトル等の固有値は**すべて引数で受け取り**、呼び出し側（スキル + プロファイル）が渡す
+- 出力は `KEY  値` 形式など**そのまま取り込める形**にする。LLM に再計算させない
+- 許可プロンプトを省くには `.claude/settings.json` の `permissions.allow` へ `Bash(python .claude/scripts/*)` を追加する（SKILL.md の `allowed-tools` は「そのスキルが使えるツールの制限」であり、書くと列挙外のツールが使えなくなる。許可の追加用途には使わない）
 
 ---
 

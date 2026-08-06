@@ -12,7 +12,7 @@ argument-hint: "[full | 追加観点]"
 
 | 順 | ファイル | 内容 |
 |----|---------|------|
-| 1 | `.claude/references/review-procedure.md` | モード判定・差分特定・機械的検証・指摘の書き方・出力 |
+| 1 | `.claude/references/review-procedure.md` | 準備スクリプト・モード判定・機械的検証・指摘の書き方・出力 |
 | 2 | `.claude/project/profile.md` | ディレクトリ（§2）・不変条件（§5）・コスト規律（§6） |
 | 3 | `.claude/project/review-docs.md` | パラメータ・照合先・分担・観点・重要度基準 |
 
@@ -26,7 +26,7 @@ argument-hint: "[full | 追加観点]"
 
 ## 2. 手順
 
-review-procedure.md を §2（モード判定）→ §3 差分 / §4 全量 → §5 機械的検証 → §6 指摘の書き方 → §8 出力と報告 の順に実行する。
+review-procedure.md を §2 準備（`review_prep.py` 実行）→ §3 差分モードの対象特定 / §4 全量モードの分担 → §5 機械的検証 → §6 指摘の書き方 → §8 出力と報告 の順に実行する。
 
 | 項目 | 参照先 |
 |------|-------|

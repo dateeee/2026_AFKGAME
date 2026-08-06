@@ -13,6 +13,15 @@
 | レポートタイトル | フルスタック統合レビュー結果 |
 | カテゴリ | 仕様書-コード整合性 / フロント・バック統合整合性 / アーキテクチャ方針適合 |
 
+準備コマンド（モード判定・差分特定・ISSUE採番。全量時は `--full` を追加）:
+
+```bash
+python .claude/scripts/review_prep.py --dir docs/reviews/full-review \
+    --paths backend/app frontend/src docs/design docs/tech docs/data \
+    --title フルスタック統合レビュー結果 \
+    --categories "仕様書-コード整合性 / フロント・バック統合整合性 / アーキテクチャ方針適合"
+```
+
 修正案は、フロント・バック両側の修正が必要な場合それぞれ記述する。
 
 ## 1. 対象ファイル

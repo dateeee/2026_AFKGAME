@@ -12,6 +12,13 @@
 ファイル名は `YYYY-MM-DD_HHMMSS.md`。
 ローテーションは `python scripts/rotate_reviews.py --apply`（直下を最新10件に保ち、超過分は `archive/` へ移動）。
 
+準備コマンド（モード判定・差分特定・ISSUE採番。全量時は `--full` を追加）:
+
+```bash
+python .claude/scripts/review_prep.py --dir docs/reviews/doc-review \
+    --paths docs CLAUDE.md README.md --title 仕様レビュー結果 --categories "整合性 / 網羅性 / 規約"
+```
+
 ## 1. 差分モードの照合先（`doc-review`）
 
 変更ファイルごとに、下表の照合先を**該当セクションのみ**読む。索引構成のため、変更が子ファイルなら**その子と照合先のセクションだけ**を読む（索引の全文読み込みは不要）。

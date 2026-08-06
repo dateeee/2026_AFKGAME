@@ -12,6 +12,15 @@
 | レポートタイトル | 設計図レビュー結果 |
 | カテゴリ | 仕様書との整合性 / コードとの整合性 / 設計図間の整合性 / Mermaid構文 / 網羅性 |
 
+準備コマンド（モード判定・差分特定・ISSUE採番。全量時は `--full` を追加）。図だけでなく照合先の変更も差分に含める:
+
+```bash
+python .claude/scripts/review_prep.py --dir docs/reviews/diagrams-review \
+    --paths diagrams docs/design docs/tech backend/app frontend/src \
+    --title 設計図レビュー結果 \
+    --categories "仕様書との整合性 / コードとの整合性 / 設計図間の整合性 / Mermaid構文 / 網羅性"
+```
+
 ### 0.1 全量モードの分担（最大3体・`sonnet`）
 
 | 担当 | 対象の図 | 主な照合先 |

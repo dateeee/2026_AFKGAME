@@ -12,7 +12,7 @@ argument-hint: "[full | 追加観点]"
 
 | 順 | ファイル | 内容 |
 |----|---------|------|
-| 1 | `.claude/references/review-procedure.md` | モード判定・差分特定・機械的検証・指摘の書き方・出力 |
+| 1 | `.claude/references/review-procedure.md` | 準備スクリプト・モード判定・機械的検証・指摘の書き方・出力 |
 | 2 | `.claude/project/profile.md` | 技術スタック・技術規約（§3）・不変条件（§5）・コスト規律 |
 | 3 | `.claude/project/review-code.md` | パラメータ（§0）・対象ファイル（§1）・観点（§2）・重要度基準（§4） |
 
@@ -26,7 +26,7 @@ argument-hint: "[full | 追加観点]"
 
 ## 2. 手順
 
-review-procedure.md を §2 → §3 → §5 → §6 → §8 の順に実行する。
+review-procedure.md を §2 準備（`review_prep.py` 実行）→ §3 差分モードの対象特定 → §5 機械的検証 → §6 指摘の書き方 → §8 出力と報告 の順に実行する。
 適用する観点は review-code.md §2、重要度は同 §4。
 
 **サブエージェントは使わずメインコンテキストで完結させる**（対象規模が小さいため。review-code.md §1）。
