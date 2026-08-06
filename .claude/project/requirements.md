@@ -8,7 +8,7 @@
 | 成果物 | パス | 役割 |
 |-------|------|------|
 | ゲーム仕様（索引） | `docs/design/game_spec.md` | Phase一覧・システム別ファイルへの索引 |
-| システム別仕様 | `docs/design/systems/` | character / battle / equipment / economy / dungeon / endgame / ui |
+| システム別仕様 | `docs/design/systems/` | 配下全ファイル（一覧は索引 `game_spec.md` が正） |
 | プロダクト要件 | `docs/design/product_requirements.md` | 何を誰に届けるか |
 | 非機能要件 | `docs/design/non_functional_requirements.md` | 性能・可用性・セキュリティの要求値 |
 | 運用要件 | `docs/design/operation_requirements.md` | 運用・変更管理 |

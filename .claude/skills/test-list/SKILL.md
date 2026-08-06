@@ -36,7 +36,7 @@ argument-hint: "[対象機能]"
 
 ## 3. テストを書く
 
-一般的な実装パターンは [references/patterns.md](references/patterns.md)。プロジェクト固有の実例はプロファイルが指すファイル。
+テストを書き始める前に [references/patterns.md](references/patterns.md)（一般的な実装パターン）を読む。プロジェクト固有の実例はプロファイルが指すファイル。
 
 | # | ルール |
 |---|-------|

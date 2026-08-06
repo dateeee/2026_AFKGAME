@@ -18,7 +18,7 @@
 | 実行 | `cd backend && python -m pytest tests/integration -q --no-cov` |
 | ファイル分割 | 導線ごとに1ファイル（`test_auth_flow` / `test_tower_flow` / `test_battle_flow` / `test_shop_flow` / `test_equipment_flow`） |
 | プレイヤー生成 | フィクスチャで直接作らず **`POST /api/auth/guest` から始める** |
-| DBセッション | `tests/integration/conftest.py` の `db` を使う（単体用の `expire_on_commit=False` はコミット後もリレーションが古いまま残り、本番と挙動が変わる） |
+| DBセッション | `backend/tests/integration/conftest.py` の `db` を使う（単体用の `expire_on_commit=False` はコミット後もリレーションが古いまま残り、本番と挙動が変わる） |
 | 乱数 | `fixed_rng` フィクスチャで固定シードを与える |
 | 時刻 | `rewind(player, 秒)` で `last_tick_at` を過去へ戻す。スリープしない |
 | ドロップ | `always_drop` フィクスチャで抽選を成立させる（ドロップ率は検証対象外） |
@@ -88,11 +88,10 @@ Phase 3〜5 のシナリオは、該当Phaseの詳細設計完了時に本表へ
 一般スキルの完了基準に加え、以下を満たすこと。
 
 - 対象Phaseの必須シナリオ（§3）が **L1・L2 とも全PASS**
-- `full-review` で仕様との乖離ゼロ
 
 ## 6. 次工程
 
 | 次にやること | 手段 |
 |------------|------|
-| Phase完了ゲート | `full-review` スキル |
+| Phase完了ゲート | `full-review` スキル（期待結果: 仕様との乖離ゼロ） |
 | 乖離が出た場合 | `docs/known_issues.md` へ記録し、「仕様書を実装に合わせる」か「実装を修正する」かを判断する |

@@ -83,11 +83,10 @@
 
 - `test-list` 工程の全テストが PASS（Green）
 - `vue-tsc` の型チェックが PASS
-- `backend-review`・`frontend-review` の指摘対応が完了
 
 ## 7. 次工程
 
 | 次にやること | 手段 |
 |------------|------|
-| 製造完了ゲート | `backend-review` スキル、`frontend-review` スキル |
+| 製造完了ゲート | `backend-review` スキル、`frontend-review` スキル（指摘対応まで完了してゲート通過） |
 | 単体テストへ | `unit-test` スキル（C1網羅の測定と補完） |

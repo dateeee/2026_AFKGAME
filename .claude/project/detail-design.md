@@ -15,6 +15,7 @@
 | オフライン計算 | `docs/tech/detail/tech_offline.md` | 復帰時の一括計算 |
 | tick進行制御 | `docs/tech/detail/tech_tick.md` | 60秒tickの進行判定 |
 | フロントtick制御 | `docs/tech/detail/tech_polling.md` | ポーリング間隔・停止条件 |
+| ショップ処理 | `docs/tech/detail/tech_shop.md` | 日替わりショップの品揃え抽選・購入 |
 
 ### 横断規約
 
@@ -23,6 +24,7 @@
 | 乱数 | `docs/tech/detail/tech_rng.md` | シード管理・抽選方式 |
 | 数値・丸め | `docs/tech/detail/tech_numeric.md` | 丸め方向・桁・オーバーフロー |
 | 進行状態 | `docs/tech/detail/tech_state.md` | 状態遷移と操作可否 |
+| デザインシステム | `docs/tech/detail/tech_design_system.md` | 画面・コンポーネントの共通規約 |
 
 ### 数値（マスターデータ）
 

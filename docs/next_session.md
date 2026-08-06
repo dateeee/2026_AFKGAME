@@ -5,7 +5,7 @@
 > **鮮度**: 開始側は「前提」のコミットIDと git log を突合し、完了済みに見えたら開始せずユーザーへ確認する。
 > 本ファイルは**ポインタ専用**。Phase 進捗の正は [development_process.md](development_process.md) §5、書式の正は [.claude/project/next.md](../.claude/project/next.md)。
 
-最終更新: 2026-08-06 / 対応コミット: 93278aa の直後（fix-specs 反映のコミット）
+最終更新: 2026-08-06 / 対応コミット: ad8bb19 の直後（スキル全体リファクタ Stage 1 のコミット）
 
 ## 1. 次回（コピペ用）
 
@@ -22,3 +22,4 @@
 |------|-------|-----------|
 | 1 | Phase 3 製造（テストリスト完了後。Red → Green → Refactor） | `dev` |
 | 2 | 逼迫4ファイルの圧縮（profile.md 残5字・CLAUDE.md 残7字・tech_structure.md / tech_shop.md 残3字） | —（改稿時に随時） |
+| 3 | スキルリファクタ Stage 2（構造的重複の解消13項。profile.md 痩身は上記2と統合） | —（`docs/reviews/skill-improvement/2026-08-06_skills-refactor.md` §5 を指定） |

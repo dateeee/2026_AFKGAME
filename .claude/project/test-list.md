@@ -27,7 +27,7 @@
 
 | 順 | 参照先 | 読む範囲 |
 |----|--------|---------|
-| 1 | `docs/tech/tech_<対象処理>.md` | 分岐一覧のセクションのみ |
+| 1 | `docs/tech/detail/tech_<対象処理>.md` | 分岐一覧のセクションのみ |
 | 2 | `docs/data/master/` | テストで使う数値のみ |
 | 3 | `backend/tests/conftest.py` | フィクスチャ一覧（後述） |
 | 4 | `backend/tests/unit/test_target_floor.py` | スタイルの参考（最も整っている） |
@@ -75,7 +75,7 @@
 一般スキルの完了基準に加え、以下を満たすこと。
 
 - 分岐一覧の全項目にテストが対応している: `python scripts/check_branch_list.py --tests` が exit 0（マーカーで機械照合）
-- 実行して**期待どおりに失敗する**（Red の確認）: `cd backend && python -m pytest -q`
+- 実行して**期待どおりに失敗する**（Red の確認）: `cd backend && python -m pytest tests/unit/test_<対象モジュール>.py -q --no-cov`（対象を限定しカバレッジ計測を外す。既存テスト全体の Green 確認は製造工程で行う）
 - 実装を先に書いていない（テストの後追いで書いていない）
 
 ## 8. 次工程

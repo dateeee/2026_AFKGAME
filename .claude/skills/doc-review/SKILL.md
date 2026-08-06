@@ -13,7 +13,7 @@ argument-hint: "[full | 追加観点]"
 | 順 | ファイル | 内容 |
 |----|---------|------|
 | 1 | `.claude/references/review-procedure.md` | モード判定・差分特定・機械的検証・指摘の書き方・出力 |
-| 2 | `.claude/project/profile.md` | ディレクトリ・不変条件・コスト規律 |
+| 2 | `.claude/project/profile.md` | ディレクトリ（§2）・不変条件（§5）・コスト規律（§6） |
 | 3 | `.claude/project/review-docs.md` | パラメータ・照合先・分担・観点・重要度基準 |
 
 ## 1. 引数

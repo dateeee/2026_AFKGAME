@@ -12,6 +12,7 @@
 
 | ファイル | 内容 |
 |---------|------|
+| `.claude/skills/**` `.claude/references/**` `.claude/project/**`（17ファイル） | スキル全体リファクタ Stage 1: 8観点レビュー51件を敵対的検証し22件を適用。トリガー衝突解消（requirements↔resolve-specs）、参照の握手切れ修正（test-list入力パス・basic-design機械検証表・fix-specs契約）、完了基準の循環解消（dev/integration-test）、揮発統計の除去（unit-test）、エラー分岐追加（resolve-specs/fix-specs/unit-test）、ISSUE採番・サブエージェント規律の明確化（review-format/review-procedure）。全指摘と Stage 2〜3 手順は `docs/reviews/skill-improvement/2026-08-06_skills-refactor.md` |
 | `.claude/hooks/efficiency_check.py` ほか | 効率メモの仕組みを新設。Stop フックが直近ターンの非効率シグナル（同一Read再読・同一コマンド連発・エラー多発・許可拒否・過大ターン・手戻り発話）を検出して `docs/reviews/efficiency_memo.md` へ自動追記し、`/retro` スキル（`.claude/skills/retro/` + `.claude/project/retro.md`）で改善へ反映する。CLAUDE.md の支援スキル数を9件へ更新 |
 | `docs/data/skills/003_回復系統.md` | ISSUE-1101: `heal_p1`（回復の心得）の適用範囲を tech_skill.md §1 #5 に揃え、**蘇生を対象外**へ修正（追加効果・設計メモ・§5 参考値行の3箇所）。蘇生・リジェネはともに maxHP 基準のため除外で一貫させた |
 | `docs/data/master_data.md` | ISSUE-1104: §17「お知らせ（Phase 3〜）」を新設。項目定義（`noticeId`・`title` 40字・`body` 400字・`publishedAt` は ISO 8601 UTC）と掲示件数の上限20件を確定（Phase 3 の仮置き値） |

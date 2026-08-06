@@ -1,6 +1,6 @@
 ---
 name: diagrams-review
-description: 設計図（Mermaid図）と仕様書・コードの整合性レビュー。ER図・クラス図・画面遷移図・戦闘フロー図・APIシーケンス図・システム構成図の乖離や図どうしの矛盾、Mermaid構文の不備を検出してレポート化する。「設計図をレビューして」「図と実装がずれていないか見て」「diagrams-review して」など、基本設計の設計整合ゲートで使用する。既定は前回レビュー以降の差分、引数 full で全量。
+description: 設計図（Mermaid図）と仕様書・コードの整合性レビュー。ER図・クラス図・画面遷移図・戦闘フロー図・APIシーケンス図・システム構成図の乖離や図どうしの矛盾、Mermaid構文の不備を検出してレポート化する。「設計図をレビューして」「図と実装がずれていないか見て」「diagrams-review して」など、基本設計の設計整合ゲートで使用する。既定は前回レビュー以降の差分、引数 full で全量。対象の図・観点・重要度基準はプロジェクト固有プロファイルから読み込む。
 argument-hint: "[full | 追加観点]"
 ---
 
@@ -13,7 +13,7 @@ argument-hint: "[full | 追加観点]"
 | 順 | ファイル | 内容 |
 |----|---------|------|
 | 1 | `.claude/references/review-procedure.md` | モード判定・差分特定・機械的検証・指摘の書き方・出力 |
-| 2 | `.claude/project/profile.md` | ディレクトリ・不変条件・コスト規律 |
+| 2 | `.claude/project/profile.md` | ディレクトリ（§2）・不変条件（§5）・コスト規律（§6） |
 | 3 | `.claude/project/review-diagrams.md` | パラメータ（§0）・観点（§1）・重要度基準（§2） |
 | 4 | `.claude/project/basic-design.md` | 対象の図一覧と照合先（§1）・Mermaid の機械検証（§4） |
 
