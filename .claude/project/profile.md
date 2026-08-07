@@ -49,6 +49,7 @@
 | ドキュメント機械検証 | `python scripts/check_docs.py`（リンク・索引到達性・曖昧語・正の逸脱・決定先送り・台帳存否。`--links` 等で個別実行） |
 | 分岐一覧の検証 | `python scripts/check_branch_list.py`（構造検証。`--tests` でテストとの対応照合） |
 | DBスキーマ三者一致 | `python scripts/check_schema_triple.py`（定義書↔ER図↔models。`--columns` `--tags` `--unique` `--nofk` `--nullable` `--naming` `--index` で個別実行） |
+| 常設スクリプトの回帰テスト | `python -m pytest scripts/tests .claude/scripts/tests .claude/hooks/tests -q`（規約は [_TEMPLATE.md](_TEMPLATE.md)） |
 | トークン使用量ログ | `logs/token_usage.csv`（Stop フックが自動更新。過去分は `python scripts/log_token_usage.py --all`） |
 | 複数行コミットメッセージ | Bash ツール: `git commit -F - <<'MSG'`／PowerShell ツール: `git commit -m @'...'@`。**取り違えると `@` が本文へ混入し amend が必要になる** |
 

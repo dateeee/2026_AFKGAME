@@ -124,6 +124,7 @@
 |---------|------|----------|
 | `.claude/scripts/` | 複数スキルが共有するもの（例: `review_prep.py` — レビュー系5スキルのモード判定・差分特定・採番・雛形生成） | `.claude/scripts/tests/` |
 | `.claude/skills/<スキル名>/scripts/` | そのスキル専用のもの | 同ディレクトリの `tests/` |
+| `.claude/hooks/` | フック本体（stdin の JSON を受けて判定するもの） | `.claude/hooks/tests/` |
 | `<リポジトリ>/scripts/` | プロジェクト固有の検証（`.claude/` の外。パス・対象を内蔵してよい） | `<リポジトリ>/scripts/tests/` |
 
 - 判定ロジックを持つスクリプトには `<配置先>/tests/` へ pytest を置き、`python -m pytest <配置先>/tests -q` で回す。プロダクト側のテスト設定（カバレッジ閾値等）と混ざらないよう**別ルートで回す**
