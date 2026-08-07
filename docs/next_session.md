@@ -5,7 +5,7 @@
 > **鮮度**: 開始側は「前提」のコミットIDと git log を突合し、完了済みに見えたら開始せずユーザーへ確認する。
 > 本ファイルは**ポインタ専用**。Phase 進捗の正は [development_process.md](development_process.md) §5、書式の正は [.claude/project/next.md](../.claude/project/next.md)。
 
-最終更新: 2026-08-08 / 対応コミット: eb88d39 の次（振り返り(retro)のコミット）。§1 は未着手のため据え置き（仕様書は bc167b4 以降も無改稿）
+最終更新: 2026-08-08 / 対応コミット: 5cbbc27 の次（`doc-size` スキル新設のコミット）。§1 は未着手のため据え置き（仕様書は bc167b4 以降も無改稿。今回の変更は `.claude/**` と索引3ファイルのみ）
 
 ## 1. 次回（コピペ用）
 
@@ -23,4 +23,5 @@
 | 1 | Phase 3 製造①（パーティ・スキル操作の基盤: models（LearnedSkill / ActiveSkillSlot / PartyMember）・master_data/skills.py・party_service・routers/party・routers/skill。test_party_service.py 17件・test_skill_progression.py 26件・test_encounter_exp.py のEXP3件） | `dev` |
 | 2 | Phase 3 製造②（スキル戦闘処理: skill_service・environment_service。test_skill_service / test_skill_targeting / test_environment_service = 96件） | `dev` |
 | 3 | Phase 3 製造③（offline_service の期待値計算。test_offline_simplified 15件。既存 process_pending_ticks のサンプリング方式を置換＝ISSUE-106） | `dev` |
-| 4 | `review_prep.py` の SHA基準差分の初回観測 — doc-review も `2026-08-08_003406.md` で `HEAD: bc167b4` を記録済み（その回自体はタイムスタンプ代替）。次回の doc-review / diagrams-review が SHA基準の初実行になるため、変更ファイル一覧が妥当かを確認する（残り3ディレクトリも次回が移行回） | 各レビュースキル実行時に確認 |
+| 4 | `/doc-size` で区分A・Dの余裕づくり（`CLAUDE.md` 2,993/3,000・`.claude/project/profile.md` 4,995/5,000。いずれも次の1行追記で違反し、台帳登録が不可＝その場で作業中断になる。上限内のため規約上は残量WARN扱いで必須ではないが、中断コストの先送り回避として子ファイルへの移管を検討する） | `doc-size` |
+| 5 | `review_prep.py` の SHA基準差分の初回観測 — doc-review も `2026-08-08_003406.md` で `HEAD: bc167b4` を記録済み（その回自体はタイムスタンプ代替）。次回の doc-review / diagrams-review が SHA基準の初実行になるため、変更ファイル一覧が妥当かを確認する（残り3ディレクトリも次回が移行回） | 各レビュースキル実行時に確認 |

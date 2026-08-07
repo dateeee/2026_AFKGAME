@@ -42,6 +42,7 @@
 | `resolve-specs` | [requirements.md](requirements.md) | 未確定仕様の確定（要件定義工程の一部） |
 | `next` | [next.md](next.md) | 新セッション冒頭で引き継ぎファイルから次タスクを特定し工程スキルへ委譲 |
 | `retro` | [retro.md](retro.md) | 効率メモ（Stop フックが自動追記）の振り返りとスキル・成果物への反映 |
+| `doc-size` | [doc-size.md](doc-size.md) | ドキュメント文字数の是正（分割か圧縮かの判断と適用・台帳の消化） |
 
 ## 補助プロファイル
 

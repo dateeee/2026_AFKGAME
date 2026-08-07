@@ -68,7 +68,7 @@ VS Code は実行構成 **Full Stack** で同時起動できる（[.vscode/launc
 ├── README.md                    # 本ファイル（概要・セットアップ）
 ├── CLAUDE.md                    # AIエージェント向け開発ルール
 ├── .claude/                     # エージェント定義
-│   ├── skills/                  # 工程7件 + 支援8件（プロジェクト非依存）
+│   ├── skills/                  # 工程7件 + 支援10件（プロジェクト非依存）
 │   ├── references/              # スキル共通リファレンス（同上）
 │   └── project/                 # プロジェクト固有プロファイル（索引: INDEX.md）
 ├── docs/                        # 仕様書（*.md プロセス・規約 / design/ tech/ data/。索引は後述）

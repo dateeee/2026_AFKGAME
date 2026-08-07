@@ -43,7 +43,7 @@ Markdownには文字数上限を設けている。詳細は [docs/documentation_
 - **未確定仕様は原則ゼロ**。生じたものは `docs/open_specs.md` で管理し、確定・反映したら行を削除する（全解消でファイルごと削除）
 - **テスト標準**: バックエンド単体テストは pytest で C1（分岐）カバレッジ100%、結合テストは FastAPI TestClient + Playwright（E2E）
 - **実装規約**: スキーマは CamelModel で `schemas/`、ロジックは `services/`、ログは logging_config 準拠
-- **作業はすべてスキル経由**: 7工程 + 支援9件を `.claude/skills/` に用意している（自動起動 / `/` で明示起動）。対応表は [.claude/project/INDEX.md](.claude/project/INDEX.md)
+- **作業はすべてスキル経由**: 7工程 + 支援10件を `.claude/skills/` に用意している（自動起動 / `/` で明示起動）。対応表は [.claude/project/INDEX.md](.claude/project/INDEX.md)
 - **一般手順と固有値の分離**: `.claude/` は `project/**` のみ固有値。`skills/**` `references/**` `scripts/**` は非依存で他プロジェクトへ無改造コピー可（[_TEMPLATE.md](.claude/project/_TEMPLATE.md) に沿って書き直す）
 
 ## コスト規律（AIエージェント運用）
