@@ -12,6 +12,7 @@
 
 | ファイル | 内容 |
 |---------|------|
+| `.claude/skills/next/SKILL.md`・`.claude/references/review-procedure.md` | **振り返り（retro）— 効率メモ3件を消化し再発防止2件を適用**。next スキル §1 へ「1セッションで閉じない規模は着手前にセグメント分割し、先頭セグメントだけを対象にする」、§4 へ「候補キューの1行 = 1セッションで閉じる規模」を追加（long-turn 68回の原因が7本を1行にまとめた候補キューだったため）。review-procedure §5 へ使い捨てスクリプトの実行手順2点（スクラッチパッドへファイルとして書いてから実行 / 非ASCII出力はエンコーディングを明示）を表で追加（エラー2件がいずれもこの既知パターンだったため）。残る1件（過去レポート横断で生出力を会話へ持ち込んだ件）は profile.md §6 規律6 の適用漏れで規約の欠落ではないため対応不要と判断 |
 | `scripts/tests/`（4本新規）・`.claude/scripts/tests/`（新規）・`.claude/hooks/tests/`（新規）・`.claude/project/profile.md`・`_TEMPLATE.md` | **常設スクリプト7本の回帰テストを整備**（`check_docs` / `check_schema_triple` / `check_branch_list` / `rotate_reviews` / `log_token_usage` / `review_prep` / `efficiency_check`。既存の `check_doc_size` 19件と合わせて計333件）。各検査を「三者一致・違反なしを通す緑パス」と「1項目だけ壊すと検出する変異」の対で構成し、判定の起点（`ROOT` `TECH_DIR` `LOG_PATH` `MEMO_PATH` 等）を `tmp_path` へ差し替えて実リポジトリに触れずに回す。`review_prep` は git 実挙動に依存するため使い捨てリポジトリを作って検証。7本それぞれにしきい値・正規表現・集計の変異を注入し、全件でテストが落ちること（＝何も検出しない実装が通らないこと）を確認。profile.md §4 へ実行コマンドを追加し、`_TEMPLATE.md`「規約: スクリプトの配置」へ `.claude/hooks/` 行（テストは `.claude/hooks/tests/`）を追加 |
 | `.claude/project/_TEMPLATE.md` | 「規約: スクリプトの配置」に回帰テストの列と検証規約3点を追加（`<配置先>/tests/` に pytest・緑パス + 変異テスト・`conftest.py` で `sys.path` 追加） |
 | `.claude/project/profile.md` | §4 の `check_doc_size.py` に `--sections [path]`（測定モード）を追記 |
