@@ -22,7 +22,7 @@
 | A | `CLAUDE.md` | 3,000 | **セッション内是正**（台帳登録不可） |
 | B | `README.md`、`**/*_OVERVIEW.md` | 6,000 | 台帳へ登録 → 一括是正 |
 | C | `docs/**`、`diagrams/**` | 8,000 | 同上 |
-| D | `.claude/skills|references|project/**` | 5,000 | **セッション内是正**（台帳登録不可） |
+| D | `.claude/**`（スクリプトは `.claude/` 全体をD判定） | 5,000 | **セッション内是正**（台帳登録不可） |
 | 除外 | `docs/reviews/**`、`docs/changelog.md` | — | 追記型アーカイブ（§2・§9） |
 
 H2セクションは2,000字、H3は1,000字（§4）。1ファイルのH2は7個以内。
@@ -48,6 +48,8 @@ H2セクションは2,000字、H3は1,000字（§4）。1ファイルのH2は7�
 | `diagrams/*.md`（6図） | 同名ディレクトリ（`er_diagram/` 等） |
 
 1エンティティ1ファイルの束は `*_OVERVIEW.md` を索引にする（`docs/data/towers/TOWERS_OVERVIEW.md`）。
+
+区分A・Dは台帳に載らないため移管で余裕を作る: `CLAUDE.md` → 詳細を `docs/**` の正へ移しリンク参照、`.claude/project/profile.md` → 工程別ファイル `.claude/project/<スキル名>.md`（本ファイルがその形）。
 
 ## 5. 分割・改稿後に更新するファイル
 
