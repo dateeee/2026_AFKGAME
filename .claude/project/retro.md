@@ -19,10 +19,15 @@
 |---------|------|------|
 | same-read | 同一パラメータの Read の繰り返し（再Read禁止の違反） | 2回 |
 | same-command | 同一コマンドの繰り返し実行 | 3回 |
-| errors | ツールエラーの多発（ユーザー拒否は除く） | 3件 |
+| errors | ツールエラーの多発（ユーザー拒否・検査系の「違反あり exit 1」は除く） | 3件 |
 | denials | ユーザーによる許可拒否 | 2件 |
 | long-turn | ターン内ツール呼び出し総数 | 30回 |
 | correction | ターン冒頭の発話の手戻り語（「違う」「やり直し」等） | 1語 |
+
+`errors` から除外するコマンドは同ファイルの `EXPECTED_NONZERO`（既定: `check_*.py` /
+pytest / ruff / mypy / eslint / vue-tsc / `--noEmit` / type-check / lint）。
+違反検出時の exit 1 は正常な報告であり試行錯誤ではないため数えない。
+本プロジェクトで追加が要る場合は環境変数 `EFFICIENCY_EXPECTED_NONZERO`（正規表現）で上書きする。
 
 検出時はフックが仮エントリを追記し、Claude が「原因と改善案」を記入して完成させる。
 一時的に止めたい場合は `stop-chain.sh` の efficiency_check 呼び出しを外す

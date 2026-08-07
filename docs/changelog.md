@@ -8,6 +8,15 @@
 
 ---
 
+## 2026-08-08
+
+| ファイル | 内容 |
+|---------|------|
+| `.claude/project/_TEMPLATE.md` | 「規約: スクリプトの配置」に回帰テストの列と検証規約3点を追加（`<配置先>/tests/` に pytest・緑パス + 変異テスト・`conftest.py` で `sys.path` 追加） |
+| `.claude/project/profile.md` | §4 の `check_doc_size.py` に `--sections [path]`（測定モード）を追記 |
+| `.claude/project/retro.md` | `errors` シグナルから検査系の exit 1 を除外する旨と `EFFICIENCY_EXPECTED_NONZERO` を追記 |
+| `docs/reviews/efficiency_memo.md` | 振り返り（retro）でエントリ7件を消化し空にした |
+
 ## 2026-08-07
 
 | ファイル | 内容 |

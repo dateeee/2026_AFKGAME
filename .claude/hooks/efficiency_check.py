@@ -17,7 +17,7 @@ stop-commit.sh より先に実行する（メモの追記をコミット確認�
 検出シグナル（しきい値は下の定数。誤検出が続くものはここを調整する）:
   same-read     同一パラメータの Read が同一ターンに複数回（再Read禁止の違反）
   same-command  同一コマンドの Bash/PowerShell 実行の繰り返し（試行錯誤の空回り）
-  errors        ツールエラーの多発
+  errors        ツールエラーの多発（検査・リンタ・テストの「違反あり exit 1」は除く）
   denials       ユーザーによる許可拒否が複数（進め方の食い違い）
   long-turn     ターン内のツール呼び出し総数が過大
   correction    ターン冒頭のユーザー発話に手戻り語（前ターンの手戻りを示す）
@@ -51,6 +51,14 @@ CORRECTION_WORDS = ("違う", "ちがう", "そうじゃな", "やり直", "や�
 
 # ユーザー拒否の判定（is_error だがツール自体の失敗ではない）
 DENIAL_MARKS = ("doesn't want to proceed", "user rejected", "User rejected")
+
+# 「違反を見つけたら非ゼロ終了」が仕様のコマンド（検査・リンタ・テスト）。
+# その exit 1 は正常な報告であり、試行錯誤の空回りではないため errors に数えない。
+# プロジェクト固有の追加は環境変数 EFFICIENCY_EXPECTED_NONZERO（正規表現）で行う。
+EXPECTED_NONZERO = re.compile(
+    os.environ.get("EFFICIENCY_EXPECTED_NONZERO")
+    or r"check_\w+\.py|pytest|ruff|mypy|eslint|vue-tsc|--noEmit|type-check|\blint\b",
+    re.IGNORECASE)
 
 PLACEHOLDER = "（未記入 — Claude が1〜2行で追記する）"
 
@@ -111,6 +119,7 @@ def analyze(entries):
     if boundary is None:
         return None
     reads, cmds = Counter(), Counter()
+    tool_cmds = {}  # tool_use_id -> コマンド文字列（エラーの発生元を引くため）
     calls = errors = denials = 0
     for e in entries[boundary:]:
         content = (e.get("message") or {}).get("content")
@@ -130,6 +139,7 @@ def analyze(entries):
                     cmd = str(inp.get("command", "")).strip()
                     if cmd:
                         cmds[cmd] += 1
+                        tool_cmds[b.get("id")] = cmd
         elif e.get("type") == "user":
             for b in content:
                 if isinstance(b, dict) and b.get("type") == "tool_result" \
@@ -137,7 +147,7 @@ def analyze(entries):
                     body = json.dumps(b.get("content", ""), ensure_ascii=False)
                     if any(m in body for m in DENIAL_MARKS):
                         denials += 1
-                    else:
+                    elif not EXPECTED_NONZERO.search(tool_cmds.get(b.get("tool_use_id"), "")):
                         errors += 1
 
     signals = []

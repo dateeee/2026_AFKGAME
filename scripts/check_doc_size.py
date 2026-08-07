@@ -7,6 +7,8 @@ docs/documentation_rules.md で定めた文字数上限を検証する。
     python scripts/check_doc_size.py             # 判定（未登録の上限超過・変更履歴があれば exit 1）
     python scripts/check_doc_size.py --list      # 全ファイルの文字数一覧
     python scripts/check_doc_size.py --sections  # H2セクションの文字数超過も表示
+    python scripts/check_doc_size.py --sections <path>...
+                                                 # 指定ファイルの全H2の文字数（測定モード。判定なし・常に exit 0）
 """
 
 from __future__ import annotations
@@ -89,22 +91,71 @@ def history_sections(rel: str) -> list[tuple[int, str]]:
     return result
 
 
-def oversized_sections(rel: str) -> list[tuple[str, int]]:
-    """上限を超えた H2 セクションの (見出し, 文字数) を返す。"""
+def sections_of(rel: str) -> list[tuple[str, int]]:
+    """H2 セクションの (見出し, 文字数) を出現順に返す。コードブロック内の `## ` は見出しにしない。
+
+    文字数は見出し行を含まない本文のみ（`## ` 行の長さは「前文・見出し行」へ回る）。
+    """
     text = (ROOT / rel).read_text(encoding="utf-8")
     result, heading, buf, in_code = [], None, [], False
     for line in text.splitlines(keepends=True):
         if line.lstrip().startswith("```"):
             in_code = not in_code
         if not in_code and line.startswith("## "):
-            if heading is not None and len("".join(buf)) > SECTION_LIMIT:
+            if heading is not None:
                 result.append((heading, len("".join(buf))))
             heading, buf = line.strip(), []
         elif heading is not None:
             buf.append(line)
-    if heading is not None and len("".join(buf)) > SECTION_LIMIT:
+    if heading is not None:
         result.append((heading, len("".join(buf))))
     return result
+
+
+def oversized_sections(rel: str) -> list[tuple[str, int]]:
+    """上限を超えた H2 セクションの (見出し, 文字数) を返す。"""
+    return [(h, c) for h, c in sections_of(rel) if c > SECTION_LIMIT]
+
+
+def resolve_rel(target: str) -> str | None:
+    """引数のパスをリポジトリ相対（POSIX）へ正規化する。範囲外・不在なら None。
+
+    カレントディレクトリ相対とリポジトリルート相対の両方を受ける
+    （`backend/` 等から呼んでも同じ引数で通るようにするため）。
+    """
+    for base in (Path.cwd(), ROOT):
+        path = Path(target) if Path(target).is_absolute() else base / target
+        try:
+            rel = path.resolve().relative_to(ROOT).as_posix()
+        except (ValueError, OSError):
+            continue
+        if (ROOT / rel).is_file():
+            return rel
+    return None
+
+
+def report_sections(targets: list[str]) -> int:
+    """指定ファイルの H2 別文字数を降順で出す測定モード（判定はせず常に 0 を返す）。
+
+    痩身作業で「どのセクションを削れば上限に収まるか」を1回で決めるための出力。
+    上限以下のセクションも省かずに出す（削減候補の比較に必要なため）。
+    """
+    for target in targets:
+        rel = resolve_rel(target)
+        if rel is None:
+            print(f"ERROR {target}: リポジトリ内の実在ファイルとして解決できない")
+            continue
+        total = len((ROOT / rel).read_text(encoding="utf-8"))
+        zone = zone_of(rel)
+        limit = LIMITS[zone]
+        rest = f"残り {limit - total:,}字" if total <= limit else f"{total - limit:,}字 超過"
+        print(f"\n{rel}  {total:,}字 / 上限 {limit:,}字（区分{zone[0]}・{rest}）")
+        sections = sections_of(rel)
+        for heading, chars in sorted(sections, key=lambda s: -s[1]):
+            mark = "!" if chars > SECTION_LIMIT else " "
+            print(f"{chars:>7} {mark} {heading}")
+        print(f"{total - sum(c for _, c in sections):>7}   （前文・H2見出し行）")
+    return 0
 
 
 def main() -> int:
@@ -115,6 +166,12 @@ def main() -> int:
         pass
 
     args = sys.argv[1:]
+
+    # `--sections <path>` は測定モード（指定ファイルのH2内訳のみ。判定は行わない）
+    targets = [a for a in args if not a.startswith("--")]
+    if "--sections" in args and targets:
+        return report_sections(targets)
+
     rows = collect()
 
     if "--list" in args:
