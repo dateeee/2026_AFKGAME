@@ -12,8 +12,9 @@
 | 認証・アカウント | [tech_db/auth.md](tech_db/auth.md) | `users` `refresh_tokens` `email_verification_tokens` |
 | プレイヤー・キャラクター | [tech_db/player.md](tech_db/player.md) | `players` `player_settings` `tower_clear_records` `characters` + 未実装4件（`party_members` `learned_skills` `active_skill_slots` `prestige_bonuses`） |
 | 装備・アイテム・ショップ・施設 | [tech_db/item.md](tech_db/item.md) | `equipment` `character_equip_slots` `inventory_items` `shop_daily_states` `shop_daily_slots` + 未実装1件（`facilities`） |
+| 戦闘・ボスラッシュ | [tech_db/battle.md](tech_db/battle.md) | `battle_logs` + 未実装2件（`boss_rush_states` `boss_rush_milestones`） |
 
-戦闘系（`battle_logs` ほか）は、同構成の `tech_db/battle.md` として本索引に追加する。
+上表で全テーブルを網羅する。ダンジョン・塔・敵・スキル・装備ベースはコード上のマスターデータでありDBテーブルを持たない（§4-6）。
 
 ## 2. 命名規約
 
@@ -41,6 +42,9 @@ DBMS は `local`・初期の `production` ともに SQLite、規模到達時に 
 | `FLOAT` | `Float` | `REAL` | `double precision` | 閾値・倍率 |
 | `BOOLEAN` | `Boolean` | `INTEGER`(0/1) | `boolean` | フラグ |
 | `DATETIME(tz)` | `DateTime(timezone=True)` | `DATETIME`（UTC文字列） | `timestamptz` | 時刻。**保存・比較は常に UTC** |
+| `JSON` | `JSON` | `JSON`（実体は TEXT） | `json` | 要素数が可変で、DB側で検索しない構造（戦闘ログの `entries`） |
+
+`JSON` 列は**アプリ側でのみ解釈する**。DBMS の JSON 関数・JSON インデックスを使う設計にしない（SQLite と PostgreSQL で機能が揃わないため）。列単位の検索が必要になった時点で、正規化したテーブルへ切り出す。
 
 ## 4. 共通の列規約
 

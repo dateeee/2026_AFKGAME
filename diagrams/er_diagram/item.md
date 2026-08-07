@@ -71,8 +71,8 @@ erDiagram
         uuid id PK
         uuid shop_daily_state_id FK "references ShopDailyState.id"
         int slot_index "0-4 枠番号"
-        string base_id "装備マスターID"
         enum category "weapon / armor / accessory"
+        string base_id "装備マスターID"
         enum rarity "common / uncommon / rare"
         int level "装備レベル (= 最高到達階層, 下限1)"
         int stat_atk "nullable, ATK値"

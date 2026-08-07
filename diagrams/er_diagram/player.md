@@ -94,17 +94,17 @@ erDiagram
         uuid player_id FK "references Player.id"
         string name "キャラクター名"
         enum type "melee / magic / holy / agile"
-        enum rarity "common-legendary (Phase 3〜)"
         int level "1-9999"
         bigint exp "現在レベル内の累積EXP"
-        int limit_break "0-5 限界突破回数"
         int hp "現在HP"
         int max_hp "最大HP"
         int base_atk "基礎ATK"
         int base_def "基礎DEF"
         int base_spd "基礎SPD"
+        int limit_break "0-5 限界突破回数"
         int skill_points "未使用SP"
         datetime created_at
+        enum rarity "common-legendary (Phase 3〜・未実装)"
     }
 
     PrestigeBonus {

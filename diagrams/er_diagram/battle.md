@@ -1,6 +1,7 @@
 # ER図 — 戦闘・ボスラッシュ・マスターデータ
 
-> 親: [er_diagram.md](../er_diagram.md)。データ構造は [tech_data.md](../../docs/tech/basic/tech_data.md)、数値は [master_data.md](../../docs/data/master_data.md)。
+> 親: [er_diagram.md](../er_diagram.md)。**DBスキーマの正は** [tech_db/battle.md](../../docs/tech/basic/tech_db/battle.md) であり、本図は視覚化として属性を再掲する（食い違いは定義書側へ揃える）。データ構造は [tech_data.md](../../docs/tech/basic/tech_data.md)、数値は [master_data.md](../../docs/data/master_data.md)。
+> 「ダンジョン・塔・敵系」はコード上のマスターデータでDBテーブルを持たないため、定義書の対象外（正は [master_data.md](../../docs/data/master_data.md)）。
 
 ## 戦闘・ボスラッシュ系
 
@@ -16,13 +17,13 @@ erDiagram
         uuid player_id FK "references Player.id"
         int tick_number "tick通番"
         datetime timestamp "処理時刻"
-        json entries "ターンごとの行動ログ配列"
+        json entries "そのtickの行動ログ配列"
     }
 
     BossRushState {
         uuid id PK "Phase 5〜 (未実装)"
         uuid player_id FK "references Player.id"
-        boolean is_active "ボスラッシュ中か"
+        boolean active "ボスラッシュ中か"
         int current_wave "現在ウェーブ"
         bigint accumulated_gold "累積獲得ゴールド"
         bigint accumulated_exp "累積獲得EXP"
