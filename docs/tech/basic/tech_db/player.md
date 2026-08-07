@@ -34,10 +34,10 @@
 |----|----|------|------|-----------|
 | `id` | `VARCHAR(36)` | 不可 | UUID4 | PK |
 | `player_id` | `VARCHAR(36)` | 不可 | — | FK → `players.id`、UNIQUE（1プレイヤー1設定） |
-| `potion_threshold` | `FLOAT` | 不可 | `0.3` | ポーション使用HP閾値（0.1〜0.5） |
+| `potion_threshold` | `FLOAT` | 不可 | `0.3` | ポーション使用HP閾値（0.1〜0.5、0.1刻み。選択肢の正は [systems/ui.md](../../../design/systems/ui.md)「設定項目」） |
 | `battle_log_count` | `INTEGER` | 不可 | `50` | 表示ログ件数（20 / 50 / 100） |
 | `toast_enabled` | `BOOLEAN` | 不可 | `true` | — |
-| `auto_sell_rarity` | `VARCHAR(20)` | 可 | — | 自動売却の対象レアリティ上限。NULL は自動売却なし |
+| `auto_sell_rarity` | `VARCHAR(20)` | 可 | — | `common` / `uncommon`。自動売却の対象レアリティ上限で、NULL は自動売却なし（選択肢の正は [systems/ui.md](../../../design/systems/ui.md)「設定項目」） |
 
 ## 3. `tower_clear_records`（Phase 1）
 
@@ -146,3 +146,4 @@
 | キャラの習得スキルを引く | `uq_learned_skills_character_skill` | 充足（左端が `character_id`） |
 | キャラのセット枠を引く | `uq_active_skill_slots_character_slot` | 充足（左端が `character_id`） |
 | tick処理でプレイヤーの全キャラを引く | なし（`characters.player_id`） | 二次インデックスを張らない。行数が小さい間は全走査で足り、追加は [tech_db.md](../tech_db.md) §6-3 の再評価ラインで判断する |
+| 深淵の塔ランキング上位100件を `highest_floor` 降順・`highest_floor_at` 昇順で引く | なし（`tower_id = 'abyss_tower'` で絞って全行走査 + ソート） | 全プレイヤー横断クエリ（もう1本は [battle.md](battle.md) §4 のボスラッシュランキング）。行数が利用者数に比例するため、(`tower_id`, `highest_floor`) の複合インデックス追加は [tech_db.md](../tech_db.md) §6-3 の再評価ラインで判断する |

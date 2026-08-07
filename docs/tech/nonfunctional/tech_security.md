@@ -56,7 +56,8 @@
 |------|------|
 | `quantity`（購入・売却） | 1〜99 の整数 |
 | `targetFloor` | `1 <= targetFloor <= min(塔別 highestFloor + 1, 総階数)`（[tech_api.md](../basic/tech_api.md)「操作系」が正） |
-| `hpThreshold` / `potionThreshold` | 0〜1 の小数（刻みは仕様どおり） |
+| `hpThreshold` | 0.0〜1.0 の小数 |
+| `potionThreshold` | 0.1〜0.5 の小数（0.1刻み。選択肢の正は [systems/ui.md](../../design/systems/ui.md)「設定項目」） |
 | `memberIds` | 配列長 ≤ 4、重複禁止 |
 | `activeSlots` | 配列長 ≤ 2 |
 | `equipmentIds`（一括売却） | 配列長 ≤ 100 |

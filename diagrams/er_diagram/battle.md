@@ -22,7 +22,7 @@ erDiagram
 
     BossRushState {
         uuid id PK "Phase 5〜 (未実装)"
-        uuid player_id FK "references Player.id"
+        uuid player_id FK, UK "references Player.id（1プレイヤーにつき1行）"
         boolean active "ボスラッシュ中か"
         int current_wave "現在ウェーブ"
         bigint accumulated_gold "累積獲得ゴールド"
@@ -33,8 +33,8 @@ erDiagram
 
     BossRushMilestone {
         uuid id PK "Phase 5〜 (未実装)"
-        uuid boss_rush_state_id FK "references BossRushState.id"
-        int wave "到達ウェーブ (5,10,15,...)"
+        uuid boss_rush_state_id FK, UK "references BossRushState.id（wave と複合一意）"
+        int wave UK "到達ウェーブ (5,10,15,...)"
         boolean claimed "報酬受取済みか"
         datetime claimed_at "nullable"
     }

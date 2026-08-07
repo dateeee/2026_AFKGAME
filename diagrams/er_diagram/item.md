@@ -33,7 +33,7 @@ erDiagram
     InventoryItem {
         uuid id PK
         uuid player_id FK, UK "references Player.id（item_id と複合一意）"
-        string item_id FK, UK "references ItemMaster.id"
+        string item_id UK "マスター参照 ItemMaster.id（DB外部キーなし・player_id と複合一意）"
         int quantity "所持数"
     }
 
@@ -49,7 +49,7 @@ erDiagram
     }
 ```
 
-> **注**: `ItemMaster` はDBテーブルではなく、コード内定義のマスターデータ（`backend/app/master_data/items.py`）。`InventoryItem.item_id` の FK 表記は論理参照を示す（DBレベルのFK制約はない）。`InventoryItem` 側は `category` を列として持たず、`item_id` から `ItemMaster` を引いて得る。
+> **注**: `ItemMaster` はDBテーブルではなく、コード内定義のマスターデータ（`backend/app/master_data/items.py`）。`InventoryItem.item_id` は他のマスター参照列と同じく `FK` タグを付けず、`InventoryItem }o--|| ItemMaster` のリレーション線が論理参照を示す（DBレベルのFK制約はない。親 [tech_db.md](../../docs/tech/basic/tech_db.md) §4-6）。`InventoryItem` 側は `category` を列として持たず、`item_id` から `ItemMaster` を引いて得る。
 
 ## ショップ・施設系
 
@@ -69,8 +69,8 @@ erDiagram
 
     ShopDailySlot {
         uuid id PK
-        uuid shop_daily_state_id FK "references ShopDailyState.id"
-        int slot_index "0-4 枠番号"
+        uuid shop_daily_state_id FK, UK "references ShopDailyState.id（slot_index と複合一意）"
+        int slot_index UK "0-4 枠番号"
         enum category "weapon / armor / accessory"
         string base_id "装備マスターID"
         enum rarity "common / uncommon / rare"
@@ -85,8 +85,8 @@ erDiagram
 
     Facility {
         uuid id PK "Phase 4〜 (未実装)"
-        uuid player_id FK "references Player.id"
-        enum facility_type "tavern/forge/training_ground/warehouse/market"
+        uuid player_id FK, UK "references Player.id（facility_type と複合一意）"
+        enum facility_type UK "tavern/forge/training_ground/warehouse/market"
         int level "0-10 (0=未建設)"
     }
 ```

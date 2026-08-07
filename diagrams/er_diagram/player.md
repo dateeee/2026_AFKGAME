@@ -104,12 +104,12 @@ erDiagram
         int limit_break "0-5 限界突破回数"
         int skill_points "未使用SP"
         datetime created_at
-        enum rarity "common-legendary (Phase 3〜・未実装)"
+        enum rarity "nullable, common-legendary (Phase 3〜・未実装)"
     }
 
     PrestigeBonus {
         uuid id PK "Phase 5〜 (未実装)"
-        uuid character_id FK "references Character.id"
+        uuid character_id FK, UK "references Character.id（1キャラ1レコード）"
         int prestige_count "転生回数"
         int prestige_points "未使用転生ポイント"
         int bonus_hp "HP強化投資pt (上限50)"
@@ -123,8 +123,8 @@ erDiagram
     PartyMember {
         uuid id PK "Phase 3〜 (未実装)"
         uuid player_id FK, UK "references Player.id（slot_index / character_id と各々複合一意）"
-        int slot_index "0-3 パーティ内位置"
-        uuid character_id FK "references Character.id"
+        int slot_index UK "0-3 パーティ内位置"
+        uuid character_id FK, UK "references Character.id"
     }
 
     TowerClearRecord {
@@ -145,7 +145,7 @@ erDiagram
     LearnedSkill {
         uuid id PK "Phase 3〜 (未実装)"
         uuid character_id FK, UK "references Character.id（skill_id と複合一意）"
-        string skill_id "マスター参照 SkillMaster.id（DB外部キーなし）"
+        string skill_id UK "マスター参照 SkillMaster.id（DB外部キーなし）"
         int cooldown_remaining "残CDターン数, default 0"
         datetime learned_at
     }
@@ -153,7 +153,7 @@ erDiagram
     ActiveSkillSlot {
         uuid id PK "Phase 3〜 (未実装)"
         uuid character_id FK, UK "references Character.id（slot_index と複合一意）"
-        int slot_index "0-1 セット枠番号"
+        int slot_index UK "0-1 セット枠番号"
         string skill_id "マスター参照 SkillMaster.id（DB外部キーなし）"
     }
 

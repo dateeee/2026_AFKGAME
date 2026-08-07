@@ -86,7 +86,7 @@
 | `price` | `INTEGER` | 不可 | — | 購入価格。算出規則は [tech_shop.md](../../detail/tech_shop.md) §3.2 が正 |
 | `sold` | `BOOLEAN` | 不可 | `false` | 購入済みの枠は行を消さずフラグで表す（リセットまで枠を残すため） |
 
-一意制約: `uq_shop_daily_slot_index` = (`shop_daily_state_id`, `slot_index`)
+一意制約: `uq_shop_daily_slots_state_slot` = (`shop_daily_state_id`, `slot_index`)
 
 装備スロットと両手武器フラグは `base_id` からマスターで一意に定まるため列に持たない。購入時に `equipment` へ書き写す。
 
@@ -112,6 +112,6 @@
 | キャラの装備欄を引く | `character_equip_slots` の複合PK | 充足（左端が `character_id`） |
 | プレイヤーの所持アイテムを引く | `uq_inventory_items_player_item` | 充足（左端が `player_id`） |
 | プレイヤーのショップ状態を引く | `shop_daily_states.player_id`（UNIQUE） | 充足 |
-| 品揃えを `slot_index` 順に引く | `uq_shop_daily_slot_index` | 充足（左端が `shop_daily_state_id`） |
+| 品揃えを `slot_index` 順に引く | `uq_shop_daily_slots_state_slot` | 充足（左端が `shop_daily_state_id`） |
 | プレイヤーの施設を引く | `uq_facilities_player_type` | 充足（左端が `player_id`） |
 | 装備一覧を `acquired_at` 順に引く | なし（`equipment.player_id`） | 二次インデックスを張らない。1プレイヤーの所持上限が倉庫枠で抑えられており、追加は [tech_db.md](../tech_db.md) §6-3 の再評価ラインで判断する |

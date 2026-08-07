@@ -66,7 +66,7 @@ sequenceDiagram
     participant DB as Database
 
     B->>API: GET /api/abyss/ranking
-    API->>DB: 上位100件取得<br/>ORDER BY highest_floor DESC,<br/>updated_at ASC
+    API->>DB: 上位100件取得<br/>ORDER BY highest_floor DESC,<br/>highest_floor_at ASC
     API-->>B: { ranking: [{rank, name, floor}, ...],<br/>  myRank: 87 }
 
     Note over API: 同階なら先に到達したプレイヤーが上位。<br/>登録は認証ユーザーのみ（ゲストは閲覧のみ）
