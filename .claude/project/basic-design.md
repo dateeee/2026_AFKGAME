@@ -60,15 +60,18 @@
 
 ## 4. 機械検証（Mermaid・DBスキーマ）
 
-設計図の構文とスキーマの一致は**目視しない**。スクラッチパッドに使い捨てスクリプトを書き、以下を機械的に検証する。
+設計図の構文とスキーマの一致は**目視しない**。常設スクリプトを先に実行し、使い捨ては常設で賄えない検証だけに書く（[profile.md](profile.md) §7-5）。
 
 | 検証項目 | 方法 |
 |---------|------|
-| コードフェンスの閉じ漏れ | ` ```mermaid ` と ` ``` ` の対応を数える |
-| `end` の対応 | `subgraph` / `loop` / `alt` / `opt` と `end` の数を照合 |
-| ER図のPK/FK整合 | エンティティ定義から属性を抽出し、リレーション両端の存在を確認 |
-| DBスキーマ三者一致 | `tech_db/` の定義表・`er_diagram/` の Mermaid・`models/*.py` の `__tablename__`/`mapped_column` からテーブル名と列名を抽出し、集合差分がゼロか（正は `tech_db/`） |
-| 相対リンク切れ | 索引の子ファイルリンクが実在するか |
+| DBスキーマ三者一致 | `python scripts/check_schema_triple.py`。`tech_db/`（正）↔ `er_diagram/` ↔ `models/*.py` を、列名・並び順・PK/FK/UK タグ・一意制約・FKなし宣言・nullable・制約の命名規約・ER索引の7観点で照合する |
+| 相対リンク切れ・索引到達性 | `python scripts/check_docs.py --links --reach` |
+| 文字数上限 | `python scripts/check_doc_size.py` |
+| コードフェンスの閉じ漏れ | ` ```mermaid ` と ` ``` ` の対応を数える（使い捨て） |
+| `end` の対応 | `subgraph` / `loop` / `alt` / `opt` と `end` の数を照合（使い捨て） |
+| ER図のリレーション整合 | リレーション両端のエンティティが定義済みか（使い捨て） |
+
+`check_schema_triple.py` は定義書にあるテーブルを起点に照合する。定義書に無い ER図エンティティはマスターデータの論理設計とみなして「対象外」へ列挙するだけなので（[tech_db.md](../../docs/tech/basic/tech_db.md) §4-6）、**DBテーブルにすべきものが定義書から漏れている場合は検出できない**。出力の「対象外」一覧が想定どおりかは目視で確かめる。
 
 ## 5. 完了基準
 
