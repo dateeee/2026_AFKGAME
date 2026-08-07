@@ -17,7 +17,7 @@ Markdownには文字数上限を設けている。詳細は [docs/documentation_
 - 原則: **1ファイル = 1テーマ = 1回の読み込みで完結**
 - H2セクションは2,000字以内。表を優先し、同じ仕様を複数ファイルに重複させない（正の宣言は [docs/spec_ownership.md](docs/spec_ownership.md)）
 - **変更履歴は各ファイルに書かない**。[docs/changelog.md](docs/changelog.md)（上限対象外）の先頭へ1行追記する
-- ドキュメントの作成・改稿後は `python scripts/check_doc_size.py` と `python scripts/check_docs.py` を実行する（違反は exit 1）
+- ドキュメントの作成・改稿後は `python scripts/check_doc_size.py` と `python scripts/check_docs.py` を実行する（超過の扱いは規約§7の台帳運用）
 
 大きな仕様書は **索引 + 個別ファイル**構成。索引で担当ファイルを特定し、必要なものだけ読むこと（節番号は分割後も維持）。
 

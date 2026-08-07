@@ -64,6 +64,7 @@ graph LR
 
 **各工程スキルは工程内検証を持つ**（機械的検証 → 読んで確認 → 矛盾時の対応）。
 横断レビューへ丸投げせず、その工程で潰せる矛盾は工程内で解消してからゲートへ渡す。機械的検証は常設スクリプト（`scripts/check_*.py`）を優先する。
+例外: 文字数上限の超過（区分B・C）は工程内で是正せず、台帳へ登録して一括是正に回す（[documentation_rules.md](documentation_rules.md) §7）。
 
 ## 3. 工程定義
 
@@ -74,12 +75,12 @@ graph LR
 | ゲート | タイミング | 判定手段 |
 |-------|----------|---------|
 | 仕様確定ゲート | 要件・詳細設計の変更時 | `doc-review` 指摘ゼロ、`check_docs.py` exit 0、`open_specs.md` の未解消が対象Phaseの期限内 |
-| ドキュメント規約ゲート | 仕様書・設計図の変更時 | `python scripts/check_doc_size.py` が `違反 0`（exit 0） |
+| ドキュメント規約ゲート | 仕様書・設計図の変更時 | `python scripts/check_doc_size.py` が `違反 0`（exit 0。台帳登録済みの既知超過は可 — [documentation_rules.md](documentation_rules.md) §7） |
 | 設計整合ゲート | 基本設計の変更時 | `diagrams-review` 指摘ゼロ（仕様確定ゲートと並走し、修正は1パスに統合）。DB変更時は**テーブル定義書 ↔ ER図 ↔ `models/*.py` の三者一致**（[process/phases.md](process/phases.md) §3.2.1） |
 | テストリストゲート | 製造着手前 | 分岐一覧の全項目にテストが存在し（`check_branch_list.py --tests` で照合）、実行して全件 FAIL（Red）を確認 |
 | 製造完了ゲート | 実装完了時 | テスト全PASS（Green）+ コードレビュー指摘対応 + `vue-tsc` 型チェックPASS + テーブル変更時は Alembic リビジョンが存在し `alembic upgrade head` が通る |
 | 単体テストゲート | 製造完了後 | 全PASS + C1カバレッジ100% |
-| Phase完了ゲート | 結合テスト完了時 | API統合テスト・E2E全PASS + `full-review` で仕様との乖離ゼロ |
+| Phase完了ゲート | 結合テスト完了時 | API統合テスト・E2E全PASS + `full-review` で仕様との乖離ゼロ + 文字数台帳（`KNOWN_OVERSIZED`）が空 |
 
 ## 5. 現在の工程状況（2026-08-05時点）
 

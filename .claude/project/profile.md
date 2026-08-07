@@ -92,7 +92,7 @@
 |---|------|
 | 1 | 文字数上限は [docs/documentation_rules.md](../../docs/documentation_rules.md) §3（`.claude/**` は区分D = 5,000字） |
 | 2 | **変更履歴セクションを個々のファイルに置かない**。改稿時は [docs/changelog.md](../../docs/changelog.md) の先頭へ1行追記する（§5.1） |
-| 3 | 作成・改稿後は §4 の規約チェックと機械検証を実行する（違反は exit 1） |
+| 3 | 作成・改稿後は §4 の規約チェックと機械検証を実行する。超過は [documentation_rules.md](../../docs/documentation_rules.md) §7 の台帳運用（B・Cは登録して一括是正へ、A・Dは即時是正） |
 | 4 | 同じ数値・仕様の正は1ファイル。トピックごとの正は [docs/spec_ownership.md](../../docs/spec_ownership.md) で宣言する |
 | 5 | 機械検証は §4 の常設スクリプトを優先し、使い捨ては常設で賄えない検証のみ（繰り返すなら常設化を提案する） |
 | 6 | CLAUDE.md と `.claude/project/**` で重複するルールを改稿する際は、もう一方を必ず突合して同時に更新する |

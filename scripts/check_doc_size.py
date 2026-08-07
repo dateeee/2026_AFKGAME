@@ -4,7 +4,7 @@
 docs/documentation_rules.md で定めた文字数上限を検証する。
 
 使い方:
-    python scripts/check_doc_size.py             # 判定（新規の上限超過があれば exit 1）
+    python scripts/check_doc_size.py             # 判定（未登録の上限超過・変更履歴があれば exit 1）
     python scripts/check_doc_size.py --list      # 全ファイルの文字数一覧
     python scripts/check_doc_size.py --sections  # H2セクションの文字数超過も表示
 """
@@ -42,10 +42,16 @@ EXCLUDE = (
 # 変更履歴セクションの見出し（documentation_rules.md §5.1 により各ファイルへの記載は禁止）
 HISTORY_HEADING = re.compile(r"^#{1,6}\s*(?:\d+(?:\.\d+)*\.?\s*)?(?:変更|更新|改訂)履歴\s*$")
 
-# ── 既知の上限超過（documentation_rules.md §8 の是正計画対象）──
-# 是正計画に沿って分割が完了したファイルはこの集合から削除する。
-# 2026-08-02 に全8ファイルの分割が完了したため現在は空。新規の超過はすべて ERROR となる。
-KNOWN_OVERSIZED: set[str] = set()
+# ── 一括是正の台帳（documentation_rules.md §7）──
+# 新規の上限超過（区分B・C）は即時是正せず、是正方針を1行添えてここへ登録する。
+# 登録済みは WARN（exit 0）となり、一括是正タスクで解消したら行を削除する。
+# 区分A・Dは登録不可（毎ターン・スキル起動ごとに読み込まれ放置コストが複利のため即時是正）。
+# Phase完了ゲートでは本台帳が空であること。
+# 例: "docs/tech/basic/tech_data.md": "分割（レイヤー分割: スキーマ/JSON構造）",
+KNOWN_OVERSIZED: dict[str, str] = {}
+
+# 台帳登録を許す区分（documentation_rules.md §7。区分A・Dは即時是正）
+DEFERRABLE_ZONES = frozenset({"B 索引", "C 仕様・設計"})
 
 
 def zone_of(rel: str) -> str:
@@ -119,20 +125,27 @@ def main() -> int:
         print(f"\n{len(rows)} files, {sum(r[2] for r in rows):,} chars")
         return 0
 
-    errors = [r for r in rows if r[2] > r[3] and r[0] not in KNOWN_OVERSIZED]
-    known = [r for r in rows if r[2] > r[3] and r[0] in KNOWN_OVERSIZED]
+    over = [r for r in rows if r[2] > r[3]]
+    known = [r for r in over if r[0] in KNOWN_OVERSIZED and r[1] in DEFERRABLE_ZONES]
+    errors = [r for r in over if r not in known]
 
     for rel, zone, chars, limit in known:
-        print(f"WARN  {rel}: {chars:,}字 > {limit:,}字（区分{zone[0]}）- 是正計画あり")
+        print(f"WARN  {rel}: {chars:,}字 > {limit:,}字（区分{zone[0]}）- 台帳登録済み: {KNOWN_OVERSIZED[rel]}")
 
     for rel, zone, chars, limit in errors:
-        over = chars - limit
-        print(f"ERROR {rel}: {chars:,}字 > {limit:,}字（区分{zone[0]}）- {over:,}字 超過")
+        over_by = chars - limit
+        note = "（区分A・Dは台帳登録不可）" if rel in KNOWN_OVERSIZED else ""
+        print(f"ERROR {rel}: {chars:,}字 > {limit:,}字（区分{zone[0]}）- {over_by:,}字 超過{note}")
 
-    # 上限の90%を超えたファイルは、次の追記が超過を生む前に分割・圧縮を先行させる（レビュー指摘の反映が規約違反でブロックされる事態を防ぐ）
+    # 台帳に残っているが上限内に収まった（または削除された）ファイルは行を消させる
+    stales = sorted(set(KNOWN_OVERSIZED) - {r[0] for r in over})
+    for rel in stales:
+        print(f"WARN  {rel}: 上限内 - 台帳（KNOWN_OVERSIZED）から行を削除する")
+
+    # 上限の90%超は残量WARN（次の追記で超過し得る早期警戒。一括是正時の分割候補）
     nears = [r for r in rows if r[3] * 0.9 < r[2] <= r[3] and r[0] not in KNOWN_OVERSIZED]
     for rel, zone, chars, limit in nears:
-        print(f"WARN  {rel}: {chars:,}字（上限{limit:,}字・残り{limit - chars:,}字）- 追記の前に分割・圧縮を検討（§6）")
+        print(f"WARN  {rel}: {chars:,}字（上限{limit:,}字・残り{limit - chars:,}字）- 次の追記で超過し得る（一括是正の分割候補。§6・§7）")
 
     # 変更履歴は docs/changelog.md へ集約する（§5.1）。個別ファイルへの復活を禁止する
     histories = [(rel, no, head) for rel, _, _, _ in rows for no, head in history_sections(rel)]
@@ -145,11 +158,11 @@ def main() -> int:
                 print(f"WARN  {rel}: {heading} が {chars:,}字 > {SECTION_LIMIT:,}字")
 
     ok = len(rows) - len(errors) - len(known)
-    print(f"\n{len(rows)} files checked: {ok} OK, {len(known)} 既知超過, {len(errors)} 違反, 残量WARN {len(nears)}", end="")
+    print(f"\n{len(rows)} files checked: {ok} OK, {len(known)} 台帳登録, {len(errors)} 違反, 残量WARN {len(nears)}", end="")
     print(f", 変更履歴 {len(histories)} 件" if histories else "")
 
     if errors:
-        print("→ docs/documentation_rules.md §6 の分割パターンに従って分割すること")
+        print("→ 区分B・Cは KNOWN_OVERSIZED（台帳）へ是正方針つきで登録して一括是正へ、区分A・Dは即時是正（documentation_rules.md §7）")
     if histories:
         print("→ 変更履歴は docs/changelog.md の先頭へ移すこと（documentation_rules.md §5.1）")
     return 1 if errors or histories else 0
