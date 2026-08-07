@@ -1,6 +1,6 @@
 # ER図 — 装備・アイテム・ショップ・施設
 
-> 親: [er_diagram.md](../er_diagram.md)。データ構造は [tech_data.md](../../docs/tech/basic/tech_data.md)、日替わりショップの生成・購入は [tech_shop.md](../../docs/tech/detail/tech_shop.md)。
+> 親: [er_diagram.md](../er_diagram.md)。**DBスキーマの正は** [tech_db/item.md](../../docs/tech/basic/tech_db/item.md) であり、本図は視覚化として属性を再掲する（食い違いは定義書側へ揃える）。データ構造は [tech_data.md](../../docs/tech/basic/tech_data.md)、日替わりショップの生成・購入は [tech_shop.md](../../docs/tech/detail/tech_shop.md)。
 
 ## 装備・アイテム系
 

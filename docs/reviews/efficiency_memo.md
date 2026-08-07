@@ -62,3 +62,9 @@
 - シグナル: long-turn(calls=75)
 - ターン概要: ツール75回・エラー1回・拒否0回。開始:「<command-message>next</command-message>」
 - 原因と改善案: 大半は成果物新設1件を3セグメントへ分割して完遂した正当な作業だが、末尾で手戻りが2件出た。(1) player.md を書き上げてから 8,877字で上限超過が判明し認証系へ再分割 — `basic-design.md` へ「表形式の定義書は1テーブル約550字で見積もり、8,000字を超える構成は執筆前に分割する」を追記する。(2) commit の `-m @'...'@`（PowerShell here-string）を Bash ツールで使い commit message に `@` が混入して amend が必要 — `.claude/project/profile.md` §4 へ「複数行のコミットメッセージは Bash ツールでは `git commit -F - <<'EOF'`、PowerShell ツールでは `@'...'@` と使い分ける」を追記する
+
+## 2026-08-07 10:32 | session 81636e8a | 自動検出
+- シグナル: long-turn(calls=41)
+- ターン概要: ツール41回・エラー0回・拒否0回。開始:「<command-message>next</command-message>」
+- 原因と改善案: 41回の大半は三者一致の突合という正当な作業だが、着手前に往復が発生した。前セッションが `tech_db/item.md` を**未コミットのまま残し引き継ぎに一切書いていなかった**ため、鮮度確認で `git status` の `??` を見つけてユーザー判断を仰ぐまで作業を開始できなかった — `.claude/project/next.md` §4 へ「引き継ぎ更新時に `git status --short` を確認し、未コミットの書きかけがあれば『次回』へ明記するか破棄してから終える」を追加する
+- 追加: commit の `-m @'...'@`（PowerShell here-string）を Bash ツールで使って `@` が混入し amend が必要になった。これは **2026-08-07 00:43 のエントリと完全に同一の再発**であり、そこで挙げた `profile.md` §4 への追記（Bash は `git commit -F`、PowerShell は `@'...'@` と使い分ける）が未適用のまま放置されている証拠。次の `retro` では新規メモより**未適用エントリの反映を優先する**

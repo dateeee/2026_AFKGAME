@@ -12,6 +12,7 @@
 
 | ファイル | 内容 |
 |---------|------|
+| tech_db/item.md（新規）、tech_db.md、er_diagram/item.md・player.md、tech_shop.md | テーブル定義書のセグメント2/3。装備・アイテム・ショップ系5テーブル（`equipment` `character_equip_slots` `inventory_items` `shop_daily_states` `shop_daily_slots`）+ 未実装1件（`facilities`・Phase 4）の物理定義を子ファイルへ記載し、tech_db.md §1 の子ファイル索引へ登録。三者一致（定義書 ↔ ER図 ↔ `models/{equipment,item,shop}.py`）は列名・並び順とも差分ゼロを機械検証で確認。**正の所在の誤りを2件是正**: (1) `tech_shop.md` §5 が「列の型・制約の正は ER図」と宣言しており `spec_ownership.md` §3「図は正にならない」に反していたため、正を `tech_db/item.md`・ER図を視覚化へ改めた。(2) `er_diagram/item.md` に定義書を正とする旨の宣言が無かったため、`er_diagram/player.md` と同じ書式で追加（あわせて `CharacterEquipSlot` の定義書が `tech_db/item.md` である旨を player.md 側へ明記）。戦闘系（`battle_logs` ほか）は未着手 |
 | tech_db.md（新規）、tech_db/auth.md・player.md（新規） | テーブル定義書を新設（DBスキーマの正）。命名規約・型マッピング・共通の列規約・外部キー動作・インデックス方針を索引に置き、認証3テーブルとプレイヤー系4テーブル（+ 未実装4テーブル）の物理定義を子ファイルへ記載。装備・アイテム系と戦闘系は未着手 |
 | er_diagram/player.md | 定義書を正とする旨を明記。`Party` を `PartyMember` へ改名、`LearnedSkill.cooldown_remaining` を追加、マスターデータ参照列（`current_tower_id`・`tower_id`・`skill_id`）のDB外部キーなしを明示 |
 | tech_spec.md、README.md、CLAUDE.md | テーブル定義書を索引へ登録（CLAUDE.md は上限内に収めるため既存行を圧縮） |

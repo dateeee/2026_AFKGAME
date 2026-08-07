@@ -11,8 +11,9 @@
 |------|---------|------------|
 | 認証・アカウント | [tech_db/auth.md](tech_db/auth.md) | `users` `refresh_tokens` `email_verification_tokens` |
 | プレイヤー・キャラクター | [tech_db/player.md](tech_db/player.md) | `players` `player_settings` `tower_clear_records` `characters` + 未実装4件（`party_members` `learned_skills` `active_skill_slots` `prestige_bonuses`） |
+| 装備・アイテム・ショップ・施設 | [tech_db/item.md](tech_db/item.md) | `equipment` `character_equip_slots` `inventory_items` `shop_daily_states` `shop_daily_slots` + 未実装1件（`facilities`） |
 
-装備・アイテム系（`equipment` `character_equip_slots` `inventory_items` `shop_daily_states` `shop_daily_slots`）と戦闘系（`battle_logs` ほか）は、同構成の `tech_db/item.md`・`tech_db/battle.md` として本索引に追加する。
+戦闘系（`battle_logs` ほか）は、同構成の `tech_db/battle.md` として本索引に追加する。
 
 ## 2. 命名規約
 
