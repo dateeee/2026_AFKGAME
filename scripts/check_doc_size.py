@@ -45,12 +45,12 @@ HISTORY_HEADING = re.compile(r"^#{1,6}\s*(?:\d+(?:\.\d+)*\.?\s*)?(?:変更|更�
 # ── 一括是正の台帳（documentation_rules.md §7）──
 # 新規の上限超過（区分B・C）は即時是正せず、是正方針を1行添えてここへ登録する。
 # 登録済みは WARN（exit 0）となり、一括是正タスクで解消したら行を削除する。
-# 区分A・Dは登録不可（毎ターン・スキル起動ごとに読み込まれ放置コストが複利のため即時是正）。
+# 区分A・Dは登録不可（毎ターン・スキル起動ごとに読み込まれ放置コストが複利のため、セッション内に移管優先で是正）。
 # Phase完了ゲートでは本台帳が空であること。
 # 例: "docs/tech/basic/tech_data.md": "分割（レイヤー分割: スキーマ/JSON構造）",
 KNOWN_OVERSIZED: dict[str, str] = {}
 
-# 台帳登録を許す区分（documentation_rules.md §7。区分A・Dは即時是正）
+# 台帳登録を許す区分（documentation_rules.md §7。区分A・Dはセッション内是正）
 DEFERRABLE_ZONES = frozenset({"B 索引", "C 仕様・設計"})
 
 
@@ -162,7 +162,7 @@ def main() -> int:
     print(f", 変更履歴 {len(histories)} 件" if histories else "")
 
     if errors:
-        print("→ 区分B・Cは KNOWN_OVERSIZED（台帳）へ是正方針つきで登録して一括是正へ、区分A・Dは即時是正（documentation_rules.md §7）")
+        print("→ 区分B・Cは KNOWN_OVERSIZED（台帳）へ是正方針つきで登録して一括是正へ、区分A・Dはセッション内に是正（documentation_rules.md §7）")
     if histories:
         print("→ 変更履歴は docs/changelog.md の先頭へ移すこと（documentation_rules.md §5.1）")
     return 1 if errors or histories else 0
