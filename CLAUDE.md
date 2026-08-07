@@ -19,13 +19,13 @@ Markdownには文字数上限を設けている。詳細は [docs/documentation_
 - **変更履歴は各ファイルに書かない**。[docs/changelog.md](docs/changelog.md)（上限対象外）の先頭へ1行追記する
 - ドキュメントの作成・改稿後は `python scripts/check_doc_size.py` と `python scripts/check_docs.py` を実行する（超過の扱いは規約§7の台帳運用）
 
-大きな仕様書は **索引 + 個別ファイル**構成。索引で担当ファイルを特定し、必要なものだけ読むこと（節番号は分割後も維持）。
+大きな仕様書は **索引 + 個別ファイル**構成。索引で担当ファイルを特定し、必要なものだけ読むこと（節番号は分割後も維持）。個別ファイル名の一覧は [README.md](README.md) のドキュメント索引にある。
 
 | 索引 | 個別ファイル |
 |------|------------|
-| [docs/design/game_spec.md](docs/design/game_spec.md) | `design/systems/` — character / battle / equipment / economy / dungeon / endgame / ui / ui_onboarding |
-| [docs/tech/tech_spec.md](docs/tech/tech_spec.md) | `tech/basic/` — db / data / structure / api / api_common / architecture / logging、`tech/nonfunctional/` — performance / security / operations、`tech/detail/` — battle / offline / skill / party / tick / polling / state / rng / numeric / shop / design_system / auth |
-| [docs/data/master_data.md](docs/data/master_data.md) | `data/master/` — character / item / equipment / base / endgame |
+| [docs/design/game_spec.md](docs/design/game_spec.md) | `design/systems/`（システム別8件） |
+| [docs/tech/tech_spec.md](docs/tech/tech_spec.md) | `tech/basic/`・`tech/nonfunctional/`・`tech/detail/` |
+| [docs/data/master_data.md](docs/data/master_data.md) | `data/master/` |
 | `diagrams/*.md`（6図） | 同名ディレクトリ配下（`er_diagram/` 等） |
 
 ## アーキテクチャ不変条件
@@ -44,13 +44,13 @@ Markdownには文字数上限を設けている。詳細は [docs/documentation_
 - **テスト標準**: バックエンド単体テストは pytest で C1（分岐）カバレッジ100%、結合テストは FastAPI TestClient + Playwright（E2E）
 - **実装規約**: スキーマは CamelModel で `schemas/`、ロジックは `services/`、ログは logging_config 準拠
 - **作業はすべてスキル経由**: 7工程 + 支援10件を `.claude/skills/` に用意している（自動起動 / `/` で明示起動）。対応表は [.claude/project/INDEX.md](.claude/project/INDEX.md)
-- **一般手順と固有値の分離**: `.claude/` は `project/**` のみ固有値。`skills/**` `references/**` `scripts/**` は非依存で他プロジェクトへ無改造コピー可（[_TEMPLATE.md](.claude/project/_TEMPLATE.md) に沿って書き直す）
+- **一般手順と固有値の分離**: `.claude/` の固有値は `project/**` のみ。ほかは他プロジェクトへ無改造コピー可（[_TEMPLATE.md](.claude/project/_TEMPLATE.md) に沿って書き直す）
 
 ## コスト規律（AIエージェント運用）
 
 正は [.claude/project/profile.md](.claude/project/profile.md) §6（以下は要約）。
 
-- **サブエージェントは並列化の価値がある場合のみ**（同時最大4体・担当ファイル列挙・機械的作業は `model: sonnet`）。1体で済む作業はメインコンテキストで行う
+- **サブエージェントは並列化の価値がある場合のみ**（同時最大4体・担当ファイル列挙・機械的作業は `model: sonnet`）
 - 仕様書・コードは**必要なセクションだけ読む**（索引→該当ファイルのみ。再Read禁止）。レビュー系は差分モードが既定（正は `review-procedure.md` §1）
 - 大きな出力（ログ・テスト結果・git履歴等）は **context-mode で処理**し、生出力を会話に持ち込まない
 - 工程の区切りでは `/clear` を既定として提案する（同一タスク継続時のみ `/compact`）。レビュー→修正適用は別セッションに分ける

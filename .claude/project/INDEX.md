@@ -49,5 +49,6 @@
 | ファイル | 参照元 | 内容 |
 |---------|-------|------|
 | [test-patterns.md](test-patterns.md) | `test-list`、`unit-test` | AFK GAME のモジュール名・エラーコードを使ったテスト実装の実例 |
+| [commands.md](commands.md) | 全スキル（[profile.md](profile.md) §4 経由） | 全工程共通の常用コマンド表 |
 
 改稿時は [docs/changelog.md](../../docs/changelog.md) の先頭へ追記する（各ファイルに変更履歴セクションを置かない）。
