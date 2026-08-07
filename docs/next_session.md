@@ -23,4 +23,5 @@
 | 1 | Phase 3 製造①（パーティ・スキル操作の基盤: models（LearnedSkill / ActiveSkillSlot / PartyMember）・master_data/skills.py・party_service・routers/party・routers/skill。test_party_service.py 17件・test_skill_progression.py 26件・test_encounter_exp.py のEXP3件） | `dev` |
 | 2 | Phase 3 製造②（スキル戦闘処理: skill_service・environment_service。test_skill_service / test_skill_targeting / test_environment_service = 96件） | `dev` |
 | 3 | Phase 3 製造③（offline_service の期待値計算。test_offline_simplified 15件。既存 process_pending_ticks のサンプリング方式を置換＝ISSUE-106） | `dev` |
-| 4 | DBスキーマ三者一致チェックの常設化（`scripts/check_schema_triple.py`。セグメント1・2とも使い捨てスクリプトを作成しており、DB変更のたびに再作成が要る）＋ 効率メモの反映 | `retro` |
+| 4 | DBスキーマ三者一致チェックの常設化（`scripts/check_schema_triple.py`。セグメント1・2とも使い捨てスクリプトを作成しており、DB変更のたびに再作成が要る） | `basic-design` |
+| 5 | 効率メモの見送り2件（`check_doc_size.py --sections` の単一ファイル指定 / `.claude/scripts/` の pytest 規約）＋ `review_prep.py` 効果観測（初回レビュー実行後） | `retro` |

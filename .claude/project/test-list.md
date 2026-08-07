@@ -32,6 +32,8 @@
 | 3 | `backend/tests/conftest.py` | フィクスチャ一覧（後述） |
 | 4 | `backend/tests/unit/test_target_floor.py` | スタイルの参考（最も整っている） |
 
+**対象モジュールが未作成の場合**（関数名・データ構造が分岐一覧にない）: `docs/tech/basic/tech_structure.md` の services 一覧を確認する。そこにも無ければ**探索を打ち切り**、テストの docstring で表層（モジュール名・関数シグネチャ）を定義して製造工程へ申し送る。コード側を読み回して表層を推測しない。
+
 ## 4. 共通フィクスチャ（`backend/tests/conftest.py`）
 
 | フィクスチャ | 内容 |
