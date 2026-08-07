@@ -30,3 +30,8 @@
 - シグナル: long-turn(calls=68)
 - ターン概要: ツール68回・エラー0回・拒否0回。開始:「<command-message>next</command-message>」
 - 原因と改善案: タスク規模に比例（対象7本 × 読込+テスト作成+実行 ≒ 60回。同一Read・同一コマンド・エラー・拒否はいずれもゼロで空回りなし）。原因は**候補キューが7本を1行にまとめていた**こと — DB設計を3セグメントに割った先例と同じく、引き継ぎの粒度を「1タスク = 1セッションで閉じる規模」に保つべきだった。`.claude/project/next.md` §1 の候補キューの書き方へ「対象が複数ファイルに及ぶタスクは着手時にセグメント分割し、キューの行も分ける」を足すのが妥当（規約の欠落であり適用漏れではない）
+
+## 2026-08-08 00:40 | session 5a2ab2a5 | 自動検出
+- シグナル: long-turn(calls=35)
+- ターン概要: ツール35回・エラー2回・拒否0回。開始:「<command-message>next</command-message>」
+- 原因と改善案: 回数の大半は差分24ファイルの照合で妥当だが、**エラー2回はいずれも使い捨てPythonの実行環境で、どちらも既知の再発パターン**（Bash の heredoc が `\` を落として SyntaxError → scratchpad へ Write して回避、既定 cp932 で日本語出力が UnicodeEncodeError → `PYTHONIOENCODING=utf-8` で回避）。`review-procedure.md` §5「使い捨てスクリプト」へ実行方法の1行（scratchpad へ Write + `PYTHONIOENCODING=utf-8 python <path>`）を足すのが妥当。profile.md §4 は残り5字で追記できないため §5 側に置く
