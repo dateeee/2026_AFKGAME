@@ -5,7 +5,8 @@
 diagrams-review 2026-08-07 の「プロセスへの還元」に従い、セグメント1〜3 + レビューで
 4本書かれた使い捨てスクリプトを常設化したもの（review-procedure.md §5）。
 
-実装側の照合先は Flyway DDL のみである。
+実装側の照合先は Flyway DDL のみである（Python/FastAPI の models は削除済み。
+java_migration/steps.md §4 STEP 6）。
 
     DDL     backend/afkgame-initdb/.../db/migration/V*.sql（Flyway）
 

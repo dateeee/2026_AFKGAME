@@ -105,6 +105,7 @@ erDiagram
         int skill_points "未使用SP"
         datetime created_at
         enum rarity "nullable, common-legendary (Phase 3〜・未実装)"
+        string master_id "nullable, マスターキャラのID・FKなし (Phase 4〜・未実装)"
     }
 
     PrestigeBonus {

@@ -11,7 +11,7 @@
 - 対応方針は「仕様書を実装に合わせる」か「実装を修正する」かを都度判断する（[development_process.md](../process/development_process.md) §6）
 - **未確定仕様**は `open_specs.md`、**数値のみ調整待ち**は [balance_backlog.md](balance_backlog.md) に置き、本書には含めない
 - 対応が完了した項目は §3 へ移す（直近10件のみ保持）
-- **Java 移行中の扱い**: Python 実装は削除済みのため、「対象」列は**機能・仕様の所在**を指す（コード固有の疑義は削除時に消えた）。残っているのは言語を変えても残る**仕様欠落・未実装**であり、[java_migration.md](java_migration.md) の各 STEP で該当機能を実装する際に1件ずつ解消する
+- **Java 移行中の扱い**: Python 実装は削除済みのため、「対象」列は**機能・仕様の所在**を指す（コード固有の疑義は削除時に消えた）。残っているのは言語を変えても残る**仕様欠落・未実装**であり、[steps.md](java_migration/steps.md) の各 STEP で該当機能を実装する際に1件ずつ解消する
 
 ## 2. 未対応の項目
 
@@ -42,4 +42,4 @@
 | 8 | `app/config.py` / `logging_config.py` | `LOG_LEVEL` / `LOG_FORMAT` が config.py の死んだ定数で、`setup_logging` が `os.environ` を直接読んでいた。[tech_operations.md](../tech/nonfunctional/tech_operations.md) §12.2 の起動時バリデーションも未実装 | **実装を仕様へ合わせた**（backend-review ISSUE-003・006）。環境変数の参照を config.py へ集約し、`setup_logging(level=, fmt=)` で上書きする形にした。`APP_ENV=production` かつ `JWT_SECRET` が既定値なら起動を中止する |
 | 9 | `tests/e2e/tower.spec.ts` | 「未解放の塔は選べず解放条件が表示される」が失敗。未解放カードの `aria-disabled="true"` を Playwright 1.62 が disabled と判定し、`locked.click()` が15秒でタイムアウトしていた | **テスト側を修正**。`role="radio"` + `aria-disabled` + `tabindex="-1"` は未解放カードの正しい表現のため実装は変更せず、無効であること自体を属性で検証し、ハンドラのガードは `click({ force: true })` で確認する形にした（期待する結果は変えていない） |
 | 10 | `routers/auth.py`, `app/dependencies.py` | 認証系のエラーが `HTTPException` のままで、[tech_logging.md](../tech/basic/tech_logging.md) §エラーコード体系の `AUTH_*` コードを返していなかった（ハンドラが `HTTP_401` へ丸めるため、クライアントが「期限切れ＝refresh」と「不正トークン＝再ログイン」を判別できない） | **実装を仕様へ合わせた**（backend-review ISSUE-105）。全15コードを `AppError` へ置き換え、[tech_logging.md](../tech/basic/tech_logging.md) §AUTH_ コード一覧に正を登録。フロントは `AUTH_REFRESH_FAILED` を検知してログイン画面へ誘導する（frontend-review ISSUE-803）。同項で挙げていたレート制限は §2 #7 として継続 |
-| 11 | `models/shop.py` → `afkgame-initdb/V1__initial_schema.sql` | `ShopDailySlot` の一意制約名が `uq_shop_daily_slot_index` のままで、[tech_db/item.md](../tech/basic/tech_db/item.md) §5 が正とする `uq_shop_daily_slots_state_slot`（[tech_db.md](../tech/basic/tech_db.md) §2 の命名規約）と乖離（旧 §2 #17） | **定義書へ追従**（[java_migration.md](java_migration.md) STEP 2-A）。Flyway `V1` を定義書から起こす際に規約どおりの名前で作成し、統合テストで制約名を固定した。Python 側の `models/shop.py` は STEP 6 の削除まで残置するため、`check_schema_triple.py` は同 STEP まで本件の不一致2件を報告し続ける（既知・増減なしで判定する） |
+| 11 | `models/shop.py` → `afkgame-initdb/V1__initial_schema.sql` | `ShopDailySlot` の一意制約名が `uq_shop_daily_slot_index` のままで、[tech_db/item.md](../tech/basic/tech_db/item.md) §5 が正とする `uq_shop_daily_slots_state_slot`（[tech_db.md](../tech/basic/tech_db.md) §2 の命名規約）と乖離（旧 §2 #17） | **定義書へ追従**（[steps.md](java_migration/steps.md) STEP 2-A）。Flyway `V1` を定義書から起こす際に規約どおりの名前で作成し、統合テストで制約名を固定した。Python 側の `models/shop.py` は STEP 6 の削除まで残置するため、`check_schema_triple.py` は同 STEP まで本件の不一致2件を報告し続ける（既知・増減なしで判定する） |

@@ -15,7 +15,7 @@
 | 非対象 | `frontend/`（別書）、`scripts/`・`.claude/scripts/`（開発補助の Python） |
 | 準拠元 | [TERASOLUNA Server Framework for Spring 開発ガイドライン 5.11.0.RELEASE 日本語版](https://github.com/terasolunaorg/terasolunaorg.github.com/tree/master/guideline/5.11.0.RELEASE/ja)（以下「ガイドライン」） |
 
-**設計・実装はガイドラインをベースに作る**。本書と各分冊はガイドラインとの**差分**（本プロジェクト固有の決定・上書き）だけを持ち、書かれていない事柄はガイドラインに従う。参照する版は **5.11.0.RELEASE**（実装ライブラリの `terasoluna-gfw` は 5.10.1.RELEASE。記述が食い違う場合は実装版の制約が優先。[java_migration.md](../backlog/java_migration.md) §2）。
+**設計・実装はガイドラインをベースに作る**。本書と各分冊はガイドラインとの**差分**（本プロジェクト固有の決定・上書き）だけを持ち、書かれていない事柄はガイドラインに従う。参照する版は **5.11.0.RELEASE**（実装ライブラリの `terasoluna-gfw` も 5.11.0.RELEASE へそろえる。[tech_selection.md](../backlog/java_migration/tech_selection.md) §2。適用は移行 STEP 2R-A）。
 
 | 分冊 | ベースにするガイドラインの章 |
 |------|---------------------------|
@@ -55,4 +55,4 @@
 
 - 新規・改修したコードは本書と分冊に従う。**既存コードの一括是正はしない**（見つけた逸脱は [known_issues.md](../backlog/known_issues.md) へ記録し、その箇所を触るときに直す）
 - 改訂は基本設計工程で行う（[phases.md](phases.md) §3.2.2）。改訂したら `.claude/references/coding-standards-backend.md` を**同じ変更で**追随させる
-- **Checkstyle・Spotless は未導入**。書式・import 順・命名は `backend-review` の目視で担保する（自動化の検討は [java_migration.md](../backlog/java_migration.md) STEP 6 以降）
+- **Checkstyle・Spotless は未導入**。書式・import 順・命名は `backend-review` の目視で担保する（自動化の検討は [steps.md](../backlog/java_migration/steps.md) STEP 6 以降）
