@@ -5,7 +5,7 @@
 > **鮮度**: 開始側は「前提」のコミットIDと git log を突合し、完了済みに見えたら開始せずユーザーへ確認する。
 > 本ファイルは**ポインタ専用**。Phase 進捗の正は [development_process.md](../process/development_process.md) §5、書式の正は [.claude/project/next.md](../../.claude/project/next.md)。
 
-最終更新: 2026-08-08 / 対応コミット: c04d98a の次。**移行 STEP 3-A-1 の詳細設計**を確定したコミット。`test-list` が「`tech_auth.md` に分岐一覧が無い」ことを理由に着手前停止したのが起点で、`tech_auth.md` §8（処理フロー8手順 + 分岐一覧12件）を新設し、未文書化だった `hp_potion×5` と表示名 `冒険者` の正を宣言、初期値の Java 側配置を「値の正の所在で振り分ける」へ確定した。**製造はここから**。手順・進捗の正は [java_migration.md](java_migration.md)
+最終更新: 2026-08-08 / 対応コミット: 7db23f3 の次（**編集は worktree で行う**運用の導入。次回タスクは変わらない）。その前の `c04d98a` の次が **移行 STEP 3-A-1 の詳細設計**を確定したコミット。`test-list` が「`tech_auth.md` に分岐一覧が無い」ことを理由に着手前停止したのが起点で、`tech_auth.md` §8（処理フロー8手順 + 分岐一覧12件）を新設し、未文書化だった `hp_potion×5` と表示名 `冒険者` の正を宣言、初期値の Java 側配置を「値の正の所在で振り分ける」へ確定した。**製造はここから**。手順・進捗の正は [java_migration.md](java_migration.md)
 
 ## 1. 次回（コピペ用）
 
@@ -13,7 +13,7 @@
 /test-list → /dev 移行 STEP 3-A-1a（初期化に使うマスターデータ）: tech_auth.md §8.1 の表に沿って initial_player.yml・character_types.yml・equipment_slots.yml と対応する record を afkgame-domain へ追加し、既存の MasterDataLoader へ登録する。character_types.yml は LV1 基礎値のみ（成長率は入れない）
 完了条件: 分岐一覧 #3・#4・#6・#10（マスター検証で起動を中止する経路）の JUnit テストが Red → Green・JaCoCo branch 100%（親POMのしきい値）・mvn verify が成功・changelog へ1行追記・コミット
 参照: docs/tech/detail/tech_auth.md §8.1（YAML と正の対応表）・§8.3（分岐一覧）、backend/afkgame-domain/src/main/resources/masterdata/items.yml（既存YAMLの書式）
-前提: 移行 STEP 2 完了 + STEP 3-A-1 詳細設計完了（c04d98a の次）。分岐一覧は `check_branch_list.py` 23件・WARN 0 で通っている。**未コミットの別タスクあり**: worktree 並行作業一式（`.gitattributes`・`docs/process/worktree_guide.md`・`scripts/worktree.py` の3件が未追跡 + `README.md` の索引に1行追加）が作業ツリーに残っている。本セッションの成果物ではないため意図的にコミットへ含めていない。着手前にユーザーへ扱い（コミットするか破棄するか）を確認すること。**環境（2026-08-08 に新規シェルで実行確認済み）**: `mvn`・`java` は PATH に無く、Bash から動くのは `JAVA_HOME="/c/Program Files/Eclipse Adoptium/jdk-17.0.20.8-hotspot" "/c/Users/tubas/AppData/Local/Programs/apache-maven-3.9.11/bin/mvn" -v` の形（JAVA_HOME をインラインで与えないと mvn は "JAVA_HOME is not defined correctly" で落ちる。java 単体はフルパスで起動する）。Docker は未検証のため統合テストは zonky 埋め込み PostgreSQL を使う
+前提: 移行 STEP 2 完了 + STEP 3-A-1 詳細設計完了（c04d98a の次）。分岐一覧は `check_branch_list.py` 23件・WARN 0 で通っている。**編集は worktree で行う**（CLAUDE.md・[worktree_guide.md](../process/worktree_guide.md) §5）。着手時に `python scripts/worktree.py add step3a1a-master` → `EnterWorktree`(path) でセッションを移してから実装し、完了後に §5.3 の手順で main へ統合する。**環境（2026-08-08 に新規シェルで実行確認済み）**: `mvn`・`java` は PATH に無く、Bash から動くのは `JAVA_HOME="/c/Program Files/Eclipse Adoptium/jdk-17.0.20.8-hotspot" "/c/Users/tubas/AppData/Local/Programs/apache-maven-3.9.11/bin/mvn" -v` の形（JAVA_HOME をインラインで与えないと mvn は "JAVA_HOME is not defined correctly" で落ちる。java 単体はフルパスで起動する）。Docker は未検証のため統合テストは zonky 埋め込み PostgreSQL を使う
 ```
 
 ## 2. 候補キュー（最大5行・優先順）
