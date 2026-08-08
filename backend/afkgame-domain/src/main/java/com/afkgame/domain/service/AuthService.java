@@ -28,8 +28,9 @@ import com.afkgame.env.config.AuthProperties;
  * <p>仕様: docs/tech/detail/tech_auth.md §2「ゲストプレイ」・§3「認証フロー」・
  * §4「リフレッシュトークン」、エラーコードは docs/tech/basic/tech_logging.md「AUTH_ コード一覧」。
  *
- * <p>骨格構築（docs/backlog/java_migration.md STEP 2-B）の範囲としてゲスト作成とリフレッシュのみを持つ。
- * メール登録・ログイン・アカウント移行と、ゲスト作成時の Player・キャラクター初期化は STEP 3 で追加する。
+ * <p>ゲスト作成・リフレッシュと、ゲスト作成時のプレイヤー初期化（tech_auth.md §8.2。実体は
+ * {@link PlayerInitializationService}）を持つ。メール登録・ログイン・アカウント移行は
+ * STEP 3-A-2 以降で追加する（docs/backlog/java_migration.md）。
  */
 @Service
 public class AuthService {
@@ -48,17 +49,24 @@ public class AuthService {
     private final RefreshTokenMapper refreshTokenMapper;
     private final JwtService jwtService;
     private final Duration refreshTokenExpire;
+    private final PlayerInitializationService playerInitializationService;
 
     public AuthService(UserMapper userMapper, RefreshTokenMapper refreshTokenMapper,
-            JwtService jwtService, AuthProperties authProperties) {
+            JwtService jwtService, AuthProperties authProperties,
+            PlayerInitializationService playerInitializationService) {
         this.userMapper = userMapper;
         this.refreshTokenMapper = refreshTokenMapper;
         this.jwtService = jwtService;
         this.refreshTokenExpire = authProperties.refreshTokenExpire();
+        this.playerInitializationService = playerInitializationService;
     }
 
     /**
-     * ゲストアカウントを作成し、トークンペアを発行する。
+     * ゲストアカウントを作成し、プレイ可能な初期状態を組み立ててトークンペアを発行する。
+     *
+     * <p>tech_auth.md §8.2 の手順1（ユーザー作成）→ 手順2〜6（初期化）→ 手順7（トークン発行）を
+     * このメソッドのトランザクション境界で1つにまとめる（手順8）。途中で失敗した場合は
+     * ユーザーを含めて何も残さない。
      *
      * @return 作成したユーザーとトークンペア
      */
@@ -74,6 +82,8 @@ public class AuthService {
         user.setCreatedAt(now);
         user.setLastLoginAt(now);
         userMapper.insert(user);
+
+        playerInitializationService.initialize(user.getId());
 
         logger.info("ゲストアカウント作成 user_id={}", user.getId());
         return issueTokens(user);

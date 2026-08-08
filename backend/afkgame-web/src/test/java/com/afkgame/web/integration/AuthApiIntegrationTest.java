@@ -79,6 +79,48 @@ class AuthApiIntegrationTest {
                 Integer.class, userId, guest.at("/refreshToken").asText())).isZero();
     }
 
+    /**
+     * ゲスト作成が「プレイ可能な初期状態」まで作ることを、実DBの行で確認する。
+     * 手順ごとの分岐は PlayerInitializationServiceTest が持ち、ここでは連結と永続化（コミット）を見る。
+     *
+     * <p>分岐: tech_auth.md #11
+     */
+    @Test
+    @DisplayName("POST /api/auth/guest は Player・設定・初期キャラ・9スロット・初期アイテムまで作る")
+    void test_ゲスト作成でプレイヤーの初期状態まで永続化される() throws Exception {
+        String userId = createGuest().at("/user/id").asText();
+
+        String playerId = jdbcTemplate.queryForObject(
+                "SELECT id FROM players WHERE user_id = ?", String.class, userId);
+        assertThat(playerId).isNotBlank();
+        // 塔外で作られる（tech_auth.md §8.2 手順2）
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT count(*) FROM players WHERE id = ? AND gold = 0 AND current_tower_id IS NULL"
+                        + " AND current_floor IS NULL AND target_floor IS NULL",
+                Integer.class, playerId)).isEqualTo(1);
+
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT count(*) FROM player_settings WHERE player_id = ?",
+                Integer.class, playerId)).isEqualTo(1);
+
+        String characterId = jdbcTemplate.queryForObject(
+                "SELECT id FROM characters WHERE player_id = ?", String.class, playerId);
+        // 作成直後は全快（tech_auth.md §8.2 手順4）
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT count(*) FROM characters WHERE id = ? AND hp = max_hp AND level = 1",
+                Integer.class, characterId)).isEqualTo(1);
+
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT count(*) FROM character_equip_slots"
+                        + " WHERE character_id = ? AND equipment_id IS NULL",
+                Integer.class, characterId)).isEqualTo(9);
+
+        // 初期所持アイテム（initial_player.yml。正は master/item.md §3.5）
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT quantity FROM inventory_items WHERE player_id = ? AND item_id = 'hp_potion'",
+                Integer.class, playerId)).isEqualTo(5);
+    }
+
     @Test
     @DisplayName("POST /api/auth/refresh は新しいトークンペアを返し、旧トークンを失効させる")
     void test_リフレッシュでトークンがローテーションする() throws Exception {
