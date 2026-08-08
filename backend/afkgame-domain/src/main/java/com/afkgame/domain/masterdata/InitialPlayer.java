@@ -56,7 +56,7 @@ public class InitialPlayer {
         }
         Set<String> seen = new HashSet<>();
         for (InitialItemData item : data.items()) {
-            if (!itemMaster.all().containsKey(item.id())) {
+            if (!itemMaster.contains(item.id())) {
                 throw new MasterDataException(
                         resourcePath + ": 初期所持アイテムのIDがアイテム定義に無い (" + item.id() + ")");
             }

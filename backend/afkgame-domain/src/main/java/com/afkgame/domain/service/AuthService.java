@@ -44,6 +44,7 @@ public class AuthService {
     /** リフレッシュトークンの生値のバイト数（Base64URL で44文字になる）。 */
     private static final int REFRESH_TOKEN_BYTES = 48;
 
+    /** トークン生成用の暗号乱数。ゲーム乱数（{@code RandomFactory}）とは用途が異なり、共有してよい。 */
     private static final SecureRandom RANDOM = new SecureRandom();
 
     private final UserMapper userMapper;

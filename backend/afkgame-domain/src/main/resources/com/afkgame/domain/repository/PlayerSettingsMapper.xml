@@ -3,8 +3,6 @@
     "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.afkgame.domain.repository.PlayerSettingsMapper">
 
-  <!-- toast_enabled はプロパティ名の自動変換（map-underscore-to-camel-case）と食い違うため、
-       列とプロパティの対応を明示する -->
   <resultMap id="playerSettingsResultMap" type="com.afkgame.domain.model.PlayerSettings">
     <id     property="id"              column="id"/>
     <result property="playerId"        column="player_id"/>

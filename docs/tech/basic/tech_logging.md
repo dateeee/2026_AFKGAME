@@ -102,7 +102,7 @@ Logback を使用。Spring Boot 組み込みの Tomcat アクセスログと連�
 
 | プレフィックス | 対象 | 例 |
 |---------------|------|-----|
-| `AUTH_` | 認証関連 | `AUTH_HEADER_MISSING`, `AUTH_INVALID_FORMAT`, `AUTH_PLAYER_NOT_FOUND`, `AUTH_TOKEN_EXPIRED` |
+| `AUTH_` | 認証関連 | 一覧は下記「AUTH_ コード一覧」 |
 | `BATTLE_` | 戦闘関連 | `BATTLE_NOT_IN_TOWER`, `BATTLE_ALREADY_WIPED`, `BATTLE_TICK_BUSY`(503) |
 | `GAME_` | ゲーム状態関連 | `GAME_STATE_NOT_FOUND` |
 | `SHOP_` | ショップ関連 | `SHOP_INSUFFICIENT_GOLD`, `SHOP_ITEM_SOLD_OUT`, `SHOP_INVENTORY_FULL` |
@@ -115,10 +115,11 @@ Logback を使用。Spring Boot 組み込みの Tomcat アクセスログと連�
 | `FORGE_` | 鍛冶屋関連 | `FORGE_INSUFFICIENT_MATERIALS`, `FORGE_LEVEL_TOO_LOW` |
 | `RATE_LIMIT_` | レート制限 | `RATE_LIMIT_EXCEEDED`(429)。`Retry-After` ヘッダを併せて返す |
 | `INTERNAL_` | サーバー内部エラー | `INTERNAL_UNEXPECTED_ERROR` |
+| `HTTP_` | 業務コードを持たない Spring MVC 標準例外（**4xx のみ**。404・405・415 等） | `HTTP_405`。クライアントは個別分岐せず汎用エラー表示に倒す |
 
 ### AUTH_ コード一覧
 
-クライアントは**メッセージ文字列ではなくコードで**分岐する（`AUTH_TOKEN_EXPIRED` は refresh を試す、`AUTH_INVALID_TOKEN` はログアウトして再ログイン、のように挙動が異なるため）。
+クライアントは**メッセージ文字列ではなくコードで**分岐する（`AUTH_TOKEN_EXPIRED` は refresh、`AUTH_INVALID_TOKEN` は再ログインと、挙動が異なるため）。
 
 | コード | HTTP | 発生条件 |
 |--------|------|---------|
@@ -140,11 +141,7 @@ Logback を使用。Spring Boot 組み込みの Tomcat アクセスログと連�
 
 ### グローバル例外ハンドラ
 
-`@RestControllerAdvice` で未捕捉例外を捕捉し、以下を実行する:
-
-1. ERRORレベルでスタックトレースをログ出力
-2. クライアントには `500` + `INTERNAL_UNEXPECTED_ERROR` を返却（スタックトレースは含めない）
-3. リクエストIDをレスポンスに含め、ログとの突合を可能にする
+`@RestControllerAdvice` で未捕捉例外を捕捉し、ERRORレベルでスタックトレースをログ出力したうえで、クライアントには `500` + `INTERNAL_UNEXPECTED_ERROR` とリクエストIDだけを返す（スタックトレースは含めない）。リクエストIDでログと突合できる。
 
 ## 設定値
 
