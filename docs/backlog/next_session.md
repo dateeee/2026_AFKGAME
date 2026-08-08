@@ -9,7 +9,7 @@
 
 **Green 待ちが2件並んでいる**: 1a（§1・Red は `d08cccb`）と 1b（優先1・Red は `37d4ef5`）。互いに独立で、両方そろうと 1c（初期化サービス）に着手できる。
 
-**並行トラック**: 別セッションが worktree `wt/p4scout-detail` で **優先0 の①酒場スカウト**に着手している（2026-08-08 時点で未統合）。**優先0 を選ぶ場合は残り②〜④から取る**か、先に統合状況を確認すること。Phase 4 拠点・施設の詳細設計（`tech_base.md` 新設・分岐一覧37件）は完了済み。
+**並行トラック（Phase 4 詳細設計）**: 拠点・施設（`tech_base.md`・分岐一覧37件）と①酒場スカウト（`tech_scout.md` 新設・分岐一覧29件。`643728a` で統合済み）は完了。残りは優先0〜2 の②〜④。スカウトの副産物として **`characters.master_id`**（[tech_db/player.md](../tech/basic/tech_db/player.md) §4・Phase 4・未実装）と**酒場専用16体**（[master/character.md](../data/master/character.md) §7.3）が確定しているので、②〜④はこれを前提にしてよい。
 
 ## 1. 次回（コピペ用）
 
@@ -26,12 +26,13 @@
 
 | 優先 | タスク | 前提 | 工程スキル |
 |------|-------|------|-----------|
-| 0 | **Phase 4 詳細設計の残り**（拠点・施設は `tech_base.md` で完了）。**①〜④はそれぞれ別セッションで取る**（1行にまとめているが1セッション分ではない）。①酒場スカウト `POST /api/base/scout`（排出率の正は `master/character.md` §7.3。抽選は `tech_rng.md` に沿う）＝**別セッションが `wt/p4scout-detail` で着手中・未統合** ②鍛冶屋・素材 `/api/forge/*`（強化・製作・分解。コスト倍率の解決は `tech_base.md` §2.1 のしきい値規則を使う）③限界突破 `POST /api/character/limit-break` ④ダンジョン3（塔6〜8）のマスターデータ | なし（Java 移行と独立） | `detail-design` |
-| 1 | 移行 STEP 3-A-1b の **Green**（初期化対象の Entity + Mapper）。Red 済みの Mapper 疎通テスト28件を通す。Entity 5件（Player・PlayerSettings・Character・CharacterEquipSlot・InventoryItem）を `com.afkgame.domain.model` へ、Mapper 5件（インタフェース + 同名 XML）を `com.afkgame.domain.repository` へ。表層は各テストの Javadoc が持つ。**要判断**: ①`model.Character` は `java.lang.Character` と単純名が衝突（`users`→`User` の規則を優先して命名済み。改名するなら Green 前に）②`characters.rarity` は Phase 3 の列で V1 スキーマに無いため Entity にも持たせない | `37d4ef5` で Red 済み | `dev` |
-| 2 | 移行 STEP 3-A-1c（プレイヤー初期化サービス + 結線）。`tech_auth.md` §8.2 の8手順を単一トランザクションで実装し `POST /api/auth/guest` へ結線。分岐一覧 #1・#2・#5・#7〜#9・#11・#12 が対象 | 1a + 1b の **Green** 完了 | `test-list` → `dev` |
-| 3 | 移行 STEP 3-A-2（register / login / logout）。`BCryptPasswordEncoder`(strength 12) と `SecurityConfig` の認証不要パス追加を含む（持ち越しの正は java_migration.md §4 の 2-B 表）。初期化は 3-A-1c の手順2以降を再利用する（`tech_auth.md` §8 冒頭） | 3-A-1c | `test-list` → `dev` |
-| 4 | 移行 STEP 3-A-3（link-account / verify-email / password-reset）。確認メール送信・トークン検証 | 3-A-2 | `test-list` → `dev` |
+| 0 | **Phase 4 詳細設計 ②鍛冶屋・素材** `/api/forge/*`（強化・製作・分解の3操作）。強化上限・製作可能レアリティ・強化コスト倍率の解決は `tech_base.md` §2.1 のしきい値規則を使う。数値の正は `economy.md` §2.9 と `master/equipment.md`。書式は `tech_scout.md` に揃える（新規 `tech_forge.md` を起こし索引3点へ登録） | なし（Java 移行と独立） | `detail-design` |
+| 1 | **Phase 4 詳細設計 ③限界突破** `POST /api/character/limit-break`。素材＝同一 `master_id` のキャラ1体を消費し `limit_break` を+1（上限5回。ボーナスの正は `master/character.md` §8.1）。探索中は不可（`tech_state.md` §4）。重複の発生源とレスポンスの `canLimitBreak` は `tech_scout.md` §6 が正 | ①完了済み（`master_id`・重複仕様が確定） | `detail-design` |
+| 2 | **Phase 4 ④ダンジョン3（塔6〜8）のマスターデータ**。`docs/data/towers/` に3ファイルを追加し `TOWERS_OVERVIEW.md` と `master_data.md` の索引を更新する。書式は既存の `009_黄昏の塔.md` 等に揃える | なし | `detail-design` |
+| 3 | 移行 STEP 3-A-1b の **Green**（初期化対象の Entity + Mapper）。Red 済みの Mapper 疎通テスト28件を通す。Entity 5件（Player・PlayerSettings・Character・CharacterEquipSlot・InventoryItem）を `com.afkgame.domain.model` へ、Mapper 5件（インタフェース + 同名 XML）を `com.afkgame.domain.repository` へ。表層は各テストの Javadoc が持つ。**要判断**: ①`model.Character` は `java.lang.Character` と単純名が衝突（`users`→`User` の規則を優先して命名済み。改名するなら Green 前に）②`characters.rarity` は Phase 3 の列で V1 スキーマに無いため Entity にも持たせない | `37d4ef5` で Red 済み | `dev` |
+| 4 | 移行 STEP 3-A-1c（プレイヤー初期化サービス + 結線）。`tech_auth.md` §8.2 の8手順を単一トランザクションで実装し `POST /api/auth/guest` へ結線。分岐一覧 #1・#2・#5・#7〜#9・#11・#12 が対象 | 1a + 1b の **Green** 完了 | `test-list` → `dev` |
 
+- 移行 STEP 3-A-2（register / login / logout）は 3-A-1c の完了後。`BCryptPasswordEncoder`(strength 12) と `SecurityConfig` の認証不要パス追加を含む（持ち越しの正は java_migration.md §4 の 2-B 表）。初期化は 3-A-1c の手順2以降を再利用する（`tech_auth.md` §8 冒頭）。続けて STEP 3-A-3（link-account / verify-email / password-reset。確認メール送信・トークン検証）
 - 移行 STEP 3-B（Phase 1 の game / battle / tower 移植）は 3-A 完了後。game は `tech_state`/`tech_tick`/`tech_polling` §5、battle は `tech_battle`/`tech_rng`/`tech_numeric` §5 に分岐一覧がある。**tower は `tech_tower.md` が存在せず分岐一覧も無い**（auth と同じ欠落。2026-08-08 確認）ため `detail-design` から始める
 - **`scripts/check_branch_list.py --tests` は Java のテストを見ていない**（走査先が `backend/tests/unit/*.py` 固定。2026-08-08 確認）。`test-list.md` §7 の完了基準「マーカーで機械照合」は Java 移行後のテストに対しては**素通り**する（`tech_auth.md §8.3` はマーカー未参照＝照合対象外の扱いで exit 0 になる）。1a の Red では分岐マーカーを Javadoc に書いたが照合されていないため、対応は手で確認した。走査先へ `backend/**/src/test/java/**/*.java` を足すのは **3-A-1c の完了後**にする（§8.3 の12行がそろうまでは部分カバレッジで ERROR になるため）
 - 移行 STEP 4（Phase 2 スコープの移植: equipment / shop・日替わり含む）はキュー優先5（STEP 3-B）の完了後。着手前に `tech_shop.md` §7・§8 の分岐一覧が使える粒度かを確認する
