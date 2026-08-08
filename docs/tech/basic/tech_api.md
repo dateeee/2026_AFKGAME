@@ -42,7 +42,7 @@
 | メソッド | パス | 説明 |
 |---------|------|------|
 | GET | `/api/tower/list` | 全塔の一覧を取得（名前・階数・解放条件・解放/クリア状態・最高到達階・`targetFloorCap`）（Phase 2〜） |
-| POST | `/api/tower/select` | 塔・目標階の選択（`towerId`, `targetFloor`, `mode`: `auto_repeat` \| `stop_on_clear`）。未解放の塔は403、入塔中は400、`targetFloor` が範囲外は400 |
+| POST | `/api/tower/select` | 塔・目標階の選択（`towerId`, `targetFloor`, `mode`: `auto_repeat` \| `stop_on_clear`、イベントダンジョンは `difficulty` を追加）。未解放の塔は403、入塔中は400、`targetFloor` が範囲外は400 |
 | POST | `/api/tower/retire` | 塔からリタイア（獲得済み報酬は保持・ペナルティなし） |
 | PUT | `/api/tower/mode` | 進行モードの切り替え（進行中でも変更可） |
 | PUT | `/api/tower/retreat-conditions` | 撤退条件の更新（`hpThreshold`: 0〜1） |
@@ -99,14 +99,20 @@
 
 ## イベントダンジョン（Phase 5〜）
 
-機能仕様は [systems/endgame.md §2.13](../../design/systems/endgame.md)（常設3種 × 固定難易度3段階）。進行は通常の塔と同じ階層制のため、**`/api/tower/*` に難易度パラメータを足して再利用する方針**とする。エンドポイントと、難易度別の到達記録を `towersCleared`（[tech_data.md](tech_data.md)）へ保持するキー体系の確定、および本節への追記は Phase 5 の基本設計で行う（キー体系の未確定は [open_specs.md](../../backlog/open_specs.md) で管理）。
+機能仕様は [systems/endgame.md §2.13](../../design/systems/endgame.md)（常設3種 × 固定難易度3段階）。進行は通常の塔と同じ階層制のため、専用エンドポイントは設けず `/api/tower/*` を難易度パラメータ付きで再利用する。ダンジョンIDは `trial_maze` / `treasure_vault` / `training_hall`（正は [glossary.md](../../glossary.md)）。
+
+| 項目 | 仕様 |
+|------|------|
+| 難易度の指定 | `/api/tower/select` の任意パラメータ `difficulty`（`beginner` \| `intermediate` \| `advanced`）。イベントダンジョンでは必須（欠落は400）、通常塔・深淵の塔では指定不可（指定は400）。探索中の変更は不可 |
+| 一覧取得 | `/api/tower/list` はイベントダンジョンを**難易度ごとの独立エントリ**で返す（各エントリが `difficulty`（通常塔は `null`）・`highestFloor`・`targetFloorCap` を持つ。`totalFloors` は 10 固定） |
+| 到達記録 | サーバーが `towerId` と `difficulty` を `towersCleared` のキーへ畳み込む（キー体系の正は [tech_data.md](tech_data.md) §1.1）。クライアントはキーを組み立てない |
 
 ## お知らせ（Phase 3〜）
 | メソッド | パス | 説明 |
 |---------|------|------|
 | GET | `/api/notice/list` | お知らせ一覧の取得。`notices`: `noticeId`・`title`・`body`・`publishedAt` の配列を `publishedAt` 降順（新しい順）で返す。本文はマスターデータ配信（DBテーブルなし・更新はデプロイ）。掲示件数はマスター側の上限で抑えるためページングなし |
 
-> 要件は [operation_requirements.md](../../design/requirements/operation_requirements.md) §3.1（既読はクライアントの localStorage 保持。保持先の正は同節）。サーバーは既読状態を持たないため、エンドポイントは一覧取得のみ。未読件数はクライアントが一覧と既読 `noticeId` の突合で算出し、一覧を開いた時点で表示中の全件を既読として保存する。
+> 要件は [operation_requirements.md](../../design/requirements/operation_requirements.md) §3.1（既読はクライアントの localStorage 保持。保持先の正は同節）。サーバーは既読状態を持たないため、エンドポイントは一覧取得のみ。未読件数はクライアントが一覧と既読 `noticeId` の突合で算出し、一覧を開いた時点で表示中の全件を既読として保存する。既読キーが存在しない場合の初期化規則は [master_data.md §17.3](../../data/master_data.md) が正。
 > 取得は起動時（`GET /api/game/state` 後）の1回のみ（内容の更新はデプロイでしか起きないため。フローは [api_sequence/core.md §3.7](../../diagrams/api_sequence/core.md)）。マスターの項目定義・掲示件数の上限（20件）は [master_data.md §17](../../data/master_data.md) が正。
 
 ## 転生（Phase 5〜）

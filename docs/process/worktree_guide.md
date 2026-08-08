@@ -38,6 +38,7 @@ worktree は1つのリポジトリから複数の作業ツリーを同時に開�
 |---------|------|------|
 | `docs/changelog.md` | 先頭ブロックへ行追記 | `merge=union` で自動統合（`.gitattributes`） |
 | `docs/backlog/efficiency_memo.md` | 末尾へ追記（Stop フック） | `merge=union` で自動統合 |
+| `docs/backlog/carryover_notes.md` | 節の末尾へ行追記 | `merge=union` で自動統合。**worktree から追記してよい**（引き継ぎへ書けない申し送りの受け皿。既存行の書き換えは避ける） |
 | `docs/backlog/next_session.md` | 全面書き換え | **main でのみ・統合の直後に1回**更新する（worktree では触らない）。着手中であることは書かず、worktree の存在で示す（同ファイル §0） |
 | `docs/backlog/java_migration.md`（進捗） | 状態の更新 | main でのみ更新、または進捗を持つ STEP を担当する worktree を1つに限定 |
 | `docs/backlog/` のその他（open_specs 等） | 行の追加・削除 | 触る worktree を1つに限定 |

@@ -146,7 +146,10 @@
 | マイルストーン報酬 | milestone reward | 特定ウェーブ初回到達時のボーナス |
 | 最高ウェーブ | best wave | ボスラッシュ最高到達記録 |
 | ランキング | ranking | サーバー全体の順位表（最高ウェーブ基準） |
-| 難易度 | difficulty | イベントダンジョンの3段階（初級/中級/上級） |
+| 難易度 | difficulty | イベントダンジョンの3段階（初級/中級/上級）。識別子は `beginner` / `intermediate` / `advanced` |
+| 試練の迷宮 | trial_maze | イベントダンジョン（戦闘特化）。10F・Phase 5 |
+| 宝物庫 | treasure_vault | イベントダンジョン（報酬特化）。10F・Phase 5 |
+| 修練場 | training_hall | イベントダンジョン（経験値特化）。10F・Phase 5。施設の訓練場 `training_ground` とは別物 |
 
 ## UI・設定
 

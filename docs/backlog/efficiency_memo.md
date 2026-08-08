@@ -63,3 +63,18 @@
 - シグナル: 往復2件（測定コマンドの引数無視・分岐一覧の番号振り直し）
 - ターン概要: `/next 0` → `detail-design`（Phase 4 酒場スカウト）。仕様12ファイルの該当節読み → `tech_scout.md` 新設 + 9ファイル改稿 → 検証4種
 - 原因と改善案: ①**残量測定のコマンドを間違えた** — `check_doc_size.py <path>` はファイル引数を無視して全件チェックを出す仕様で、目的の残量が得られず、スクリプト本体を読んで `--sections <path>` に気づくまで2往復した（profile.md §7 規約7「書く前に残量を測る」は測り方までは持っていない） → `commands.md` へ「特定ファイルの残量・H2内訳は `python scripts/check_doc_size.py --sections <path>`」を1行追記する。②**分岐一覧の拾い漏れで番号を振り直した** — 処理フローの**括弧内に埋めた条件**（手順2「`facilities` に行が無ければ LV0」）を分岐一覧へ起こし忘れ、§5.3 の自己検証で気づいて27→29行へ番号を振り直した（表の全面書き換え1回・changelog の件数修正1回） → `.claude/project/detail-design.md` §4 へ「処理フローの括弧内・注記に書いた条件も分岐一覧の対象。表を書く前に本文の条件を拾い切る」を追記する。
+
+## 2026-08-08 21:28 | session 940776b6 | 自動検出
+- シグナル: same-read(next_session.md×2) / long-turn(calls=84)
+- ターン概要: ツール84回・エラー2回・拒否0回。開始:「<command-message>next</command-message>」
+- 原因と改善案: **same-read と long-turn は誤検出**（same-read は2回目が別セッションの全面書き換え後＝`49a2b77` で内容が変わっており再読が必須。long-turn は詳細設計1本ぶんの正当な作業で、実損2件は直前の手動エントリに記入済み）。ただし **`profile.md` §6 規律4 の再Read禁止は例外が「Edit 失敗時の再確認」しか無い**ため、「他セッションの更新・worktree 統合でファイルが変わった場合」を例外に加える（並行セッション運用が常態化しており、規律どおりだと古い内容で Edit して失敗する）。**エラー2件も並行運用が原因**で、いずれも「別セッションが main を触った直後」に起きた（Edit の old_string 不一致 / `worktree.py merge` が main の未コミット変更で停止）→ `worktree_guide.md` §5.3 の手順3 の前に「main 側に未コミットの変更（Stop フックが書いた効率メモ等）が無いか確認し、あれば先にコミットする」を1行足す。
+
+## 2026-08-08 21:30 | session 3e371c6c | 自動検出
+- シグナル: long-turn(calls=80)
+- ターン概要: ツール80回・エラー2回・拒否0回。開始:「<ide_opened_file>The user opened the file c:\GIT\2026_AFKGAM」
+- 原因と改善案: **long-turn 自体は誤検出**（バランス3件の確定 + 9ファイル改稿 + 検証3種 + worktree 統合で妥当な分量。エラー2件は直前エントリと同じ並行セッション由来）。実損は1件で、**B-8 の根拠を書き終えた後に `tech_party.md` の「控えとして加入・自動編入しない」を取りこぼし確認で発見し、書いたばかりの記述を修正した**（控えは Phase 3 で EXP を得られないため根拠の前提が変わる）。原因は現状把握を `requirements.md` §4 の「カテゴリ→参照先」表だけで済ませ、読んだセクションが張っているインラインリンク（`master/character.md` §7.1 → `tech_party.md` §2）を追わなかったこと → `.claude/project/requirements.md` §4 へ「参照先表は**起点であり網羅ではない**。対象セクション内のリンク先（その仕様が依存する処理側）も現状把握に含める」を1行追記する。あわせて判断材料の収集を6往復に分けた（EXPテーブル→塔の報酬→パーティ人数→戦闘不能規則）ため、`resolve-specs` SKILL §2 へ「必要ファイルを洗い出してから1バッチで読む」を添える。
+
+## 2026-08-08 21:30 | session c4f40b08 | 自動検出
+- シグナル: long-turn(calls=84)
+- ターン概要: ツール84回・エラー0回・拒否0回。開始:「<ide_opened_file>The user opened the file c:\GIT\2026_AFKGAM」
+- 原因と改善案: **編集対象を main と worktree で二度読みした**（11ファイル・約12回）。worktree へ入るのが §4 反映の直前で Edit が worktree パスでの Read を要求するため → `requirements.md` §4 へ「§2 の現状把握の**前に** worktree へ入る」を追記する
