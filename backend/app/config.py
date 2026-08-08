@@ -45,6 +45,9 @@ DEFEAT_EXP_PENALTY = 0.5     # 全滅時に持ち帰れるEXPの割合
 # オフライン簡易計算のサンプルtick数（tech_offline.md §4）
 OFFLINE_SAMPLE_TICKS = 10
 
+# ボス階の出現数（tech_battle.md §3.2）。範囲指定にかかわらず1体固定
+BOSS_ENEMY_COUNT = 1
+
 # 戦闘乱数のシード（tech_rng.md §2）。空 = OSエントロピー、調査時のみ固定する
 BATTLE_RNG_SEED = os.environ.get("BATTLE_RNG_SEED", "")
 
@@ -180,3 +183,19 @@ SHOP_PRICES = {
     "uncommon": {"weapon": 1500, "armor": 1200, "accessory": 1000},
     "rare":     {"weapon": 4000, "armor": 3200, "accessory": 2500},
 }
+
+# ── パーティ・スキル (Phase 3) ──
+# 仕様: tech_party.md、数値の正: master/character.md §9.1・skills/SKILLS_OVERVIEW.md §1
+
+# パーティ編成の人数（正: systems/character.md §2.7）
+PARTY_MIN_SIZE = 1
+PARTY_MAX_SIZE = 4
+
+# アクティブスキルのセット枠数（0件=全解除も許可する）
+ACTIVE_SKILL_SLOT_COUNT = 2
+
+# スキル振り直しコスト = キャラLV × 本定数（G）
+SKILL_RESET_COST_PER_LEVEL = 50
+
+# レベルアップ1回あたりの獲得SP
+SKILL_POINTS_PER_LEVEL_UP = 1

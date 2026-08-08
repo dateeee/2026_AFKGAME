@@ -3,6 +3,7 @@
 import random
 from dataclasses import dataclass
 
+from app.config import BOSS_ENEMY_COUNT
 from app.master_data.enemies import EnemyData, get_enemy
 from app.rng import DEFAULT_RNG
 
@@ -110,3 +111,19 @@ def roll_encounter(
     weights = [e[1] for e in pool]
     chosen_id = rng.choices(enemy_ids, weights=weights, k=1)[0]
     return get_enemy(chosen_id)
+
+
+def roll_enemy_count(
+    min_count: int,
+    max_count: int,
+    is_boss: bool,
+    rng: random.Random = DEFAULT_RNG,
+) -> int:
+    """階の出現数を抽選する（tech_battle.md §3.2「エンカウント抽選ロジック」）
+
+    最小〜最大の範囲で均等確率。最小=最大の階は固定値になる。
+    ボス階は範囲指定にかかわらず1体固定。
+    """
+    if is_boss:
+        return BOSS_ENEMY_COUNT
+    return rng.randint(min_count, max_count)

@@ -21,7 +21,7 @@ from app.exceptions import register_exception_handlers
 from app.logging_config import setup_logging
 from app.middleware import RequestLogMiddleware
 import app.models  # noqa: F401 — 全モデルをBase.metadataに登録（テーブル自動生成用）
-from app.routers import auth, battle, equipment, game, shop, tower
+from app.routers import auth, battle, equipment, game, party, shop, skill, tower
 
 # ログシステム初期化
 setup_logging()
@@ -71,6 +71,8 @@ app.include_router(battle.router)
 app.include_router(tower.router)
 app.include_router(shop.router)
 app.include_router(equipment.router)
+app.include_router(party.router)
+app.include_router(skill.router)
 
 
 @app.get("/health")

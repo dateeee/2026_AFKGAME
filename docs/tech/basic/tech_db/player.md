@@ -76,9 +76,9 @@
 | `created_at` | `DATETIME(tz)` | 不可 | 現在時刻 | — |
 | `rarity` | `VARCHAR(20)` | 可 | — | **Phase 3・未実装**。`common` / `uncommon` / `rare` / `epic` / `legendary`。倍率は [master/character.md](../../../data/master/character.md) §7.2 が正 |
 
-## 5. `party_members`（Phase 3・未実装）
+## 5. `party_members`（Phase 3）
 
-実装予定: `backend/app/models/party.py` `PartyMember`。編成の処理仕様は [tech_party.md](../../detail/tech_party.md) §1。
+実装: `backend/app/models/party.py` `PartyMember`。編成の処理仕様は [tech_party.md](../../detail/tech_party.md) §1。
 
 | 列 | 型 | NULL | 既定 | 制約・備考 |
 |----|----|------|------|-----------|
@@ -89,9 +89,9 @@
 
 一意制約: `uq_party_members_player_slot` = (`player_id`, `slot_index`) / `uq_party_members_player_character` = (`player_id`, `character_id`)（同一キャラの重複編成を防ぐ。サービス層の `422 PARTY_MEMBER_DUPLICATED` に対する二重の防御）
 
-## 6. `learned_skills`（Phase 3・未実装）
+## 6. `learned_skills`（Phase 3）
 
-実装予定: `backend/app/models/character.py` `LearnedSkill`。習得の処理仕様は [tech_party.md](../../detail/tech_party.md) §3。
+実装: `backend/app/models/character.py` `LearnedSkill`。習得の処理仕様は [tech_party.md](../../detail/tech_party.md) §3。
 
 | 列 | 型 | NULL | 既定 | 制約・備考 |
 |----|----|------|------|-----------|
@@ -103,9 +103,9 @@
 
 一意制約: `uq_learned_skills_character_skill` = (`character_id`, `skill_id`)（サービス層の `400 SKILL_ALREADY_LEARNED` に対する二重の防御）
 
-## 7. `active_skill_slots`（Phase 3・未実装）
+## 7. `active_skill_slots`（Phase 3）
 
-実装予定: `backend/app/models/character.py` `ActiveSkillSlot`。セットの処理仕様は [tech_party.md](../../detail/tech_party.md) §4。
+実装: `backend/app/models/character.py` `ActiveSkillSlot`。セットの処理仕様は [tech_party.md](../../detail/tech_party.md) §4。
 
 | 列 | 型 | NULL | 既定 | 制約・備考 |
 |----|----|------|------|-----------|
