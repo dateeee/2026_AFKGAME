@@ -60,14 +60,7 @@ Mapper を追加するときは以下を使う（毎回の再調査を避ける�
 
 ## 5. 記述規約
 
-| # | 規約 |
-|---|------|
-| 1 | テストクラスに `@Tag("unit")` を付ける |
-| 2 | モジュール docstring に**仕様書の参照先**と**分岐観点**を書く |
-| 3 | 観点ごとに `class Test<対象>` でグループ化する |
-| 4 | テスト関数名は**日本語**で期待する振る舞いを書く（例: `test_目標階が上限と一致していれば追従する`） |
-| 5 | 境界値・等価クラスは `@ParameterizedTest` + `@CsvSource`/`@MethodSource` にまとめ、各ケースにコメントで意図を書く |
-| 6 | テストメソッドの Javadoc に対応マーカー「`分岐: tech_<対象>.md §<節> #<行番号>`」を書く（一覧が1つの文書は §省略可、`#3,4` と複数可）。`check_branch_list.py --tests` がこれで対応を照合する |
+**正は [docs/process/coding_standards_backend/test.md](../../docs/process/coding_standards_backend/test.md)**（配置・タグ・命名・対応マーカー）。本書では再掲しない。
 
 実装パターンは一般形を [.claude/skills/test-list/references/patterns.md](../skills/test-list/references/patterns.md)、AFK GAME のモジュール名・エラーコードを使った実例を [test-patterns.md](test-patterns.md) に置いている。
 

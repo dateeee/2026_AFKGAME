@@ -2,7 +2,7 @@
 
 > 一般手順は [.claude/skills/dev/SKILL.md](../skills/dev/SKILL.md) を参照。本書は AFK GAME 固有の値のみを持つ。
 > 技術スタック・不変条件は [profile.md](profile.md) §3・§5。
-> **コードを書く前に [.claude/references/coding-standards-backend.md](../references/coding-standards-backend.md)（正: [docs/process/coding_standards_backend.md](../../docs/process/coding_standards_backend.md)）を読む。**
+> **コードを書く前に [.claude/references/coding-standards-backend.md](../references/coding-standards-backend.md) と、正の規約から「[common.md](../../docs/process/coding_standards_backend/common.md) + 書く層の分冊（[domain](../../docs/process/coding_standards_backend/domain.md) / [web](../../docs/process/coding_standards_backend/web.md) / [test](../../docs/process/coding_standards_backend/test.md)）」を読む。**規約のベースは TERASOLUNA 開発ガイドライン 5.11.0.RELEASE 日本語版（[索引](../../docs/process/coding_standards_backend.md) §1）。
 
 ## 1. 成果物
 
@@ -68,7 +68,7 @@
 | 3 | データ駆動 | マスターデータの数値をハードコードしていないか |
 | 4 | サーバー権威 | 戦闘計算・報酬決定をフロント側に置いていないか |
 | 5 | 開発時フォールバック | `frontend/src/composables/useBattleLocal.ts` の単体動作を壊していないか |
-| 6 | 既存パターン踏襲 | 命名規則・ディレクトリ構造・import規約がコーディング規約どおりか（バックエンドは [coding_standards_backend.md](../../docs/process/coding_standards_backend.md) §2〜§5、フロントは既存コードの流儀） |
+| 6 | 既存パターン踏襲 | 命名規則・ディレクトリ構造・import規約がコーディング規約どおりか（バックエンドは [common.md](../../docs/process/coding_standards_backend/common.md) §2〜§5 + 層別の分冊、フロントは既存コードの流儀） |
 | 7 | ログ | `logback-spring.xml` 準拠か（ロガー名体系は `tech_logging.md` が正） |
 
 ## 5. 動作確認
