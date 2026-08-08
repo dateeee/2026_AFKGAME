@@ -61,6 +61,8 @@
 | オフライン・tick | `tech/detail/tech_offline.md`、`tech/detail/tech_tick.md`、`tech/detail/tech_polling.md` |
 | 認証 | `tech/detail/tech_auth.md` |
 
+**この表は起点であり網羅ではない**。読んだセクションが張っているインラインリンク先（その仕様が依存する処理側。例: `master/character.md` §7.1 → `tech_party.md` §2）も現状把握に含める。リンクを追わないと、根拠を書き終えてから前提が崩れて書き直しになる。
+
 ### 確定後の反映先
 
 1. 該当仕様書へ反映（数値・計算式・分岐条件を一意に書く）

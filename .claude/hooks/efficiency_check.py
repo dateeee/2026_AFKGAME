@@ -22,6 +22,11 @@ stop-commit.sh より先に実行する（メモの追記をコミット確認�
   long-turn     ターン内のツール呼び出し総数が過大
   correction    ターン冒頭のユーザー発話に手戻り語（前ターンの手戻りを示す）
 
+出力先:
+  フック入力の cwd から作業ツリーの根を解決し、その配下の効率メモへ書く。
+  worktree セッションでは worktree 側のメモになる（worktree_guide.md §5.4）。
+  解決できなければ `__file__` から辿った main のメモへフォールバックする。
+
 トランスクリプトのパースは log_token_usage.py と同様に防御的に行い、
 失敗してもセッションを妨げない（常に exit 0）。
 テスト時は環境変数 EFFICIENCY_MEMO でメモの出力先を差し替えられる。
@@ -35,8 +40,8 @@ from datetime import datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-MEMO_PATH = Path(os.environ.get("EFFICIENCY_MEMO")
-                 or ROOT / "docs" / "backlog" / "efficiency_memo.md")
+MEMO_REL = Path("docs") / "backlog" / "efficiency_memo.md"
+MEMO_PATH = Path(os.environ.get("EFFICIENCY_MEMO") or ROOT / MEMO_REL)
 
 # ── しきい値 ──
 SAME_READ_MIN = 2   # 同一 (file_path, offset, limit) の Read 回数
@@ -74,6 +79,23 @@ def to_local_path(raw):
     if m and not Path(raw).exists():
         return Path(f"{m.group(1)}:/{m.group(2)}")
     return Path(raw)
+
+
+def worktree_root(cwd):
+    """セッションの作業ディレクトリから、その作業ツリーの根を返す（無ければ None）。
+
+    フックは main の CLAUDE_PROJECT_DIR から起動されるため `__file__` は常に main を指す。
+    worktree セッションのメモを main へ書くと worktree 側のコミットに含められないので、
+    フック入力の cwd から辿り直す（docs/process/worktree_guide.md §5.4:
+    効率メモは各 worktree 内の自分のファイルへ書き、統合時に merge=union で合流する）。
+    """
+    if not cwd:
+        return None
+    base = to_local_path(cwd)
+    for d in (base, *base.parents):
+        if (d / MEMO_REL.parent).is_dir():
+            return d
+    return None
 
 
 def iter_entries(path):
@@ -196,8 +218,9 @@ def append_memo(session_id, stats):
 
 
 def block_reason(stats):
-    memo_rel = MEMO_PATH.relative_to(ROOT).as_posix() \
-        if MEMO_PATH.is_relative_to(ROOT) else str(MEMO_PATH)
+    memo_rel = MEMO_REL.as_posix()
+    if not MEMO_PATH.as_posix().endswith(memo_rel):
+        memo_rel = str(MEMO_PATH)
     return (
         f"Stopフック（効率チェック）: このターンに非効率シグナル "
         f"[{' / '.join(stats['signals'])}] を検出し、{memo_rel} の末尾に仮エントリを"
@@ -217,9 +240,14 @@ def main():
             stream.reconfigure(encoding="utf-8", errors="replace")
         except Exception:
             pass
+    global MEMO_PATH
     data = json.load(sys.stdin)
     if data.get("stop_hook_active"):
         return
+    if not os.environ.get("EFFICIENCY_MEMO"):
+        root = worktree_root(data.get("cwd"))
+        if root:
+            MEMO_PATH = root / MEMO_REL
     path = to_local_path(data.get("transcript_path", ""))
     if not path.is_file():
         return

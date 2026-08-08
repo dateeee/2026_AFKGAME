@@ -89,7 +89,7 @@ worktree の作成・統合（main への merge）・削除は**ユーザーへ�
 |----|------|------|
 | 1 | worktree | 成果物をコミットし、テストが通ることを確認 |
 | 2 | — | `ExitWorktree`（`action: "keep"`）で main へ戻る。**`"remove"` は効かない**（§5.4） |
-| 3 | main | `python scripts/worktree.py merge <名前>`（main 取り込み → ff 統合 → worktree・ブランチ削除まで一括） |
+| 3 | main | **先に `git status --short` で main 側の未コミット変更を確認**し、あればコミットする（並行セッションの成果物が残っていると ff 統合が止まる）→ `python scripts/worktree.py merge <名前>`（main 取り込み → ff 統合 → worktree・ブランチ削除まで一括） |
 | 4 | main | `next_session.md` の更新（§3 のとおり main でのみ）→ コミット |
 
 `merge` が「競合」で止まったら: worktree 側のファイルを編集して解消 → worktree でコミット → main から `merge` を再実行（worktree へ入り直す必要はない）。
@@ -99,6 +99,8 @@ worktree の作成・統合（main への merge）・削除は**ユーザーへ�
 - **内蔵 worktree 機能とは別物**: `EnterWorktree` を `name` 付きで呼ぶと `.claude/worktrees/`（gitignore 済み）に作られ、§1 の配置規約・`settings.local.json` のコピー・rerere が効かない。必ず `add` してから `path` で入る
 - `ExitWorktree` が削除できるのは自分が `name` で作った worktree だけ。`path` で入ったものは `"keep"` で戻るのみ（実体は §5.3 の 3 の `merge` が消す）
 - `.claude/`（スキル・フック・プロファイル）はコミット済みなので worktree にも同梱されそのまま動く。`settings.local.json` は `add` がコピーする
-- 効率メモ・Stop フックは各 worktree 内の自分のファイルへ書き、統合時に `merge=union` で合流する
+- 効率メモ・Stop フックは各 worktree 内の自分のファイルへ書き、統合時に `merge=union` で合流する（`efficiency_check.py` はフック入力の `cwd` から作業ツリーの根を解決するため、main の `CLAUDE_PROJECT_DIR` から起動されても worktree 側のメモへ書く）
+- **worktree 中は main を指す `git -C <mainのパス> ...` と、リダイレクト付きの複合コマンドが拒否される**。main 側の状態を見る必要が出たら §5.3 の 2 で戻ってから確認する
+- **worktree 内のファイル解析は `ctx_execute` にパスを直書きして行う**。`ctx_execute_file` はプロジェクトルート外として拒否される
 - 自動メモリ（`~/.claude/projects/<パス>/memory/`）はディレクトリパス単位のため worktree では別になる。プロジェクトの正はリポジトリ内ドキュメントに置く方針（`MEMORY.md` 参照）なので実害はない
 - 工程の区切りで `/clear` を提案する既定ルール（CLAUDE.md）は worktree 内でも同じ。`/clear` しても作業ディレクトリは worktree のまま

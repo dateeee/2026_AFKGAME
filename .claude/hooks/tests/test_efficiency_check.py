@@ -66,6 +66,34 @@ def test_to_local_path_converts_posix_drive_form():
     assert mod.to_local_path("/c/Users/x/a.jsonl").as_posix() == "c:/Users/x/a.jsonl"
 
 
+# ── worktree_root ────────────────────────────────────────────
+
+def make_tree(base):
+    """`docs/backlog` を持つ作業ツリーを作り、その根を返す。"""
+    (base / "docs" / "backlog").mkdir(parents=True)
+    return base
+
+
+def test_worktree_root_finds_tree_root_from_cwd(tmp_path):
+    root = make_tree(tmp_path / "wt")
+    assert mod.worktree_root(str(root)) == root
+
+
+def test_worktree_root_walks_up_from_subdirectory(tmp_path):
+    root = make_tree(tmp_path / "wt")
+    sub = root / "backend" / "afkgame-domain"
+    sub.mkdir(parents=True)
+    assert mod.worktree_root(str(sub)) == root
+
+
+def test_worktree_root_returns_none_outside_a_tree(tmp_path):
+    assert mod.worktree_root(str(tmp_path)) is None
+
+
+def test_worktree_root_returns_none_without_cwd():
+    assert mod.worktree_root("") is None
+
+
 def test_iter_entries_skips_blank_and_broken_lines(tmp_path):
     path = tmp_path / "t.jsonl"
     path.write_text('{"type": "user"}\n\n{壊れた\n"文字列"\n', encoding="utf-8")
@@ -296,6 +324,21 @@ def test_main_blocks_and_appends_memo_on_signal(memo, tmp_path, monkeypatch, cap
     run_main(monkeypatch, {"transcript_path": str(path), "session_id": "s1"})
     printed = json.loads(capsys.readouterr().out)
     assert printed["decision"] == "block" and "same-read" in printed["reason"]
+    assert memo.exists()
+
+
+def test_main_writes_into_the_session_worktree(memo, tmp_path, monkeypatch, capsys):
+    """worktree セッションのメモは main ではなく worktree 側へ書く（§5.4）。"""
+    wt = make_tree(tmp_path / "2026_AFKGAME.worktrees" / "task")
+    path = write_transcript(tmp_path / "t.jsonl", [user("依頼"), *reads("a.md", 3)])
+    run_main(monkeypatch, {"transcript_path": str(path), "session_id": "s1",
+                           "cwd": str(wt / "backend")})
+    assert (wt / mod.MEMO_REL).exists() and not memo.exists()
+
+
+def test_main_falls_back_to_repo_root_without_cwd(memo, tmp_path, monkeypatch, capsys):
+    path = write_transcript(tmp_path / "t.jsonl", [user("依頼"), *reads("a.md", 3)])
+    run_main(monkeypatch, {"transcript_path": str(path), "session_id": "s1"})
     assert memo.exists()
 
 

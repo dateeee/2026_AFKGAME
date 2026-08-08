@@ -1,6 +1,6 @@
 # AFK GAME — プロジェクトプロファイル
 
-全スキルが最初に読む共通プロファイル。工程固有の値は [INDEX.md](INDEX.md) の対応表から該当プロファイルを開く。
+全スキルが最初に読む共通プロファイル。工程固有の値は [INDEX.md](INDEX.md) の対応表から開く。
 
 ## 1. 基本情報
 
@@ -14,7 +14,7 @@
 
 | パス | 内容 |
 |------|------|
-| `backend/` | `afkgame-domain`（Entity・Mapper・Service・マスターデータ）、`afkgame-web`（`@RestController`・Resource・Security設定）、`afkgame-env`（DataSource・設定）、`afkgame-initdb`（Flyway） |
+| `backend/` | `afkgame-domain`（Entity・Mapper・Service・マスターデータ）、`afkgame-web`（Controller・Resource・Security）、`afkgame-env`（DataSource・設定）、`afkgame-initdb`（Flyway） |
 | 各モジュールの `src/test/java/` | 単体（JUnit5+Mockito）と統合（`@SpringBootTest`+MockMvc）をパッケージで分離 |
 | `frontend/src/` | `components/` `views/` `stores/` `api/` `types/` `composables/` `router/` `utils/` `assets/` |
 | `frontend/tests/e2e/` | E2Eテスト（Playwright） |
@@ -22,12 +22,11 @@
 | `docs/tech/` | 基本設計・詳細設計の成果物（`tech_spec.md` 索引 + `tech_*.md`） |
 | `docs/data/` | マスターデータ（`master_data.md` 索引 + `master/` `towers/` `skills/`） |
 | `docs/diagrams/` | 設計図6点（各図は索引 + 同名ディレクトリ構成） |
-| `docs/reviews/` | レビュー結果の追記型アーカイブ（スキル名ごと + `archive/`。文字数上限の対象外） |
+| `docs/reviews/` | レビュー結果のアーカイブ（スキル名ごと + `archive/`。上限の対象外） |
 
 ## 3. 技術スタック
 
-実装の記述規約（層の責務・命名・例外・ログ・Javadoc）の正は [docs/process/coding_standards_backend.md](../../docs/process/coding_standards_backend.md)（バックエンド）。
-エージェント向けチェックリストは [.claude/references/coding-standards-backend.md](../references/coding-standards-backend.md)。本表は**採用技術の一覧**に限る。
+記述規約の正は [coding_standards_backend.md](../../docs/process/coding_standards_backend.md)、エージェント向けチェックリストは [coding-standards-backend.md](../references/coding-standards-backend.md)。本表は**採用技術の一覧**に限る。
 
 | 層 | 技術 | 規約 |
 |----|------|------|
@@ -71,7 +70,7 @@
 | 1 | サブエージェントは**並列化の価値がある場合のみ**（同時最大4体）。1体で済む調査・修正はメインコンテキストで行う |
 | 2 | 機械的な作業（一括置換・リンク修正・定型データ生成・構文検証）は `model: sonnet` のサブエージェントか使い捨てスクリプトで処理する |
 | 3 | サブエージェントには**担当ファイルのみを列挙**し、「列挙外は読まない」「戻り値は結論のみ」を明示する |
-| 4 | 仕様書・コードは**必要なセクションだけ読む**。索引（`tech_spec.md` 等）で担当ファイルを特定 → 該当ファイルのみ（大きいファイルは `Read` の offset/limit で節単位）。同一セッション内で同じファイルを再 Read しない（Edit 失敗時の再確認を除く） |
+| 4 | 仕様書・コードは**必要なセクションだけ読む**。索引（`tech_spec.md` 等）で担当ファイルを特定 → 該当ファイルのみ（大きいファイルは `Read` の offset/limit で節単位）。同一セッション内で同じファイルを再 Read しない（Edit 失敗時の再確認と、他セッション・worktree 統合でファイルが変わった場合を除く） |
 | 5 | 工程の区切り（レビュー完了・コミット後）で `/clear` を既定として提案する（同一タスクを続ける場合のみ `/compact`）。レビュー→修正適用は別セッションに分ける |
 | 6 | 大きな出力（ログ・テスト結果・git履歴・集計・検索）の処理は context-mode（`ctx_batch_execute` / `ctx_execute`）で行い、生出力を会話に持ち込まない。ファイルの分析・要約は `ctx_execute_file`。`Read` の全文読みは Edit 前提のときのみ |
 
@@ -87,12 +86,12 @@
 | 4 | 同じ数値・仕様の正は1ファイル。トピックごとの正は [docs/process/spec_ownership.md](../../docs/process/spec_ownership.md) で宣言する |
 | 5 | 機械検証は §4 の常設スクリプトを優先し、使い捨ては常設で賄えない検証のみ（繰り返すなら常設化を提案する） |
 | 6 | CLAUDE.md と `.claude/project/**` で重複するルールを改稿する際は、もう一方を必ず突合して同時に更新する |
-| 7 | **書く前に残量を測る**。残量WARN のファイルへ追記するときは追記予定の字数と残量を突き合わせ、超えるなら同ファイルの完了済みセクションの圧縮を**同じ編集にまとめる**。新規ファイルの作成・索引への行追加も、書く前に `check_doc_size.py` で対象と索引の残量を確認する（超過してから削るのは往復になる） |
+| 7 | **書く前に残量を測る**（`check_doc_size.py --sections <path>`）。**追記予定の字数も `len()` で実測する**（目分量禁止。表は見出し・ヘッダ2行・各行4字以上の付帯文字が乗る）。超えるなら完了済みセクションの圧縮を**同じ編集にまとめる**。新規ファイル作成・索引への行追加も同様 |
 
 ## 8. worktree 運用
 
 手順・競合ポリシーの正は [worktree_guide.md](../../docs/process/worktree_guide.md) §5。
 
 - **ファイルを編集する作業は worktree 内で行う**（main のままでよいのは読み取りのみと `docs/backlog/**` の更新 = §5.1）。開始は `worktree.py add` → `EnterWorktree` に **`path`** で移動（§5.2。`name` で内蔵 worktree を作らない）
-- 完了時は worktree で `git merge main` → `ExitWorktree`(keep) → main で merge・削除（§5.3）。**main への merge と削除の前にユーザー確認を取る**
+- 完了時は worktree でコミット → `ExitWorktree`(keep) → main で `python scripts/worktree.py merge <名前>`（main 取り込み〜削除まで一括。§5.3。**ユーザー確認は不要**）
 
