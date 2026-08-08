@@ -1,0 +1,16 @@
+# AFK GAME — プレイヤー初期化に使うマスターデータ
+#
+# 初期キャラの正は docs/data/master/character.md §1.1、初期所持アイテムの正は
+# docs/data/master/item.md §3.5。スキーマの正は
+# com.afkgame.domain.masterdata.InitialPlayerData（制約違反は起動時に検出して起動を中止する）。
+# ステータスはここに持たず、type から character_types.yml を引いて得る（tech_auth.md §8.2 手順4）。
+# ゲストの表示名（冒険者）は tech_auth.md §8.2 手順1 が正でここには持たない。
+
+character:
+  id: hero_001
+  name: 勇者
+  type: melee
+  level: 1
+items:
+  - id: hp_potion
+    quantity: 5

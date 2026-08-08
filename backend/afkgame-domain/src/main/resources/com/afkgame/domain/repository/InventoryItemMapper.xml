@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.afkgame.domain.repository.InventoryItemMapper">
+
+  <resultMap id="inventoryItemResultMap" type="com.afkgame.domain.model.InventoryItem">
+    <id     property="id"       column="id"/>
+    <result property="playerId" column="player_id"/>
+    <result property="itemId"   column="item_id"/>
+    <result property="quantity" column="quantity"/>
+  </resultMap>
+
+  <select id="selectByPlayerId" resultMap="inventoryItemResultMap">
+    SELECT id, player_id, item_id, quantity
+      FROM inventory_items
+     WHERE player_id = #{playerId}
+     ORDER BY item_id
+  </select>
+
+  <insert id="insert">
+    INSERT INTO inventory_items (id, player_id, item_id, quantity)
+    VALUES (#{id}, #{playerId}, #{itemId}, #{quantity})
+  </insert>
+
+</mapper>

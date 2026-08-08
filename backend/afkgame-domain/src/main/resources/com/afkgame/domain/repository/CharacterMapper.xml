@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.afkgame.domain.repository.CharacterMapper">
+
+  <resultMap id="characterResultMap" type="com.afkgame.domain.model.Character">
+    <id     property="id"          column="id"/>
+    <result property="playerId"    column="player_id"/>
+    <result property="name"        column="name"/>
+    <result property="type"        column="type"/>
+    <result property="level"       column="level"/>
+    <result property="exp"         column="exp"/>
+    <result property="hp"          column="hp"/>
+    <result property="maxHp"       column="max_hp"/>
+    <result property="baseAtk"     column="base_atk"/>
+    <result property="baseDef"     column="base_def"/>
+    <result property="baseSpd"     column="base_spd"/>
+    <result property="limitBreak"  column="limit_break"/>
+    <result property="skillPoints" column="skill_points"/>
+    <result property="createdAt"   column="created_at"/>
+  </resultMap>
+
+  <sql id="characterColumns">
+    id, player_id, name, type, level, exp, hp, max_hp,
+    base_atk, base_def, base_spd, limit_break, skill_points, created_at
+  </sql>
+
+  <select id="selectById" resultMap="characterResultMap">
+    SELECT <include refid="characterColumns"/>
+      FROM characters
+     WHERE id = #{id}
+  </select>
+
+  <select id="selectByPlayerId" resultMap="characterResultMap">
+    SELECT <include refid="characterColumns"/>
+      FROM characters
+     WHERE player_id = #{playerId}
+     ORDER BY created_at, id
+  </select>
+
+  <insert id="insert">
+    INSERT INTO characters (id, player_id, name, type, level, exp, hp, max_hp,
+                            base_atk, base_def, base_spd, limit_break, skill_points, created_at)
+    VALUES (#{id}, #{playerId}, #{name}, #{type}, #{level}, #{exp}, #{hp}, #{maxHp},
+            #{baseAtk}, #{baseDef}, #{baseSpd}, #{limitBreak}, #{skillPoints}, #{createdAt})
+  </insert>
+
+</mapper>
