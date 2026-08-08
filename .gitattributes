@@ -3,3 +3,4 @@
 # 運用ルールは docs/process/worktree_guide.md を参照。
 docs/changelog.md merge=union
 docs/backlog/efficiency_memo.md merge=union
+docs/backlog/carryover_notes.md merge=union

@@ -68,3 +68,18 @@
 - シグナル: same-read(next_session.md×2) / long-turn(calls=84)
 - ターン概要: ツール84回・エラー2回・拒否0回。開始:「<command-message>next</command-message>」
 - 原因と改善案: **same-read と long-turn は誤検出**（same-read は2回目が別セッションの全面書き換え後＝`49a2b77` で内容が変わっており再読が必須。long-turn は詳細設計1本ぶんの正当な作業で、実損2件は直前の手動エントリに記入済み）。ただし **`profile.md` §6 規律4 の再Read禁止は例外が「Edit 失敗時の再確認」しか無い**ため、「他セッションの更新・worktree 統合でファイルが変わった場合」を例外に加える（並行セッション運用が常態化しており、規律どおりだと古い内容で Edit して失敗する）。**エラー2件も並行運用が原因**で、いずれも「別セッションが main を触った直後」に起きた（Edit の old_string 不一致 / `worktree.py merge` が main の未コミット変更で停止）→ `worktree_guide.md` §5.3 の手順3 の前に「main 側に未コミットの変更（Stop フックが書いた効率メモ等）が無いか確認し、あれば先にコミットする」を1行足す。
+
+## 2026-08-08 21:30 | session 3e371c6c | 自動検出
+- シグナル: long-turn(calls=80)
+- ターン概要: ツール80回・エラー2回・拒否0回。開始:「<ide_opened_file>The user opened the file c:\GIT\2026_AFKGAM」
+- 原因と改善案: **long-turn 自体は誤検出**（バランス3件の確定 + 9ファイル改稿 + 検証3種 + worktree 統合で妥当な分量。エラー2件は直前エントリと同じ並行セッション由来）。実損は1件で、**B-8 の根拠を書き終えた後に `tech_party.md` の「控えとして加入・自動編入しない」を取りこぼし確認で発見し、書いたばかりの記述を修正した**（控えは Phase 3 で EXP を得られないため根拠の前提が変わる）。原因は現状把握を `requirements.md` §4 の「カテゴリ→参照先」表だけで済ませ、読んだセクションが張っているインラインリンク（`master/character.md` §7.1 → `tech_party.md` §2）を追わなかったこと → `.claude/project/requirements.md` §4 へ「参照先表は**起点であり網羅ではない**。対象セクション内のリンク先（その仕様が依存する処理側）も現状把握に含める」を1行追記する。あわせて判断材料の収集を6往復に分けた（EXPテーブル→塔の報酬→パーティ人数→戦闘不能規則）ため、`resolve-specs` SKILL §2 へ「必要ファイルを洗い出してから1バッチで読む」を添える。
+
+## 2026-08-08 21:30 | session c4f40b08 | 自動検出
+- シグナル: long-turn(calls=84)
+- ターン概要: ツール84回・エラー0回・拒否0回。開始:「<ide_opened_file>The user opened the file c:\GIT\2026_AFKGAM」
+- 原因と改善案: **編集対象を main と worktree で二度読みした**（11ファイル・約12回）。worktree へ入るのが §4 反映の直前で Edit が worktree パスでの Read を要求するため → `requirements.md` §4 へ「§2 の現状把握の**前に** worktree へ入る」を追記する
+
+## 2026-08-08 21:43 | session b5dc92f5 | 自動検出
+- シグナル: same-command('python scripts/check_doc_size.'×4) / errors×3 / long-turn(calls=89)
+- ターン概要: ツール89回・エラー3回・拒否0回。開始:「<ide_opened_file>The user opened the file c:\GIT\2026_AFKGAM」
+- 原因と改善案: **字数超過の是正で圧縮を小刻みに試し、4回測り直した末に結局「分離」で解決した**（8,528字→圧縮5回で7,996字＝残り4字→ carryover_notes.md へ分離して5,511字）。超過幅が500字超なら圧縮では実用的な余白が残らないと最初に判断できた → `doc-size.md` へ「超過幅 >300字 または是正後の残量が上限の5%未満になる見込みなら、圧縮を試さず分割から入る。塊ごとの字数を先に一括計測する」を追記する。エラー3件は worktree 内から `worktree.py list` を実行して `WT_ROOT` がずれた1件（本ターンで修正済み）と Edit の不一致・Bash 複合コマンド拒否で、いずれも波及なし
