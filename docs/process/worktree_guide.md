@@ -79,7 +79,7 @@ worktree は1つのリポジトリから複数の作業ツリーを同時に開�
 | 1 | `python scripts/worktree.py add <名前>`（§1 の命名。作成先パスが標準出力に出る） |
 | 2 | `EnterWorktree` にそのパスを **`path` で渡す**（`name` を使わない ＝ §5.4）。セッションの作業ディレクトリが worktree へ移る |
 | 3 | frontend を触るタスクなら worktree 側で `cd frontend; npm install`（`node_modules` は共有されない） |
-| 4 | 以降の編集・コミットはすべて worktree 内で行う |
+| 4 | 以降の読み込み・編集・コミットはすべて worktree 内で行う。**編集対象が特定済みのファイルは worktree へ入ってから読む**（main 側で先に読むと Edit 用の再 Read で二重読みになる） |
 
 ### 5.3 完了手順（統合）
 
