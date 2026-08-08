@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.afkgame.domain.repository.CharacterEquipSlotMapper">
+
+  <!-- 主キーは (character_id, slot) の複合主キー（tech_db/item.md §2） -->
+  <resultMap id="characterEquipSlotResultMap" type="com.afkgame.domain.model.CharacterEquipSlot">
+    <id     property="characterId" column="character_id"/>
+    <id     property="slot"        column="slot"/>
+    <result property="equipmentId" column="equipment_id"/>
+  </resultMap>
+
+  <select id="selectByCharacterId" resultMap="characterEquipSlotResultMap">
+    SELECT character_id, slot, equipment_id
+      FROM character_equip_slots
+     WHERE character_id = #{characterId}
+     ORDER BY slot
+  </select>
+
+  <insert id="insert">
+    INSERT INTO character_equip_slots (character_id, slot, equipment_id)
+    VALUES (#{characterId}, #{slot}, #{equipmentId})
+  </insert>
+
+</mapper>

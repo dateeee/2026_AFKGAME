@@ -14,6 +14,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
@@ -67,14 +68,35 @@ public class MasterDataLoader {
         return Collections.unmodifiableMap(byId);
     }
 
+    /**
+     * IDキーを持たない単一オブジェクトの YAML を record へ読み込む。
+     *
+     * <p>ネストした record も検証するため、対象 record のフィールドには {@code @Valid} を付ける
+     * （{@link InitialPlayerData} を参照）。
+     *
+     * @param resourcePath クラスパス上の YAML（例: {@code masterdata/initial_player.yml}）
+     * @param type         対応する record
+     * @return 読み込んだ record
+     * @throws MasterDataException リソース不在・パース失敗・スキーマ違反のいずれか
+     */
+    public <T> T loadSingle(String resourcePath, Class<T> type) {
+        T entry = read(resourcePath, YAML_MAPPER.getTypeFactory().constructType(type));
+        validate(resourcePath, entry);
+        return entry;
+    }
+
     private <T> List<T> read(String resourcePath, Class<T> elementType) {
+        return read(resourcePath,
+                YAML_MAPPER.getTypeFactory().constructCollectionType(List.class, elementType));
+    }
+
+    private <T> T read(String resourcePath, JavaType targetType) {
         ClassPathResource resource = new ClassPathResource(resourcePath);
         if (!resource.exists()) {
             throw new MasterDataException(resourcePath + ": マスターデータのリソースが見つからない");
         }
         try (InputStream in = resource.getInputStream()) {
-            return YAML_MAPPER.readValue(in,
-                    YAML_MAPPER.getTypeFactory().constructCollectionType(List.class, elementType));
+            return YAML_MAPPER.readValue(in, targetType);
         } catch (IOException e) {
             throw new MasterDataException(resourcePath + ": マスターデータの読み込みに失敗", e);
         }

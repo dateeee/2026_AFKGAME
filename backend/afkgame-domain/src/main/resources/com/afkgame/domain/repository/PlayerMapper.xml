@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.afkgame.domain.repository.PlayerMapper">
+
+  <resultMap id="playerResultMap" type="com.afkgame.domain.model.Player">
+    <id     property="id"             column="id"/>
+    <result property="userId"         column="user_id"/>
+    <result property="gold"           column="gold"/>
+    <result property="currentTowerId" column="current_tower_id"/>
+    <result property="currentFloor"   column="current_floor"/>
+    <result property="targetFloor"    column="target_floor"/>
+    <result property="towerMode"      column="tower_mode"/>
+    <result property="hpThreshold"    column="hp_threshold"/>
+    <result property="currentEnemyId" column="current_enemy_id"/>
+    <result property="currentEnemyHp" column="current_enemy_hp"/>
+    <result property="runGold"        column="run_gold"/>
+    <result property="highestFloor"   column="highest_floor"/>
+    <result property="lastTickAt"     column="last_tick_at"/>
+    <result property="createdAt"      column="created_at"/>
+  </resultMap>
+
+  <sql id="playerColumns">
+    id, user_id, gold, current_tower_id, current_floor, target_floor, tower_mode,
+    hp_threshold, current_enemy_id, current_enemy_hp, run_gold, highest_floor,
+    last_tick_at, created_at
+  </sql>
+
+  <select id="selectById" resultMap="playerResultMap">
+    SELECT <include refid="playerColumns"/>
+      FROM players
+     WHERE id = #{id}
+  </select>
+
+  <select id="selectByUserId" resultMap="playerResultMap">
+    SELECT <include refid="playerColumns"/>
+      FROM players
+     WHERE user_id = #{userId}
+  </select>
+
+  <insert id="insert">
+    INSERT INTO players (id, user_id, gold, current_tower_id, current_floor, target_floor,
+                         tower_mode, hp_threshold, current_enemy_id, current_enemy_hp,
+                         run_gold, highest_floor, last_tick_at, created_at)
+    VALUES (#{id}, #{userId}, #{gold}, #{currentTowerId}, #{currentFloor}, #{targetFloor},
+            #{towerMode}, #{hpThreshold}, #{currentEnemyId}, #{currentEnemyHp},
+            #{runGold}, #{highestFloor}, #{lastTickAt}, #{createdAt})
+  </insert>
+
+</mapper>

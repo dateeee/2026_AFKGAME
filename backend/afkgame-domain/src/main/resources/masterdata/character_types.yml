@@ -1,0 +1,27 @@
+# AFK GAME — キャラクタータイプ別 LV1 基礎ステータスのマスターデータ
+#
+# 数値の正は docs/data/master/character.md §1.2。スキーマの正は
+# com.afkgame.domain.masterdata.CharacterTypeData（制約違反は起動時に検出して起動を中止する）。
+# 成長率は持たない（レベルアップ機能の移植時に追加する。tech_auth.md §8.1）。
+# 未知のキーは起動時に弾かれるため、先回りしてキーを足さないこと。
+
+- id: melee
+  hp: 100
+  atk: 10
+  def: 5
+  spd: 5
+- id: magic
+  hp: 80
+  atk: 12
+  def: 4
+  spd: 7
+- id: holy
+  hp: 95
+  atk: 8
+  def: 5
+  spd: 6
+- id: agile
+  hp: 85
+  atk: 10
+  def: 4
+  spd: 10
