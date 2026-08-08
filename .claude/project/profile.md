@@ -26,7 +26,7 @@
 
 ## 3. 技術スタック
 
-記述規約の正は [coding_standards_backend.md](../../docs/process/coding_standards_backend.md)（索引 + 層別4分冊。**ベースは TERASOLUNA 開発ガイドライン 5.11.0**）、エージェント向けチェックリストは [coding-standards-backend.md](../references/coding-standards-backend.md)。本表は**採用技術の一覧**に限る。
+記述規約の正は [coding_standards_backend.md](../../docs/process/coding_standards_backend.md)（索引 + 分冊。**ベースは TERASOLUNA 開発ガイドライン 5.11.0**）、エージェント向けチェックリストは [coding-standards-backend.md](../references/coding-standards-backend.md)。本表は**採用技術の一覧**に限る。
 
 | 層 | 技術 | 規約 |
 |----|------|------|

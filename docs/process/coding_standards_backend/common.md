@@ -1,12 +1,14 @@
 # バックエンドコーディング規約 — 共通
 
 > [coding_standards_backend.md](../coding_standards_backend.md) の分冊。**どの層を書くときも本書を先に読む**。
-> ベースは TERASOLUNA 開発ガイドライン 5.11.0.RELEASE 日本語版（索引 §1）の `Overview/ApplicationLayering`・`ArchitectureInDetail`。本書はそこからの差分だけを持つ。
-> 層固有の規約は [domain.md](domain.md)（ドメイン層）・[web.md](web.md)（Web層）・[test.md](test.md)（テスト）。節番号は分割前の索引のものを維持している。
+> ベースは TERASOLUNA 開発ガイドライン 5.11.0.RELEASE 日本語版（[basis.md](basis.md) §1）の `ArchitectureInDetail`。本書はそこからの差分だけを持つ。
+> レイヤの定義とコンポーネント間の呼び出し可否は [layering.md](layering.md)、層固有の規約は [domain.md](domain.md)（Entity・Mapper）・[domain_service.md](domain_service.md)（Service）・[web.md](web.md)（Web層）・[test.md](test.md)（テスト）。
 
 ---
 
 ## 2. モジュールとパッケージ
+
+ガイドラインのマルチプロジェクト構成（`[projectName]-domain` / `-web` / `-env`）との対応は [layering.md](layering.md) §4。
 
 | モジュール | パッケージ | 置くもの | 依存してよい先 |
 |-----------|-----------|---------|--------------|
@@ -36,7 +38,7 @@
 
 ## 4. 全層共通のルール
 
-層別の責務は [domain.md](domain.md)・[web.md](web.md) が持つ。本節は層に依らないもの。
+層別の責務は [domain.md](domain.md)・[domain_service.md](domain_service.md)・[web.md](web.md) が持つ。本節は層に依らないもの。
 
 | # | 規約 |
 |---|------|
@@ -63,7 +65,7 @@
 
 ## 6. 例外とエラー
 
-応答への変換とメッセージの作法は [web.md](web.md) §5、トランザクションとの関係は [domain.md](domain.md) §2。
+応答への変換とメッセージの作法は [web.md](web.md) §5、ガイドラインの業務例外・システム例外との対応とトランザクションとの関係は [domain_service.md](domain_service.md) §6・§4。
 
 | # | 規約 |
 |---|------|
@@ -100,7 +102,8 @@
 | 禁止 | 代わりに |
 |------|---------|
 | フィールド `@Autowired`・setter 注入 | コンストラクタ注入（`private final`） |
-| コントローラへの業務ロジック記述 | Service へ集約（[domain.md](domain.md) §2） |
+| コントローラへの業務ロジック記述 | Service へ集約（[domain_service.md](domain_service.md) §1） |
+| コントローラから Mapper の直接呼び出し | Service を通す（[layering.md](layering.md) §3 の呼び出し可否） |
 | SQL の `${}` による文字列組み立て | `#{}` によるパラメータバインド |
 | ワイルドカード import | 個別 import |
 | ゲームバランス数値のハードコード | マスターデータ YAML・`application.yml` |

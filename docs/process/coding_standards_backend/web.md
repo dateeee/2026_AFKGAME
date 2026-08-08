@@ -1,20 +1,23 @@
 # バックエンドコーディング規約 — Web層（`afkgame-web`）
 
-> [coding_standards_backend.md](../coding_standards_backend.md) の分冊。全層共通の規約は [common.md](common.md) が先。
-> ベースは TERASOLUNA 開発ガイドライン 5.11.0.RELEASE 日本語版（索引 §1）の `ImplementationAtEachLayer/ApplicationLayer` と `Security`。本書はそこからの差分だけを持つ。
+> [coding_standards_backend.md](../coding_standards_backend.md) の分冊。全層共通の規約は [common.md](common.md) が先、層の位置づけは [layering.md](layering.md)。
+> ベースは TERASOLUNA 開発ガイドライン 5.11.0.RELEASE 日本語版（[basis.md](basis.md) §1）の `ImplementationAtEachLayer/ApplicationLayer` と `Security`。本書はそこからの差分だけを持つ。
+> `afkgame-web` はガイドラインの**アプリケーション層**に当たる。**実装はできるだけ薄く保ち、ビジネスルールを含めない**（[layering.md](layering.md) §1）。
 
 ---
 
 ## 1. 対象と責務
 
-| パッケージ | 置くもの |
-|-----------|---------|
-| `.api` | `@RestController`（アプリケーション層） |
-| `.resource` | Resource(DTO) + Bean Validation |
-| `.config` | Security・Jackson・`@ConfigurationProperties` |
-| `.filter` | リクエストIDログ・共通例外ハンドラ |
+| パッケージ | 置くもの | ガイドライン上の分類 |
+|-----------|---------|------------------|
+| `.api` | `@RestController` | Controller |
+| `.resource` | Resource(DTO) + Bean Validation | Form（2.4.1.1.3 Tip: REST では `Resource` が Form の役割を担う） |
+| `.config` | Security・Jackson・`@ConfigurationProperties` | （対応なし） |
+| `.filter` | リクエストIDログ・共通例外ハンドラ | （対応なし） |
 
-- Web層は「受け取る・検証する・ドメインへ渡す・返す」だけを担う。業務判断は [domain.md](domain.md) §2 の Service が持つ
+- Web層は「受け取る・検証する・ドメインへ渡す・返す」だけを担う。業務判断は [domain_service.md](domain_service.md) §1 の Service が持つ
+- **View と Helper は持たない**（逸脱 #8・#7）。描画は SPA（Vue 3）、変換は Resource の `static from(...)`（§3 #3）
+- Controller から Mapper を直接呼ばない（[layering.md](layering.md) §3）。参照系でも Service を通す
 - API契約（パス・HTTPメソッド・ステータス・JSON構造）の正は [tech_api.md](../../tech/basic/tech_api.md)・[tech_api_common.md](../../tech/basic/tech_api_common.md)。本書で再掲しない
 
 ## 2. コントローラ（`api`）
@@ -25,6 +28,7 @@
 | 2 | ボディは `@Valid @RequestBody` で受ける |
 | 3 | 戻り値は Resource（`ResponseEntity` はステータスやヘッダを変える場合のみ） |
 | 4 | `try-catch` しない。応答への変換は `ApiExceptionHandler`（`@RestControllerAdvice`）へ集約する |
+| 5 | **単項目チェック・相関項目チェックは本層**（Bean Validation）で行う。ビジネスルールのチェックは Service（責任分界点の全体像は [domain_service.md](domain_service.md) §1） |
 
 ## 3. Resource（`resource`）
 
@@ -32,7 +36,7 @@
 |---|------|
 | 1 | `record` + Bean Validation（Jakarta）で定義する |
 | 2 | リクエスト用とレスポンス用を**兼用しない** |
-| 3 | ドメイン型からの変換は `public static from(...)` に集約する |
+| 3 | ドメイン型 ↔ Resource の変換は `public static from(...)` に集約する。ガイドラインは Helper クラスか MapStruct への委譲を推奨するが、本プロジェクトは**Helper を作らない**（逸脱 #7）。変換対象が Resource ごとに閉じており、Controller の見通しは `from(...)` への集約で足りるため |
 | 4 | **JSON のフィールド名は lowerCamelCase**。Jackson の既定でそのまま出るため `@JsonProperty` での改名をしない（[tech_api_common.md](../../tech/basic/tech_api_common.md) §5.0） |
 | 5 | 業務ロジックを持たせない（判定・計算は Service 側） |
 

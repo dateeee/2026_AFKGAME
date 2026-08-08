@@ -1,7 +1,7 @@
 # バックエンドコーディング規約 — テスト
 
 > [coding_standards_backend.md](../coding_standards_backend.md) の分冊。全層共通の規約は [common.md](common.md) が先（テストコードも同じ記述規約に従う）。
-> ベースは TERASOLUNA 開発ガイドライン 5.11.0.RELEASE 日本語版（索引 §1）の `UnitTest`。本書はそこからの差分だけを持つ。
+> ベースは TERASOLUNA 開発ガイドライン 5.11.0.RELEASE 日本語版（[basis.md](basis.md) §1）の `UnitTest`。本書はそこからの差分だけを持つ。
 > **テストコードの書き方の正は本書**（`.claude/project/test-list.md` §5 から移管）。工程側が持つものは §4 の分担表を参照。
 
 ---
