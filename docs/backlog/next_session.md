@@ -11,9 +11,9 @@
 
 ```
 /dev 移行 STEP 2（骨格構築の 1〜4）: Terasoluna MyBatis3 blank project から backend/ のモジュール（afkgame-domain / web / env / initdb）を生成し、local 用 PostgreSQL の docker-compose.yml、統一エラーレスポンス・例外ハンドラ・リクエストIDログ、Spring Security によるゲスト認証（JWT）、Flyway 初期スキーマ V1 までを実装する
-完了条件: docker compose up -d db → mvn verify が成功・GET /health が 200（db:ok）・POST /api/auth/guest → POST /api/auth/refresh が通る・java_migration.md §4 の STEP 2 を「着手中」へ更新・changelog へ1行追記・コミット
+完了条件: mvn verify が成功（統合テストは埋め込みPostgreSQLで起動）・GET /health が 200（db:ok）・POST /api/auth/guest → POST /api/auth/refresh が通る・java_migration.md §4 の STEP 2 を「着手中」へ更新・changelog へ1行追記・コミット
 参照: docs/backlog/java_migration.md §2・§4（正）、docs/tech/basic/tech_structure.md §2・§4（構成と設定値）、docs/tech/basic/tech_db.md（Flyway V1 の起こし元）、docs/tech/detail/tech_auth.md（認証仕様）
-前提: STEP 1 完了。DBは PostgreSQL に統一済み（SQLite 記述は仕様書から削除済み）。V1 を定義書から起こす際、known_issues.md #17（ShopDailySlot の一意制約名 uq_shop_daily_slots_state_slot）を定義書どおりに採用して解消する。backend/ の Python 実装はまだ残っており、削除は STEP 6
+前提: STEP 1 完了。DBは PostgreSQL に統一済み（SQLite 記述は仕様書から削除済み）。V1 を定義書から起こす際、known_issues.md #17（ShopDailySlot の一意制約名 uq_shop_daily_slots_state_slot）を定義書どおりに採用して解消する。backend/ の Python 実装はまだ残っており、削除は STEP 6。**環境（確認済み）**: この端末に Docker は無い。docker-compose.yml は仕様どおり成果物として作るが、テストは zonky embedded-postgres（test スコープ）で回す方針をユーザーが選択済み（java_migration.md §2 へ1行追記する）。JDK は 17（Adoptium 17.0.7）と 25 が入っており、ビルドは 17 を使う。Maven 3.9.11・Maven Central 疎通あり
 ```
 
 ## 2. 候補キュー（最大5行・優先順）
