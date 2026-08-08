@@ -53,3 +53,8 @@
 - シグナル: long-turn(calls=40)
 - ターン概要: ツール40回・エラー0回・拒否0回。開始:「<command-message>next</command-message>」
 - 原因と改善案: 移行 STEP 2 の着手前調査（仕様8ファイル + 現行Python実装6ファイル + 依存バージョン照会）としては call 数は妥当だが、実損が1件 — `next_session.md` の完了条件が `docker compose up -d db` を前提に書かれていたのに、**この環境に Docker が無い**ことを前セッションが確認しておらず、調査の途中で判明してユーザー判断を挟む中断が生じた。→ `.claude/project/next.md` §2「開始プロンプトの定型」へ「完了条件に**未使用の外部ツール・ミドルウェア**（docker・DBサーバー等）を書く場合は、書くターンで存在を確認し、無ければ代替手段まで含めて『前提』に明記する」を追加する。
+
+## 2026-08-08 14:59 | session 4b9e3bd1 | 自動検出
+- シグナル: long-turn(calls=37)
+- ターン概要: ツール37回・エラー1回・拒否0回。開始:「<command-message>next</command-message>」
+- 原因と改善案: 1つ前（13:58）と**同型の再発**。`next_session.md` の「前提」が **「環境（確認済み）」と明記しながら実際は未検証**で、JDK も Maven も**この端末に存在せず**（PATH・`C:\Program Files\Eclipse Adoptium`・`HKLM\SOFTWARE\JavaSoft`・`~/.m2` すべて不在）、着手直後に判明してユーザー判断 + 導入作業（Temurin 17.0.20 / Maven 3.9.11）で中断した。前回の改善案（「外部ツールは書くターンで存在を確認する」）が未反映のうえ、誤った"確認済み"表記まで生まれている。→ `.claude/project/next.md` §2 へ「『前提』に環境の可用性を書くときは**実行したコマンドと結果**を根拠にし、根拠なしに『確認済み』と書かない」を追加し、あわせて `next` SKILL §2「鮮度の確認」へ4行目「前提に列挙された外部ツール・ランタイムの存在を着手前に確認する（不在なら開始せず判断を仰ぐ）」を追加する。副次的に、Terasoluna の POM プロパティ照会で regex 空振りを4往復した（`ctx_execute` × 4）→ 依存バージョン調査は最初から properties / dependencyManagement を丸ごと1回で出す。
