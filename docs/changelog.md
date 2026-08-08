@@ -12,6 +12,7 @@
 
 | ファイル | 内容 |
 |---------|------|
+| backlog/next_session.md・process/worktree_guide.md・.claude/project/next.md | **worktree 並行編集への対応**。引き継ぎに「着手中」を書かず worktree の存在で示す方式へ（書いた行が即古くなり、実際に3 worktree 稼働中に1件しか載っていなかったため）。next_session.md へ §0「並行作業のルール」を新設し、候補キューへ「wt 名 / 領域」列（名前を事前採番し、同名 worktree の有無で着手中を判定・領域列で並行可否を判定）。更新は main でのみ・統合直後に1回へ統一し、鮮度確認に wt ブランチ側のコミット確認を追加。`scripts/worktree.py list` が main との差分・未コミット件数から「作業中 / 完了・未統合 / 空」を判定して出すようにした |
 | tech/detail/tech_scout.md | **新規**。Phase 4 酒場スカウト（`POST /api/base/scout`）の詳細設計。しきい値表からの排出設定の解決、レアリティ→キャラの2段階抽選（排出率は**整数パーセントのまま累積**し `r × 100 < 累積` で判定。小数へ変換して累積しない＝最終累積が100未満になる経路を作らないため）、候補は**マスターID昇順**に並べて離散一様で1体、処理フロー10手順（検証はすべて抽選前・失敗経路で乱数を消費しない）、加入時のキャラ生成（基礎値は**レアリティ倍率を掛けずに保存**し実効値は読み取り時に算出）、API応答（新規・重複で形を変えず `isDuplicate` / `canLimitBreak` で区別）、分岐一覧29件。エラーコードは新設せず `BASE_NOT_BUILT`・`BASE_INSUFFICIENT_GOLD` を再利用 |
 | tech/basic/tech_db/player.md・tech/detail/tech_party.md・tech/basic/tech_data.md | **同一キャラの判定方法を確定**（重複＝限界突破素材の前提）。`characters` はマスターID列を持たず現行実装は**表示名で所持判定**していた（`party_service.py` にコメントあり）ため、§4 へ `master_id`（`VARCHAR(50)`・**Phase 4・未実装**・Phase 3 以前の行は NULL で名前から補完）を追加。tech_party.md §2 へ Phase 4 で判定をIDへ寄せる旨、tech_data.md のゲーム状態JSONへ `masterId` のコメント行を追記 |
 | data/master/character.md | §7.3 の「命名規約」（Phase 4 の詳細設計で定義する、というTODO）を**酒場専用16体の一覧**へ置き換え。4タイプ × 4レアリティ（レアは §7.1 の確定入手4体が占める）、IDはタイプごとにレアリティ昇順で `*_002`〜`*_005`、表示名は2〜4文字のカタカナ和風名 |

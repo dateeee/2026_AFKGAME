@@ -24,7 +24,7 @@ worktree は1つのリポジトリから複数の作業ツリーを同時に開�
 | # | ルール |
 |---|-------|
 | 1 | **1 worktree = 1 タスク（工程スキル1件）**。完了したら即 main へ統合して worktree を削除する。長生きブランチが競合の最大要因 |
-| 2 | **触るファイル領域が重ならないタスクだけ並行させる**（backend 実装 × docs 整備は○、同一システムを触る2タスクは×）。`next_session.md` の候補キューから選ぶ時点で担当ファイルの重なりを確認する |
+| 2 | **触るファイル領域が重ならないタスクだけ並行させる**（backend 実装 × docs 整備は○、同一システムを触る2タスクは×）。`next_session.md` の候補キューは行ごとに「wt 名 / 領域」を持つので、選ぶ時点でそれを突き合わせる |
 | 3 | **統合前に main を取り込む**（`merge` コマンドが自動で行う）。手順は §5.3 |
 | 4 | 追記型ファイル（changelog・効率メモ）は自動解決に任せる（§3） |
 | 5 | 単独更新ファイル（§3 の表）は **main のセッションでのみ更新**し、worktree では触らない |
@@ -38,7 +38,7 @@ worktree は1つのリポジトリから複数の作業ツリーを同時に開�
 |---------|------|------|
 | `docs/changelog.md` | 先頭ブロックへ行追記 | `merge=union` で自動統合（`.gitattributes`） |
 | `docs/backlog/efficiency_memo.md` | 末尾へ追記（Stop フック） | `merge=union` で自動統合 |
-| `docs/backlog/next_session.md` | 全面書き換え | **main でのみ更新**。並行タスクの完了報告は統合時に main 側でまとめる |
+| `docs/backlog/next_session.md` | 全面書き換え | **main でのみ・統合の直後に1回**更新する（worktree では触らない）。着手中であることは書かず、worktree の存在で示す（同ファイル §0） |
 | `docs/backlog/java_migration.md`（進捗） | 状態の更新 | main でのみ更新、または進捗を持つ STEP を担当する worktree を1つに限定 |
 | `docs/backlog/` のその他（open_specs 等） | 行の追加・削除 | 触る worktree を1つに限定 |
 
@@ -76,7 +76,8 @@ worktree は1つのリポジトリから複数の作業ツリーを同時に開�
 
 | 順 | 操作 |
 |----|------|
-| 1 | `python scripts/worktree.py add <名前>`（§1 の命名。作成先パスが標準出力に出る） |
+| 0 | `python scripts/worktree.py list` で着手状況を確認する。取ろうとしている行の worktree が既にあれば別セッションが着手中（`next_session.md` §0） |
+| 1 | `python scripts/worktree.py add <名前>`（名前は `next_session.md` が採番済み。無い場合は §1 の命名。作成先パスが標準出力に出る） |
 | 2 | `EnterWorktree` にそのパスを **`path` で渡す**（`name` を使わない ＝ §5.4）。セッションの作業ディレクトリが worktree へ移る |
 | 3 | frontend を触るタスクなら worktree 側で `cd frontend; npm install`（`node_modules` は共有されない） |
 | 4 | 以降の読み込み・編集・コミットはすべて worktree 内で行う。**編集対象が特定済みのファイルは worktree へ入ってから読む**（main 側で先に読むと Edit 用の再 Read で二重読みになる） |
@@ -90,7 +91,7 @@ worktree の作成・統合（main への merge）・削除は**ユーザーへ�
 | 1 | worktree | 成果物をコミットし、テストが通ることを確認 |
 | 2 | — | `ExitWorktree`（`action: "keep"`）で main へ戻る。**`"remove"` は効かない**（§5.4） |
 | 3 | main | `python scripts/worktree.py merge <名前>`（main 取り込み → ff 統合 → worktree・ブランチ削除まで一括） |
-| 4 | main | `next_session.md` の更新（§3 のとおり main でのみ）→ コミット |
+| 4 | main | `next_session.md` の更新（§3 のとおり main でのみ・ここで1回）: §1 を次のタスクへ書き換え、**消化した候補キューの行を消す** → コミット |
 
 `merge` が「競合」で止まったら: worktree 側のファイルを編集して解消 → worktree でコミット → main から `merge` を再実行（worktree へ入り直す必要はない）。
 

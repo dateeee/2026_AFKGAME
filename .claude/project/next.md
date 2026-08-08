@@ -8,8 +8,9 @@
 | 項目 | 値 |
 |------|-----|
 | パス | `docs/backlog/next_session.md` |
-| 構成 | §1「次回（コピペ用）」1件 + §2 候補キュー最大5行（**ポインタ専用**。Phase 進捗は転記しない） |
-| 更新タイミング | タスク完了のコミット前（Stop フック `stop-commit.sh`（`stop-chain.sh` 経由）がリマインドする） |
+| 構成 | §0 並行作業のルール + §1「次回（コピペ用）」1件 + §2 候補キュー最大5行（**ポインタ専用**。Phase 進捗は転記しない） |
+| 更新タイミング | タスク完了のコミット前（Stop フック `stop-commit.sh`（`stop-chain.sh` 経由）がリマインドする）。worktree で作業した場合は **main へ統合してから main 側で1回**（同ファイル §0 ルール4） |
+| 並行作業 | 着手中はファイルに書かず worktree の存在で示す。状態の確認は `python scripts/worktree.py list`（作業中 / 完了・未統合 / 空を判定して出す） |
 | 役割の宣言 | [docs/process/spec_ownership.md](../../docs/process/spec_ownership.md) §2 |
 
 ## 2. 開始プロンプトの定型（5要素）
