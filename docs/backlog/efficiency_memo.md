@@ -68,3 +68,8 @@
 - シグナル: long-turn(calls=151)
 - ターン概要: ツール151回・エラー2回・拒否0回。開始:「<command-message>next</command-message>」
 - 原因と改善案: 新規29ファイル（実装22 + テスト7）を Red→Green で1件ずつ回し `mvn verify` を4回通す規模としては call 数は妥当。実損は2件 — ①**残量WARN のファイルへ追記して上限超過 → 圧縮の往復**（`java_migration.md` 8,300字 → 圧縮 → 8,236字 → 再圧縮の3往復）で、これは 08-08 11:19・13:22 に続く**3回目の同型再発**（当該改善が未反映のまま）。→ `/retro` を最優先で回し、あわせて `.claude/project/profile.md` §7 へ「`check_doc_size.py` が残量WARN のファイルへ追記するときは、**追記前に**残量と追記予定の字数を突き合わせ、超えるなら同ファイル内の完了済みセクション圧縮をセットで行う」を追加する。②テスト結果の確認で surefire の `*.txt` が `@Nested` 配下を「Tests run: 0」と表示するため件数を読み違え、XML を解析する使い捨てスクリプトを書く往復が生じた。→ `.claude/project/dev.md` §5「動作確認」へ「JUnit 5 の `@Nested` を使うため、テスト件数・失敗は `target/surefire-reports/*.xml`（`tests=` / `<failure`）で確認する（`*.txt` は入れ子分を 0 と表示する）」を追加する。副次的に、テストソースへ生の制御文字（U+0001）と自作の AssertJ ヘルパを書いて Edit 失敗 + 全文書き直しに3往復 → テストの期待値に制御文字を置くときは `(char) 1` のような**定数経由**にする。
+
+## 2026-08-08 16:23 | session 3b9316a6 | 自動検出
+- シグナル: long-turn(calls=80)
+- ターン概要: ツール80回・エラー0回・拒否0回。開始:「<command-message>next</command-message>」
+- 原因と改善案: 新規14ファイル + ドキュメント5件を Red→Green で回す規模としては妥当（同一Read・同一コマンドの再実行なし。Maven 出力はファイルへ退避して `Select-String` で絞り、生ログを会話に持ち込んでいない）。実損は1件 — **`mvn verify` を2回走らせた**（1回目は統合テストの失敗で約2分の空振り）。原因は `@SpringBootTest` のテストクラスに `@Configuration` をネストしたことで、Spring Boot がそれを**テスト本体の構成として採用**し、壊れた構成でコンテキストが起動してしまうという既知挙動を知らなかったため。→ `.claude/project/integration-test.md` へ「`@SpringBootTest` のテストクラスに `@Configuration` をネストしない。起動失敗を検証する壊れた構成は `new ApplicationContextRunner().withBean(...)` で別コンテキストとして組む」を追加する。
