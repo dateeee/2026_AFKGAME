@@ -6,7 +6,7 @@ diagrams-review 2026-08-07 の「プロセスへの還元」に従い、セグ�
 4本書かれた使い捨てスクリプトを常設化したもの（review-procedure.md §5）。
 
 実装側の照合先は2つある。Python/FastAPI から Java/Terasoluna への移行期は両方を見る
-（java_migration.md §4 STEP 6）。models は移行完了時に削除され、DDL だけが残る。
+（java_migration/steps.md §4 STEP 6）。models は移行完了時に削除され、DDL だけが残る。
 
     models  backend/app/models/*.py（SQLAlchemy）
     DDL     backend/afkgame-initdb/.../db/migration/V*.sql（Flyway）
