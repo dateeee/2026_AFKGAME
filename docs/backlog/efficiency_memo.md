@@ -38,3 +38,12 @@
 - シグナル: long-turn(calls=66)
 - ターン概要: ツール66回・エラー1回・拒否0回。開始:「<ide_opened_file>The user opened the file c:\GIT\2026_AFKGAM」
 - 原因と改善案: ①**分岐一覧の見出し段数がプロファイルから読み取れない** — `detail-design.md` §4 の記載形式サンプルが `### 分岐一覧（単体テスト観点）` 単体で示されているため、`## 7. 分岐一覧（建設・レベルアップ）` の下にサンプルどおり `###` を重ねて書き、`check_branch_list.py` が「見出しはあるが表がない」で2件 ERROR → 見出し削除の往復1回。§4 へ「見出しは**1段のみ**。`## N. 分岐一覧（対象）` に表を直付けし `###` を重ねない（既存例: `tech_shop.md` §7・§8）」を追記する。②**worktree 隔離セッションで使い捨てスクリプトを heredoc + リダイレクトで作ろうとして拒否された**（`cat > <scratchpad> <<'PY'` が「worktree 内に留まると検証できない」として拒否・1エラー → Write ツールで作り直し）。`profile.md` §6 規律2 へ「使い捨てスクリプトは Write ツールでスクラッチパッドへ作成し `python <path> <root>` で実行する（Bash のヒアドキュメント + リダイレクトは隔離セッションで拒否される）」を追記する。なお残量は今回 `len()` で実測しており、直前2エントリの「目視見積もり」は再発していない。
+## 2026-08-08 17:49 | session 1e1dedd3 | 自動検出
+- シグナル: long-turn(calls=75)
+- ターン概要: ツール75回・エラー1回・拒否0回。開始:「<command-message>next</command-message>」
+- 原因と改善案: ①**テスト基盤の所在が台帳化されていない** — `afkgame-domain` に Mapper 統合テストの前例が無く、「zonky はどこにあるか・domain から使えるか・起動クラスが要るか」の調査に約15回を費やした。`test-list.md` §4 の共通テストユーティリティ表へ `MapperTestSupport`（親レコード生成・時刻固定）と `MapperTestApplication`（`@ComponentScan` なしの最小コンテキスト）、pom のテスト依存を1行ずつ登録し、次の Mapper 追加で再調査しない。②**列挙値を推測で書いて裏取りの往復** — 装備スロット9種を `hands`/`feet`/`accessory1-3` と発明し、`tech_db/item.md` §1 の実値（`arms`/`waist`/`legs`/`ears`/`ring`）で書き直した。`test-list.md` §3 の参照順へ「列挙値を使うテストは、値を書く前に定義元の節を読む（推測して後で照合しない）」を追加する。③**フックと worktree 運用の不整合**（構造的・要判断） — Stop フックの効率メモ追記が `CLAUDE_PROJECT_DIR`（main）へ書かれ、worktree 側のファイルには現れないため、記入と同一コミット化に手作業の移送が要った。`worktree_guide.md` §5 か `retro.md` へ、worktree 作業時のメモ記入先を明記する。
+
+## 2026-08-08 17:49 | session af922544 | 自動検出
+- シグナル: errors×3 / long-turn(calls=68)
+- ターン概要: ツール68回・エラー3回・拒否0回。開始:「<command-message>next</command-message>」
+- 原因と改善案: ①**候補キューの行に依存関係が書かれていない** — `/next 2`（STEP 3-A-1c）は前提の 1a・1b が未実装で着手不能、代替に挙がった STEP 3-B も「3-A 完了 + tower の詳細設計」待ちと判明するまでに調査・ユーザー確認で5往復を要した。`.claude/project/next.md` §1 の候補キュー書式へ「各行に依存する先行セグメントを明記する」を追加し、行を選んだ時点で着手可否が分かるようにする。②**worktree セッションのシェル制約と Stop フックの更新先が食い違う** — main を指す `git -C` とリダイレクト付き複合コマンドが拒否され2回空振りした。さらに Stop フックは効率メモを **main の作業ツリー**へ追記するのに、worktree 側からは main のファイルを編集できないため、フックの「メモを同じコミットに含めよ」が構造的に成立しない（本エントリも worktree 側へ書き直した）。`docs/process/worktree_guide.md` §5 へ「worktree 中は main を触るコマンドを使わない」と「効率メモは worktree 側の copy に書く（`merge=union` で統合される。main 側に残る未記入エントリは統合時に削除する）」を明記する。
