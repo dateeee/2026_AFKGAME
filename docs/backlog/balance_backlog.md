@@ -31,6 +31,7 @@
 | B-6 | 日替わりショップの帯内レアリティ出現率 | 5F未満 コモン100% / 5〜14F **70:30** / 15F〜 **55:30:15** | [tech_shop.md §2.3](../tech/detail/tech_shop.md) | レア枠が出る頻度。ドロップ品との住み分け（ショップは「つなぎ」の位置づけ）が保てているか |
 | B-7 | お知らせの掲示件数の上限値（Phase 3） | **20件**（title 40字・body 400字も仮置き） | [master_data.md §17](../data/master_data.md) | 配信頻度に対して古い告知が流れすぎないか。未読件数が過大にならないか |
 | B-8 | 確定入手キャラの加入時LV（Phase 3） | **LV1** | [master/character.md §7.1](../data/master/character.md) | 加入階（森の塔15F=推奨LV20前後）で即戦力になるか。EXP全額付与（[tech_battle.md §3.1.5](../tech/detail/tech_battle.md)）での追いつき速度をプレイテストで確認 |
+| B-9 | 酒場・鍛冶屋のしきい値LV（Phase 4） | しきい値 **1・3・5・7・10**（[tech_base.md §2.1](../tech/detail/tech_base.md) で解決規則を確定済み） | [systems/economy.md §2.9](../design/systems/economy.md) | LV2・4・6・8・9 は**コストを払っても効果が据え置き**になる。据え置きLVでレベルアップの動機が失われないか（他4施設は全LVで効果が上がる） |
 
 ## 3. 調整の進め方
 

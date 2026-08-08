@@ -7,6 +7,8 @@
 
 最終更新: 2026-08-08 / 対応コミット: `37d4ef5`（移行 STEP 3-A-1b の Mapper 疎通テストを Red で追加）。`tech_auth.md` §8.3 の分岐一覧12件は 1a・1c の担当で **1b には対応行が無い**ため、Entity/Mapper には分岐マーカーを付けず、往復・NULL 許容列の両側・一意制約4種・取得0/1/2件の観点で28ケースを置いた（`test-list.md` §2「定義のみのため副次的」・既存 `AuthServiceTest` と同じ扱い）。**次は同じ 1b の Green から**。手順・進捗の正は [java_migration.md](java_migration.md)
 
+**並行トラック**: 別セッションが **Phase 4 拠点・施設の詳細設計**（`tech_base.md` 新設・分岐一覧37件）を完了した。Java 移行とは独立に進むため §2 の**優先0**に置いてある。移行の再開（§1）と Phase 4 の続き（優先0）のどちらを先にするかはユーザー判断。
+
 ## 1. 次回（コピペ用）
 
 ```
@@ -22,6 +24,7 @@
 
 | 優先 | タスク | 前提 | 工程スキル |
 |------|-------|------|-----------|
+| 0 | **Phase 4 詳細設計の残り**（拠点・施設は `tech_base.md` で完了）。①酒場スカウト `POST /api/base/scout`（排出率の正は `master/character.md` §7.3。抽選は `tech_rng.md` に沿う）②鍛冶屋・素材 `/api/forge/*`（強化・製作・分解。コスト倍率の解決は `tech_base.md` §2.1 のしきい値規則を使う）③限界突破 `POST /api/character/limit-break` ④ダンジョン3（塔6〜8）のマスターデータ | なし（Java 移行と独立） | `detail-design` |
 | 1 | 移行 STEP 3-A-1a（初期化に使うマスターデータ）。`tech_auth.md` §8.1 の表に沿って `initial_player.yml`・`character_types.yml`（LV1 基礎値のみ。成長率は入れない）・`equipment_slots.yml` と record を追加し `MasterDataLoader` へ登録。分岐一覧 #3・#4・#6・#10 | なし | `test-list` → `dev` |
 | 2 | 移行 STEP 3-A-1c（プレイヤー初期化サービス + 結線）。`tech_auth.md` §8.2 の8手順を単一トランザクションで実装し `POST /api/auth/guest` へ結線。分岐一覧 #1・#2・#5・#7〜#9・#11・#12 が対象 | 1a + 1b | `test-list` → `dev` |
 | 3 | 移行 STEP 3-A-2（register / login / logout）。`BCryptPasswordEncoder`(strength 12) と `SecurityConfig` の認証不要パス追加を含む（持ち越しの正は java_migration.md §4 の 2-B 表）。初期化は 3-A-1c の手順2以降を再利用する（`tech_auth.md` §8 冒頭） | 3-A-1c | `test-list` → `dev` |
