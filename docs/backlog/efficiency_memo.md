@@ -59,3 +59,8 @@
 - シグナル: errors×5 / long-turn(calls=184)
 - ターン概要: ツール184回・エラー5回・拒否0回。開始:「<command-message>next</command-message>」
 - 原因と改善案: **long-turn は誤検出**（`/next` → 決着確認 → worktree → 6件を TDD で適用 → `mvn verify` → 統合 → 引き継ぎ更新まで1ターンで完走。実質的な無駄は1つ上のエントリの `-am` 件のみ）。**errors×5 の内訳は3種**: ①**worktree 分離セッションで複合 Bash が3回拒否された**（`&&` 連結 + `>` リダイレクト + 複数パスを1コマンドに詰めると "too complex to verify that it stays inside the worktree"）②`python -c` に日本語を直接書いて CP932 で壊れ SyntaxError（`profile.md` §7 規約7 の `len()` 実測をワンライナーでやろうとしたため）③`-Dtest=<クラス>` の `failIfNoSpecifiedTests` 未指定（前セッションの効率メモが既に指摘済みで、`commands.md` へのレシピ追記が**未反映のまま再発**）。→ ①は `worktree_guide.md` §5 へ「worktree 内の Bash は1コマンド1目的に割る（`&&` とリダイレクトの併用を避ける）」、②は `profile.md` §7 規約7 へ「実測用スクリプトはスクラッチパッドへ書いて `python <file>` で実行する（`python -c` に日本語を埋めない）」を追記する。③は**前セッション提案の `commands.md` レシピを次の `retro` で確実に反映する**（2セッション連続で同じ往復をしている）。
+
+## 2026-08-08 23:27 | session d27c1b8c | 自動検出
+- シグナル: long-turn(calls=55)
+- ターン概要: ツール55回・エラー1回・拒否0回。開始:「<ide_selection>The user selected the lines 49 to 49 from c:\」
+- 原因と改善案: **long-turn は誤検出**（Terasoluna 単体テストガイドライン6ページの精読 → テスト28ファイルの実装監査 → 改善方針の確定 → pom/プロファイル/テストの是正 → `mvn verify` で分離動作の実測 → 統合まで1ターンで完走）。ただし**`mvn verify` の空振りが2回**: ①failsafe を新規に pom へ足したのに `-o`（オフライン）のまま回してプラグイン解決に失敗 ②spring-boot-starter-parent が failsafe の実行（id: `default`）を pluginManagement に持つことを知らず自前 `<executions>` を足し、結合テストが二重実行になった。→ ②は `backend/pom.xml` のコメントへ記録済み。①は `commands.md` のバックエンド節（直近2セッションが「モジュールを絞ってテストする」レシピの追記を提案済み）へ「pom へプラグインを新規追加した直後の初回だけ `-o` を外す」を同レシピの5点目として足す。
