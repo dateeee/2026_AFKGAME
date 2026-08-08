@@ -53,3 +53,8 @@
 - シグナル: 突合漏れ（profile.md §7 規約6 違反の状態）
 - ターン概要: retro 中に発見。worktree_guide §5.3 の「統合前ユーザー確認」を撤廃した際、重複記載の profile.md §8 を突合しておらず矛盾が残った
 - 原因と改善案: profile.md §8 末尾の「main への merge と削除の前にユーザー確認を取る」を削除し、完了手順を「`worktree.py merge <名前>` で確認なしに一括統合」へ更新する（前回 retro で提案・未承認のため保留。次回に再提案）。
+
+## 2026-08-08 21:24 | session 62b754f7 | 自動検出
+- シグナル: long-turn(calls=76)
+- ターン概要: ツール76回・エラー1回・拒否0回。開始:「<command-message>next</command-message>」
+- 原因と改善案: ①**Java のビルド出力が cp932 で、Bash 経由のフィルタでは読めない** — Red 確認の `mvn` を `| grep` で受けたところ日本語が全て文字化けし、しかも判定に要る詳細行（`シンボル: クラス X`）は `[ERROR]` 行に続く字下げ行のため grep から漏れていた。結局ログをファイルへ落として cp932 デコードで読み直し、**重い mvn を2回実行**した（1回あたり数十秒）。`commands.md` の Java 実行コマンドへ「出力は `> <scratchpad>/x.log 2>&1` で受け、`ctx_execute` の python で `cp932` デコードして解析する（Bash のパイプ + grep は文字化け・行落ちする）」を1行足す。②**`ctx_execute_file` は worktree のファイルを読めない** — プロジェクトルート外として拒否され `ctx_execute` で書き直す往復1回。`worktree_guide.md` §5.4 へ「worktree 内のファイル解析は `ctx_execute`（パス直書き）を使う。`ctx_execute_file` はルート外として拒否される」を追記する。
