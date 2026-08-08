@@ -35,6 +35,7 @@
 | 日替わりショップ（品揃え生成・24時間更新・購入） | [tech_shop.md](detail/tech_shop.md) |
 | 拠点・施設（建設・レベルアップ・施設効果の解決） | [tech_base.md](detail/tech_base.md) |
 | 酒場スカウト（排出設定の解決・ガチャ抽選・重複判定） | [tech_scout.md](detail/tech_scout.md) |
+| 鍛冶屋（強化・製作・分解の索引） | [tech_forge.md](detail/tech_forge.md) → [enhance](detail/tech_forge_enhance.md) / [craft](detail/tech_forge_craft.md) / [disassemble](detail/tech_forge_disassemble.md) |
 | 乱数設計（RNG注入・消費順序・再現性） | [tech_rng.md](detail/tech_rng.md) |
 | 数値・丸め規約（丸め方向・キャップ・適用順序） | [tech_numeric.md](detail/tech_numeric.md) |
 | 進行状態と操作可否（状態機械・不変条件・探索セッション） | [tech_state.md](detail/tech_state.md) |
