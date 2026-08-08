@@ -26,14 +26,14 @@
 
 ## 3. 技術スタック
 
-記述規約の正は [coding_standards_backend.md](../../docs/process/coding_standards_backend.md)、エージェント向けチェックリストは [coding-standards-backend.md](../references/coding-standards-backend.md)。本表は**採用技術の一覧**に限る。
+記述規約の正は [coding_standards_backend.md](../../docs/process/coding_standards_backend.md)（索引 + 層別4分冊。**ベースは TERASOLUNA 開発ガイドライン 5.11.0**）、エージェント向けチェックリストは [coding-standards-backend.md](../references/coding-standards-backend.md)。本表は**採用技術の一覧**に限る。
 
 | 層 | 技術 | 規約 |
 |----|------|------|
 | DBアクセス | MyBatis3 | Entity + Mapper（インタフェース+XML）。`afkgame-domain` に配置 |
 | スキーマ(DTO) | Resource + Bean Validation（Jakarta） | `afkgame-web` に配置。Jackson が camelCase を維持（変換不要） |
 | ロジック | Java 17 | `afkgame-domain` の Service に集約。Controller にビジネスロジックを書かない |
-| API | Spring MVC（Terasoluna） | `@RestController`（`afkgame-web`）、DIは `@Autowired`/コンストラクタ注入 |
+| API | Spring MVC（Terasoluna） | `@RestController`（`afkgame-web`）、DIはコンストラクタ注入 |
 | ログ | Logback + MDC | `logback-spring.xml` 準拠。`X-Request-ID` は MDC で引き回す |
 | UI | Vue 3 | `<script setup lang="ts">` + Composition API |
 | 状態管理 | Pinia | `defineStore` の **Setup Store 形式** |
