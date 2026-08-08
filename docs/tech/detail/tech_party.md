@@ -27,10 +27,12 @@
 
 階クリア処理で、確定入手キャラ（[master/character.md §7.1](../../data/master/character.md)）の入手条件（塔・階）に一致するかを判定する。
 
-1. 対象階のクリア時、該当キャラを**未所持なら**付与する。初期状態は LV1・EXP0・SP0・スキル未習得・装備なし・HP=maxHP（**加入時LVは仮置き**。調整は [balance_backlog.md](../../backlog/balance_backlog.md)）
+1. 対象階のクリア時、該当キャラを**未所持なら**付与する。初期状態は LV1・EXP0・SP0・スキル未習得・装備なし・HP=maxHP（加入時LV1 の根拠は [master/character.md §7.1](../../data/master/character.md)）
 2. 既所持（周回・再クリア）なら何もしない（Phase 3 に重複の概念はない。重複→限界突破素材は Phase 4 の酒場ガチャのみ）
 3. 付与してもパーティへ自動編入しない（控えとして加入。編成はプレイヤー操作）
 4. 戦闘ログに `type: "character_join"` の行を追加する（生JSON・snake_case。[tech_battle §1](tech_battle.md)）
+
+- 所持判定は Phase 3 では**表示名**で行う（`characters` にマスターID列がないため）。Phase 4 で `master_id`（[tech_db/player.md §4](../basic/tech_db/player.md)）が入り次第、判定をIDへ寄せる（[tech_scout.md](tech_scout.md)）
 
 ### 2. 分岐一覧（単体テスト観点）
 

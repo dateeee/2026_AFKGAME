@@ -17,6 +17,7 @@
 | フロントtick制御 | `docs/tech/detail/tech_polling.md` | ポーリング間隔・停止条件 |
 | ショップ処理 | `docs/tech/detail/tech_shop.md` | 日替わりショップの品揃え抽選・購入 |
 | 拠点・施設 | `docs/tech/detail/tech_base.md` | 建設・レベルアップ・施設効果の解決 |
+| 酒場スカウト | `docs/tech/detail/tech_scout.md` | 排出設定の解決・ガチャ抽選・重複判定 |
 
 ### 横断規約
 

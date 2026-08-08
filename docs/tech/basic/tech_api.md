@@ -112,7 +112,7 @@
 |---------|------|------|
 | GET | `/api/notice/list` | お知らせ一覧の取得。`notices`: `noticeId`・`title`・`body`・`publishedAt` の配列を `publishedAt` 降順（新しい順）で返す。本文はマスターデータ配信（DBテーブルなし・更新はデプロイ）。掲示件数はマスター側の上限で抑えるためページングなし |
 
-> 要件は [operation_requirements.md](../../design/requirements/operation_requirements.md) §3.1（既読はクライアントの localStorage 保持。保持先の正は同節）。サーバーは既読状態を持たないため、エンドポイントは一覧取得のみ。未読件数はクライアントが一覧と既読 `noticeId` の突合で算出し、一覧を開いた時点で表示中の全件を既読として保存する。
+> 要件は [operation_requirements.md](../../design/requirements/operation_requirements.md) §3.1（既読はクライアントの localStorage 保持。保持先の正は同節）。サーバーは既読状態を持たないため、エンドポイントは一覧取得のみ。未読件数はクライアントが一覧と既読 `noticeId` の突合で算出し、一覧を開いた時点で表示中の全件を既読として保存する。既読キーが存在しない場合の初期化規則は [master_data.md §17.3](../../data/master_data.md) が正。
 > 取得は起動時（`GET /api/game/state` 後）の1回のみ（内容の更新はデプロイでしか起きないため。フローは [api_sequence/core.md §3.7](../../diagrams/api_sequence/core.md)）。マスターの項目定義・掲示件数の上限（20件）は [master_data.md §17](../../data/master_data.md) が正。
 
 ## 転生（Phase 5〜）
