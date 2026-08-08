@@ -65,8 +65,7 @@ VS Code は実行構成 **Full Stack** で同時起動できる（[.vscode/launc
 
 ```
 2026_AFKGAME/
-├── README.md                    # 本ファイル（概要・セットアップ）
-├── CLAUDE.md                    # AIエージェント向け開発ルール
+├── README.md  CLAUDE.md         # 本ファイル / AIエージェント向け開発ルール
 ├── .claude/                     # エージェント定義
 │   ├── skills/                  # 工程7件 + 支援10件（プロジェクト非依存）
 │   ├── references/              # スキル共通リファレンス（同上）
@@ -78,15 +77,11 @@ VS Code は実行構成 **Full Stack** で同時起動できる（[.vscode/launc
 │   ├── backlog/                 # 状態: 未処理項目の台帳（工程で増減する）
 │   └── reviews/                 # 記録: レビュー結果（自動生成。スキル名/日時.md）
 ├── scripts/                     # 開発補助スクリプト
-├── frontend/                    # Vue.js SPA
-│   ├── src/views/ components/   # ページ / UIコンポーネント
-│   ├── src/stores/ composables/ # Pinia ストア / Composition API ロジック
-│   ├── src/api/ types/          # API通信レイヤー / 型定義
-│   └── tests/e2e/               # E2Eテスト（Playwright）
-└── backend/                     # Terasoluna (Spring Boot) サーバー
-    ├── afkgame-domain/ web/     # Entity・Mapper・Service / API・DTO・Security
-    └── afkgame-env/ initdb/     # 環境設定（application.yml）/ Flyway
+├── frontend/                    # Vue.js SPA。src/{views,components,stores,composables,api,types} + tests/e2e/
+└── backend/                     # Terasoluna (Spring Boot)。afkgame-{domain,web,env,initdb}
 ```
+
+各ディレクトリの責務は [.claude/project/profile.md](.claude/project/profile.md) §2 が正。
 
 ## アーキテクチャ方針
 
@@ -110,8 +105,6 @@ VS Code は実行構成 **Full Stack** で同時起動できる（[.vscode/launc
 
 ### 開発プロセス・台帳
 
-分類軸は [documentation_rules.md](docs/process/documentation_rules.md) §10。
-
 | 分類 | ファイル |
 |------|---------|
 | 進め方 `docs/process/` | [development_process](docs/process/development_process.md) 7工程・ゲート・進捗 / [phases](docs/process/phases.md) 工程別の定義 / [documentation_rules](docs/process/documentation_rules.md) 文書規約 / [coding_standards_backend](docs/process/coding_standards_backend.md) バックエンドのコーディング規約 / [spec_ownership](docs/process/spec_ownership.md) 正の所在マップ |
@@ -120,15 +113,15 @@ VS Code は実行構成 **Full Stack** で同時起動できる（[.vscode/launc
 
 ### 仕様書
 - [docs/design/game_spec.md](docs/design/game_spec.md) — ゲーム仕様の索引
-  - [requirements/](docs/design/requirements/) 要件 — product プロダクト / non_functional 非機能 / operation 運用
+  - [requirements/](docs/design/requirements/) 要件 — product / non_functional / operation
   - [systems/](docs/design/systems/) — character / battle / equipment / economy / dungeon / endgame / ui / ui_onboarding
 - [docs/tech/tech_spec.md](docs/tech/tech_spec.md) — 技術仕様の索引
-  - [basic/](docs/tech/basic/) 基本設計 — [db](docs/tech/basic/tech_db.md)（テーブル定義書の索引 + [tech_db/](docs/tech/basic/tech_db/)） / data / structure / api / api_common / architecture / logging
+  - [basic/](docs/tech/basic/) 基本設計 — [db](docs/tech/basic/tech_db.md) + [tech_db/](docs/tech/basic/tech_db/)（テーブル定義書）/ data / structure / api / api_common / architecture / logging
   - [nonfunctional/](docs/tech/nonfunctional/) 非機能 — performance / security / operations
   - [detail/](docs/tech/detail/) 詳細設計 — battle / offline / skill / party / tick / polling / state / rng / numeric / shop / design_system / auth
 - [docs/data/master_data.md](docs/data/master_data.md) — マスターデータの索引 + 塔データ一覧
   - [master/](docs/data/master/) — character / item / equipment / base / endgame
-  - [TOWERS_OVERVIEW.md](docs/data/towers/TOWERS_OVERVIEW.md) 全塔概要一覧 / [SKILLS_OVERVIEW.md](docs/data/skills/SKILLS_OVERVIEW.md) スキルシステム概要
+  - [TOWERS_OVERVIEW.md](docs/data/towers/TOWERS_OVERVIEW.md) 塔一覧 / [SKILLS_OVERVIEW.md](docs/data/skills/SKILLS_OVERVIEW.md) スキル概要
 
 ### 設計図
 [docs/diagrams/](docs/diagrams/) — 全6図とも索引 + 同名ディレクトリ構成。

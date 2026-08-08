@@ -50,10 +50,7 @@ HISTORY_HEADING = re.compile(r"^#{1,6}\s*(?:\d+(?:\.\d+)*\.?\s*)?(?:変更|更�
 # 区分A・Dは登録不可（毎ターン・スキル起動ごとに読み込まれ放置コストが複利のため、セッション内に移管優先で是正）。
 # Phase完了ゲートでは本台帳が空であること。
 # 例: "docs/tech/basic/tech_data.md": "分割（レイヤー分割: スキーマ/JSON構造）",
-KNOWN_OVERSIZED: dict[str, str] = {
-    # 索引が満杯（登録前で 5,995字）。コーディング規約の登録で 77字 超過した。
-    "README.md": "圧縮（ドキュメント索引の説明文を削るか、索引テーブルを docs/INDEX.md へ分離）",
-}
+KNOWN_OVERSIZED: dict[str, str] = {}
 
 # 台帳登録を許す区分（documentation_rules.md §7。区分A・Dはセッション内是正）
 DEFERRABLE_ZONES = frozenset({"B 索引", "C 仕様・設計"})

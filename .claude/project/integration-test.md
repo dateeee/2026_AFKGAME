@@ -23,6 +23,7 @@
 | 時刻 | `rewind(player, 秒)` で `last_tick_at` を過去へ戻す。スリープしない |
 | ドロップ | 固定した `Random` 注入で抽選を成立させる（ドロップ率は検証対象外） |
 | ログ経由の値 | Logback の `ListAppender`（テストユーティリティ）で検証する（`afkgame` ロガーは `additivity=false`） |
+| 構成のネスト | テストクラスに `@Configuration` を**ネストしない**。Spring Boot がそれをテスト本体の構成として採用し、壊れた構成でコンテキストが起動する。起動失敗を検証したい場合は `new ApplicationContextRunner().withBean(...)` で別コンテキストとして組む |
 
 ### 1.2 L2 の記述規約
 

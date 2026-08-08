@@ -35,13 +35,14 @@
 |----|--------|------|
 | 1 | `docs/design/game_spec.md` → `design/systems/` | ゲームシステム・バランス仕様 |
 | 2 | `docs/tech/tech_spec.md` → `tech_api.md` / `tech_data.md` / `tech_structure.md` | API設計・データ構造・実装配置 |
-| 3 | `docs/tech/detail/tech_battle.md`・`tech_offline.md` | 戦闘処理・オフライン計算（戦闘関連の場合） |
-| 4 | `docs/tech/detail/tech_auth.md` | 認証システム（認証関連の場合） |
-| 5 | `docs/tech/detail/tech_rng.md`・`tech_numeric.md`・`tech_state.md` | 乱数・丸め・状態（該当する場合） |
-| 6 | `docs/data/master_data.md` → `data/master/` | マスターデータ（数値定義） |
-| 7 | `docs/data/towers/`・`docs/data/skills/` | 塔・スキルの個別データ（該当する場合のみ） |
-| 8 | `docs/diagrams/` | ER図・クラス図・APIシーケンス図等 |
-| 9 | `docs/backlog/open_specs.md` | 未確定仕様の確認（**存在する場合のみ**。不在＝未確定ゼロ） |
+| 3 | `docs/tech/detail/tech_<機能>.md` | 対象機能の処理フローと**分岐一覧の正**（機能名は索引 `tech_spec.md` で特定する） |
+| 4 | `docs/tech/basic/tech_db/<領域>.md` | 列・NULL・一意制約の正（**モデルを新設・変更する場合**。`check_schema_triple.py` の照合元） |
+| 5 | `docs/tech/detail/tech_battle.md`・`tech_offline.md`・`tech_auth.md` | 戦闘処理・オフライン計算・認証（該当する場合の補助） |
+| 6 | `docs/tech/detail/tech_rng.md`・`tech_numeric.md`・`tech_state.md` | 乱数・丸め・状態（該当する場合） |
+| 7 | `docs/data/master_data.md` → `data/master/` | マスターデータ（数値定義） |
+| 8 | `docs/data/towers/`・`docs/data/skills/` | 塔・スキルの個別データ（該当する場合のみ） |
+| 9 | `docs/diagrams/` | ER図・クラス図・APIシーケンス図等 |
+| 10 | `docs/backlog/open_specs.md` | 未確定仕様の確認（**存在する場合のみ**。不在＝未確定ゼロ） |
 
 **未確定仕様チェック**: `open_specs.md` が存在し、実装対象に未確定項目が含まれる場合、ユーザーに通知し、実装を進めるか仕様確定（`resolve-specs` スキル）を先にするか確認する。
 
@@ -77,6 +78,12 @@
 | バックエンド構文 | `cd backend && mvn -q compile` |
 | バックエンドテスト | `cd backend && mvn test`（TDDの全テストがGreen） |
 | フロント型チェック | `cd frontend && npm run type-check` |
+
+| # | 確認時の注意 |
+|---|------------|
+| 1 | テスト件数・失敗は `target/surefire-reports/*.xml`（`tests=` / `<failure`）で数える。`*.txt` は JUnit 5 の `@Nested` 配下を「Tests run: 0」と表示するため読み違える |
+| 2 | 外部依存の版は**推測で書かない**。Maven Central へ1回問い合わせてから POM へ入れる（誤った版はビルド1回ぶんの空振りになる） |
+| 3 | 既存 POM の版調査は properties と dependencyManagement を**まとめて1回**で出す（キーを推測した grep の空振りを繰り返さない） |
 
 ## 6. 完了基準
 

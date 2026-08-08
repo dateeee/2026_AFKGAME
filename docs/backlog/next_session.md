@@ -5,29 +5,28 @@
 > **鮮度**: 開始側は「前提」のコミットIDと git log を突合し、完了済みに見えたら開始せずユーザーへ確認する。
 > 本ファイルは**ポインタ専用**。Phase 進捗の正は [development_process.md](../process/development_process.md) §5、書式の正は [.claude/project/next.md](../../.claude/project/next.md)。
 
-最終更新: 2026-08-08 / 対応コミット: fa084e0 の次。**バックエンドのコーディング規約を整備**したコミット。正 `docs/process/coding_standards_backend.md` + 派生 `.claude/references/coding-standards-backend.md` の二層構成で、工程定義には `phases.md` §3.2.2（規約は基本設計の成果物）を新設。STEP 2 は完了済みで、次は移行 STEP 3。手順・進捗の正は [java_migration.md](java_migration.md)
+最終更新: 2026-08-08 / 対応コミット: 1822d69 の次。**`/retro` で効率メモ10件を反映**したコミット。再発2件（文字数超過→圧縮の往復4回 / 引き継ぎの環境前提が未検証3回）を `profile.md` §7 規約7・`next.md` §2.1・`next` SKILL §2 へ反映し、メモを空にした。文字数台帳（`KNOWN_OVERSIZED`）も空。STEP 2 は完了済みで、次は移行 STEP 3。手順・進捗の正は [java_migration.md](java_migration.md)
 
 ## 1. 次回（コピペ用）
 
 ```
-/retro 効率メモの棚卸し: docs/backlog/efficiency_memo.md に未反映エントリが10件（2026-08-08 01:29〜16:40）溜まっているため、原因をスキル・プロファイル・成果物の改善へ反映して反映済みエントリを削除する。同型の再発（上限に近いファイルへ追記して超過 → 圧縮の往復）が4回記録されており、これを最優先で潰す
-完了条件: 各エントリの改善案が反映先ファイルへ入っている・反映済みエントリを削除・README.md を文字数台帳から外す・check_doc_size.py と check_docs.py が OK・changelog へ1行追記・コミット
-参照: docs/backlog/efficiency_memo.md（未反映エントリ10件）、.claude/project/retro.md（反映先マップ・しきい値）
-前提: 移行 STEP 2 完了。メモは約7,900字（区分C 8,000字）で次の自動追記で超過する。エントリ内で名指しされている反映先は `.claude/project/profile.md` §7（**追記・新規作成の前に残量を確認する** — 4回再発中の未反映分）と `.claude/project/dev.md` §5（`@Nested` 使用時のテスト件数は surefire の *.xml で確認する）。あわせて `scripts/check_doc_size.py` の `KNOWN_OVERSIZED` に `README.md`（6,077/6,000字）が登録済みで、是正方針は「索引の説明文を削る」または「索引テーブルを docs/INDEX.md へ分離」。STEP 3 は複数セッションに及ぶため、着手前にここで整地しておく
+/test-list → /dev 移行 STEP 3-A-1（ゲスト作成の初期化）: POST /api/auth/guest で Player・キャラクター・装備スロット・初期ポーションを作る。初期値がマスターデータ側にあるため、必要な範囲のマスターデータを YAML + record へ移す（ローダ基盤は STEP 2-C で完成済み）
+完了条件: 分岐一覧から起こした JUnit テストが Red → Green・JaCoCo branch 100%（親POMのしきい値）・mvn verify が成功・changelog へ1行追記・コミット
+参照: docs/tech/detail/tech_auth.md（分岐一覧の正）、docs/tech/basic/tech_db/player.md（列・一意制約の正）、docs/data/master/character.md（初期値）、docs/backlog/java_migration.md §4（STEP 3 の手順）
+前提: 移行 STEP 2 完了（1822d69 時点）。効率メモは空。**環境（2026-08-08 に新規シェルで実行確認済み）**: `mvn`・`java` は PATH に無く、Bash から動くのは `JAVA_HOME="/c/Program Files/Eclipse Adoptium/jdk-17.0.20.8-hotspot" "/c/Users/tubas/AppData/Local/Programs/apache-maven-3.9.11/bin/mvn" -v` の形（JAVA_HOME をインラインで与えないと mvn は "JAVA_HOME is not defined correctly" で落ちる。java 単体はフルパスで起動する）。Docker は未検証のため統合テストは zonky 埋め込み PostgreSQL を使う
 ```
 
 ## 2. 候補キュー（最大5行・優先順）
 
 | 優先 | タスク | 工程スキル |
 |------|-------|-----------|
-| 1 | 移行 STEP 3-A-1（ゲスト作成の初期化）。`POST /api/auth/guest` で Player・キャラクター・装備スロット・初期ポーションを作る。初期値がマスターデータ側にあるため、**必要な範囲のマスターデータを YAML + record へ移す**（ローダ基盤は 2-C で完成済み） | `test-list` → `dev` |
-| 2 | 移行 STEP 3-A-2（register / login / logout）。`BCryptPasswordEncoder`(strength 12) と `SecurityConfig` の認証不要パス追加を含む（持ち越しの正は java_migration.md §4 の 2-B 表） | `test-list` → `dev` |
-| 3 | 移行 STEP 3-A-3（link-account / verify-email / password-reset）。確認メール送信・トークン検証 | `test-list` → `dev` |
-| 4 | 移行 STEP 3-B（Phase 1 の game / battle / tower 移植）。分岐一覧から JUnit テストを起こす Red → Green | `test-list` → `dev` |
-| 5 | 移行 STEP 4（Phase 2 スコープの移植: equipment / shop・日替わり含む） | `test-list` → `dev` |
+| 1 | 移行 STEP 3-A-2（register / login / logout）。`BCryptPasswordEncoder`(strength 12) と `SecurityConfig` の認証不要パス追加を含む（持ち越しの正は java_migration.md §4 の 2-B 表） | `test-list` → `dev` |
+| 2 | 移行 STEP 3-A-3（link-account / verify-email / password-reset）。確認メール送信・トークン検証 | `test-list` → `dev` |
+| 3 | 移行 STEP 3-B（Phase 1 の game / battle / tower 移植）。分岐一覧から JUnit テストを起こす Red → Green | `test-list` → `dev` |
+| 4 | 移行 STEP 4（Phase 2 スコープの移植: equipment / shop・日替わり含む） | `test-list` → `dev` |
 
 - 移行 STEP 5（Phase 3 製造①の実装済み分＝パーティ・スキル操作を移植）。続けて製造②（スキル戦闘処理: skill / environment）・製造③（オフライン期待値計算＝ISSUE-106）を Java で実装する。製造②では `SkillData` へダメージ倍率・対象・状態異常のフィールドを追加する
 - 獣の塔（`docs/data/towers/003_獣の塔.md`）をマスターデータへ追加する際、`FLOOR_CHARACTERS` へ `scout_001` ハヤテ（獣の塔10Fクリア。character.md §7.1 の3体目）を追加する。製造①では塔IDがどの仕様書にも宣言されておらず ID を発明しないため見送った（着手は優先1または STEP 5 に合流させる）
 - 移行 STEP 6（切替と後始末: Vite プロキシ・`.vscode/launch.json`・デプロイ手順・`backend/` の Python 削除・本ファイル群の整理）は上記すべての完了後。手順は [java_migration.md](java_migration.md) §4 が正
 - `docker-compose.yml` は成果物として作成済みだが **Docker 環境が未検証**のため未起動確認。`local` で実際に `docker compose up -d` → `mvn spring-boot:run` → `GET /health` を通すのは Docker が使えるタイミングで行う
-- **環境**: `mvn`・`java` は PATH に無い。`JAVA_HOME="C:\Program Files\Eclipse Adoptium\jdk-17.0.20.8-hotspot"` と `"C:\Users\tubas\AppData\Local\Programs\apache-maven-3.9.11\bin\mvn.cmd"` のフルパスで実行する（PowerShell からは `mvn.cmd`）。統合テストのDBは zonky 埋め込み PostgreSQL（`@AutoConfigureEmbeddedDatabase(provider = ZONKY)`）。`@ConfigurationProperties` クラスは `afkgame-env` の `com.afkgame.env.config` に置く。親POMに JaCoCo branch しきい値100%が入っているため、追加した分岐はすべてテストで通す
+- **環境**（2026-08-08 に新規シェルで実行確認済み）: `mvn`・`java` は PATH に無く、**`JAVA_HOME` も設定されていない**。フルパス（JDK `C:\Program Files\Eclipse Adoptium\jdk-17.0.20.8-hotspot`、Maven `C:\Users\tubas\AppData\Local\Programs\apache-maven-3.9.11\bin\mvn.cmd`。PowerShell からは `mvn.cmd`）に加え、**`JAVA_HOME` を毎回与える**こと（無いと mvn は "JAVA_HOME is not defined correctly" で落ちる。java 単体はフルパスのみで起動する）。統合テストのDBは zonky 埋め込み PostgreSQL（`@AutoConfigureEmbeddedDatabase(provider = ZONKY)`）。`@ConfigurationProperties` クラスは `afkgame-env` の `com.afkgame.env.config` に置く。親POMに JaCoCo branch しきい値100%が入っているため、追加した分岐はすべてテストで通す
