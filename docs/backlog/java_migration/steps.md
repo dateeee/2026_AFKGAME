@@ -95,7 +95,7 @@ STEP 2 で作った骨格は Spring Boot アプリで、ガイドラインのブ
 | 1 | Vite の `/api` プロキシ先・E2E の webServer を Java 側へ向ける | 完了 |
 | 2 | `tech_db/` 各テーブルの「実装:」行を Entity 参照へ切り替え、`check_schema_triple.py` の models 照合を削除（DDL 照合が引き継ぐ） | 完了 |
 | 3 | `backend/`（Python）と Python 依存の削除（旧コードはタグ `python-backend-final` から取り出せる） | 完了 |
-| 4 | `.vscode/launch.json`（gitignore 済み）の実行構成を Java 側へ向ける | 未着手 |
+| 4 | `.vscode/launch.json`（gitignore 済み）の実行構成を Java 側へ向ける | 完了（2R で war + Tomcat になったら再度差し替える） |
 | 5 | デプロイ手順（war + Tomcat）の反映は 2R-F で済ませ、本 STEP では最終構成での再確認のみ | 2R 完了後 |
 | 6 | E2E 全PASS の確認 | STEP 5 完了後 |
 | 7 | 本ファイル群（`java_migration.md` と `java_migration/`）を削除し、[changelog.md](../../changelog.md) へ完了を1行記録 | STEP 5 完了後 |

@@ -51,11 +51,6 @@ HISTORY_HEADING = re.compile(r"^#{1,6}\s*(?:\d+(?:\.\d+)*\.?\s*)?(?:変更|更�
 # Phase完了ゲートでは本台帳が空であること。
 # 例: "docs/tech/basic/tech_data.md": "分割（レイヤー分割: スキーマ/JSON構造）",
 KNOWN_OVERSIZED: dict[str, str] = {
-    "docs/backlog/next_session.md": (
-        "圧縮 — §1 の統合待ちブロック（wt/drop-python-backend、約1,500字）は統合完了時に消える。"
-        "統合直後に再測定し、収まっていれば本行を削除する。なお超えるなら冒頭の「決まった流儀」"
-        "各段落を carryover_notes.md へ移す"
-    ),
     "docs/backlog/efficiency_memo.md": (
         "圧縮 — Stop フックの追記で超過。/retro で消化して反映済みエントリを削除する（削除で解消する運用）"
     ),
