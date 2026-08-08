@@ -96,7 +96,7 @@ DBスキーマは**テキスト（テーブル定義書）を正、ER図を視�
 | 項目 | 内容 |
 |------|------|
 | 目的 | 基本設計どおりにAPI・画面が連携して動作することを検証する |
-| レイヤー1: API統合テスト | MockMvc（`@SpringBootTest`）+ SQLite実DB。認証→塔選択→tick→報酬などのAPIシーケンスを検証。配置: `backend/tests/integration/` |
+| レイヤー1: API統合テスト | MockMvc（`@SpringBootTest`）+ テスト用 PostgreSQL。認証→塔選択→tick→報酬などのAPIシーケンスを検証。配置: 各モジュールの `src/test/java`（統合テストパッケージ） |
 | レイヤー2: E2Eテスト | **Playwright**。フロントエンド＋バックエンドを通しで起動し、画面操作ベースで検証。配置: `frontend/tests/e2e/` |
 | シナリオの導出元 | [docs/diagrams/screen_transition.md](../diagrams/screen_transition.md)（画面遷移図）、[docs/diagrams/api_sequence.md](../diagrams/api_sequence.md)（APIシーケンス図） |
 | 完了基準 | 対象Phaseの主要シナリオが全PASS |

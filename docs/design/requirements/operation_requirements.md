@@ -31,7 +31,7 @@
 | Phase 4（拠点導入） | 全施設を未建設（LV0）で初期化する |
 | Phase 5（転生導入） | 転生回数0・転生ポイント0で初期化する |
 | マスタIDの扱い | 既存データが参照するIDは**削除・再利用しない**（追番のみ） |
-| DB移行（SQLite → PostgreSQL） | 本番移行時に既存データを引き継げること |
+| DBインフラ変更（ノード分離・バージョン更新） | 変更時に既存データを引き継げること |
 | ダウンタイム | 移行に伴う停止は24時間未満に収めること（[non_functional_requirements.md §3](non_functional_requirements.md)） |
 
 - 移行ツール・リビジョン粒度・前方互換・ロールバック手順は [tech_operations.md §12.4](../../tech/nonfunctional/tech_operations.md) が正

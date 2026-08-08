@@ -11,8 +11,10 @@
 
 | 環境 | 用途 | DB | ログ形式 | CORS |
 |------|------|-----|---------|------|
-| `local` | 開発・デバッグ | SQLite（ファイル） | `text` | `http://localhost:5173` |
-| `production` | 本番 | SQLite → PostgreSQL（§12.4 の移行判断ライン） | `json` | 本番フロントのオリジンのみ |
+| `local` | 開発・デバッグ | PostgreSQL（Docker Compose） | `text` | `http://localhost:5173` |
+| `production` | 本番 | PostgreSQL（EC2 同居） | `json` | 本番フロントのオリジンのみ |
+
+- DBMS は **`local`・`production` とも PostgreSQL** に統一する（dev/prod で DBMS を揃え、型・ロック挙動の差異を持ち込まない）。`local` の起動はリポジトリ同梱の Docker Compose 定義による
 
 - ステージング環境は設けない（個人開発のため）。本番反映前の確認は `local` で行う
 - 環境の識別は環境変数 `APP_ENV`（`local` / `production`）。**本番でのみ有効化される制約**（HTTPS必須・CORSワイルドカード禁止・`USE_API` 強制）はこの値で判定する
@@ -23,12 +25,12 @@
 |----|------|
 | フロント（SPA） | S3（静的ホスティング）+ CloudFront。HTTPS は CloudFront が終端する |
 | API | EC2 1台。Nginx をリバースプロキシに Spring Boot 実行可能 jar を systemd で常駐させる |
-| DB | 同一 EC2 の EBS 上に配置。SQLite → PostgreSQL（§12.4 の移行判断ライン） |
+| DB | 同一 EC2 上に PostgreSQL を常駐させ、データディレクトリを EBS に置く（マネージドDBは使わない） |
 | 定期ジョブ | 同一 EC2 の OS cron（§12.6） |
 | バックアップ | EBS の日次スナップショットを取得する。方式・頻度・保持期間・保管先は **§12.5 が正** |
 
 - フロントとバックエンドは**別オリジン**（CloudFront / EC2）になる。許可オリジンは §12.2 の `CORS_ORIGINS` が正
-- マネージドコンテナ（App Runner・ECS Fargate）は採用しない。ファイルシステムが揮発し、SQLite と OS cron を継続できないため
+- マネージドコンテナ（App Runner・ECS Fargate）は採用しない。ファイルシステムが揮発し、DBのデータディレクトリと OS cron を同一ノードで継続できないため
 
 ## 12.2 環境変数一覧
 
@@ -37,7 +39,9 @@
 | 変数名 | 用途 | 既定値 | 本番必須 |
 |--------|------|--------|---------|
 | `APP_ENV` | 環境識別 | `local` | ○ |
-| `DATABASE_URL` | DB接続文字列 | `sqlite:///./afkgame.db` | ○ |
+| `DATABASE_URL` | DB接続文字列（JDBC） | `jdbc:postgresql://localhost:5432/afkgame` | ○ |
+| `DATABASE_USER` | DB接続ユーザー | `afkgame` | ○ |
+| `DATABASE_PASSWORD` | DB接続パスワード | なし（未設定なら起動失敗） | ○ |
 | `JWT_SECRET` | JWT署名鍵 | なし（未設定なら起動失敗） | ○ |
 | `CORS_ORIGINS` | 許可オリジン（カンマ区切り） | `http://localhost:5173` | ○ |
 | `FRONTEND_BASE_URL` | メール内リンクの生成元 | `http://localhost:5173` | ○ |
@@ -66,7 +70,7 @@
 | 5xx 率 | 1% 超で調査 | Filter/Interceptor の `status_code` |
 | `POST /api/battle/tick` の p95 | [non_functional_requirements.md](../../design/requirements/non_functional_requirements.md) §1 の目標超過で調査 | Filter/Interceptor の `duration_ms` |
 | ERROR ログ件数 | 1件でも出たら内容を確認 | ロガー `afkgame.*` |
-| DBファイル/テーブルサイズ | 850MB 接近で PostgreSQL 移行を検討 | 日次バッチ（§12.6）で記録 |
+| DBサイズ（`pg_database_size`） | [tech_performance.md](tech_performance.md) §10.3 の試算を上回る増加傾向で調査 | 日次バッチ（§12.6）で記録 |
 
 - アラート通知はベストエフォート（個人運用）。定期的にログを確認する運用とし、SLA は提示しない
 
@@ -82,20 +86,18 @@
 | 破壊的変更 | 列・テーブルの削除は **2段階リリース**（①アプリが参照しなくなる → ②次リリースで削除）。ダウングレードでデータを復元できないため |
 | 適用手順 | ①バックアップ取得（§12.5）→ ②アプリ停止 → ③新バージョンの jar を起動（起動時に Flyway が自動適用。`flyway migrate` 相当）→ ④`GET /health` 確認 → ⑤アプリ再開 |
 | ロールバック | Flyway に `downgrade` 相当の機能はないため、バックアップからの復元で対応する（破壊的変更を含むリビジョンの復元方針は変更なし） |
-| SQLite の制約 | 列削除・型変更は「新テーブル作成 → データ移行 → 差し替え」をマイグレーションSQLに明示的に記述する（Flyway に自動抽象化の機能はない） |
+| DDLのロック | `ALTER TABLE ... DROP COLUMN` と列追加（既定値なし）は即時だが、**型変更はテーブル全体の書き換えと排他ロック**を伴う。破壊的変更の②削除リリースは停止時間を見積もって適用する |
 
 **初期化**: 既存 Alembic の4リビジョンは Flyway の `V1` 初期スキーマへ統合する（移行前後で同一スキーマになることを確認する。[java_migration.md §5](../../backlog/java_migration.md)）。
 
-**マスターデータの扱い**: マスターデータ（`record` + 静的Map。`afkgame-domain`）はマイグレーション対象外。ただし**既存IDの変更・削除は禁止**（プレイヤーの所持データが参照するため）。変更が必要な場合は新IDを追加し、旧IDは非表示にする。
-
-**PostgreSQL 移行判断**: DBサイズ 850MB 接近（≒1万人規模。[tech_performance.md](tech_performance.md) §10.3）、または書き込みロック競合が観測された時点で移行する。DataSource 設定（接続文字列）の差し替えで切り替わるよう、SQLite 固有機能に依存しない実装を維持する。
+**マスターデータの扱い**: マスターデータは YAML リソース（`afkgame-domain` の `resources/masterdata/`）であり、DBマイグレーションの対象外。差し替えは**再ビルドなしで反映できる**が、既存IDの**変更・削除は禁止**（プレイヤーの所持データが参照するため）。変更が必要な場合は新IDを追加し、旧IDは非表示にする。ローダは起動時にスキーマを検証し、不正なら起動を中止する。
 
 ## 12.5 バックアップ・リストア
 
 | 項目 | 仕様 |
 |------|------|
 | 頻度 | 日次（`production` のみ）。§12.6 と同じ OS cron で実行する |
-| 方式 | **論理バックアップ**（SQLite: `VACUUM INTO` でのファイルコピー／PostgreSQL: `pg_dump`）と、**EBS 日次スナップショット**（ボリューム全体）を併用する |
+| 方式 | **論理バックアップ**（`pg_dump`）と、**EBS 日次スナップショット**（ボリューム全体）を併用する |
 | 保持期間 | 14日（論理バックアップ・スナップショットとも） |
 | 保管先 | アプリ稼働ノードとは別のストレージ（論理バックアップは S3、スナップショットは EBS の保管領域） |
 | 検証 | 月1回、バックアップからのリストアを実施して復元可能性を確認する |

@@ -11,7 +11,7 @@
 | オフライン計算 | **サーバー** | 復帰時に経過tick分をまとめてシミュレーション (正規 or 簡略) |
 | 塔進行・撤退判定 | **サーバー** | tick処理内で階クリア・撤退条件・全滅をすべて判定 |
 | ショップ購入 | **サーバー** | 在庫・価格・残金チェックをサーバーで実行 |
-| データ永続化 | **サーバー** | SQLite（初期）→ PostgreSQL（[tech_operations.md](../../tech/nonfunctional/tech_operations.md) §12.4 の移行判断ライン） |
+| データ永続化 | **サーバー** | PostgreSQL（`local`・`production` とも。[tech_operations.md](../../tech/nonfunctional/tech_operations.md) §12.1） |
 | UI表示 | **クライアント** | 戦闘ログのテキスト表示、ゲージ描画、モーダル表示 |
 | ポーリング制御 | **クライアント** | 60秒間隔のsetInterval管理、visibilitychange検知 |
 | ローカル計算 | **クライアント** | useBattleLocal.ts — **デバッグ用のみ**。USE_API=false時のフォールバック |

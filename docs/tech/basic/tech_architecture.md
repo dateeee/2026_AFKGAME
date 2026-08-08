@@ -28,7 +28,7 @@
 | 識別 | JWT（アクセストークン30分 + リフレッシュトークン30日） |
 | トークン保存先 | アクセストークン: メモリ保持 / リフレッシュトークン: LocalStorage（キー: `refresh_token`） |
 | APIリクエスト | `Authorization: Bearer <access_token>` ヘッダーで識別 |
-| サーバー側 | アカウントに紐づくプレイヤーデータをSQLiteに保存 |
+| サーバー側 | アカウントに紐づくプレイヤーデータを PostgreSQL に保存 |
 | 本登録移行 | ゲスト→本登録フロー（[tech_auth.md](../detail/tech_auth.md) 参照）で既存データを引き継ぎ |
 | データロスト | リフレッシュトークン消失時、ゲストのままではデータ復旧不可（本登録で回避可能） |
 
@@ -90,12 +90,12 @@ WCAG準拠レベルは明示的に定めず、ベストエフォートで以下�
 - 正式なWCAG準拠テスト・認証は行わない
 
 ## MVP開発方針
-Phase 1 から **フロントエンド（Vue + Vite）とバックエンド（Terasoluna + SQLite）を同時開発** する。
+Phase 1 から **フロントエンド（Vue + Vite）とバックエンド（Terasoluna + PostgreSQL）を同時開発** する。
 
 | 機能 | Phase 1（MVP） | 備考 |
 |------|---------------|------|
 | tick計算 | Terasoluna `/api/battle/tick` | サーバー権威 |
-| データ保存 | SQLite | サーバーDB |
+| データ保存 | PostgreSQL | サーバーDB |
 | オフライン報酬 | サーバー側で計算 | 復帰時にまとめて処理 |
 | フロント | Vue 3 SPA | ポーリングで結果取得・表示 |
 

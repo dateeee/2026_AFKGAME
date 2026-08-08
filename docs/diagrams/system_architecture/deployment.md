@@ -17,9 +17,9 @@ flowchart TB
 
         subgraph EC2["EC2 (1台)"]
             Nginx["Nginx\nリバースプロキシ"]
-            Uvicorn["Spring Boot 実行可能jar\nTerasoluna(Spring Boot) 常駐"]
+            AppJar["Spring Boot 実行可能jar\nTerasoluna(Spring Boot) 常駐"]
             Cron["OS cron\n日次バッチ (§12.6)"]
-            EBS["EBS\nSQLite → PostgreSQL\n(§12.4 移行判断ライン)"]
+            EBS["PostgreSQL\nデータディレクトリは EBS 上"]
         end
 
         Snapshot["EBS 日次スナップショット\n(§12.5)"]
@@ -29,8 +29,8 @@ flowchart TB
     Browser -->|"HTTPS"| CloudFront
     CloudFront -->|"SPA配信"| S3spa
     Browser -->|"REST API (JSON)\n別オリジン・CORS"| Nginx
-    Nginx --> Uvicorn
-    Uvicorn -->|"DB読み書き"| EBS
+    Nginx --> AppJar
+    AppJar -->|"DB読み書き"| EBS
     Cron -->|"日次バッチ・論理バックアップ"| EBS
     EBS -->|"日次スナップショット"| Snapshot
     EBS -->|"論理バックアップを転送"| S3backup

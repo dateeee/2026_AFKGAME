@@ -37,18 +37,19 @@
 | 統合テスト | MockMvc（`@SpringBootTest`） | FastAPI TestClient の置き換え |
 | E2E | Playwright（既存を流用） | 変更なし |
 | 設定 | `application.yml` + 環境変数 | `.env` / `config.py` の置き換え |
-| DB | SQLite（MVP）→ PostgreSQL | 変更なし。ドライバは `sqlite-jdbc` |
+| DB | **PostgreSQL に統一** | `local` は Docker Compose、`production` は EC2 同居。ドライバは `postgresql` JDBC。SQLite は採用しない（§5） |
+| マスターデータ | **YAML リソース + 起動時ローダ** | `afkgame-domain` の `src/main/resources/masterdata/`。起動時に `record` へ読み込み、不変 Map で公開する |
 
 ### モジュール構成
 
 Terasoluna blank project の標準構成に従う。
 
 | モジュール | パッケージ | 内容 |
-|-----------|-----------|------|
+|------|------|------|
 | `afkgame-domain` | `com.afkgame.domain.model` | Entity |
 | | `.repository` | MyBatis3 Mapper インタフェース + 同名の Mapper XML |
 | | `.service` | ビジネスロジック |
-| | `.masterdata` | マスターデータ（`record` + 静的 Map） |
+| | `.masterdata` | マスターデータの `record` + YAML ローダ（YAML 本体は `src/main/resources/masterdata/`） |
 | `afkgame-web` | `com.afkgame.web.api` | `@RestController` |
 | | `.resource` | Resource(DTO) + Bean Validation |
 | | `.config` | Security・Jackson・`@ConfigurationProperties` |
@@ -61,7 +62,7 @@ Terasoluna blank project の標準構成に従う。
 ## 3. 対応表（Python → Java）
 
 | 現行 | 移行後 |
-|------|-------|
+|------|------|
 | `routers/` (FastAPI) | `afkgame-web` の `@RestController`（アプリケーション層） |
 | `services/` | `afkgame-domain` の Service（ドメイン層） |
 | `schemas/`（Pydantic / CamelModel） | Resource クラス + Bean Validation |
@@ -72,7 +73,7 @@ Terasoluna blank project の標準構成に従う。
 | `exceptions.py` + 例外ハンドラ | Terasoluna の例外体系 + `@RestControllerAdvice` |
 | `logging_config.py` | `logback-spring.xml` |
 | `config.py` の定数 | `@ConfigurationProperties` クラス |
-| `master_data/`（Python定数） | `record` + 静的 Map（`afkgame-domain`） |
+| `master_data/`（Python定数） | YAML リソース + 起動時ローダ → `record`（`afkgame-domain`） |
 | `rng.py` | `java.util.Random` を注入（[tech_rng.md](../tech/detail/tech_rng.md) が正） |
 | Alembic | Flyway |
 | pytest / pytest-cov | JUnit 5 / JaCoCo |
@@ -85,7 +86,7 @@ Terasoluna blank project の標準構成に従う。
 | STEP | 内容 | 状態 |
 |------|------|------|
 | 0 | 技術選定（§2） | 完了 |
-| 1 | 基本設計・規約の改訂（ドキュメント先行） | 着手中 |
+| 1 | 基本設計・規約の改訂（ドキュメント先行） | 完了 |
 | 2 | Java 側の骨格構築（横断基盤） | 未着手 |
 | 3 | Phase 1 スコープの移植 | 未着手 |
 | 4 | Phase 2 スコープの移植 | 未着手 |
@@ -97,7 +98,7 @@ Terasoluna blank project の標準構成に従う。
 コードより先に仕様書を Java/Terasoluna 前提へ改訂する。対象は §2 の技術選定に触れる記述のみで、**ゲーム仕様・API契約・DBスキーマは変更しない**。
 
 | 対象 | 改訂内容 |
-|------|---------|
+|------|------|
 | `README.md` | 技術スタック表・セットアップ・ディレクトリ構成・主なコマンド |
 | `CLAUDE.md` | 実装規約・テスト標準 |
 | `tech_structure.md` | §2 ディレクトリ構成・§4 バックエンド構成・設定値 |
@@ -114,24 +115,26 @@ Terasoluna blank project の標準構成に従う。
 | `development_process.md`・`phases.md` | テスト標準・コマンド |
 | `.claude/project/**` | 対象ファイル一覧・コマンド・技術規約・テストパターン |
 
+§2 で確定した2点（**PostgreSQL 統一**・**マスターデータの YAML 外出し**）の仕様書反映も本 STEP に含む。影響は §5 の該当行を参照。
+
 完了基準: `check_doc_size.py` と `check_docs.py` が exit 0、`doc-review` の指摘ゼロ。
 
 ### STEP 2: 骨格構築
 
-機能を持たない共通基盤を先に固める。完了時点で「`GET /health` が 200・ゲスト認証が通る」状態にする。
+機能を持たない共通基盤を先に固める。完了時点で「`GET /health` が 200（`db:ok`）・ゲスト認証が通る」状態にする。
 
-1. Terasoluna MyBatis3 blank project からモジュール生成
+1. Terasoluna MyBatis3 blank project からモジュール生成 + `local` 用 PostgreSQL の Docker Compose 定義
 2. 統一エラーレスポンス・例外ハンドラ・リクエストIDログ
 3. Spring Security による JWT / ゲスト認証
 4. Flyway 初期スキーマ（[tech_db.md](../tech/basic/tech_db.md) が正）
-5. RNG・設定プロパティ・マスターデータのロード基盤
+5. RNG・設定プロパティ・マスターデータの YAML ローダ基盤（起動時に検証し、不正なら起動失敗）
 
 ### STEP 3〜5: Phase 単位の移植
 
 各 Phase とも **分岐一覧 → JUnit テスト（Red）→ 実装（Green）** の順で進める（TDD 方針は維持）。
 
 | STEP | スコープ |
-|------|---------|
+|------|------|
 | 3 | auth / game / battle / tower（Phase 1） |
 | 4 | equipment / shop（Phase 2・日替わり含む） |
 | 5 | party / skill（Phase 3 製造①の実装済み分） |
@@ -160,10 +163,6 @@ API契約は不変だが、以下は言語差により仕様側の見直しが�
 | 乱数の再現性 | Python の Mersenne Twister と Java の乱数は互換性がない。**同一シードでも結果は一致しない**。シード固定テストの期待値は Java 側で再生成する |
 | tick の排他 | SQLAlchemy のセッション前提から、Spring の `@Transactional` + 行ロック前提へ読み替える |
 | マイグレーション履歴 | Alembic の既存4リビジョンは Flyway の `V1` 初期スキーマへ畳む（移行前後で同一スキーマになることを確認する） |
-
-## 6. 未決事項
-
-| # | 項目 | 期限 |
-|---|------|------|
-| 1 | ローカル開発DBを SQLite のまま維持するか、PostgreSQL（Docker）へ寄せるか。SQLite 維持は現行設計を変えずに済むが、Flyway の SQLite 対応はコミュニティ層で列削除・型変更に制約が残る | STEP 2 着手前 |
-| 2 | マスターデータを Java 定数で持つか、YAML リソースへ外出しするか（現行は Python 定数） | STEP 2 着手前 |
+| DBMS の統一 | SQLite を廃止し `local`・`production` とも PostgreSQL にする。段階移行（規模到達で SQLite → PostgreSQL）の前提が消えるため、型マッピングの SQLite 列・ロック方式の分岐・バックアップの二本立て・容量による移行判断ラインを削除する |
+| tick のロック | SQLite の `BEGIN IMMEDIATE` 前提をやめ、`SELECT ... FOR UPDATE` の行ロックに一本化する（[tech_tick.md](../tech/detail/tech_tick.md) §3.1 が正） |
+| マスターデータ | Python 定数 → YAML リソース。数値の正は `docs/data/master/` のまま変わらないが、**再ビルドなしで差し替え可能**になる。ローダは起動時にスキーマ検証し、不正なら起動を中止する |

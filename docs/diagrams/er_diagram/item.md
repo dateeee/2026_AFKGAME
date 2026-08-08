@@ -49,7 +49,7 @@ erDiagram
     }
 ```
 
-> **注**: `ItemMaster` はDBテーブルではなく、コード内定義のマスターデータ（`afkgame-domain` の `ItemMaster` 静的Map）。`InventoryItem.item_id` は他のマスター参照列と同じく `FK` タグを付けず、`InventoryItem }o--|| ItemMaster` のリレーション線が論理参照を示す（DBレベルのFK制約はない。親 [tech_db.md](../../tech/basic/tech_db.md) §4-6）。`InventoryItem` 側は `category` を列として持たず、`item_id` から `ItemMaster` を引いて得る。
+> **注**: `ItemMaster` はDBテーブルではなく、YAML リソース由来のマスターデータ（`afkgame-domain` の `ItemMaster` レコード）。`InventoryItem.item_id` は他のマスター参照列と同じく `FK` タグを付けず、`InventoryItem }o--|| ItemMaster` のリレーション線が論理参照を示す（DBレベルのFK制約はない。親 [tech_db.md](../../tech/basic/tech_db.md) §4-6）。`InventoryItem` 側は `category` を列として持たず、`item_id` から `ItemMaster` を引いて得る。
 
 ## ショップ・施設系
 

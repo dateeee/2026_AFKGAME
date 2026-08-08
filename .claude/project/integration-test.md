@@ -7,7 +7,7 @@
 
 | レイヤー | 内容 | 配置 | 状態 |
 |---------|------|------|------|
-| L1: API統合テスト | MockMvc（`@SpringBootTest`）+ インメモリSQLite。APIシーケンスを検証 | Maven の `src/test/java`（統合テストパッケージ） | **整備済み**（Phase 1〜2） |
+| L1: API統合テスト | MockMvc（`@SpringBootTest`）+ テスト用 PostgreSQL（Testcontainers）。APIシーケンスを検証 | Maven の `src/test/java`（統合テストパッケージ） | **整備済み**（Phase 1〜2） |
 | L2: E2Eテスト | Playwright。フロント＋バックを通しで起動し画面操作で検証 | `frontend/tests/e2e/` | **整備済み**（Phase 1〜2） |
 
 ### 1.1 L1 の記述規約
@@ -29,7 +29,7 @@
 | 項目 | 規約 |
 |------|------|
 | 実行 | `cd frontend && npm run test:e2e`（`playwright.config.ts` がフロント・バックを自動起動） |
-| サーバー | バック :8100（`DATABASE_URL=jdbc:sqlite:./e2e.db`）／フロント :5174。開発用の :8000 / :5173 とDBを分ける |
+| サーバー | バック :8100（`DATABASE_URL=jdbc:postgresql://localhost:5432/afkgame_e2e`）／フロント :5174。開発用の :8000 / :5173 とDBを分ける |
 | 起動確認 | バックは `GET /health` が通るまで待つ。`reuseExistingServer` は使わない（開発用DBを掴む事故を防ぐ） |
 | 実行順 | 1つのDBを共有するため `workers: 1` の直列。独立性は**テストごとにゲストを作る**ことで担保 |
 | ヘルパー | `tests/e2e/support/harness.ts`。画面操作はUI経由、DB直接操作は**時刻の巻き戻しだけ** |

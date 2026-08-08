@@ -37,7 +37,7 @@
 
 | ユーティリティ | 内容 |
 |------------|------|
-| `db` | インメモリSQLiteのセッション。`@SpringBootTest` ごとに作り直す |
+| `db` | テスト用 PostgreSQL（Testcontainers）への接続。`@SpringBootTest` ごとにスキーマを作り直す |
 | `user` | `test-user` / 非ゲスト |
 | `player` | gold=1000、`PlayerSettings(potionThreshold=0.3)`、hp_potion×5、初期キャラを持つ |
 | `character` | `player` の初期キャラクター |

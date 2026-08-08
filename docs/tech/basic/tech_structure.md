@@ -11,6 +11,7 @@
 ├── docs/                          # 仕様書・設計図 ※構成は README.md を正とする
 │   └── diagrams/                  # 設計図（Mermaid）
 ├── scripts/                       # 開発補助スクリプト
+├── docker-compose.yml             # `local` 用 PostgreSQL（:5432）
 │
 ├── frontend/                      # Vue.js SPA
 │   ├── src/
@@ -81,8 +82,9 @@
 │   │   │   ├── EquipmentService / ShopDailyService / AuthService（Phase 2〜）
 │   │   │   ├── PartyService / SkillService（Phase 3〜）
 │   │   │   └── BaseService / ForgeService（Phase 4〜）
-│   │   └── masterdata/            # マスターデータ（record + 静的Map）
-│   │       └── Enemies, Towers, Items, Equipments, Characters, Notices（Phase 3〜）
+│   │   ├── masterdata/            # マスターデータの record + YAML ローダ
+│   │   │   └── Enemies, Towers, Items, Equipments, Characters, Notices（Phase 3〜）
+│   │   └── (src/main/resources/masterdata/)  # マスターデータ本体（YAML。数値の正は docs/data/）
 │   ├── afkgame-web/               # アプリケーション層 (com.afkgame.web)
 │   │   ├── AfkgameApplication     # エントリーポイント
 │   │   ├── api/                   # @RestController
@@ -140,8 +142,9 @@
 | バリデーション | Bean Validation（Jakarta） | リクエストの制約定義 |
 | JSON | Jackson | camelCase でのシリアライズ |
 | APIドキュメント | springdoc-openapi | Swagger UI の自動生成（`/docs`） |
-| DB | SQLite（MVP）→ PostgreSQL | データ永続化。ゴールドは `BIGINT`（64bit）カラムで管理 |
+| DB | PostgreSQL（`local` は Docker Compose） | データ永続化。ゴールドは `BIGINT`（64bit）カラムで管理 |
 | マイグレーション | Flyway | DBスキーマ管理 |
+| マスターデータ | YAML リソース + 起動時ローダ | 数値の正は `docs/data/`。再ビルドなしで差し替え可能 |
 | 認証 | Spring Security + JWT（Phase 2〜） | ユーザー認証・セッション管理 |
 | OAuth | Google OAuth 2.0（Phase 2〜） | Googleアカウント連携 |
 | パスワードハッシュ | `BCryptPasswordEncoder`（strength = 12） | パスワード保存 |

@@ -13,11 +13,11 @@ flowchart LR
 
     Schema1 -->|"validated data"| Service["BattleService.java\n未処理tick算出\n3ターン分戦闘計算\nダメージ・報酬・階層進行"]
 
-    Service -->|"敵・塔データ取得\nエンカウント抽選"| MasterData["afkgame-domain\nTowers, Enemies (静的Map)\n塔・敵マスター"]
+    Service -->|"敵・塔データ取得\nエンカウント抽選"| MasterData["afkgame-domain\nTowers, Enemies (YAMLロード)\n塔・敵マスター"]
 
     Service -->|"DB読み書き"| Model["Entity + MyBatis3 Mapper\nPlayer, Character\nEquipment, BattleLog"]
 
-    Model <-->|"SQL"| Database["SQLite / PostgreSQL"]
+    Model <-->|"SQL"| Database["PostgreSQL"]
 
     Model -->|"更新後データ"| Schema2["BattleResource.java\nBean Validation\nレスポンス構築"]
 

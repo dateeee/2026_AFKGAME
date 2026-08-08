@@ -113,7 +113,7 @@ flowchart TB
 
         Config["AppProperties.java (@ConfigurationProperties)\nTICK_INTERVAL_SECONDS = 60\nTURNS_PER_TICK = 3\nFAST_CALC_THRESHOLD = 100\nMAX_OFFLINE_HOURS = 24\nMAX_BATTLE_LOG_RECORDS = 100\nMAX_LOG_PER_RESPONSE = 50\nMAX_PLAYER_LEVEL = 9999"]
         DB_Module["afkgame-env\nDataSource設定\nセッション管理"]
-        Alembic["flyway/\nDBマイグレーション\nスキーマ管理"]
+        Flyway["flyway/\nDBマイグレーション\nスキーマ管理"]
 
         Routers --> Schemas
         Routers --> Services
@@ -126,19 +126,16 @@ flowchart TB
     DB_Module <-->|"MyBatis3"| DB
 
     subgraph DB["データベース"]
-        SQLite["SQLite\n(local / production 初期)\nEBS上に配置"]
-        PostgreSQL["PostgreSQL\n(移行後)\nDB 850MB接近 or\n書き込みロック競合で移行"]
+        PostgreSQL["PostgreSQL\nlocal: Docker Compose\nproduction: EC2同居 (EBS上)"]
     end
 
-    SQLite -->|"§12.4 移行判断ライン"| PostgreSQL
-
-    Alembic -->|"マイグレーション"| DB
+    Flyway -->|"マイグレーション"| DB
 
     style Client fill:#e8f5e9
     style Server fill:#e3f2fd
     style DB fill:#fff3e0
 ```
 
-- DB の移行判断ライン（§12.4）とデプロイ構成は [tech_operations.md](../../tech/nonfunctional/tech_operations.md) §12 が正。デプロイ構成の図は [deployment.md](deployment.md)
+- DBMS（`local`・`production` とも PostgreSQL）とデプロイ構成は [tech_operations.md](../../tech/nonfunctional/tech_operations.md) §12 が正。デプロイ構成の図は [deployment.md](deployment.md)
 - Components の3層構成（トークン / UIプリミティブ / アプリシェル）と各層の責務は [tech_design_system.md](../../tech/detail/tech_design_system.md) が正。UIプリミティブはトークンだけを参照し、ストアには触れない
 - Resources は `afkgame-web` の `resource/` に実装済みのクラスのみを描く。Phase 3〜5 で追加する Resource（`PartyEditResource` 等）は Controllers の Phase 注記と [tech_structure.md](../../tech/basic/tech_structure.md) §2 を参照

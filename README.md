@@ -11,7 +11,7 @@
 |---------|------|
 | フロントエンド | Vue.js 3 (SPA / Composition API / TypeScript) + Vite + Pinia + Tailwind CSS |
 | バックエンド | Java 17 / Terasoluna (Spring Boot 3) + MyBatis3 + Flyway |
-| DB | SQLite（MVP）→ PostgreSQL（本番） |
+| DB | PostgreSQL |
 | 描画方式 | テキストベース（Canvas不使用）。UIアイコンはSVG、アイテムは画像 |
 
 ## セットアップ
@@ -19,6 +19,7 @@
 ### バックエンド
 
 ```bash
+docker compose up -d db   # PostgreSQL :5432
 cd backend
 mvn clean install
 java -jar afkgame-web/target/afkgame-web.jar     # http://localhost:8000
@@ -40,12 +41,12 @@ VS Code は実行構成 **Full Stack** で同時起動できる（[.vscode/launc
 
 | 変数 | 既定値 | 用途 |
 |------|-------|------|
-| `DATABASE_URL` | `jdbc:sqlite:./afkgame.db` | DB接続文字列（JDBC URL） |
-| `JWT_SECRET` | `dev-secret-change-in-production` | JWT署名鍵（本番では必ず変更） |
+| `DATABASE_URL` / `_USER` / `_PASSWORD` | `jdbc:postgresql://localhost:5432/afkgame` / `afkgame` / `afkgame` | DB接続情報（本番では変更必須） |
+| `JWT_SECRET` | `dev-secret-change-in-production` | JWT署名鍵（本番で変更必須） |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | 空 | Google OAuth（空の場合は無効） |
 | `LOG_LEVEL` / `LOG_FORMAT` | `INFO` / `text` | ログ出力設定 |
 
-その他の設定値は `afkgame-env` の `application.yml` を参照。
+その他は `afkgame-env` の `application.yml` を参照。
 
 ### 主なコマンド
 
@@ -56,7 +57,7 @@ VS Code は実行構成 **Full Stack** で同時起動できる（[.vscode/launc
 | `npm run test:e2e` | E2Eテスト（Playwright。専用ポート/DBで自動起動） |
 | `mvn verify` | バックエンドテスト（JUnit 5 + JaCoCo。branch 100%・`target/site/jacoco/`） |
 | `python scripts/check_doc_size.py` | ドキュメント文字数チェック |
-| `python scripts/check_docs.py` | ドキュメント機械検証（リンク・索引・曖昧語・正の逸脱・決定先送り・台帳存否） |
+| `python scripts/check_docs.py` | ドキュメント機械検証（リンク・索引・曖昧語・正の逸脱ほか） |
 | `python scripts/check_branch_list.py` | 分岐一覧の構造検証（`--tests` でテスト対応照合） |
 | `python scripts/rotate_reviews.py --apply` | レビュー結果の退避（直下は最新10件、超過分は `archive/` へ） |
 
