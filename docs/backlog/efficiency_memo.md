@@ -78,3 +78,13 @@
 - シグナル: long-turn(calls=84)
 - ターン概要: ツール84回・エラー0回・拒否0回。開始:「<ide_opened_file>The user opened the file c:\GIT\2026_AFKGAM」
 - 原因と改善案: **編集対象を main と worktree で二度読みした**（11ファイル・約12回）。worktree へ入るのが §4 反映の直前で Edit が worktree パスでの Read を要求するため → `requirements.md` §4 へ「§2 の現状把握の**前に** worktree へ入る」を追記する
+
+## 2026-08-08 21:43 | session b5dc92f5 | 自動検出
+- シグナル: same-command('python scripts/check_doc_size.'×4) / errors×3 / long-turn(calls=89)
+- ターン概要: ツール89回・エラー3回・拒否0回。開始:「<ide_opened_file>The user opened the file c:\GIT\2026_AFKGAM」
+- 原因と改善案: **字数超過の是正で圧縮を小刻みに試し、4回測り直した末に結局「分離」で解決した**（8,528字→圧縮5回で7,996字＝残り4字→ carryover_notes.md へ分離して5,511字）。超過幅が500字超なら圧縮では実用的な余白が残らないと最初に判断できた → `doc-size.md` へ「超過幅 >300字 または是正後の残量が上限の5%未満になる見込みなら、圧縮を試さず分割から入る。塊ごとの字数を先に一括計測する」を追記する。エラー3件は worktree 内から `worktree.py list` を実行して `WT_ROOT` がずれた1件（本ターンで修正済み）と Edit の不一致・Bash 複合コマンド拒否で、いずれも波及なし
+
+## 2026-08-08 21:47 | session c27aaa5e | 自動検出
+- シグナル: same-read(next_session.md×2) / long-turn(calls=111)
+- ターン概要: ツール111回・エラー0回・拒否0回。開始:「<ide_opened_file>The user opened the file c:\GIT\2026_AFKGAM」
+- 原因と改善案: **worktree 内で引き継ぎを書き、統合時に main 側の再構成（§0 並行ルール新設）と衝突して書き直した**（2回目の Read はその再構成後の main 版。ファイルが実際に変わっているので same-read 自体は誤検出だが、引き継ぎ1件ぶんの手戻りは実損）。統合直前まで main の更新を見ずに worktree 内で書いたのが原因で、**新ルール §0-4「更新は main でのみ・統合の直後に1回」が本ターンの途中に入って解消済み** → 追加の是正は不要だが、`.claude/project/next.md` §4 が「引き継ぎを書き換えて作業を終える前に」と worktree 前提の書き方のままなので、§0-4 と揃えて「統合後の main で書く」へ直す。long-turn は**誤検出**（1a の Green に着手後、同一モジュールのテスト一括コンパイルで 1b も同時 Green が必須と判明し2セグメントぶんになった。mvn 実行4回・26ファイル新規作成を含む妥当な分量。この知見は carryover_notes.md §1 へ記入済み）

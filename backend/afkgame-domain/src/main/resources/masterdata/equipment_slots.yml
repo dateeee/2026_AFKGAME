@@ -1,0 +1,26 @@
+# AFK GAME — 装備スロット定義のマスターデータ
+#
+# スロットの正は docs/design/systems/equipment.md §2.4、スロットIDの正は
+# docs/tech/basic/tech_db/item.md §1 の equipment.slot。スキーマの正は
+# com.afkgame.domain.masterdata.EquipmentSlotData（制約違反は起動時に検出して起動を中止する）。
+# 9種固定で、そろわなければ起動を中止する（tech_auth.md §8.3 #6）。
+# 記載順は装備画面の表示順にそのまま使うため、並べ替えないこと。
+
+- id: weapon
+  name: 武器
+- id: shield
+  name: 盾
+- id: head
+  name: 頭
+- id: body
+  name: 胴体
+- id: arms
+  name: 腕
+- id: waist
+  name: 腰
+- id: legs
+  name: 足
+- id: ears
+  name: 耳
+- id: ring
+  name: 指輪

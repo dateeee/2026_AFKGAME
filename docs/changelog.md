@@ -20,6 +20,8 @@
 | tech/basic/tech_api.md | 鍛冶屋の `craft` 行へ `recipeId` の排他指定を反映し、3操作の正が tech_forge.md である旨を追記 |
 | tech/tech_spec.md・README.md・.claude/project/detail-design.md | 索引へ tech_forge.md（+子3件）を登録 |
 | backlog/balance_backlog.md | B-10（吸収装備製作レシピの持ち手・基礎ステータス）を追加。残件 B-1〜B-6・B-10 の7件 |
+| backlog/carryover_notes.md | **新規**。next_session.md から溢れる「複数セッションにまたがる申し送り」の受け皿（Java 移行 / 仕様・マスターデータ / 環境・ツールの3節）。`.gitattributes` へ `merge=union` を登録し **worktree からも追記可**とした（各セッションが引き継ぎの末尾へ申し送りを足して衝突し、8,000字上限も破っていたため）。next_session.md は 7,996字 → 5,511字 |
+| backlog/next_session.md・process/worktree_guide.md・.claude/project/next.md | **worktree 並行編集への対応**。引き継ぎに「着手中」を書かず worktree の存在で示す方式へ（書いた行が即古くなり、実際に3 worktree 稼働中に1件しか載っていなかったため）。next_session.md へ §0「並行作業のルール」を新設し、候補キューへ「wt 名 / 領域」列（名前を事前採番し、同名 worktree の有無で着手中を判定・領域列で並行可否を判定）。更新は main でのみ・統合直後に1回へ統一し、鮮度確認に wt ブランチ側のコミット確認を追加。`scripts/worktree.py list` が main との差分・未コミット件数から「作業中 / 完了・未統合 / 空」を判定して出すようにした |
 | `docs/tech/basic/tech_data.md` / `docs/tech/basic/tech_api.md` / `docs/glossary.md` | **open_specs #3 の確定**: 難易度別到達記録のキー体系を `towersCleared` の `{towerId}_{difficulty}`（平坦キー・値の型は全エントリ共通）に確定。`/api/tower/select` へ任意パラメータ `difficulty`（`beginner`/`intermediate`/`advanced`）を追加し、`/api/tower/list` は難易度ごとの独立エントリで返す。イベントダンジョンID3件（`trial_maze`/`treasure_vault`/`training_hall`）と難易度識別子を glossary へ登録 |
 | `docs/design/systems/ui.md` / `docs/diagrams/screen_transition/main_nav.md` / `docs/diagrams/screen_transition/endgame.md` | **open_specs #4 の確定**: ボスラッシュ・イベントダンジョンの導線はタブを追加せず「探索」タブ（Phase 5 で「塔」から改称）配下のセクションへ集約（タブ総数7で不変）。モバイルの Phase 5 行を追加（直接=ホーム・キャラ・装備・探索／その他=拠点・ショップ・設定） |
 | `docs/design/systems/endgame.md` / `docs/diagrams/api_sequence/endgame.md` | #3・#4 の確定に伴い、台帳リンク付きの決定先送り記述を確定内容へ置換 |

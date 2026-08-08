@@ -180,8 +180,48 @@ def cmd_remove(args: argparse.Namespace) -> None:
     do_remove(args.name, args.delete_branch, args.force)
 
 
+def worktree_entries() -> list[tuple[str, Path]]:
+    """付随 worktree を (名前, パス) で返す。
+
+    WT_ROOT を使わずに git の一覧から取る（worktree の中から実行しても効くように。
+    ROOT は __file__ 起点なので worktree 内では WT_ROOT が別の場所を指す）。
+    porcelain の先頭エントリは main 本体なので落とす。
+    """
+    paths = [
+        Path(line[len("worktree "):].strip())
+        for line in run_git("worktree", "list", "--porcelain", check=False).stdout.splitlines()
+        if line.startswith("worktree ")
+    ]
+    return sorted((p.name, p) for p in paths[1:])
+
+
 def cmd_list(_args: argparse.Namespace) -> None:
+    """一覧に加えて「着手中 / 完了・未統合 / 空」の判定材料を出す。
+
+    引き継ぎ（docs/backlog/next_session.md §0）は着手状態をファイルに書かず、
+    このコマンドの出力を正とするため、判断に要る材料をここで揃える。
+    """
     print(run_git("worktree", "list").stdout, end="")
+
+    entries = worktree_entries()
+    if not entries:
+        return
+    width = max(len(name) for name, _ in entries)
+    print()
+    for name, dest in entries:
+        ahead = run_wt(dest, "rev-list", "--count", "main..HEAD").stdout.strip()
+        dirty = len(run_wt(dest, "status", "--porcelain").stdout.splitlines())
+        if dirty:
+            state = "作業中（未コミットあり）"
+        elif ahead not in ("", "0"):
+            state = "完了・未統合の可能性（merge 候補）"
+        else:
+            state = "空（着手直後か放棄）"
+        subject = run_wt(dest, "log", "-1", "--format=%s").stdout.strip()
+        print(f"  {name.ljust(width)}  main比 +{ahead or '?'}  未コミット {dirty}件"
+              f"  {state}")
+        if ahead not in ("", "0") and subject:
+            print(f"  {' ' * width}  最新: {subject}")
 
 
 def main() -> None:
@@ -208,7 +248,8 @@ def main() -> None:
                       help="未コミットの変更があっても worktree を削除")
     p_rm.set_defaults(func=cmd_remove)
 
-    p_ls = sub.add_parser("list", help="worktree の一覧")
+    p_ls = sub.add_parser("list", help="worktree の一覧と状態"
+                                       "（作業中 / 完了・未統合 / 空）")
     p_ls.set_defaults(func=cmd_list)
 
     args = parser.parse_args()
