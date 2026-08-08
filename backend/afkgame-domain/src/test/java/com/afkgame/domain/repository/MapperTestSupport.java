@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
@@ -25,6 +26,7 @@ import io.zonky.test.db.AutoConfigureEmbeddedDatabase.DatabaseProvider;
  */
 @Tag("integration")
 @SpringBootTest
+@ActiveProfiles("local")
 @AutoConfigureEmbeddedDatabase(provider = DatabaseProvider.ZONKY)
 @Transactional
 abstract class MapperTestSupport {

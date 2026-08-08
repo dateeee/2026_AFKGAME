@@ -8,3 +8,8 @@ spring:
     url: ${DATABASE_URL}
     username: ${DATABASE_USER}
     password: ${DATABASE_PASSWORD}
+
+afkgame:
+  auth:
+    # 共通設定にも既定値は無いが、本番の必須変数を本ファイルに列挙して読み取れるようにする
+    secret: ${JWT_SECRET}

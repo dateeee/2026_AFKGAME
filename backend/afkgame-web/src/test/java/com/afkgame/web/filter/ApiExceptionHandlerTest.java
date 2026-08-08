@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.slf4j.MDC;
 import org.springframework.http.MediaType;
+import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -63,6 +64,13 @@ class ApiExceptionHandlerTest {
         @GetMapping(path = "/stub/required-param")
         String requiredParam(@RequestParam String name) {
             return name;
+        }
+
+        /** 標準例外のうち 500 で {@code handleExceptionInternal} を通るもの。 */
+        @PostMapping(path = "/stub/not-writable")
+        String notWritable() {
+            throw new HttpMessageNotWritableException(
+                    "Could not write JSON: com.afkgame.domain.model.Player");
         }
     }
 
@@ -128,6 +136,18 @@ class ApiExceptionHandlerTest {
             mockMvc.perform(get("/stub/required-param"))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.error.code").value("HTTP_400"));
+        }
+
+        /**
+         * 5xx は内部の型名・変換先を含みうるため、例外メッセージを応答へ載せない
+         * （規約 §4-4「応答に内部情報を載せない」）。
+         */
+        @Test
+        void test_5xxは例外メッセージを返さず定型文にする() throws Exception {
+            mockMvc.perform(post("/stub/not-writable"))
+                    .andExpect(status().isInternalServerError())
+                    .andExpect(jsonPath("$.error.code").value("INTERNAL_UNEXPECTED_ERROR"))
+                    .andExpect(jsonPath("$.error.message").value("サーバー内部エラーが発生しました"));
         }
     }
 

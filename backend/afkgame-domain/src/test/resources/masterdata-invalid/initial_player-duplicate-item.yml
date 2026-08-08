@@ -1,0 +1,15 @@
+# 異常系フィクスチャ: 初期所持アイテムのIDが重複している
+# 分岐: tech_auth.md §8.3 #11（起動時のローダ検証で起動を中止する）
+# ID はいずれも items.yml に実在させる。実在検査を通ったうえで
+# 重複検査が働くこと（uq_inventory_items_player_item 違反を作らないこと）を確かめる。
+
+character:
+  id: hero_001
+  name: 勇者
+  type: melee
+  level: 1
+items:
+  - id: hp_potion
+    quantity: 5
+  - id: hp_potion
+    quantity: 3

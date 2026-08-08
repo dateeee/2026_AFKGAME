@@ -9,6 +9,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 
@@ -66,10 +67,17 @@ class AuthServiceTest {
 
     private AuthService authService;
 
+    /**
+     * 時刻の供給元。JJWT の期限判定は実時間で行われるため、実時間のクロックを渡す。
+     * 発行時刻を1回だけ取ることの検証は、同一レコードの2列の関係（下記 expires_at − created_at）で行う。
+     */
+    private static final Clock CLOCK = Clock.systemUTC();
+
     private AuthService authService() {
         if (authService == null) {
             authService = new AuthService(userMapper, refreshTokenMapper,
-                    new JwtService(AUTH_PROPERTIES), AUTH_PROPERTIES, playerInitializationService);
+                    new JwtService(AUTH_PROPERTIES, CLOCK), AUTH_PROPERTIES,
+                    playerInitializationService, CLOCK);
         }
         return authService;
     }
@@ -168,9 +176,10 @@ class AuthServiceTest {
                     .isNotEqualTo(result.refreshToken())
                     .hasSize(64);
             assertThat(saved.getValue().isRevoked()).isFalse();
-            // 有効期限は30日（tech_auth.md §1）
-            assertThat(saved.getValue().getExpiresAt())
-                    .isAfter(Instant.now().plus(Duration.ofDays(29)));
+            // 有効期限は30日（tech_auth.md §1）。時刻を2回取ると誤差が乗るため、
+            // expires_at − created_at はちょうど有効期限であること
+            assertThat(Duration.between(saved.getValue().getCreatedAt(),
+                    saved.getValue().getExpiresAt())).isEqualTo(Duration.ofDays(30));
         }
     }
 

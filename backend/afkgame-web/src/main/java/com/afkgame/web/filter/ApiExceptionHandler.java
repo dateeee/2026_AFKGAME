@@ -78,10 +78,23 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
         return validationError();
     }
 
-    /** 上記以外の Spring MVC 標準例外。コードは {@code HTTP_<status>} とする。 */
+    /**
+     * 上記以外の Spring MVC 標準例外。コードは {@code HTTP_<status>} とする。
+     *
+     * <p>5xx（{@code HttpMessageNotWritableException}・{@code ConversionNotSupportedException} 等）は
+     * 例外メッセージに内部のクラス名・変換先の型名が入るため、応答へ載せず
+     * {@link #handleUnexpected(Exception)} と同じ定型文へそろえる（規約 §4-4）。
+     * 4xx は内容が送り手自身のリクエストに閉じるため、そのまま返す。
+     */
     @Override
     protected ResponseEntity<Object> handleExceptionInternal(Exception ex, Object body,
             HttpHeaders headers, HttpStatusCode statusCode, WebRequest request) {
+        if (statusCode.is5xxServerError()) {
+            middlewareLogger.error("フレームワーク内部エラー status={}", statusCode.value(), ex);
+            return new ResponseEntity<>(
+                    ErrorResource.of("INTERNAL_UNEXPECTED_ERROR", "サーバー内部エラーが発生しました"),
+                    headers, statusCode);
+        }
         return new ResponseEntity<>(
                 ErrorResource.of("HTTP_" + statusCode.value(), ex.getMessage()), headers, statusCode);
     }

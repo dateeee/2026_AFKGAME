@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Base64;
@@ -50,15 +51,17 @@ public class AuthService {
     private final JwtService jwtService;
     private final Duration refreshTokenExpire;
     private final PlayerInitializationService playerInitializationService;
+    private final Clock clock;
 
     public AuthService(UserMapper userMapper, RefreshTokenMapper refreshTokenMapper,
             JwtService jwtService, AuthProperties authProperties,
-            PlayerInitializationService playerInitializationService) {
+            PlayerInitializationService playerInitializationService, Clock clock) {
         this.userMapper = userMapper;
         this.refreshTokenMapper = refreshTokenMapper;
         this.jwtService = jwtService;
         this.refreshTokenExpire = authProperties.refreshTokenExpire();
         this.playerInitializationService = playerInitializationService;
+        this.clock = clock;
     }
 
     /**
@@ -72,7 +75,7 @@ public class AuthService {
      */
     @Transactional
     public AuthResult createGuest() {
-        Instant now = Instant.now();
+        Instant now = clock.instant();
 
         User user = new User();
         user.setId("guest_" + UUID.randomUUID());
@@ -113,7 +116,7 @@ public class AuthService {
             throw refreshInvalid("Refresh token reuse detected");
         }
 
-        if (stored.getExpiresAt().isBefore(Instant.now())) {
+        if (stored.getExpiresAt().isBefore(clock.instant())) {
             throw refreshInvalid("Refresh token expired");
         }
 
@@ -144,6 +147,9 @@ public class AuthService {
 
     /** アクセストークンを発行し、リフレッシュトークンを新規保存する。 */
     private AuthResult issueTokens(User user) {
+        // expires_at と created_at の差を有効期限そのものにするため、時刻は1回だけ取る
+        Instant now = clock.instant();
+
         byte[] raw = new byte[REFRESH_TOKEN_BYTES];
         RANDOM.nextBytes(raw);
         String rawRefreshToken = Base64.getUrlEncoder().withoutPadding().encodeToString(raw);
@@ -151,9 +157,9 @@ public class AuthService {
         RefreshToken record = new RefreshToken();
         record.setUserId(user.getId());
         record.setTokenHash(hashToken(rawRefreshToken));
-        record.setExpiresAt(Instant.now().plus(refreshTokenExpire));
+        record.setExpiresAt(now.plus(refreshTokenExpire));
         record.setRevoked(false);
-        record.setCreatedAt(Instant.now());
+        record.setCreatedAt(now);
         refreshTokenMapper.insert(record);
 
         return new AuthResult(user, jwtService.createAccessToken(user.getId(), user.isGuest()), rawRefreshToken);

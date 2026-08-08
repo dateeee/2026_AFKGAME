@@ -9,7 +9,9 @@ spring:
     name: afkgame
   profiles:
     # 環境の識別は APP_ENV（local / production）。tech_operations.md §12.1
-    active: ${APP_ENV:local}
+    # 既定値を置かない。設定漏れのまま local として本番起動し、開発用の既定署名鍵が
+    # 有効になるのを防ぐ（tech_operations.md §12.2）
+    active: ${APP_ENV}
   datasource:
     driver-class-name: org.postgresql.Driver
     url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/afkgame}

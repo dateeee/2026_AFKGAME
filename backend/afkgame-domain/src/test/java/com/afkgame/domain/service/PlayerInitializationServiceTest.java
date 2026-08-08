@@ -11,7 +11,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.Clock;
 import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -100,10 +102,13 @@ class PlayerInitializationServiceTest {
     @Mock
     private InitialPlayer initialPlayer;
 
+    /** 時刻は固定値で受け取る（実行のたびに結果が変わらないようにする）。 */
+    private static final Instant FIXED_NOW = Instant.parse("2026-08-08T12:00:00Z");
+
     private PlayerInitializationService service() {
         return new PlayerInitializationService(playerMapper, playerSettingsMapper, characterMapper,
                 characterEquipSlotMapper, inventoryItemMapper, characterTypes, equipmentSlots,
-                initialPlayer);
+                initialPlayer, Clock.fixed(FIXED_NOW, ZoneOffset.UTC));
     }
 
     /** 装備スロット9種のマスターデータ（記載順を保つ）。 */
@@ -157,7 +162,6 @@ class PlayerInitializationServiceTest {
         @DisplayName("未作成なら Player と PlayerSettings を既定値で作成する")
         void test_未作成ならPlayerとPlayerSettingsを既定値で作成する() {
             givenMasterData(defaultItems());
-            Instant before = Instant.now();
 
             service().initialize(USER_ID);
 
@@ -170,8 +174,8 @@ class PlayerInitializationServiceTest {
             assertThat(player.getHpThreshold()).isEqualTo(0.3);
             assertThat(player.getRunGold()).isZero();
             assertThat(player.getHighestFloor()).isZero();
-            assertThat(player.getLastTickAt()).isBetween(before, Instant.now());
-            assertThat(player.getCreatedAt()).isBetween(before, Instant.now());
+            assertThat(player.getLastTickAt()).isEqualTo(FIXED_NOW);
+            assertThat(player.getCreatedAt()).isEqualTo(FIXED_NOW);
             // 塔外のため塔関連と交戦中の敵は NULL（tech_auth.md §8.2 手順2）
             assertThat(player.getCurrentTowerId()).isNull();
             assertThat(player.getCurrentFloor()).isNull();
@@ -200,7 +204,6 @@ class PlayerInitializationServiceTest {
         @DisplayName("未作成なら初期キャラを1体、タイプ別 LV1 基礎値で作成する")
         void test_未作成なら初期キャラをLV1基礎値で1体作成する() {
             givenMasterData(defaultItems());
-            Instant before = Instant.now();
 
             service().initialize(USER_ID);
 
@@ -220,7 +223,7 @@ class PlayerInitializationServiceTest {
             assertThat(character.getHp()).isEqualTo(character.getMaxHp());
             assertThat(character.getLimitBreak()).isZero();
             assertThat(character.getSkillPoints()).isZero();
-            assertThat(character.getCreatedAt()).isBetween(before, Instant.now());
+            assertThat(character.getCreatedAt()).isEqualTo(FIXED_NOW);
         }
 
         /**

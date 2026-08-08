@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
@@ -30,6 +31,7 @@ import io.zonky.test.db.AutoConfigureEmbeddedDatabase.DatabaseProvider;
  */
 @Tag("integration")
 @SpringBootTest
+@ActiveProfiles("local")
 @AutoConfigureMockMvc
 @AutoConfigureEmbeddedDatabase(provider = DatabaseProvider.ZONKY)
 class HealthApiIntegrationTest {

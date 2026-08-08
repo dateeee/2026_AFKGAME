@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
@@ -36,8 +37,10 @@ class JwtServiceTest {
 
     private static final String SECRET = "afkgame-test-secret-value-32bytes-or-longer";
 
+    // 発行時刻と JJWT の期限判定を同じ時間軸に置くため、実時間のクロックを渡す
     private final JwtService jwtService = new JwtService(
-            new AuthProperties(SECRET, Duration.ofMinutes(30), Duration.ofDays(30)));
+            new AuthProperties(SECRET, Duration.ofMinutes(30), Duration.ofDays(30)),
+            Clock.systemUTC());
 
     private static Claims claimsOf(String token, String secret) {
         return Jwts.parser()
@@ -122,6 +125,21 @@ class JwtServiceTest {
                     .isInstanceOf(AppException.class)
                     .extracting("code")
                     .isEqualTo("AUTH_INVALID_TOKEN");
+        }
+
+        @Test
+        void test_typeがaccessでないトークンはAUTH_INVALID_TOKENになる() {
+            String wrongType = Jwts.builder()
+                    .subject("user_001")
+                    .claim("type", "refresh")
+                    .expiration(Date.from(Instant.now().plus(Duration.ofMinutes(30))))
+                    .signWith(Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8)))
+                    .compact();
+
+            assertThatThrownBy(() -> jwtService.parseUserId(wrongType))
+                    .isInstanceOf(AppException.class)
+                    .extracting("code", "status")
+                    .containsExactly("AUTH_INVALID_TOKEN", 401);
         }
 
         @Test

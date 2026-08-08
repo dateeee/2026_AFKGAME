@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.test.context.ActiveProfiles;
 
 import com.afkgame.domain.masterdata.ItemData;
 import com.afkgame.domain.masterdata.Items;
@@ -29,6 +30,7 @@ import jakarta.validation.Validator;
  */
 @Tag("integration")
 @SpringBootTest
+@ActiveProfiles("local")
 @AutoConfigureEmbeddedDatabase(provider = DatabaseProvider.ZONKY)
 class MasterDataIntegrationTest {
 

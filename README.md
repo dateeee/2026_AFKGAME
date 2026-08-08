@@ -22,7 +22,7 @@
 docker compose up -d db   # PostgreSQL :5432
 cd backend
 mvn clean install
-java -jar afkgame-web/target/afkgame-web.jar     # http://localhost:8000
+APP_ENV=local java -jar afkgame-web/target/afkgame-web.jar   # http://localhost:8000
 ```
 
 API ドキュメント: http://localhost:8000/docs
@@ -42,7 +42,8 @@ VS Code は実行構成 **Full Stack** で同時起動できる（[.vscode/launc
 | 変数 | 既定値 | 用途 |
 |------|-------|------|
 | `DATABASE_URL` / `_USER` / `_PASSWORD` | `jdbc:postgresql://localhost:5432/afkgame` / `afkgame` / `afkgame` | DB接続情報（本番では変更必須） |
-| `JWT_SECRET` | `dev-secret-change-in-production` | JWT署名鍵（本番で変更必須） |
+| `APP_ENV` | なし（必須） | 環境識別（`local` / `production`）。未設定なら起動失敗 |
+| `JWT_SECRET` | `local` のみ既定値あり | JWT署名鍵（本番は必須。未設定なら起動失敗） |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | 空 | Google OAuth（空の場合は無効） |
 | `LOG_LEVEL` / `LOG_FORMAT` | `INFO` / `text` | ログ出力設定 |
 

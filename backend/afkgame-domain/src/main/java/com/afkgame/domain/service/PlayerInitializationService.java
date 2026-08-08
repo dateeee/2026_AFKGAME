@@ -1,9 +1,12 @@
 package com.afkgame.domain.service;
 
+import java.time.Clock;
 import java.time.Instant;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.afkgame.domain.masterdata.CharacterTypeData;
 import com.afkgame.domain.masterdata.CharacterTypes;
@@ -31,6 +34,7 @@ import com.afkgame.domain.repository.PlayerSettingsMapper;
  * <p>ゲスト作成（手順1）と本登録は入口が異なるだけで手順2以降は共通のため、
  * 呼び出し側（{@link AuthService}）から切り出している。
  * トランザクション境界は呼び出し側が持ち（手順8）、本サービスでは開始しない。
+ * 呼び出し側の付け忘れを防ぐため {@code Propagation.MANDATORY} で既存トランザクションを必須にする。
  *
  * <p>マスターデータの妥当性（初期キャラのタイプが実在する・初期所持アイテムのIDがアイテム定義にある・
  * スロットが9種そろう）は起動時のローダ検証で担保済みのため、ここでは再検証しない（§8.2 末尾）。
@@ -61,12 +65,13 @@ public class PlayerInitializationService {
     private final CharacterTypes characterTypes;
     private final EquipmentSlots equipmentSlots;
     private final InitialPlayer initialPlayer;
+    private final Clock clock;
 
     public PlayerInitializationService(PlayerMapper playerMapper,
             PlayerSettingsMapper playerSettingsMapper, CharacterMapper characterMapper,
             CharacterEquipSlotMapper characterEquipSlotMapper,
             InventoryItemMapper inventoryItemMapper, CharacterTypes characterTypes,
-            EquipmentSlots equipmentSlots, InitialPlayer initialPlayer) {
+            EquipmentSlots equipmentSlots, InitialPlayer initialPlayer, Clock clock) {
         this.playerMapper = playerMapper;
         this.playerSettingsMapper = playerSettingsMapper;
         this.characterMapper = characterMapper;
@@ -75,6 +80,7 @@ public class PlayerInitializationService {
         this.characterTypes = characterTypes;
         this.equipmentSlots = equipmentSlots;
         this.initialPlayer = initialPlayer;
+        this.clock = clock;
     }
 
     /**
@@ -86,9 +92,12 @@ public class PlayerInitializationService {
      *
      * @param userId 初期化する対象のユーザーID
      * @return 作成したプレイヤー
+     * @throws org.springframework.transaction.IllegalTransactionStateException
+     *         トランザクションが無い状態で呼ばれた場合
      */
+    @Transactional(propagation = Propagation.MANDATORY)
     public Player initialize(String userId) {
-        Instant now = Instant.now();
+        Instant now = clock.instant();
 
         Player player = createPlayer(userId, now);
         createSettings(player.getId());

@@ -16,6 +16,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -35,6 +36,7 @@ import io.zonky.test.db.AutoConfigureEmbeddedDatabase.DatabaseProvider;
  */
 @Tag("integration")
 @SpringBootTest
+@ActiveProfiles("local")
 @AutoConfigureMockMvc
 @AutoConfigureEmbeddedDatabase(provider = DatabaseProvider.ZONKY)
 class AuthApiIntegrationTest {
@@ -83,7 +85,7 @@ class AuthApiIntegrationTest {
      * ゲスト作成が「プレイ可能な初期状態」まで作ることを、実DBの行で確認する。
      * 手順ごとの分岐は PlayerInitializationServiceTest が持ち、ここでは連結と永続化（コミット）を見る。
      *
-     * <p>分岐: tech_auth.md #11
+     * <p>分岐: tech_auth.md #12
      */
     @Test
     @DisplayName("POST /api/auth/guest は Player・設定・初期キャラ・9スロット・初期アイテムまで作る")

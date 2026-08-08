@@ -143,6 +143,23 @@ class InitialPlayerTest {
         }
 
         /**
+         * アイテムIDが重複していれば、構築時に落として起動を中止する。
+         *
+         * <p>実在検査だけでは通ってしまい、ゲスト作成のたびに
+         * {@code uq_inventory_items_player_item} 違反で 500 になる（新規ユーザーを1人も作れない）。
+         *
+         * <p>分岐: tech_auth.md §8.3 #11
+         */
+        @Test
+        @DisplayName("アイテムIDが重複していれば例外（起動を中止する）")
+        void test_アイテムIDが重複なら例外() {
+            assertThatThrownBy(
+                    () -> initialPlayer("masterdata-invalid/initial_player-duplicate-item.yml"))
+                    .isInstanceOf(MasterDataException.class)
+                    .hasMessageContaining("hp_potion");
+        }
+
+        /**
          * 公開するリストは不変（実行時の書き換えを許さない）。
          *
          * <p>分岐一覧の行ではなく、レジストリ共通の横断検証（{@code Items} と同じ扱い）。

@@ -1,6 +1,7 @@
 package com.afkgame.web.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -15,10 +16,13 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.IllegalTransactionStateException;
 
 import com.afkgame.domain.repository.InventoryItemMapper;
+import com.afkgame.domain.service.PlayerInitializationService;
 
 import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
 import io.zonky.test.db.AutoConfigureEmbeddedDatabase.DatabaseProvider;
@@ -35,6 +39,7 @@ import io.zonky.test.db.AutoConfigureEmbeddedDatabase.DatabaseProvider;
  */
 @Tag("integration")
 @SpringBootTest
+@ActiveProfiles("local")
 @AutoConfigureMockMvc
 @AutoConfigureEmbeddedDatabase(provider = DatabaseProvider.ZONKY)
 class GuestInitializationRollbackIntegrationTest {
@@ -48,12 +53,15 @@ class GuestInitializationRollbackIntegrationTest {
     @MockitoBean
     private InventoryItemMapper inventoryItemMapper;
 
+    @Autowired
+    private PlayerInitializationService playerInitializationService;
+
     private int countOf(String table) {
         return jdbcTemplate.queryForObject("SELECT count(*) FROM " + table, Integer.class);
     }
 
     /**
-     * 分岐: tech_auth.md #12
+     * 分岐: tech_auth.md #13
      */
     @Test
     @DisplayName("初期化の途中で失敗したら、ユーザーを含めて何も残らない")
@@ -73,5 +81,21 @@ class GuestInitializationRollbackIntegrationTest {
         assertThat(countOf("character_equip_slots")).isZero();
         assertThat(countOf("inventory_items")).isZero();
         assertThat(countOf("refresh_tokens")).isZero();
+    }
+
+    /**
+     * トランザクション境界を持たない呼び出しは、実行時に落として中途半端なデータを作らせない。
+     *
+     * <p>{@code initialize()} は5つの Mapper へ12行以上を INSERT するため、呼び出し側が
+     * {@code @Transactional} を付け忘れると手順8（全体をロールバック）が破れる。契約を Javadoc
+     * だけで担保せず {@code Propagation.MANDATORY} で強制していることを確かめる。
+     */
+    @Test
+    @DisplayName("トランザクションの外から初期化を呼ぶと実行時に落ちる")
+    void test_トランザクションの外から呼ぶと落ちる() {
+        assertThatThrownBy(() -> playerInitializationService.initialize("user_no_tx"))
+                .isInstanceOf(IllegalTransactionStateException.class);
+
+        assertThat(countOf("players")).isZero();
     }
 }
