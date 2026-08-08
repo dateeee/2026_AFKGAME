@@ -5,26 +5,28 @@
 > **鮮度**: 開始側は「前提」のコミットIDと git log を突合し、完了済みに見えたら開始せずユーザーへ確認する。
 > 本ファイルは**ポインタ専用**。Phase 進捗の正は [development_process.md](../process/development_process.md) §5、書式の正は [.claude/project/next.md](../../.claude/project/next.md)。
 
-最終更新: 2026-08-08 / 対応コミット: 7db23f3 の次（**編集は worktree で行う**運用の導入。次回タスクは変わらない）。その前の `c04d98a` の次が **移行 STEP 3-A-1 の詳細設計**を確定したコミット。`test-list` が「`tech_auth.md` に分岐一覧が無い」ことを理由に着手前停止したのが起点で、`tech_auth.md` §8（処理フロー8手順 + 分岐一覧12件）を新設し、未文書化だった `hp_potion×5` と表示名 `冒険者` の正を宣言、初期値の Java 側配置を「値の正の所在で振り分ける」へ確定した。**製造はここから**。手順・進捗の正は [java_migration.md](java_migration.md)
+最終更新: 2026-08-08 / 対応コミット: `37d4ef5`（移行 STEP 3-A-1b の Mapper 疎通テストを Red で追加）。`tech_auth.md` §8.3 の分岐一覧12件は 1a・1c の担当で **1b には対応行が無い**ため、Entity/Mapper には分岐マーカーを付けず、往復・NULL 許容列の両側・一意制約4種・取得0/1/2件の観点で28ケースを置いた（`test-list.md` §2「定義のみのため副次的」・既存 `AuthServiceTest` と同じ扱い）。**次は同じ 1b の Green から**。手順・進捗の正は [java_migration.md](java_migration.md)
 
 ## 1. 次回（コピペ用）
 
 ```
-/test-list → /dev 移行 STEP 3-A-1a（初期化に使うマスターデータ）: tech_auth.md §8.1 の表に沿って initial_player.yml・character_types.yml・equipment_slots.yml と対応する record を afkgame-domain へ追加し、既存の MasterDataLoader へ登録する。character_types.yml は LV1 基礎値のみ（成長率は入れない）
-完了条件: 分岐一覧 #3・#4・#6・#10（マスター検証で起動を中止する経路）の JUnit テストが Red → Green・JaCoCo branch 100%（親POMのしきい値）・mvn verify が成功・changelog へ1行追記・コミット
-参照: docs/tech/detail/tech_auth.md §8.1（YAML と正の対応表）・§8.3（分岐一覧）、backend/afkgame-domain/src/main/resources/masterdata/items.yml（既存YAMLの書式）
-前提: 移行 STEP 2 完了 + STEP 3-A-1 詳細設計完了（c04d98a の次）。分岐一覧は `check_branch_list.py` 23件・WARN 0 で通っている。**編集は worktree で行う**（CLAUDE.md・[worktree_guide.md](../process/worktree_guide.md) §5）。着手時に `python scripts/worktree.py add step3a1a-master` → `EnterWorktree`(path) でセッションを移してから実装し、完了後に §5.3 の手順で main へ統合する。**環境（2026-08-08 に新規シェルで実行確認済み）**: `mvn`・`java` は PATH に無く、Bash から動くのは `JAVA_HOME="/c/Program Files/Eclipse Adoptium/jdk-17.0.20.8-hotspot" "/c/Users/tubas/AppData/Local/Programs/apache-maven-3.9.11/bin/mvn" -v` の形（JAVA_HOME をインラインで与えないと mvn は "JAVA_HOME is not defined correctly" で落ちる。java 単体はフルパスで起動する）。Docker は未検証のため統合テストは zonky 埋め込み PostgreSQL を使う
+/dev 移行 STEP 3-A-1b（初期化対象の Entity + Mapper）: Red 済みの Mapper 疎通テスト28件を Green にする。Entity 5件（Player・PlayerSettings・Character・CharacterEquipSlot・InventoryItem）を com.afkgame.domain.model へ、Mapper 5件（インタフェース + 同名 XML）を com.afkgame.domain.repository へ追加する。要求される表層（メソッド名・null/空リストの扱い）は各テストの Javadoc に書いてある
+完了条件: mvn verify が成功・追加した28ケースが全PASS・JaCoCo branch 100%（親POMのしきい値）・changelog へ1行追記・コミット
+参照: backend/afkgame-domain/src/test/java/com/afkgame/domain/repository/（Red テスト6件が起点）、docs/tech/basic/tech_db/player.md §1・§2・§4、docs/tech/basic/tech_db/item.md §2・§3、既存書式は UserMapper.java と src/main/resources/com/afkgame/domain/repository/UserMapper.xml
+前提: `37d4ef5` で Red 済み（テスト実行前のコンパイルで停止し、未作成の10型ちょうどに「シンボルを見つけられません」が出る状態）。**着手時の要判断2件**: ①`model.Character` は `java.lang.Character` と単純名が衝突する（`users`→`User` と同じ規則を優先して命名済み。改名するなら Green 前に）②`characters.rarity` は Phase 3 の列で V1 スキーマに無いため Entity にも持たせない。**編集は worktree で行う**（[worktree_guide.md](../process/worktree_guide.md) §5）。`python scripts/worktree.py add step3a1b-green` → `EnterWorktree`(path) で移り、完了後に §5.3 で統合する。**環境（2026-08-08 に実行確認済み）**: `mvn`・`java` は PATH に無く、Bash から動くのは `JAVA_HOME="/c/Program Files/Eclipse Adoptium/jdk-17.0.20.8-hotspot" "/c/Users/tubas/AppData/Local/Programs/apache-maven-3.9.11/bin/mvn" -f backend/pom.xml -pl afkgame-domain -am test` の形（JAVA_HOME をインラインで与えないと "JAVA_HOME is not defined correctly" で落ちる）。統合テストDBは zonky 埋め込み PostgreSQL（Docker 未検証）
 ```
 
 ## 2. 候補キュー（最大5行・優先順）
 
-| 優先 | タスク | 工程スキル |
-|------|-------|-----------|
-| 1 | 移行 STEP 3-A-1b（初期化対象の Entity + Mapper）。`players` / `player_settings` / `characters` / `character_equip_slots` / `inventory_items` の Entity と MyBatis3 Mapper（インタフェース + XML）。列・一意制約の正は `tech_db/player.md` §1・§2・§4 と `tech_db/item.md` §2・§3 | `test-list` → `dev` |
-| 2 | 移行 STEP 3-A-1c（プレイヤー初期化サービス + 結線）。`tech_auth.md` §8.2 の8手順を単一トランザクションで実装し `POST /api/auth/guest` へ結線。分岐一覧 #1・#2・#5・#7〜#9・#11・#12 が対象 | `test-list` → `dev` |
-| 3 | 移行 STEP 3-A-2（register / login / logout）。`BCryptPasswordEncoder`(strength 12) と `SecurityConfig` の認証不要パス追加を含む（持ち越しの正は java_migration.md §4 の 2-B 表）。初期化は 3-A-1c の手順2以降を再利用する（`tech_auth.md` §8 冒頭） | `test-list` → `dev` |
-| 4 | 移行 STEP 3-A-3（link-account / verify-email / password-reset）。確認メール送信・トークン検証 | `test-list` → `dev` |
-| 5 | 移行 STEP 3-B（Phase 1 の game / battle / tower 移植）。着手前に各 `tech_*.md` の分岐一覧の有無を確認する（auth と同じ欠落があれば `detail-design` を先に回す） | `test-list` → `dev` |
+**各行に前提セグメントを書く**（着手可否を選んだ時点で判断できるようにするため）。
+
+| 優先 | タスク | 前提 | 工程スキル |
+|------|-------|------|-----------|
+| 1 | 移行 STEP 3-A-1a（初期化に使うマスターデータ）。`tech_auth.md` §8.1 の表に沿って `initial_player.yml`・`character_types.yml`（LV1 基礎値のみ。成長率は入れない）・`equipment_slots.yml` と record を追加し `MasterDataLoader` へ登録。分岐一覧 #3・#4・#6・#10 | なし | `test-list` → `dev` |
+| 2 | 移行 STEP 3-A-1c（プレイヤー初期化サービス + 結線）。`tech_auth.md` §8.2 の8手順を単一トランザクションで実装し `POST /api/auth/guest` へ結線。分岐一覧 #1・#2・#5・#7〜#9・#11・#12 が対象 | 1a + 1b | `test-list` → `dev` |
+| 3 | 移行 STEP 3-A-2（register / login / logout）。`BCryptPasswordEncoder`(strength 12) と `SecurityConfig` の認証不要パス追加を含む（持ち越しの正は java_migration.md §4 の 2-B 表）。初期化は 3-A-1c の手順2以降を再利用する（`tech_auth.md` §8 冒頭） | 3-A-1c | `test-list` → `dev` |
+| 4 | 移行 STEP 3-A-3（link-account / verify-email / password-reset）。確認メール送信・トークン検証 | 3-A-2 | `test-list` → `dev` |
+| 5 | 移行 STEP 3-B（Phase 1 の game / battle / tower 移植）。game は `tech_state`/`tech_tick`/`tech_polling` §5、battle は `tech_battle`/`tech_rng`/`tech_numeric` §5 に分岐一覧がある。**tower は `tech_tower.md` が存在せず分岐一覧も無い**（auth と同じ欠落。2026-08-08 確認） | 3-A 完了 + tower の詳細設計 | `detail-design` → `test-list` → `dev` |
 
 - 移行 STEP 4（Phase 2 スコープの移植: equipment / shop・日替わり含む）はキュー優先5（STEP 3-B）の完了後。着手前に `tech_shop.md` §7・§8 の分岐一覧が使える粒度かを確認する
 - 移行 STEP 5（Phase 3 製造①の実装済み分＝パーティ・スキル操作を移植）。続けて製造②（スキル戦闘処理: skill / environment）・製造③（オフライン期待値計算＝ISSUE-106）を Java で実装する。製造②では `SkillData` へダメージ倍率・対象・状態異常のフィールドを追加する
