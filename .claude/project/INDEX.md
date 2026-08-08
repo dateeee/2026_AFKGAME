@@ -51,4 +51,12 @@
 | [test-patterns.md](test-patterns.md) | `test-list`、`unit-test` | AFK GAME のモジュール名・エラーコードを使ったテスト実装の実例 |
 | [commands.md](commands.md) | 全スキル（[profile.md](profile.md) §4 経由） | 全工程共通の常用コマンド表 |
 
+## 共有リファレンス（`.claude/references/`）
+
+| ファイル | 参照元 | 内容 |
+|---------|-------|------|
+| [review-procedure.md](../references/review-procedure.md) | レビュー系5スキル | レビューの共通手順・コスト規律 |
+| [review-format.md](../references/review-format.md) | レビュー系5スキル | レビュー結果の出力形式 |
+| [coding-standards-backend.md](../references/coding-standards-backend.md) | `dev`、`backend-review`、`unit-test` | Java 実装のコーディング規約チェックリスト。**正は [docs/process/coding_standards_backend.md](../../docs/process/coding_standards_backend.md)**（本書はその派生） |
+
 改稿時は [docs/changelog.md](../../docs/changelog.md) の先頭へ追記する（各ファイルに変更履歴セクションを置かない）。

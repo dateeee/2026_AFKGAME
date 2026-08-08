@@ -10,6 +10,7 @@
 - 製造は **TDD（テスト駆動開発）** で進める。適用範囲はバックエンドのみ（[process/phases.md](phases.md) §3.4）
 - 適用範囲は AFK GAME の全開発（Phase 1〜5）
 - 各工程の成果物（Markdown）の記述規約（文字数上限・分割ルール）は [documentation_rules.md](documentation_rules.md) に従う
+- **実装コードの記述規約（コーディング規約）は基本設計工程で定め、製造工程が従う**。バックエンドとフロントエンドで別冊とする（[process/phases.md](phases.md) §3.2.2）
 
 ## 2. 工程モデル
 
@@ -78,7 +79,7 @@ graph LR
 | ドキュメント規約ゲート | 仕様書・設計図の変更時 | `python scripts/check_doc_size.py` が `違反 0`（exit 0。台帳登録済みの既知超過は可 — [documentation_rules.md](documentation_rules.md) §7） |
 | 設計整合ゲート | 基本設計の変更時 | `diagrams-review` 指摘ゼロ（仕様確定ゲートと並走し、修正は1パスに統合）。DB変更時は**テーブル定義書 ↔ ER図 ↔ `Entity/Mapper`（`afkgame-domain`）の三者一致**（[process/phases.md](phases.md) §3.2.1） |
 | テストリストゲート | 製造着手前 | 分岐一覧の全項目にテストが存在し（`check_branch_list.py --tests` で照合）、実行して全件 FAIL（Red）を確認 |
-| 製造完了ゲート | 実装完了時 | テスト全PASS（Green）+ コードレビュー指摘対応 + `vue-tsc` 型チェックPASS + テーブル変更時は Flyway マイグレーションが存在し `flyway migrate` が通る |
+| 製造完了ゲート | 実装完了時 | テスト全PASS（Green）+ コードレビュー指摘対応（**コーディング規約からの逸脱ゼロ** — [coding_standards_backend.md](coding_standards_backend.md)）+ `vue-tsc` 型チェックPASS + テーブル変更時は Flyway マイグレーションが存在し `flyway migrate` が通る |
 | 単体テストゲート | 製造完了後 | 全PASS + C1カバレッジ100% |
 | Phase完了ゲート | 結合テスト完了時 | API統合テスト・E2E全PASS + `full-review` で仕様との乖離ゼロ + 文字数台帳（`KNOWN_OVERSIZED`）が空 |
 

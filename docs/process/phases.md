@@ -17,9 +17,9 @@
 | 項目 | 内容 |
 |------|------|
 | 目的 | システム構造・API・データモデル・画面構成と、非機能要件の実現方式を確定する |
-| 主な作業 | アーキテクチャ設計、API一覧・共通仕様の定義、**DB設計（テーブル定義・キー・インデックス・制約）とER図作成**、画面遷移設計、性能／セキュリティ／運用の実現方式の設計 |
-| 成果物 | [tech_spec.md](../tech/tech_spec.md)（索引）配下の**構造**（data / **db** / structure / api / architecture / logging / auth）と**非機能の実現方式**（performance / security / operations）、[docs/diagrams/](../diagrams/) 6点 |
-| 完了基準 | 仕様書・設計図間の矛盾がない（`diagrams-review` の指摘解消）。要件定義の非機能・運用要件がすべて、実現方式を定めたいずれかの成果物に対応づいている。新規・変更テーブルが**テーブル定義書とER図の双方**へ反映されている（§3.2.1） |
+| 主な作業 | アーキテクチャ設計、API一覧・共通仕様の定義、**DB設計（テーブル定義・キー・インデックス・制約）とER図作成**、画面遷移設計、性能／セキュリティ／運用の実現方式の設計、**コーディング規約の策定・改訂**（§3.2.2） |
+| 成果物 | [tech_spec.md](../tech/tech_spec.md)（索引）配下の**構造**（data / **db** / structure / api / architecture / logging / auth）と**非機能の実現方式**（performance / security / operations）、[docs/diagrams/](../diagrams/) 6点、**コーディング規約**（[coding_standards_backend.md](coding_standards_backend.md)） |
+| 完了基準 | 仕様書・設計図間の矛盾がない（`diagrams-review` の指摘解消）。要件定義の非機能・運用要件がすべて、実現方式を定めたいずれかの成果物に対応づいている。新規・変更テーブルが**テーブル定義書とER図の双方**へ反映されている（§3.2.1）。技術スタック・レイヤ構成を変えた場合はコーディング規約が追随している（§3.2.2） |
 | レビュー | `diagrams-review` スキル、`doc-review` スキル |
 
 ### 3.2.1 DB設計とER図
@@ -35,6 +35,22 @@ DBスキーマは**テキスト（テーブル定義書）を正、ER図を視�
 - **差し戻しルール**: 詳細設計以降で「定義書にないテーブル・列が要る」と判明したら、実装を先に書かず**基本設計へ戻して定義書とER図を更新**してから進む（§3.4 の分岐一覧と同じ扱い）
 - インデックスは**それを使う検索パターンとセット**で書く。パターンの無いインデックスは作らない
 - 列の追加は `nullable` または `server_default` を付ける（前方互換。[tech_operations.md](../tech/nonfunctional/tech_operations.md) §12.4）
+
+### 3.2.2 コーディング規約
+
+**コーディング規約は基本設計の成果物**とする。技術スタックとレイヤ構成が決まって初めて書ける一方、製造（§3.5）の全コードが従う前提であり、実装が始まってから決めると既存コードとの整合コストが出るため。
+
+**フロントエンドとバックエンドで別々の規約を持つ**（言語・フレームワーク・レイヤ構成が異なり、1冊にまとめると双方で読み飛ばしが起きるため）。
+
+| 規約 | 対象 | 状態 |
+|------|------|------|
+| [coding_standards_backend.md](coding_standards_backend.md) | `backend/` の Java（Terasoluna / MyBatis3） | 整備済み |
+| `coding_standards_frontend.md` | `frontend/` の Vue 3 / TypeScript | **未整備**。フロントエンドの製造再開前に作成する |
+
+- **正は `docs/process/` 側**。エージェントが実装・レビュー時に読む要約を [.claude/references/coding-standards-backend.md](../../.claude/references/coding-standards-backend.md) へ派生させる。改訂は**正 → 派生の順に同じ変更で**行う（派生側に固有値を書かない）
+- 規約の**境界**: テストコードの記述規約は [.claude/project/test-list.md](../../.claude/project/test-list.md) §5、レビュー観点は [.claude/project/review-code.md](../../.claude/project/review-code.md) §2、技術スタックの一覧は [.claude/project/profile.md](../../.claude/project/profile.md) §3 が正。規約側で再掲しない（[spec_ownership.md](spec_ownership.md)）
+- **改訂の起点**: ①技術スタック・レイヤ構成の変更 ②`backend-review` / `frontend-review` で同じ指摘が繰り返された（規約へ昇格させる）③実装で新しい流儀が必要になった（先に規約を直してから実装する）
+- 既存コードの一括是正は行わない。逸脱は [known_issues.md](../backlog/known_issues.md) へ記録し、その箇所を触るときに直す
 
 ## 3.3 詳細設計（ローレベル設計）
 
@@ -67,8 +83,8 @@ DBスキーマは**テキスト（テーブル定義書）を正、ER図を視�
 | 目的 | §3.4 のテストを満たす実装をTDDで作る |
 | 主な作業 | backend/（Terasoluna(Spring Boot)）は Red-Green-Refactor を1テストずつ回す。frontend/（Vue 3）は従来どおり実装 |
 | 成果物 | 実装コード一式（テーブルの追加・変更を伴う場合は Flyway マイグレーションを含む） |
-| 規約 | 既存コード規約に従う（リクエスト/レスポンスは Resource クラス + Bean Validation、ロジックは `afkgame-domain` の Service に集約、ログは Logback（`logback-spring.xml`）準拠 等）。Entity/Mapper は §3.2.1 のテーブル定義書どおりに作り、定義書に無い列を足さない |
-| 完了基準 | §3.4 の全テストがPASS、`backend-review`・`frontend-review` の指摘対応完了。テーブル変更がある場合は Flyway マイグレーションが存在し `flyway migrate` が通る |
+| 規約 | **バックエンドは [coding_standards_backend.md](coding_standards_backend.md) に従う**（層の責務・命名・例外・ログ・Javadoc）。フロントエンドは規約整備まで既存コードの流儀に倣う（§3.2.2）。Entity/Mapper は §3.2.1 のテーブル定義書どおりに作り、定義書に無い列を足さない |
+| 完了基準 | §3.4 の全テストがPASS、`backend-review`・`frontend-review` の指摘対応完了（コーディング規約からの逸脱ゼロ）。テーブル変更がある場合は Flyway マイグレーションが存在し `flyway migrate` が通る |
 | レビュー | `backend-review` スキル、`frontend-review` スキル（仕様↔コードの統合整合は §3.7 の `full-review`） |
 
 - **TDDサイクル**: Red（テストが失敗する）→ Green（**最小の実装**で通す）→ Refactor（テストを保ったまま整理）

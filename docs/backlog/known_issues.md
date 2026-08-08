@@ -29,6 +29,7 @@
 
 | 11 | `services/battle_service.py`, `services/equipment_service.py` | 全滅ペナルティ「**塔内取得アイテム全ロスト**」が未実装（[battle.md](../design/systems/battle.md)「全滅時の処理」3項目のうちEXP・ゴールドのみ実装）。`equipment_service.try_drop()` がドロップ装備を即座に永続化し、オートセル益も即 `player.gold` へ加算するため、取り消し対象として管理されていない。仕様・[battle_flow/overview.md](../diagrams/battle_flow/overview.md) が正 | 中（仕様乖離） | diagrams-review ISSUE-515 |
 | 12 | `routers/item.py`（未作成） | 換金アイテムが**ドロップも売却APIも未実装**。仕様では [item.md §5](../data/master/item.md) の換金アイテムが Phase 2〜 ドロップし、[tech_api.md](../tech/basic/tech_api.md) の `POST /api/item/sell` で Phase 2〜 売却できる（素材分は Phase 4〜）。現状は塔ファイル §7.4 のドロップテーブルが実装に反映されていない | 中（Phase 2 の機能欠落） | doc-review ISSUE-1020 |
+| 18 | `HealthService` | ロガーが `getLogger(HealthService.class)` で、[tech_logging.md](../tech/basic/tech_logging.md)「ロガー名体系」（[規約](../process/coding_standards_backend.md) §7 #1）に反する（他6件は準拠）。体系にヘルス用の名前が無く、**仕様へ追加後に寄せる** | 低 | 規約整備 |
 | 13 | `routers/auth.py` | 退会（アカウント削除）`POST /api/auth/delete-account` が未実装。[main_nav.md](../diagrams/screen_transition/main_nav.md) は退会導線を Phase 2〜 として描き、[tech_api.md](../tech/basic/tech_api.md)・[api_sequence/auth.md](../diagrams/api_sequence/auth.md) §14 に再認証つきの削除フローを定義済み | 中（Phase 2 の機能欠落） | diagrams-review ISSUE-509 |
 
 - 単体テストは**現状の実装に合わせて**作成済み。上記を修正する場合は該当テストの期待値も併せて更新すること

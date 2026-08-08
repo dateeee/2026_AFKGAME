@@ -5,15 +5,15 @@
 > **鮮度**: 開始側は「前提」のコミットIDと git log を突合し、完了済みに見えたら開始せずユーザーへ確認する。
 > 本ファイルは**ポインタ専用**。Phase 進捗の正は [development_process.md](../process/development_process.md) §5、書式の正は [.claude/project/next.md](../../.claude/project/next.md)。
 
-最終更新: 2026-08-08 / 対応コミット: e22f26c の次。**移行 STEP 2-C（骨格の設定・データ基盤）を実装**したコミット。`GameProperties`（`afkgame.*` の `@ConfigurationProperties`）・`RandomFactory`（`java.util.Random` を1リクエスト1個生成）・マスターデータの YAML ローダ（不正なら起動失敗）が入り `mvn verify` が通る（69件 PASS・branch 100%）。**これで STEP 2（骨格構築）は完了**。手順・進捗の正は [java_migration.md](java_migration.md)
+最終更新: 2026-08-08 / 対応コミット: fa084e0 の次。**バックエンドのコーディング規約を整備**したコミット。正 `docs/process/coding_standards_backend.md` + 派生 `.claude/references/coding-standards-backend.md` の二層構成で、工程定義には `phases.md` §3.2.2（規約は基本設計の成果物）を新設。STEP 2 は完了済みで、次は移行 STEP 3。手順・進捗の正は [java_migration.md](java_migration.md)
 
 ## 1. 次回（コピペ用）
 
 ```
-/retro 効率メモの棚卸し: docs/backlog/efficiency_memo.md に未反映エントリが9件（2026-08-08 01:29〜16:05）溜まっているため、原因をスキル・プロファイル・成果物の改善へ反映して反映済みエントリを削除する。同型の再発（残量WARN のファイルへ追記して上限超過 → 圧縮の往復）が3回記録されており、これを最優先で潰す
-完了条件: 各エントリの改善案が反映先ファイルへ入っている・反映済みエントリを削除・check_doc_size.py と check_docs.py が OK・changelog へ1行追記・コミット
-参照: docs/backlog/efficiency_memo.md（未反映エントリ9件）、.claude/project/retro.md（反映先マップ・しきい値）
-前提: 移行 STEP 2 完了。メモは 7,259字（区分C 8,000字・残り741字）で、次の自動追記2〜3回で上限に達する。エントリ内で名指しされている反映先は `.claude/project/profile.md` §7（追記前に残量と追記予定字数を突き合わせる）と `.claude/project/dev.md` §5（`@Nested` 使用時のテスト件数は surefire の *.xml で確認する）。STEP 3 は複数セッションに及ぶため、着手前にここで整地しておく
+/retro 効率メモの棚卸し: docs/backlog/efficiency_memo.md に未反映エントリが10件（2026-08-08 01:29〜16:40）溜まっているため、原因をスキル・プロファイル・成果物の改善へ反映して反映済みエントリを削除する。同型の再発（上限に近いファイルへ追記して超過 → 圧縮の往復）が4回記録されており、これを最優先で潰す
+完了条件: 各エントリの改善案が反映先ファイルへ入っている・反映済みエントリを削除・README.md を文字数台帳から外す・check_doc_size.py と check_docs.py が OK・changelog へ1行追記・コミット
+参照: docs/backlog/efficiency_memo.md（未反映エントリ10件）、.claude/project/retro.md（反映先マップ・しきい値）
+前提: 移行 STEP 2 完了。メモは約7,900字（区分C 8,000字）で次の自動追記で超過する。エントリ内で名指しされている反映先は `.claude/project/profile.md` §7（**追記・新規作成の前に残量を確認する** — 4回再発中の未反映分）と `.claude/project/dev.md` §5（`@Nested` 使用時のテスト件数は surefire の *.xml で確認する）。あわせて `scripts/check_doc_size.py` の `KNOWN_OVERSIZED` に `README.md`（6,077/6,000字）が登録済みで、是正方針は「索引の説明文を削る」または「索引テーブルを docs/INDEX.md へ分離」。STEP 3 は複数セッションに及ぶため、着手前にここで整地しておく
 ```
 
 ## 2. 候補キュー（最大5行・優先順）

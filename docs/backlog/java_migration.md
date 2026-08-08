@@ -128,6 +128,7 @@ Terasoluna blank project の標準構成に従う。
 ### STEP 3〜5: Phase 単位の移植
 
 各 Phase とも **分岐一覧 → JUnit テスト（Red）→ 実装（Green）** の順で進める（TDD 方針は維持）。
+実装は [coding_standards_backend.md](../process/coding_standards_backend.md) に従う（STEP 2 のコードから抽出した規約。チェックリストは [.claude/references/coding-standards-backend.md](../../.claude/references/coding-standards-backend.md)）。
 
 | STEP | スコープ |
 |------|------|

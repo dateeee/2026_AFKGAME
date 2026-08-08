@@ -26,6 +26,9 @@
 
 ## 3. 技術スタック
 
+実装の記述規約（層の責務・命名・例外・ログ・Javadoc）の正は [docs/process/coding_standards_backend.md](../../docs/process/coding_standards_backend.md)（バックエンド）。
+エージェント向けチェックリストは [.claude/references/coding-standards-backend.md](../references/coding-standards-backend.md)。本表は**採用技術の一覧**に限る。
+
 | 層 | 技術 | 規約 |
 |----|------|------|
 | DBアクセス | MyBatis3 | Entity + Mapper（インタフェース+XML）。`afkgame-domain` に配置 |
