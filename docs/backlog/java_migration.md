@@ -59,7 +59,7 @@ Terasoluna blank project の標準構成に従う。
 
 配置の正は [tech_structure.md](../tech/basic/tech_structure.md) §2。
 
-採用バージョンは `spring-boot-starter-parent` 3.5.16 / `terasoluna-gfw-*` 5.10.1.RELEASE / `mybatis-spring-boot-starter` 3.0.5（5.11.0 は Spring Boot 4 系のため不可）。**Terasoluna の BOM は import しない**。Spring Boot 3.5 が管理する Spring の版を BOM が上書きするため、`terasoluna-gfw-*` は親POMの `terasoluna.version` を使って個別に版指定する。
+採用バージョンは `spring-boot-starter-parent` 3.5.16 / `terasoluna-gfw-*` 5.10.1.RELEASE / `mybatis-spring-boot-starter` 3.0.5（5.11.0 は Spring Boot 4 系のため不可）。**Terasoluna の BOM は import しない**。Spring Boot 3.5 が管理する Spring の版を BOM が上書きするため、`terasoluna-gfw-*` は親POMの `terasoluna.version` で個別に版指定する。
 
 ## 3. 対応表（Python → Java）
 
@@ -81,7 +81,9 @@ Terasoluna blank project の標準構成に従う。
 | pytest / pytest-cov | JUnit 5 / JaCoCo |
 | uvicorn | Spring Boot 実行可能 jar |
 
-`scripts/*.py`（ドキュメント検証・レビュー退避）は**Python のまま維持**する。アプリではなく開発補助のため移行対象外。
+振り分けは**値の正の所在**で決める。`config.py` にあっても、正が `docs/data/master/`・`docs/design/systems/` にある値（初期キャラ・初期所持アイテム・装備スロット）は YAML マスターデータへ寄せる。
+
+`scripts/*.py`（ドキュメント検証・レビュー退避）は開発補助のため**Python のまま維持**する。
 
 ## 4. STEP 一覧
 
@@ -90,16 +92,16 @@ Terasoluna blank project の標準構成に従う。
 | 0 | 技術選定（§2） | 完了 |
 | 1 | 基本設計・規約の改訂（ドキュメント先行） | 完了 |
 | 2 | Java 側の骨格構築（横断基盤） | 完了 |
-| 3 | Phase 1 スコープの移植 | 未着手 |
+| 3 | Phase 1 スコープの移植 | 着手中 |
 | 4 | Phase 2 スコープの移植 | 未着手 |
 | 5 | Phase 3 実装済み分の移植 | 未着手 |
 | 6 | 切替と Python 資産の削除 | 未着手 |
 
 ### STEP 1: 基本設計・規約の改訂（完了）
 
-コードより先に仕様書を Java/Terasoluna 前提へ改訂した。対象は §2 の技術選定に触れる記述のみで、**ゲーム仕様・API契約・DBスキーマは変更していない**。改訂したファイルの内訳は [changelog.md](../changelog.md) 2026-08-08 が持つ。
+コードより先に仕様書を Java/Terasoluna 前提へ改訂した。対象は §2 の技術選定に触れる記述のみで、**ゲーム仕様・API契約・DBスキーマは変更していない**。内訳は [changelog.md](../changelog.md) 2026-08-08。
 
-§2 で確定した2点（**PostgreSQL 統一**・**マスターデータの YAML 外出し**）の反映も本 STEP に含む。影響は §5 の該当行を参照。
+§2 で確定した2点（**PostgreSQL 統一**・**マスターデータの YAML 外出し**）の反映も本 STEP に含む（影響は §5）。
 
 **`tech_db/` 各テーブルの「実装:」行だけは据え置いた** — `scripts/check_schema_triple.py` が三者一致検証に使うアンカーで、Python models が実体である間は書き換えられない（切替は STEP 6）。
 
@@ -107,7 +109,7 @@ Terasoluna blank project の標準構成に従う。
 
 機能を持たない共通基盤を先に固める。完了時点で「`GET /health` が 200（`db:ok`）・ゲスト認証が通る」状態にする。
 
-1セッションで閉じないため、3つのセグメントへ割って進めた。
+1セッションで閉じないため3セグメントへ割って進めた。
 
 | セグメント | 内容 | 状態 |
 |-----------|------|------|
@@ -160,6 +162,6 @@ API契約は不変だが、以下は言語差により仕様側の見直しが�
 | 乱数の再現性 | Python の Mersenne Twister と Java の乱数は互換性がない。**同一シードでも結果は一致しない**。シード固定テストの期待値は Java 側で再生成する |
 | tick の排他 | SQLAlchemy のセッション前提から、Spring の `@Transactional` + 行ロック前提へ読み替える |
 | マイグレーション履歴 | Alembic の既存5リビジョンは Flyway の `V1` 初期スキーマへ畳む（移行前後で同一スキーマになることを確認する） |
-| DBMS の統一 | SQLite を廃止し `local`・`production` とも PostgreSQL にする。段階移行（規模到達で SQLite → PostgreSQL）の前提が消えるため、型マッピングの SQLite 列・ロック方式の分岐・バックアップの二本立て・容量による移行判断ラインを削除する |
+| DBMS の統一 | SQLite を廃止し `local`・`production` とも PostgreSQL にする。段階移行の前提が消えるため、型マッピングの SQLite 列・ロック方式の分岐・バックアップの二本立て・容量による移行判断ラインを削除する |
 | tick のロック | SQLite の `BEGIN IMMEDIATE` 前提をやめ、`SELECT ... FOR UPDATE` の行ロックに一本化する（[tech_tick.md](../tech/detail/tech_tick.md) §3.1 が正） |
 | マスターデータ | Python 定数 → YAML リソース。数値の正は `docs/data/master/` のまま変わらないが、**再ビルドなしで差し替え可能**になる。ローダは起動時にスキーマ検証し、不正なら起動を中止する |
