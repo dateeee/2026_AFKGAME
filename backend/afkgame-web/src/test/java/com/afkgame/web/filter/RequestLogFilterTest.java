@@ -6,14 +6,19 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.util.UUID;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.mock.web.MockFilterChain;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 
@@ -24,6 +29,7 @@ import jakarta.servlet.ServletException;
  * リクエストIDの採番・{@code X-Request-ID} ヘッダ付与・処理時間計測・INFOログ出力を担う。
  *
  * <p>分岐観点: 正常終了 / 後続で例外が起きた場合（いずれも MDC を後始末する）。
+ * ログ本文は {@link ListAppender} で受けて検証する（Terasoluna 単体テストガイドライン 10.2.3）。
  * 骨格構築（java_migration.md STEP 2）の横断基盤であり詳細設計の分岐一覧を持たないため、
  * 分岐マーカーは付けない。
  */
@@ -32,8 +38,22 @@ class RequestLogFilterTest {
 
     private final RequestLogFilter filter = new RequestLogFilter();
 
+    /** ログ出力そのものを検証するための受け皿（unit-test.md §8「新規実装から適用する」1）。 */
+    private final ListAppender<ILoggingEvent> logs = new ListAppender<>();
+
+    private ch.qos.logback.classic.Logger middlewareLogger;
+
+    @BeforeEach
+    void setUp() {
+        logs.start();
+        middlewareLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("afkgame.middleware");
+        middlewareLogger.addAppender(logs);
+    }
+
     @AfterEach
     void tearDown() {
+        middlewareLogger.detachAppender(logs);
+        logs.stop();
         MDC.clear();
     }
 
@@ -70,6 +90,23 @@ class RequestLogFilterTest {
 
         // スレッドを再利用しても前のリクエストの値が残らないこと
         assertThat(MDC.getCopyOfContextMap()).isNullOrEmpty();
+    }
+
+    @Test
+    @DisplayName("処理時間つきの INFO ログを afkgame.middleware へ出す")
+    void test_リクエストログをINFOで出力する() throws Exception {
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        filter.doFilter(request(), response, new MockFilterChain());
+
+        assertThat(logs.list).hasSize(1);
+        ILoggingEvent event = logs.list.get(0);
+        assertThat(event.getLevel()).isEqualTo(Level.INFO);
+        assertThat(event.getFormattedMessage()).matches("POST /api/auth/guest 200 \\d+ms");
+        // MDC は finally で clear されるが、ログイベントには出力時点の値が焼き込まれている
+        assertThat(event.getMDCPropertyMap())
+                .containsEntry("status_code", "200")
+                .containsKeys("request_id", "duration_ms");
     }
 
     @Test

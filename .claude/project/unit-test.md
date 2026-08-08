@@ -7,9 +7,11 @@
 
 | 項目 | 値 |
 |------|-----|
-| 対象 | `afkgame-domain`・`afkgame-web`（Service・Controller・マスターデータを主、Entity/Mapper・Resource は副次的） |
+| 対象 | `@Tag("unit")` を付けたテスト（`afkgame-env`・`afkgame-domain`・`afkgame-web`）。Service・Controller・フィルタ・マスターデータが主 |
+| 対象外 | `@Tag("integration")`（Mapper・`@SpringBootTest`）。**カバレッジの分母にも入らない**（下記「実行の分離」） |
 | 配置 | 各モジュールの `src/test/java/.../<対象クラス>Test.java` |
 | 設定 | 各モジュールの `pom.xml`（`jacoco-maven-plugin`。branch カバレッジ・しきい値100%を設定） |
+| 実行の分離 | `backend/pom.xml` の surefire が `integration` タグを除外し、failsafe が `integration` タグだけを `integration-test` フェーズで回す。failsafe 側は `argLine` を上書きして JaCoCo agent を外しているため、**C1 は単体テストだけで測られる** |
 | レポート | `mvn verify` のターミナル出力と `target/site/jacoco/index.html`（未実行行=赤、部分分岐=黄） |
 | カバレッジ基準 | **C1（分岐網羅）100%** |
 | フロントエンド | 対象外。単体レベルの検証は結合テスト（Playwright）に統合し、型検証は `vue-tsc` を製造工程で実施 |
@@ -18,9 +20,10 @@
 
 | 目的 | コマンド |
 |------|---------|
-| 現状測定 | `cd backend && mvn test`（JaCoCoレポートは `target/site/jacoco/index.html`） |
-| クラスを絞る | `mvn test -Dtest=<対象クラス>Test` |
-| 完了判定 | `cd backend && mvn verify`（JaCoCo の branch カバレッジしきい値100%で判定） |
+| 現状測定 | `cd backend && mvn verify -DskipITs`（単体のみ実行 + JaCoCo レポート生成。**`mvn test` では `target/site/jacoco/index.html` は作られない**。`report` は verify フェーズにバインドしてある） |
+| クラスを絞る | `mvn test -Dtest=<対象クラス>Test`（速い確認用。HTML レポートも C1 判定も行われない） |
+| 結合テストも含めて回す | `cd backend && mvn verify` |
+| 完了判定 | `cd backend && mvn verify`（JaCoCo の branch カバレッジしきい値100%で判定。exit 0 が条件） |
 
 ## 3. 固有の分岐観点
 
@@ -28,9 +31,9 @@
 
 | 領域 | 押さえる分岐 |
 |------|------------|
-| 乱数 | ダメージ分散の上振れ/下振れ/中央、クリティカル発生/非発生、ドロップ有/無、エンカウント抽選。`random.random() < rate` は **rate 未満と rate 以上の両方**を固定して通す |
+| 乱数 | ダメージ分散の上振れ/下振れ/中央、クリティカル発生/非発生、ドロップ有/無、エンカウント抽選。`RandomFactory` 由来の `nextDouble() < rate` は **rate 未満と rate 以上の両方**を固定して通す |
 | 境界値 | `>=` と `>` の境界そのものの値、0、負値、上限クランプ（例: `target_floor_cap` の `highest == total_floors`） |
-| マスターデータ | 既知ID / **未知ID**（`None` またはフォールバック）、空リスト、有限塔 `total_floors=int` と無限塔 `None` |
+| マスターデータ | 既知ID / **未知ID**（`null` またはフォールバック）、空リスト、有限塔 `total_floors` あり と無限塔 `null` |
 | DB状態 | レコードなし（初回） / あり、塔別に独立していること、複数レコードでの絞り込み |
 | 認証 | ゲスト / 正規ユーザー、トークンなし / 期限切れ / 署名不正 |
 | tick・オフライン | `TURNS_PER_TICK` 内で決着 / 決着せず持ち越し、経過0tick / 1tick / 大量tick、上限クランプ |
@@ -41,13 +44,20 @@
 
 ## 4. 除外規則
 
-`# pragma: no cover` は**理由コメント必須**。許容されるのは `if __name__ == "__main__":` などの起動コードや、実行環境依存で再現できない例外ハンドラのみ。
+除外は各モジュール `pom.xml` の `jacoco-maven-plugin` の `<configuration><excludes>` で行い、**理由コメント必須**。許容されるのは `main` メソッド等の起動コードと、実行環境依存で再現できない例外ハンドラのみ。
 
-```python
-except (AttributeError, OSError):  # pragma: no cover - 実行環境依存
+```xml
+<configuration>
+  <excludes>
+    <!-- 起動クラス。Spring Boot の SpringApplication.run のみで分岐を持たない -->
+    <exclude>com/afkgame/web/AfkgameApplication.class</exclude>
+  </excludes>
+</configuration>
 ```
 
-カバレッジを通すためだけに `pragma: no cover` を付けることは**禁止**（新規に付ける場合は理由コメントを必須とし、完了報告で明示する）。
+上は書式の例で、**現時点の除外指定は0件**（全モジュール branch 100%）。`@Generated` が付いた自動生成コードは JaCoCo が自動的に除外するため、手書きの指定は要らない。
+
+カバレッジを通すためだけに除外を足すことは**禁止**（新規に足す場合は理由コメントを必須とし、完了報告で明示する）。
 
 ## 5. 現在の整備状況
 
@@ -72,3 +82,23 @@ except (AttributeError, OSError):  # pragma: no cover - 実行環境依存
 | 次にやること | 手段 |
 |------------|------|
 | 結合テストへ | `integration-test` スキル |
+
+## 8. Terasoluna 単体テストガイドラインとの差分
+
+正は [Terasoluna 5.x 開発ガイドライン 10章](https://terasolunaorg.github.io/guideline/current/ja/UnitTest/UnitTestOverview.html)。本プロジェクトは Spring Boot 3.5 ベースのため、ガイドラインの `@SpringJUnitConfig` + `test-context.xml` 構成を **Boot 流儀（`@SpringBootTest`・`@AutoConfigureMockMvc`）へ読み替えて適用する**。読み替えは乖離ではない（ガイドライン 10.1.2.2 の OSS 表も JUnit・AssertJ・Mockito・Spring Test を Boot 管理としている）。
+
+そのうえで、**意図して採らない**と決めた項目は以下。ここに無い差分を見つけたらガイドライン側へ寄せる。
+
+| ガイドライン | 本プロジェクトの選択 | 理由 |
+|------------|------------------|------|
+| DBUnit / Spring Test DBUnit（10.2.2.1.1.2） | 採らない。埋め込み PostgreSQL（zonky）+ `JdbcTemplate` のフィクスチャを使う | `@Transactional` ロールバック・固定時刻・親レコード生成が既に成立済み。Excel データ定義ファイルは保守対象を増やすだけで、Boot 管理外の依存2件も避けられる |
+| `MockMvcTester`（10.2.4.2.3） | 既存は旧 `MockMvc#perform().andExpect()` のまま。新規テストでの採用は任意 | 旧 API は非推奨ではなく、移行の得は記述の簡潔さのみ |
+| `@InjectMocks`（10.2.4.3.3.1） | 採らない。テスト内でコンストラクタへ手渡す | 本体がコンストラクタ注入のため、手渡しなら依存の欠落がコンパイルエラーで出る。`@InjectMocks` はリフレクション注入で失敗が静かになる |
+| Repository は「インフラ層の単体テスト」 | Mapper は `@Tag("integration")`（結合側）に分類する | 実 DB 起動を伴うため。C1 の分母を実 DB なしで閉じるための線引き |
+
+**新規実装から適用する**もの（既存は書き直さない）。
+
+| # | ルール |
+|---|-------|
+| 1 | `tech_logging.md` にログ要件があるクラスは `ListAppender<ILoggingEvent>` でログレベル・メッセージ・MDC を検証する（10.2.3 準拠） |
+| 2 | カスタム制約アノテーションを作ったら `jakarta.validation.Validator` を直接使う単体テストを必ず添える（10.2.3.1）。標準制約だけの Resource は `ApiExceptionHandler` 経由の 422 検証で足りる |
