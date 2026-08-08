@@ -7,7 +7,7 @@
 
 | レイヤー | 内容 | 配置 | 状態 |
 |---------|------|------|------|
-| L1: API統合テスト | MockMvc（`@SpringBootTest`）+ テスト用 PostgreSQL（Testcontainers）。APIシーケンスを検証 | Maven の `src/test/java`（統合テストパッケージ） | **整備済み**（Phase 1〜2） |
+| L1: API統合テスト | MockMvc（`@SpringBootTest`）+ 埋め込み PostgreSQL（`@AutoConfigureEmbeddedDatabase(provider = ZONKY)`）。APIシーケンスを検証 | Maven の `src/test/java`（統合テストパッケージ） | **整備済み**（Phase 1〜2） |
 | L2: E2Eテスト | Playwright。フロント＋バックを通しで起動し画面操作で検証 | `frontend/tests/e2e/` | **整備済み**（Phase 1〜2） |
 
 ### 1.1 L1 の記述規約

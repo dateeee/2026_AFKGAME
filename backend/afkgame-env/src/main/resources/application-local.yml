@@ -1,0 +1,8 @@
+# local — 開発・デバッグ（tech_operations.md §12.1）
+#
+# DB はリポジトリ同梱の docker-compose.yml が起動する PostgreSQL（:5432）を既定とする。
+# 開発の起動を止めないため、共通設定では既定値を持たない DATABASE_PASSWORD にのみ既定値を与える。
+
+spring:
+  datasource:
+    password: ${DATABASE_PASSWORD:afkgame}

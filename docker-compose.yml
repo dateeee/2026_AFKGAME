@@ -1,0 +1,32 @@
+# local 環境の PostgreSQL（tech_operations.md §12.1）
+#
+# 起動: docker compose up -d
+# 接続: jdbc:postgresql://localhost:5432/afkgame（DATABASE_URL の既定値）
+#
+# production は EC2 同居の PostgreSQL であり、本定義は local 専用。
+# スキーマは Flyway（afkgame-initdb）がアプリ起動時に適用するため、ここでは初期化SQLを流さない。
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: afkgame-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: afkgame
+      POSTGRES_USER: afkgame
+      # application-local.yml の DATABASE_PASSWORD 既定値と揃える
+      POSTGRES_PASSWORD: afkgame
+      # 照合順序に環境差を持ち込まない
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U afkgame -d afkgame"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres-data:

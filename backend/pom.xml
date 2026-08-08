@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>3.5.16</version>
+    <relativePath/>
+  </parent>
+
+  <groupId>com.afkgame</groupId>
+  <artifactId>afkgame</artifactId>
+  <version>0.1.0</version>
+  <packaging>pom</packaging>
+  <name>afkgame</name>
+  <description>AFK GAME backend (Terasoluna / Spring Boot)</description>
+
+  <modules>
+    <module>afkgame-env</module>
+    <module>afkgame-initdb</module>
+    <module>afkgame-domain</module>
+    <module>afkgame-web</module>
+  </modules>
+
+  <properties>
+    <java.version>17</java.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <!-- 実行環境の platform encoding が MS932 のため、テストJVMを UTF-8 に固定する。
+         JaCoCo の prepare-agent は本プロパティへ javaagent 引数を前置する -->
+    <argLine>-Dfile.encoding=UTF-8</argLine>
+
+    <terasoluna.version>5.10.1.RELEASE</terasoluna.version>
+    <mybatis-spring-boot.version>3.0.5</mybatis-spring-boot.version>
+    <embedded-database-spring-test.version>2.6.0</embedded-database-spring-test.version>
+    <embedded-postgres.version>2.1.0</embedded-postgres.version>
+    <!-- 統合テストで使う埋め込み PostgreSQL のメジャーバージョン（docker-compose.yml と揃える） -->
+    <embedded-postgres-binaries.version>16.9.0</embedded-postgres-binaries.version>
+    <jacoco.version>0.8.12</jacoco.version>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.mybatis.spring.boot</groupId>
+        <artifactId>mybatis-spring-boot-starter</artifactId>
+        <version>${mybatis-spring-boot.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.zonky.test</groupId>
+        <artifactId>embedded-database-spring-test</artifactId>
+        <version>${embedded-database-spring-test.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>io.zonky.test</groupId>
+        <artifactId>embedded-postgres</artifactId>
+        <version>${embedded-postgres.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>io.zonky.test.postgres</groupId>
+        <artifactId>embedded-postgres-binaries-bom</artifactId>
+        <version>${embedded-postgres-binaries.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>com.afkgame</groupId>
+        <artifactId>afkgame-env</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.afkgame</groupId>
+        <artifactId>afkgame-initdb</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.afkgame</groupId>
+        <artifactId>afkgame-domain</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <!-- 単体テストのC1（分岐）カバレッジ100%を mvn verify で判定する -->
+        <plugin>
+          <groupId>org.jacoco</groupId>
+          <artifactId>jacoco-maven-plugin</artifactId>
+          <version>${jacoco.version}</version>
+          <executions>
+            <execution>
+              <id>prepare-agent</id>
+              <goals>
+                <goal>prepare-agent</goal>
+              </goals>
+            </execution>
+            <execution>
+              <id>report</id>
+              <phase>verify</phase>
+              <goals>
+                <goal>report</goal>
+              </goals>
+            </execution>
+            <execution>
+              <id>check-branch-coverage</id>
+              <phase>verify</phase>
+              <goals>
+                <goal>check</goal>
+              </goals>
+              <configuration>
+                <rules>
+                  <rule>
+                    <element>BUNDLE</element>
+                    <limits>
+                      <limit>
+                        <counter>BRANCH</counter>
+                        <value>COVEREDRATIO</value>
+                        <minimum>1.00</minimum>
+                      </limit>
+                    </limits>
+                  </rule>
+                </rules>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+</project>

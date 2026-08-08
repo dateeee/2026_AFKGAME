@@ -25,7 +25,7 @@
 | フレームワーク | Terasoluna Server Framework for Spring 5.x（Spring Boot 3 / Spring Framework 6） | 実行可能 jar。Nginx 配下に systemd で常駐 |
 | 言語・ビルド | Java 17 / Maven マルチモジュール | Terasoluna blank project 準拠 |
 | データアクセス | **MyBatis3** | Terasoluna の MyBatis3 blank project を起点にする |
-| マイグレーション | Flyway | Alembic の既存4リビジョンは初期スキーマ `V1` へ畳む |
+| マイグレーション | Flyway | Alembic の既存5リビジョンは初期スキーマ `V1` へ畳む |
 | JSON | Jackson | camelCase 維持（`CamelModel` 相当の変換は不要） |
 | APIドキュメント | springdoc-openapi | FastAPI 自動生成の `/docs`（Swagger UI）を維持する |
 | 入力検証 | Bean Validation（Jakarta） | Pydantic のフィールド制約を移す |
@@ -34,7 +34,7 @@
 | ログ | Logback + MDC | `X-Request-ID` は MDC で引き回す |
 | テスト | JUnit 5 + Mockito + JaCoCo | C1 = JaCoCo **branch 100%** |
 | 依存脆弱性スキャン | OWASP Dependency-Check（Maven プラグイン） | `pip-audit` の置き換え |
-| 統合テスト | MockMvc（`@SpringBootTest`） | FastAPI TestClient の置き換え |
+| 統合テスト | MockMvc（`@SpringBootTest`）+ **埋め込み PostgreSQL** | FastAPI TestClient の置き換え。DBは `io.zonky.test:embedded-postgres`（`local` と同じ PostgreSQL 16 系）を使い、Docker なしで `mvn verify` を完結させる |
 | E2E | Playwright（既存を流用） | 変更なし |
 | 設定 | `application.yml` + 環境変数 | `.env` / `config.py` の置き換え |
 | DB | **PostgreSQL に統一** | `local` は Docker Compose、`production` は EC2 同居。ドライバは `postgresql` JDBC。SQLite は採用しない（§5） |
@@ -58,6 +58,8 @@ Terasoluna blank project の標準構成に従う。
 | `afkgame-initdb` | — | Flyway マイグレーション |
 
 配置の正は [tech_structure.md](../tech/basic/tech_structure.md) §2。
+
+採用バージョンは `spring-boot-starter-parent` 3.5.16 / `terasoluna-gfw-*` 5.10.1.RELEASE / `mybatis-spring-boot-starter` 3.0.5（5.11.0 は Spring Boot 4 系のため不可）。**Terasoluna の BOM は import しない**。Spring Boot 3.5 が管理する Spring の版を BOM が上書きするため、`terasoluna-gfw-*` は親POMの `terasoluna.version` を使って個別に版指定する。
 
 ## 3. 対応表（Python → Java）
 
@@ -87,7 +89,7 @@ Terasoluna blank project の標準構成に従う。
 |------|------|------|
 | 0 | 技術選定（§2） | 完了 |
 | 1 | 基本設計・規約の改訂（ドキュメント先行） | 完了 |
-| 2 | Java 側の骨格構築（横断基盤） | 未着手 |
+| 2 | Java 側の骨格構築（横断基盤） | 着手中（2-A 完了 / 2-B・2-C 未着手） |
 | 3 | Phase 1 スコープの移植 | 未着手 |
 | 4 | Phase 2 スコープの移植 | 未着手 |
 | 5 | Phase 3 実装済み分の移植 | 未着手 |
@@ -123,11 +125,13 @@ Terasoluna blank project の標準構成に従う。
 
 機能を持たない共通基盤を先に固める。完了時点で「`GET /health` が 200（`db:ok`）・ゲスト認証が通る」状態にする。
 
-1. Terasoluna MyBatis3 blank project からモジュール生成 + `local` 用 PostgreSQL の Docker Compose 定義
-2. 統一エラーレスポンス・例外ハンドラ・リクエストIDログ
-3. Spring Security による JWT / ゲスト認証
-4. Flyway 初期スキーマ（[tech_db.md](../tech/basic/tech_db.md) が正）
-5. RNG・設定プロパティ・マスターデータの YAML ローダ基盤（起動時に検証し、不正なら起動失敗）
+1セッションで閉じないため、3つのセグメントへ割って進める。
+
+| セグメント | 内容 | 状態 |
+|-----------|------|------|
+| 2-A | Terasoluna MyBatis3 blank project からモジュール生成 + `local` 用 PostgreSQL の Docker Compose 定義 / Flyway 初期スキーマ（[tech_db.md](../tech/basic/tech_db.md) が正）/ `GET /health` | 完了 |
+| 2-B | 統一エラーレスポンス・例外ハンドラ・リクエストIDログ / Spring Security による JWT・ゲスト認証（CORS・`logback-spring.xml` を含む） | 未着手 |
+| 2-C | RNG・設定プロパティ（`@ConfigurationProperties`）・マスターデータの YAML ローダ基盤（起動時に検証し、不正なら起動失敗） | 未着手 |
 
 ### STEP 3〜5: Phase 単位の移植
 
@@ -162,7 +166,7 @@ API契約は不変だが、以下は言語差により仕様側の見直しが�
 |------|------|
 | 乱数の再現性 | Python の Mersenne Twister と Java の乱数は互換性がない。**同一シードでも結果は一致しない**。シード固定テストの期待値は Java 側で再生成する |
 | tick の排他 | SQLAlchemy のセッション前提から、Spring の `@Transactional` + 行ロック前提へ読み替える |
-| マイグレーション履歴 | Alembic の既存4リビジョンは Flyway の `V1` 初期スキーマへ畳む（移行前後で同一スキーマになることを確認する） |
+| マイグレーション履歴 | Alembic の既存5リビジョンは Flyway の `V1` 初期スキーマへ畳む（移行前後で同一スキーマになることを確認する） |
 | DBMS の統一 | SQLite を廃止し `local`・`production` とも PostgreSQL にする。段階移行（規模到達で SQLite → PostgreSQL）の前提が消えるため、型マッピングの SQLite 列・ロック方式の分岐・バックアップの二本立て・容量による移行判断ラインを削除する |
 | tick のロック | SQLite の `BEGIN IMMEDIATE` 前提をやめ、`SELECT ... FOR UPDATE` の行ロックに一本化する（[tech_tick.md](../tech/detail/tech_tick.md) §3.1 が正） |
 | マスターデータ | Python 定数 → YAML リソース。数値の正は `docs/data/master/` のまま変わらないが、**再ビルドなしで差し替え可能**になる。ローダは起動時にスキーマ検証し、不正なら起動を中止する |

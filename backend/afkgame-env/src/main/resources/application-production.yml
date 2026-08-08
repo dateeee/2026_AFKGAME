@@ -1,0 +1,10 @@
+# production — 本番（tech_operations.md §12.1）
+#
+# 必須の環境変数に既定値を置かない。未設定のままだとプレースホルダを解決できず起動を中止するため、
+# 設定漏れのまま本番稼働することを防ぐ（tech_operations.md §12.2 の起動時バリデーション）。
+
+spring:
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USER}
+    password: ${DATABASE_PASSWORD}

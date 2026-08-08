@@ -32,6 +32,10 @@ env/
 *.db
 *.db-journal
 
+# Java / Maven
+backend/target/
+backend/*/target/
+
 # Node / Frontend
 node_modules/
 frontend/dist/
