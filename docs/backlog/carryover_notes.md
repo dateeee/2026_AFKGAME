@@ -11,6 +11,9 @@
 - 各 STEP の申し送り: **tower は `tech_tower.md` が無く分岐一覧も無い**（auth と同じ欠落。2026-08-08 確認）ため 3-B は `detail-design` から始める（game は `tech_state`/`tech_tick`/`tech_polling` §5、battle は `tech_battle`/`tech_rng`/`tech_numeric` §5 にある）。STEP 4 は着手前に `tech_shop.md` §7・§8 の分岐一覧が使える粒度かを確認する。STEP 5 は製造①（パーティ・スキル操作）の移植に続けて製造②（スキル戦闘処理: skill / environment。`SkillData` へダメージ倍率・対象・状態異常のフィールドを追加）・製造③（オフライン期待値計算＝ISSUE-106）を Java で実装する
 - **`docs/backlog/java_migration.md` は 7,988字 / 上限8,000字（残り12字）**。STEP 3 以降の進捗を書き足す前に `doc-size` で分割する（STEP 別に子ファイルへ切り出す等）。次の追記は圧縮では吸収できない
 - **`scripts/check_branch_list.py --tests` は Java のテストを見ていない**（走査先が `backend/tests/unit/*.py` 固定。2026-08-08 確認）。`test-list.md` §7 の「マーカーで機械照合」は Java 移行後のテストでは**素通り**する（exit 0）。3-A-1a の Red は Javadoc のマーカーが未照合のため手で確認した。走査先へ `backend/**/src/test/java/**/*.java` を足すのは **3-A-1c の完了後**（`tech_auth.md` §8.3 の12行がそろうまでは部分カバレッジで ERROR になる）
+- **同一モジュールに Red が複数並ぶと、片方だけでは Green を検証できない**（2026-08-08。3-A-1a を単独で verify しようとして判明）。Maven はテストソースを一括コンパイルするため、未実装の型を参照する別の Red があると `mvn test` はテスト実行前に止まる。Red を分割して積むときは、Green も同じ単位でまとめて取る
+- **テスト用コンストラクタを足したマスターデータのレジストリは、公開コンストラクタへ `@Autowired` を明示する**（2026-08-08。`CharacterTypes`・`EquipmentSlots`・`InitialPlayer` で発生）。リソースパスを受け取るパッケージプライベートなコンストラクタを併設すると候補が2つになり、Spring は既定コンストラクタを探して `NoSuchMethodException` で Bean 生成に失敗する。単体テストは通り、コンテキストを起こす統合テストだけが落ちる
+- **`characters.rarity` は V1 スキーマに無い**（Phase 3 の列）。`Character` Entity にも持たせていないので、Phase 3 の移植（STEP 5）でスキーマ追加と同時に足す
 
 ## 2. 仕様・マスターデータ
 
