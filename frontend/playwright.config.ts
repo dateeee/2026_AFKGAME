@@ -1,6 +1,12 @@
 import { defineConfig, devices } from '@playwright/test'
 
-import { E2E_BACKEND_PORT, E2E_DB_FILENAME, E2E_FRONTEND_PORT } from './tests/e2e/support/config'
+import {
+  E2E_BACKEND_PORT,
+  E2E_DB_NAME,
+  E2E_DB_SERVICE,
+  E2E_DB_USER,
+  E2E_FRONTEND_PORT,
+} from './tests/e2e/support/config'
 
 const FRONTEND_URL = `http://localhost:${E2E_FRONTEND_PORT}`
 const BACKEND_URL = `http://localhost:${E2E_BACKEND_PORT}`
@@ -40,7 +46,9 @@ export default defineConfig({
       timeout: 60_000,
       env: {
         E2E_BACKEND_PORT: String(E2E_BACKEND_PORT),
-        E2E_DB_FILENAME: E2E_DB_FILENAME,
+        E2E_DB_NAME,
+        E2E_DB_SERVICE,
+        E2E_DB_USER,
       },
       stdout: 'ignore',
       stderr: 'pipe',

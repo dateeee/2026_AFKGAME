@@ -14,7 +14,7 @@ Thumbs.db
 Desktop.ini
 .DS_Store
 
-# Python
+# Python（開発補助スクリプトのみ。アプリ本体は Java）
 __pycache__/
 *.py[cod]
 *.pyo
@@ -26,13 +26,8 @@ build/
 venv/
 # 仮想環境 env/ はパスを限定する。無指定だと Java パッケージ com/afkgame/env/ まで除外される
 /env/
-backend/env/
 .env
 .env.*
-
-# FastAPI / SQLite
-*.db
-*.db-journal
 
 # Java / Maven
 backend/target/
@@ -54,9 +49,6 @@ frontend/.playwright/
 logs/token_usage.csv
 
 # Coverage / Test
-htmlcov/
-.coverage
-.coverage.*
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/

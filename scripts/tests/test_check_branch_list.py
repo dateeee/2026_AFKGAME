@@ -2,8 +2,9 @@
 
 実行: `python -m pytest scripts/tests -q`（リポジトリルートから）
 
-スクリプトは `TECH_DIR` / `TEST_DIR` を起点に走査するため、各テストは両者を
-`tmp_path` へ差し替えて実リポジトリの内容に依存させない。
+スクリプトは分岐一覧を `TECH_DIR` から、マーカーを `ROOT` 配下の JUnit テスト
+（`JAVA_TEST_GLOB`）から読むため、各テストは両者を `tmp_path` へ差し替えて
+実リポジトリの内容に依存させない。
 
 緑パス（違反のない一覧を通す）と変異テスト（1項目ずつ壊して検出される）を
 対にして置く。
@@ -19,13 +20,13 @@ HEADER = "| # | 分岐点 | 条件 | 期待する振る舞い |\n|---|---|---|--
 
 @pytest.fixture
 def dirs(tmp_path, monkeypatch):
-    """`TECH_DIR` / `TEST_DIR` を差し替えた空ツリーを返す。"""
+    """`TECH_DIR` と `ROOT`（JUnit テストの走査起点）を差し替えた空ツリーを返す。"""
     tech = tmp_path / "docs" / "tech"
-    tests = tmp_path / "backend" / "tests" / "unit"
+    tests = tmp_path / "backend" / "afkgame-domain" / "src" / "test" / "java" / "com" / "afkgame"
     tech.mkdir(parents=True)
     tests.mkdir(parents=True)
     monkeypatch.setattr(mod, "TECH_DIR", tech)
-    monkeypatch.setattr(mod, "TEST_DIR", tests)
+    monkeypatch.setattr(mod, "ROOT", tmp_path)
     return tech, tests
 
 
@@ -33,8 +34,9 @@ def write_tech(dirs, name: str, text: str) -> None:
     (dirs[0] / name).write_text(text, encoding="utf-8")
 
 
-def write_test(dirs, name: str, text: str) -> None:
-    (dirs[1] / name).write_text(text, encoding="utf-8")
+def write_test(dirs, cls: str, text: str) -> None:
+    """JUnit テストを1つ置く（`JAVA_TEST_GLOB` に一致する `<cls>Test.java`）。"""
+    (dirs[1] / f"{cls}Test.java").write_text(text, encoding="utf-8")
 
 
 def standard_doc(rows: str, sec: str = "4. ", note: str = "") -> str:
@@ -190,54 +192,55 @@ def test_check_structure_skips_branch_coverage_for_old_format(dirs):
 
 def test_check_tests_passes_when_every_row_has_marker(dirs):
     write_tech(dirs, "tech_a.md", standard_doc(TWO_SIDED))
-    write_test(dirs, "test_a.py", '"""分岐: tech_a.md §4 #1,2"""\n')
+    write_test(dirs, "A", '"""分岐: tech_a.md §4 #1,2"""\n')
     assert mod.check_tests(mod.parse_tables()) == []
 
 
-def test_check_tests_returns_empty_when_test_dir_missing(dirs, monkeypatch, tmp_path):
+def test_check_tests_returns_empty_when_no_test_file_exists(dirs, monkeypatch, tmp_path):
+    """テストが1件も無ければ照合対象ゼロ。マーカー未整備の文書を落とさない。"""
     write_tech(dirs, "tech_a.md", standard_doc(TWO_SIDED))
-    monkeypatch.setattr(mod, "TEST_DIR", tmp_path / "none")
+    monkeypatch.setattr(mod, "ROOT", tmp_path / "none")
     assert mod.check_tests(mod.parse_tables()) == []
 
 
 def test_check_tests_detects_row_without_test(dirs):
     write_tech(dirs, "tech_a.md", standard_doc(TWO_SIDED))
-    write_test(dirs, "test_a.py", '"""分岐: tech_a.md §4 #1"""\n')
+    write_test(dirs, "A", '"""分岐: tech_a.md §4 #1"""\n')
     errors = mod.check_tests(mod.parse_tables())
     assert len(errors) == 1 and "行 #2 に対応するテストがない" in errors[0]
 
 
 def test_check_tests_detects_marker_pointing_to_missing_row(dirs):
     write_tech(dirs, "tech_a.md", standard_doc(TWO_SIDED))
-    write_test(dirs, "test_a.py", '"""分岐: tech_a.md §4 #1,2,3"""\n')
+    write_test(dirs, "A", '"""分岐: tech_a.md §4 #1,2,3"""\n')
     errors = mod.check_tests(mod.parse_tables())
     assert len(errors) == 1 and "存在しない行 #3" in errors[0]
 
 
 def test_check_tests_detects_marker_to_document_without_branch_list(dirs):
     write_tech(dirs, "tech_a.md", standard_doc(TWO_SIDED))
-    write_test(dirs, "test_a.py", '"""分岐: tech_zzz.md §4 #1"""\n')
+    write_test(dirs, "A", '"""分岐: tech_zzz.md §4 #1"""\n')
     errors = mod.check_tests(mod.parse_tables())
     assert any("参照先 tech_zzz.md に分岐一覧がない" in e for e in errors)
 
 
 def test_check_tests_detects_marker_to_missing_section(dirs):
     write_tech(dirs, "tech_a.md", standard_doc(TWO_SIDED))
-    write_test(dirs, "test_a.py", '"""分岐: tech_a.md §9 #1"""\n')
+    write_test(dirs, "A", '"""分岐: tech_a.md §9 #1"""\n')
     errors = mod.check_tests(mod.parse_tables())
     assert any("§9 の分岐一覧が見つからない" in e for e in errors)
 
 
 def test_check_tests_allows_omitted_section_when_document_has_one_list(dirs):
     write_tech(dirs, "tech_a.md", standard_doc(TWO_SIDED))
-    write_test(dirs, "test_a.py", '"""分岐: tech_a.md #1,2"""\n')
+    write_test(dirs, "A", '"""分岐: tech_a.md #1,2"""\n')
     assert mod.check_tests(mod.parse_tables()) == []
 
 
 def test_check_tests_requires_section_when_document_has_multiple_lists(dirs):
     doc = standard_doc(TWO_SIDED) + "\n" + standard_doc(TWO_SIDED, sec="5. ")
     write_tech(dirs, "tech_a.md", doc)
-    write_test(dirs, "test_a.py", '"""分岐: tech_a.md #1,2"""\n')
+    write_test(dirs, "A", '"""分岐: tech_a.md #1,2"""\n')
     errors = mod.check_tests(mod.parse_tables())
     assert any("§番号で特定する" in e for e in errors)
 
@@ -245,7 +248,7 @@ def test_check_tests_requires_section_when_document_has_multiple_lists(dirs):
 def test_check_tests_ignores_documents_no_marker_references(dirs):
     """マーカーが1件も指していない文書は照合対象外（レガシーテスト保護）。"""
     write_tech(dirs, "tech_a.md", standard_doc(TWO_SIDED))
-    write_test(dirs, "test_a.py", '"""マーカーなし"""\n')
+    write_test(dirs, "A", '"""マーカーなし"""\n')
     assert mod.check_tests(mod.parse_tables()) == []
 
 
@@ -267,14 +270,14 @@ def test_main_returns_one_on_error(dirs, monkeypatch, capsys):
 
 def test_main_skips_test_matching_without_flag(dirs, monkeypatch, capsys):
     write_tech(dirs, "tech_a.md", standard_doc(TWO_SIDED))
-    write_test(dirs, "test_a.py", '"""分岐: tech_a.md §4 #1"""\n')
+    write_test(dirs, "A", '"""分岐: tech_a.md §4 #1"""\n')
     monkeypatch.setattr(mod.sys, "argv", ["check_branch_list.py"])
     assert mod.main() == 0
 
 
 def test_main_runs_test_matching_with_flag(dirs, monkeypatch, capsys):
     write_tech(dirs, "tech_a.md", standard_doc(TWO_SIDED))
-    write_test(dirs, "test_a.py", '"""分岐: tech_a.md §4 #1"""\n')
+    write_test(dirs, "A", '"""分岐: tech_a.md §4 #1"""\n')
     monkeypatch.setattr(mod.sys, "argv", ["check_branch_list.py", "--tests"])
     assert mod.main() == 1
     assert "行 #2 に対応するテストがない" in capsys.readouterr().out

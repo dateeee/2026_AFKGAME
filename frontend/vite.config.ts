@@ -14,7 +14,7 @@ export default defineConfig({
     proxy: {
       '/api': {
         // E2E では専用DBのバックエンド（既定 :8100）を指すため環境変数で差し替える
-        target: process.env.VITE_API_PROXY_TARGET || 'http://localhost:8000',
+        target: process.env.VITE_API_PROXY_TARGET || 'http://localhost:8080',
         changeOrigin: true,
       },
     },

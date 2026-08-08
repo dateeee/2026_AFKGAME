@@ -11,28 +11,23 @@
 - 対応方針は「仕様書を実装に合わせる」か「実装を修正する」かを都度判断する（[development_process.md](../process/development_process.md) §6）
 - **未確定仕様**は `open_specs.md`、**数値のみ調整待ち**は [balance_backlog.md](balance_backlog.md) に置き、本書には含めない
 - 対応が完了した項目は §3 へ移す（直近10件のみ保持）
-- **Java 移行中の扱い**: 「対象」列は Python 実装のパスを指す。書き換えず、[java_migration.md](java_migration.md) の各 STEP で移植する際に1件ずつ再確認する。仕様欠落・未実装の項目は言語を変えても残る
+- **Java 移行中の扱い**: Python 実装は削除済みのため、「対象」列は**機能・仕様の所在**を指す（コード固有の疑義は削除時に消えた）。残っているのは言語を変えても残る**仕様欠落・未実装**であり、[java_migration.md](java_migration.md) の各 STEP で該当機能を実装する際に1件ずつ解消する
 
 ## 2. 未対応の項目
 
 | # | 対象 | 内容 | 影響度 | 検出元 |
 |---|------|------|--------|--------|
-| 2 | `services/battle_service.py` | 簡易計算が [tech_offline.md](../tech/detail/tech_offline.md) §4 と乖離。仕様は「乱数なしの期待値計算・サマリーのみ返却」だが、実装は乱数込み10tickの実シミュレーション結果に倍率を掛け、10tick分のログも返す。`equipment_drops`・`equipment_auto_sold` は外挿されない（ルーターから `process_pending_ticks` へ移設済みだが、算出方法は未修正） | 中（仕様乖離） | 単体テスト |
-| 3 | `services/battle_service.py` | `_get_potion_count()` がどこからも呼ばれていないデッドコード | 低 | 単体テスト |
-| 6 | `app/config.py` | [tech_operations.md](../tech/nonfunctional/tech_operations.md) §12.2 の環境変数一覧のうち、`CORS_ORIGINS`・`FRONTEND_BASE_URL`・`SMTP_*` が未対応（`APP_ENV`・`LOG_LEVEL`・`LOG_FORMAT`・`BATTLE_RNG_SEED`・起動時バリデーションは対応済み → §3）。[README.md](../../README.md) も環境変数として案内している | 低（残りは本番設定の一部） | 結合テスト |
-| 7 | `app/main.py`, `routers/auth.py` | [tech_security.md](../tech/nonfunctional/tech_security.md) §11.6 のレート制限（`RATE_LIMIT_EXCEEDED` / 429）が未実装。`/api/auth/login`（ブルートフォース）・`/api/auth/guest`（無制限のアカウント作成でDB肥大）・`/api/auth/password-reset/request`（トークン大量発行）が無防備で、コード上に考慮を示すコメント・設定もない。**アプリ層（slowapi 等）で持つか、インフラ層（WAF・ALB）へ寄せるかの方針決定が先**（決めたうえで tech_security.md へ明記する） | 中（本番公開前に必須） | backend-review ISSUE-103 |
-| 14 | `services/equipment_service.py` | 装備ドロップ（`try_drop`）に所持枠上限（`EQUIPMENT_STORAGE_LIMIT`=50）のチェックが無い。ショップ購入は `SHOP_INVENTORY_FULL`（400）で止まるため、同じ「装備取得」で上限の扱いが経路により非対称。**上限到達時の挙動（ドロップ消滅／強制オートセル／上限撤廃）の仕様確定が先**（[economy.md](../design/systems/economy.md) §倉庫） | 中（仕様欠落） | backend-review ISSUE-107 |
-| 15 | `models/item.py`, `app/config.py` | `BattleLog` モデルと `MAX_BATTLE_LOG_RECORDS`（100）が定義のみで、書き込み・読み出し・ローテーションのコードが存在しない。戦闘ログはtick応答で返すのみで、[ui.md](../design/systems/ui.md) §設定画面「上限はDB保存件数100件」に対応する保存機構が無い。**DB保存を実装するか、Phase 1〜2 では保存しない設計に確定してモデル・定数を削除するかの決定が先**。あわせて `entries` の型注釈が `Mapped[dict]` だが正は**配列**（[tech_db/battle.md](../tech/basic/tech_db/battle.md) §1・[tech_data.md](../tech/basic/tech_data.md) §1.3）で、保存実装時に `Mapped[list]` へ是正する | 中（仕様と実装の不一致） | backend-review ISSUE-111 |
+| 6 | 環境変数（`application.yml`） | [tech_operations.md](../tech/nonfunctional/tech_operations.md) §12.2 の環境変数一覧のうち、`FRONTEND_BASE_URL`・`SMTP_*` が未対応（`APP_ENV`・`LOG_LEVEL`・`LOG_FORMAT`・`BATTLE_RNG_SEED`・`CORS_ORIGINS`・起動時バリデーションは対応済み → §3）。[README.md](../../README.md) も環境変数として案内している | 低（残りは本番設定の一部） | 結合テスト |
+| 7 | `afkgame-web`（認証API） | [tech_security.md](../tech/nonfunctional/tech_security.md) §11.6 のレート制限（`RATE_LIMIT_EXCEEDED` / 429）が未実装。`/api/auth/login`（ブルートフォース）・`/api/auth/guest`（無制限のアカウント作成でDB肥大）・`/api/auth/password-reset/request`（トークン大量発行）が無防備。**アプリ層（Bucket4j 等）で持つか、インフラ層（WAF・ALB）へ寄せるかの方針決定が先**（決めたうえで tech_security.md へ明記する） | 中（本番公開前に必須） | backend-review ISSUE-103 |
+| 14 | 装備ドロップの仕様 | 装備ドロップに所持枠上限（`EQUIPMENT_STORAGE_LIMIT`=50）の扱いが無い。ショップ購入は `SHOP_INVENTORY_FULL`（400）で止まるため、同じ「装備取得」で上限の扱いが経路により非対称になる。**上限到達時の挙動（ドロップ消滅／強制オートセル／上限撤廃）の仕様確定が先**（[economy.md](../design/systems/economy.md) §倉庫） | 中（仕様欠落） | backend-review ISSUE-107 |
+| 15 | 戦闘ログのDB保存 | `max-battle-log-records`（100）は設定にあるが、`battle_logs` への書き込み・読み出し・ローテーションが未実装。戦闘ログはtick応答で返すのみで、[ui.md](../design/systems/ui.md) §設定画面「上限はDB保存件数100件」に対応する保存機構が無い。**DB保存を実装するか、Phase 1〜2 では保存しない設計に確定してテーブル・設定値を削除するかの決定が先**（[tech_db/battle.md](../tech/basic/tech_db/battle.md) §1 は `entries` を**配列**と定める） | 中（仕様と実装の不一致） | backend-review ISSUE-111 |
 | 16 | `views/SettingsView.vue`, `composables/usePolling.ts` | 設定「通知表示（トースト）」の `toastEnabled` は保存・永続化されるが、トーストを表示するコンポーネント・呼び出しが存在せず、ONにしても何も起きない。`TickResponse.equipmentDrops` / `equipmentAutoSold` も受け取ったまま未使用。**トーストを実装するか、Phase 2 スコープ外として設定項目を外すかの決定が先**（[ui.md](../design/systems/ui.md) §設定画面） | 中（設定が機能していない） | frontend-review ISSUE-802 |
 | 8 | `composables/useBattleLocal.ts` | 開発時フォールバック（[CLAUDE.md](../../CLAUDE.md) アーキテクチャ不変条件4「バックエンド未起動でもフロント単体で動作可」）が実質未実装のスタブで、どこからも import されていない。`VITE_USE_API=false` では初期化がスキップされ、空の画面になる（クラッシュはしない）。**不変条件が求める水準の確定が先**（ダミー状態＋簡易ローカルtickを実装するか、不変条件を「クラッシュせず起動する」へ緩めるか） | 中（不変条件と実装の乖離） | コードレビュー |
-| 10 | `master_data/towers.py`, `services/battle_service.py`, `schemas/tower.py` | 深淵の塔（[endgame.md](../design/systems/endgame.md) §2.14 の無限塔）は総階数を持たないが、`TowerData.total_floors` は `int` 固定。Phase 5 着手時に `target_floor_cap` / `process_tick` の目標到達判定 / `TowerInfo.total_floors` をまとめて `None` 対応させる（片側だけ対応すると判定が非対称になるため、現在は全て非 None を不変条件としている） | 低（Phase 5 の前提条件） | コードレビュー |
-
-| 11 | `services/battle_service.py`, `services/equipment_service.py` | 全滅ペナルティ「**塔内取得アイテム全ロスト**」が未実装（[battle.md](../design/systems/battle.md)「全滅時の処理」3項目のうちEXP・ゴールドのみ実装）。`equipment_service.try_drop()` がドロップ装備を即座に永続化し、オートセル益も即 `player.gold` へ加算するため、取り消し対象として管理されていない。仕様・[battle_flow/overview.md](../diagrams/battle_flow/overview.md) が正 | 中（仕様乖離） | diagrams-review ISSUE-515 |
-| 12 | `routers/item.py`（未作成） | 換金アイテムが**ドロップも売却APIも未実装**。仕様では [item.md §5](../data/master/item.md) の換金アイテムが Phase 2〜 ドロップし、[tech_api.md](../tech/basic/tech_api.md) の `POST /api/item/sell` で Phase 2〜 売却できる（素材分は Phase 4〜）。現状は塔ファイル §7.4 のドロップテーブルが実装に反映されていない | 中（Phase 2 の機能欠落） | doc-review ISSUE-1020 |
+| 10 | 深淵の塔（塔マスター・戦闘・API） | 深淵の塔（[endgame.md](../design/systems/endgame.md) §2.14 の無限塔）は総階数を持たないが、塔マスターの `totalFloors` は非 null を前提にしている。Phase 5 着手時に目標階の上限 / tick の目標到達判定 / `TowerInfo.totalFloors` をまとめて null 対応させる（片側だけ対応すると判定が非対称になる） | 低（Phase 5 の前提条件） | コードレビュー |
+| 11 | 全滅ペナルティ | 「**塔内取得アイテム全ロスト**」が未実装（[battle.md](../design/systems/battle.md)「全滅時の処理」3項目のうちEXP・ゴールドのみ）。ドロップ装備を即座に永続化しオートセル益も即ゴールドへ加算すると、取り消し対象として管理できない。仕様・[battle_flow/overview.md](../diagrams/battle_flow/overview.md) が正 | 中（仕様乖離） | diagrams-review ISSUE-515 |
+| 12 | 換金アイテム（`/api/item/*`） | 換金アイテムが**ドロップも売却APIも未実装**。仕様では [item.md §5](../data/master/item.md) の換金アイテムが Phase 2〜 ドロップし、[tech_api.md](../tech/basic/tech_api.md) の `POST /api/item/sell` で Phase 2〜 売却できる（素材分は Phase 4〜）。塔ファイル §7.4 のドロップテーブルが実装に反映されていない | 中（Phase 2 の機能欠落） | doc-review ISSUE-1020 |
 | 18 | `HealthService` | ロガーが `getLogger(HealthService.class)` で、[tech_logging.md](../tech/basic/tech_logging.md)「ロガー名体系」（[規約](../process/coding_standards_backend/common.md) §7 #1）に反する（他6件は準拠）。体系にヘルス用の名前が無く、**仕様へ追加後に寄せる** | 低 | 規約整備 |
-| 13 | `routers/auth.py` | 退会（アカウント削除）`POST /api/auth/delete-account` が未実装。[main_nav.md](../diagrams/screen_transition/main_nav.md) は退会導線を Phase 2〜 として描き、[tech_api.md](../tech/basic/tech_api.md)・[api_sequence/auth.md](../diagrams/api_sequence/auth.md) §14 に再認証つきの削除フローを定義済み | 中（Phase 2 の機能欠落） | diagrams-review ISSUE-509 |
-
-- 単体テストは**現状の実装に合わせて**作成済み。上記を修正する場合は該当テストの期待値も併せて更新すること
+| 13 | 退会API（`/api/auth/delete-account`） | 退会（アカウント削除）が未実装。[main_nav.md](../diagrams/screen_transition/main_nav.md) は退会導線を Phase 2〜 として描き、[tech_api.md](../tech/basic/tech_api.md)・[api_sequence/auth.md](../diagrams/api_sequence/auth.md) §14 に再認証つきの削除フローを定義済み | 中（Phase 2 の機能欠落） | diagrams-review ISSUE-509 |
 
 ## 3. 対応済みの項目
 

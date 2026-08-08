@@ -17,7 +17,7 @@ WARN の抑止（`WARN許容`）:
 
 テスト対応照合（--tests）:
     テストの docstring / Javadoc / コメントにあるマーカーを集計し、分岐一覧の行と突き合わせる。
-    対象は backend/tests/unit/*.py（Python）と backend/*/src/test/java/**/*Test.java（Java）。
+    対象は backend/*/src/test/java/**/*Test.java（JUnit 5）。
     マーカー形式: 「分岐: tech_shop.md §7 #3」（節番号は §8.3 のような枝番も可。
     一覧が1つだけの文書は §番号 を省略可。#3,4 と複数可）
     マーカーが1件も参照していない文書・セクションは照合対象外（レガシーテストに影響しない）。
@@ -35,7 +35,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 TECH_DIR = ROOT / "docs" / "tech"
-PY_TEST_DIR = ROOT / "backend" / "tests" / "unit"
 JAVA_TEST_GLOB = "backend/*/src/test/java/**/*Test.java"
 
 HEADING = re.compile(r"^(#{2,4})\s*(?:(\d+(?:\.\d+)*)\.?\s*)?分岐一覧")
@@ -122,9 +121,8 @@ def check_structure(sections) -> tuple[list[str], list[str]]:
 
 
 def test_files() -> list[Path]:
-    """マーカーを探すテストファイル（Python のレガシーテストと Java のテスト）。"""
-    files = sorted(PY_TEST_DIR.glob("test_*.py")) if PY_TEST_DIR.exists() else []
-    return files + sorted(ROOT.glob(JAVA_TEST_GLOB))
+    """マーカーを探すテストファイル（JUnit 5）。"""
+    return sorted(ROOT.glob(JAVA_TEST_GLOB))
 
 
 def check_tests(sections) -> list[str]:

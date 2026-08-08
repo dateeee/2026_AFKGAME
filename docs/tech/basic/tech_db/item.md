@@ -7,7 +7,7 @@
 
 ## 1. `equipment`（Phase 2）
 
-実装: `backend/app/models/equipment.py` `Equipment`。テーブル名は不可算名詞のため単数形（親 §2）。
+実装予定: `com.afkgame.domain.model.Equipment`。テーブル名は不可算名詞のため単数形（親 §2）。
 
 | 列 | 型 | NULL | 既定 | 制約・備考 |
 |----|----|------|------|-----------|
@@ -31,7 +31,7 @@
 
 ## 2. `character_equip_slots`（Phase 2）
 
-実装: `backend/app/models/equipment.py` `CharacterEquipSlot`。キャラクターと装備の交差テーブルで、キャラ1体につき9行（全スロット分）を持つ。
+実装: `com.afkgame.domain.model.CharacterEquipSlot`。キャラクターと装備の交差テーブルで、キャラ1体につき9行（全スロット分）を持つ。
 
 | 列 | 型 | NULL | 既定 | 制約・備考 |
 |----|----|------|------|-----------|
@@ -43,7 +43,7 @@
 
 ## 3. `inventory_items`（Phase 2）
 
-実装: `backend/app/models/item.py` `InventoryItem`
+実装: `com.afkgame.domain.model.InventoryItem`
 
 | 列 | 型 | NULL | 既定 | 制約・備考 |
 |----|----|------|------|-----------|
@@ -58,7 +58,7 @@
 
 ## 4. `shop_daily_states`（Phase 2）
 
-実装: `backend/app/models/shop.py` `ShopDailyState`。日替わりショップの更新サイクルを表し、プレイヤーごとに1件。
+実装予定: `com.afkgame.domain.model.ShopDailyState`。日替わりショップの更新サイクルを表し、プレイヤーごとに1件。
 
 | 列 | 型 | NULL | 既定 | 制約・備考 |
 |----|----|------|------|-----------|
@@ -68,7 +68,7 @@
 
 ## 5. `shop_daily_slots`（Phase 2）
 
-実装: `backend/app/models/shop.py` `ShopDailySlot`。状態1件につき5行。
+実装予定: `com.afkgame.domain.model.ShopDailySlot`。状態1件につき5行。
 
 | 列 | 型 | NULL | 既定 | 制約・備考 |
 |----|----|------|------|-----------|
@@ -92,7 +92,7 @@
 
 ## 6. `facilities`（Phase 4・未実装）
 
-実装予定: `backend/app/models/facility.py` `Facility`。拠点の施設をプレイヤーごとに保持する。効果・コストは [systems/economy.md](../../../design/systems/economy.md) と [master/base.md](../../../data/master/base.md) が正。
+実装予定: `com.afkgame.domain.model.Facility`。拠点の施設をプレイヤーごとに保持する。効果・コストは [systems/economy.md](../../../design/systems/economy.md) と [master/base.md](../../../data/master/base.md) が正。
 
 | 列 | 型 | NULL | 既定 | 制約・備考 |
 |----|----|------|------|-----------|

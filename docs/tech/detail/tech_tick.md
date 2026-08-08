@@ -90,12 +90,15 @@ C1網羅の対象分岐。[phases.md §3.4](../../process/phases.md) のテス�
 | 11 | ロック競合（`busy_timeout` 超過） | `503 BATTLE_TICK_BUSY` |
 | 12 | tick処理中の例外 | 全ロールバック・`last_tick_at` 不変 |
 
-## 6. 現行実装との差異（製造工程の是正対象）
+## 6. Java 実装時に満たすこと（未実装）
 
-| 箇所 | 現行実装 | 本仕様 |
-|------|---------|-------|
-| [battle.py:41](../../../backend/app/routers/battle.py) | 24時間超を無言で切り詰め（クランプ自体は §2 どおり） | §2 `capped` をサマリーに含める |
-| [battle.py:28](../../../backend/app/routers/battle.py) | 行ロックなし（二重tickが成立する） | §3 排他ロック |
-| [battle.py:57](../../../backend/app/routers/battle.py) | 簡略計算 = 10tickサンプルの平均 × 残り | [tech_offline.md §4](tech_offline.md) の期待値計算 |
+旧 Python 実装が本仕様と乖離していた点。移植時に本仕様どおり実装する
+（[java_migration.md](../../backlog/java_migration.md) STEP 3）。
 
-§1 の端数繰り越しは実装済み（[battle.py:73](../../../backend/app/routers/battle.py)。backend-review ISSUE-102）。
+| 項目 | 満たすべき仕様 |
+|------|--------------|
+| 24時間超のクランプ | 無言で切り詰めない。§2 の `capped` をサマリーに含める |
+| tick の排他 | 行ロックを取り、二重tickを成立させない（§3） |
+| 簡略計算 | 10tickサンプルの平均 × 残り ではなく、[tech_offline.md §4](tech_offline.md) の期待値計算を使う |
+
+§1 の端数繰り越しは仕様どおり実装する（旧実装でも満たしていた）。

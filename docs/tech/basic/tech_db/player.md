@@ -7,7 +7,7 @@
 
 ## 1. `players`（Phase 1）
 
-実装: `backend/app/models/player.py` `Player`
+実装: `com.afkgame.domain.model.Player`
 
 | 列 | 型 | NULL | 既定 | 制約・備考 |
 |----|----|------|------|-----------|
@@ -28,7 +28,7 @@
 
 ## 2. `player_settings`（Phase 1）
 
-実装: `backend/app/models/player.py` `PlayerSettings`
+実装: `com.afkgame.domain.model.PlayerSettings`
 
 | 列 | 型 | NULL | 既定 | 制約・備考 |
 |----|----|------|------|-----------|
@@ -41,7 +41,7 @@
 
 ## 3. `tower_clear_records`（Phase 1）
 
-実装: `backend/app/models/player.py` `TowerClearRecord`
+実装予定: `com.afkgame.domain.model.TowerClearRecord`
 
 | 列 | 型 | NULL | 既定 | 制約・備考 |
 |----|----|------|------|-----------|
@@ -56,7 +56,7 @@
 
 ## 4. `characters`（Phase 1）
 
-実装: `backend/app/models/character.py` `Character`
+実装: `com.afkgame.domain.model.Character`
 
 | 列 | 型 | NULL | 既定 | 制約・備考 |
 |----|----|------|------|-----------|
@@ -79,7 +79,7 @@
 
 ## 5. `party_members`（Phase 3）
 
-実装: `backend/app/models/party.py` `PartyMember`。編成の処理仕様は [tech_party.md](../../detail/tech_party.md) §1。
+実装予定: `com.afkgame.domain.model.PartyMember`。編成の処理仕様は [tech_party.md](../../detail/tech_party.md) §1。
 
 | 列 | 型 | NULL | 既定 | 制約・備考 |
 |----|----|------|------|-----------|
@@ -92,7 +92,7 @@
 
 ## 6. `learned_skills`（Phase 3）
 
-実装: `backend/app/models/character.py` `LearnedSkill`。習得の処理仕様は [tech_party.md](../../detail/tech_party.md) §3。
+実装予定: `com.afkgame.domain.model.LearnedSkill`。習得の処理仕様は [tech_party.md](../../detail/tech_party.md) §3。
 
 | 列 | 型 | NULL | 既定 | 制約・備考 |
 |----|----|------|------|-----------|
@@ -106,7 +106,7 @@
 
 ## 7. `active_skill_slots`（Phase 3）
 
-実装: `backend/app/models/character.py` `ActiveSkillSlot`。セットの処理仕様は [tech_party.md](../../detail/tech_party.md) §4。
+実装予定: `com.afkgame.domain.model.ActiveSkillSlot`。セットの処理仕様は [tech_party.md](../../detail/tech_party.md) §4。
 
 | 列 | 型 | NULL | 既定 | 制約・備考 |
 |----|----|------|------|-----------|
@@ -119,7 +119,7 @@
 
 ## 8. `prestige_bonuses`（Phase 5・未実装）
 
-実装予定: `backend/app/models/prestige.py` `PrestigeBonus`。投資上限の正は [master/endgame.md](../../../data/master/endgame.md) §16.1。
+実装予定: `com.afkgame.domain.model.PrestigeBonus`。投資上限の正は [master/endgame.md](../../../data/master/endgame.md) §16.1。
 
 | 列 | 型 | NULL | 既定 | 制約・備考 |
 |----|----|------|------|-----------|

@@ -7,7 +7,7 @@
 
 ## 1. `users`（Phase 2）
 
-実装: `backend/app/models/user.py` `User`
+実装: `com.afkgame.domain.model.User`
 
 | 列 | 型 | NULL | 既定 | 制約・備考 |
 |----|----|------|------|-----------|
@@ -23,7 +23,7 @@
 
 ## 2. `refresh_tokens`（Phase 2）
 
-実装: `backend/app/models/user.py` `RefreshToken`
+実装: `com.afkgame.domain.model.RefreshToken`
 
 | 列 | 型 | NULL | 既定 | 制約・備考 |
 |----|----|------|------|-----------|
@@ -36,7 +36,7 @@
 
 ## 3. `email_verification_tokens`（Phase 2）
 
-実装: `backend/app/models/user.py` `EmailVerificationToken`
+実装予定: `com.afkgame.domain.model.EmailVerificationToken`
 
 | 列 | 型 | NULL | 既定 | 制約・備考 |
 |----|----|------|------|-----------|

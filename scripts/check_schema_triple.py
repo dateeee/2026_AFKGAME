@@ -1,25 +1,25 @@
 #!/usr/bin/env python3
-"""DBスキーマ一致チェック（テーブル定義書 ↔ ER図 ↔ SQLAlchemy models ↔ Flyway DDL）
+"""DBスキーマ一致チェック（テーブル定義書 ↔ ER図 ↔ Flyway DDL）
 
-正は docs/tech/basic/tech_db/*.md（テーブル定義書）。ER図・models・DDL を定義書へ照合する。
+正は docs/tech/basic/tech_db/*.md（テーブル定義書）。ER図・DDL を定義書へ照合する。
 diagrams-review 2026-08-07 の「プロセスへの還元」に従い、セグメント1〜3 + レビューで
 4本書かれた使い捨てスクリプトを常設化したもの（review-procedure.md §5）。
 
-実装側の照合先は2つある。Python/FastAPI から Java/Terasoluna への移行期は両方を見る
-（java_migration.md §4 STEP 6）。models は移行完了時に削除され、DDL だけが残る。
+実装側の照合先は Flyway DDL のみである。
 
-    models  backend/app/models/*.py（SQLAlchemy）
     DDL     backend/afkgame-initdb/.../db/migration/V*.sql（Flyway）
 
-Java の Entity は列メタデータを持たない素の POJO のため照合対象にしない。Java 側で
-スキーマの正を持つのは Flyway DDL である。
+Java の Entity は列メタデータを持たない素の POJO のため列の照合対象にしない
+（Java 側でスキーマの正を持つのは Flyway DDL）。定義書の「実装:」行が指す Entity は
+**ファイルの実在だけ**を見る。未作成の Entity は「実装予定:」と書き分ける。
 
 検証項目:
-    1. 列        テーブル・列名・並び順の一致（`未実装` は models・DDL 側を除外）
+    1. 列        テーブル・列名・並び順の一致（`未実装` は DDL 側を除外）
+                 「実装:」宣言の Entity が afkgame-domain に実在すること
     2. タグ      PK / FK / UK タグの一致（FK参照先の一致を含む）
-    3. 一意制約  定義書の uq_* ↔ models の UniqueConstraint ↔ DDL の UNIQUE 制約
-    4. FKなし    「FKなし（親 §4-6）」の列に ER図・models・DDL が FK を持たないこと
-    5. nullable  定義書の NULL 欄 ↔ ER図注記 ↔ models の Mapped[T | None] ↔ DDL の NOT NULL
+    3. 一意制約  定義書の uq_* ↔ DDL の UNIQUE 制約
+    4. FKなし    「FKなし（親 §4-6）」の列に ER図・DDL が FK を持たないこと
+    5. nullable  定義書の NULL 欄 ↔ ER図注記 ↔ DDL の NOT NULL
     6. 命名規約  一意制約名が uq_<テーブル名>_<列>_<列>（tech_db.md §2）に適合するか
     7. ER索引    er_diagram.md 索引の列挙エンティティ ↔ 各子ファイルの実在エンティティ
 
@@ -45,7 +45,9 @@ ROOT = Path(__file__).resolve().parent.parent
 DEF_DIR = ROOT / "docs" / "tech" / "basic" / "tech_db"
 ER_INDEX = ROOT / "docs" / "diagrams" / "er_diagram.md"
 ER_DIR = ROOT / "docs" / "diagrams" / "er_diagram"
-MODELS_DIR = ROOT / "backend" / "app" / "models"
+ENTITY_DIR = (
+    ROOT / "backend" / "afkgame-domain" / "src" / "main" / "java" / "com" / "afkgame" / "domain" / "model"
+)
 DDL_DIR = ROOT / "backend" / "afkgame-initdb" / "src" / "main" / "resources" / "db" / "migration"
 
 ER_TAGS = {"PK", "FK", "UK"}
@@ -72,7 +74,7 @@ class DefTable:
     src: str
     line: int
     cls: str = ""
-    model_file: str = ""
+    planned: bool = False  # 「実装予定:」（Entity 未作成）か
     unimplemented: bool = False
     columns: list[DefColumn] = field(default_factory=list)
     uniques: list[tuple[str, tuple[str, ...]]] = field(default_factory=list)
@@ -102,28 +104,6 @@ class ErEntity:
 
 
 @dataclass
-class ModelColumn:
-    name: str
-    nullable: bool  # 実効値（nullable= の明示があればそれ、無ければ注釈）
-    ann_nullable: bool  # Mapped[T | None] か
-    kw_nullable: bool | None  # mapped_column(nullable=...) の明示。無指定は None
-    pk: bool
-    fk_target: str | None
-    unique: bool
-    line: int
-
-
-@dataclass
-class ModelTable:
-    table: str
-    cls: str
-    src: str
-    line: int
-    columns: list[ModelColumn] = field(default_factory=list)
-    uniques: list[tuple[str, tuple[str, ...]]] = field(default_factory=list)
-
-
-@dataclass
 class DdlColumn:
     name: str
     nullable: bool  # NOT NULL が無い
@@ -149,7 +129,7 @@ PARSE_ERRORS: list[str] = []
 # 1. テーブル定義書（正）
 # --------------------------------------------------------------------------
 SECTION = re.compile(r"^##\s+\d+\.\s+`(?P<table>[a-z0-9_]+)`(?:（(?P<phase>[^）]*)）)?\s*$")
-IMPL = re.compile(r"^実装(?:予定)?:\s*`backend/app/models/(?P<file>[\w./]+)`\s*`(?P<cls>\w+)`")
+IMPL = re.compile(r"^実装(?P<planned>予定)?:\s*`com\.afkgame\.domain\.model\.(?P<cls>\w+)`")
 UNIQ = re.compile(r"`(?P<name>uq_[a-z0-9_]+)`\s*=\s*\((?P<cols>[^)]*)\)")
 BACKTICKED = re.compile(r"`([a-z0-9_]+)`")
 FK_REF = re.compile(r"FK\s*(?:→|->)\s*`(?P<target>[a-z0-9_]+\.[a-z0-9_]+)`")
@@ -188,8 +168,8 @@ def parse_definitions() -> dict[str, DefTable]:
 
             m = IMPL.match(line)
             if m:
-                current.model_file = m.group("file")
                 current.cls = m.group("cls")
+                current.planned = m.group("planned") is not None
                 continue
 
             if line.startswith("一意制約"):
@@ -315,118 +295,11 @@ def _parse_er_attr(raw: str, no: int, rel: str, entity: str) -> ErAttr | None:
 
 
 # --------------------------------------------------------------------------
-# 3. SQLAlchemy models
+# 3. Java Entity（実在のみ）
 # --------------------------------------------------------------------------
-CLASS_DEF = re.compile(r"^class\s+(?P<cls>\w+)\(Base\):")
-TABLENAME = re.compile(r'^\s+__tablename__\s*=\s*"(?P<table>\w+)"')
-COLUMN_DEF = re.compile(r"^\s{4}(?P<name>\w+)\s*:\s*Mapped\[")
-UNIQUE_CONSTRAINT = re.compile(r"UniqueConstraint\((?P<args>[^)]*)\)")
-FOREIGN_KEY = re.compile(r'ForeignKey\(\s*"(?P<target>[^"]+)"')
-NAME_KW = re.compile(r'name\s*=\s*"(?P<name>[^"]+)"')
-
-
-def _strip_comment(line: str) -> str:
-    """行末コメントを落とす（引用符の外の # のみ）。"""
-    out, quote = [], ""
-    for ch in line:
-        if quote:
-            out.append(ch)
-            if ch == quote:
-                quote = ""
-            continue
-        if ch in "\"'":
-            quote = ch
-            out.append(ch)
-            continue
-        if ch == "#":
-            break
-        out.append(ch)
-    return "".join(out)
-
-
-def _statement(lines: list[str], i: int) -> tuple[str, int]:
-    """括弧が閉じるまで行を連結して1つの文にする。"""
-    buf = _strip_comment(lines[i])
-    depth = buf.count("(") - buf.count(")") + buf.count("[") - buf.count("]")
-    while depth > 0 and i + 1 < len(lines):
-        i += 1
-        piece = _strip_comment(lines[i]).strip()
-        buf += " " + piece
-        depth += piece.count("(") - piece.count(")") + piece.count("[") - piece.count("]")
-    return buf, i
-
-
-def parse_models() -> dict[str, ModelTable]:
-    """backend/app/models/*.py からテーブルを読む（正規表現ベース。import しない）。"""
-    tables: dict[str, ModelTable] = {}
-    for path in sorted(MODELS_DIR.glob("*.py")):
-        if path.name == "__init__.py":
-            continue
-        rel = path.relative_to(ROOT).as_posix()
-        lines = path.read_text(encoding="utf-8").splitlines()
-        cls = ""
-        cls_line = 0
-        current: ModelTable | None = None
-        i = 0
-        while i < len(lines):
-            line = lines[i]
-            m = CLASS_DEF.match(line)
-            if m:
-                cls, cls_line, current = m.group("cls"), i + 1, None
-                i += 1
-                continue
-            if line and not line[0].isspace() and not line.startswith(")"):
-                cls, current = "", None  # クラス外へ出た
-            m = TABLENAME.match(line)
-            if m and cls:
-                current = ModelTable(table=m.group("table"), cls=cls, src=rel, line=cls_line)
-                if current.table in tables:
-                    PARSE_ERRORS.append(
-                        f"ERROR {rel}:{i + 1}: __tablename__ `{current.table}` が重複している"
-                    )
-                tables[current.table] = current
-                i += 1
-                continue
-            if current is None:
-                i += 1
-                continue
-
-            if re.match(r"\s+__table_args__\s*=", line):
-                stmt, i = _statement(lines, i)
-                for u in UNIQUE_CONSTRAINT.finditer(stmt):
-                    args = u.group("args")
-                    nm = NAME_KW.search(args)
-                    cols = tuple(re.findall(r'"([^"]+)"', NAME_KW.sub("", args)))
-                    current.uniques.append((nm.group("name") if nm else "", cols))
-                i += 1
-                continue
-
-            m = COLUMN_DEF.match(line)
-            if m:
-                stmt, i = _statement(lines, i)
-                if "relationship(" in stmt or "mapped_column(" not in stmt:
-                    i += 1
-                    continue
-                ann = re.search(r"Mapped\[(?P<t>.+?)\]\s*=", stmt)
-                annotation = ann.group("t") if ann else ""
-                ann_nullable = "None" in annotation
-                kw = re.search(r"nullable\s*=\s*(?P<v>True|False)", stmt)
-                kw_nullable = (kw.group("v") == "True") if kw else None
-                fk = FOREIGN_KEY.search(stmt)
-                current.columns.append(
-                    ModelColumn(
-                        name=m.group("name"),
-                        nullable=kw_nullable if kw_nullable is not None else ann_nullable,
-                        ann_nullable=ann_nullable,
-                        kw_nullable=kw_nullable,
-                        pk="primary_key=True" in stmt,
-                        fk_target=fk.group("target") if fk else None,
-                        unique="unique=True" in stmt,
-                        line=i + 1,
-                    )
-                )
-            i += 1
-    return tables
+def entity_exists(cls: str) -> bool:
+    """afkgame-domain に `com.afkgame.domain.model.<cls>` があるか。"""
+    return (ENTITY_DIR / f"{cls}.java").is_file()
 
 
 # --------------------------------------------------------------------------
@@ -559,14 +432,10 @@ class Sources:
     defs: dict[str, DefTable]
     er: dict[str, ErEntity]
     er_files: dict[str, list[str]]
-    models: dict[str, ModelTable]
     ddl: dict[str, DdlTable] = field(default_factory=dict)
 
     def er_of(self, d: DefTable) -> ErEntity | None:
         return self.er.get(d.cls)
-
-    def model_of(self, d: DefTable) -> ModelTable | None:
-        return self.models.get(d.table)
 
     def ddl_of(self, d: DefTable) -> DdlTable | None:
         """定義書に対応する DDL テーブル。DDL 未解析（`ddl` が空）なら常に None。"""
@@ -601,7 +470,10 @@ def check_columns(s: Sources) -> list[str]:
     errors = []
     for d in s.defs.values():
         if not d.cls:
-            errors.append(f"ERROR {d.label}: 「実装:」行が無く models クラス名を特定できない")
+            errors.append(
+                f"ERROR {d.label}: 「実装:」行が無く Entity 名（= ER図のエンティティ名）を特定できない"
+                f"（書式: 実装: `com.afkgame.domain.model.<クラス>`。未作成なら「実装予定:」）"
+            )
             continue
 
         er = s.er_of(d)
@@ -629,28 +501,20 @@ def check_columns(s: Sources) -> list[str]:
                 for msg in _seq_diff("DDL の列", expected, [c.name for c in ddl.columns]):
                     errors.append(f"ERROR {d.label} ↔ {ddl.src}:{ddl.line} {msg}")
 
-        model = s.model_of(d)
-        if model is None:
-            if not d.unimplemented:
-                errors.append(f"ERROR {d.label}: models に __tablename__ = \"{d.table}\" が無い（未実装表記も無い）")
-            continue
-        if d.unimplemented:
-            errors.append(f"ERROR {d.label}: 定義書は未実装だが models に実装がある（定義書の Phase 表記を更新する）")
-        if model.cls != d.cls:
-            errors.append(f"ERROR {d.label}: モデルクラス名が不一致 定義書={d.cls} / {model.src}={model.cls}")
-        expected_src = f"backend/app/models/{d.model_file}"
-        if d.model_file and model.src != expected_src:
+        # Entity は列を持たない POJO のため、実在と「実装 / 実装予定」の書き分けだけを見る
+        exists = entity_exists(d.cls)
+        if d.planned and exists:
             errors.append(
-                f"ERROR {d.label}: 実装ファイルが不一致 定義書={expected_src} / 実体={model.src}"
+                f"ERROR {d.label}: 「実装予定:」だが `{d.cls}.java` が実在する"
+                f"（作成済みなら「実装:」へ変える）"
             )
-        expected = [c.name for c in d.columns if not c.unimplemented]
-        for msg in _seq_diff("models の列", expected, [c.name for c in model.columns]):
-            errors.append(f"ERROR {d.label} ↔ {model.src}:{model.line} {msg}")
+        elif not d.planned and not exists:
+            errors.append(
+                f"ERROR {d.label}: 「実装:」が指す `com.afkgame.domain.model.{d.cls}` が無い"
+                f"（未作成なら「実装予定:」と書く）"
+            )
 
     known = {d.table for d in s.defs.values()}
-    for table, m in s.models.items():
-        if table not in known:
-            errors.append(f"ERROR {m.src}:{m.line}: テーブル `{table}` が定義書に無い（tech_db.md §7: 定義書に無いテーブルを実装しない）")
     for table, t in s.ddl.items():
         if table not in known:
             errors.append(
@@ -665,7 +529,6 @@ def check_tags(s: Sources) -> list[str]:
     """PK / FK / UK タグの三者一致（ISSUE-601・602 の検出層）。"""
     errors = []
     for d, er in s.pairs():
-        model = s.model_of(d)
         er_pk = {a.name for a in er.attrs if "PK" in a.tags}
         er_fk = {a.name for a in er.attrs if "FK" in a.tags}
         er_uk = {a.name for a in er.attrs if "UK" in a.tags}
@@ -726,34 +589,11 @@ def check_tags(s: Sources) -> list[str]:
                         f"ERROR {ddl.src}:{dc.line} `{ddl.table}`.{c.name}: UNIQUE が定義書と不一致"
                         f"（定義書={'UNIQUE' if c.unique else 'UNIQUEでない'}）"
                     )
-
-        if model is None or d.unimplemented:
-            continue
-        m_cols = {c.name: c for c in model.columns}
-        for c in d.columns:
-            if c.unimplemented or c.name not in m_cols:
-                continue
-            mc = m_cols[c.name]
-            if c.pk != mc.pk:
-                errors.append(
-                    f"ERROR {model.src}:{mc.line} {model.cls}.{c.name}: primary_key が定義書と不一致"
-                    f"（定義書={'PK' if c.pk else 'PKでない'}）"
-                )
-            if c.fk_target and mc.fk_target != c.fk_target:
-                errors.append(
-                    f"ERROR {model.src}:{mc.line} {model.cls}.{c.name}: FK参照先が不一致"
-                    f"（定義書={c.fk_target} / models={mc.fk_target}）"
-                )
-            if c.unique != mc.unique:
-                errors.append(
-                    f"ERROR {model.src}:{mc.line} {model.cls}.{c.name}: unique が定義書と不一致"
-                    f"（定義書={'UNIQUE' if c.unique else 'UNIQUEでない'}）"
-                )
     return errors
 
 
 def check_unique(s: Sources) -> list[str]:
-    """定義書の一意制約 ↔ models の UniqueConstraint ↔ DDL の UNIQUE 制約（名前・構成列）。
+    """定義書の一意制約 ↔ DDL の UNIQUE 制約（名前・構成列）。
 
     定義書は単一列 UNIQUE を備考欄で宣言する（名前を持たない）ため、DDL 側からの
     「定義書に無い」報告は複合一意（2列以上）に限る。単一列は check_tags が見る。
@@ -781,38 +621,14 @@ def check_unique(s: Sources) -> list[str]:
                         f"ERROR {ddl.src}:{ddl.line} `{ddl.table}`: 一意制約 `{name}` が定義書 {d.src} に無い"
                         f"（DDL={list(cols)}）"
                     )
-
-        model = s.model_of(d)
-        if model is None or d.unimplemented:
-            continue
-        def_map = dict(d.uniques)
-        model_map = dict(model.uniques)
-        for name, cols in d.uniques:
-            if name not in model_map:
-                errors.append(
-                    f"ERROR {model.src}:{model.line} {model.cls}: 一意制約 `{name}` が models に無い"
-                    f"（定義書 {d.src}:{d.line} = {list(cols)}）"
-                )
-            elif tuple(model_map[name]) != tuple(cols):
-                errors.append(
-                    f"ERROR {model.src}:{model.line} {model.cls}: 一意制約 `{name}` の構成列が不一致"
-                    f"（定義書={list(cols)} / models={list(model_map[name])}）"
-                )
-        for name, cols in model.uniques:
-            if name not in def_map:
-                errors.append(
-                    f"ERROR {model.src}:{model.line} {model.cls}: 一意制約 `{name}` が定義書 {d.src} に無い"
-                    f"（models={list(cols)}）"
-                )
     return errors
 
 
 def check_nofk(s: Sources) -> list[str]:
-    """「FKなし（親 §4-6）」宣言の列に ER図・models が FK を持たないこと（ISSUE-602）。"""
+    """「FKなし（親 §4-6）」宣言の列に ER図・DDL が FK を持たないこと（ISSUE-602）。"""
     errors = []
     for d in s.defs.values():
         er = s.er_of(d)
-        model = s.model_of(d)
         ddl = s.ddl_of(d)
         for c in d.columns:
             if not c.no_fk:
@@ -823,13 +639,6 @@ def check_nofk(s: Sources) -> list[str]:
                     errors.append(
                         f"ERROR {er.src}:{a.line} {er.name}.{c.name}: 定義書は「FKなし」だが ER図が FK タグを持つ"
                         f"（マスター参照は FK を外し「（DB外部キーなし）」と注記する。tech_db.md §4-6）"
-                    )
-            if model and not d.unimplemented:
-                mc = next((x for x in model.columns if x.name == c.name), None)
-                if mc and mc.fk_target:
-                    errors.append(
-                        f"ERROR {model.src}:{mc.line} {model.cls}.{c.name}: 定義書は「FKなし」だが"
-                        f" ForeignKey(\"{mc.fk_target}\") がある（tech_db.md §4-6）"
                     )
             if ddl and not d.unimplemented:
                 dc = next((x for x in ddl.columns if x.name == c.name), None)
@@ -850,11 +659,10 @@ NULLABLE_HINT = re.compile(r"nullable", re.IGNORECASE)
 
 
 def check_nullable(s: Sources) -> list[str]:
-    """定義書の NULL 欄 ↔ ER図注記 ↔ models の Mapped[T | None]（ISSUE-604）。"""
+    """定義書の NULL 欄 ↔ ER図注記 ↔ DDL の NOT NULL（ISSUE-604）。"""
     errors = []
     for d in s.defs.values():
         er = s.er_of(d)
-        model = s.model_of(d)
         ddl = s.ddl_of(d)
         for c in d.columns:
             if ddl and not d.unimplemented and not c.unimplemented:
@@ -879,22 +687,6 @@ def check_nullable(s: Sources) -> list[str]:
                             f"ERROR {er.src}:{a.line} {er.name}.{c.name}: ER図は nullable と注記するが"
                             f" 定義書は NULL 不可（{d.src}:{c.line}）"
                         )
-            if model and not d.unimplemented and not c.unimplemented:
-                mc = next((x for x in model.columns if x.name == c.name), None)
-                if mc is None:
-                    continue
-                if mc.kw_nullable is not None and mc.kw_nullable != mc.ann_nullable:
-                    errors.append(
-                        f"ERROR {model.src}:{mc.line} {model.cls}.{c.name}: models 内で注釈と nullable= が矛盾"
-                        f"（Mapped[...{'| None' if mc.ann_nullable else ''}] / nullable={mc.kw_nullable}）"
-                        f" — tech_db.md §4-3 は Mapped[T | None] と一対一に対応させる"
-                    )
-                elif mc.nullable != c.nullable:
-                    errors.append(
-                        f"ERROR {model.src}:{mc.line} {model.cls}.{c.name}: NULL 可否が定義書と不一致"
-                        f"（定義書={'可' if c.nullable else '不可'} / models={'可' if mc.nullable else '不可'}）"
-                        f" — tech_db.md §4-3 は Mapped[T | None] と一対一に対応させる"
-                    )
     return errors
 
 
@@ -970,21 +762,21 @@ def main() -> int:
     args = sys.argv[1:]
     defs = parse_definitions()
     er, er_files = parse_er()
-    models = parse_models()
     ddl = parse_ddl()
     if not ddl:
         PARSE_ERRORS.append(
             f"ERROR {DDL_DIR.relative_to(ROOT).as_posix()}: Flyway の V*.sql から"
             f" CREATE TABLE を1件も読めない（DDL 照合が丸ごと無効になる）"
         )
-    sources = Sources(defs=defs, er=er, er_files=er_files, models=models, ddl=ddl)
+    sources = Sources(defs=defs, er=er, er_files=er_files, ddl=ddl)
 
     n_def_cols = sum(len(d.columns) for d in defs.values())
+    n_entity = sum(1 for d in defs.values() if d.cls and not d.planned)
     print(
         f"定義書 {len(defs)} テーブル / {n_def_cols} 列 ・ "
         f"ER図 {len(er)} エンティティ（{len(er_files)} ファイル） ・ "
-        f"models {len(models)} テーブル ・ "
-        f"DDL {len(ddl)} テーブル"
+        f"DDL {len(ddl)} テーブル ・ "
+        f"Entity {n_entity} 件（実装宣言）"
     )
     # 定義書に対応の無い ER図エンティティ（マスターデータの論理設計。tech_db.md §4-6 で対象外）
     master_only = sorted(set(er) - {d.cls for d in defs.values() if d.cls})
@@ -992,7 +784,7 @@ def main() -> int:
         print(f"  対象外（DBテーブルを持たないマスター系エンティティ） {len(master_only)} 件: {', '.join(master_only)}")
     unimpl = sorted(d.table for d in defs.values() if d.unimplemented)
     if unimpl:
-        print(f"  models・DDL 照合を除外（定義書が未実装と明記） {len(unimpl)} 件: {', '.join(unimpl)}")
+        print(f"  DDL 照合を除外（定義書が未実装と明記） {len(unimpl)} 件: {', '.join(unimpl)}")
     if "--summary" in args:
         for e in PARSE_ERRORS:
             print(e)

@@ -8,7 +8,7 @@
 
 ## 1. `battle_logs`（Phase 2）
 
-実装: `backend/app/models/item.py` `BattleLog`（戦闘系の専用モデルファイルは持たない）。1行 = 1tick分の戦闘ログ。
+実装予定: `com.afkgame.domain.model.BattleLog`。1行 = 1tick分の戦闘ログ。
 
 | 列 | 型 | NULL | 既定 | 制約・備考 |
 |----|----|------|------|-----------|
@@ -24,7 +24,7 @@
 
 ## 2. `boss_rush_states`（Phase 5・未実装）
 
-実装予定: `backend/app/models/boss_rush.py` `BossRushState`。プレイヤーごとに1件を持ち、**進行中の挑戦**（`active` 〜 `accumulated_exp`）と**挑戦をまたいで残る自己ベスト**（`best_*`）を同一行で保持する。
+実装予定: `com.afkgame.domain.model.BossRushState`。プレイヤーごとに1件を持ち、**進行中の挑戦**（`active` 〜 `accumulated_exp`）と**挑戦をまたいで残る自己ベスト**（`best_*`）を同一行で保持する。
 
 | 列 | 型 | NULL | 既定 | 制約・備考 |
 |----|----|------|------|-----------|
@@ -43,7 +43,7 @@
 
 ## 3. `boss_rush_milestones`（Phase 5・未実装）
 
-実装予定: `backend/app/models/boss_rush.py` `BossRushMilestone`。初回到達したマイルストーンを1行ずつ記録する。報酬内容の正は [master/endgame.md](../../../data/master/endgame.md) §15.2。
+実装予定: `com.afkgame.domain.model.BossRushMilestone`。初回到達したマイルストーンを1行ずつ記録する。報酬内容の正は [master/endgame.md](../../../data/master/endgame.md) §15.2。
 
 | 列 | 型 | NULL | 既定 | 制約・備考 |
 |----|----|------|------|-----------|

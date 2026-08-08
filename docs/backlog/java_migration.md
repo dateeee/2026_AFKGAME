@@ -61,29 +61,13 @@ Terasoluna blank project の標準構成に従う。
 
 採用バージョンは `spring-boot-starter-parent` 3.5.16 / `terasoluna-gfw-*` 5.10.1.RELEASE / `mybatis-spring-boot-starter` 3.0.5（5.11.0 は Spring Boot 4 系のため不可）。**Terasoluna の BOM は import しない**。Spring Boot 3.5 が管理する Spring の版を BOM が上書きするため、`terasoluna-gfw-*` は親POMの `terasoluna.version` で個別に版指定する。
 
-## 3. 対応表（Python → Java）
+## 3. 実装の起点
 
-| 現行 | 移行後 |
-|------|------|
-| `routers/` (FastAPI) | `afkgame-web` の `@RestController`（アプリケーション層） |
-| `services/` | `afkgame-domain` の Service（ドメイン層） |
-| `schemas/`（Pydantic / CamelModel） | Resource クラス + Bean Validation |
-| `models/`（SQLAlchemy） | Entity + MyBatis3 Mapper（インタフェース + XML） |
-| `db/database.py` | `afkgame-env` の DataSource 設定 |
-| `dependencies.py`（DI） | Spring DI（`@Autowired` / コンストラクタ注入） |
-| `middleware.py` | Servlet Filter / `HandlerInterceptor` |
-| `exceptions.py` + 例外ハンドラ | Terasoluna の例外体系 + `@RestControllerAdvice` |
-| `logging_config.py` | `logback-spring.xml` |
-| `config.py` の定数 | `@ConfigurationProperties` クラス |
-| `master_data/`（Python定数） | YAML リソース + 起動時ローダ → `record`（`afkgame-domain`） |
-| `rng.py` | `java.util.Random` を注入（[tech_rng.md](../tech/detail/tech_rng.md) が正） |
-| Alembic | Flyway |
-| pytest / pytest-cov | JUnit 5 / JaCoCo |
-| uvicorn | Spring Boot 実行可能 jar |
+Python 実装は削除済み（STEP 6）。**移植の起点は仕様書であってコードではない** — API契約は `tech_api.md`、DBスキーマは `tech_db/`、数値は `docs/data/master/`、分岐は詳細設計の「分岐一覧」が正。旧コードを見る必要が出たらタグ `python-backend-final` から取り出す。
 
-振り分けは**値の正の所在**で決める。`config.py` にあっても、正が `docs/data/master/`・`docs/design/systems/` にある値（初期キャラ・初期所持アイテム・装備スロット）は YAML マスターデータへ寄せる。
+層の割り当ては §2 モジュール構成、実装規約は [coding_standards_backend.md](../process/coding_standards_backend.md) が正。定数の振り分けは**値の正の所在**で決める（正が `docs/data/master/`・`docs/design/systems/` にある初期キャラ・初期所持アイテム・装備スロットは YAML マスターデータへ、それ以外は `@ConfigurationProperties` へ）。
 
-`scripts/*.py`（ドキュメント検証・レビュー退避）は開発補助のため**Python のまま維持**する。
+`scripts/*.py`・`.claude/{scripts,hooks}/*.py`（ドキュメント検証・レビュー退避・フック）は開発補助のため**Python のまま維持**する（依存は ルートの `requirements-dev.txt`）。
 
 ## 4. STEP 一覧
 
@@ -95,7 +79,9 @@ Terasoluna blank project の標準構成に従う。
 | 3 | Phase 1 スコープの移植 | 着手中 |
 | 4 | Phase 2 スコープの移植 | 未着手 |
 | 5 | Phase 3 実装済み分の移植 | 未着手 |
-| 6 | 切替と Python 資産の削除 | 未着手 |
+| 6 | 切替と Python 資産の削除 | **一部完了**（デプロイ手順の反映が残る） |
+
+**STEP 6 を STEP 3〜5 より先に実施した**（2026-08-09・ユーザー判断）。Python は仕様の正ではなく参照実装にすぎず、残すと二重管理になるため。結果として Phase 1〜3 は**どの言語でも未実装**の期間に入る。
 
 ### STEP 1: 基本設計・規約の改訂（完了）
 
@@ -142,16 +128,21 @@ Terasoluna blank project の標準構成に従う。
 
 移植時にあわせて処理するもの:
 
-- 詳細設計の「現行実装との差異」節（[tech_rng.md](../tech/detail/tech_rng.md) §6・[tech_tick.md](../tech/detail/tech_tick.md) §6）は Python 実装の行番号を指す。該当機能を Java で実装したら節ごと削除する
+- 詳細設計の [tech_rng.md](../tech/detail/tech_rng.md) §6・[tech_tick.md](../tech/detail/tech_tick.md) §6「Java 実装時に満たすこと」を満たす。満たしたら節ごと削除する
 - [known_issues.md](known_issues.md) §2 の未対応項目のうち、移植対象の機能に紐づくものを1件ずつ再確認して解消する
+- 対応する Entity を作ったら `tech_db/` の「実装予定:」を「実装:」へ変える（`check_schema_triple.py` が実在を照合する）
 
 ### STEP 6: 切替と後始末
 
-1. Vite の `/api` プロキシ先・`.vscode/launch.json` の実行構成を Java 側へ向ける
-2. `tech_db/` 各テーブルの「実装:」行を Entity 参照へ切り替え、`check_schema_triple.py` の models 照合を削除する（Python models の削除と同時。DDL 照合が引き継ぐ）
-3. デプロイ手順（jar + systemd）を [tech_operations.md](../tech/nonfunctional/tech_operations.md) へ反映
-4. E2E 全PASS を確認後に `backend/`（Python）を削除
-5. 本ファイルを削除し、[changelog.md](../changelog.md) へ完了を1行記録
+| # | 内容 | 状態 |
+|---|------|------|
+| 1 | Vite プロキシ先を `:8080` へ、E2E の webServer を jar 起動へ切り替え | 完了 |
+| 2 | `tech_db/` の「実装:」行を Entity 参照へ、`check_schema_triple.py` の models 照合を Entity 実在チェックへ置換（スキーマの正は DDL が引き継ぐ） | 完了 |
+| 3 | `backend/`（Python）と Python 依存の削除 | 完了（タグ `python-backend-final`） |
+| 4 | デプロイ手順（jar + systemd）を [tech_operations.md](../tech/nonfunctional/tech_operations.md) へ反映 | **未着手** |
+| 5 | 本ファイルを削除し [changelog.md](../changelog.md) へ完了を1行記録 | STEP 3〜5 完了後 |
+
+**E2E は STEP 5 まで通らない**。`serve-backend.mjs` は jar 起動へ切り替え済みで `/health` までは通るが、Phase 1〜3 の API が無いためテスト本体は失敗する。前提は `docker compose up -d` と `mvn -DskipTests package`。
 
 ## 5. 移行に伴う仕様変更点
 

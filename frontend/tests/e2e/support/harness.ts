@@ -7,36 +7,36 @@
  * 「その時間だけ放置した」状態を作る。
  */
 
-import { DatabaseSync } from 'node:sqlite'
+import { spawnSync } from 'node:child_process'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { expect, type Locator, type Page } from '@playwright/test'
 
-import { E2E_DB_FILENAME, TICK_INTERVAL_SECONDS } from './config'
+import { E2E_DB_NAME, E2E_DB_SERVICE, E2E_DB_USER, TICK_INTERVAL_SECONDS } from './config'
 
-// frontend/tests/e2e/support → リポジトリルート → backend/e2e.db
-const E2E_DB_PATH = resolve(
-  dirname(fileURLToPath(import.meta.url)),
-  '../../../../backend',
-  E2E_DB_FILENAME,
-)
+// frontend/tests/e2e/support → リポジトリルート（docker compose の実行位置）
+const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../../..')
 
 /**
  * 全プレイヤーの `last_tick_at` を `seconds` 秒前へ戻す。
  *
  * テストは直列実行でプレイヤーもテストごとに作られるため、対象を絞らず一括で更新する。
- * `datetime('now')` は SQLite でも UTC を返し、バックエンドは naive を UTC とみなす
- * （`routers/battle.py`）ので、そのまま突き合わせられる。
+ * DB は docker compose の PostgreSQL にあるため、コンテナ内の psql から更新する
+ * （E2E 実行中はバックエンドが同じDBを掴んでいるが、行ロックは短時間で解ける）。
  */
 export function rewindLastTick(seconds: number): void {
-  const db = new DatabaseSync(E2E_DB_PATH)
-  try {
-    // uvicorn が同じファイルを開いているため、書き込みが競合したら少し待つ
-    db.exec('PRAGMA busy_timeout = 5000')
-    db.prepare("UPDATE players SET last_tick_at = datetime('now', ?)").run(`-${seconds} seconds`)
-  } finally {
-    db.close()
+  const result = spawnSync(
+    'docker',
+    [
+      'compose', 'exec', '-T', E2E_DB_SERVICE,
+      'psql', '-v', 'ON_ERROR_STOP=1', '-U', E2E_DB_USER, '-d', E2E_DB_NAME,
+      '-c', `UPDATE players SET last_tick_at = now() - interval '${seconds} seconds'`,
+    ],
+    { cwd: REPO_ROOT, encoding: 'utf-8' },
+  )
+  if (result.status !== 0) {
+    throw new Error(`last_tick_at を巻き戻せなかった: ${result.stderr ?? result.error?.message}`)
   }
 }
 

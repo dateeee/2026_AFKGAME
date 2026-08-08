@@ -1,0 +1,9 @@
+# 開発補助スクリプト（scripts/ ・ .claude/{scripts,hooks}/）の実行・テスト用依存。
+#
+# アプリケーション本体は Java/Terasoluna であり Python 依存を持たない
+# （java_migration.md §3: スクリプトのみ Python のまま維持する）。
+#
+# 導入: pip install -r requirements-dev.txt
+# 実行: python -m pytest scripts/tests .claude/scripts/tests .claude/hooks/tests -q
+
+pytest>=8.0.0

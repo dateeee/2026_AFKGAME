@@ -19,20 +19,20 @@
 ### バックエンド
 
 ```bash
-docker compose up -d db   # PostgreSQL :5432
+docker compose up -d          # PostgreSQL :5432
 cd backend
 mvn clean install
-APP_ENV=local java -jar afkgame-web/target/afkgame-web.jar   # http://localhost:8000
+APP_ENV=local java -jar afkgame-web/target/afkgame-web-0.1.0.jar   # http://localhost:8080
 ```
 
-API ドキュメント: http://localhost:8000/docs
+疎通確認は `curl localhost:8080/health`。
 
 ### フロントエンド
 
 ```bash
 cd frontend
 npm install
-npm run dev        # http://localhost:5173（/api は :8000 へプロキシ）
+npm run dev        # http://localhost:5173（/api は :8080 へプロキシ）
 ```
 
 VS Code は実行構成 **Full Stack** で同時起動できる（[.vscode/launch.json](.vscode/launch.json)）。
@@ -55,7 +55,7 @@ VS Code は実行構成 **Full Stack** で同時起動できる（[.vscode/launc
 |---------|------|
 | `npm run dev` / `npm run build` | フロント開発サーバー / 本番ビルド |
 | `npm run type-check` | 型チェック（vue-tsc + E2E） |
-| `npm run test:e2e` | E2Eテスト（Playwright。専用ポート/DBで自動起動） |
+| `npm run test:e2e` | E2Eテスト（Playwright。専用ポート/DBで自動起動）。要 `docker compose up -d` + jar ビルド済み |
 | `mvn verify` | バックエンドテスト（JUnit 5 + JaCoCo。branch 100%・`target/site/jacoco/`） |
 | `python scripts/check_doc_size.py` | ドキュメント文字数チェック |
 | `python scripts/check_docs.py` | ドキュメント機械検証（リンク・索引・曖昧語・正の逸脱ほか） |
