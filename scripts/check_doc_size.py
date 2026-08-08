@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """ドキュメント文字数チェッカー
 
-docs/documentation_rules.md で定めた文字数上限を検証する。
+docs/process/documentation_rules.md で定めた文字数上限を検証する。
 
 使い方:
     python scripts/check_doc_size.py             # 判定（未登録の上限超過・変更履歴があれば exit 1）

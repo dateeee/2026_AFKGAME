@@ -5,7 +5,7 @@
 
 ## ドキュメント規約（必読）
 
-Markdownには文字数上限を設けている。詳細は [docs/documentation_rules.md](docs/documentation_rules.md)。
+Markdownには文字数上限を設けている。詳細は [docs/process/documentation_rules.md](docs/process/documentation_rules.md)。
 
 | 区分 | 対象 | 上限 |
 |------|------|------|
@@ -15,7 +15,7 @@ Markdownには文字数上限を設けている。詳細は [docs/documentation_
 | D | `.claude/skills/**`、`.claude/references/**`、`.claude/project/**` | 5,000字 |
 
 - 原則: **1ファイル = 1テーマ = 1回の読み込みで完結**
-- H2セクションは2,000字以内。表を優先し、同じ仕様を複数ファイルに重複させない（正の宣言は [docs/spec_ownership.md](docs/spec_ownership.md)）
+- H2セクションは2,000字以内。表を優先し、同じ仕様を複数ファイルに重複させない（正の宣言は [docs/process/spec_ownership.md](docs/process/spec_ownership.md)）
 - **変更履歴は各ファイルに書かない**。[docs/changelog.md](docs/changelog.md)（上限対象外）の先頭へ1行追記する
 - ドキュメントの作成・改稿後は `python scripts/check_doc_size.py` と `python scripts/check_docs.py` を実行する（超過の扱いは規約§7の台帳運用）
 
@@ -37,10 +37,10 @@ Markdownには文字数上限を設けている。詳細は [docs/documentation_
 
 ## 開発方針
 
-- **7工程で管理**: 要件定義 → 基本設計 → 詳細設計 → テストリスト作成 → 製造 → 単体テスト → 結合テスト（[docs/development_process.md](docs/development_process.md)）
+- **7工程で管理**: 要件定義 → 基本設計 → 詳細設計 → テストリスト作成 → 製造 → 単体テスト → 結合テスト（[docs/process/development_process.md](docs/process/development_process.md)）
 - **製造はTDD**: バックエンドの新規実装はテストを先に書く（Red → Green → Refactor）
 - **仕様は全Phase確定 → 実装は段階的**: 全Phase(1-5)の仕様を確定してから Phase 1 から順に実装する
-- **未確定仕様は原則ゼロ**。生じたものは `docs/open_specs.md` で管理し、確定・反映したら行を削除する（全解消でファイルごと削除）
+- **未確定仕様は原則ゼロ**。生じたものは `docs/backlog/open_specs.md` で管理し、確定・反映したら行を削除する（全解消でファイルごと削除）
 - **テスト標準**: バックエンド単体テストは pytest で C1（分岐）カバレッジ100%、結合テストは FastAPI TestClient + Playwright（E2E）
 - **実装規約**: スキーマは CamelModel で `schemas/`、ロジックは `services/`、ログは logging_config 準拠
 - **作業はすべてスキル経由**: 7工程 + 支援10件を `.claude/skills/` に用意している（自動起動 / `/` で明示起動）。対応表は [.claude/project/INDEX.md](.claude/project/INDEX.md)

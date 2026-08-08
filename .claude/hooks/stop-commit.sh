@@ -46,7 +46,7 @@ count=$(printf '%s\n' "$changes" | grep -c .)
 cat >&2 <<EOF
 未コミットの変更が ${count} 件あります。作業を終える前にコミットしてください。
 
-1. 上に効率メモ（docs/reviews/efficiency_memo.md）への記入指示が出ている場合は、
+1. 上に効率メモ（docs/backlog/efficiency_memo.md）への記入指示が出ている場合は、
    コミットより先に記入を済ませる。その変更もこのコミットに含める
    （メモだけを別コミットにしない。上の件数にはメモの変更も含まれている）
 2. git status --short と git diff --stat で変更内容を把握する
@@ -55,7 +55,7 @@ cat >&2 <<EOF
    無関係な変更（前セッションの残り・ステージ済みの別作業）が混ざっている場合は
    git add -A を使わず、git commit -- <path>... で対象パスを明示して範囲を限定する
    ステージした後、git diff --cached --name-only で対象を確認してからコミットする
-4. タスクが完了した場合、コミット前に docs/next_session.md の「次回」を次のタスクへ
+4. タスクが完了した場合、コミット前に docs/backlog/next_session.md の「次回」を次のタスクへ
    更新する（書式は .claude/project/next.md。未確定なら「ユーザー判断待ち」+ 候補を残す）
    このコミットに含めない書きかけを残す場合は、そのパスと状態を「次回」へ明記する
    （引き継ぎに無い未コミットファイルは次セッションの着手を止める）

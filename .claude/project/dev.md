@@ -40,7 +40,7 @@
 | 6 | `docs/data/master_data.md` → `data/master/` | マスターデータ（数値定義） |
 | 7 | `docs/data/towers/`・`docs/data/skills/` | 塔・スキルの個別データ（該当する場合のみ） |
 | 8 | `docs/diagrams/` | ER図・クラス図・APIシーケンス図等 |
-| 9 | `docs/open_specs.md` | 未確定仕様の確認（**存在する場合のみ**。不在＝未確定ゼロ） |
+| 9 | `docs/backlog/open_specs.md` | 未確定仕様の確認（**存在する場合のみ**。不在＝未確定ゼロ） |
 
 **未確定仕様チェック**: `open_specs.md` が存在し、実装対象に未確定項目が含まれる場合、ユーザーに通知し、実装を進めるか仕様確定（`resolve-specs` スキル）を先にするか確認する。
 

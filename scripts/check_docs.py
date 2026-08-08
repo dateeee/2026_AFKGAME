@@ -8,7 +8,7 @@
     1. リンク       相対Markdownリンクの参照先が実在するか
     2. 索引到達性   docs/** の全ファイルが README.md / CLAUDE.md から辿れるか
     3. 曖昧語       仕様書本文に「適宜」「おおよそ」「TBD」「後日検討」「未定」が残っていないか
-    4. 正の逸脱     docs/spec_ownership.md の検出パターンが正・許可ファイル以外に現れていないか
+    4. 正の逸脱     docs/process/spec_ownership.md の検出パターンが正・許可ファイル以外に現れていないか
     5. 決定先送り   「Phase N の基本設計で確定する」形の先送りが台帳（open_specs.md）へリンクしているか
     6. 台帳存否     open_specs.md の実在と、本文の「不在」「実在」の断定が一致するか
 
@@ -24,7 +24,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-OWNERSHIP = ROOT / "docs" / "spec_ownership.md"
+OWNERSHIP = ROOT / "docs" / "process" / "spec_ownership.md"
 
 # 検査対象外（check_doc_size.py と同基準 + 追記型アーカイブ）
 EXCLUDE = (
@@ -42,7 +42,7 @@ EXCLUDE = (
 AMBIGUOUS = re.compile(r"適宜|おおよそ|TBD|後日検討|未定(?!義)")
 # 曖昧語検査の対象は仕様書系のみ（管理台帳・プロセス文書は「未定」を扱う場でありうるため除外）
 AMBIGUOUS_DIRS = ("docs/design/", "docs/tech/", "docs/data/", "docs/diagrams/")
-AMBIGUOUS_EXCLUDE = ("docs/open_specs.md", "docs/balance_backlog.md", "docs/known_issues.md")
+AMBIGUOUS_EXCLUDE = ("docs/backlog/open_specs.md", "docs/backlog/balance_backlog.md", "docs/backlog/known_issues.md")
 
 LINK = re.compile(r"!?\[[^\]]*\]\(([^)\s]+)(?:\s+\"[^\"]*\")?\)")
 
@@ -138,9 +138,9 @@ def check_ambiguous(files: list[Path]) -> list[str]:
 # 「定義する」「追記する」「行う」は選択肢が未決なのではなく後工程で書くだけなので対象外
 PENDING = re.compile(r"Phase\s*[0-9]+\s*の(基本設計|詳細設計)で.{0,40}(確定|決める|決定)")
 PENDING_DIRS = ("docs/",)
-PENDING_EXCLUDE = ("docs/open_specs.md", "docs/balance_backlog.md")
+PENDING_EXCLUDE = ("docs/backlog/open_specs.md", "docs/backlog/balance_backlog.md")
 
-LEDGER = ROOT / "docs" / "open_specs.md"
+LEDGER = ROOT / "docs" / "backlog" / "open_specs.md"
 # 台帳の存否を事実として断定するパターン（「不在なら」「不在＝」等の条件文は対象外）
 LEDGER_ABSENT = re.compile(r"(現在は不在|ため不在|ため現在は不在|全解消済み|未確定ゼロのため)")
 LEDGER_PRESENT = re.compile(r"(現在|現時点).{0,8}([0-9]+\s*(件|項目)|実在)")
@@ -168,7 +168,7 @@ def check_ledger(files: list[Path]) -> list[str]:
     exists = LEDGER.exists()
     for path in files:
         rel = path.relative_to(ROOT).as_posix()
-        if rel == "docs/open_specs.md":
+        if rel == "docs/backlog/open_specs.md":
             continue
         for no, line in body_lines(path):
             if "open_specs" not in line:
@@ -209,7 +209,7 @@ def check_ownership(files: list[Path]) -> list[str]:
         text = path.read_text(encoding="utf-8")
         for topic, canonical, allow, rx in rules:
             if rel not in allow and rx.search(text):
-                errors.append(f"ERROR {rel}: 「{topic}」の記載は {canonical} が正（重複させずリンクする。docs/spec_ownership.md）")
+                errors.append(f"ERROR {rel}: 「{topic}」の記載は {canonical} が正（重複させずリンクする。docs/process/spec_ownership.md）")
     return errors
 
 

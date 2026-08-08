@@ -7,9 +7,9 @@
 
 | 要件 | ファイル |
 |------|---------|
-| 目的・ターゲット・想定プレイサイクル・スコープ・成功基準 | [product_requirements.md](product_requirements.md) |
-| 性能・容量・可用性・不正防止・プライバシー | [non_functional_requirements.md](non_functional_requirements.md) |
-| バランス改定・データ移行・障害時の補填 | [operation_requirements.md](operation_requirements.md) |
+| 目的・ターゲット・想定プレイサイクル・スコープ・成功基準 | [product_requirements.md](requirements/product_requirements.md) |
+| 性能・容量・可用性・不正防止・プライバシー | [non_functional_requirements.md](requirements/non_functional_requirements.md) |
+| バランス改定・データ移行・障害時の補填 | [operation_requirements.md](requirements/operation_requirements.md) |
 
 ---
 
@@ -33,7 +33,7 @@
 - **ダンジョン1 完成 — 塔2「森の塔」を追加**し、塔の選択・切り替えを実装
 - ショップ拡張（日替わり装備販売）
 - 認証（ゲスト／メール登録／Google OAuth連携）
-- 退会（アカウント削除）（[non_functional_requirements.md](non_functional_requirements.md) §5.1）
+- 退会（アカウント削除）（[non_functional_requirements.md](requirements/non_functional_requirements.md) §5.1）
 
 ### Phase 3 — パーティ・編成
 - 複数キャラクターの獲得（塔クリア報酬で確定入手）
@@ -42,7 +42,7 @@
 - スキルシステム（6系統、アクティブ2枠+パッシブ、自動発動）
 - 複数敵との戦闘（1階あたり最大3体）
 - **ダンジョン2「荒野のダンジョン」（塔3〜5）＋ 環境効果システム**
-- ゲーム内お知らせ（[operation_requirements.md](operation_requirements.md) §3.1）
+- ゲーム内お知らせ（[operation_requirements.md](requirements/operation_requirements.md) §3.1）
 
 ### Phase 4 — 拠点・経営要素
 - 拠点建設（酒場・鍛冶屋・訓練場・倉庫・市場）
@@ -109,4 +109,4 @@
 - **ゴールド上限**: **9,223,372,036,854,775,807**（64bit符号付き整数最大値）。インフレ対策は設けない。既存のゴールドシンク（施設・強化・製作等）で自然に消費される設計
 - **数値表示**: 大きな数値は短縮表記（1,000以上を K/M/B/T/Qa/Qi で表記、小数1桁・切り捨て。詳細は [systems/ui.md](systems/ui.md) 参照）
 
-Phase 1〜5 の仕様は確定済み。未確定が生じた場合は [open_specs.md](../open_specs.md)、数値のみ未定の項目は [balance_backlog.md](../balance_backlog.md) で管理する。
+Phase 1〜5 の仕様は確定済み。未確定が生じた場合は [open_specs.md](../backlog/open_specs.md)、数値のみ未定の項目は [balance_backlog.md](../backlog/balance_backlog.md) で管理する。

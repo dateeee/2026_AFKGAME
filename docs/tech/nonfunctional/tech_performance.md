@@ -1,6 +1,6 @@
 # AFK GAME — 性能・容量設計
 
-> [tech_spec.md](../tech_spec.md) §10。**目標値（どこまで満たすか）は [non_functional_requirements.md](../../design/non_functional_requirements.md) §1〜§3 が正**。本書はそれを満たすための**実現方式**を扱い、目標値を再掲しない。
+> [tech_spec.md](../tech_spec.md) §10。**目標値（どこまで満たすか）は [non_functional_requirements.md](../../design/requirements/non_functional_requirements.md) §1〜§3 が正**。本書はそれを満たすための**実現方式**を扱い、目標値を再掲しない。
 > 運用面の監視・移行手順は [tech_operations.md](tech_operations.md)、tick処理そのものは [tech_tick.md](../detail/tech_tick.md)。
 
 ---
@@ -31,7 +31,7 @@
 
 ## 10.3 データ容量の見積り
 
-保持上限そのものは [non_functional_requirements.md](../../design/non_functional_requirements.md) §2 が正。本節はそこから導かれる**サイズ見積り**を示す。
+保持上限そのものは [non_functional_requirements.md](../../design/requirements/non_functional_requirements.md) §2 が正。本節はそこから導かれる**サイズ見積り**を示す。
 
 | データ | 上限 | 見積りサイズ |
 |--------|------|-------------|

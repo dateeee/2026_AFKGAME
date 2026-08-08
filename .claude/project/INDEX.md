@@ -17,7 +17,7 @@
 
 ## 工程 ↔ スキル ↔ プロファイル 対応表
 
-工程の定義は [docs/development_process.md](../../docs/development_process.md)。
+工程の定義は [docs/process/development_process.md](../../docs/process/development_process.md)。
 
 | # | 工程 | スキル（一般手順） | プロファイル（固有値） | ゲートスキル |
 |---|------|-----------------|-------------------|------------|

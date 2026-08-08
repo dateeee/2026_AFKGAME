@@ -3,9 +3,9 @@
 > **使い方**: 新セッションの最初のメッセージで `/next` と送る（または §1 のコードブロックを貼り付ける）。
 > **更新**: タスク完了のコミット前に §1 を次のタスクへ書き換える（Stop フックがリマインドする）。
 > **鮮度**: 開始側は「前提」のコミットIDと git log を突合し、完了済みに見えたら開始せずユーザーへ確認する。
-> 本ファイルは**ポインタ専用**。Phase 進捗の正は [development_process.md](development_process.md) §5、書式の正は [.claude/project/next.md](../.claude/project/next.md)。
+> 本ファイルは**ポインタ専用**。Phase 進捗の正は [development_process.md](../process/development_process.md) §5、書式の正は [.claude/project/next.md](../../.claude/project/next.md)。
 
-最終更新: 2026-08-08 / 対応コミット: 51e292a の次（設計図を `diagrams/` → `docs/diagrams/` へ移設したコミット）。基本設計の仕様確定ゲートは通過し、指摘残ゼロ
+最終更新: 2026-08-08 / 対応コミット: ef9e0e1 の次（`docs/` 直下の未分類9件を `process/`・`backlog/` へ分類し、要件3件を `design/requirements/` へ移設したコミット）。基本設計の仕様確定ゲートは通過し、指摘残ゼロ。§1 のタスクは前回から未着手のまま
 
 ## 1. 次回（コピペ用）
 

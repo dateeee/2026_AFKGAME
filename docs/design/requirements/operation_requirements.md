@@ -1,15 +1,15 @@
 # AFK GAME — 運用・変更管理要件
 
 > リリース後にマスターデータを調整し、Phase を追加していく前提での要件を定義する。
-> プロダクト要件は [product_requirements.md](product_requirements.md)、非機能要件は [non_functional_requirements.md](non_functional_requirements.md)、工程の進め方は [development_process.md](../development_process.md) を参照。
+> プロダクト要件は [product_requirements.md](product_requirements.md)、非機能要件は [non_functional_requirements.md](non_functional_requirements.md)、工程の進め方は [development_process.md](../../process/development_process.md) を参照。
 >
-> 本書は **「何を守るか（ポリシー）」** を定義し、実現方式は持たない。環境・監視・ジョブ・移行手順は [tech_operations.md](../tech/nonfunctional/tech_operations.md)（§12）が正。
+> 本書は **「何を守るか（ポリシー）」** を定義し、実現方式は持たない。環境・監視・ジョブ・移行手順は [tech_operations.md](../../tech/nonfunctional/tech_operations.md)（§12）が正。
 
 ---
 
 ## 1. バランス改定ポリシー
 
-[balance_backlog.md](../balance_backlog.md) には「プレイテスト後に調整」とした数値が複数ある。改定時の既存プレイヤーの扱いを次のとおり定める。
+[balance_backlog.md](../../backlog/balance_backlog.md) には「プレイテスト後に調整」とした数値が複数ある。改定時の既存プレイヤーの扱いを次のとおり定める。
 
 | 改定種別 | 事前告知 | 既存プレイヤーへの影響 |
 |---------|---------|---------------------|
@@ -19,7 +19,7 @@
 | 経験値テーブルの変更 | **必要** | **現在レベルは下げない**。以降の必要EXPのみ変更する |
 | スキル効果量の変更 | 下方修正時のみ必要 | 次回発動から新しい値を適用する |
 
-- 装備はドロップ時にステータスが確定する（インスタンスとして保持）ため、マスタ改定の影響を受けない（[systems/equipment.md](systems/equipment.md)）
+- 装備はドロップ時にステータスが確定する（インスタンスとして保持）ため、マスタ改定の影響を受けない（[systems/equipment.md](../systems/equipment.md)）
 - **補填は不具合による損失にのみ行う**。バランス調整を理由とした補填は行わない
 
 ## 2. データマイグレーション要件
@@ -34,7 +34,7 @@
 | DB移行（SQLite → PostgreSQL） | 本番移行時に既存データを引き継げること |
 | ダウンタイム | 移行に伴う停止は24時間未満に収めること（[non_functional_requirements.md §3](non_functional_requirements.md)） |
 
-- 移行ツール・リビジョン粒度・前方互換・ロールバック手順は [tech_operations.md §12.4](../tech/nonfunctional/tech_operations.md) が正
+- 移行ツール・リビジョン粒度・前方互換・ロールバック手順は [tech_operations.md §12.4](../../tech/nonfunctional/tech_operations.md) が正
 
 ## 3. 障害・メンテナンス時の扱い
 
@@ -54,25 +54,25 @@
 |------|------|
 | 配信内容 | 計画メンテナンス告知・バランス改定の予告・補填の実施報告 |
 | データ保持 | お知らせ本文はマスターデータとして持つ。DBテーブル・管理画面は設けず、更新はデプロイで行う |
-| 掲示 | 全画面共通のヘッダから参照でき、未読件数がわかること（[systems/ui.md](systems/ui.md)） |
+| 掲示 | 全画面共通のヘッダから参照でき、未読件数がわかること（[systems/ui.md](../systems/ui.md)） |
 | 既読管理 | クライアントの localStorage 専用キーで保持する（**本行が正**。Pinia ストアはメモリ上の参照のみで永続化プラグインは使わない）。サーバーはプレイヤーごとの既読状態を持たない。機種変更・ブラウザ変更で既読が引き継がれないことは許容する |
 | 保持件数 | 掲示件数に上限を設け、古いものはマスターデータから削除する（[non_functional_requirements.md](non_functional_requirements.md) §2「上限のないデータを新設しない」） |
 
-- お知らせマスターの項目定義と掲示件数の上限値（20件）の正は [master_data.md §17](../data/master_data.md)。上限値は仮置きのため、調整対象としての管理は [balance_backlog.md](../balance_backlog.md) B-7 で続ける
+- お知らせマスターの項目定義と掲示件数の上限値（20件）の正は [master_data.md §17](../../data/master_data.md)。上限値は仮置きのため、調整対象としての管理は [balance_backlog.md](../../backlog/balance_backlog.md) B-7 で続ける
 - Phase 3 の実装完了までは告知手段を持たないため、**下方修正を伴う改定は行わない**
-- ゲスト削除の事前告知には使えない（**一定期間アクセスのないプレイヤー**には届かないため。期限は [tech_auth.md](../tech/detail/tech_auth.md) が正）。緩和策は [non_functional_requirements.md](non_functional_requirements.md) §5 が正
+- ゲスト削除の事前告知には使えない（**一定期間アクセスのないプレイヤー**には届かないため。期限は [tech_auth.md](../../tech/detail/tech_auth.md) が正）。緩和策は [non_functional_requirements.md](non_functional_requirements.md) §5 が正
 
 ## 4. リリース・変更適用フロー
 
 | 手順 | 内容 |
 |------|------|
-| 1 | 変更内容を仕様書へ反映する（[phases.md](../process/phases.md) の該当工程） |
+| 1 | 変更内容を仕様書へ反映する（[phases.md](../../process/phases.md) の該当工程） |
 | 2 | Phase完了ゲートを通過する（テスト・レビュー） |
 | 3 | 下方修正・仕様変更を含む場合は、ゲーム内お知らせを先行して掲示する |
 | 4 | DBバックアップ取得 → マイグレーション → デプロイ |
 | 5 | 主要導線のスモークテスト（起動・tick・ショップ・装備変更） |
 
-- 各手順で実行する技術的な確認項目（`check_doc_size.py`・`GET /health`・リリース後の指標確認）は [tech_operations.md §12.7](../tech/nonfunctional/tech_operations.md) が正
+- 各手順で実行する技術的な確認項目（`check_doc_size.py`・`GET /health`・リリース後の指標確認）は [tech_operations.md §12.7](../../tech/nonfunctional/tech_operations.md) が正
 
 ## 5. サポート・問い合わせ
 

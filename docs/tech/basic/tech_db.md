@@ -1,6 +1,6 @@
 # AFK GAME — テーブル定義書（索引）
 
-> 技術仕様の索引は [tech_spec.md](../tech_spec.md)。本書は **DBスキーマの正**（物理テーブル名・列・型・キー・制約・インデックス）であり、[er_diagram.md](../../diagrams/er_diagram.md) は同じ内容の視覚化。食い違いは常に本書側へ揃える（[spec_ownership.md](../../spec_ownership.md) §2、[process/phases.md](../../process/phases.md) §3.2.1）。
+> 技術仕様の索引は [tech_spec.md](../tech_spec.md)。本書は **DBスキーマの正**（物理テーブル名・列・型・キー・制約・インデックス）であり、[er_diagram.md](../../diagrams/er_diagram.md) は同じ内容の視覚化。食い違いは常に本書側へ揃える（[spec_ownership.md](../../process/spec_ownership.md) §2、[process/phases.md](../../process/phases.md) §3.2.1）。
 > API・マスターデータの JSON 構造は [tech_data.md](tech_data.md) が正であり、本書は永続化スキーマのみを扱う。
 
 ---

@@ -58,7 +58,7 @@
 
 ## 17. お知らせ（Phase 3〜）
 
-告知の要件は [operation_requirements.md §3.1](../design/operation_requirements.md)、配信APIは [tech_api.md](../tech/basic/tech_api.md)「お知らせ」が正。本節は**マスターの項目定義と上限値**を持つ。本文はマスターデータとして配信し、DBテーブルは設けない（更新はデプロイ）。
+告知の要件は [operation_requirements.md §3.1](../design/requirements/operation_requirements.md)、配信APIは [tech_api.md](../tech/basic/tech_api.md)「お知らせ」が正。本節は**マスターの項目定義と上限値**を持つ。本文はマスターデータとして配信し、DBテーブルは設けない（更新はデプロイ）。
 
 ### 17.1 項目定義
 
@@ -73,8 +73,8 @@
 
 | 項目 | 値 | 備考 |
 |------|----|------|
-| 掲示件数の上限 | **20件** | 上限を超えたら `publishedAt` の古いものからマスターデータより削除する（[operation_requirements.md §3.1](../design/operation_requirements.md)「保持件数」） |
+| 掲示件数の上限 | **20件** | 上限を超えたら `publishedAt` の古いものからマスターデータより削除する（[operation_requirements.md §3.1](../design/requirements/operation_requirements.md)「保持件数」） |
 
 一覧は `publishedAt` 降順（新しい順）で**全件**を返す。件数がこの上限で抑えられているためページングは設けない。
 
-上記3つの数値（title 40字・body 400字・掲示件数20件）は Phase 3 の仮置き値。調整対象としての管理は [balance_backlog.md](../balance_backlog.md) B-7。
+上記3つの数値（title 40字・body 400字・掲示件数20件）は Phase 3 の仮置き値。調整対象としての管理は [balance_backlog.md](../backlog/balance_backlog.md) B-7。

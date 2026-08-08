@@ -71,9 +71,12 @@ VS Code は実行構成 **Full Stack** で同時起動できる（[.vscode/launc
 │   ├── skills/                  # 工程7件 + 支援10件（プロジェクト非依存）
 │   ├── references/              # スキル共通リファレンス（同上）
 │   └── project/                 # プロジェクト固有プロファイル（索引: INDEX.md）
-├── docs/                        # 要件定義〜詳細設計の成果物（*.md プロセス・規約 / design/ tech/ data/）
-│   ├── diagrams/                # 設計図（Mermaid）。索引 + 同名ディレクトリに分割
-│   └── reviews/                 # レビュー結果（自動生成。スキル名/日時.md）
+├── docs/                        # ドキュメント（分類軸は documentation_rules.md §10）
+│   ├── design/ tech/ data/      # 成果物: ゲーム仕様 / 技術仕様 / マスターデータ
+│   ├── diagrams/                # 成果物: 設計図（Mermaid）。索引 + 同名ディレクトリ
+│   ├── process/                 # 進め方: 工程定義・ドキュメント規約
+│   ├── backlog/                 # 状態: 未処理項目の台帳（工程で増減する）
+│   └── reviews/                 # 記録: レビュー結果（自動生成。スキル名/日時.md）
 ├── scripts/                     # 開発補助スクリプト
 ├── frontend/                    # Vue.js SPA
 │   ├── src/views/ components/   # ページ / UIコンポーネント
@@ -103,27 +106,24 @@ VS Code は実行構成 **Full Stack** で同時起動できる（[.vscode/launc
 | Phase 4 | 拠点建設（酒場・鍛冶屋・訓練場・倉庫・市場）、素材・生産システム |
 | Phase 5 | エンドコンテンツ（ボスラッシュ、転生等） |
 
-仕様は全Phase(1-5)を先に確定し、実装をPhase 1から順に進める方針。進捗の正は [開発工程](docs/development_process.md) §5。
+仕様は全Phase(1-5)を先に確定し、実装をPhase 1から順に進める方針。進捗の正は [開発工程](docs/process/development_process.md) §5。
 
 ## ドキュメント索引
 
-### 開発プロセス
-- [docs/development_process.md](docs/development_process.md) — 開発工程（7工程・TDD・テスト標準。工程定義は [process/phases.md](docs/process/phases.md)）
-- [.claude/project/INDEX.md](.claude/project/INDEX.md) — 工程↔スキル↔プロファイル対応表
-- [docs/documentation_rules.md](docs/documentation_rules.md) — ドキュメント規約（文字数上限・分割）
-- [docs/spec_ownership.md](docs/spec_ownership.md) — 正の所在マップ
-- [docs/glossary.md](docs/glossary.md) — 用語集
-- [docs/balance_backlog.md](docs/balance_backlog.md) — バランス調整（見直す数値）
-- [docs/open_specs.md](docs/open_specs.md) — 未確定仕様（確定後に削除）
-- [docs/known_issues.md](docs/known_issues.md) — 実装の疑義
-- [docs/next_session.md](docs/next_session.md) — 次回セッションの開始プロンプト（`/next` の引き継ぎ）
+### 開発プロセス・台帳
 
-大きな仕様書は **索引 + 個別ファイル** 構成。索引から辿ること。
+分類軸は [documentation_rules.md](docs/process/documentation_rules.md) §10。
+
+| 分類 | ファイル |
+|------|---------|
+| 進め方 `docs/process/` | [development_process](docs/process/development_process.md) 7工程・ゲート・進捗 / [phases](docs/process/phases.md) 工程別の定義 / [documentation_rules](docs/process/documentation_rules.md) 文書規約 / [spec_ownership](docs/process/spec_ownership.md) 正の所在マップ |
+| 状態 `docs/backlog/` | [open_specs](docs/backlog/open_specs.md) 未確定仕様 / [balance_backlog](docs/backlog/balance_backlog.md) 見直す数値 / [known_issues](docs/backlog/known_issues.md) 実装の疑義 / [next_session](docs/backlog/next_session.md) 引き継ぎ / [efficiency_memo](docs/backlog/efficiency_memo.md) 効率メモ |
+| 横断 | [glossary](docs/glossary.md) 用語集 / [changelog](docs/changelog.md) 変更履歴 / [INDEX](.claude/project/INDEX.md) 工程↔スキル対応表 |
 
 ### 仕様書
 - [docs/design/game_spec.md](docs/design/game_spec.md) — ゲーム仕様の索引
+  - [requirements/](docs/design/requirements/) 要件 — product プロダクト / non_functional 非機能 / operation 運用
   - [systems/](docs/design/systems/) — character / battle / equipment / economy / dungeon / endgame / ui / ui_onboarding
-  - 要件: [product](docs/design/product_requirements.md) プロダクト / [nfr](docs/design/non_functional_requirements.md) 非機能 / [operation](docs/design/operation_requirements.md) 運用
 - [docs/tech/tech_spec.md](docs/tech/tech_spec.md) — 技術仕様の索引
   - [basic/](docs/tech/basic/) 基本設計 — [db](docs/tech/basic/tech_db.md)（テーブル定義書の索引 + [tech_db/](docs/tech/basic/tech_db/)） / data / structure / api / api_common / architecture / logging
   - [nonfunctional/](docs/tech/nonfunctional/) 非機能 — performance / security / operations
@@ -133,5 +133,5 @@ VS Code は実行構成 **Full Stack** で同時起動できる（[.vscode/launc
   - [TOWERS_OVERVIEW.md](docs/data/towers/TOWERS_OVERVIEW.md) 全塔概要一覧 / [SKILLS_OVERVIEW.md](docs/data/skills/SKILLS_OVERVIEW.md) スキルシステム概要
 
 ### 設計図
-- [docs/diagrams/](docs/diagrams/) 配下。全6図とも索引 + 同名ディレクトリ構成: [er_diagram.md](docs/diagrams/er_diagram.md) / [class_diagram.md](docs/diagrams/class_diagram.md) / [battle_flow.md](docs/diagrams/battle_flow.md) / [api_sequence.md](docs/diagrams/api_sequence.md)
-- [system_architecture.md](docs/diagrams/system_architecture.md)（全体構成 / tick / サーバー権威 / 本番構成）/ [screen_transition.md](docs/diagrams/screen_transition.md)（認証 / ナビ / Phase 5 / モーダル）
+[docs/diagrams/](docs/diagrams/) — 全6図とも索引 + 同名ディレクトリ構成。
+[er_diagram](docs/diagrams/er_diagram.md) / [class_diagram](docs/diagrams/class_diagram.md) / [battle_flow](docs/diagrams/battle_flow.md) / [api_sequence](docs/diagrams/api_sequence.md) / [system_architecture](docs/diagrams/system_architecture.md)（構成 / tick / 権威 / 本番）/ [screen_transition](docs/diagrams/screen_transition.md)（認証 / ナビ / Phase 5 / モーダル）

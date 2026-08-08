@@ -58,7 +58,7 @@ except (AttributeError, OSError):  # pragma: no cover - 実行環境依存
 |---|-------|
 | 1 | 実装済み（Phase 1〜2）のテストは遡及整備で C1 100% に到達済みのため**書き直さない** |
 | 2 | 本工程で補完した分岐は、[detail-design.md](detail-design.md) §4 の分岐一覧へ**逆反映**する |
-| 3 | 検出した実装の疑義（仕様乖離・デッドコード等）は `docs/known_issues.md` へ記録する |
+| 3 | 検出した実装の疑義（仕様乖離・デッドコード等）は `docs/backlog/known_issues.md` へ記録する |
 
 ## 6. 完了基準
 
@@ -66,7 +66,7 @@ except (AttributeError, OSError):  # pragma: no cover - 実行環境依存
 
 - 全テスト PASS かつ **C1カバレッジ100%**（`--cov-fail-under=100` が exit 0）
 - 補完した分岐が詳細設計の分岐一覧へ反映されている
-- 検出した実装の疑義が `docs/known_issues.md` に登録されている
+- 検出した実装の疑義が `docs/backlog/known_issues.md` に登録されている
 
 ## 7. 次工程
 

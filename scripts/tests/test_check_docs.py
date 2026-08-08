@@ -16,8 +16,8 @@ import check_docs as mod
 def root(tmp_path, monkeypatch):
     """`ROOT` 系を差し替えた空リポジトリを返す。"""
     monkeypatch.setattr(mod, "ROOT", tmp_path)
-    monkeypatch.setattr(mod, "OWNERSHIP", tmp_path / "docs" / "spec_ownership.md")
-    monkeypatch.setattr(mod, "LEDGER", tmp_path / "docs" / "open_specs.md")
+    monkeypatch.setattr(mod, "OWNERSHIP", tmp_path / "docs" / "process" / "spec_ownership.md")
+    monkeypatch.setattr(mod, "LEDGER", tmp_path / "docs" / "backlog" / "open_specs.md")
     (tmp_path / "docs").mkdir()
     return tmp_path
 
@@ -164,7 +164,7 @@ def test_check_ambiguous_allows_line_pointing_to_ledger(root):
 
 def test_check_ambiguous_skips_non_spec_directories(root):
     """管理台帳・プロセス文書は対象外（「未定」を扱う場でありうる）。"""
-    write(root, "docs/development_process.md", "値は未定\n")
+    write(root, "docs/process/development_process.md", "値は未定\n")
     assert mod.check_ambiguous(mod.targets()) == []
 
 
@@ -189,12 +189,12 @@ def test_check_pending_detects_deferral_without_ledger_link(root):
 def test_check_pending_allows_deferral_linked_to_ledger(root):
     write(root, "docs/tech/tech_a.md",
           "詳細は Phase 3 の基本設計で確定する（[台帳](../open_specs.md)）\n")
-    write(root, "docs/open_specs.md")
+    write(root, "docs/backlog/open_specs.md")
     assert mod.check_pending(mod.targets()) == []
 
 
 def test_check_pending_skips_the_ledger_itself(root):
-    write(root, "docs/open_specs.md", "Phase 3 の基本設計で確定する\n")
+    write(root, "docs/backlog/open_specs.md", "Phase 3 の基本設計で確定する\n")
     assert mod.check_pending(mod.targets()) == []
 
 
@@ -206,13 +206,13 @@ def test_check_pending_skips_files_outside_docs(root):
 # ── check_ledger ─────────────────────────────────────────────
 
 def test_check_ledger_passes_when_assertion_matches_reality(root):
-    write(root, "docs/open_specs.md", "台帳\n")
+    write(root, "docs/backlog/open_specs.md", "台帳\n")
     write(root, "docs/a.md", "open_specs.md は現在 3 件\n")
     assert mod.check_ledger(mod.targets()) == []
 
 
 def test_check_ledger_detects_absent_claim_while_ledger_exists(root):
-    write(root, "docs/open_specs.md", "台帳\n")
+    write(root, "docs/backlog/open_specs.md", "台帳\n")
     write(root, "docs/a.md", "open_specs.md は全解消済み\n")
     errors = mod.check_ledger(mod.targets())
     assert len(errors) == 1 and "実在するのに不在と断定" in errors[0]
@@ -230,7 +230,7 @@ def test_check_ledger_allows_absent_claim_while_ledger_missing(root):
 
 
 def test_check_ledger_ignores_lines_without_ledger_mention(root):
-    write(root, "docs/open_specs.md", "台帳\n")
+    write(root, "docs/backlog/open_specs.md", "台帳\n")
     write(root, "docs/a.md", "現在は不在\n")
     assert mod.check_ledger(mod.targets()) == []
 
@@ -250,37 +250,37 @@ def test_parse_ownership_returns_empty_when_file_missing(root):
 
 def test_parse_ownership_skips_header_separator_and_patternless_rows(root):
     table = OWNERSHIP_TABLE + "| 空欄 | `docs/a.md` | — | — |\n"
-    write(root, "docs/spec_ownership.md", table)
+    write(root, "docs/process/spec_ownership.md", table)
     assert [topic for topic, *_ in mod.parse_ownership()] == ["tick間隔"]
 
 
 def test_parse_ownership_builds_allow_set_from_canonical_and_allowed(root):
-    write(root, "docs/spec_ownership.md", OWNERSHIP_TABLE)
+    write(root, "docs/process/spec_ownership.md", OWNERSHIP_TABLE)
     _, canonical, allow, _ = mod.parse_ownership()[0]
     assert canonical == "docs/tech/tick.md" and allow == {"docs/tech/tick.md", "CLAUDE.md"}
 
 
 def test_check_ownership_passes_for_canonical_file(root):
-    write(root, "docs/spec_ownership.md", OWNERSHIP_TABLE)
+    write(root, "docs/process/spec_ownership.md", OWNERSHIP_TABLE)
     write(root, "docs/tech/tick.md", "tick は 60秒間隔\n")
     assert mod.check_ownership(mod.targets()) == []
 
 
 def test_check_ownership_passes_for_allowed_file(root):
-    write(root, "docs/spec_ownership.md", OWNERSHIP_TABLE)
+    write(root, "docs/process/spec_ownership.md", OWNERSHIP_TABLE)
     write(root, "CLAUDE.md", "tick は 60秒間隔\n")
     assert mod.check_ownership(mod.targets()) == []
 
 
 def test_check_ownership_detects_duplication_outside_allow_set(root):
-    write(root, "docs/spec_ownership.md", OWNERSHIP_TABLE)
+    write(root, "docs/process/spec_ownership.md", OWNERSHIP_TABLE)
     write(root, "docs/design/systems/battle.md", "tick は 60秒間隔\n")
     errors = mod.check_ownership(mod.targets())
     assert len(errors) == 1 and "docs/tech/tick.md が正" in errors[0]
 
 
 def test_check_ownership_skips_files_outside_scanned_areas(root):
-    write(root, "docs/spec_ownership.md", OWNERSHIP_TABLE)
+    write(root, "docs/process/spec_ownership.md", OWNERSHIP_TABLE)
     write(root, "README.md", "tick は 60秒間隔\n")
     assert mod.check_ownership(mod.targets()) == []
 

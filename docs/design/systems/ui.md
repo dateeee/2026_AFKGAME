@@ -99,7 +99,7 @@
 | 4 | ホーム・キャラ・装備・拠点 | 塔・ショップ・設定 |
 
 - 選定基準: 設定はヘッダ右端に常設導線があり重複、ショップは日1回程度の「つなぎ」（[tech_shop.md](../../tech/detail/tech_shop.md)）、塔の進行状況はホームでも確認できるため Phase 4 で「その他」へ移す
-- Phase 5 のボスラッシュ・イベントダンジョンへの導線（タブ追加かホーム内セクションか）は [open_specs.md](../../open_specs.md) で管理する。確定までモバイルの構成は Phase 4 のまま据え置く
+- Phase 5 のボスラッシュ・イベントダンジョンへの導線（タブ追加かホーム内セクションか）は [open_specs.md](../../backlog/open_specs.md) で管理する。確定までモバイルの構成は Phase 4 のまま据え置く
 
 ## 通知システム（Phase 1〜）
 
@@ -144,7 +144,7 @@
 | 設定項目 | デフォルト値 | 説明 | Phase |
 |---------|-----------|------|-------|
 | ポーション自動使用閾値 | 30% | HP何%以下で自動使用するか（10%〜50%、10%刻み） | 1 |
-| 戦闘ログ表示件数 | 50件 | ログの最大表示件数（20/50/100）。上限はDB保存件数100件（[non_functional_requirements.md §2](../non_functional_requirements.md)） | 1 |
+| 戦闘ログ表示件数 | 50件 | ログの最大表示件数（20/50/100）。上限はDB保存件数100件（[non_functional_requirements.md §2](../requirements/non_functional_requirements.md)） | 1 |
 | トースト通知 | ON | トースト通知の表示ON/OFF | 1 |
 | 自動売却レアリティ | OFF | 指定レアリティ以下の装備を自動売却（OFF/コモン/アンコモン） | 2 |
 
@@ -157,11 +157,11 @@
 
 | 項目 | 内容 | Phase |
 |------|------|-------|
-| 問い合わせ先 | メールまたはフォームへの導線（[operation_requirements.md](../operation_requirements.md) §5） | 2 |
+| 問い合わせ先 | メールまたはフォームへの導線（[operation_requirements.md](../requirements/operation_requirements.md) §5） | 2 |
 | 規約類 | 利用規約・プライバシーポリシーへの導線 | 2 |
-| クレジット | 帰属表示が必要なアセットの出典（[product_requirements.md](../product_requirements.md) §6） | 2 |
+| クレジット | 帰属表示が必要なアセットの出典（[product_requirements.md](../requirements/product_requirements.md) §6） | 2 |
 | ログアウト | セッションを終了しログイン画面へ戻る。ゲスト時は「このデータに戻れない」旨を警告し本登録を促したうえで実行できる（[tech_auth.md](../../tech/detail/tech_auth.md) §3） | 2 |
-| 退会（アカウント削除） | 削除要求の導線。実行前に再認証を求め、復旧できない旨を明示する（[non_functional_requirements.md](../non_functional_requirements.md) §5.1） | 2 |
+| 退会（アカウント削除） | 削除要求の導線。実行前に再認証を求め、復旧できない旨を明示する（[non_functional_requirements.md](../requirements/non_functional_requirements.md) §5.1） | 2 |
 
 - 退会は誤操作の影響が最大のため、他の設定項目と視覚的に分離し、最下部に置く
 
@@ -171,7 +171,7 @@
 |------|------|
 | 導線 | 「ナビゲーション構造」のヘッダにアイコンを常設し、未読件数をバッジで示す |
 | 一覧 | タイトル・日付・本文を新しい順に表示する |
-| 既読 | クライアント側で保持する（[operation_requirements.md](../operation_requirements.md) §3.1） |
+| 既読 | クライアント側で保持する（[operation_requirements.md](../requirements/operation_requirements.md) §3.1） |
 
 - 未読のお知らせがあっても、モーダルで操作を強制しない（放置ゲームとして起動直後の進行確認を妨げないため）
 

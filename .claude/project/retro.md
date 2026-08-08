@@ -6,10 +6,10 @@
 
 | 項目 | 値 |
 |------|----|
-| メモのパス | `docs/reviews/efficiency_memo.md`（追記型。文字数上限・doc検査・ローテーションの対象外） |
+| メモのパス | `docs/backlog/efficiency_memo.md`（作業用の台帳。区分C 8,000字上限・doc検査の対象。超過は `/retro` を回す合図） |
 | 自動追記フック | `.claude/hooks/efficiency_check.py`（Stop フック。`stop-chain.sh` 経由で登録済み） |
 | 実行順 | `stop-chain.sh` が efficiency_check → stop-commit の順で実行。メモ記入をコミットより先に済ませ、メモの変更も同じコミットへ含める（メモだけの追いコミットを作らない） |
-| エントリの寿命 | 反映済み・対応不要になったら削除（`docs/open_specs.md` と同じ運用） |
+| エントリの寿命 | 反映済み・対応不要になったら削除（`docs/backlog/open_specs.md` と同じ運用） |
 
 ## 検出シグナルとしきい値
 

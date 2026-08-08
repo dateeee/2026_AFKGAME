@@ -7,7 +7,7 @@ stop-commit.sh より先に実行する（メモの追記をコミット確認�
 
 動作:
   シグナルなし       → exit 0（何もしない）
-  シグナルあり       → docs/reviews/efficiency_memo.md へ仮エントリを追記し、
+  シグナルあり       → docs/backlog/efficiency_memo.md へ仮エントリを追記し、
                        {"decision": "block"} で Claude に「原因と改善案」の
                        記入だけを指示する（新たな作業はさせない）
 
@@ -36,7 +36,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 MEMO_PATH = Path(os.environ.get("EFFICIENCY_MEMO")
-                 or ROOT / "docs" / "reviews" / "efficiency_memo.md")
+                 or ROOT / "docs" / "backlog" / "efficiency_memo.md")
 
 # ── しきい値 ──
 SAME_READ_MIN = 2   # 同一 (file_path, offset, limit) の Read 回数

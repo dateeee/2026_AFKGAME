@@ -24,22 +24,22 @@
 | トピック | 正ファイル | 許可（参照可） | 検出パターン | 備考 |
 |---------|-----------|--------------|-------------|------|
 | 経験値計算式（100×level^1.5） | `docs/data/master/character.md` | `docs/design/systems/character.md`, `docs/design/game_spec.md`, `docs/glossary.md` | `\^1\.5` | 数値テーブルの導出元。許可3件は縮減候補 |
-| ゲスト削除猶予（90日） | `docs/tech/detail/tech_auth.md` | `docs/design/non_functional_requirements.md`, `docs/tech/nonfunctional/tech_operations.md` | `90日` | 要求値は nfr、実現方式の正は auth |
+| ゲスト削除猶予（90日） | `docs/tech/detail/tech_auth.md` | `docs/design/requirements/non_functional_requirements.md`, `docs/tech/nonfunctional/tech_operations.md` | `90日` | 要求値は nfr、実現方式の正は auth |
 | ダメージ計算式 | `docs/tech/detail/tech_battle.md` | `docs/design/systems/battle.md` | — | 図（`battle_flow/`）は視覚化として再掲可、値の変更は正から |
 | ヘッダの構成要素 | `docs/design/systems/ui.md` | `docs/tech/detail/tech_design_system.md` | — | ISSUE-601 で確定（2026-08-02） |
 | モーダルの表示位置・閉じ方 | `docs/tech/detail/tech_design_system.md` | `docs/design/systems/ui.md` | — | ISSUE-502 で確定（2026-08-02） |
 | ナビゲーション項目と「その他」まとめ | `docs/design/systems/ui.md` | `docs/tech/detail/tech_design_system.md`, `docs/diagrams/screen_transition/main_nav.md` | — | ISSUE-603 で確定。「その他」対象タブは 2026-08-05 に確定（Phase 5 の導線のみ `open_specs.md` #4 管理） |
-| お知らせの既読管理（保持先） | `docs/design/operation_requirements.md` | `docs/tech/basic/tech_api.md`, `docs/design/systems/ui.md` | — | §3.1 が正。localStorage 保持で確定（2026-08-05） |
+| お知らせの既読管理（保持先） | `docs/design/requirements/operation_requirements.md` | `docs/tech/basic/tech_api.md`, `docs/design/systems/ui.md` | — | §3.1 が正。localStorage 保持で確定（2026-08-05） |
 | ログアウトの挙動（フロー・トークン失効） | `docs/tech/detail/tech_auth.md` | `docs/design/systems/ui.md`, `docs/tech/basic/tech_api.md` | — | エンドポイント定義そのものは `tech_api.md` が正（ISSUE-602） |
 | リフレッシュトークンの保管先 | `docs/tech/detail/tech_auth.md` | `docs/tech/basic/tech_architecture.md`, `docs/tech/nonfunctional/tech_security.md` | `httpOnly` | §7 が正。LocalStorage で確定（ISSUE-704）。XSSリスクの受容判断は `tech_security.md` §11.7 |
-| 未確定仕様・調整待ち数値の管理ルール | `docs/development_process.md` | `docs/open_specs.md`, `docs/balance_backlog.md`, `CLAUDE.md` | — | §6 が正。台帳は open_specs / balance_backlog、振り分けと解消フローの正はプロセス側（ISSUE-701〜703） |
+| 未確定仕様・調整待ち数値の管理ルール | `docs/process/development_process.md` | `docs/backlog/open_specs.md`, `docs/backlog/balance_backlog.md`, `CLAUDE.md` | — | §6 が正。台帳は open_specs / balance_backlog、振り分けと解消フローの正はプロセス側（ISSUE-701〜703） |
 | コスト規律（サブエージェント運用・読み方・工程区切り） | `.claude/project/profile.md` | `CLAUDE.md`, `.claude/references/review-procedure.md` | `同時最大4体` | §6 が正。CLAUDE.md は常時読込のため要約 + リンクを残す。review-procedure.md は一般手順としての原則再掲のみ可（固有値は持たない）。ISSUE-901 で確定（2026-08-03） |
 | 確率・軽減率の上限（挑発率・状態異常付与率の合算80%） | `docs/design/systems/battle.md` | `docs/design/systems/character.md`, `docs/tech/detail/tech_battle.md`, `docs/data/skills/006_生存術系統.md` | — | 「確率・軽減率の上限（キャップ）」が正。合算80%・残り20%は必ずランダム。按分の実装式は `tech_battle.md` §3.1.3（ISSUE-1001・1002 で確定） |
-| Phaseごとの開発進捗（工程の完了状況） | `docs/development_process.md` | — | — | §5 が正。README.md は Phase の**内容**のみを持ち、状況列は持たない（ISSUE-1019 で確定） |
+| Phaseごとの開発進捗（工程の完了状況） | `docs/process/development_process.md` | — | — | §5 が正。README.md は Phase の**内容**のみを持ち、状況列は持たない（ISSUE-1019 で確定） |
 | キャラクター成長式と LV 別ステータス | `docs/data/master/character.md` | `docs/design/systems/character.md`, `docs/data/towers/*.md` | — | §1.2 の `base + growth × (LV - 1)` が正。塔ファイル §4 の勇者参考値は導出値（ISSUE-1008 で確定） |
-| 次セッションの開始タスク（引き継ぎ） | `docs/next_session.md` | — | — | ポインタ専用（「次回」1件 + 候補キュー最大5行）。Phase 進捗の正は `development_process.md` §5、書式の正は `.claude/project/next.md` |
+| 次セッションの開始タスク（引き継ぎ） | `docs/backlog/next_session.md` | — | — | ポインタ専用（「次回」1件 + 候補キュー最大5行）。Phase 進捗の正は `development_process.md` §5、書式の正は `.claude/project/next.md` |
 | 回復量+%（回復の心得）の適用範囲 | `docs/tech/detail/tech_skill.md` | `docs/data/skills/003_回復系統.md` | — | §1 #5 が正。ATK係数の回復スキル（`heal_1`・`heal_2`）にのみ乗算し、maxHP基準の蘇生・リジェネとポーションには適用しない（ISSUE-1101 で確定） |
-| お知らせマスターの項目定義・掲示件数の上限 | `docs/data/master_data.md` | `docs/tech/basic/tech_api.md`, `docs/design/operation_requirements.md`, `docs/balance_backlog.md` | — | §17 が正。掲示件数20件・title 40字・body 400字は Phase 3 の仮置き（ISSUE-1104 で確定）。既読管理の保持先は別行（`operation_requirements.md` §3.1 が正） |
+| お知らせマスターの項目定義・掲示件数の上限 | `docs/data/master_data.md` | `docs/tech/basic/tech_api.md`, `docs/design/requirements/operation_requirements.md`, `docs/backlog/balance_backlog.md` | — | §17 が正。掲示件数20件・title 40字・body 400字は Phase 3 の仮置き（ISSUE-1104 で確定）。既読管理の保持先は別行（`operation_requirements.md` §3.1 が正） |
 | DBスキーマ（物理テーブル名・列・型・キー・インデックス・制約） | `docs/tech/basic/tech_db.md` + `tech_db/` | `docs/diagrams/er_diagram/*.md`（**視覚化として再掲可**・値の変更は正から）, `docs/tech/basic/tech_data.md`（API/マスターの JSON 構造のみ） | — | 図は正にならない（§3）。反映順は定義書 → ER図 → `backend/app/models/`。運用手順（適用・ロールバック）の正は `tech_operations.md` §12.4 |
 | ゲーム設定の選択肢・範囲・刻み・既定値（設定画面の4項目） | `docs/design/systems/ui.md` | `docs/design/systems/battle.md`, `docs/tech/basic/tech_db/player.md`, `docs/tech/basic/tech_data.md`, `docs/tech/nonfunctional/tech_security.md` | `0\.1〜0\.5` | §設定画面「設定項目」表が正（ポーション閾値・戦闘ログ件数・トースト通知・自動売却レアリティ）。正は%表記・技術層は小数表記のため検出パターンは小数側のみ。列の型・NULL・既定値は「DBスキーマ」行（`tech_db/` が正）。ISSUE-1201・1203 で確定（2026-08-08） |
 

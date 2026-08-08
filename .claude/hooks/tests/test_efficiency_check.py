@@ -43,7 +43,7 @@ def commands(cmd, count, tool_id="c"):
 @pytest.fixture
 def memo(tmp_path, monkeypatch):
     """`MEMO_PATH` / `ROOT` を差し替えた（まだ存在しない）メモのパスを返す。"""
-    path = tmp_path / "docs" / "reviews" / "efficiency_memo.md"
+    path = tmp_path / "docs" / "backlog" / "efficiency_memo.md"
     monkeypatch.setattr(mod, "ROOT", tmp_path)
     monkeypatch.setattr(mod, "MEMO_PATH", path)
     return path
@@ -277,7 +277,7 @@ def test_append_memo_handles_missing_session_id(memo):
 
 def test_block_reason_points_at_memo_with_repo_relative_path(memo):
     reason = mod.block_reason(STATS)
-    assert "docs/reviews/efficiency_memo.md" in reason and "[errors×3]" in reason
+    assert "docs/backlog/efficiency_memo.md" in reason and "[errors×3]" in reason
 
 
 def test_block_reason_forbids_new_work(memo):

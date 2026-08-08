@@ -1,6 +1,6 @@
 # AFK GAME — 工程定義
 
-> [development_process.md](../development_process.md) §3 の担当ファイル。工程モデル・工程ゲート・現況・変更管理は親を参照。節番号 §3.x は分割前を維持している。
+> [development_process.md](development_process.md) §3 の担当ファイル。工程モデル・工程ゲート・現況・変更管理は親を参照。節番号 §3.x は分割前を維持している。
 
 ## 3.1 要件定義
 
@@ -8,8 +8,8 @@
 |------|------|
 | 目的 | ゲームとして「何を作るか」を確定する |
 | 主な作業 | ゲームシステム・バランス・UI要件の定義、未確定仕様の解消 |
-| 成果物 | [game_spec.md](../design/game_spec.md)（索引）＋ [design/systems/](../design/systems/)、要件3種（[product](../design/product_requirements.md) / [nfr](../design/non_functional_requirements.md) / [operation](../design/operation_requirements.md)）、[glossary.md](../glossary.md) |
-| 完了基準 | game_spec.md 系へ反映され、仕様確定ゲート（[development_process.md](../development_process.md) §4）を通過している |
+| 成果物 | [game_spec.md](../design/game_spec.md)（索引）＋ [design/systems/](../design/systems/)、要件3種（[product](../design/requirements/product_requirements.md) / [nfr](../design/requirements/non_functional_requirements.md) / [operation](../design/requirements/operation_requirements.md)）、[glossary.md](../glossary.md) |
+| 完了基準 | game_spec.md 系へ反映され、仕様確定ゲート（[development_process.md](development_process.md) §4）を通過している |
 | レビュー | `doc-review` スキル → 指摘は `fix-specs` スキルで反映 |
 
 ## 3.2 基本設計（ハイレベル設計）
@@ -24,7 +24,7 @@
 
 ### 3.2.1 DB設計とER図
 
-DBスキーマは**テキスト（テーブル定義書）を正、ER図を視覚化**とする（[spec_ownership.md](../spec_ownership.md)）。両者は必ず同じ変更で更新する。
+DBスキーマは**テキスト（テーブル定義書）を正、ER図を視覚化**とする（[spec_ownership.md](spec_ownership.md)）。両者は必ず同じ変更で更新する。
 
 | 成果物 | 内容 | 位置づけ |
 |-------|------|---------|

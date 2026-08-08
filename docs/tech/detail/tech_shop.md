@@ -44,7 +44,7 @@
 
 ### 2.3 レアリティ抽選
 
-解放帯は到達階層で決まる（[economy.md §2.5](../../design/systems/economy.md)）。帯の中の出現率を次のとおり定める（**仮置き**。調整は [balance_backlog.md](../../balance_backlog.md)）。
+解放帯は到達階層で決まる（[economy.md §2.5](../../design/systems/economy.md)）。帯の中の出現率を次のとおり定める（**仮置き**。調整は [balance_backlog.md](../../backlog/balance_backlog.md)）。
 
 | 最高到達階層 | コモン | アンコモン | レア |
 |------------|-------|----------|------|

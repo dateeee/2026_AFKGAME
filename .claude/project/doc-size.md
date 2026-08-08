@@ -1,7 +1,7 @@
 # AFK GAME — 文字数是正プロファイル
 
 `doc-size` スキルが読む固有値。一般手順は [.claude/skills/doc-size/SKILL.md](../skills/doc-size/SKILL.md)。
-規約の正は [docs/documentation_rules.md](../../docs/documentation_rules.md)。
+規約の正は [docs/process/documentation_rules.md](../../docs/process/documentation_rules.md)。
 
 ## 1. コマンド
 
@@ -15,7 +15,7 @@
 
 ## 2. 区分と上限
 
-正は [documentation_rules.md](../../docs/documentation_rules.md) §3。
+正は [documentation_rules.md](../../docs/process/documentation_rules.md) §3。
 
 | 区分 | 対象 | 上限 | 超過時の扱い |
 |------|------|------|------------|
@@ -57,7 +57,7 @@ H2セクションは2,000字、H3は1,000字（§4）。1ファイルのH2は7�
 |------|---------|
 | [README.md](../../README.md) | 「ドキュメント索引」の該当行 |
 | [CLAUDE.md](../../CLAUDE.md) | 「ドキュメント規約」の索引表（大きな仕様書を分割した場合のみ） |
-| [docs/spec_ownership.md](../../docs/spec_ownership.md) | 正の所在が別ファイルへ移る場合 |
+| [docs/process/spec_ownership.md](../../docs/process/spec_ownership.md) | 正の所在が別ファイルへ移る場合 |
 | `.claude/project/review-*.md`、工程プロファイル | レビュー・工程スキルの対象ファイル一覧 |
 | [docs/changelog.md](../../docs/changelog.md) | 先頭へ1行（**各ファイルに変更履歴を書かない**。§5.1） |
 

@@ -64,4 +64,4 @@ stateDiagram-v2
     ランキング画面 --> ボスラッシュ画面 : 戻る
 ```
 
-- ボスラッシュ・イベントダンジョンへの**導線**（タブ追加かホーム内セクションか）は未確定（[open_specs.md](../../open_specs.md) #4 で管理。正は [systems/ui.md](../../design/systems/ui.md) ナビゲーション構造、タブ構成の現状は [main_nav.md](main_nav.md)「Phase別タブ構成」）
+- ボスラッシュ・イベントダンジョンへの**導線**（タブ追加かホーム内セクションか）は未確定（[open_specs.md](../../backlog/open_specs.md) #4 で管理。正は [systems/ui.md](../../design/systems/ui.md) ナビゲーション構造、タブ構成の現状は [main_nav.md](main_nav.md)「Phase別タブ構成」）

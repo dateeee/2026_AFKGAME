@@ -3,7 +3,7 @@
 > [tech_spec.md](../tech_spec.md) §11。認証方式そのものは [tech_auth.md](../detail/tech_auth.md)、ログのマスク規則・統一エラー形式は [tech_logging.md](../basic/tech_logging.md)、環境変数の管理は [tech_operations.md](tech_operations.md) を参照。
 >
 > 本書は **認証方式以外**のセキュリティ方針（通信・入力検証・認可・レート制限・秘密情報）を扱う。
-> **守るべき要件（何を防ぐか）は [non_functional_requirements.md](../../design/non_functional_requirements.md) §4 が正**。本書はその実現方式を定める。
+> **守るべき要件（何を防ぐか）は [non_functional_requirements.md](../../design/requirements/non_functional_requirements.md) §4 が正**。本書はその実現方式を定める。
 
 ---
 

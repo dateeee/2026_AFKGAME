@@ -40,7 +40,7 @@
 | 順 | 参照先 | 読む範囲 |
 |----|--------|---------|
 | 1 | `docs/design/game_spec.md` → `systems/` | 設計対象の機能セクションのみ |
-| 2 | `docs/design/non_functional_requirements.md` | 要求値の該当行のみ |
+| 2 | `docs/design/requirements/non_functional_requirements.md` | 要求値の該当行のみ |
 | 3 | `docs/tech/tech_spec.md` | 索引から対象ファイルを特定 |
 | 4 | 既存の `backend/app/` `frontend/src/` | 対応するモジュールのみ（現状のパターン把握） |
 
@@ -80,7 +80,7 @@
 - 仕様書・設計図間に矛盾がない（`diagrams-review` の指摘解消）
 - DB変更時は §4「DBスキーマ三者一致」が差分ゼロ。追加した列は `nullable` または `server_default` を持つ（前方互換）
 - 要件定義の非機能・運用要件がすべて、実現方式を定めたいずれかの成果物に対応づいている
-- 新規の仕様ファイルは索引（`README.md`）へ登録し、既存ファイルと記述が重なるトピックの正を [docs/spec_ownership.md](../../docs/spec_ownership.md) へ宣言している
+- 新規の仕様ファイルは索引（`README.md`）へ登録し、既存ファイルと記述が重なるトピックの正を [docs/process/spec_ownership.md](../../docs/process/spec_ownership.md) へ宣言している
 - `python scripts/check_doc_size.py`・`python scripts/check_docs.py` が exit 0
 
 ## 6. 次工程

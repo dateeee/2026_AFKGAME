@@ -5,7 +5,7 @@
 それより古いレポートを `<スキル名>/archive/` へ移す。**削除はしない**。
 
 一覧を開いたときに視界へ入るファイル数を一定に保つのが目的で、
-総量を減らすことは目的ではない（docs/documentation_rules.md §9）。
+総量を減らすことは目的ではない（docs/process/documentation_rules.md §9）。
 
 使い方:
     python scripts/rotate_reviews.py            # 退避対象の表示のみ（何も動かさない）
@@ -22,7 +22,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 REVIEWS = ROOT / "docs" / "reviews"
 
-# 各スキルディレクトリの直下に残す件数（docs/documentation_rules.md §9）
+# 各スキルディレクトリの直下に残す件数（docs/process/documentation_rules.md §9）
 RECENT = 10
 
 ARCHIVE = "archive"

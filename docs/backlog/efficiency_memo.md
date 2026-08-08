@@ -1,7 +1,8 @@
 # 効率メモ（efficiency memo）
 
-非効率だったやり取りの記録。追記型アーカイブ（文字数上限・doc検査の対象外）。
+非効率だったやり取りの記録。反映したら消す作業用の台帳（[documentation_rules.md](../process/documentation_rules.md) §10）。
 運用の正は [.claude/project/retro.md](../../.claude/project/retro.md)。
+区分Cの文字数上限（8,000字）の対象。**超過したら `/retro` を回す合図**（溜め込まずに反映して消す）。
 
 - **自動追記**: Stop フック `.claude/hooks/efficiency_check.py` が直近ターンの
   非効率シグナル（同一Readの再読・同一コマンドの連発・エラー多発・許可拒否・

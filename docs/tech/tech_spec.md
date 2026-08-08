@@ -21,7 +21,7 @@
 | 11. セキュリティ設計 | 通信／CORS・入力検証・認可・レート制限・秘密情報管理 | [tech_security.md](nonfunctional/tech_security.md) |
 | 12. 運用設計 | 環境区分・環境変数・ヘルスチェック／監視・マイグレーション・バックアップ・定期ジョブ | [tech_operations.md](nonfunctional/tech_operations.md) |
 
-> §10〜§12 は **実現方式**を扱う。目標値・満たすべき要件は要件定義工程の成果物（[non_functional_requirements.md](../design/non_functional_requirements.md)・[operation_requirements.md](../design/operation_requirements.md)）が正であり、本章群では再掲しない。
+> §10〜§12 は **実現方式**を扱う。目標値・満たすべき要件は要件定義工程の成果物（[non_functional_requirements.md](../design/requirements/non_functional_requirements.md)・[operation_requirements.md](../design/requirements/operation_requirements.md)）が正であり、本章群では再掲しない。
 
 ### 関連する詳細仕様（詳細設計工程の成果物）
 
@@ -47,4 +47,4 @@
 - [x] デプロイ先の選定 → **AWS**（EC2 1台 + S3/CloudFront）。[tech_operations.md](nonfunctional/tech_operations.md) §12.1 に反映済み
 - [x] ブラウザ対応範囲 → [tech_structure.md](basic/tech_structure.md) §3 レスポンシブ設計に反映済み
 - [x] アクセシビリティ対応 → [tech_architecture.md](basic/tech_architecture.md) アクセシビリティ対応方針に反映済み
-- [x] パフォーマンス目標（ログ保持件数の上限など）→ 目標値は [non_functional_requirements.md](../design/non_functional_requirements.md) §1〜§2、実現方式は [tech_performance.md](nonfunctional/tech_performance.md) に反映済み
+- [x] パフォーマンス目標（ログ保持件数の上限など）→ 目標値は [non_functional_requirements.md](../design/requirements/non_functional_requirements.md) §1〜§2、実現方式は [tech_performance.md](nonfunctional/tech_performance.md) に反映済み

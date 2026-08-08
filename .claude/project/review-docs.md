@@ -59,7 +59,7 @@ python .claude/scripts/review_prep.py --dir docs/reviews/doc-review \
 | 網羅性 | 11 | 索引到達性・リンク切れ: `check_docs.py --reach --links` の出力をそのまま取り込む（重要度=中） |
 | 規約 | 12 | `python scripts/check_doc_size.py --sections` の出力を**そのまま取り込む**（目視で数えない） |
 | 規約 | 13 | 索引に子ファイルへのリンクが揃い、子の節番号・親リンクが維持されているか |
-| 規約 | 14 | 重複記載: `check_docs.py --owner` の出力を取り込む。[spec_ownership.md](../../docs/spec_ownership.md) 未登録トピックの重複は目視。修正案に正の宣言（同表への登録）を含める |
+| 規約 | 14 | 重複記載: `check_docs.py --owner` の出力を取り込む。[spec_ownership.md](../../docs/process/spec_ownership.md) 未登録トピックの重複は目視。修正案に正の宣言（同表への登録）を含める |
 | 網羅性 | 15 | 決定先送りの台帳登録・台帳存否の断定: `check_docs.py --pending --ledger` の出力をそのまま取り込む |
 | 規約 | 16 | **成果物表の役割列**: `.claude/project/*.md` §1 の役割記述が、実ファイルの内容および `spec_ownership.md` の正と一致しているか（表を信頼して本文の読み飛ばしを判断できる状態を保つ） |
 
