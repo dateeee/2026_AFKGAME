@@ -18,11 +18,11 @@
 | 分冊 | ベースにするガイドラインの章 |
 |------|---------------------------|
 | [layering.md](layering.md) | `Overview/ApplicationLayering`（2.4） |
-| [common.md](common.md) | `ArchitectureInDetail` |
+| [common.md](common.md) | `ArchitectureInDetail`（4.3 例外ハンドリング・7.1 ロギングほかの横断機能） |
 | [domain.md](domain.md) | `ImplementationAtEachLayer/DomainLayer`（3.2.1〜3.2.4）、`ImplementationAtEachLayer/InfrastructureLayer`（MyBatis3） |
 | [domain_service.md](domain_service.md) | `ImplementationAtEachLayer/DomainLayer`（3.2.5〜3.2.7） |
-| [web.md](web.md) | `ImplementationAtEachLayer/ApplicationLayer`、`Security` |
-| [test.md](test.md) | `UnitTest` |
+| [web.md](web.md) | `ImplementationAtEachLayer/ApplicationLayer`（3.4）、`ArchitectureInDetail/WebServiceDetail/REST`（5.1）、`Security`（9） |
+| [test.md](test.md) | `UnitTest`（10） |
 
 ## 2. 原則
 
@@ -36,18 +36,27 @@
 
 ## 3. ガイドラインからの逸脱一覧
 
-原則 #5 に従って明記した逸脱の索引。**理由と適用の詳細は「正」欄の分冊が持つ**（本表では再掲しない）。
+原則 #5 で明記した逸脱の索引。**理由と適用は「正」欄の分冊が持つ**（リンクは §1 の表）。
 
 | # | ガイドラインの推奨 | 本プロジェクトの決定 | 正 |
 |---|------------------|-------------------|-----|
-| 1 | Repository インタフェース + RepositoryImpl でデータアクセスを抽象化する（2.4.1.2.2） | Repository を作らず、Service から MyBatis3 Mapper を直接呼ぶ（2.4.2.2 が認める構成） | [layering.md](layering.md) §3 |
-| 2 | Service はインタフェース + 実装クラスで作る（3.2.5.4.1） | `@Service` を付けた具象クラスのみ | [domain_service.md](domain_service.md) §3 #1 |
-| 3 | 再利用するロジックは SharedService クラスへ分ける（3.2.5.2） | クラスを分けず、共有される Service を Javadoc と伝播属性で示す | [domain_service.md](domain_service.md) §2 |
-| 4 | Service の引数・戻り値は `Serializable` なクラスにする（3.2.5.4.3） | 課さない | [domain_service.md](domain_service.md) §3 #3 |
-| 5 | 業務例外 `BusinessException`・システム例外 `SystemException`・`ResultMessages` を使う（3.2.5.6） | クライアントへ返す業務エラーは `AppException` に一本化する | [domain_service.md](domain_service.md) §6 |
-| 6 | Repository のメソッド名は `findById` / `findAll` / `save` / `delete` 系（3.2.4.5） | `select` / `insert` / `update` / `delete` + `By<条件>` | [domain.md](domain.md) §5 |
-| 7 | Form ↔ Domain Object の変換は Helper か MapStruct へ委譲する（2.4.1.1.3・2.4.1.1.4） | Helper を作らず、Resource の `public static from(...)` に集約する | [web.md](web.md) §3 #3 |
-| 8 | View（JSP / Thymeleaf）でレスポンスを組み立てる（2.4.1.1.2） | View を持たない。描画は SPA（Vue 3）が担い、バックエンドは JSON だけを返す | [layering.md](layering.md) §2 |
+| 1 | Repository + RepositoryImpl でデータアクセスを抽象化する（2.4.1.2.2） | 作らず Service から Mapper を直接呼ぶ（2.4.2.2 が認める） | layering §3 |
+| 2 | Service はインタフェース + 実装クラスで作る（3.2.5.4.1） | `@Service` を付けた具象クラスのみ | domain_service §3 #1 |
+| 3 | 再利用するロジックは SharedService クラスへ分ける（3.2.5.2） | 分けず、Javadoc と伝播属性で示す | domain_service §2 |
+| 4 | Service の引数・戻り値は `Serializable` にする（3.2.5.4.3） | 課さない | domain_service §3 #3 |
+| 5 | `BusinessException`・`SystemException`・`ResultMessages` を使う（3.2.5.6） | 業務エラーは `AppException` に一本化する | domain_service §6 |
+| 6 | Repository のメソッド名は `findById` / `save` 系（3.2.4.5） | `select` / `insert` / `update` / `delete` + `By<条件>` | domain §5 |
+| 7 | Form ↔ Domain Object の変換は Helper へ委譲する（2.4.1.1.3・2.4.1.1.4） | 作らず Resource の `static from(...)` に集約する | web §3 #3 |
+| 8 | View でレスポンスを組み立てる（2.4.1.1.2） | 持たない。描画は SPA が担い JSON だけを返す | layering §2 |
+| 9 | リソース毎のパッケージへ `[リソース名]RestController` を置く（5.1.4.5.1） | 種類別パッケージに分け、コントローラは `<リソース>Api` | web §6 |
+| 10 | エラー応答は `ApiError` + `ExceptionCodeResolver` で組む（5.1.4.6.1） | `AppException` のコードとステータスを `ApiExceptionHandler` が `ErrorResource` へ写す | web §5 #4 |
+| 11 | 依存は `@Inject` でフィールドへ注入する（3.4.1.6.2） | コンストラクタ注入のみ（`private final`） | common §4 #1 |
+| 12 | ロガーはクラスオブジェクトから取る（`getLogger(Xxx.class)`） | ロガー名体系の文字列を渡す | common §7 #1 |
+| 13 | Repository の単体テストは DBUnit で書く（10.2.2.1.1.2） | 埋め込み PostgreSQL + `JdbcTemplate` を使う | test §5 |
+| 14 | Repository はインフラ層の**単体**テスト（10.2.2.1） | Mapper は結合テストへ分類し、C1 の分母から外す | test §5 |
+| 15 | モックの注入は `@InjectMocks`（10.2.4.3.3.1） | テスト内でコンストラクタへ手渡す | test §5 |
+| 16 | 認証はフォーム認証 + セッション（9.2.2.1・9.2.2.4） | `Authorization: Bearer` の JWT でステートレスにする | web §7 #1 |
+| 17 | CSRF トークンで偽造リクエストを弾く（9.5） | 使わない。Cookie を認証に使わないため | web §7 #2 |
 
 ## 4. 適用と検証
 

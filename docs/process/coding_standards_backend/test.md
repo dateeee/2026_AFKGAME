@@ -43,3 +43,21 @@
 | カバレッジ測定コマンド・JaCoCo 設定・固有の分岐観点 | [.claude/project/unit-test.md](../../../.claude/project/unit-test.md) |
 | 結合テストのレイヤー構成・必須シナリオ・E2E | [.claude/project/integration-test.md](../../../.claude/project/integration-test.md) |
 | 実装パターンの実例 | [.claude/project/test-patterns.md](../../../.claude/project/test-patterns.md) |
+
+## 5. ガイドラインとの差分
+
+ガイドラインの `@SpringJUnitConfig` + `test-context.xml` 構成は **Boot 流儀（`@SpringBootTest`・`@AutoConfigureMockMvc`）へ読み替えて適用する**。読み替えは逸脱ではない（10.1.2.2 の OSS 表も JUnit・AssertJ・Mockito・Spring Test を Boot 管理としている）。そのうえで**意図して採らない**と決めたものは以下。ここに無い差分を見つけたらガイドライン側へ寄せる。
+
+| 逸脱 | ガイドライン | 本書の決定と理由 |
+|------|------------|----------------|
+| #13 | Repository の単体テストは DBUnit / Spring Test DBUnit で書く（10.2.2.1.1.2） | 採らない。埋め込み PostgreSQL（zonky）+ `JdbcTemplate` でフィクスチャを作る。`@Transactional` ロールバック・固定時刻・親レコード生成が既に成立済みで、Excel のデータ定義ファイルは保守対象を増やすだけ。Boot 管理外の依存2件も避けられる |
+| #14 | Repository はインフラストラクチャ層の**単体**テスト（10.2.2.1） | Mapper は `@Tag("integration")`（結合側）へ分類する。実 DB 起動を伴うため。**C1 の分母を実 DB なしで閉じる**ための線引き（§1「実行の分離」） |
+| #15 | モックの注入は `@InjectMocks`（10.2.4.3.3.1） | テスト内でコンストラクタへ手渡す。本体がコンストラクタ注入（[common.md](common.md) §4 #1）のため、手渡しなら依存の欠落がコンパイルエラーで出る。`@InjectMocks` はリフレクション注入で失敗が静かになる |
+| — | `MockMvcTester`（10.2.4.2.3） | 既存は旧 `MockMvc#perform().andExpect()` のままとし、新規テストでの採用は任意。旧 API は非推奨ではなく、移行の得は記述の簡潔さのみ。**決め切っていないため §3 の逸脱一覧には載せない** |
+
+**新規実装から適用する**もの（既存は書き直さない）。
+
+| # | ルール |
+|---|-------|
+| 1 | [tech_logging.md](../../tech/basic/tech_logging.md) にログ要件があるクラスは `ListAppender<ILoggingEvent>` でログレベル・メッセージ・MDC を検証する（10.2.3 準拠） |
+| 2 | カスタム制約アノテーションを作ったら `jakarta.validation.Validator` を直接使う単体テストを必ず添える（10.2.3.1）。標準制約だけの Resource は `ApiExceptionHandler` 経由の 422 検証で足りる |

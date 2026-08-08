@@ -85,20 +85,4 @@
 
 ## 8. Terasoluna 単体テストガイドラインとの差分
 
-正は [Terasoluna 5.x 開発ガイドライン 10章](https://terasolunaorg.github.io/guideline/current/ja/UnitTest/UnitTestOverview.html)。本プロジェクトは Spring Boot 3.5 ベースのため、ガイドラインの `@SpringJUnitConfig` + `test-context.xml` 構成を **Boot 流儀（`@SpringBootTest`・`@AutoConfigureMockMvc`）へ読み替えて適用する**。読み替えは乖離ではない（ガイドライン 10.1.2.2 の OSS 表も JUnit・AssertJ・Mockito・Spring Test を Boot 管理としている）。
-
-そのうえで、**意図して採らない**と決めた項目は以下。ここに無い差分を見つけたらガイドライン側へ寄せる。
-
-| ガイドライン | 本プロジェクトの選択 | 理由 |
-|------------|------------------|------|
-| DBUnit / Spring Test DBUnit（10.2.2.1.1.2） | 採らない。埋め込み PostgreSQL（zonky）+ `JdbcTemplate` のフィクスチャを使う | `@Transactional` ロールバック・固定時刻・親レコード生成が既に成立済み。Excel データ定義ファイルは保守対象を増やすだけで、Boot 管理外の依存2件も避けられる |
-| `MockMvcTester`（10.2.4.2.3） | 既存は旧 `MockMvc#perform().andExpect()` のまま。新規テストでの採用は任意 | 旧 API は非推奨ではなく、移行の得は記述の簡潔さのみ |
-| `@InjectMocks`（10.2.4.3.3.1） | 採らない。テスト内でコンストラクタへ手渡す | 本体がコンストラクタ注入のため、手渡しなら依存の欠落がコンパイルエラーで出る。`@InjectMocks` はリフレクション注入で失敗が静かになる |
-| Repository は「インフラ層の単体テスト」 | Mapper は `@Tag("integration")`（結合側）に分類する | 実 DB 起動を伴うため。C1 の分母を実 DB なしで閉じるための線引き |
-
-**新規実装から適用する**もの（既存は書き直さない）。
-
-| # | ルール |
-|---|-------|
-| 1 | `tech_logging.md` にログ要件があるクラスは `ListAppender<ILoggingEvent>` でログレベル・メッセージ・MDC を検証する（10.2.3 準拠） |
-| 2 | カスタム制約アノテーションを作ったら `jakarta.validation.Validator` を直接使う単体テストを必ず添える（10.2.3.1）。標準制約だけの Resource は `ApiExceptionHandler` 経由の 422 検証で足りる |
+**正は [coding_standards_backend/test.md](../../docs/process/coding_standards_backend/test.md) §5**（Boot 流儀への読み替え・意図して採らない項目・新規実装から適用するルール）。逸脱番号の索引は [basis.md](../../docs/process/coding_standards_backend/basis.md) §3 #13〜#15。本書では再掲しない。

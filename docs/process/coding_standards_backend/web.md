@@ -55,6 +55,7 @@
 | 1 | 応答メッセージに内部情報（SQL・スタックトレース・テーブル構造・ライブラリ名）を載せない |
 | 2 | 認証・認可の失敗理由を出し分けない（探索の手がかりになるため）。詳細はログにだけ残す |
 | 3 | エラーコード体系の正は [tech_logging.md](../../tech/basic/tech_logging.md)、レスポンス形式の正は [tech_api_common.md](../../tech/basic/tech_api_common.md) |
+| 4 | 例外から応答への変換は `ApiExceptionHandler`（`@RestControllerAdvice`）へ集約し、`AppException` が持つコードと HTTP ステータスをそのまま `ErrorResource` へ写す。ガイドラインの `ApiError` + `ExceptionCodeResolver` + `ResponseEntityExceptionHandler` 継承（5.1.4.6.1）は**採らない**（逸脱 #10）。コードの正は `tech_logging.md` にあり、例外側がコードとステータスを持てば例外クラス→コードの解決表を二重に持たずに済むため |
 
 ## 6. 命名（Web層）
 
@@ -64,3 +65,20 @@
 | Resource（DTO） | `<用途>Resource` | `AuthResource`・`ErrorResource` |
 
 共通の命名（クラス・メソッド・定数・例外・パッケージ）は [common.md](common.md) §3。
+
+ガイドライン 5.1.4.5.1 は、ルートパッケージ `api` の下に**リソース毎のパッケージ**を切り、そこへ `[リソース名]RestController`・`[リソース名]Resource`・`[リソース名]Validator`・`[リソース名]Helper` をまとめる構成を推奨する。本プロジェクトは**採らない**（逸脱 #9）。
+
+| # | 理由 |
+|---|------|
+| 1 | Helper を作らず（逸脱 #7）、相関チェックも Bean Validation で書く（§2 #5）ため、リソース毎のパッケージに入るクラスが Controller と Resource の2つだけになり、束ねる意味が薄い |
+| 2 | `.config`・`.filter` は特定リソースに属さない。種類別（`.api` / `.resource` / `.config` / `.filter`）で切るほうが全体の並びがそろう |
+| 3 | 接尾辞 `Api` は Vue 側の呼び出し単位（`api/auth.ts` 等）と名前が一致する。`RestController` は本プロジェクトでは唯一の Controller 種別のため、種別を名前で区別する必要がない |
+
+## 7. セキュリティ
+
+方式の正は [tech_auth.md](../../tech/detail/tech_auth.md)（認証）と [tech_security.md](../../tech/nonfunctional/tech_security.md)（対策一覧）。本節はガイドライン `Security`（9章）との差分だけを持ち、ハッシュ方式・レート制限・トークンのローテーションは再掲しない。
+
+| # | 規約 |
+|---|------|
+| 1 | 認証は**ステートレス**（`Authorization: Bearer` の JWT）。ガイドラインが前提とするフォーム認証 + セッション（9.2.2.1）と `UserDetailsService` による DB 認証（9.2.2.4）は採らない（逸脱 #16）。クライアントが SPA だけで画面遷移を伴うログインが無く、サーバーにセッションを持たせない構成のため |
+| 2 | CSRF トークンを使わない（逸脱 #17）。Cookie を認証に使わないため、偽造リクエストに資格情報が乗らない（`tech_security.md` §11.2）。**Cookie を使う認証へ変えるときは本行ごと見直す** |

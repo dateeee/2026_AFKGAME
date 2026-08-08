@@ -38,7 +38,7 @@ class RequestLogFilterTest {
 
     private final RequestLogFilter filter = new RequestLogFilter();
 
-    /** ログ出力そのものを検証するための受け皿（unit-test.md §8「新規実装から適用する」1）。 */
+    /** ログ出力そのものを検証するための受け皿（coding_standards_backend/test.md §5「新規実装から適用する」1）。 */
     private final ListAppender<ILoggingEvent> logs = new ListAppender<>();
 
     private ch.qos.logback.classic.Logger middlewareLogger;
