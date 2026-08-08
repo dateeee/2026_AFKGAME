@@ -103,7 +103,7 @@ Terasoluna blank project の標準構成に従う。
 
 §2 で確定した2点（**PostgreSQL 統一**・**マスターデータの YAML 外出し**）の反映も本 STEP に含む（影響は §5）。
 
-**`tech_db/` 各テーブルの「実装:」行だけは据え置いた** — `scripts/check_schema_triple.py` が三者一致検証に使うアンカーで、Python models が実体である間は書き換えられない（切替は STEP 6）。
+**`tech_db/` 各テーブルの「実装:」行だけは据え置いた** — `check_schema_triple.py` が models 照合に使うアンカーで、Python models が実体である間は書き換えられない（切替は STEP 6）。DDL 照合はテーブル名で対応づけるため本行に依存しない。
 
 ### STEP 2: 骨格構築（完了）
 
@@ -117,7 +117,7 @@ Terasoluna blank project の標準構成に従う。
 | 2-B | 統一エラーレスポンス・例外ハンドラ・リクエストIDログ / Spring Security による JWT・ゲスト認証（CORS・`logback-spring.xml` を含む） | 完了 |
 | 2-C | RNG・設定プロパティ（`@ConfigurationProperties`）・マスターデータの YAML ローダ基盤（起動時に検証し、不正なら起動失敗） | 完了 |
 
-2-C はローダ基盤のみで、YAML 化した実データは動作確認用の `items.yml`（HPポーション1件。Python 実装と同一）だけを置いた。**各マスターデータの YAML 化と `record` 追加は、それを使う機能を移植する STEP 3〜5 で同時に行う**（先に全件を YAML 化しても参照側が無く、検証されないため）。
+2-C はローダ基盤のみで、実データは動作確認用の `items.yml`（HPポーション1件）だけを置いた。**各マスターデータの YAML 化と `record` 追加は、それを使う機能を移植する STEP 3〜5 で同時に行う**（先に全件を YAML 化しても参照側が無く検証されないため）。
 
 2-B が横断基盤の範囲外として見送り、STEP 3 へ持ち越した項目:
 
@@ -148,7 +148,7 @@ Terasoluna blank project の標準構成に従う。
 ### STEP 6: 切替と後始末
 
 1. Vite の `/api` プロキシ先・`.vscode/launch.json` の実行構成を Java 側へ向ける
-2. `tech_db/` 各テーブルの「実装:」行と `scripts/check_schema_triple.py` の `IMPL` 正規表現を Entity 参照へ切り替える（Python models の削除と同時に行う）
+2. `tech_db/` 各テーブルの「実装:」行を Entity 参照へ切り替え、`check_schema_triple.py` の models 照合を削除する（Python models の削除と同時。DDL 照合が引き継ぐ）
 3. デプロイ手順（jar + systemd）を [tech_operations.md](../tech/nonfunctional/tech_operations.md) へ反映
 4. E2E 全PASS を確認後に `backend/`（Python）を削除
 5. 本ファイルを削除し、[changelog.md](../changelog.md) へ完了を1行記録

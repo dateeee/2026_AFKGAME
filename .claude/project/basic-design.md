@@ -64,7 +64,7 @@
 
 | 検証項目 | 方法 |
 |---------|------|
-| DBスキーマ三者一致 | `python scripts/check_schema_triple.py`。`tech_db/`（正）↔ `er_diagram/` ↔ Entity + MyBatis3 Mapper を、列名・並び順・PK/FK/UK タグ・一意制約・FKなし宣言・nullable・制約の命名規約・ER索引の7観点で照合する |
+| DBスキーマ一致 | `python scripts/check_schema_triple.py`。`tech_db/`（正）↔ `er_diagram/` ↔ Python models ↔ Flyway DDL を、列名・並び順・PK/FK/UK タグ・一意制約・FKなし宣言・nullable・制約の命名規約・ER索引の7観点で照合する |
 | 相対リンク切れ・索引到達性 | `python scripts/check_docs.py --links --reach` |
 | 文字数上限 | `python scripts/check_doc_size.py` |
 | コードフェンスの閉じ漏れ | ` ```mermaid ` と ` ``` ` の対応を数える（使い捨て） |
@@ -78,7 +78,7 @@
 | `tech_db/<領域>.md` の `` ## N `table_name` `` 見出し | テーブルの特定 |
 | その直下の `` 実装: `backend/...` `Class` `` 行 | 実装クラスの特定 |
 
-**実装側が変わるまでこの2行を書き換えない**（技術スタック移行等の一括改訂で置換対象に含めない）。
+**実装側が変わるまでこの2行を書き換えない**（技術スタック移行等の一括改訂で置換対象に含めない）。Flyway DDL の照合はテーブル名で対応づけるため、この2行に依存しない。
 
 `check_schema_triple.py` は定義書にあるテーブルを起点に照合する。定義書に無い ER図エンティティはマスターデータの論理設計とみなして「対象外」へ列挙するだけなので（[tech_db.md](../../docs/tech/basic/tech_db.md) §4-6）、**DBテーブルにすべきものが定義書から漏れている場合は検出できない**。出力の「対象外」一覧が想定どおりかは目視で確かめる。
 

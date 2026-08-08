@@ -77,7 +77,7 @@ graph LR
 |-------|----------|---------|
 | 仕様確定ゲート | 要件・詳細設計の変更時 | `doc-review` 指摘ゼロ、`check_docs.py` exit 0、`open_specs.md` の未解消が対象Phaseの期限内 |
 | ドキュメント規約ゲート | 仕様書・設計図の変更時 | `python scripts/check_doc_size.py` が `違反 0`（exit 0。台帳登録済みの既知超過は可 — [documentation_rules.md](documentation_rules.md) §7） |
-| 設計整合ゲート | 基本設計の変更時 | `diagrams-review` 指摘ゼロ（仕様確定ゲートと並走し、修正は1パスに統合）。DB変更時は**テーブル定義書 ↔ ER図 ↔ `Entity/Mapper`（`afkgame-domain`）の三者一致**（[process/phases.md](phases.md) §3.2.1） |
+| 設計整合ゲート | 基本設計の変更時 | `diagrams-review` 指摘ゼロ（仕様確定ゲートと並走し、修正は1パスに統合）。DB変更時は**テーブル定義書 ↔ ER図 ↔ 実装（Python models・Flyway DDL）の一致**（[process/phases.md](phases.md) §3.2.1） |
 | テストリストゲート | 製造着手前 | 分岐一覧の全項目にテストが存在し（`check_branch_list.py --tests` で照合）、実行して全件 FAIL（Red）を確認 |
 | 製造完了ゲート | 実装完了時 | テスト全PASS（Green）+ コードレビュー指摘対応（**コーディング規約からの逸脱ゼロ** — [coding_standards_backend.md](coding_standards_backend.md)）+ `vue-tsc` 型チェックPASS + テーブル変更時は Flyway マイグレーションが存在し `flyway migrate` が通る |
 | 単体テストゲート | 製造完了後 | 全PASS + C1カバレッジ100% |
