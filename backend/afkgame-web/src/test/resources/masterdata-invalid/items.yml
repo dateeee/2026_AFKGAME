@@ -1,0 +1,7 @@
+# 起動失敗の確認用。必須項目 name が空で Bean Validation に違反する
+- id: hp_potion
+  name: ""
+  category: potion
+  price: 25
+  healRatio: 0.20
+  stackLimit: 99

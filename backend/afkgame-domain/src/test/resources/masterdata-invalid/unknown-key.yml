@@ -1,0 +1,8 @@
+# スキーマに無いキーを持つ不正データ（Jackson のパースで失敗させる）
+- id: hp_potion
+  name: HPポーション
+  category: potion
+  price: 25
+  healRatio: 0.20
+  stackLimit: 99
+  unknownKey: 1

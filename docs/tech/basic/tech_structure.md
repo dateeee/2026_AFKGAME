@@ -84,7 +84,8 @@
 │   │   │   └── BaseService / ForgeService（Phase 4〜）
 │   │   ├── masterdata/            # マスターデータの record + YAML ローダ
 │   │   │   └── Enemies, Towers, Items, Equipments, Characters, Notices（Phase 3〜）
-│   │   └── (src/main/resources/masterdata/)  # マスターデータ本体（YAML。数値の正は docs/data/）
+│   │   ├── (src/main/resources/masterdata/)  # マスターデータ本体（YAML。数値の正は docs/data/）
+│   │   └── rng/                   # RandomFactory（乱数源の生成。tech_rng.md §2）
 │   ├── afkgame-web/               # アプリケーション層 (com.afkgame.web)
 │   │   ├── AfkgameApplication     # エントリーポイント
 │   │   ├── api/                   # @RestController
@@ -162,6 +163,7 @@ afkgame:
   max-log-per-response: 50       # 1レスポンスあたりのログ件数上限
   max-player-level: 9999         # プレイヤーLV上限
   max-gold: 9223372036854775807  # ゴールド上限（64bit符号付き整数最大値）
+  battle-rng-seed:               # 戦闘乱数のシード。既定は未設定（tech_rng.md §2 の調査時のみ固定）
 ```
 
 - 認証系の定数（トークン期限・bcrypt strength・パスワード要件・ゲスト期限）も `application.yml` に置く（値の正は [tech_auth.md](../detail/tech_auth.md)。本書では列挙しない）

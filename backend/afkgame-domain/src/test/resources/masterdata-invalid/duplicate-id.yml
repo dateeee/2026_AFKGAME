@@ -1,0 +1,13 @@
+# ID が重複した不正データ（先勝ち・後勝ちのどちらでもなく起動を止める）
+- id: hp_potion
+  name: HPポーション
+  category: potion
+  price: 25
+  healRatio: 0.20
+  stackLimit: 99
+- id: hp_potion
+  name: HPポーション（重複）
+  category: potion
+  price: 30
+  healRatio: 0.25
+  stackLimit: 99

@@ -89,7 +89,7 @@ Terasoluna blank project の標準構成に従う。
 |------|------|------|
 | 0 | 技術選定（§2） | 完了 |
 | 1 | 基本設計・規約の改訂（ドキュメント先行） | 完了 |
-| 2 | Java 側の骨格構築（横断基盤） | 着手中（2-A・2-B 完了 / 2-C 未着手） |
+| 2 | Java 側の骨格構築（横断基盤） | 完了 |
 | 3 | Phase 1 スコープの移植 | 未着手 |
 | 4 | Phase 2 スコープの移植 | 未着手 |
 | 5 | Phase 3 実装済み分の移植 | 未着手 |
@@ -103,17 +103,19 @@ Terasoluna blank project の標準構成に従う。
 
 **`tech_db/` 各テーブルの「実装:」行だけは据え置いた** — `scripts/check_schema_triple.py` が三者一致検証に使うアンカーで、Python models が実体である間は書き換えられない（切替は STEP 6）。
 
-### STEP 2: 骨格構築
+### STEP 2: 骨格構築（完了）
 
 機能を持たない共通基盤を先に固める。完了時点で「`GET /health` が 200（`db:ok`）・ゲスト認証が通る」状態にする。
 
-1セッションで閉じないため、3つのセグメントへ割って進める。
+1セッションで閉じないため、3つのセグメントへ割って進めた。
 
 | セグメント | 内容 | 状態 |
 |-----------|------|------|
 | 2-A | Terasoluna MyBatis3 blank project からモジュール生成 + `local` 用 PostgreSQL の Docker Compose 定義 / Flyway 初期スキーマ（[tech_db.md](../tech/basic/tech_db.md) が正）/ `GET /health` | 完了 |
 | 2-B | 統一エラーレスポンス・例外ハンドラ・リクエストIDログ / Spring Security による JWT・ゲスト認証（CORS・`logback-spring.xml` を含む） | 完了 |
-| 2-C | RNG・設定プロパティ（`@ConfigurationProperties`）・マスターデータの YAML ローダ基盤（起動時に検証し、不正なら起動失敗） | 未着手 |
+| 2-C | RNG・設定プロパティ（`@ConfigurationProperties`）・マスターデータの YAML ローダ基盤（起動時に検証し、不正なら起動失敗） | 完了 |
+
+2-C はローダ基盤のみで、YAML 化した実データは動作確認用の `items.yml`（HPポーション1件。Python 実装と同一）だけを置いた。**各マスターデータの YAML 化と `record` 追加は、それを使う機能を移植する STEP 3〜5 で同時に行う**（先に全件を YAML 化しても参照側が無く、検証されないため）。
 
 2-B が横断基盤の範囲外として見送り、STEP 3 へ持ち越した項目:
 

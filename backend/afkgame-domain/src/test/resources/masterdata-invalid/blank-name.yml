@@ -1,0 +1,7 @@
+# 必須項目が空の不正データ（Bean Validation で失敗させる）
+- id: hp_potion
+  name: ""
+  category: potion
+  price: 25
+  healRatio: 0.20
+  stackLimit: 99

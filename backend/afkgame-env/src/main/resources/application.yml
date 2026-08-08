@@ -65,3 +65,5 @@ afkgame:
   max-log-per-response: 50       # 1レスポンスあたりのログ件数上限
   max-player-level: 9999         # プレイヤーLV上限
   max-gold: 9223372036854775807  # ゴールド上限（64bit符号付き整数最大値）
+  # 戦闘乱数のシード。調査時のみ固定する（tech_rng.md §2）。未設定なら毎リクエストでランダム
+  battle-rng-seed: ${BATTLE_RNG_SEED:}

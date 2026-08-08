@@ -1,0 +1,12 @@
+# AFK GAME — アイテムのマスターデータ
+#
+# 数値の正は docs/data/master/item.md §3.1。スキーマの正は
+# com.afkgame.domain.masterdata.ItemData（制約違反は起動時に検出して起動を中止する）。
+# ハイポーション・エリクサーは未実装のため持たない（追加は該当 Phase の製造で行う）。
+
+- id: hp_potion
+  name: HPポーション
+  category: potion
+  price: 25
+  healRatio: 0.20
+  stackLimit: 99
