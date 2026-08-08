@@ -91,3 +91,9 @@
 - ターン概要: ツール78回・エラー0回・拒否0回。開始:「<command-message>next</command-message>」
 - 原因と改善案: **統合〜引き継ぎ更新までを1ターンで完走した正当な分量**（鮮度確認 → merge → 競合3ファイルの解消 → 検証 → 統合 → 統合後3タスク → 引き継ぎ書き換え → コミット2件。エラー0）だが、**引き継ぎを書き換える段になって `next_session.md` が既に上限超過（9,164字）だと気づいた**のが無駄で、`carryover_notes.md` への移設と同ファイルの H2 分割・節番号繰り下げが後追いになった（約8コール）。`check_doc_size.py` の台帳には「統合直後に再測定し、超えるなら冒頭の『決まった流儀』を carryover_notes.md へ移す」と**手順まで書いてあったのに読んでいない**（00:11・00:24 と同じ「先行セッションの申し送りを読まずに編集へ入る」パターンの3回目）。→ [.claude/project/next.md](../../.claude/project/next.md) §4 の冒頭へ「**書き換える前に** `check_doc_size.py --sections docs/backlog/next_session.md` を実行し、台帳（`KNOWN_OVERSIZED`）に本ファイルの行があれば**その是正方針をそのまま実施してから**書く」を追加する。
 - 別件: Python 残骸の物理削除（`backend/{app,tests,alembic,.pytest_cache,...}`・`__pycache__`）が Bash・PowerShell とも権限分類器に拒否され**未実施**。再帰削除が必要な後片付けは、引き継ぎの「統合後」へ書くだけでなく**承認が要る前提でユーザーへ提示する**手順にしておくと1往復で済む。
+
+## 2026-08-09 08:33 | session 43461a8b | 自動検出
+- シグナル: long-turn(calls=85)
+- ターン概要: ツール85回・エラー2回・拒否0回。開始:「<ide_selection>The user selected the lines 37 to 38 from c:\」
+- 原因と改善案: **H2 の残量を数えずに表へ行を足し、`basis.md` §3 の圧縮を3周した**（2,319 → 2,070 → 1,984 → 1,854字。上限2,000）。着手前に `--sections` で測ってはいたが、見たのは**ファイル残量だけで H2 残量 × 追記予定行数を見積もっていない**。→ [.claude/project/doc-size.md](../../.claude/project/doc-size.md) §3.1 の #0 へ「表へ行を足すときは**該当 H2 の残量 ÷ 既存1行の字数**で入る行数を先に出す。入らないなら圧縮ではなく分割を提案する」を足す。long-turn 自体は誤検出（ガイドライン6章の精読 → 分冊3件との突き合わせ → 逸脱9件の確定 → 4ファイル改訂 + 所有権の移管 → 検証 → 統合まで1ターンで完走）。
+- 別件（errors×2、いずれも同種のツール取り違え）: ①Bash ツールへ PowerShell の here-string（`@'...'@`）を書き、コミット本文に `@` が混入して amend ②`worktree.py merge` を worktree の中から実行してパス解決に失敗（`ExitWorktree` して main から実行し直し）。→ ②は [worktree_guide.md](../process/worktree_guide.md) §5 へ「**merge は main で実行する**（worktree 内からは相対パス解決に失敗する）」を1行。①は Stop フックの指示文が既に警告しており、追加の対策は不要。
