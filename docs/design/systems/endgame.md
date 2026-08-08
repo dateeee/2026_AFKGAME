@@ -115,8 +115,8 @@ HP／ATK／DEF／SPD／EXP獲得／スキルダメージの6種に、獲得し�
 | tick・オフライン | 塔と同じハイブリッドtick制。オフライン中も進行する |
 
 - 難易度は入場時に選択し、探索中は変更できない。難易度ごとに到達済み最高階を個別管理する
-- 塔の進行ルールを再利用するため、入退場の実現方式も `/api/tower/*` の流用を基本とする（確定は基本設計。[tech_api.md](../../tech/basic/tech_api.md)）
-- 難易度別の到達記録を `towersCleared`（[tech_data.md](../../tech/basic/tech_data.md)）へどう保持するか（キー体系）は [open_specs.md](../../backlog/open_specs.md) で管理する
+- 塔の進行ルールを再利用するため、入退場も `/api/tower/*` を再利用する（難易度は `difficulty` パラメータで指定。正は [tech_api.md](../../tech/basic/tech_api.md)「イベントダンジョン」）
+- 難易度別の到達記録は `towersCleared` へ難易度ごとに個別に保持する（キー体系の正は [tech_data.md](../../tech/basic/tech_data.md) §1.1）
 
 ### 難易度設定
 

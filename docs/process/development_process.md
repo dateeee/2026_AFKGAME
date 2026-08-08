@@ -40,7 +40,7 @@ graph LR
 
 | 工程 | 適用単位 | 状態 |
 |------|---------|------|
-| 要件定義 | 全Phase一括 | 完了（未確定は `open_specs.md` 管理） |
+| 要件定義 | 全Phase一括 | 完了（未確定仕様ゼロ。生じたら `open_specs.md` を作成して管理する） |
 | 基本設計 | 全Phase一括 | 完了（変更時は差分更新）。ただし**DB設計（テーブル定義書）は未着手** — 2026-08-07 に成果物へ追加（[process/phases.md](phases.md) §3.2.1）。Phase 3 製造の着手前に作成する |
 | 詳細設計 | Phase単位 | Phase単位で数値・アルゴリズムを確定 |
 | テストリスト作成 | 機能単位 | 分岐一覧を失敗するテストへ落とす（バックエンドのみ） |
@@ -118,7 +118,7 @@ graph LR
 
 ## 6. 変更管理
 
-- 未確定仕様・仕様変更は [open_specs.md](../backlog/open_specs.md) で管理する。**原則ゼロ**とし、生じた場合のみ作成・登録する（不在＝未確定ゼロ）
+- 未確定仕様・仕様変更は `docs/backlog/open_specs.md` で管理する。**原則ゼロ**とし、生じた場合のみ作成・登録する（不在＝未確定ゼロ）
 - 確定 → 成果物（仕様書・設計図）へ反映 → [changelog.md](../changelog.md) に追記 → open_specs.md から削除（全解消でファイルごと削除）
 - **仕様は確定済みで数値のみ調整待ち**の項目は [docs/backlog/balance_backlog.md](../backlog/balance_backlog.md) で管理する。実装をブロックしないため open_specs.md には残さず、結合テスト〜リリース後の実測で確定する
 - **実装側の疑義**（仕様との乖離・デッドコード・規約違反）は [docs/backlog/known_issues.md](../backlog/known_issues.md) で管理する。対応時は「仕様書を実装に合わせる」か「実装を修正する」かを都度判断する

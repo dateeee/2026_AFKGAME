@@ -12,6 +12,10 @@
 
 | ファイル | 内容 |
 |---------|------|
+| `docs/tech/basic/tech_data.md` / `docs/tech/basic/tech_api.md` / `docs/glossary.md` | **open_specs #3 の確定**: 難易度別到達記録のキー体系を `towersCleared` の `{towerId}_{difficulty}`（平坦キー・値の型は全エントリ共通）に確定。`/api/tower/select` へ任意パラメータ `difficulty`（`beginner`/`intermediate`/`advanced`）を追加し、`/api/tower/list` は難易度ごとの独立エントリで返す。イベントダンジョンID3件（`trial_maze`/`treasure_vault`/`training_hall`）と難易度識別子を glossary へ登録 |
+| `docs/design/systems/ui.md` / `docs/diagrams/screen_transition/main_nav.md` / `docs/diagrams/screen_transition/endgame.md` | **open_specs #4 の確定**: ボスラッシュ・イベントダンジョンの導線はタブを追加せず「探索」タブ（Phase 5 で「塔」から改称）配下のセクションへ集約（タブ総数7で不変）。モバイルの Phase 5 行を追加（直接=ホーム・キャラ・装備・探索／その他=拠点・ショップ・設定） |
+| `docs/design/systems/endgame.md` / `docs/diagrams/api_sequence/endgame.md` | #3・#4 の確定に伴い、台帳リンク付きの決定先送り記述を確定内容へ置換 |
+| `docs/backlog/open_specs.md` | **ファイルごと削除**。#3・#4 の確定で Phase 1〜5 の未確定仕様がゼロになったため（全解消でファイルごと削除する方針に準拠）。参照元の `README.md` 索引行・`docs/process/spec_ownership.md`・`docs/process/development_process.md` を追随 |
 | process/worktree_guide.md | §5.2 手順4へ「編集対象が特定済みのファイルは worktree へ入ってから読む」を追記（retro: 二重Read防止） |
 | process/worktree_guide.md | §5.3 の統合前ユーザー確認を撤廃（作成・統合・削除は確認なしで実施）。統合手順を `worktree.py merge`（main 取り込み→ff統合→片付けの一括コマンド、新設）へ置き換え。§1 表・§2 ルール3・§5.4 も追随 |
 | tech/detail/tech_base.md | **新規**。Phase 4 拠点・施設の詳細設計。建設・レベルアップの処理フロー、段階表（酒場・鍛冶屋）の中間LV解決規則、LV0 の効果値、効果の適用点と丸め、`BASE_` エラーコード一覧、分岐一覧2件（建設・レベルアップ21件／効果値の解決16件） |

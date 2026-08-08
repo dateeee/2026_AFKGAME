@@ -28,7 +28,7 @@
 | ダメージ計算式 | `docs/tech/detail/tech_battle.md` | `docs/design/systems/battle.md` | — | 図（`battle_flow/`）は視覚化として再掲可、値の変更は正から |
 | ヘッダの構成要素 | `docs/design/systems/ui.md` | `docs/tech/detail/tech_design_system.md` | — | ISSUE-601 で確定（2026-08-02） |
 | モーダルの表示位置・閉じ方 | `docs/tech/detail/tech_design_system.md` | `docs/design/systems/ui.md` | — | ISSUE-502 で確定（2026-08-02） |
-| ナビゲーション項目と「その他」まとめ | `docs/design/systems/ui.md` | `docs/tech/detail/tech_design_system.md`, `docs/diagrams/screen_transition/main_nav.md` | — | ISSUE-603 で確定。「その他」対象タブは 2026-08-05 に確定（Phase 5 の導線のみ `open_specs.md` #4 管理） |
+| ナビゲーション項目と「その他」まとめ | `docs/design/systems/ui.md` | `docs/tech/detail/tech_design_system.md`, `docs/diagrams/screen_transition/main_nav.md` | — | ISSUE-603 で確定。「その他」対象タブは 2026-08-05、Phase 5 の導線（「探索」タブへ集約）は 2026-08-08 に確定 |
 | お知らせの既読管理（保持先） | `docs/design/requirements/operation_requirements.md` | `docs/tech/basic/tech_api.md`, `docs/design/systems/ui.md` | — | §3.1 が正。localStorage 保持で確定（2026-08-05） |
 | ログアウトの挙動（フロー・トークン失効） | `docs/tech/detail/tech_auth.md` | `docs/design/systems/ui.md`, `docs/tech/basic/tech_api.md` | — | エンドポイント定義そのものは `tech_api.md` が正（ISSUE-602） |
 | リフレッシュトークンの保管先 | `docs/tech/detail/tech_auth.md` | `docs/tech/basic/tech_architecture.md`, `docs/tech/nonfunctional/tech_security.md` | `httpOnly` | §7 が正。LocalStorage で確定（ISSUE-704）。XSSリスクの受容判断は `tech_security.md` §11.7 |
@@ -41,6 +41,7 @@
 | 回復量+%（回復の心得）の適用範囲 | `docs/tech/detail/tech_skill.md` | `docs/data/skills/003_回復系統.md` | — | §1 #5 が正。ATK係数の回復スキル（`heal_1`・`heal_2`）にのみ乗算し、maxHP基準の蘇生・リジェネとポーションには適用しない（ISSUE-1101 で確定） |
 | お知らせマスターの項目定義・掲示件数の上限 | `docs/data/master_data.md` | `docs/tech/basic/tech_api.md`, `docs/design/requirements/operation_requirements.md`, `docs/backlog/balance_backlog.md` | — | §17 が正。掲示件数20件・title 40字・body 400字は Phase 3 の仮置き（ISSUE-1104 で確定）。既読管理の保持先は別行（`operation_requirements.md` §3.1 が正） |
 | DBスキーマ（物理テーブル名・列・型・キー・インデックス・制約） | `docs/tech/basic/tech_db.md` + `tech_db/` | `docs/diagrams/er_diagram/*.md`（**視覚化として再掲可**・値の変更は正から）, `docs/tech/basic/tech_data.md`（API/マスターの JSON 構造のみ） | — | 図は正にならない（§3）。反映順は定義書 → ER図 → `backend/app/models/`。運用手順（適用・ロールバック）の正は `tech_operations.md` §12.4 |
+| 到達記録（`towersCleared`）のキー体系 | `docs/tech/basic/tech_data.md` | — | `\{towerId\}_\{difficulty\}` | §1.1 が正。キーは塔ID、イベントダンジョンのみ難易度を畳み込む。難易度パラメータの受け渡し（`/api/tower/select` の `difficulty`）の正は `tech_api.md`「イベントダンジョン」（2026-08-08 に確定） |
 | バックエンドのコーディング規約（層の責務・命名・記述・例外・ログ・Javadoc） | `docs/process/coding_standards_backend.md` | `.claude/references/coding-standards-backend.md`（**派生**・固有値を持たないチェックリスト）, `.claude/project/profile.md`（§3 技術スタック表のみ）, `.claude/project/review-code.md`（§2 レビュー観点のみ）, `docs/process/phases.md` | — | 正 → 派生の順に同じ変更で改訂する（`phases.md` §3.2.2）。テストコードの記述規約は `.claude/project/test-list.md` §5、ロガー名体系・エラーコードは `docs/tech/basic/tech_logging.md`、DB列名は `tech_db.md` が正 |
 | ゲーム設定の選択肢・範囲・刻み・既定値（設定画面の4項目） | `docs/design/systems/ui.md` | `docs/design/systems/battle.md`, `docs/tech/basic/tech_db/player.md`, `docs/tech/basic/tech_data.md`, `docs/tech/nonfunctional/tech_security.md` | `0\.1〜0\.5` | §設定画面「設定項目」表が正（ポーション閾値・戦闘ログ件数・トースト通知・自動売却レアリティ）。正は%表記・技術層は小数表記のため検出パターンは小数側のみ。列の型・NULL・既定値は「DBスキーマ」行（`tech_db/` が正）。ISSUE-1201・1203 で確定（2026-08-08） |
 

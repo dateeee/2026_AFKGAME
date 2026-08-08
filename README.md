@@ -108,7 +108,7 @@ VS Code は実行構成 **Full Stack** で同時起動できる（[.vscode/launc
 | 分類 | ファイル |
 |------|---------|
 | 進め方 `docs/process/` | [development_process](docs/process/development_process.md) 7工程・ゲート・進捗 / [phases](docs/process/phases.md) 工程別の定義 / [documentation_rules](docs/process/documentation_rules.md) 文書規約 / [coding_standards_backend](docs/process/coding_standards_backend.md) バックエンドのコーディング規約 / [spec_ownership](docs/process/spec_ownership.md) 正の所在マップ / [worktree_guide](docs/process/worktree_guide.md) 編集時の worktree 運用 |
-| 状態 `docs/backlog/` | [open_specs](docs/backlog/open_specs.md) 未確定仕様 / [balance_backlog](docs/backlog/balance_backlog.md) 見直す数値 / [known_issues](docs/backlog/known_issues.md) 実装の疑義 / [next_session](docs/backlog/next_session.md) 引き継ぎ / [efficiency_memo](docs/backlog/efficiency_memo.md) 効率メモ / [java_migration](docs/backlog/java_migration.md) Java移行計画 |
+| 状態 `docs/backlog/` | [balance_backlog](docs/backlog/balance_backlog.md) 見直す数値 / [known_issues](docs/backlog/known_issues.md) 実装の疑義 / [next_session](docs/backlog/next_session.md) 引き継ぎ / [efficiency_memo](docs/backlog/efficiency_memo.md) 効率メモ / [java_migration](docs/backlog/java_migration.md) Java移行計画 |
 | 横断 | [glossary](docs/glossary.md) 用語集 / [changelog](docs/changelog.md) 変更履歴 / [INDEX](.claude/project/INDEX.md) 工程↔スキル対応表 |
 
 ### 仕様書

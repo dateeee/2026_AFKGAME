@@ -52,10 +52,11 @@
   "potions": {
     "hp_potion": 10
   },
-  "towersCleared": {                   // 塔別の到達記録。目標階の上限 = min(highestFloor + 1, totalFloors)
+  "towersCleared": {                   // 到達記録。キーは塔ID。目標階の上限 = min(highestFloor + 1, totalFloors)
     "goblin_tower": { "cleared": true, "highestFloor": 20 },
     "forest_tower": { "cleared": false, "highestFloor": 15 },
-    "abyss_tower": { "cleared": false, "highestFloor": 87 }   // 深淵の塔（無限塔）。cleared は常に false
+    "abyss_tower": { "cleared": false, "highestFloor": 87 },  // 深淵の塔（無限塔）。cleared は常に false
+    "trial_maze_beginner": { "cleared": true, "highestFloor": 10 }   // Phase 5〜: イベントダンジョンのみ難易度を畳み込む
   },
   "currentEnemy": {                    // null = 現在戦闘中でない
     "id": "goblin",
@@ -100,6 +101,8 @@
   // "bossRush": { ... }               // Phase 5〜: ボスラッシュ状態
 }
 ```
+
+> **`towersCleared` のキー体系**: キーは塔ID。イベントダンジョン（Phase 5〜）のみ `{towerId}_{difficulty}` の形で難易度を畳み込み、難易度別に到達記録を持つ（`difficulty` = `beginner` / `intermediate` / `advanced`）。通常塔・深淵の塔はサフィックスを付けないため、Phase 1〜4 のセーブデータは移行処理なしでそのまま有効。値の型は全エントリ共通で `{ cleared, highestFloor }`。キーの組み立てはサーバーが行う（[tech_api.md](tech_api.md)「イベントダンジョン」）。
 
 ## 1.2 敵データ定義例
 ```json
