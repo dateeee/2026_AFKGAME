@@ -9,10 +9,10 @@
 
 | 順 | 層 | パス | 規約 |
 |----|----|------|------|
-| 1 | モデル | `backend/app/models/` | SQLAlchemy 2.0（`Mapped[]` + `mapped_column()`） |
-| 2 | スキーマ | `backend/app/schemas/` | Pydantic v2。`CamelModel` を継承 |
-| 3 | サービス | `backend/app/services/` | ビジネスロジックを集約 |
-| 4 | ルーター | `backend/app/routers/` | FastAPI `APIRouter`（prefix / tags / response_model） |
+| 1 | モデル | `afkgame-domain` の Entity + MyBatis3 Mapper | インタフェース + XML |
+| 2 | スキーマ | `afkgame-web` の Resource | Bean Validation（Jakarta）でフィールド制約 |
+| 3 | サービス | `afkgame-domain` の Service | ビジネスロジックを集約 |
+| 4 | コントローラ | `afkgame-web` の `@RestController` | Spring MVC（マッピング・バリデーション） |
 
 ### フロントエンド（実装順）
 
@@ -67,14 +67,14 @@
 | 4 | サーバー権威 | 戦闘計算・報酬決定をフロント側に置いていないか |
 | 5 | 開発時フォールバック | `frontend/src/composables/useBattleLocal.ts` の単体動作を壊していないか |
 | 6 | 既存パターン踏襲 | 命名規則・ディレクトリ構造・import規約が既存コードと揃っているか |
-| 7 | ログ | `logging_config` 準拠か |
+| 7 | ログ | `logback-spring.xml` 準拠か |
 
 ## 5. 動作確認
 
 | 対象 | コマンド |
 |------|---------|
-| バックエンド構文 | `cd backend && python -m py_compile app/main.py` |
-| バックエンドテスト | `cd backend && python -m pytest -q`（TDDの全テストがGreen） |
+| バックエンド構文 | `cd backend && mvn -q compile` |
+| バックエンドテスト | `cd backend && mvn test`（TDDの全テストがGreen） |
 | フロント型チェック | `cd frontend && npm run type-check` |
 
 ## 6. 完了基準

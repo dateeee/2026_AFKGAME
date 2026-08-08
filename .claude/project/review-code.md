@@ -13,13 +13,13 @@
 
 ファイル名は `YYYY-MM-DD_HHMMSS.md`。
 ローテーションは `python scripts/rotate_reviews.py --apply`（直下を最新10件に保ち、超過分は `archive/` へ移動）。
-該当箇所は行番号（`xxx.py 行N〜M`）で示す。
+該当箇所は行番号（`xxx.java 行N〜M`）で示す。
 
 準備コマンド（モード判定・差分特定・ISSUE採番。全量時は `--full` を追加）:
 
 ```bash
 python .claude/scripts/review_prep.py --dir docs/reviews/backend-review \
-    --paths backend/app --title バックエンドコードレビュー結果 \
+    --paths backend --title バックエンドコードレビュー結果 \
     --categories "コード品質 / セキュリティ / 一貫性"
 
 python .claude/scripts/review_prep.py --dir docs/reviews/frontend-review \
@@ -32,7 +32,7 @@ python .claude/scripts/review_prep.py --dir docs/reviews/frontend-review \
 
 | スキル | 対象 |
 |-------|------|
-| `backend-review` | `backend/app/` 配下の全 `.py`（`__pycache__/` 除外） |
+| `backend-review` | `backend/` 配下の全 `.java`（`target/` のビルド生成物除外） |
 | `frontend-review` | `frontend/src/` 配下の全 `.vue` `.ts` `.css` + `index.html`・`vite.config.ts`・`package.json`・`tsconfig.json` |
 
 **全量モードの分担: 分担なし＝1体全量**。対象規模が小さいため、複数体へ分割せずメインコンテキストで完結させる
@@ -42,20 +42,20 @@ python .claude/scripts/review_prep.py --dir docs/reviews/frontend-review \
 
 | 分類 | # | 観点 |
 |------|---|------|
-| コード品質 | 1 | **FastAPI**: `APIRouter`（prefix / tags / response_model）、`Depends` による依存性注入、HTTPステータス（200/201/400/401/404/422）、例外ハンドリングの一貫性、パス・クエリパラメータの型アノテーション |
-| コード品質 | 2 | **SQLAlchemy 2.0**: `Mapped[]` + `mapped_column()`（旧 `Column()` でないか）、`relationship()` + `Mapped[]`、セッション・トランザクション管理、**N+1問題**（`selectinload` / `joinedload`） |
-| コード品質 | 3 | **Pydantic v2**: `model_config = ConfigDict(from_attributes=True)`（旧 `class Config` でないか）、`Field()` の活用、Create/Update/Response の分離、`@field_validator` / `@model_validator` |
-| コード品質 | 4 | **Python一般**: 型ヒントの網羅性、snake_case、不要な `Any`、マジックナンバー |
+| コード品質 | 1 | **Spring MVC**: `@RestController`（マッピングアノテーション・パス設計）、コンストラクタ注入によるDI、HTTPステータス（200/201/400/401/404/422）、`@RestControllerAdvice` による例外ハンドリングの一貫性、パス・クエリパラメータの型・バリデーション |
+| コード品質 | 2 | **MyBatis3**: Mapper インタフェースと XML の対応、SQL のパラメータバインド、`@Transactional` によるトランザクション境界、**N+1問題**（Mapper でのJOIN取得・バッチ取得） |
+| コード品質 | 3 | **Resource + Bean Validation**: `@NotNull` 等の制約アノテーションの活用、Create/Update/Response の分離、`@Valid` によるコントローラ側の検証 |
+| コード品質 | 4 | **Java一般**: 型の網羅性、命名規則（camelCase）、不要な `Object`、マジックナンバー |
 | セキュリティ | 5 | SQLインジェクション（生SQLのパラメータバインド） |
 | セキュリティ | 6 | 保護すべきエンドポイントに認証チェック（`Depends`）があるか |
-| セキュリティ | 7 | 入力バリデーション（Pydanticスキーマによる検証） |
+| セキュリティ | 7 | 入力バリデーション（Bean Validation アノテーションによる検証） |
 | セキュリティ | 8 | 重要エンドポイント（ログイン・購入）のレート制限が考慮されているか |
 | セキュリティ | 9 | エラーレスポンスに内部情報（スタックトレース・DB構造）が漏れていないか |
 | セキュリティ | 10 | パスワードが適切にハッシュ化されているか（平文保存でないか） |
 | 一貫性 | 11 | 全エンドポイントで統一エラーレスポンス形式（`error.code`）が使われているか |
 | 一貫性 | 12 | レスポンス構造の統一、命名パターンの統一 |
 | 一貫性 | 13 | ログ出力の箇所とログレベルが `logging_config` 準拠で一貫しているか |
-| 一貫性 | 14 | 環境変数・設定値が `config.py` で一元管理されているか |
+| 一貫性 | 14 | 環境変数・設定値が `@ConfigurationProperties` クラスで一元管理されているか |
 | 一貫性 | 15 | ロジックが `services/` に集約され、ルーターに漏れていないか |
 
 ## 3. `frontend-review` の観点

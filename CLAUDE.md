@@ -41,8 +41,9 @@ Markdownには文字数上限を設けている。詳細は [docs/process/docume
 - **製造はTDD**: バックエンドの新規実装はテストを先に書く（Red → Green → Refactor）
 - **仕様は全Phase確定 → 実装は段階的**: 全Phase(1-5)の仕様を確定してから Phase 1 から順に実装する
 - **未確定仕様は原則ゼロ**。生じたものは `docs/backlog/open_specs.md` で管理し、確定・反映したら行を削除する（全解消でファイルごと削除）
-- **テスト標準**: バックエンド単体テストは pytest で C1（分岐）カバレッジ100%、結合テストは FastAPI TestClient + Playwright（E2E）
-- **実装規約**: スキーマは CamelModel で `schemas/`、ロジックは `services/`、ログは logging_config 準拠
+- **テスト標準**: バックエンド単体テストは JUnit 5 + JaCoCo で C1（分岐）カバレッジ100%、結合テストは MockMvc + Playwright（E2E）
+- **実装規約**: Resource(DTO) は `afkgame-web` の `resource/`（Bean Validation 付与）、ロジックは `afkgame-domain` の `service/`、ログは `logback-spring.xml` 準拠
+- **バックエンドは Java/Terasoluna へ移行中**。手順と進捗の正は [docs/backlog/java_migration.md](docs/backlog/java_migration.md)
 - **作業はすべてスキル経由**: 7工程 + 支援10件を `.claude/skills/` に用意している（自動起動 / `/` で明示起動）。対応表は [.claude/project/INDEX.md](.claude/project/INDEX.md)
 - **一般手順と固有値の分離**: `.claude/` の固有値は `project/**` のみ。ほかは他プロジェクトへ無改造コピー可（[_TEMPLATE.md](.claude/project/_TEMPLATE.md) に沿って書き直す）
 

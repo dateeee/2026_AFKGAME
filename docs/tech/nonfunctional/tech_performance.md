@@ -70,7 +70,7 @@
 
 | 検証 | 内容 | 実施タイミング |
 |------|------|--------------|
-| 常時計測 | ミドルウェアの `duration_ms`（[tech_logging.md](../basic/tech_logging.md)）から p95 を確認 | 常時 |
+| 常時計測 | Filter/Interceptor の `duration_ms`（[tech_logging.md](../basic/tech_logging.md)）から p95 を確認 | 常時 |
 | 最悪ケース検証 | 24時間放置相当（1,440tick）の復帰を実データで計測 | 結合テスト（Phase単位） |
 | 負荷試験 | 同時100ユーザーのポーリングを再現（k6 または locust） | Phase 2 結合テストで初回実施 |
 | DB容量検証 | 1,000人相当のダミーデータを投入しサイズとクエリ時間を確認 | 負荷試験と同時 |

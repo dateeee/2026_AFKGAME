@@ -4,7 +4,7 @@
 > 性能・容量設計は [tech_performance.md](../nonfunctional/tech_performance.md)、セキュリティは [tech_security.md](../nonfunctional/tech_security.md)、運用は [tech_operations.md](../nonfunctional/tech_operations.md)、tick進行制御は [tech_tick.md](../detail/tech_tick.md)。
 
 ```
-[Vue.js SPA]  ←── REST API (polling) ──→  [FastAPI]  ←── ORM ──→  [DB]
+[Vue.js SPA]  ←── REST API (polling) ──→  [Terasoluna]  ←── MyBatis3 ──→  [DB]
    │                                          │
    ├─ 60秒ごとにポーリング                  ├─ tick処理（戦闘計算の権威）
    ├─ 戦闘ログのテキスト表示                    ├─ オフライン復帰時のまとめ計算
@@ -12,7 +12,7 @@
    └─ オフラインキャッシュ（一時的）             └─ 不正防止（サーバー権威）
 ```
 
-- **本番ではすべての戦闘計算はサーバー側（FastAPI）で実行**。チート対策のためフロントでは計算しない
+- **本番ではすべての戦闘計算はサーバー側（Terasoluna）で実行**。チート対策のためフロントでは計算しない
 - フロントは **ポーリングで結果を取得** → テキストログとして表示するだけ
 - オフライン中はサーバーで何もせず、**復帰時に経過tick数分をまとめてシミュレーション** する
 
@@ -90,11 +90,11 @@ WCAG準拠レベルは明示的に定めず、ベストエフォートで以下�
 - 正式なWCAG準拠テスト・認証は行わない
 
 ## MVP開発方針
-Phase 1 から **フロントエンド（Vue + Vite）とバックエンド（FastAPI + SQLite）を同時開発** する。
+Phase 1 から **フロントエンド（Vue + Vite）とバックエンド（Terasoluna + SQLite）を同時開発** する。
 
 | 機能 | Phase 1（MVP） | 備考 |
 |------|---------------|------|
-| tick計算 | FastAPI `/api/battle/tick` | サーバー権威 |
+| tick計算 | Terasoluna `/api/battle/tick` | サーバー権威 |
 | データ保存 | SQLite | サーバーDB |
 | オフライン報酬 | サーバー側で計算 | 復帰時にまとめて処理 |
 | フロント | Vue 3 SPA | ポーリングで結果取得・表示 |

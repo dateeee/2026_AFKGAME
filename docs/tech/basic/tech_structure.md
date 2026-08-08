@@ -50,7 +50,7 @@
 │   │   │   ├── PartyView.vue      # パーティ編成画面（Phase 3〜）
 │   │   │   └── BaseView.vue       # 拠点画面（Phase 4〜）
 │   │   ├── api/                   # API通信
-│   │   │   ├── client.ts          # FastAPI との通信レイヤー
+│   │   │   ├── client.ts          # バックエンドとの通信レイヤー
 │   │   │   └── auth.ts            # 認証API（Phase 2〜）
 │   │   ├── types/                 # TypeScript 型定義
 │   │   │   └── game.ts            # ゲーム関連の型
@@ -66,65 +66,37 @@
 │   ├── tsconfig.json
 │   └── package.json
 │
-├── backend/                       # FastAPI サーバー
-│   ├── app/
-│   │   ├── main.py                # FastAPI エントリーポイント
-│   │   ├── config.py              # 設定・定数
-│   │   ├── dependencies.py        # 依存性注入（認証・プレイヤー取得）
-│   │   ├── middleware.py          # ミドルウェア（リクエストログ等）
-│   │   ├── exceptions.py         # カスタム例外
-│   │   ├── logging_config.py     # ログ設定
-│   │   ├── models/                # SQLAlchemy モデル（DB定義）
-│   │   │   ├── player.py
-│   │   │   ├── character.py
-│   │   │   ├── item.py
-│   │   │   ├── equipment.py       # 装備モデル（Phase 2〜）
-│   │   │   ├── shop.py            # ShopDailyState, ShopDailySlot（Phase 2〜）
-│   │   │   └── user.py            # User, RefreshToken, EmailVerificationToken（Phase 2〜）
-│   │   ├── schemas/               # Pydantic スキーマ（API I/O）
-│   │   │   ├── __init__.py        # CamelModel ベースクラス
-│   │   │   ├── player.py
-│   │   │   ├── battle.py
-│   │   │   ├── equipment.py       # 装備スキーマ（Phase 2〜）
-│   │   │   ├── shop.py            # ショップスキーマ
-│   │   │   ├── tower.py           # 塔関連スキーマ
-│   │   │   └── auth.py            # 認証関連スキーマ（Phase 2〜）
-│   │   ├── routers/               # APIルーター
-│   │   │   ├── auth.py            # 認証
-│   │   │   ├── game.py            # ゲーム状態取得・設定更新
-│   │   │   ├── battle.py          # 戦闘tick処理（オフライン計算含む）
-│   │   │   ├── tower.py           # 塔選択・退却・モード変更
-│   │   │   ├── shop.py            # ショップ商品一覧・購入
-│   │   │   ├── equipment.py       # 装備一覧・装着・売却・ロック（Phase 2〜）
-│   │   │   ├── party.py           # パーティ編成・スキル・限界突破（Phase 3〜）
-│   │   │   ├── notice.py          # お知らせ一覧（Phase 3〜）
-│   │   │   ├── base.py            # 施設建設・レベルアップ（Phase 4〜）
-│   │   │   ├── forge.py           # 装備強化・製作・分解（Phase 4〜）
-│   │   │   ├── boss_rush.py       # ボスラッシュ・ランキング（Phase 5〜）
-│   │   │   ├── abyss.py           # 深淵の塔ランキング（Phase 5〜）
-│   │   │   └── prestige.py        # 転生・ポイント振り分け（Phase 5〜）
-│   │   ├── services/              # ビジネスロジック
-│   │   │   ├── battle_service.py  # 戦闘計算・エンカウント処理（オフライン報酬含む）
-│   │   │   ├── equipment_service.py # 装備ロジック（Phase 2〜）
-│   │   │   ├── shop_daily_service.py # 日替わりショップ（Phase 2〜）
-│   │   │   ├── auth_service.py    # 認証ロジック（Phase 2〜）
-│   │   │   ├── game_state_builder.py # ゲーム状態レスポンス構築
-│   │   │   ├── base_service.py    # 施設建設・レベルアップ（Phase 4〜）
-│   │   │   └── forge_service.py   # 装備強化・製作・分解（Phase 4〜）
-│   │   ├── master_data/           # マスターデータ（Python定数）
-│   │   │   ├── enemies.py         # 敵データ
-│   │   │   ├── towers.py          # 塔データ
-│   │   │   ├── items.py           # アイテムデータ
-│   │   │   ├── equipment.py       # 装備ベースデータ
-│   │   │   ├── characters.py      # キャラクター成長データ
-│   │   │   └── notices.py         # お知らせデータ（Phase 3〜）
-│   │   └── db/
-│   │       └── database.py        # DB接続設定
-│   ├── requirements.txt
-│   ├── alembic.ini                # 接続先は env.py が config.DATABASE_URL から設定
-│   └── alembic/                   # DBマイグレーション
-│       ├── env.py
-│       └── versions/              # 1リリース = 1リビジョン
+├── backend/                       # Terasoluna (Spring Boot) サーバー
+│   ├── pom.xml                    # 親POM（Maven マルチモジュール）
+│   ├── afkgame-domain/            # ドメイン層 (com.afkgame.domain)
+│   │   ├── model/                 # Entity（テーブル定義の正は tech_db.md）
+│   │   │   ├── Player, Character, Item
+│   │   │   ├── Equipment / ShopDailyState / ShopDailySlot（Phase 2〜）
+│   │   │   ├── User / RefreshToken / EmailVerificationToken（Phase 2〜）
+│   │   │   └── Party / PartyMember / CharacterSkill（Phase 3〜）
+│   │   ├── repository/            # MyBatis3 Mapper インタフェース + 同名の Mapper XML
+│   │   ├── service/               # ビジネスロジック
+│   │   │   ├── BattleService      # 戦闘計算・エンカウント（オフライン報酬含む）
+│   │   │   ├── GameStateBuilder   # ゲーム状態レスポンス構築
+│   │   │   ├── EquipmentService / ShopDailyService / AuthService（Phase 2〜）
+│   │   │   ├── PartyService / SkillService（Phase 3〜）
+│   │   │   └── BaseService / ForgeService（Phase 4〜）
+│   │   └── masterdata/            # マスターデータ（record + 静的Map）
+│   │       └── Enemies, Towers, Items, Equipments, Characters, Notices（Phase 3〜）
+│   ├── afkgame-web/               # アプリケーション層 (com.afkgame.web)
+│   │   ├── AfkgameApplication     # エントリーポイント
+│   │   ├── api/                   # @RestController
+│   │   │   ├── AuthApi, GameApi, BattleApi, TowerApi, ShopApi
+│   │   │   ├── EquipmentApi（Phase 2〜）
+│   │   │   ├── PartyApi, NoticeApi（Phase 3〜）
+│   │   │   ├── BaseApi, ForgeApi（Phase 4〜）
+│   │   │   └── BossRushApi, AbyssApi, PrestigeApi（Phase 5〜）
+│   │   ├── resource/              # Resource(DTO) + Bean Validation（API I/O）
+│   │   ├── config/                # Security・Jackson・@ConfigurationProperties
+│   │   ├── filter/                # リクエストIDログ・共通例外ハンドラ
+│   │   └── logback-spring.xml     # ログ設定
+│   ├── afkgame-env/               # 環境依存設定（application.yml・DataSource）
+│   └── afkgame-initdb/            # Flyway マイグレーション（1リリース = 1バージョン）
 │
 └── README.md
 ```
@@ -139,7 +111,7 @@
 | UIフレームワーク | Vue 3 (Composition API) | SPA コンポーネント管理 |
 | 状態管理 | Pinia | ゲーム状態のリアクティブ管理 |
 | ルーティング | Vue Router | 画面遷移（`router/index.ts` の定義が正） |
-| API通信 | Axios or fetch | FastAPI との REST 通信 |
+| API通信 | Axios or fetch | バックエンドとの REST 通信 |
 | 言語 | TypeScript | 型安全な開発 |
 | スタイル | Tailwind CSS v4 | ユーティリティCSS。色・寸法・部品の定義は [tech_design_system.md](../detail/tech_design_system.md) が正（トークンは `assets/styles/tokens.css` の `@theme`） |
 
@@ -162,27 +134,31 @@
 
 | レイヤー | 技術 | 役割 |
 |---------|------|------|
-| フレームワーク | FastAPI | REST API + 自動ドキュメント生成（Swagger UI） |
-| ORM | SQLAlchemy 2.0 | DB操作 |
-| バリデーション | Pydantic v2 | リクエスト/レスポンスの型定義 |
+| フレームワーク | Terasoluna Server Framework for Spring 5.x（Spring Boot 3 / Java 17） | REST API。実行可能 jar |
+| ビルド | Maven（マルチモジュール） | 依存管理・テスト実行 |
+| データアクセス | MyBatis3 | DB操作（Mapper インタフェース + XML） |
+| バリデーション | Bean Validation（Jakarta） | リクエストの制約定義 |
+| JSON | Jackson | camelCase でのシリアライズ |
+| APIドキュメント | springdoc-openapi | Swagger UI の自動生成（`/docs`） |
 | DB | SQLite（MVP）→ PostgreSQL | データ永続化。ゴールドは `BIGINT`（64bit）カラムで管理 |
-| マイグレーション | Alembic | DBスキーマ管理 |
-| 認証 | JWT（Phase 2〜） | ユーザー認証・セッション管理 |
+| マイグレーション | Flyway | DBスキーマ管理 |
+| 認証 | Spring Security + JWT（Phase 2〜） | ユーザー認証・セッション管理 |
 | OAuth | Google OAuth 2.0（Phase 2〜） | Googleアカウント連携 |
-| パスワードハッシュ | bcrypt（cost factor = 12） | パスワード保存 |
+| パスワードハッシュ | `BCryptPasswordEncoder`（strength = 12） | パスワード保存 |
 
 ### 設定値
-```python
-# backend/app/config.py
-TICK_INTERVAL_SECONDS = 60      # 1 tick の間隔（秒）
-TURNS_PER_TICK = 3              # 1 tick あたりのターン数
-OFFLINE_EFFICIENCY = 1.0        # オフライン時の報酬効率（オンラインと同一）
-MAX_OFFLINE_HOURS = 24          # オフライン報酬の最大蓄積時間
-FAST_CALC_THRESHOLD = 100       # これを超える（101以上の）未処理tickは簡略計算に切り替え
-MAX_BATTLE_LOG_RECORDS = 100    # DB保持ログ件数上限
-MAX_LOG_PER_RESPONSE = 50       # 1レスポンスあたりのログ件数上限
-MAX_PLAYER_LEVEL = 9999         # プレイヤーLV上限
-MAX_GOLD = 9_223_372_036_854_775_807  # ゴールド上限（64bit符号付き整数最大値）
+```yaml
+# afkgame-env/src/main/resources/application.yml（afkgame.* を @ConfigurationProperties で受ける）
+afkgame:
+  tick-interval-seconds: 60      # 1 tick の間隔（秒）
+  turns-per-tick: 3              # 1 tick あたりのターン数
+  offline-efficiency: 1.0        # オフライン時の報酬効率（オンラインと同一）
+  max-offline-hours: 24          # オフライン報酬の最大蓄積時間
+  fast-calc-threshold: 100       # これを超える（101以上の）未処理tickは簡略計算に切り替え
+  max-battle-log-records: 100    # DB保持ログ件数上限
+  max-log-per-response: 50       # 1レスポンスあたりのログ件数上限
+  max-player-level: 9999         # プレイヤーLV上限
+  max-gold: 9223372036854775807  # ゴールド上限（64bit符号付き整数最大値）
 ```
 
-- 認証系の定数（トークン期限・bcrypt cost・パスワード要件・ゲスト期限）も `config.py` に置く（値の正は [tech_auth.md](../detail/tech_auth.md)。本書では列挙しない）
+- 認証系の定数（トークン期限・bcrypt strength・パスワード要件・ゲスト期限）も `application.yml` に置く（値の正は [tech_auth.md](../detail/tech_auth.md)。本書では列挙しない）

@@ -10,7 +10,7 @@
 | 項目 | 仕様 |
 |------|------|
 | 時刻の権威 | サーバーのUTC時刻のみ。クライアント送信の時刻は一切信用しない |
-| 基準時刻 | `player.last_tick_at`（UTCで保存。SQLite由来のnaive値はUTCとして解釈する） |
+| 基準時刻 | `player.last_tick_at`（UTCで保存。SQLite由来のタイムゾーン情報を持たない値はUTCとして解釈する） |
 | tick間隔 | 60秒固定（`TICK_INTERVAL_SECONDS`） |
 | 未処理tick数 | `pending_ticks = floor((now − last_tick_at) / 60)` |
 | **端数の扱い** | **繰り越す**。`last_tick_at ← last_tick_at + pending_ticks × 60秒`（`now` を代入しない） |
@@ -50,11 +50,12 @@
 
 | 項目 | 仕様 |
 |------|------|
-| ロック取得 | tick処理の先頭で対象 `players` 行を**排他ロック**して読む |
-| SQLite | `BEGIN IMMEDIATE` でトランザクションを開始する（書き込みロックを先に取得） |
-| 他RDBMSへ移行時 | `SELECT ... FOR UPDATE` に置き換える |
-| ロック競合時 | 待機する（`busy_timeout` 5秒）。超過時は `503` + `BATTLE_TICK_BUSY` |
-| ロック範囲 | `last_tick_at` の読み取り 〜 更新 〜 コミットまで |
+| トランザクション境界 | tick処理の Service メソッドに `@Transactional` を付与し、Spring 管理のトランザクションとして開始する |
+| ロック取得 | トランザクション内で対象 `players` 行を**排他ロック**して読む（MyBatis Mapper が発行するロック取得SQL） |
+| SQLite | Mapper に `BEGIN IMMEDIATE` 相当のロック取得SQLを明示させる（書き込みロックを先に取得） |
+| 他RDBMSへ移行時 | Mapper のSQLを `SELECT ... FOR UPDATE` に置き換える |
+| ロック競合時 | 待機する（`busy_timeout` 5秒。`sqlite-jdbc` の接続プロパティで設定）。超過時は `503` + `BATTLE_TICK_BUSY` |
+| ロック範囲 | `last_tick_at` の読み取り 〜 更新 〜 トランザクションコミットまで |
 
 - ロックにより後発リクエストは先発のコミット後に `last_tick_at` を読むため `pending_ticks = 0` となり、二重付与が起きない（**追加の冪等キーを持たずに冪等になる**）
 - フロント側でも多重tickを抑止する（[tech_polling.md §2](tech_polling.md)）。サーバー側ロックはその最終防衛線
@@ -63,9 +64,9 @@
 
 | 項目 | 仕様 |
 |------|------|
-| 境界 | 1リクエスト = 1トランザクション（`pending_ticks` 全件をまとめてコミット） |
-| コミット位置 | 全tickの処理完了 + `last_tick_at` 更新の後に**1回だけ** |
-| 例外発生時 | 全ロールバック。`last_tick_at` が進まないため、次回リクエストで同じ区間を再計算する |
+| 境界 | 1リクエスト = 1トランザクション（`@Transactional` を付与した Service メソッド1呼び出しで `pending_ticks` 全件をまとめてコミット） |
+| コミット位置 | 全tickの処理完了 + `last_tick_at` 更新の後に**1回だけ**（メソッド正常終了時に Spring が自動コミット） |
+| 例外発生時 | 全ロールバック（`@Transactional` の既定は非チェック例外で自動ロールバック）。`last_tick_at` が進まないため、次回リクエストで同じ区間を再計算する |
 | 部分コミット | **禁止**。「報酬は入ったが `last_tick_at` が進んでいない」状態を作らない |
 | レスポンス構築 | コミット後に行う |
 

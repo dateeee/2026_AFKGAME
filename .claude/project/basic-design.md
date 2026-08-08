@@ -26,12 +26,12 @@
 
 | 図 | パス | 検証対象 |
 |----|------|---------|
-| ER図 | `docs/diagrams/er_diagram.md` + `er_diagram/` | `tech_db.md`（正）・`backend/app/models/` |
-| クラス図 | `docs/diagrams/class_diagram.md` + `class_diagram/` | `backend/app/`・`frontend/src/` の構造 |
+| ER図 | `docs/diagrams/er_diagram.md` + `er_diagram/` | `tech_db.md`（正）・`afkgame-domain` の Entity + MyBatis3 Mapper |
+| クラス図 | `docs/diagrams/class_diagram.md` + `class_diagram/` | `afkgame-domain`・`afkgame-web`・`frontend/src/` の構造 |
 | 画面遷移図 | `docs/diagrams/screen_transition.md` + `screen_transition/` | `design/systems/ui*.md`・`frontend/src/router/` |
-| 戦闘フロー図 | `docs/diagrams/battle_flow.md` + `battle_flow/` | `tech_battle.md`・`services/battle_service.py` |
+| 戦闘フロー図 | `docs/diagrams/battle_flow.md` + `battle_flow/` | `tech_battle.md`・`afkgame-domain` の戦闘 Service |
 | システム構成図 | `docs/diagrams/system_architecture.md` + `system_architecture/` | `tech_architecture.md`・`tech_operations.md` §12 |
-| APIシーケンス図 | `docs/diagrams/api_sequence.md` + `api_sequence/` | `tech_api.md`・`backend/app/routers/` |
+| APIシーケンス図 | `docs/diagrams/api_sequence.md` + `api_sequence/` | `tech_api.md`・`afkgame-web` の `@RestController` |
 
 **索引で担当ファイルを特定し、必要な子ファイルのみ読む**（全図の一括読み込みは禁止）。
 
@@ -42,7 +42,7 @@
 | 1 | `docs/design/game_spec.md` → `systems/` | 設計対象の機能セクションのみ |
 | 2 | `docs/design/requirements/non_functional_requirements.md` | 要求値の該当行のみ |
 | 3 | `docs/tech/tech_spec.md` | 索引から対象ファイルを特定 |
-| 4 | 既存の `backend/app/` `frontend/src/` | 対応するモジュールのみ（現状のパターン把握） |
+| 4 | 既存の Java モジュール（`afkgame-domain`・`afkgame-web`）・`frontend/src/` | 対応するモジュールのみ（現状のパターン把握） |
 
 ## 3. 固有の観点
 
@@ -53,7 +53,7 @@
 | 3 | API網羅性 | `game_spec.md` の各機能に対応するエンドポイントが `tech_api.md` に存在するか |
 | 4 | データ構造の表現力 | `tech_db.md` のテーブル・列が `game_spec.md` の仕様を表現できているか |
 | 5 | 図とテキストの一致 | ER図のPK/FK・APIシーケンスのエンドポイント名が `tech_*.md` と一致しているか |
-| 8 | DBスキーマ三者一致 | テーブル定義書 ↔ ER図 ↔ `backend/app/models/` の `__tablename__`・列・キーが一致しているか（正は定義書） |
+| 8 | DBスキーマ三者一致 | テーブル定義書 ↔ ER図 ↔ `afkgame-domain` の Entity + Mapper（テーブル名・列・キーの対応）が一致しているか（正は定義書） |
 | 9 | インデックスの根拠 | 各インデックスに、それを使う検索パターン（サービス層のクエリ）が定義書へ書かれているか |
 | 6 | オフライン復帰 | 復帰時の一括計算が API・データ構造の両面で成立しているか |
 | 7 | 非機能の実現方式 | 非機能・運用要件の各項目が `tech_performance` / `tech_security` / `tech_operations` のいずれかに対応づいているか |
@@ -64,7 +64,7 @@
 
 | 検証項目 | 方法 |
 |---------|------|
-| DBスキーマ三者一致 | `python scripts/check_schema_triple.py`。`tech_db/`（正）↔ `er_diagram/` ↔ `models/*.py` を、列名・並び順・PK/FK/UK タグ・一意制約・FKなし宣言・nullable・制約の命名規約・ER索引の7観点で照合する |
+| DBスキーマ三者一致 | `python scripts/check_schema_triple.py`。`tech_db/`（正）↔ `er_diagram/` ↔ Entity + MyBatis3 Mapper を、列名・並び順・PK/FK/UK タグ・一意制約・FKなし宣言・nullable・制約の命名規約・ER索引の7観点で照合する |
 | 相対リンク切れ・索引到達性 | `python scripts/check_docs.py --links --reach` |
 | 文字数上限 | `python scripts/check_doc_size.py` |
 | コードフェンスの閉じ漏れ | ` ```mermaid ` と ` ``` ` の対応を数える（使い捨て） |

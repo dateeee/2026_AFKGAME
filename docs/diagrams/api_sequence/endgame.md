@@ -8,7 +8,7 @@
 %%{init: {'theme': 'default', 'sequence': {'actorFontSize': 18, 'messageFontSize': 16, 'noteFontSize': 14}} }%%
 sequenceDiagram
     participant B as ブラウザ
-    participant API as FastAPI
+    participant API as Terasoluna(Spring Boot)
     participant DB as Database
 
     B->>API: POST /api/boss-rush/start
@@ -56,13 +56,13 @@ sequenceDiagram
 
 ## 11.7. 深淵の塔ランキング（Phase 5）
 
-> 入塔・目標階設定・リタイアは通常の塔と同じ `/api/tower/*` を `towerId: "abyss_tower"` で使用する（[gameplay.md](gameplay.md) §4）。専用エンドポイントはランキング取得のみで、`routers/abyss.py` が担当する（[tech_structure.md](../../tech/basic/tech_structure.md) §2）。
+> 入塔・目標階設定・リタイアは通常の塔と同じ `/api/tower/*` を `towerId: "abyss_tower"` で使用する（[gameplay.md](gameplay.md) §4）。専用エンドポイントはランキング取得のみで、`AbyssController`（afkgame-web）が担当する（[tech_structure.md](../../tech/basic/tech_structure.md) §2）。
 
 ```mermaid
 %%{init: {'theme': 'default', 'sequence': {'actorFontSize': 18, 'messageFontSize': 16, 'noteFontSize': 14}} }%%
 sequenceDiagram
     participant B as ブラウザ
-    participant API as FastAPI
+    participant API as Terasoluna(Spring Boot)
     participant DB as Database
 
     B->>API: GET /api/abyss/ranking
@@ -78,7 +78,7 @@ sequenceDiagram
 %%{init: {'theme': 'default', 'sequence': {'actorFontSize': 18, 'messageFontSize': 16, 'noteFontSize': 14}} }%%
 sequenceDiagram
     participant B as ブラウザ
-    participant API as FastAPI
+    participant API as Terasoluna(Spring Boot)
     participant DB as Database
 
     Note over B: === 転生実行 ===

@@ -17,7 +17,7 @@
 
 ```bash
 python .claude/scripts/review_prep.py --dir docs/reviews/full-review \
-    --paths backend/app frontend/src docs/design docs/tech docs/data \
+    --paths backend frontend/src docs/design docs/tech docs/data \
     --title フルスタック統合レビュー結果 \
     --categories "仕様書-コード整合性 / フロント・バック統合整合性 / アーキテクチャ方針適合"
 ```
@@ -28,7 +28,7 @@ python .claude/scripts/review_prep.py --dir docs/reviews/full-review \
 
 | 区分 | 対象 |
 |------|------|
-| コード | `backend/app/` 配下の全 `.py`（`__pycache__/` 除外）、`frontend/src/` 配下の全 `.vue` `.ts` `.css` |
+| コード | `backend/` 配下の全 `.java`（`target/` のビルド生成物除外）、`frontend/src/` 配下の全 `.vue` `.ts` `.css` |
 | 仕様書 | `design/game_spec.md` → `systems/`、`tech/tech_spec.md` → `tech_data` / `tech_structure` / `tech_api` / `tech_architecture` / `tech_logging`、`tech_battle.md`・`tech_offline.md`・`tech_auth.md`、`data/master_data.md` → `data/master/` |
 
 索引 + 個別ファイル構成のため、**照合に必要な個別ファイルのみ**読む。
@@ -38,8 +38,8 @@ python .claude/scripts/review_prep.py --dir docs/reviews/full-review \
 
 | 担当 | 対象ファイル |
 |------|------------|
-| API・型整合 | `backend/app/routers/`、`backend/app/schemas/`、`frontend/src/api/`、`frontend/src/types/`、`tech_api.md` |
-| ロジック・マスターデータ | `backend/app/services/`、`backend/app/models/`、`backend/app/master_data/`、`design/systems/`、`tech_battle.md`、`tech_offline.md`、`tech_data.md`、`data/master/` |
+| API・型整合 | `afkgame-web` の `@RestController`・Resource、`frontend/src/api/`、`frontend/src/types/`、`tech_api.md` |
+| ロジック・マスターデータ | `afkgame-domain` の Service・Entity/Mapper・マスターデータ、`design/systems/`、`tech_battle.md`、`tech_offline.md`、`tech_data.md`、`data/master/` |
 | 画面・アーキテクチャ | `frontend/src/views/`・`components/`・`stores/`・`router/`、`design/systems/ui*.md`、`tech_architecture.md`、[profile.md](profile.md) §5 |
 
 差分モードは分担しない（[review-procedure.md](../references/review-procedure.md) §1 規律2）。
@@ -48,14 +48,14 @@ python .claude/scripts/review_prep.py --dir docs/reviews/full-review \
 
 | 変更ファイル | 照合先 |
 |------------|--------|
-| `backend/app/routers/*.py` | `tech_api.md`、`frontend/src/api/` |
-| `backend/app/models/*.py` | `tech_data.md` |
-| `backend/app/schemas/*.py` | `frontend/src/types/`、`tech_api.md` |
-| `backend/app/services/*.py` | `design/systems/`、`tech_battle.md`・`tech_offline.md` |
-| `backend/app/master_data/*.py` | `docs/data/master/`、`docs/data/towers/`、`docs/data/skills/` |
+| `afkgame-web` の `@RestController` | `tech_api.md`、`frontend/src/api/` |
+| `afkgame-domain` の Entity/Mapper | `tech_data.md` |
+| `afkgame-web` の Resource | `frontend/src/types/`、`tech_api.md` |
+| `afkgame-domain` の Service | `design/systems/`、`tech_battle.md`・`tech_offline.md` |
+| `afkgame-domain` のマスターデータ | `docs/data/master/`、`docs/data/towers/`、`docs/data/skills/` |
 | `frontend/src/router/index.ts` | `design/systems/ui*.md` |
 | `frontend/src/views/`・`components/` | `design/systems/ui*.md` |
-| `frontend/src/stores/`・`api/` | `backend/app/routers/`、`backend/app/schemas/` |
+| `frontend/src/stores/`・`api/` | `afkgame-web` の `@RestController`・Resource |
 
 ## 3. 観点
 
@@ -64,10 +64,10 @@ python .claude/scripts/review_prep.py --dir docs/reviews/full-review \
 | 仕様書-コード | 1 | **API完全性**: `tech_api.md` の全エンドポイントが `routers/` に実装され、メソッド・パス・リクエスト/レスポンス形式が一致するか |
 | 仕様書-コード | 2 | **データモデル**: `models/` が `tech_data.md` のテーブル定義と一致するか（テーブル名・カラム名・型・リレーション、必須カラムの欠落、不要カラム） |
 | 仕様書-コード | 3 | **ビジネスロジック**: `services/` が `design/systems/` を正しく実装しているか（ダメージ計算・経験値/レベルアップ・ドロップ率・オフライン報酬・ショップ価格） |
-| 仕様書-コード | 4 | **マスターデータ**: `backend/app/master_data/` が `docs/data/` と一致するか。**`services/` に数値がハードコードされていないか** |
+| 仕様書-コード | 4 | **マスターデータ**: `afkgame-domain` のマスターデータが `docs/data/` と一致するか。**Service に数値がハードコードされていないか** |
 | 仕様書-コード | 5 | **UI仕様**: 各画面の構成要素・表示情報（ステータス・レベル・ゴールド等）が `systems/ui*.md` と一致するか |
 | 仕様書-コード | 6 | **画面遷移**: `frontend/src/router/index.ts` が `systems/ui*.md` の画面一覧・遷移条件と一致し、全画面がルート定義にあり、認証ガードが適切か |
-| 統合整合性 | 7 | **API型整合**: `frontend/src/types/` と `backend/app/schemas/` の一致（camelCase↔snake_case 変換、オプショナル/必須、enum・定数値） |
+| 統合整合性 | 7 | **API型整合**: `frontend/src/types/` と `afkgame-web` の Resource の一致（Jackson が camelCase を維持するため変換なし、オプショナル/必須、enum・定数値） |
 | 統合整合性 | 8 | **エンドポイント整合**: `frontend/src/api/` の URL・HTTPメソッド・ボディ・レスポンス期待値が `routers/` と一致するか |
 | 統合整合性 | 9 | **認証フロー**: トークン管理、ヘッダー名・形式（Bearer 等）、認証エラー時のフロント側ハンドリング（リダイレクト等） |
 | 統合整合性 | 10 | **データフロー**: ポーリング間隔がフロント・バック・仕様書で一致するか。オフライン復帰の取得フローが整合するか |
@@ -81,7 +81,7 @@ python .claude/scripts/review_prep.py --dir docs/reviews/full-review \
 
 | 対象 | 方法 |
 |------|------|
-| 型・スキーマの突き合わせ | `schemas/` の Pydantic フィールドと `types/` の TypeScript プロパティを抽出して差分を取る |
+| 型・スキーマの突き合わせ | `afkgame-web` の Resource フィールドと `types/` の TypeScript プロパティを抽出して差分を取る |
 | エンドポイントの突き合わせ | `routers/` のデコレータと `frontend/src/api/` の呼び出しURLを抽出して差分を取る |
 | ハードコード数値の検出 | `services/` 内の数値リテラルを抽出し、`master_data/` に対応があるか照合する |
 | ルート定義の突き合わせ | `router/index.ts` の path と `systems/ui*.md` の画面一覧を抽出して差分を取る |

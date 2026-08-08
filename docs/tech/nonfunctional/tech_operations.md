@@ -22,7 +22,7 @@
 | 層 | 構成 |
 |----|------|
 | フロント（SPA） | S3（静的ホスティング）+ CloudFront。HTTPS は CloudFront が終端する |
-| API | EC2 1台。Nginx をリバースプロキシに FastAPI（uvicorn）を常駐させる |
+| API | EC2 1台。Nginx をリバースプロキシに Spring Boot 実行可能 jar を systemd で常駐させる |
 | DB | 同一 EC2 の EBS 上に配置。SQLite → PostgreSQL（§12.4 の移行判断ライン） |
 | 定期ジョブ | 同一 EC2 の OS cron（§12.6） |
 | バックアップ | EBS の日次スナップショットを取得する。方式・頻度・保持期間・保管先は **§12.5 が正** |
@@ -32,7 +32,7 @@
 
 ## 12.2 環境変数一覧
 
-設定値の参照は `config.py` に集約し、アプリケーションコードから `os.environ` を直接読まない。
+設定値の参照は `@ConfigurationProperties` クラス（`afkgame-env`）に集約し、アプリケーションコードから環境変数を直接読まない。値は `application.yml` の既定値を環境変数で上書きする。
 
 | 変数名 | 用途 | 既定値 | 本番必須 |
 |--------|------|--------|---------|
@@ -48,7 +48,7 @@
 | `BATTLE_RNG_SEED` | 戦闘乱数のシード固定（[tech_rng.md §2](../detail/tech_rng.md) の調査用。本番では未設定） | なし | — |
 
 - **起動時バリデーション**: `APP_ENV=production` かつ必須変数が未設定・既定値のままの場合は、起動を中止して ERROR ログを出す（設定漏れのまま本番稼働することを防ぐ）
-- 変数を追加したら `.env.example` と本表を同時に更新する
+- 変数を追加したら `application.yml`（サンプル設定）と本表を同時に更新する
 
 ## 12.3 ヘルスチェック・監視
 
@@ -63,8 +63,8 @@
 
 | 指標 | しきい値の目安 | 取得元 |
 |------|--------------|--------|
-| 5xx 率 | 1% 超で調査 | ミドルウェアの `status_code` |
-| `POST /api/battle/tick` の p95 | [non_functional_requirements.md](../../design/requirements/non_functional_requirements.md) §1 の目標超過で調査 | ミドルウェアの `duration_ms` |
+| 5xx 率 | 1% 超で調査 | Filter/Interceptor の `status_code` |
+| `POST /api/battle/tick` の p95 | [non_functional_requirements.md](../../design/requirements/non_functional_requirements.md) §1 の目標超過で調査 | Filter/Interceptor の `duration_ms` |
 | ERROR ログ件数 | 1件でも出たら内容を確認 | ロガー `afkgame.*` |
 | DBファイル/テーブルサイズ | 850MB 接近で PostgreSQL 移行を検討 | 日次バッチ（§12.6）で記録 |
 
@@ -76,17 +76,19 @@
 
 | 項目 | 仕様 |
 |------|------|
-| ツール | Alembic（`backend/alembic.ini` + `backend/alembic/`。接続先は `env.py` が `app.config.DATABASE_URL` から設定する） |
-| 粒度 | 1リリース = 1リビジョン。リビジョンには対応するPhase・変更概要をメッセージに記す |
-| 互換方針 | **前方互換**を守る。列追加は `nullable` または `server_default` を付与し、既存行の移行はマイグレーション内で行う |
+| ツール | Flyway（`afkgame-initdb` モジュール配下のマイグレーションSQL。接続先は `afkgame-env` の DataSource 設定から取得する） |
+| 粒度 | 1リリース = 1バージョン（`V<n>__説明.sql`）。ファイルには対応するPhase・変更概要を記す |
+| 互換方針 | **前方互換**を守る。列追加は `NULL許容` または既定値を付与し、既存行の移行はマイグレーションSQL内で行う |
 | 破壊的変更 | 列・テーブルの削除は **2段階リリース**（①アプリが参照しなくなる → ②次リリースで削除）。ダウングレードでデータを復元できないため |
-| 適用手順 | ①バックアップ取得（§12.5）→ ②アプリ停止 → ③`alembic upgrade head` → ④`GET /health` 確認 → ⑤アプリ再開 |
-| ロールバック | `alembic downgrade -1`。破壊的変更を含むリビジョンはダウングレード不可のため、バックアップからの復元で対応する |
-| SQLite の制約 | 列削除・型変更は「新テーブル作成 → データ移行 → 差し替え」となる（Alembic の `batch_alter_table` を使用） |
+| 適用手順 | ①バックアップ取得（§12.5）→ ②アプリ停止 → ③新バージョンの jar を起動（起動時に Flyway が自動適用。`flyway migrate` 相当）→ ④`GET /health` 確認 → ⑤アプリ再開 |
+| ロールバック | Flyway に `downgrade` 相当の機能はないため、バックアップからの復元で対応する（破壊的変更を含むリビジョンの復元方針は変更なし） |
+| SQLite の制約 | 列削除・型変更は「新テーブル作成 → データ移行 → 差し替え」をマイグレーションSQLに明示的に記述する（Flyway に自動抽象化の機能はない） |
 
-**マスターデータの扱い**: `master_data/`（Python定数）はマイグレーション対象外。ただし**既存IDの変更・削除は禁止**（プレイヤーの所持データが参照するため）。変更が必要な場合は新IDを追加し、旧IDは非表示にする。
+**初期化**: 既存 Alembic の4リビジョンは Flyway の `V1` 初期スキーマへ統合する（移行前後で同一スキーマになることを確認する。[java_migration.md §5](../../backlog/java_migration.md)）。
 
-**PostgreSQL 移行判断**: DBサイズ 850MB 接近（≒1万人規模。[tech_performance.md](tech_performance.md) §10.3）、または書き込みロック競合が観測された時点で移行する。`DATABASE_URL` の差し替えで切り替わるよう、SQLite 固有機能に依存しない実装を維持する。
+**マスターデータの扱い**: マスターデータ（`record` + 静的Map。`afkgame-domain`）はマイグレーション対象外。ただし**既存IDの変更・削除は禁止**（プレイヤーの所持データが参照するため）。変更が必要な場合は新IDを追加し、旧IDは非表示にする。
+
+**PostgreSQL 移行判断**: DBサイズ 850MB 接近（≒1万人規模。[tech_performance.md](tech_performance.md) §10.3）、または書き込みロック競合が観測された時点で移行する。DataSource 設定（接続文字列）の差し替えで切り替わるよう、SQLite 固有機能に依存しない実装を維持する。
 
 ## 12.5 バックアップ・リストア
 
@@ -126,7 +128,7 @@
 | 手順 | 技術チェック |
 |------|------------|
 | ゲート通過前 | `python scripts/check_doc_size.py` が exit 0 |
-| デプロイ直前 | `.env` の必須変数が揃っている（§12.2 の起動時バリデーションで検知） |
+| デプロイ直前 | `application.yml` / 環境変数の必須項目が揃っている（§12.2 の起動時バリデーションで検知） |
 | デプロイ直後 | `GET /health` が 200 かつ `db: ok` |
 | スモークテスト | 起動 → tick → 報酬取得 の主要導線を通す |
 | リリース後10分 | ERROR ログ件数・5xx 率・tick の p95 を確認（§12.3） |

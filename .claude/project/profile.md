@@ -7,15 +7,15 @@
 | 項目 | 値 |
 |------|-----|
 | 種別 | 放置系ファンタジーRPG（Webブラウザゲーム） |
-| 構成 | フロントエンド（Vue 3 SPA）+ バックエンド（FastAPI）の2層 |
+| 構成 | フロントエンド（Vue 3 SPA）+ バックエンド（Java/Terasoluna Spring Boot）の2層 |
 | 開発工程 | 7工程。工程の定義と**Phase進捗の正**は [development_process.md](../../docs/process/development_process.md)（進捗は §5） |
 
 ## 2. ディレクトリ
 
 | パス | 内容 |
 |------|------|
-| `backend/app/` | `models/` `schemas/` `services/` `routers/` `master_data/` `db/` + 直下に `main.py` `config.py` `dependencies.py` `exceptions.py` `logging_config.py` `middleware.py` |
-| `backend/tests/` | `unit/`（単体・pytest）、`integration/`（API統合）。`conftest.py` `helpers.py` は直下 |
+| `backend/` | `afkgame-domain`（Entity・Mapper・Service・マスターデータ）、`afkgame-web`（`@RestController`・Resource・Security設定）、`afkgame-env`（DataSource・設定）、`afkgame-initdb`（Flyway） |
+| 各モジュールの `src/test/java/` | 単体（JUnit5+Mockito）と統合（`@SpringBootTest`+MockMvc）をパッケージで分離 |
 | `frontend/src/` | `components/` `views/` `stores/` `api/` `types/` `composables/` `router/` `utils/` `assets/` |
 | `frontend/tests/e2e/` | E2Eテスト（Playwright） |
 | `docs/design/` | 要件定義の成果物（`game_spec.md` 索引 + `systems/`） |
@@ -28,15 +28,15 @@
 
 | 層 | 技術 | 規約 |
 |----|------|------|
-| DBモデル | SQLAlchemy 2.0 | `Mapped[]` 型アノテーション + `mapped_column()`。旧 `Column()` スタイル禁止 |
-| スキーマ | Pydantic v2 | `CamelModel` を継承し `schemas/` に配置。`model_config = ConfigDict(from_attributes=True)`。旧 `class Config` 禁止 |
-| ロジック | Python | `services/` に集約。ルーターにビジネスロジックを書かない |
-| API | FastAPI | `APIRouter`（prefix / tags / response_model を指定）、依存性注入は `Depends` |
-| ログ | 標準 logging | `logging_config` 準拠 |
+| DBアクセス | MyBatis3 | Entity + Mapper（インタフェース+XML）。`afkgame-domain` に配置 |
+| スキーマ(DTO) | Resource + Bean Validation（Jakarta） | `afkgame-web` に配置。Jackson が camelCase を維持（変換不要） |
+| ロジック | Java 17 | `afkgame-domain` の Service に集約。Controller にビジネスロジックを書かない |
+| API | Spring MVC（Terasoluna） | `@RestController`（`afkgame-web`）、DIは `@Autowired`/コンストラクタ注入 |
+| ログ | Logback + MDC | `logback-spring.xml` 準拠。`X-Request-ID` は MDC で引き回す |
 | UI | Vue 3 | `<script setup lang="ts">` + Composition API |
 | 状態管理 | Pinia | `defineStore` の **Setup Store 形式** |
 | 型 | TypeScript | 厳密な型定義。`any` を避ける |
-| テスト | pytest + pytest-cov | C1（分岐）カバレッジ100%（設定は [unit-test.md](unit-test.md) §1） |
+| テスト | JUnit 5 + Mockito + JaCoCo | C1（分岐）カバレッジ100%（設定は [unit-test.md](unit-test.md) §1） |
 
 ## 4. 常用コマンド
 

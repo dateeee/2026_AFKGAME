@@ -76,9 +76,9 @@ graph LR
 |-------|----------|---------|
 | 仕様確定ゲート | 要件・詳細設計の変更時 | `doc-review` 指摘ゼロ、`check_docs.py` exit 0、`open_specs.md` の未解消が対象Phaseの期限内 |
 | ドキュメント規約ゲート | 仕様書・設計図の変更時 | `python scripts/check_doc_size.py` が `違反 0`（exit 0。台帳登録済みの既知超過は可 — [documentation_rules.md](documentation_rules.md) §7） |
-| 設計整合ゲート | 基本設計の変更時 | `diagrams-review` 指摘ゼロ（仕様確定ゲートと並走し、修正は1パスに統合）。DB変更時は**テーブル定義書 ↔ ER図 ↔ `models/*.py` の三者一致**（[process/phases.md](phases.md) §3.2.1） |
+| 設計整合ゲート | 基本設計の変更時 | `diagrams-review` 指摘ゼロ（仕様確定ゲートと並走し、修正は1パスに統合）。DB変更時は**テーブル定義書 ↔ ER図 ↔ `Entity/Mapper`（`afkgame-domain`）の三者一致**（[process/phases.md](phases.md) §3.2.1） |
 | テストリストゲート | 製造着手前 | 分岐一覧の全項目にテストが存在し（`check_branch_list.py --tests` で照合）、実行して全件 FAIL（Red）を確認 |
-| 製造完了ゲート | 実装完了時 | テスト全PASS（Green）+ コードレビュー指摘対応 + `vue-tsc` 型チェックPASS + テーブル変更時は Alembic リビジョンが存在し `alembic upgrade head` が通る |
+| 製造完了ゲート | 実装完了時 | テスト全PASS（Green）+ コードレビュー指摘対応 + `vue-tsc` 型チェックPASS + テーブル変更時は Flyway マイグレーションが存在し `flyway migrate` が通る |
 | 単体テストゲート | 製造完了後 | 全PASS + C1カバレッジ100% |
 | Phase完了ゲート | 結合テスト完了時 | API統合テスト・E2E全PASS + `full-review` で仕様との乖離ゼロ + 文字数台帳（`KNOWN_OVERSIZED`）が空 |
 
@@ -91,13 +91,15 @@ graph LR
 | Phase 3 | **完了**（分岐一覧まで整備。数値は仮置き。お知らせはAPI定義済み → [tech_api.md](../tech/basic/tech_api.md)「お知らせ」、マスター項目定義は [master_data.md §17](../data/master_data.md)。分岐一覧の追補（例外経路の注記・ループ行）のみ残 → テストリスト作成時に解消する） | 未着手 | — | — |
 | Phase 4〜5 | 完了（数値は仮置き。分岐一覧は各Phase着手時に整備） | 未着手 | — | — |
 
-- テスト基盤は導入済み（pytest / pytest-cov、Playwright）。Phase 1〜2 は**遡及整備**で完了
+- テスト基盤は導入済み（Playwright）。Phase 1〜2 は**遡及整備**で完了
+- **Java/Terasoluna への移行中**（手順・進捗の正は [java_migration.md](../backlog/java_migration.md)）。上表の「製造」「単体テスト」「結合テスト」の完了は Python 実装に対する到達状況であり、移行 STEP 3〜5 で Java 実装として再度満たす必要がある。Phase 3 製造は移行完了まで中断する
 
 ### 5.1 単体テストの整備状況（C1カバレッジ）
 
-**単体テストゲート通過（2026-08-03 レビュー指摘反映後に再測定）**: `app/` 全42モジュールが C1 100%、402件 PASS（単体373・結合29）、1,819 stmts / 308 branches。`# pragma: no cover` の使用はゼロ。
+**単体テストゲート通過（2026-08-03 レビュー指摘反映後に再測定。Python 実装での測定値）**: `app/` 全42モジュールが C1 100%、402件 PASS（単体373・結合29）、1,819 stmts / 308 branches。カバレッジ除外の使用はゼロ。
 
-- 数値は `pytest` 実行時に更新する。製造の追加・変更時は同一変更内で100%を維持する
+- 上記は移行前の到達状況。Java 実装での測定値は `mvn verify`（JaCoCo）で取り直し、本節を置き換える
+- 数値は測定のたびに更新する。製造の追加・変更時は同一変更内で100%を維持する
 
 ### 5.2 TDDの適用範囲
 

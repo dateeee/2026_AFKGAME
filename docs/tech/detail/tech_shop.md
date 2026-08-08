@@ -14,7 +14,7 @@
 | 枠数 | 5枠固定（武器2・防具2・アクセサリー1） |
 | 在庫 | 各枠1個。購入すると次の更新まで売り切れ |
 | 永続化 | 生成結果をDBへ保存する。RNGの内部状態は保存しない（[tech_rng.md §2](tech_rng.md)） |
-| RNG | `random.Random` のインスタンスを引数で受け取る（グローバル `random.*` の直呼び禁止） |
+| RNG | `java.util.Random` のインスタンスを引数で受け取る（静的・共有インスタンスの直接参照は禁止） |
 | HP吸収 | 付与しない（ショップ販売なし。[systems/equipment.md §2.4](../../design/systems/equipment.md)） |
 | 強化値 | 常に 0 |
 

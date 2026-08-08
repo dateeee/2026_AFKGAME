@@ -43,3 +43,8 @@
 - シグナル: long-turn(calls=85)
 - ターン概要: ツール85回・エラー0回・拒否0回。開始:「<command-message>next</command-message>」
 - 原因と改善案: 4層 + マスターデータ（6系統24スキル）を新設する製造セグメントとしては call 数は妥当で、手戻り・期待値の書き換えはゼロ（誤検出寄り）。ただし仕様の**発見**に無駄があり、`.claude/project/dev.md` §2「参照先（読む順）」が `tech_battle` / `tech_offline` / `tech_auth` 等の**機能名決め打ち**の列挙で、今回の正である `tech/detail/tech_party.md`（分岐一覧）と `tech/basic/tech_db/`（新設テーブルの列・一意制約）を含まないため、`ls docs/tech/detail/` から当たりを付ける探索に数回を要した。→ `.claude/project/dev.md` §2 の表へ2行を追加する: 「対象機能の `tech/detail/tech_<機能>.md` — 処理フローと**分岐一覧の正**（機能名は索引 `tech_spec.md` で特定）」「モデルを新設・変更する場合は `tech/basic/tech_db/<領域>.md` — 列・NULL・一意制約の正（`check_schema_triple.py` の照合元）」。既存の機能名決め打ち行は "（戦闘関連の場合）" 等の条件付き行なので、上位に汎用の2行を置いて決め打ち行を補助に落とす。
+
+## 2026-08-08 13:22 | session 3139884e | 自動検出
+- シグナル: long-turn(calls=106)
+- ターン概要: ツール106回・エラー0回・拒否0回。開始:「MyBatis3 を採用する」
+- 原因と改善案: 技術スタック移行の方針決定 + 50ファイル一括改訂としては call 数は妥当（サブエージェント4体で分担）。実損は1件 — `docs/tech/basic/tech_db/` の「実装:」行が `check_schema_triple.py` の models 特定アンカーであることが**どのプロファイルにも書かれておらず**、担当エージェントが20行を Java Entity 参照へ書き換えて三者一致検証が停止（ERROR 20件）、検知 → `git checkout` で4ファイル差し戻す往復が生じた。→ `.claude/project/basic-design.md` のDB設計節へ「常設スクリプトが解析するドキュメント行」を明記する（`tech_db/<領域>.md` の `## N \`table\`` 見出し = テーブル特定、直下の `実装: \`backend/app/models/...\` \`Class\`` = models 特定アンカー。**実装side が変わるまで書き換えない**）。あわせて `README.md`・`known_issues.md` が残量WARN から追記で上限超過し圧縮の往復2回 — これは 2026-08-08 11:19 のエントリと同型の**再発**（当該改善が未反映）のため、`/retro` を優先的に回す。

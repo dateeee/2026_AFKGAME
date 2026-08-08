@@ -25,7 +25,7 @@
 | correction | ターン冒頭の発話の手戻り語（「違う」「やり直し」等） | 1語 |
 
 `errors` から除外するコマンドは同ファイルの `EXPECTED_NONZERO`（既定: `check_*.py` /
-pytest / ruff / mypy / eslint / vue-tsc / `--noEmit` / type-check / lint）。
+pytest / mvn / ruff / mypy / eslint / vue-tsc / `--noEmit` / type-check / lint）。
 違反検出時の exit 1 は正常な報告であり試行錯誤ではないため数えない。
 本プロジェクトで追加が要る場合は環境変数 `EFFICIENCY_EXPECTED_NONZERO`（正規表現）で上書きする。
 

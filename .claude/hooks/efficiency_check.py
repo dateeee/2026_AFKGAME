@@ -57,7 +57,7 @@ DENIAL_MARKS = ("doesn't want to proceed", "user rejected", "User rejected")
 # プロジェクト固有の追加は環境変数 EFFICIENCY_EXPECTED_NONZERO（正規表現）で行う。
 EXPECTED_NONZERO = re.compile(
     os.environ.get("EFFICIENCY_EXPECTED_NONZERO")
-    or r"check_\w+\.py|pytest|ruff|mypy|eslint|vue-tsc|--noEmit|type-check|\blint\b",
+    or r"check_\w+\.py|pytest|\bmvn\b|ruff|mypy|eslint|vue-tsc|--noEmit|type-check|\blint\b",
     re.IGNORECASE)
 
 PLACEHOLDER = "（未記入 — Claude が1〜2行で追記する）"

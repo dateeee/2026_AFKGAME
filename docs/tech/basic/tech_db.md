@@ -28,21 +28,21 @@
 | 一意制約 | `uq_<テーブル名>_<列>_<列>` | `uq_tower_clear_records_player_tower` |
 | モデルクラス | テーブル名の単数形アッパーキャメル | `players` → `Player` |
 
-API・スキーマ層は camelCase（`CamelModel`）で、DB列名の snake_case との変換はスキーマ層が担う。DB列名に camelCase を持ち込まない。
+API・Resource層は camelCase（Jackson）で、DB列名の snake_case との変換は MyBatis3 Mapper（`mapUnderscoreToCamelCase`）が担う。DB列名に camelCase を持ち込まない。
 
 ## 3. 型マッピング
 
-DBMS は `local`・初期の `production` ともに SQLite、規模到達時に PostgreSQL へ移行する（[tech_operations.md](../nonfunctional/tech_operations.md) §12.4）。**SQLite 固有型に依存しない**ため、定義は SQLAlchemy 型で行い、各DBMSの実型は下表の対応に従う。
+DBMS は `local`・初期の `production` ともに SQLite、規模到達時に PostgreSQL へ移行する（[tech_operations.md](../nonfunctional/tech_operations.md) §12.4）。**SQLite 固有型に依存しない**ため、定義は Java 型で行い、各DBMSの実型は下表の対応に従う。
 
-| 定義書の表記 | SQLAlchemy | SQLite | PostgreSQL | 用途 |
+| 定義書の表記 | Java型 | SQLite | PostgreSQL | 用途 |
 |------------|-----------|--------|-----------|------|
-| `VARCHAR(n)` | `String(n)` | `VARCHAR(n)`（長さ非強制） | `varchar(n)` | ID・列挙値・名称 |
+| `VARCHAR(n)` | `String` | `VARCHAR(n)`（長さ非強制） | `varchar(n)` | ID・列挙値・名称 |
 | `INTEGER` | `Integer` | `INTEGER` | `integer` | 階層・レベル・件数 |
-| `BIGINT` | `BigInteger` | `INTEGER`(64bit) | `bigint` | ゴールド・EXP（32bit桁溢れ回避） |
-| `FLOAT` | `Float` | `REAL` | `double precision` | 閾値・倍率 |
+| `BIGINT` | `Long` | `INTEGER`(64bit) | `bigint` | ゴールド・EXP（32bit桁溢れ回避） |
+| `FLOAT` | `Double` | `REAL` | `double precision` | 閾値・倍率 |
 | `BOOLEAN` | `Boolean` | `INTEGER`(0/1) | `boolean` | フラグ |
-| `DATETIME(tz)` | `DateTime(timezone=True)` | `DATETIME`（UTC文字列） | `timestamptz` | 時刻。**保存・比較は常に UTC** |
-| `JSON` | `JSON` | `JSON`（実体は TEXT） | `json` | 要素数が可変で、DB側で検索しない構造（戦闘ログの `entries`） |
+| `DATETIME(tz)` | `OffsetDateTime` | `DATETIME`（UTC文字列） | `timestamptz` | 時刻。**保存・比較は常に UTC** |
+| `JSON` | `String`（MyBatis TypeHandler で変換） | `JSON`（実体は TEXT） | `json` | 要素数が可変で、DB側で検索しない構造（戦闘ログの `entries`） |
 
 `JSON` 列は**アプリ側でのみ解釈する**。DBMS の JSON 関数・JSON インデックスを使う設計にしない（SQLite と PostgreSQL で機能が揃わないため）。列単位の検索が必要になった時点で、正規化したテーブルへ切り出す。
 
@@ -51,8 +51,8 @@ DBMS は `local`・初期の `production` ともに SQLite、規模到達時に 
 | # | 規約 |
 |---|------|
 | 1 | 主キーは `id`。採番はアプリ側で行う（`users` は `user_<uuid4>` / `guest_<uuid4>` の接頭辞つき、他は UUID4 文字列。`refresh_tokens`・`email_verification_tokens` のみ `INTEGER` の自動採番） |
-| 2 | 既定値はアプリ側（SQLAlchemy の `default=`）で付与し、`server_default` は使わない。**既存テーブルへ列を追加する場合のみ** `nullable` または `server_default` を必須とする（前方互換。[tech_operations.md](../nonfunctional/tech_operations.md) §12.4） |
-| 3 | `NULL` 欄が「可」の列だけが NULL を取りうる。`Mapped[T \| None]` と一対一に対応させる |
+| 2 | 既定値はアプリ側（Entity フィールドの初期値）で付与し、`server_default` は使わない。**既存テーブルへ列を追加する場合のみ** `nullable` または `server_default` を必須とする（前方互換。[tech_operations.md](../nonfunctional/tech_operations.md) §12.4） |
+| 3 | `NULL` 欄が「可」の列だけが NULL を取りうる。Entity のボックス型フィールドと一対一に対応させる |
 | 4 | 時刻列は UTC で保存する。ローカル時刻への変換は表示層が行う |
 | 5 | 列挙値は `VARCHAR(n)` + 取りうる値の列挙で表現し、DBMS の ENUM 型は使わない（SQLite 非対応・移行容易性のため） |
 | 6 | マスターデータ（塔・敵・スキル・装備ベース）はコード上の定義であり DBテーブルを持たない。それらを指す列（`current_tower_id` `tower_id` `skill_id` 等）は**DB外部キーを張らず**、値の妥当性はサービス層が検証する |

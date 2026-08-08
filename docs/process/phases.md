@@ -30,7 +30,7 @@ DBスキーマは**テキスト（テーブル定義書）を正、ER図を視�
 |-------|------|---------|
 | `docs/tech/basic/tech_db.md`（索引）+ `tech_db/` | 物理テーブル名・列の物理型・NULL/既定・主キー/外部キー/一意制約・インデックス・外部キー動作・命名規約・導入Phase | **正** |
 | [er_diagram.md](../diagrams/er_diagram.md) + `er_diagram/` | エンティティ・関連・カーディナリティの一望図（属性は視覚化としての再掲） | 視覚化 |
-| `backend/app/models/*.py` + `backend/alembic/versions/` | 実装。製造（§3.5）で定義書どおりに作る | 実装 |
+| `afkgame-domain` の Entity/Mapper + `afkgame-initdb` の Flyway マイグレーション | 実装。製造（§3.5）で定義書どおりに作る | 実装 |
 
 - **差し戻しルール**: 詳細設計以降で「定義書にないテーブル・列が要る」と判明したら、実装を先に書かず**基本設計へ戻して定義書とER図を更新**してから進む（§3.4 の分岐一覧と同じ扱い）
 - インデックスは**それを使う検索パターンとセット**で書く。パターンの無いインデックスは作らない
@@ -65,10 +65,10 @@ DBスキーマは**テキスト（テーブル定義書）を正、ER図を視�
 | 項目 | 内容 |
 |------|------|
 | 目的 | §3.4 のテストを満たす実装をTDDで作る |
-| 主な作業 | backend/（FastAPI）は Red-Green-Refactor を1テストずつ回す。frontend/（Vue 3）は従来どおり実装 |
-| 成果物 | 実装コード一式（テーブルの追加・変更を伴う場合は Alembic リビジョンを含む） |
-| 規約 | 既存コード規約に従う（スキーマは CamelModel、スキーマは `schemas/` に配置、ロジックは `services/` に集約、ログは logging_config 準拠 等）。`models/*.py` は §3.2.1 のテーブル定義書どおりに作り、定義書に無い列を足さない |
-| 完了基準 | §3.4 の全テストがPASS、`backend-review`・`frontend-review` の指摘対応完了。テーブル変更がある場合は Alembic リビジョンが存在し `alembic upgrade head` が通る |
+| 主な作業 | backend/（Terasoluna(Spring Boot)）は Red-Green-Refactor を1テストずつ回す。frontend/（Vue 3）は従来どおり実装 |
+| 成果物 | 実装コード一式（テーブルの追加・変更を伴う場合は Flyway マイグレーションを含む） |
+| 規約 | 既存コード規約に従う（リクエスト/レスポンスは Resource クラス + Bean Validation、ロジックは `afkgame-domain` の Service に集約、ログは Logback（`logback-spring.xml`）準拠 等）。Entity/Mapper は §3.2.1 のテーブル定義書どおりに作り、定義書に無い列を足さない |
+| 完了基準 | §3.4 の全テストがPASS、`backend-review`・`frontend-review` の指摘対応完了。テーブル変更がある場合は Flyway マイグレーションが存在し `flyway migrate` が通る |
 | レビュー | `backend-review` スキル、`frontend-review` スキル（仕様↔コードの統合整合は §3.7 の `full-review`） |
 
 - **TDDサイクル**: Red（テストが失敗する）→ Green（**最小の実装**で通す）→ Refactor（テストを保ったまま整理）
@@ -81,14 +81,14 @@ DBスキーマは**テキスト（テーブル定義書）を正、ER図を視�
 |------|------|
 | 目的 | TDDで作成したテスト群のC1網羅を測定し、漏れた分岐を補完する |
 | 対象 | バックエンド（`services/`・`master_data/`・`routers/` の関数・分岐） |
-| フレームワーク | pytest + pytest-cov |
+| フレームワーク | JUnit 5 + Mockito + JaCoCo |
 | 配置 | `backend/tests/unit/` |
-| カバレッジ基準 | **C1（分岐網羅）100%**: `pytest --cov=app --cov-branch --cov-fail-under=100` |
-| 除外規則 | `# pragma: no cover` の使用は理由コメント必須（例: `if __name__ == "__main__"` 等の起動コードのみ許容） |
+| カバレッジ基準 | **C1（分岐網羅）100%**: JaCoCo branch カバレッジ100%（`mvn test jacoco:check`） |
+| 除外規則 | JaCoCo の `<excludes>` 指定は理由コメント必須（例: 起動クラス `AfkgameApplication` のみ許容） |
 | 完了基準 | 全テストPASS かつ C1カバレッジ100% |
 
 - TDDのテストだけではC1 100%に届かないことがある（分岐一覧の漏れ）。本工程で測定し、補完した分岐は詳細設計の分岐一覧へ反映する
-- 乱数を含むロジック（ダメージ分散・ドロップ抽選・エンカウント抽選）は乱数を固定（`random.seed` / モック）して分岐を網羅する
+- 乱数を含むロジック（ダメージ分散・ドロップ抽選・エンカウント抽選）は乱数を固定（シード固定の `java.util.Random` を注入、または Mockito のスタブ）して分岐を網羅する
 - フロントエンドの単体レベル検証は Playwright（§3.7）に統合する（型検証は `vue-tsc` を製造工程で実施）
 
 ## 3.7 結合テスト
@@ -96,7 +96,7 @@ DBスキーマは**テキスト（テーブル定義書）を正、ER図を視�
 | 項目 | 内容 |
 |------|------|
 | 目的 | 基本設計どおりにAPI・画面が連携して動作することを検証する |
-| レイヤー1: API統合テスト | FastAPI TestClient + SQLite実DB。認証→塔選択→tick→報酬などのAPIシーケンスを検証。配置: `backend/tests/integration/` |
+| レイヤー1: API統合テスト | MockMvc（`@SpringBootTest`）+ SQLite実DB。認証→塔選択→tick→報酬などのAPIシーケンスを検証。配置: `backend/tests/integration/` |
 | レイヤー2: E2Eテスト | **Playwright**。フロントエンド＋バックエンドを通しで起動し、画面操作ベースで検証。配置: `frontend/tests/e2e/` |
 | シナリオの導出元 | [docs/diagrams/screen_transition.md](../diagrams/screen_transition.md)（画面遷移図）、[docs/diagrams/api_sequence.md](../diagrams/api_sequence.md)（APIシーケンス図） |
 | 完了基準 | 対象Phaseの主要シナリオが全PASS |

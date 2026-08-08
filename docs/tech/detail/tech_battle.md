@@ -12,7 +12,7 @@
 - 上限を超えた古いログはtick処理時に自動削除
 - フロント側に返却するログも **直近50件** まで（ポーリング1回あたり）
 - オフライン復帰時のサマリーは集計結果のみ返却し、個別ログは保持しない
-- **注意**: `TickResponse.battle_logs`は生JSONオブジェクトの配列であり、CamelModel変換の対象外。キー名はsnake_case（例: `target_hp`, `max_hp`, `exp_lost`）のまま返却される
+- **注意**: `TickResponse.battle_logs`は生JSONオブジェクトの配列であり、Resource の camelCase 化の対象外。キー名はsnake_case（例: `target_hp`, `max_hp`, `exp_lost`）のまま返却される
 
 ## 3. 戦闘処理フロー（Phase 3〜: パーティ・スキル対応）
 
@@ -90,7 +90,7 @@
 
 ### 3.1.1 ステータス計算の適用順序
 
-```python
+```text
 def calc_final_stat(base, growth, lv, rarity_mult, limit_break_pct, rebirth_pct, equip_val, passive_pct, buff_pct, debuff_pct, env_pct):
     raw = (base + growth * (lv - 1)) * rarity_mult          # ① 素ステータス × レアリティ倍率（master/character.md §7.2）
     enhanced = raw * (1 + limit_break_pct) * (1 + rebirth_pct)  # ② 限界突破・転生
@@ -110,7 +110,7 @@ def calc_final_stat(base, growth, lv, rarity_mult, limit_break_pct, rebirth_pct,
 
 ### 3.1.3 挑発の確率計算
 
-```python
+```text
 def select_target_with_taunt(enemies_or_allies, taunters):
     """taunters: [{char, taunt_rate}, ...]"""
     TAUNT_CAP = 0.8  # 合算上限（systems/battle.md「確率・軽減率の上限」）
@@ -181,7 +181,7 @@ def select_target_with_taunt(enemies_or_allies, taunters):
 
 ### 3.3 ターゲット選択の実装
 
-```python
+```text
 def select_target(actor, action_type, allies, enemies):
     if action_type == "normal_attack":
         # ランダム1体

@@ -17,7 +17,7 @@ flowchart TB
 
         subgraph EC2["EC2 (1台)"]
             Nginx["Nginx\nリバースプロキシ"]
-            Uvicorn["uvicorn\nFastAPI 常駐"]
+            Uvicorn["Spring Boot 実行可能jar\nTerasoluna(Spring Boot) 常駐"]
             Cron["OS cron\n日次バッチ (§12.6)"]
             EBS["EBS\nSQLite → PostgreSQL\n(§12.4 移行判断ライン)"]
         end

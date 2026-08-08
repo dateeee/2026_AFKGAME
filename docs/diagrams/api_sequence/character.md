@@ -8,7 +8,7 @@
 %%{init: {'theme': 'default', 'sequence': {'actorFontSize': 18, 'messageFontSize': 16, 'noteFontSize': 14}} }%%
 sequenceDiagram
     participant B as ブラウザ
-    participant API as FastAPI
+    participant API as Terasoluna(Spring Boot)
     participant DB as Database
 
     B->>API: PUT /api/party/edit<br/>{ memberIds: ["hero_001", "hero_003"] }
@@ -31,7 +31,7 @@ sequenceDiagram
 %%{init: {'theme': 'default', 'sequence': {'actorFontSize': 18, 'messageFontSize': 16, 'noteFontSize': 14}} }%%
 sequenceDiagram
     participant B as ブラウザ
-    participant API as FastAPI
+    participant API as Terasoluna(Spring Boot)
     participant DB as Database
 
     Note over B: === スキル習得 ===
@@ -71,7 +71,7 @@ sequenceDiagram
 %%{init: {'theme': 'default', 'sequence': {'actorFontSize': 18, 'messageFontSize': 16, 'noteFontSize': 14}} }%%
 sequenceDiagram
     participant B as ブラウザ
-    participant API as FastAPI
+    participant API as Terasoluna(Spring Boot)
     participant DB as Database
 
     B->>API: POST /api/character/limit-break<br/>{<br/>  characterId: "hero_001",<br/>  materialCharacterId: "hero_002"<br/>}

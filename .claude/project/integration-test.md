@@ -7,29 +7,29 @@
 
 | レイヤー | 内容 | 配置 | 状態 |
 |---------|------|------|------|
-| L1: API統合テスト | FastAPI TestClient + インメモリSQLite。APIシーケンスを検証 | `backend/tests/integration/` | **整備済み**（Phase 1〜2） |
+| L1: API統合テスト | MockMvc（`@SpringBootTest`）+ インメモリSQLite。APIシーケンスを検証 | Maven の `src/test/java`（統合テストパッケージ） | **整備済み**（Phase 1〜2） |
 | L2: E2Eテスト | Playwright。フロント＋バックを通しで起動し画面操作で検証 | `frontend/tests/e2e/` | **整備済み**（Phase 1〜2） |
 
 ### 1.1 L1 の記述規約
 
 | 項目 | 規約 |
 |------|------|
-| マーカー | `pytestmark = pytest.mark.integration` |
-| 実行 | `cd backend && python -m pytest tests/integration -q --no-cov` |
-| ファイル分割 | 導線ごとに1ファイル（`test_auth_flow` / `test_tower_flow` / `test_battle_flow` / `test_shop_flow` / `test_equipment_flow`） |
-| プレイヤー生成 | フィクスチャで直接作らず **`POST /api/auth/guest` から始める** |
-| DBセッション | `backend/tests/integration/conftest.py` の `db` を使う（単体用の `expire_on_commit=False` はコミット後もリレーションが古いまま残り、本番と挙動が変わる） |
-| 乱数 | `fixed_rng` フィクスチャで固定シードを与える |
+| マーカー | `@Tag("integration")` |
+| 実行 | `cd backend && mvn test -Dgroups=integration` |
+| ファイル分割 | 導線ごとに1クラス（`AuthFlowIntegrationTest` / `TowerFlowIntegrationTest` / `BattleFlowIntegrationTest` / `ShopFlowIntegrationTest` / `EquipmentFlowIntegrationTest`） |
+| プレイヤー生成 | 直接作らず **`POST /api/auth/guest` から始める** |
+| DBセッション | 実際の MyBatis Mapper（`@SpringBootTest` の `SqlSessionFactory`）を使う。単体テストのモック Mapper とは差し替え、本番と同じマッピング設定で検証する |
+| 乱数 | 固定シードの `Random` を DI で注入する（`tech_rng.md`） |
 | 時刻 | `rewind(player, 秒)` で `last_tick_at` を過去へ戻す。スリープしない |
-| ドロップ | `always_drop` フィクスチャで抽選を成立させる（ドロップ率は検証対象外） |
-| ログ経由の値 | `app_logs` フィクスチャ（`afkgame` ロガーは `propagate=False` のため caplog 単体では拾えない） |
+| ドロップ | 固定した `Random` 注入で抽選を成立させる（ドロップ率は検証対象外） |
+| ログ経由の値 | Logback の `ListAppender`（テストユーティリティ）で検証する（`afkgame` ロガーは `additivity=false`） |
 
 ### 1.2 L2 の記述規約
 
 | 項目 | 規約 |
 |------|------|
 | 実行 | `cd frontend && npm run test:e2e`（`playwright.config.ts` がフロント・バックを自動起動） |
-| サーバー | バック :8100（`DATABASE_URL=sqlite:///./e2e.db`）／フロント :5174。開発用の :8000 / :5173 とDBを分ける |
+| サーバー | バック :8100（`DATABASE_URL=jdbc:sqlite:./e2e.db`）／フロント :5174。開発用の :8000 / :5173 とDBを分ける |
 | 起動確認 | バックは `GET /health` が通るまで待つ。`reuseExistingServer` は使わない（開発用DBを掴む事故を防ぐ） |
 | 実行順 | 1つのDBを共有するため `workers: 1` の直列。独立性は**テストごとにゲストを作る**ことで担保 |
 | ヘルパー | `tests/e2e/support/harness.ts`。画面操作はUI経由、DB直接操作は**時刻の巻き戻しだけ** |
@@ -56,7 +56,7 @@
 
 | 対象 | 設計側の抽出元 | テスト側の突き合わせ先 |
 |------|-------------|------------------|
-| エンドポイント | `backend/app/routers/` のルートデコレータ（`@router.<method>("...")`）。仕様との差は `docs/tech/basic/tech_api.md` のエンドポイント表で確認する | `backend/tests/integration/` 内のリクエストパス |
+| エンドポイント | `afkgame-web` の `@RestController` のマッピングアノテーション（`@GetMapping` 等）。仕様との差は `docs/tech/basic/tech_api.md` のエンドポイント表で確認する | 統合テスト内のリクエストパス |
 | 画面 | `frontend/src/router/index.ts` の `path` | `frontend/tests/e2e/` 内の遷移先パス（`goto` ・リンク操作後のURL） |
 
 差分に出た経路は §3.1「意図的に扱わない経路」に宣言があるか確認し、無ければ**不足として報告**する。
@@ -91,7 +91,7 @@ Phase 3〜5 のシナリオは、該当Phaseの詳細設計完了時に本表へ
 | 3 | 画面遷移 | `screen_transition.md` の遷移がすべて実際に到達できるか。到達不能な画面がないか |
 | 4 | エラー表示 | API エラー時にフロントが統一エラーボディ（`error.code`）を解釈して表示するか |
 | 5 | 開発時フォールバック | バックエンド未起動時に `useBattleLocal.ts` で単体動作するか |
-| 6 | camelCase | API の Request/Response が camelCase（CamelModel）で往復しているか |
+| 6 | camelCase | API の Request/Response が camelCase（Jackson）で往復しているか |
 | 7 | データ永続 | 再起動・再ログイン後に進行状態が保持されるか |
 
 ## 5. 完了基準

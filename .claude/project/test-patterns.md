@@ -1,84 +1,91 @@
 # テスト実装パターン — AFK GAME 固有の具体例
 
-> 一般形（モジュールの骨格・外部要因の固定・parametrize・例外の検証・フィクスチャ方針）は
+> 一般形（クラスの骨格・外部要因の固定・parametrize・例外の検証・共通ユーティリティ方針）は
 > [.claude/skills/test-list/references/patterns.md](../skills/test-list/references/patterns.md)。
-> **本書は一般形へ当てはめる固有の値のみ**を持つ。フィクスチャ一覧は [test-list.md](test-list.md) §4、除外規則は [unit-test.md](unit-test.md) §4。
+> **本書は一般形へ当てはめる固有の値のみ**を持つ。ユーティリティ一覧は [test-list.md](test-list.md) §4、除外規則は [unit-test.md](unit-test.md) §4。
 
-参考にする既存テスト: `backend/tests/unit/test_target_floor.py`（最も整っている）、`test_battle_service.py`。
+参考にする既存テスト: Java化後に `afkgame-domain` の Service テストとして整備する（STEP 2 骨格構築後）。
 
-## 対象モジュールとフィクスチャ
+## 対象クラスと共通ユーティリティ
 
 | 一般形の箇所 | AFK GAME での値 |
 |------------|---------------|
-| 対象モジュールの import | `from app.services import battle_service as bs`（docstring の実装ファイルは `services/xxx.py`） |
-| テスト関数の引数 | 共通フィクスチャ `db` / `player` / `character` / `client` / `tower_record` |
+| 対象クラスの import | `afkgame-domain` の `BattleService`（Javadoc の実装ファイルは Service クラス） |
+| テストメソッドの引数 | 共通ユーティリティ `db` / `player` / `character` / `client` / `towerRecord` |
 
 ## 乱数の固定
 
-差し替える実体（一般形の `m.random` ・ `<抽選関数>` に対応）。
+差し替える実体（一般形の `m.random` ・ `<抽選関数>` に対応）。Mockito で `Random` と抽選系メソッドをスタブする。
 
-```python
-@pytest.fixture
-def no_variance(monkeypatch):
-    """ダメージ分散・クリティカル・装備ドロップを固定する"""
-    monkeypatch.setattr(bs.random, "uniform", lambda a, b: 0.0)
-    monkeypatch.setattr(bs.random, "random", lambda: 1.0)  # クリティカル発生せず
-    monkeypatch.setattr(bs, "try_drop", lambda *a, **kw: (None, None))
-
-
-monkeypatch.setattr(bs, "roll_encounter", lambda tower_id, floor: enemy)
+```java
+@BeforeEach
+void noVariance() {
+    // ダメージ分散・クリティカル・装備ドロップを固定する
+    when(random.nextDouble()).thenReturn(0.0);
+    when(random.nextBoolean()).thenReturn(false); // クリティカル発生せず
+    when(dropService.tryDrop(any(), any())).thenReturn(Optional.empty());
+    when(encounterService.roll(anyString(), anyInt())).thenReturn(enemy);
+}
 ```
 
 ## 時刻の固定
 
-過去へずらす対象は `player.last_tick_at`（tick は60秒間隔）。トークン期限切れは DBレコードの `expires_at` を過去に設定する。
+過去へずらす対象は `player.getLastTickAt()`（tick は60秒間隔）。トークン期限切れは DBレコードの `expiresAt` を過去に設定する。
 
-```python
-def test_経過時間ぶんのtickが処理される(db, player, client):
-    player.last_tick_at = datetime.now(timezone.utc) - timedelta(minutes=5)
-    db.commit()
-    # → 60秒tick × 5回ぶんが処理される
+```java
+@Test
+void 経過時間ぶんのtickが処理される() {
+    player.setLastTickAt(OffsetDateTime.now().minusMinutes(5));
+    db.commit();
+    // → 60秒tick × 5回ぶんが処理される
+}
 ```
 
-## 境界値の実例（`target_floor_cap`）
+## 境界値の実例（`targetFloorCap`）
 
-```python
-@pytest.mark.parametrize(
-    ("highest", "total", "expected"),
-    [
-        (0, 20, 1),    # 未挑戦 → 1階のみ
-        (19, 20, 20),  # 最上階の1つ手前
-        (20, 20, 20),  # 総階数でクランプ（+1 しない）
-        (25, 20, 20),  # 記録が総階数を超えていてもクランプ
-    ],
-)
-def test_有限塔は総階数でクランプされる(highest, total, expected):
-    assert target_floor_cap(highest, total) == expected
+```java
+@ParameterizedTest
+@CsvSource({
+    "0, 20, 1",   // 未挑戦 → 1階のみ
+    "19, 20, 20", // 最上階の1つ手前
+    "20, 20, 20", // 総階数でクランプ（+1 しない）
+    "25, 20, 20", // 記録が総階数を超えていてもクランプ
+})
+void 有限塔は総階数でクランプされる(int highest, int total, int expected) {
+    assertThat(targetFloorCap(highest, total)).isEqualTo(expected);
+}
 ```
 
 ## 例外・エラーレスポンス
 
-サービス層が送出する例外型は `app.exceptions.AppError`（`code` と `status_code` を持つ）。
+Service層が送出する例外型は `AppException`（`code` と `statusCode` を持つ）。
 
-```python
-def test_gold不足なら購入できない(db, player):
-    player.gold = 0
-    with pytest.raises(AppError) as exc:
-        buy_item(player, "hp_potion", 1, db)
-    assert exc.value.code == "INSUFFICIENT_GOLD"
-    assert exc.value.status_code == 400
+```java
+@Test
+void gold不足なら購入できない() {
+    player.setGold(0);
+    AppException ex = assertThrows(AppException.class,
+        () -> shopService.buyItem(player, "hp_potion", 1, db));
+    assertThat(ex.getCode()).isEqualTo("INSUFFICIENT_GOLD");
+    assertThat(ex.getStatusCode()).isEqualTo(400);
+}
 ```
 
-ルーター経由は統一エラーボディ `error.code` を検証する。リクエスト／レスポンスは **camelCase**（CamelModel）。
+コントローラ経由は統一エラーボディ `error.code` を検証する。リクエスト／レスポンスは **camelCase**（Jackson）。
 
-```python
-def test_未知の塔IDは404(client):
-    res = client.post("/api/tower/select", json={"towerId": "unknown"})
-    assert res.status_code == 404
-    assert res.json()["error"]["code"] == "TOWER_NOT_FOUND"
+```java
+@Test
+void 未知の塔IDは404() throws Exception {
+    mockMvc.perform(post("/api/tower/select")
+            .contentType(APPLICATION_JSON)
+            .content("{\"towerId\":\"unknown\"}"))
+        .andExpect(status().isNotFound())
+        .andExpect(jsonPath("$.error.code").value("TOWER_NOT_FOUND"));
+}
 
-
-def test_トークンなしは401(client):
-    client.headers.pop("Authorization")  # client フィクスチャは認証済み
-    assert client.get("/api/game/state").status_code == 401
+@Test
+void トークンなしは401() throws Exception {
+    mockMvc.perform(get("/api/game/state")) // Authorization ヘッダなし
+        .andExpect(status().isUnauthorized());
+}
 ```

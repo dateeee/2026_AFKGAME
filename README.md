@@ -10,7 +10,7 @@
 | レイヤー | 技術 |
 |---------|------|
 | フロントエンド | Vue.js 3 (SPA / Composition API / TypeScript) + Vite + Pinia + Tailwind CSS |
-| バックエンド | Python / FastAPI + SQLAlchemy 2.0 + Pydantic v2 |
+| バックエンド | Java 17 / Terasoluna (Spring Boot 3) + MyBatis3 + Flyway |
 | DB | SQLite（MVP）→ PostgreSQL（本番） |
 | 描画方式 | テキストベース（Canvas不使用）。UIアイコンはSVG、アイテムは画像 |
 
@@ -20,9 +20,8 @@
 
 ```bash
 cd backend
-python -m venv .venv && .venv\Scripts\activate   # Windows
-pip install -r requirements.txt -r requirements-dev.txt
-uvicorn app.main:app --reload --port 8000
+mvn clean install
+java -jar afkgame-web/target/afkgame-web.jar     # http://localhost:8000
 ```
 
 API ドキュメント: http://localhost:8000/docs
@@ -37,16 +36,16 @@ npm run dev        # http://localhost:5173（/api は :8000 へプロキシ）
 
 VS Code は実行構成 **Full Stack** で同時起動できる（[.vscode/launch.json](.vscode/launch.json)）。
 
-### 環境変数（`backend/.env`）
+### 環境変数（既定値は `application.yml`）
 
 | 変数 | 既定値 | 用途 |
 |------|-------|------|
-| `DATABASE_URL` | `sqlite:///./afkgame.db` | DB接続文字列 |
+| `DATABASE_URL` | `jdbc:sqlite:./afkgame.db` | DB接続文字列（JDBC URL） |
 | `JWT_SECRET` | `dev-secret-change-in-production` | JWT署名鍵（本番では必ず変更） |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | 空 | Google OAuth（空の場合は無効） |
 | `LOG_LEVEL` / `LOG_FORMAT` | `INFO` / `text` | ログ出力設定 |
 
-その他の設定値は [backend/app/config.py](backend/app/config.py) を参照。
+その他の設定値は `afkgame-env` の `application.yml` を参照。
 
 ### 主なコマンド
 
@@ -55,7 +54,7 @@ VS Code は実行構成 **Full Stack** で同時起動できる（[.vscode/launc
 | `npm run dev` / `npm run build` | フロント開発サーバー / 本番ビルド |
 | `npm run type-check` | 型チェック（vue-tsc + E2E） |
 | `npm run test:e2e` | E2Eテスト（Playwright。専用ポート/DBで自動起動） |
-| `pytest` | バックエンドテスト（C1 100%・`htmlcov/` にHTMLレポート） |
+| `mvn verify` | バックエンドテスト（JUnit 5 + JaCoCo。branch 100%・`target/site/jacoco/`） |
 | `python scripts/check_doc_size.py` | ドキュメント文字数チェック |
 | `python scripts/check_docs.py` | ドキュメント機械検証（リンク・索引・曖昧語・正の逸脱・決定先送り・台帳存否） |
 | `python scripts/check_branch_list.py` | 分岐一覧の構造検証（`--tests` でテスト対応照合） |
@@ -83,11 +82,9 @@ VS Code は実行構成 **Full Stack** で同時起動できる（[.vscode/launc
 │   ├── src/stores/ composables/ # Pinia ストア / Composition API ロジック
 │   ├── src/api/ types/          # API通信レイヤー / 型定義
 │   └── tests/e2e/               # E2Eテスト（Playwright）
-└── backend/                     # FastAPI サーバー
-    ├── app/routers/ services/   # APIルーター / ビジネスロジック
-    ├── app/models/ schemas/     # SQLAlchemy モデル / Pydantic スキーマ
-    ├── app/master_data/         # マスターデータ定義
-    └── tests/unit/ integration/ # 単体テスト / API統合テスト
+└── backend/                     # Terasoluna (Spring Boot) サーバー
+    ├── afkgame-domain/ web/     # Entity・Mapper・Service / API・DTO・Security
+    └── afkgame-env/ initdb/     # 環境設定（application.yml）/ Flyway
 ```
 
 ## アーキテクチャ方針
@@ -117,7 +114,7 @@ VS Code は実行構成 **Full Stack** で同時起動できる（[.vscode/launc
 | 分類 | ファイル |
 |------|---------|
 | 進め方 `docs/process/` | [development_process](docs/process/development_process.md) 7工程・ゲート・進捗 / [phases](docs/process/phases.md) 工程別の定義 / [documentation_rules](docs/process/documentation_rules.md) 文書規約 / [spec_ownership](docs/process/spec_ownership.md) 正の所在マップ |
-| 状態 `docs/backlog/` | [open_specs](docs/backlog/open_specs.md) 未確定仕様 / [balance_backlog](docs/backlog/balance_backlog.md) 見直す数値 / [known_issues](docs/backlog/known_issues.md) 実装の疑義 / [next_session](docs/backlog/next_session.md) 引き継ぎ / [efficiency_memo](docs/backlog/efficiency_memo.md) 効率メモ |
+| 状態 `docs/backlog/` | [open_specs](docs/backlog/open_specs.md) 未確定仕様 / [balance_backlog](docs/backlog/balance_backlog.md) 見直す数値 / [known_issues](docs/backlog/known_issues.md) 実装の疑義 / [next_session](docs/backlog/next_session.md) 引き継ぎ / [efficiency_memo](docs/backlog/efficiency_memo.md) 効率メモ / [java_migration](docs/backlog/java_migration.md) Java移行計画 |
 | 横断 | [glossary](docs/glossary.md) 用語集 / [changelog](docs/changelog.md) 変更履歴 / [INDEX](.claude/project/INDEX.md) 工程↔スキル対応表 |
 
 ### 仕様書

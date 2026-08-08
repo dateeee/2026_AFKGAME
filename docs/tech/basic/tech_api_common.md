@@ -9,10 +9,10 @@
 |------|------|
 | ベースパス | `/api`（バージョン番号なし）。破壊的変更が必要になった場合のみ `/api/v2/...` を併設し、旧版を一定期間並行維持する |
 | パス命名 | 小文字ケバブケース（例: `/api/boss-rush/start`）。リソース名は単数形 |
-| ボディのキー | **camelCase**（バックエンドは `CamelModel` で snake_case ↔ camelCase を自動変換） |
+| ボディのキー | **camelCase**（バックエンドは Resource クラスのプロパティを camelCase で定義し、Jackson がそのまま直列化） |
 | 日時 | ISO 8601 の UTC（例: `2026-03-15T12:00:00Z`）。ローカル時刻は返さない |
 | 数値 | すべて整数（ゴールドは64bit）。割合は 0〜1 の小数 |
-| 未知フィールド | リクエストの未定義フィールドは 422 で拒否（`extra="forbid"`） |
+| 未知フィールド | リクエストの未定義フィールドは 422 で拒否（Jackson `FAIL_ON_UNKNOWN_PROPERTIES`） |
 | 認証 | **全エンドポイントで `Authorization: Bearer <access_token>` 必須**。例外は下表のみ |
 | 認証不要な例外 | `/api/auth/guest`, `/api/auth/register`, `/api/auth/login`, `/api/auth/refresh`, `/api/auth/verify-email`, `/api/auth/google`, `/api/auth/password-reset/*`, `/health` |
 | 一覧系の件数 | ページングは設けない（1プレイヤーのデータ量が上限で抑えられているため）。`/api/boss-rush/ranking` と `/api/abyss/ranking` のみ上位100件固定 |

@@ -178,9 +178,9 @@
 |------|------|
 | Vue Router | Vue.jsのSPA画面遷移管理 |
 | Pinia | Vue 3の公式状態管理ライブラリ |
-| SQLAlchemy 2.0 | PythonのORM（データベースアクセス） |
-| Pydantic v2 | リクエスト/レスポンスのスキーマバリデーション |
-| Alembic | SQLAlchemy用のDBマイグレーション管理ツール |
+| MyBatis3 | JavaのO/Rマッパー（データベースアクセス） |
+| Bean Validation | リクエスト/レスポンスのスキーマバリデーション |
+| Flyway | DBマイグレーション管理ツール |
 
 ### 認証・セキュリティ
 | 用語 | 説明 |

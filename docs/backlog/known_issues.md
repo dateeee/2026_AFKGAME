@@ -11,6 +11,7 @@
 - 対応方針は「仕様書を実装に合わせる」か「実装を修正する」かを都度判断する（[development_process.md](../process/development_process.md) §6）
 - **未確定仕様**は [open_specs.md](open_specs.md)、**数値のみ調整待ち**は [balance_backlog.md](balance_backlog.md) に置き、本書には含めない
 - 対応が完了した項目は §3 へ移す（直近10件のみ保持）
+- **Java 移行中の扱い**: 「対象」列は Python 実装のパスを指す。書き換えず、[java_migration.md](java_migration.md) の各 STEP で移植する際に1件ずつ再確認する。仕様欠落・未実装の項目は言語を変えても残る
 
 ## 2. 未対応の項目
 
@@ -28,7 +29,7 @@
 
 | 11 | `services/battle_service.py`, `services/equipment_service.py` | 全滅ペナルティ「**塔内取得アイテム全ロスト**」が未実装（[battle.md](../design/systems/battle.md)「全滅時の処理」3項目のうちEXP・ゴールドのみ実装）。`equipment_service.try_drop()` がドロップ装備を即座に永続化し、オートセル益も即 `player.gold` へ加算するため、取り消し対象として管理されていない。仕様・[battle_flow/overview.md](../diagrams/battle_flow/overview.md) が正 | 中（仕様乖離） | diagrams-review ISSUE-515 |
 | 12 | `routers/item.py`（未作成） | 換金アイテムが**ドロップも売却APIも未実装**。仕様では [item.md §5](../data/master/item.md) の換金アイテムが Phase 2〜 ドロップし、[tech_api.md](../tech/basic/tech_api.md) の `POST /api/item/sell` で Phase 2〜 売却できる（素材分は Phase 4〜）。現状は塔ファイル §7.4 のドロップテーブルが実装に反映されていない | 中（Phase 2 の機能欠落） | doc-review ISSUE-1020 |
-| 17 | `models/shop.py` | `ShopDailySlot` の一意制約名が `uq_shop_daily_slot_index` のままで、[tech_db/item.md](../tech/basic/tech_db/item.md) §5 が正とする `uq_shop_daily_slots_state_slot`（[tech_db.md](../tech/basic/tech_db.md) §2 の命名規約 `uq_<テーブル名>_<列>_<列>`）と乖離。**実装を定義書へ追従させる**。SQLite は制約名を直接 RENAME できないため、Alembic のテーブル再構築マイグレーションが必要 | 低（命名のみ・機能影響なし） | doc-review ISSUE-1204 |
+| 17 | `models/shop.py` | `ShopDailySlot` の一意制約名が `uq_shop_daily_slot_index` のままで、[tech_db/item.md](../tech/basic/tech_db/item.md) §5 が正とする `uq_shop_daily_slots_state_slot`（[tech_db.md](../tech/basic/tech_db.md) §2 の命名規約 `uq_<テーブル名>_<列>_<列>`）と乖離。**実装を定義書へ追従させる**。Flyway 初期スキーマ（`V1`）を定義書から起こすため、[java_migration.md](java_migration.md) STEP 2 で解消する | 低（命名のみ・機能影響なし） | doc-review ISSUE-1204 |
 | 13 | `routers/auth.py` | 退会（アカウント削除）`POST /api/auth/delete-account` が未実装。[main_nav.md](../diagrams/screen_transition/main_nav.md) は退会導線を Phase 2〜 として描き、[tech_api.md](../tech/basic/tech_api.md)・[api_sequence/auth.md](../diagrams/api_sequence/auth.md) §14 に再認証つきの削除フローを定義済み | 中（Phase 2 の機能欠落） | diagrams-review ISSUE-509 |
 
 - 単体テストは**現状の実装に合わせて**作成済み。上記を修正する場合は該当テストの期待値も併せて更新すること

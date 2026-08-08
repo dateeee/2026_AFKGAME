@@ -3,7 +3,7 @@
 > [tech_spec.md](../tech_spec.md) §6「ログ設計」。アーキテクチャ方針は [tech_architecture.md](tech_architecture.md)。
 
 ## ログライブラリ
-Python標準 `logging` モジュールを使用。Uvicornのアクセスログと連携する。
+Logback を使用。Spring Boot 組み込みの Tomcat アクセスログと連携する。
 
 ## ログレベル方針
 
@@ -60,7 +60,7 @@ Python標準 `logging` モジュールを使用。Uvicornのアクセスログ�
 | `player_not_found` | トークンに該当するプレイヤーなし | `WARNING auth: 認証失敗 reason=player_not_found token=abc1****wxyz` |
 | `token_expired` | JWT期限切れ（Phase 2〜） | `WARNING auth: 認証失敗 reason=token_expired` |
 
-## リクエストログミドルウェア
+## リクエストログ用フィルタ
 
 全APIリクエストに対して以下を実行する:
 
@@ -138,7 +138,7 @@ Python標準 `logging` モジュールを使用。Uvicornのアクセスログ�
 
 ### グローバル例外ハンドラ
 
-FastAPIの例外ハンドラで未捕捉例外を捕捉し、以下を実行する:
+`@RestControllerAdvice` で未捕捉例外を捕捉し、以下を実行する:
 
 1. ERRORレベルでスタックトレースをログ出力
 2. クライアントには `500` + `INTERNAL_UNEXPECTED_ERROR` を返却（スタックトレースは含めない）
@@ -146,8 +146,9 @@ FastAPIの例外ハンドラで未捕捉例外を捕捉し、以下を実行す�
 
 ## 設定値
 
-```python
-# backend/app/config.py に追加
-LOG_LEVEL = "INFO"                  # ログレベル（環境変数 LOG_LEVEL で上書き可）
-LOG_FORMAT = "text"                 # ログフォーマット（text / json、環境変数 LOG_FORMAT で上書き可）
+```yaml
+# afkgame-env の application.yml に追加
+logging:
+  level: INFO      # ログレベル（環境変数 LOG_LEVEL で上書き可）
+  format: text     # ログフォーマット（text / json、環境変数 LOG_FORMAT で上書き可）
 ```

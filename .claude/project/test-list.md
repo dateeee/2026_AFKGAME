@@ -7,16 +7,16 @@
 
 | 成果物 | パス | 状態 |
 |-------|------|------|
-| 単体テストコード | `backend/tests/unit/test_<対象モジュール>.py` | 実装前。**全件 FAIL または ERROR** |
+| 単体テストコード | 各モジュールの `src/test/java/.../<対象クラス>Test.java` | 実装前。**全件 FAIL または ERROR** |
 
 ## 2. 対象と適用範囲
 
 | 対象 | 適用 |
 |------|------|
-| `backend/app/services/` | **厳格に適用**（すべての分岐にテストを先に書く） |
-| `backend/app/master_data/` | **厳格に適用** |
-| `backend/app/routers/` | TestClient で先行作成 |
-| `backend/app/models/` `schemas/` | 定義のみのため副次的 |
+| `afkgame-domain` の Service | **厳格に適用**（すべての分岐にテストを先に書く） |
+| `afkgame-domain` のマスターデータ | **厳格に適用** |
+| `afkgame-web` の `@RestController` | MockMvc で先行作成 |
+| Entity/Mapper・Resource | 定義のみのため副次的 |
 | `frontend/` | **対象外**（TDD非適用。`vue-tsc` と結合テストで検証する） |
 
 **適用時期**: TDDは**新規実装から**適用する。Phase 2 の残り（日替わりショップ）と Phase 3〜5 が対象。実装済み（Phase 1〜2）のテストは遡及整備で C1 100% に到達済みのため**書き直さない**。既存機能の修正・リファクタ時は、先にその変更を表すテストを追加してから実装に着手する。
@@ -29,34 +29,33 @@
 |----|--------|---------|
 | 1 | `docs/tech/detail/tech_<対象処理>.md` | 分岐一覧のセクションのみ |
 | 2 | `docs/data/master/` | テストで使う数値のみ |
-| 3 | `backend/tests/conftest.py` | フィクスチャ一覧（後述） |
-| 4 | `backend/tests/unit/test_target_floor.py` | スタイルの参考（最も整っている） |
+| 3 | 共通テストユーティリティ | 一覧は §4（後述）。Java化後の参考実装クラスは STEP 2 骨格構築後に整備する |
 
 **対象モジュールが未作成の場合**（関数名・データ構造が分岐一覧にない）: `docs/tech/basic/tech_structure.md` の services 一覧を確認する。そこにも無ければ**探索を打ち切り**、テストの docstring で表層（モジュール名・関数シグネチャ）を定義して製造工程へ申し送る。コード側を読み回して表層を推測しない。
 
-## 4. 共通フィクスチャ（`backend/tests/conftest.py`）
+## 4. 共通テストユーティリティ
 
-| フィクスチャ | 内容 |
+| ユーティリティ | 内容 |
 |------------|------|
-| `db` | インメモリSQLite（StaticPool）のセッション。テストごとに作り直す |
+| `db` | インメモリSQLiteのセッション。`@SpringBootTest` ごとに作り直す |
 | `user` | `test-user` / 非ゲスト |
-| `player` | gold=1000、`PlayerSettings(potion_threshold=0.3)`、hp_potion×5、初期キャラを持つ |
+| `player` | gold=1000、`PlayerSettings(potionThreshold=0.3)`、hp_potion×5、初期キャラを持つ |
 | `character` | `player` の初期キャラクター |
-| `client` | `get_db` を差し替え済み・Authorization ヘッダ付与済みの `TestClient` |
-| `tower_record` | `tower_record(tower_id, highest_floor=0, cleared=False)` で塔別クリア記録を作るファクトリ |
+| `client` | 認証ヘッダ付与済みの `MockMvc` |
+| `towerRecord` | `towerRecord(towerId, highestFloor=0, cleared=false)` で塔別クリア記録を作るファクトリ |
 
-不足するフィクスチャはテストモジュール内にローカル定義する（`conftest.py` は全テスト共通のものだけ）。
+不足するユーティリティはテストクラス内にローカル定義する（共通ユーティリティは全テスト共通のものだけ）。
 
 ## 5. 記述規約
 
 | # | 規約 |
 |---|------|
-| 1 | モジュール先頭に `pytestmark = pytest.mark.unit` を置く |
+| 1 | テストクラスに `@Tag("unit")` を付ける |
 | 2 | モジュール docstring に**仕様書の参照先**と**分岐観点**を書く |
 | 3 | 観点ごとに `class Test<対象>` でグループ化する |
 | 4 | テスト関数名は**日本語**で期待する振る舞いを書く（例: `test_目標階が上限と一致していれば追従する`） |
-| 5 | 境界値・等価クラスは `@pytest.mark.parametrize` にまとめ、各ケースに `#` コメントで意図を書く |
-| 6 | テスト関数の docstring に対応マーカー「`分岐: tech_<対象>.md §<節> #<行番号>`」を書く（一覧が1つの文書は §省略可、`#3,4` と複数可）。`check_branch_list.py --tests` がこれで対応を照合する |
+| 5 | 境界値・等価クラスは `@ParameterizedTest` + `@CsvSource`/`@MethodSource` にまとめ、各ケースにコメントで意図を書く |
+| 6 | テストメソッドの Javadoc に対応マーカー「`分岐: tech_<対象>.md §<節> #<行番号>`」を書く（一覧が1つの文書は §省略可、`#3,4` と複数可）。`check_branch_list.py --tests` がこれで対応を照合する |
 
 実装パターンは一般形を [.claude/skills/test-list/references/patterns.md](../skills/test-list/references/patterns.md)、AFK GAME のモジュール名・エラーコードを使った実例を [test-patterns.md](test-patterns.md) に置いている。
 
@@ -76,7 +75,7 @@
 一般スキルの完了基準に加え、以下を満たすこと。
 
 - 分岐一覧の全項目にテストが対応している: `python scripts/check_branch_list.py --tests` が exit 0（マーカーで機械照合）
-- 実行して**期待どおりに失敗する**（Red の確認）: `cd backend && python -m pytest tests/unit/test_<対象モジュール>.py -q --no-cov`（対象を限定しカバレッジ計測を外す。既存テスト全体の Green 確認は製造工程で行う）
+- 実行して**期待どおりに失敗する**（Red の確認）: `cd backend && mvn test -Dtest=<対象クラス>Test`（対象を限定。既存テスト全体の Green 確認は製造工程で行う）
 - 実装を先に書いていない（テストの後追いで書いていない）
 
 ## 8. 次工程
