@@ -3,6 +3,8 @@ package com.afkgame.domain.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -16,8 +18,10 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DuplicateKeyException;
 
 import com.afkgame.domain.exception.AppException;
 import com.afkgame.domain.model.RefreshToken;
@@ -35,8 +39,12 @@ import com.afkgame.env.config.AuthProperties;
  *
  * <p>分岐観点: リフレッシュの 正常 / 該当なし / revoked済み（再利用検知）/ 期限切れ /
  * ユーザー不在、および認証ユーザー取得の 存在する / しない。
- * 骨格構築（java_migration.md STEP 2）の横断基盤であり詳細設計の分岐一覧を持たないため、
+ * これらは骨格構築（java_migration.md STEP 2）の横断基盤であり詳細設計の分岐一覧を持たないため、
  * 分岐マーカーは付けない。
+ *
+ * <p>ゲスト作成は tech_auth.md §8.2「処理フロー」のトランザクション境界（手順1・7・8）を担うため、
+ * §8.3 の #11・#12 に対応するテストだけマーカーを持つ。手順2〜6（#1・#2・#5・#7〜#9）は
+ * {@link PlayerInitializationService} 側の責務で、{@code PlayerInitializationServiceTest} が持つ。
  */
 @Tag("unit")
 @ExtendWith(MockitoExtension.class)
@@ -53,12 +61,15 @@ class AuthServiceTest {
     @Mock
     private RefreshTokenMapper refreshTokenMapper;
 
+    @Mock
+    private PlayerInitializationService playerInitializationService;
+
     private AuthService authService;
 
     private AuthService authService() {
         if (authService == null) {
-            authService = new AuthService(
-                    userMapper, refreshTokenMapper, new JwtService(AUTH_PROPERTIES), AUTH_PROPERTIES);
+            authService = new AuthService(userMapper, refreshTokenMapper,
+                    new JwtService(AUTH_PROPERTIES), AUTH_PROPERTIES, playerInitializationService);
         }
         return authService;
     }
@@ -104,6 +115,47 @@ class AuthServiceTest {
             assertThat(result.user().getId()).isEqualTo(saved.getValue().getId());
             assertThat(result.accessToken()).isNotBlank();
             assertThat(result.refreshToken()).isNotBlank();
+        }
+
+        /**
+         * 手順1〜7がすべて成功する経路。手順2〜6の中身は
+         * {@code PlayerInitializationServiceTest} が持ち、ここでは順序と委譲だけを見る。
+         *
+         * <p>分岐: tech_auth.md #11
+         */
+        @Test
+        void test_ユーザー作成後にプレイヤー初期化を行いトークンペアを返す() {
+            AuthResult result = authService().createGuest();
+
+            ArgumentCaptor<User> saved = ArgumentCaptor.forClass(User.class);
+            verify(userMapper).insert(saved.capture());
+
+            // 手順1（ユーザー）→ 手順2〜6（初期化）→ 手順7（トークン）の順で進む
+            InOrder inOrder = inOrder(userMapper, playerInitializationService, refreshTokenMapper);
+            inOrder.verify(userMapper).insert(any(User.class));
+            inOrder.verify(playerInitializationService).initialize(saved.getValue().getId());
+            inOrder.verify(refreshTokenMapper).insert(any(RefreshToken.class));
+
+            assertThat(result.accessToken()).isNotBlank();
+            assertThat(result.refreshToken()).isNotBlank();
+        }
+
+        /**
+         * 途中で失敗した場合。ロールバック自体は {@code @Transactional} が行うため、
+         * ここでは「例外を握りつぶさずに伝播させる（＝ロールバックが起きる）」ことと、
+         * トークンを発行しないことを見る。DBへ何も残らないことの検証は統合テストが持つ。
+         *
+         * <p>分岐: tech_auth.md #12
+         */
+        @Test
+        void test_初期化に失敗したらトークンを発行せず例外を伝播する() {
+            doThrow(new DuplicateKeyException("uq_players_user_id"))
+                    .when(playerInitializationService).initialize(any());
+
+            assertThatThrownBy(() -> authService().createGuest())
+                    .isInstanceOf(DuplicateKeyException.class);
+
+            verify(refreshTokenMapper, never()).insert(any());
         }
 
         @Test
