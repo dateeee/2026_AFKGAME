@@ -53,3 +53,18 @@
 - シグナル: 突合漏れ（profile.md §7 規約6 違反の状態）
 - ターン概要: retro 中に発見。worktree_guide §5.3 の「統合前ユーザー確認」を撤廃した際、重複記載の profile.md §8 を突合しておらず矛盾が残った
 - 原因と改善案: profile.md §8 末尾の「main への merge と削除の前にユーザー確認を取る」を削除し、完了手順を「`worktree.py merge <名前>` で確認なしに一括統合」へ更新する（前回 retro で提案・未承認のため保留。次回に再提案）。
+
+## 2026-08-08 21:24 | session 62b754f7 | 自動検出
+- シグナル: long-turn(calls=76)
+- ターン概要: ツール76回・エラー1回・拒否0回。開始:「<command-message>next</command-message>」
+- 原因と改善案: ①**Java のビルド出力が cp932 で、Bash 経由のフィルタでは読めない** — Red 確認の `mvn` を `| grep` で受けたところ日本語が全て文字化けし、しかも判定に要る詳細行（`シンボル: クラス X`）は `[ERROR]` 行に続く字下げ行のため grep から漏れていた。結局ログをファイルへ落として cp932 デコードで読み直し、**重い mvn を2回実行**した（1回あたり数十秒）。`commands.md` の Java 実行コマンドへ「出力は `> <scratchpad>/x.log 2>&1` で受け、`ctx_execute` の python で `cp932` デコードして解析する（Bash のパイプ + grep は文字化け・行落ちする）」を1行足す。②**`ctx_execute_file` は worktree のファイルを読めない** — プロジェクトルート外として拒否され `ctx_execute` で書き直す往復1回。`worktree_guide.md` §5.4 へ「worktree 内のファイル解析は `ctx_execute`（パス直書き）を使う。`ctx_execute_file` はルート外として拒否される」を追記する。
+
+## 2026-08-08 21:25 | session 940776b6 | 手動
+- シグナル: 往復2件（測定コマンドの引数無視・分岐一覧の番号振り直し）
+- ターン概要: `/next 0` → `detail-design`（Phase 4 酒場スカウト）。仕様12ファイルの該当節読み → `tech_scout.md` 新設 + 9ファイル改稿 → 検証4種
+- 原因と改善案: ①**残量測定のコマンドを間違えた** — `check_doc_size.py <path>` はファイル引数を無視して全件チェックを出す仕様で、目的の残量が得られず、スクリプト本体を読んで `--sections <path>` に気づくまで2往復した（profile.md §7 規約7「書く前に残量を測る」は測り方までは持っていない） → `commands.md` へ「特定ファイルの残量・H2内訳は `python scripts/check_doc_size.py --sections <path>`」を1行追記する。②**分岐一覧の拾い漏れで番号を振り直した** — 処理フローの**括弧内に埋めた条件**（手順2「`facilities` に行が無ければ LV0」）を分岐一覧へ起こし忘れ、§5.3 の自己検証で気づいて27→29行へ番号を振り直した（表の全面書き換え1回・changelog の件数修正1回） → `.claude/project/detail-design.md` §4 へ「処理フローの括弧内・注記に書いた条件も分岐一覧の対象。表を書く前に本文の条件を拾い切る」を追記する。
+
+## 2026-08-08 21:28 | session 940776b6 | 自動検出
+- シグナル: same-read(next_session.md×2) / long-turn(calls=84)
+- ターン概要: ツール84回・エラー2回・拒否0回。開始:「<command-message>next</command-message>」
+- 原因と改善案: **same-read と long-turn は誤検出**（same-read は2回目が別セッションの全面書き換え後＝`49a2b77` で内容が変わっており再読が必須。long-turn は詳細設計1本ぶんの正当な作業で、実損2件は直前の手動エントリに記入済み）。ただし **`profile.md` §6 規律4 の再Read禁止は例外が「Edit 失敗時の再確認」しか無い**ため、「他セッションの更新・worktree 統合でファイルが変わった場合」を例外に加える（並行セッション運用が常態化しており、規律どおりだと古い内容で Edit して失敗する）。**エラー2件も並行運用が原因**で、いずれも「別セッションが main を触った直後」に起きた（Edit の old_string 不一致 / `worktree.py merge` が main の未コミット変更で停止）→ `worktree_guide.md` §5.3 の手順3 の前に「main 側に未コミットの変更（Stop フックが書いた効率メモ等）が無いか確認し、あれば先にコミットする」を1行足す。

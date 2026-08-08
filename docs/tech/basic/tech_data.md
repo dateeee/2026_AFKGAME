@@ -34,6 +34,7 @@
       "baseDef": 12,                   // 基礎DEF
       "baseSpd": 10,                   // 基礎SPD
       "effectiveMaxHp": 150            // 装備込み最大HP（装備未装着時はmaxHpと同値）。Phase 3〜はレアリティ・限界突破も込み
+      // "masterId": "hero_002",       // Phase 4〜: マスターキャラのID（重複・限界突破の同一性判定）
       // "rarity": "common",           // Phase 3〜: キャラのレアリティ（common〜legendary）
       // "limitBreak": 0,              // Phase 3〜: 限界突破回数（0-5）
       // "effectiveAtk": 25,           // Phase 3〜: 実効ATK（基礎 × レアリティ倍率 × 限界突破ボーナス + 装備）

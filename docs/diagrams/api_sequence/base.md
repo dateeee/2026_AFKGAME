@@ -39,16 +39,16 @@ sequenceDiagram
 
     API->>API: 酒場LV確認 → 排出可能レアリティ決定<br/>LV3 → コモン~アンコモン<br/>スカウト費用: 1,000G<br/>残金チェック
 
-    API->>API: ガチャ抽選:<br/>タイプ4種 x レアリティ = プールから1体
+    API->>API: ガチャ抽選:<br/>レアリティ(累積確率) → 同レアリティ内で均等<br/>プール20体から1体
 
     API->>DB: gold -= 1000
-    API->>DB: Character作成 (新キャラ)
+    API->>DB: Character作成 (重複でも1行追加)
 
     alt 新規キャラ
-        API-->>B: { newCharacter: {...} }
+        API-->>B: { character: {...},<br/>  isDuplicate: false, canLimitBreak: false }
         B->>B: 新キャラ加入モーダル表示
-    else 重複キャラ
-        API-->>B: { duplicateCharacter: {...},<br/>  canLimitBreak: true }
+    else 重複キャラ (同一 master_id を所持)
+        API-->>B: { character: {...},<br/>  isDuplicate: true, canLimitBreak: true }
         B->>B: 「限界突破に使用できます」
     end
 ```
