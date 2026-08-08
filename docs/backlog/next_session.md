@@ -7,7 +7,7 @@
 
 **1a と 1b は同時に Green にした**（独立ではなかった）。同一モジュールではテストソースが一括コンパイルされるため、片方だけでは `mvn test` がコンパイルで止まり検証できない。以後も同一モジュール内に Red が複数並ぶ場合は同じ制約がかかる。
 
-**Phase 4 詳細設計**: 拠点・施設（`tech_base.md`）と①酒場スカウト（`tech_scout.md`・`643728a`）は完了。副産物の **`characters.master_id`**（[tech_db/player.md](../tech/basic/tech_db/player.md) §4・Phase 4・未実装）と**酒場専用16体**（[master/character.md](../data/master/character.md) §7.3）は確定済み。
+**Phase 4 詳細設計**: 拠点・施設（`tech_base.md`）・①酒場スカウト（`tech_scout.md`・`643728a`）・②鍛冶屋（`tech_forge.md` + 操作別3件・`40d37c4`）は完了。残りは③限界突破と④塔6〜8。副産物の **`characters.master_id`**（[tech_db/player.md](../tech/basic/tech_db/player.md) §4・Phase 4・未実装）と**酒場専用16体**（[master/character.md](../data/master/character.md) §7.3）は確定済み。
 
 ## 0. 並行作業のルール（着手前に読む）
 
@@ -37,10 +37,11 @@ worktree を使う複数セッションが同時に走る前提。**着手状態
 
 | 優先 | タスク | 前提 | wt 名 / 領域 | 工程スキル |
 |------|-------|------|------------|-----------|
-| 0 | **Phase 4 詳細設計 ②鍛冶屋・素材** `/api/forge/*`（強化・製作・分解の3操作）。強化上限・製作可能レアリティ・強化コスト倍率の解決は `tech_base.md` §2.1（**2026-08-08 にしきい値方式を廃止し全10LV定義へ変更済み**。施設LVと一致する行を引くだけ）。数値の正は `economy.md` §2.9 と `master/equipment.md`。書式は `tech_scout.md` に揃える（新規 `tech_forge.md` を起こし索引3点へ登録） | なし（Java 移行と独立） | `p4forge-detail`<br>docs/tech | `detail-design` |
+| 0 | **`efficiency_memo.md` の字数是正**（9,276字 / 上限8,000字・**1,276字超過**）。`d10574d` の追記で超過し、`check_doc_size.py` が exit 1 になっている＝**ドキュメント工程の完了ゲートが全セッションで通らない**。`retro` で反映済みエントリを消化して縮めるのが本筋（縮まりきらなければ `doc-size` で分割） | なし（最優先。docs を触る行はこれを通してから） | `memo-shrink`<br>docs/backlog | `retro` |
 | 1 | **Phase 4 詳細設計 ③限界突破** `POST /api/character/limit-break`。素材＝同一 `master_id` のキャラ1体を消費し `limit_break` を+1（上限5回。ボーナスの正は `master/character.md` §8.1）。探索中は不可（`tech_state.md` §4）。重複の発生源とレスポンスの `canLimitBreak` は `tech_scout.md` §6 が正 | ①完了済み（`master_id`・重複仕様が確定） | `p4limitbreak-detail`<br>docs/tech | `detail-design` |
-| 2 | **Phase 4 ④ダンジョン3（塔6〜8）のマスターデータ**。`docs/data/towers/` に3ファイルを追加し `TOWERS_OVERVIEW.md` と `master_data.md` の索引を更新する。書式は既存の `009_黄昏の塔.md` 等に揃える | なし | `towers-6to8`<br>docs/data | `detail-design` |
-| 3 | 移行 STEP 3-A-2（register / login / logout）。`BCryptPasswordEncoder`(strength 12) と `SecurityConfig` の認証不要パス追加を含む（持ち越しの正は java_migration.md §4 の 2-B 表）。初期化は 1c の手順2以降を再利用する（`tech_auth.md` §8 冒頭） | 3-A-1c の完了 | `step3a2-auth`<br>backend | `test-list` → `dev` |
-| 4 | 移行 STEP 3-B（Phase 1 の game / battle / tower 移植）。**tower は `tech_tower.md` が無く分岐一覧も無い**ため詳細設計から始める（game・battle は分岐一覧あり。詳細は [carryover_notes.md](carryover_notes.md) §1） | 3-A の完了 | `step3b-phase1`<br>backend | `detail-design` → `test-list` → `dev` |
+| 1 | **Phase 4 ④ダンジョン3（塔6〜8）のマスターデータ**。`docs/data/towers/` に3ファイルを追加し `TOWERS_OVERVIEW.md` と `master_data.md` の索引を更新する。書式は既存の `009_黄昏の塔.md` 等に揃える | なし | `towers-6to8`<br>docs/data | `detail-design` |
+| 2 | 移行 STEP 3-A-2（register / login / logout）。`BCryptPasswordEncoder`(strength 12) と `SecurityConfig` の認証不要パス追加を含む（持ち越しの正は java_migration.md §4 の 2-B 表）。初期化は 1c の手順2以降を再利用する（`tech_auth.md` §8 冒頭） | 3-A-1c の完了 | `step3a2-auth`<br>backend | `test-list` → `dev` |
+| 3 | 移行 STEP 3-B（Phase 1 の game / battle / tower 移植）。**tower は `tech_tower.md` が無く分岐一覧も無い**ため詳細設計から始める（game・battle は分岐一覧あり。詳細は [carryover_notes.md](carryover_notes.md) §1） | 3-A の完了 | `step3b-phase1`<br>backend | `detail-design` → `test-list` → `dev` |
+| 4 | **Phase 4 テストリスト作成（拠点・施設・鍛冶屋）**。`tech_base.md` §7・§8（36件）と `tech_forge_{enhance,craft,disassemble}.md` §9〜§11（74件）を失敗するテストへ展開する。Java 側の分岐マーカーは `check_branch_list.py --tests` が見ていない（[carryover_notes.md](carryover_notes.md) §1）ため照合は手で行う | Phase 4 の詳細設計②まで完了。③④とは独立 | `p4base-testlist`<br>backend | `test-list` |
 
 - 上記に載らない**複数セッションにまたがる申し送り**（移行 STEP の順序・環境・確定済み仕様の波及）は [carryover_notes.md](carryover_notes.md) が持つ。着手前にそちらも見る
