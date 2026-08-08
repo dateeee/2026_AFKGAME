@@ -13,6 +13,7 @@ worktree は1つのリポジトリから複数の作業ツリーを同時に開�
 | 操作 | コマンド |
 |------|---------|
 | 作成 | `python scripts/worktree.py add <名前> [--base main]` |
+| 統合 | `python scripts/worktree.py merge <名前> [--keep]`（main 取り込み → ff 統合 → worktree・ブランチ削除まで一括。main 側で実行） |
 | 削除 | `python scripts/worktree.py remove <名前> [--delete-branch]` |
 | 一覧 | `python scripts/worktree.py list` |
 
@@ -24,7 +25,7 @@ worktree は1つのリポジトリから複数の作業ツリーを同時に開�
 |---|-------|
 | 1 | **1 worktree = 1 タスク（工程スキル1件）**。完了したら即 main へ統合して worktree を削除する。長生きブランチが競合の最大要因 |
 | 2 | **触るファイル領域が重ならないタスクだけ並行させる**（backend 実装 × docs 整備は○、同一システムを触る2タスクは×）。`next_session.md` の候補キューから選ぶ時点で担当ファイルの重なりを確認する |
-| 3 | **統合前に main を取り込む**（worktree 側で `git merge main` してから main へ戻す）。手順は §5.3 |
+| 3 | **統合前に main を取り込む**（`merge` コマンドが自動で行う）。手順は §5.3 |
 | 4 | 追記型ファイル（changelog・効率メモ）は自動解決に任せる（§3） |
 | 5 | 単独更新ファイル（§3 の表）は **main のセッションでのみ更新**し、worktree では触らない |
 | 6 | Stop フックの自動コミットは各 worktree で独立に働くため、未コミットのまま放置されない。`remove` が「未コミットあり」で失敗したら消す前にコミットする |
@@ -82,20 +83,21 @@ worktree は1つのリポジトリから複数の作業ツリーを同時に開�
 
 ### 5.3 完了手順（統合）
 
-**main への merge と worktree 削除の前にユーザーへ確認を取る**（main を書き換える不可逆な操作のため）。
+worktree の作成・統合（main への merge）・削除は**ユーザーへの確認なしで進めてよい**。確認が要るのは競合解消の方針など機械的に決められない判断だけ。
 
 | 順 | 場所 | 操作 |
 |----|------|------|
-| 1 | worktree | 成果物をコミット（未コミットが残ると 4 の `remove` が失敗する） |
-| 2 | worktree | `git merge main` → 競合解消 → テスト |
-| 3 | — | `ExitWorktree`（`action: "keep"`）で main へ戻る。**`"remove"` は効かない**（§5.4）ので削除は 4 で行う |
-| 4 | main | `git merge wt/<名前>`（fast-forward）→ `python scripts/worktree.py remove <名前> --delete-branch` |
-| 5 | main | `next_session.md` の更新（§3 のとおり main でのみ）→ コミット |
+| 1 | worktree | 成果物をコミットし、テストが通ることを確認 |
+| 2 | — | `ExitWorktree`（`action: "keep"`）で main へ戻る。**`"remove"` は効かない**（§5.4） |
+| 3 | main | `python scripts/worktree.py merge <名前>`（main 取り込み → ff 統合 → worktree・ブランチ削除まで一括） |
+| 4 | main | `next_session.md` の更新（§3 のとおり main でのみ）→ コミット |
+
+`merge` が「競合」で止まったら: worktree 側のファイルを編集して解消 → worktree でコミット → main から `merge` を再実行（worktree へ入り直す必要はない）。
 
 ### 5.4 前提と注意
 
 - **内蔵 worktree 機能とは別物**: `EnterWorktree` を `name` 付きで呼ぶと `.claude/worktrees/`（gitignore 済み）に作られ、§1 の配置規約・`settings.local.json` のコピー・rerere が効かない。必ず `add` してから `path` で入る
-- `ExitWorktree` が削除できるのは自分が `name` で作った worktree だけ。`path` で入ったものは `"keep"` で戻るのみ（実体は §5.3 の 4 で消す）
+- `ExitWorktree` が削除できるのは自分が `name` で作った worktree だけ。`path` で入ったものは `"keep"` で戻るのみ（実体は §5.3 の 3 の `merge` が消す）
 - `.claude/`（スキル・フック・プロファイル）はコミット済みなので worktree にも同梱されそのまま動く。`settings.local.json` は `add` がコピーする
 - 効率メモ・Stop フックは各 worktree 内の自分のファイルへ書き、統合時に `merge=union` で合流する
 - 自動メモリ（`~/.claude/projects/<パス>/memory/`）はディレクトリパス単位のため worktree では別になる。プロジェクトの正はリポジトリ内ドキュメントに置く方針（`MEMORY.md` 参照）なので実害はない
