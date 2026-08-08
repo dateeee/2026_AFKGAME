@@ -9,7 +9,7 @@
 
 **レビュー由来の未消化2件**（本ファイルの行にしない申し送り。正は [carryover_notes.md](carryover_notes.md)）: Java 規約チェッカーの常設化と、Phase 3 Python 実装（`c3e9a2b`）が未レビューである件。
 
-**⚠ main に未コミットの `docs/process/coding_standards_backend.md` が残っている**（本セッションの成果物ではないため触っていない）。原則表へ「準拠元 = Terasoluna ガイドライン 5.11.0.RELEASE」を足す内容で、**区分C上限（8,000字）を超過**（2026-08-08 23:3x 時点で編集が進行中のため字数は変動する）。ISSUE-608 で同ファイルを触る前に、この差分を圧縮してコミットするか捨てるかを決めること（§1 の「7,984字 / 残り16字」はこの差分を含まない数値）。
+**コーディング規約が索引 + 4分冊になった**（`499e161`）。[coding_standards_backend.md](../process/coding_standards_backend.md) は索引（適用範囲・**準拠元 = TERASOLUNA 開発ガイドライン 5.11.0.RELEASE 日本語版**・原則・分冊索引）だけを持ち、規約本体は `coding_standards_backend/` の common / domain / web / test にある。**common が旧 §2〜§9 の節番号を維持**しているので既存の節参照はパス変更だけで有効（旧 §4「レイヤ別の規約」のみ層別へ分解）。**規約はガイドラインとの差分だけを持つ**方針なので、追記の前にガイドライン側に同じ記述が無いかを見る。テストコードの記述規約の正も `.claude/project/test-list.md` §5 から `coding_standards_backend/test.md` へ移った。
 
 **単体テストと結合テストが実行レベルで分かれた**（`641bab1`）。surefire が `@Tag("unit")` のみ、failsafe が `@Tag("integration")` のみを回し、**JaCoCo の C1 判定は単体テストだけで行う**（failsafe 側は `argLine` 上書きで agent を外している）。`mvn verify` は従来どおり両方を通す。Terasoluna ガイドラインとの差分（採らないと決めた DBUnit・`MockMvcTester`・`@InjectMocks` の理由、新規実装から適用するログ検証・Bean Validation 検証）の正は [.claude/project/unit-test.md](../../.claude/project/unit-test.md) §8。
 
@@ -37,7 +37,7 @@ worktree を使う複数セッションが同時に走る前提。**着手状態
 ```
 /dev 移行 STEP 3-A-1 レビュー指摘の修正適用 セグメント2: docs/reviews/backend-review/2026-08-08_221814.md の低4件 + ドキュメント（ISSUE-607〜611）を適用する。これで11件すべてが片付き、STEP 3-A-1 の製造完了ゲートが閉じる（.claude/project/dev.md §7「指摘対応まで完了してゲート通過」）
 完了条件: `mvn verify` 全モジュール成功・JaCoCo branch 100% 維持。ドキュメントを触ったら `python scripts/check_doc_size.py` と `python scripts/check_docs.py`、分岐を足したら `python scripts/check_branch_list.py --tests` を exit 0 にする
-参照: docs/reviews/backend-review/2026-08-08_221814.md の ISSUE-607（行347）〜ISSUE-611（行514）が起点。**ISSUE-607 は登録が要るのは 4xx のみ**（セグメント1の ISSUE-604 で 5xx は `INTERNAL_UNEXPECTED_ERROR` へ寄せたため、`HTTP_<status>` が出るのは 4xx だけになった）。ISSUE-608（静的 `SecureRandom`）で規約本文を改訂するなら派生の .claude/references/coding-standards-backend.md も同時更新（profile.md §7 規約6）で、**`coding_standards_backend.md` は 7,984字 / 残り16字**なので既存節の圧縮を同じ編集にまとめる（同 規約7）
+参照: docs/reviews/backend-review/2026-08-08_221814.md の ISSUE-607（行347）〜ISSUE-611（行514）が起点。**ISSUE-607 は登録が要るのは 4xx のみ**（セグメント1の ISSUE-604 で 5xx は `INTERNAL_UNEXPECTED_ERROR` へ寄せたため、`HTTP_<status>` が出るのは 4xx だけになった）。ISSUE-608（静的 `SecureRandom`）の規約側の例外明記は、**規約分割にあわせて `coding_standards_backend/common.md` §4 #2 と派生の .claude/references/coding-standards-backend.md へ適用済み**（要確認・コード側の対応が残っていないかを見る）。以後この規約を改訂するときの書き先も同じ2ファイル（profile.md §7 規約6。残り2,814字あるので圧縮は不要）
 前提: `885c644` でセグメント1（ISSUE-601〜606）を適用済み（`mvn verify` BUILD SUCCESS・テスト131件 PASS・JaCoCo branch 100%）。**ファイルを編集するので worktree を作る**: `python scripts/worktree.py add fix-bereview-3a1b` → `EnterWorktree` に `path` で移動（領域は backend + docs。§2 優先3・優先4 と backend が重なるため並行させない）。**環境（2026-08-08 に実行確認済み）**: `mvn`・`java` は PATH にも JAVA_HOME にも無く、Bash から動くのは `JAVA_HOME="/c/Program Files/Eclipse Adoptium/jdk-17.0.20.8-hotspot" "/c/Users/tubas/AppData/Local/Programs/apache-maven-3.9.11/bin/mvn" -f backend/pom.xml verify` の形（出力は CP932 なのでログはファイルへ落として `iconv -f CP932 -t UTF-8` で読む）。**1クラスだけ流すときは `-Dtest=X -Dsurefire.failIfNoSpecifiedTests=false`、`-pl <module>` には必ず `-am` を付ける**（付けないと `~/.m2` の古い成果物を拾い、変更が効いていない結果を見る）
 ```
 
