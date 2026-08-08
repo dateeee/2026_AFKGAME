@@ -77,4 +77,4 @@
 ## 2026-08-08 21:30 | session c4f40b08 | 自動検出
 - シグナル: long-turn(calls=84)
 - ターン概要: ツール84回・エラー0回・拒否0回。開始:「<ide_opened_file>The user opened the file c:\GIT\2026_AFKGAM」
-- 原因と改善案: （未記入 — Claude が1〜2行で追記する）
+- 原因と改善案: **編集対象を main と worktree で二度読みした**（11ファイル・約12回）。worktree へ入るのが §4 反映の直前で Edit が worktree パスでの Read を要求するため → `requirements.md` §4 へ「§2 の現状把握の**前に** worktree へ入る」を追記する
