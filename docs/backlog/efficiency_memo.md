@@ -85,3 +85,9 @@
 - シグナル: same-read(java_migration.md×2) / long-turn(calls=59)
 - ターン概要: ツール59回・エラー0回・拒否0回。開始:「<ide_opened_file>The user opened the file c:\GIT\2026_AFKGAM」
 - 原因と改善案: **`carryover_notes.md` が既に記録していた「`java_migration.md` は残り12字・次の追記は圧縮では吸収できない」を読まずに追記へ入った**ため、10編集を入れてから超過（11,532字）に気づき、分割のために同ファイルを再Readした（same-read の実体）。00:11 の同種指摘への対策は `/next` SKILL §0 へ「着手前に carryover_notes.md を読む」を足すことだったが、**本セッションは質問から始まって編集タスクへ変わった**ため `/next` を経由せず効かなかった。→ スキル非経由でも効く場所として [.claude/project/doc-size.md](../../.claude/project/doc-size.md) §3.1 の判断表へ #0「**追記前に**対象の残量（`--sections`）と `carryover_notes.md` の該当行を確認する。残量が上限の5%未満なら追記せず先に分割する」を追加する。long-turn(calls=59) は誤検出（ガイドライン2ページの精読 → リポジトリ実態調査 → 方針3案の提示 → ユーザー決定2件 → 計画改訂 → 分割 → 参照元11箇所の張り直し → 検証 → コミットを1ターンで完走。エラー0・拒否0）。ただし先に分割していれば約10コールは不要だった。
+
+## 2026-08-09 00:41 | session 41a85d7f | 自動検出
+- シグナル: long-turn(calls=78)
+- ターン概要: ツール78回・エラー0回・拒否0回。開始:「<command-message>next</command-message>」
+- 原因と改善案: **統合〜引き継ぎ更新までを1ターンで完走した正当な分量**（鮮度確認 → merge → 競合3ファイルの解消 → 検証 → 統合 → 統合後3タスク → 引き継ぎ書き換え → コミット2件。エラー0）だが、**引き継ぎを書き換える段になって `next_session.md` が既に上限超過（9,164字）だと気づいた**のが無駄で、`carryover_notes.md` への移設と同ファイルの H2 分割・節番号繰り下げが後追いになった（約8コール）。`check_doc_size.py` の台帳には「統合直後に再測定し、超えるなら冒頭の『決まった流儀』を carryover_notes.md へ移す」と**手順まで書いてあったのに読んでいない**（00:11・00:24 と同じ「先行セッションの申し送りを読まずに編集へ入る」パターンの3回目）。→ [.claude/project/next.md](../../.claude/project/next.md) §4 の冒頭へ「**書き換える前に** `check_doc_size.py --sections docs/backlog/next_session.md` を実行し、台帳（`KNOWN_OVERSIZED`）に本ファイルの行があれば**その是正方針をそのまま実施してから**書く」を追加する。
+- 別件: Python 残骸の物理削除（`backend/{app,tests,alembic,.pytest_cache,...}`・`__pycache__`）が Bash・PowerShell とも権限分類器に拒否され**未実施**。再帰削除が必要な後片付けは、引き継ぎの「統合後」へ書くだけでなく**承認が要る前提でユーザーへ提示する**手順にしておくと1往復で済む。
