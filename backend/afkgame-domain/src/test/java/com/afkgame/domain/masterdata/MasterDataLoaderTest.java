@@ -20,6 +20,8 @@ import jakarta.validation.Validator;
  * マスターデータの不備は**起動時に**すべて例外へ落とし、実行時に欠損の分岐を作らない。
  *
  * <p>分岐観点: リソース不在 / パース失敗 / 空 / スキーマ違反 / ID重複 / 正常。
+ * リスト形式（{@code load}）に加え、単一オブジェクト形式（{@code loadSingle}）も同じ観点で扱う
+ * （{@code initial_player.yml} のようにIDキーを持たないマスターデータ用）。
  * 骨格構築（java_migration.md STEP 2）の横断基盤であり詳細設計の分岐一覧を持たないため、
  * 分岐マーカーは付けない。
  */
@@ -100,6 +102,57 @@ class MasterDataLoaderTest {
             assertThatThrownBy(() -> load("masterdata-invalid/duplicate-id.yml"))
                     .isInstanceOf(MasterDataException.class)
                     .hasMessageContaining("hp_potion");
+        }
+    }
+
+    /**
+     * IDキーを持たない単一オブジェクトの読み込み。
+     *
+     * <p><strong>製造工程への申し送り（本テストが要求する表層）</strong>:
+     * {@code <T> T loadSingle(String resourcePath, Class<T> type)} を追加する。
+     * リソース不在・パース失敗・スキーマ違反はいずれも {@link MasterDataException} で
+     * 起動を中止し、メッセージにリソースパスを含める（{@code load} と同じ扱い）。
+     * ネストした record まで検証するため、対象 record のフィールドには {@code @Valid} を付ける。
+     */
+    @Nested
+    @DisplayName("loadSingle（単一オブジェクト）")
+    class TestLoadSingle {
+
+        @Test
+        @DisplayName("単一オブジェクトの YAML を record へ読み込む")
+        void test_単一オブジェクトを読み込む() {
+            InitialPlayerData actual =
+                    loader.loadSingle("masterdata/initial_player.yml", InitialPlayerData.class);
+
+            assertThat(actual.character().id()).isEqualTo("hero_001");
+            assertThat(actual.items()).hasSize(1);
+        }
+
+        @Test
+        @DisplayName("リソースが存在しなければ例外")
+        void test_単一オブジェクトでリソース不在なら例外() {
+            assertThatThrownBy(() -> loader.loadSingle("masterdata/not-exists.yml",
+                    InitialPlayerData.class))
+                    .isInstanceOf(MasterDataException.class)
+                    .hasMessageContaining("masterdata/not-exists.yml");
+        }
+
+        @Test
+        @DisplayName("ネストした record の必須項目が空なら例外（違反した項目名をメッセージに含める）")
+        void test_ネストしたスキーマ違反で例外() {
+            assertThatThrownBy(() -> loader.loadSingle(
+                    "masterdata-invalid/initial_player-blank-id.yml", InitialPlayerData.class))
+                    .isInstanceOf(MasterDataException.class)
+                    .hasMessageContaining("character.id");
+        }
+
+        @Test
+        @DisplayName("スキーマに無いキーがあれば例外（項目名の誤りを見逃さない）")
+        void test_単一オブジェクトで未知のキーなら例外() {
+            assertThatThrownBy(() -> loader.loadSingle(
+                    "masterdata-invalid/initial_player-unknown-key.yml", InitialPlayerData.class))
+                    .isInstanceOf(MasterDataException.class)
+                    .hasMessageContaining("masterdata-invalid/initial_player-unknown-key.yml");
         }
     }
 }

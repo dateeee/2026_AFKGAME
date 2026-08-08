@@ -1,0 +1,14 @@
+# 異常系フィクスチャ: 単一オブジェクト読み込みでスキーマに無いキーがある
+# 分岐一覧の行ではなく MasterDataLoader#loadSingle の横断検証（items.yml と同じ扱い）。
+# growthRate は「成長率はレベルアップ移植時に追加する」（tech_auth.md §8.1）の裏返しで、
+# 先走って足すと起動時に落ちることを表す。
+
+character:
+  id: hero_001
+  name: 勇者
+  type: melee
+  level: 1
+  growthRate: 20
+items:
+  - id: hp_potion
+    quantity: 5
