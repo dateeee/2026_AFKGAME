@@ -80,3 +80,8 @@
 - ターン概要: ツール209回・エラー4回・拒否0回。開始:「<ide_opened_file>The user opened the file c:\GIT\2026_AFKGAM」
 - 原因と改善案: **23:41・23:45 の改善案が未適用のまま同じ壁に3回目** — 統合直前に main が dirty（別セッションが STEP 2R のドキュメント改訂中）で merge が弾かれ、同じ7ファイルを双方が編集していて手動競合が確定した。→ **`retro` を回して 23:45 の①②を反映する**のが第一で、あわせて `worktree_guide.md` §5.2 へ「ホットスポット（`java_migration.md`・`known_issues.md`・`README.md`）を worktree 側で触ると決めた時点で main の進行を確認する」を追記。same-command×3 は `EnterWorktree` 後の cwd が worktree なのに `cd <worktree> &&` を前置していたもの（複合コマンドは分離ガードで弾かれる）→ §5.4 へ1行。errors×4 の2件と long-turn は誤検出。
 - 本ファイル自体が上限超過（8,7xx字 / 8,000字）。未消化3エントリが積んだ結果で、**`retro` の実行が是正そのもの**。
+
+## 2026-08-09 00:24 | session c8b8ca48 | 自動検出
+- シグナル: same-read(java_migration.md×2) / long-turn(calls=59)
+- ターン概要: ツール59回・エラー0回・拒否0回。開始:「<ide_opened_file>The user opened the file c:\GIT\2026_AFKGAM」
+- 原因と改善案: **`carryover_notes.md` が既に記録していた「`java_migration.md` は残り12字・次の追記は圧縮では吸収できない」を読まずに追記へ入った**ため、10編集を入れてから超過（11,532字）に気づき、分割のために同ファイルを再Readした（same-read の実体）。00:11 の同種指摘への対策は `/next` SKILL §0 へ「着手前に carryover_notes.md を読む」を足すことだったが、**本セッションは質問から始まって編集タスクへ変わった**ため `/next` を経由せず効かなかった。→ スキル非経由でも効く場所として [.claude/project/doc-size.md](../../.claude/project/doc-size.md) §3.1 の判断表へ #0「**追記前に**対象の残量（`--sections`）と `carryover_notes.md` の該当行を確認する。残量が上限の5%未満なら追記せず先に分割する」を追加する。long-turn(calls=59) は誤検出（ガイドライン2ページの精読 → リポジトリ実態調査 → 方針3案の提示 → ユーザー決定2件 → 計画改訂 → 分割 → 参照元11箇所の張り直し → 検証 → コミットを1ターンで完走。エラー0・拒否0）。ただし先に分割していれば約10コールは不要だった。
