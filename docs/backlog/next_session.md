@@ -5,7 +5,9 @@
 > **鮮度**: 開始側は「前提」のコミットIDと git log を突合し、完了済みに見えたら開始せずユーザーへ確認する。
 > 本ファイルは**ポインタ専用**。Phase 進捗の正は [development_process.md](../process/development_process.md) §5、書式の正は [.claude/project/next.md](../../.claude/project/next.md)。
 
-最終更新: 2026-08-08 / 対応コミット: 7db23f3 の次（**編集は worktree で行う**運用の導入。次回タスクは変わらない）。その前の `c04d98a` の次が **移行 STEP 3-A-1 の詳細設計**を確定したコミット。`test-list` が「`tech_auth.md` に分岐一覧が無い」ことを理由に着手前停止したのが起点で、`tech_auth.md` §8（処理フロー8手順 + 分岐一覧12件）を新設し、未文書化だった `hp_potion×5` と表示名 `冒険者` の正を宣言、初期値の Java 側配置を「値の正の所在で振り分ける」へ確定した。**製造はここから**。手順・進捗の正は [java_migration.md](java_migration.md)
+最終更新: 2026-08-08 / 対応コミット: **Phase 4 拠点・施設の詳細設計**（`tech_base.md` 新設）。ユーザー指示で Java 移行キューから一時的に外れ、Phase 4 の詳細設計へ着手した。移行 STEP 3-A-1a（下記 §1）は**未着手のまま有効**。その前の `c04d98a` の次が移行 STEP 3-A-1 の詳細設計を確定したコミット。手順・進捗の正は [java_migration.md](java_migration.md)
+
+**次にどちらを進めるかはユーザー判断待ち**: (A) Phase 4 詳細設計の続き（§2 の優先1）／(B) Java 移行の再開（§1）。
 
 ## 1. 次回（コピペ用）
 
@@ -20,6 +22,7 @@
 
 | 優先 | タスク | 工程スキル |
 |------|-------|-----------|
+| 0 | **Phase 4 詳細設計の残り**（拠点・施設は完了）。①酒場スカウト `POST /api/base/scout`（排出率の正は `master/character.md` §7.3。抽選は `tech_rng.md` に沿う）②鍛冶屋・素材 `/api/forge/*`（強化・製作・分解。コスト倍率の解決は `tech_base.md` §2.1 のしきい値規則を使う）③限界突破 `POST /api/character/limit-break` ④ダンジョン3（塔6〜8）のマスターデータ | `detail-design` |
 | 1 | 移行 STEP 3-A-1b（初期化対象の Entity + Mapper）。`players` / `player_settings` / `characters` / `character_equip_slots` / `inventory_items` の Entity と MyBatis3 Mapper（インタフェース + XML）。列・一意制約の正は `tech_db/player.md` §1・§2・§4 と `tech_db/item.md` §2・§3 | `test-list` → `dev` |
 | 2 | 移行 STEP 3-A-1c（プレイヤー初期化サービス + 結線）。`tech_auth.md` §8.2 の8手順を単一トランザクションで実装し `POST /api/auth/guest` へ結線。分岐一覧 #1・#2・#5・#7〜#9・#11・#12 が対象 | `test-list` → `dev` |
 | 3 | 移行 STEP 3-A-2（register / login / logout）。`BCryptPasswordEncoder`(strength 12) と `SecurityConfig` の認証不要パス追加を含む（持ち越しの正は java_migration.md §4 の 2-B 表）。初期化は 3-A-1c の手順2以降を再利用する（`tech_auth.md` §8 冒頭） | `test-list` → `dev` |
