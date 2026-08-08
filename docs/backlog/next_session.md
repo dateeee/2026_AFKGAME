@@ -9,6 +9,10 @@
 
 **レビュー由来の未消化2件**（本ファイルの行にしない申し送り。正は [carryover_notes.md](carryover_notes.md)）: Java 規約チェッカーの常設化と、Phase 3 Python 実装（`c3e9a2b`）が未レビューである件。
 
+**⚠ main に未コミットの `docs/process/coding_standards_backend.md` が残っている**（本セッションの成果物ではないため触っていない）。原則表へ「準拠元 = Terasoluna ガイドライン 5.11.0.RELEASE」を足す内容で、**区分C上限（8,000字）を超過**（2026-08-08 23:3x 時点で編集が進行中のため字数は変動する）。ISSUE-608 で同ファイルを触る前に、この差分を圧縮してコミットするか捨てるかを決めること（§1 の「7,984字 / 残り16字」はこの差分を含まない数値）。
+
+**単体テストと結合テストが実行レベルで分かれた**（`641bab1`）。surefire が `@Tag("unit")` のみ、failsafe が `@Tag("integration")` のみを回し、**JaCoCo の C1 判定は単体テストだけで行う**（failsafe 側は `argLine` 上書きで agent を外している）。`mvn verify` は従来どおり両方を通す。Terasoluna ガイドラインとの差分（採らないと決めた DBUnit・`MockMvcTester`・`@InjectMocks` の理由、新規実装から適用するログ検証・Bean Validation 検証）の正は [.claude/project/unit-test.md](../../.claude/project/unit-test.md) §8。
+
 **分岐マーカーの照合が Java へ効くようになった**（`fbf2073`）。`check_branch_list.py --tests` の走査先が移行前の `backend/tests/unit/*.py` だけで、かつ節番号の正規表現が `§8.3` の枝番に非対応だったため、Java テストのマーカーを1件も見ていなかった。両方を直したので、以後は `--tests` の exit 0 が対応漏れゼロの根拠になる（手で照合しなくてよい）。
 
 **`#2` の決着**: `uq_players_user_id` 違反に対応する業務エラーコードは AUTH_ 一覧に無く、公開APIからは到達しない経路のため**新設しない**。`DuplicateKeyException` をそのまま送出し 500 `INTERNAL_UNEXPECTED_ERROR` として扱う（3-A-2 の register でも同じ判断を使う）。

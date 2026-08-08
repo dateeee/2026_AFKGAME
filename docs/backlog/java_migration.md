@@ -32,9 +32,9 @@
 | 認証 | Spring Security + JJWT | 方式・期限は [tech_auth.md](../tech/detail/tech_auth.md) が正（変更なし） |
 | パスワード | `BCryptPasswordEncoder`（strength 12） | 既存ハッシュと互換（同一 bcrypt 形式） |
 | ログ | Logback + MDC | `X-Request-ID` は MDC で引き回す |
-| テスト | JUnit 5 + Mockito + JaCoCo | C1 = JaCoCo **branch 100%** |
+| 単体テスト | JUnit 5 + Mockito + JaCoCo | surefire で `unit` タグのみ。C1 = **branch 100%** |
 | 依存脆弱性スキャン | OWASP Dependency-Check（Maven プラグイン） | `pip-audit` の置き換え |
-| 統合テスト | MockMvc（`@SpringBootTest`）+ **埋め込み PostgreSQL** | FastAPI TestClient の置き換え。DBは `io.zonky.test:embedded-postgres`（`local` と同じ PostgreSQL 16 系）を使い、Docker なしで `mvn verify` を完結させる |
+| 統合テスト | MockMvc（`@SpringBootTest`）+ **埋め込み PostgreSQL** | failsafe で `integration` タグのみ（計測外）。DBは `embedded-postgres`（`local` と同じ 16 系）で `mvn verify` は Docker 不要 |
 | E2E | Playwright（既存を流用） | 変更なし |
 | 設定 | `application.yml` + 環境変数 | `.env` / `config.py` の置き換え |
 | DB | **PostgreSQL に統一** | `local` は Docker Compose、`production` は EC2 同居。ドライバは `postgresql` JDBC。SQLite は採用しない（§5） |

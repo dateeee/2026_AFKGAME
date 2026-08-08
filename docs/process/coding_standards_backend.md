@@ -13,13 +13,15 @@
 |------|------|
 | 対象 | `backend/` 配下の全 `.java`、Mapper XML、`application*.yml`、`logback-*.xml`、Flyway SQL |
 | 非対象 | `frontend/`（別書）、`scripts/`・`.claude/scripts/`（開発補助の Python） |
+| 準拠元 | [TERASOLUNA Server Framework for Spring 開発ガイドライン 5.11.0.RELEASE 日本語版](https://github.com/terasolunaorg/terasolunaorg.github.com/tree/master/guideline/5.11.0.RELEASE/ja)（以下「ガイドライン」） |
 
 | # | 原則 |
 |---|------|
-| 1 | **本書に無い判断は近傍の既存コードに倣う**。同じ層の既存クラスと書き方を揃えることを好みより優先する |
-| 2 | **レイヤの責務を越えない**（§2 の依存方向・§4 の層別規約） |
-| 3 | **仕様の正はドキュメント**。バランス数値・エラーコード・スキーマをコードに埋め込まない（[spec_ownership.md](spec_ownership.md)） |
-| 4 | 規約と既存コードが食い違っていたら、直さずに [known_issues.md](../backlog/known_issues.md) へ記録する |
+| 1 | **設計・実装はガイドラインをベースに作る**。本書はガイドラインとの差分（本プロジェクト固有の決定・上書き）だけを持ち、本書に無い規約はガイドラインに従う。ガイドラインは 5.11.0.RELEASE 版を読む（実装の `terasoluna-gfw` は 5.10.1.RELEASE。食い違う記述は実装版の制約が優先） |
+| 2 | **本書に無い判断は近傍の既存コードに倣う**。同じ層の既存クラスと書き方を揃えることを好みより優先する |
+| 3 | **レイヤの責務を越えない**（§2 の依存方向・§4 の層別規約） |
+| 4 | **仕様の正はドキュメント**。バランス数値・エラーコード・スキーマをコードに埋め込まない（[spec_ownership.md](spec_ownership.md)） |
+| 5 | 規約と既存コードが食い違っていたら、直さずに [known_issues.md](../backlog/known_issues.md) へ記録する |
 
 ## 2. モジュールとパッケージ
 
@@ -74,18 +76,17 @@
 
 | # | 規約 |
 |---|------|
-| 1 | インデントは**半角スペース4つ**（タブ禁止）、継続行は8つ。1行は120字を目安に折る |
+| 1 | インデントは**半角スペース4つ**（タブ禁止）、継続行は8つ。1行は120字を目安に折る。UTF-8 / LF / 末尾に改行1つ |
 | 2 | `import` は `java` → `javax` → `org` → `com` → その他（`jakarta` 等）の順。グループ間に空行1つ。**ワイルドカード import 禁止**、未使用 import を残さない |
-| 3 | 文字コードは UTF-8、改行は LF、ファイル末尾に改行1つ |
-| 4 | フィールドは原則 `private final`。可変が必要なのは MyBatis がマッピングする Entity だけ |
-| 5 | 不変のデータ構造は `record`（Resource・マスターデータ・戻り値の組）。getter/setter を持つ class は Entity に限る |
-| 6 | `var` は右辺から型が自明なときのみ使う |
-| 7 | `null` を返しうるメソッドは Javadoc に明記する。`Optional` は**戻り値にのみ**使い、フィールド・引数に使わない |
-| 8 | 日時は `java.time`。既定は `Instant`（DB は `timestamptz`）。`java.util.Date`・`Calendar` を使わない |
-| 9 | ゴールド・経験値などの整数は `long`。浮動小数で保持しない。丸めは [tech_numeric.md](../tech/detail/tech_numeric.md) に従う |
-| 10 | **マジックナンバー禁止**。技術的な定数は `private static final` + Javadoc、運用値は `application.yml`、ゲームバランス値はマスターデータ（YAML）へ置く |
-| 11 | 早期 return でネストを浅くする（3段以上ネストさせない）。ループ内で文字列を `+` 連結しない |
-| 12 | 可視性は最小に。`@Override` を省略せず、`@SuppressWarnings` には理由コメントを添える |
+| 3 | フィールドは原則 `private final`。可変が必要なのは MyBatis がマッピングする Entity だけ |
+| 4 | 不変のデータ構造は `record`（Resource・マスターデータ・戻り値の組）。getter/setter を持つ class は Entity に限る |
+| 5 | `var` は右辺から型が自明なときのみ使う |
+| 6 | `null` を返しうるメソッドは Javadoc に明記する。`Optional` は**戻り値にのみ**使い、フィールド・引数に使わない |
+| 7 | 日時は `java.time`。既定は `Instant`（DB は `timestamptz`）。`java.util.Date`・`Calendar` を使わない |
+| 8 | ゴールド・経験値などの整数は `long`。浮動小数で保持しない。丸めは [tech_numeric.md](../tech/detail/tech_numeric.md) に従う |
+| 9 | **マジックナンバー禁止**。技術的な定数は `private static final` + Javadoc、運用値は `application.yml`、ゲームバランス値はマスターデータ（YAML）へ置く |
+| 10 | 早期 return でネストを浅くする（3段以上ネストさせない）。ループ内で文字列を `+` 連結しない |
+| 11 | 可視性は最小に。`@Override` を省略せず、`@SuppressWarnings` には理由コメントを添える |
 
 ## 6. 例外とエラー
 
@@ -103,11 +104,12 @@
 
 | # | 規約 |
 |---|------|
-| 1 | SLF4J を使う。`private static final Logger logger = LoggerFactory.getLogger("afkgame.<領域>")` の形で、**ロガー名体系の名前**を指定する（`getLogger(Xxx.class)` にしない）。名前の正は [tech_logging.md](../tech/basic/tech_logging.md)「ロガー名体系」（レベル・フォーマット・マスク規則も同ファイルが正） |
-| 2 | メッセージはプレースホルダ `{}` で組む（文字列連結・`String.format` を使わない） |
-| 3 | パスワード・トークン生値・メールアドレスをそのまま出さない |
-| 4 | `request_id` などの横断項目は MDC（`RequestLogFilter`）が載せる。各所で詰め直さない |
-| 5 | `System.out.println`・`printStackTrace` を使わない |
+| 1 | SLF4J を使う。`private static final Logger logger = LoggerFactory.getLogger("afkgame.<領域>")` の形で、**ロガー名体系の名前**を指定する（`getLogger(Xxx.class)` にしない）。名前の正は [tech_logging.md](../tech/basic/tech_logging.md)「ロガー名体系」 |
+| 2 | レベル・フォーマット・マスク規則も同ファイルが正（再掲しない） |
+| 3 | メッセージはプレースホルダ `{}` で組む（文字列連結・`String.format` を使わない） |
+| 4 | パスワード・トークン生値・メールアドレスをそのまま出さない |
+| 5 | `request_id` などの横断項目は MDC（`RequestLogFilter`）が載せる。各所で詰め直さない |
+| 6 | `System.out.println`・`printStackTrace` を使わない |
 
 ## 8. Javadoc・コメント
 
@@ -122,19 +124,9 @@
 
 ## 9. 禁止事項
 
-| 禁止 | 代わりに |
-|------|---------|
-| フィールド `@Autowired`・setter 注入 | コンストラクタ注入（`private final`） |
-| コントローラへの業務ロジック記述 | Service へ集約 |
-| SQL の `${}` による文字列組み立て | `#{}` によるパラメータバインド |
-| ワイルドカード import | 個別 import |
-| ゲームバランス数値のハードコード | マスターデータ YAML・`application.yml` |
-| `System.out` / `printStackTrace` | SLF4J のロガー |
-| 空の `catch`・例外の握りつぶし | `AppException` へ変換するか再スロー |
-| 静的な可変フィールド（共有状態） | DI か引数で受け渡す |
-| `java.util.Date` / `Calendar` | `java.time`（既定は `Instant`） |
-| テーブル定義書に無い列・テーブルの追加 | 基本設計へ差し戻し（[phases.md](phases.md) §3.2.1） |
-| 対象Phaseより後の機能の先行実装 | Phase 厳守（将来拡張を考慮した設計は可） |
+§2〜§8 からの再掲（レビュー用の一覧）。**代わりに何をするかは各節が正**。
+
+フィールド `@Autowired`・setter 注入／コントローラへの業務ロジック記述／SQL の `${}` による文字列組み立て／ワイルドカード import／ゲームバランス数値のハードコード／`System.out`・`printStackTrace`／空の `catch`・例外の握りつぶし／静的な可変フィールド（共有状態）／`java.util.Date`・`Calendar`／テーブル定義書に無い列・テーブルの追加（[phases.md](phases.md) §3.2.1 へ差し戻す）／対象Phaseより後の機能の先行実装（将来拡張を考慮した設計は可）
 
 ## 10. 適用と検証
 
@@ -146,4 +138,4 @@
 
 - 本書は新規・改修コードに適用する。**既存の一括是正はしない**（逸脱は [known_issues.md](../backlog/known_issues.md) へ記録し、触るときに直す）
 - 本書の改訂は基本設計工程で行う（[phases.md](phases.md) §3.2.2）。改訂したら `.claude/references/coding-standards-backend.md` を**同じ変更で**追随させる
-- **Checkstyle・Spotless は未導入**。書式・import 順・命名は `backend-review` の目視で担保し、自動化は Java 移行の完了（[java_migration.md](../backlog/java_migration.md) STEP 6）以降に検討する
+- **Checkstyle・Spotless は未導入**。書式・import 順・命名は `backend-review` の目視で担保する（自動化の検討は [java_migration.md](../backlog/java_migration.md) STEP 6 以降）

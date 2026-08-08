@@ -154,5 +154,40 @@
         </plugin>
       </plugins>
     </pluginManagement>
+
+    <plugins>
+      <!-- 単体テスト（mvn test）。@Tag("integration") を除外し、C1 100% の判定を単体テストだけで行う。
+           絞り込み実行は mvn test -Dtest=<クラス>Test -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <excludedGroups>integration</excludedGroups>
+        </configuration>
+      </plugin>
+
+      <!-- 結合テスト（mvn verify の integration-test フェーズ）。@Tag("integration") のみを実行する。
+           クラス名は *IntegrationTest / *MapperTest と単体テストで揃っているため、includes は
+           failsafe 既定の *IT ではなく *Test とし、実際の選別は groups（JUnit 5 のタグ）で行う。
+
+           argLine を明示して JaCoCo の javaagent（prepare-agent が argLine へ前置する）を意図的に
+           外している。結合テストの通過分をカバレッジへ混ぜないための措置で、これがないと
+           jacoco.exec に結合テストの実行結果が追記され、単体テストの C1 を過大評価する。
+
+           executions は書かない。spring-boot-starter-parent が integration-test / verify を
+           束ねた実行（id: default）を pluginManagement 側に持っており、ここで plugin を宣言した
+           時点でそれが有効になる。自前の execution を足すと結合テストが二重に走る -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <configuration>
+          <groups>integration</groups>
+          <includes>
+            <include>**/*Test.java</include>
+          </includes>
+          <argLine>-Dfile.encoding=UTF-8</argLine>
+        </configuration>
+      </plugin>
+    </plugins>
   </build>
 </project>
