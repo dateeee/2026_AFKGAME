@@ -16,8 +16,10 @@ WARN の抑止（`WARN許容`）:
     3・4 の WARN を出さない。書式: `> WARN許容 #21・#22: <理由>`（`#` 番号はコロンの前に列挙する）
 
 テスト対応照合（--tests）:
-    backend/tests/unit/*.py の docstring / コメントにあるマーカーを集計し、分岐一覧の行と突き合わせる。
-    マーカー形式: 「分岐: tech_shop.md §7 #3」（一覧が1つだけの文書は §番号 を省略可。#3,4 と複数可）
+    テストの docstring / Javadoc / コメントにあるマーカーを集計し、分岐一覧の行と突き合わせる。
+    対象は backend/tests/unit/*.py（Python）と backend/*/src/test/java/**/*Test.java（Java）。
+    マーカー形式: 「分岐: tech_shop.md §7 #3」（節番号は §8.3 のような枝番も可。
+    一覧が1つだけの文書は §番号 を省略可。#3,4 と複数可）
     マーカーが1件も参照していない文書・セクションは照合対象外（レガシーテストに影響しない）。
 
 使い方:
@@ -33,10 +35,11 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 TECH_DIR = ROOT / "docs" / "tech"
-TEST_DIR = ROOT / "backend" / "tests" / "unit"
+PY_TEST_DIR = ROOT / "backend" / "tests" / "unit"
+JAVA_TEST_GLOB = "backend/*/src/test/java/**/*Test.java"
 
 HEADING = re.compile(r"^(#{2,4})\s*(?:(\d+(?:\.\d+)*)\.?\s*)?分岐一覧")
-MARKER = re.compile(r"分岐[:：]\s*(\S+?\.md)(?:\s*§(\d+))?\s*#([0-9,\s#]+)")
+MARKER = re.compile(r"分岐[:：]\s*(\S+?\.md)(?:\s*§(\d+(?:\.\d+)*))?\s*#([0-9,\s#]+)")
 ALLOW_WARN = re.compile(r"WARN許容\s*([#0-9,、・\s]+)[:：]")
 LAP_COUNT = re.compile(r"\d+\s*周")
 
@@ -118,16 +121,20 @@ def check_structure(sections) -> tuple[list[str], list[str]]:
     return errors, warns
 
 
+def test_files() -> list[Path]:
+    """マーカーを探すテストファイル（Python のレガシーテストと Java のテスト）。"""
+    files = sorted(PY_TEST_DIR.glob("test_*.py")) if PY_TEST_DIR.exists() else []
+    return files + sorted(ROOT.glob(JAVA_TEST_GLOB))
+
+
 def check_tests(sections) -> list[str]:
     errors = []
     covered: dict[tuple[str, str], set[int]] = {}
-    if not TEST_DIR.exists():
-        return []
     per_file_sections: dict[str, list[str]] = {}
     for fname, sec in sections:
         per_file_sections.setdefault(fname, []).append(sec)
 
-    for test in sorted(TEST_DIR.glob("test_*.py")):
+    for test in test_files():
         for m in MARKER.finditer(test.read_text(encoding="utf-8")):
             fname, sec, nums = m.group(1), m.group(2) or "", m.group(3)
             if fname not in per_file_sections:

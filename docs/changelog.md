@@ -12,6 +12,7 @@
 
 | ファイル | 内容 |
 |---------|------|
+| `scripts/check_branch_list.py` | **分岐マーカーの照合が Java テストへ効いていなかったのを修正**。①走査先が `backend/tests/unit/*.py`（Python 移行前のレガシー）だけで、Java 化後に書いたテストのマーカーを1件も見ていなかった ②マーカーの節番号が `§(\d+)` で、`§8.3` のような枝番にマッチせず既存の1aテスト（`tech_auth.md §8.3 #3` 等）が黙って無視されていた。走査先へ `backend/*/src/test/java/**/*Test.java` を追加し、節番号を枝番許容へ。これで `--tests` の exit 0 が「12行すべてにテストがある」ことの根拠になる（従来は該当セクションが照合対象外で、常に素通りしていた）。[test-list.md](../.claude/project/test-list.md) §5 規約6・§7 が想定していた動作に実装を合わせたもので、規約側の変更はない |
 | backlog/carryover_notes.md | **新規**。next_session.md から溢れる「複数セッションにまたがる申し送り」の受け皿（Java 移行 / 仕様・マスターデータ / 環境・ツールの3節）。`.gitattributes` へ `merge=union` を登録し **worktree からも追記可**とした（各セッションが引き継ぎの末尾へ申し送りを足して衝突し、8,000字上限も破っていたため）。next_session.md は 7,996字 → 5,511字 |
 | backlog/next_session.md・process/worktree_guide.md・.claude/project/next.md | **worktree 並行編集への対応**。引き継ぎに「着手中」を書かず worktree の存在で示す方式へ（書いた行が即古くなり、実際に3 worktree 稼働中に1件しか載っていなかったため）。next_session.md へ §0「並行作業のルール」を新設し、候補キューへ「wt 名 / 領域」列（名前を事前採番し、同名 worktree の有無で着手中を判定・領域列で並行可否を判定）。更新は main でのみ・統合直後に1回へ統一し、鮮度確認に wt ブランチ側のコミット確認を追加。`scripts/worktree.py list` が main との差分・未コミット件数から「作業中 / 完了・未統合 / 空」を判定して出すようにした |
 | `docs/tech/basic/tech_data.md` / `docs/tech/basic/tech_api.md` / `docs/glossary.md` | **open_specs #3 の確定**: 難易度別到達記録のキー体系を `towersCleared` の `{towerId}_{difficulty}`（平坦キー・値の型は全エントリ共通）に確定。`/api/tower/select` へ任意パラメータ `difficulty`（`beginner`/`intermediate`/`advanced`）を追加し、`/api/tower/list` は難易度ごとの独立エントリで返す。イベントダンジョンID3件（`trial_maze`/`treasure_vault`/`training_hall`）と難易度識別子を glossary へ登録 |
