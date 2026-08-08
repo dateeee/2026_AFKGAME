@@ -1,0 +1,15 @@
+# 異常系フィクスチャ: 初期所持アイテムのIDが items.yml に無い
+# 分岐: tech_auth.md §8.3 #10（起動時のローダ検証で起動を中止する）
+# character 側は正常にして、2種類目のアイテムIDだけを未定義にする
+# （1種類目が実在しても、後続の未定義を見逃さないことを確かめる）。
+
+character:
+  id: hero_001
+  name: 勇者
+  type: melee
+  level: 1
+items:
+  - id: hp_potion
+    quantity: 5
+  - id: unknown_item
+    quantity: 1

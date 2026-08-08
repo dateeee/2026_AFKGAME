@@ -1,0 +1,11 @@
+# 異常系フィクスチャ: 単一オブジェクト読み込みのスキーマ検証（初期キャラのIDが空）
+# 分岐一覧の行ではなく MasterDataLoader#loadSingle の横断検証（items.yml と同じ扱い）。
+
+character:
+  id: ""
+  name: 勇者
+  type: melee
+  level: 1
+items:
+  - id: hp_potion
+    quantity: 5

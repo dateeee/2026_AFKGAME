@@ -1,0 +1,19 @@
+# 異常系フィクスチャ: 装備スロットが9種そろっていない（8種・ring が欠落）
+# 分岐: tech_auth.md §8.3 #6（起動時のローダ検証で起動を中止する）
+
+- id: weapon
+  name: 武器
+- id: shield
+  name: 盾
+- id: head
+  name: 頭
+- id: body
+  name: 胴体
+- id: arms
+  name: 腕
+- id: waist
+  name: 腰
+- id: legs
+  name: 足
+- id: ears
+  name: 耳
