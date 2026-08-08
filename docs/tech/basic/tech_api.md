@@ -74,6 +74,8 @@
 | POST | `/api/base/upgrade` | 施設をレベルアップ（`facilityId`）。ゴールド+素材を消費 |
 | POST | `/api/base/scout` | 酒場でスカウト実行。ゴールドを消費してキャラ1体をランダム獲得 |
 
+`build` / `upgrade` の処理フロー・エラーコード・施設効果の解決規則は [tech_base.md](../detail/tech_base.md) が正。
+
 ## 鍛冶屋（Phase 4〜）
 | メソッド | パス | 説明 |
 |---------|------|------|

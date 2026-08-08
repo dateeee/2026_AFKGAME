@@ -111,7 +111,7 @@ Logback を使用。Spring Boot 組み込みの Tomcat アクセスログと連�
 | `SKILL_` | スキル関連 | `SKILL_INSUFFICIENT_SP`, `SKILL_PREREQUISITE_NOT_MET`（一覧は [tech_party.md §7](../detail/tech_party.md)） |
 | `PARTY_` | パーティ関連 | `PARTY_LOCKED_IN_TOWER`, `PARTY_MEMBER_NOT_OWNED` |
 | `CHARACTER_` | キャラクター関連 | `CHARACTER_NOT_FOUND` |
-| `BASE_` | 施設関連 | `BASE_INSUFFICIENT_MATERIALS`, `BASE_MAX_LEVEL` |
+| `BASE_` | 施設関連 | `BASE_INSUFFICIENT_MATERIALS`, `BASE_MAX_LEVEL`（一覧は [tech_base.md §6](../detail/tech_base.md)） |
 | `FORGE_` | 鍛冶屋関連 | `FORGE_INSUFFICIENT_MATERIALS`, `FORGE_LEVEL_TOO_LOW` |
 | `RATE_LIMIT_` | レート制限 | `RATE_LIMIT_EXCEEDED`(429)。`Retry-After` ヘッダを併せて返す |
 | `INTERNAL_` | サーバー内部エラー | `INTERNAL_UNEXPECTED_ERROR` |

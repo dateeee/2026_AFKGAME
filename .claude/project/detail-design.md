@@ -16,6 +16,7 @@
 | tick進行制御 | `docs/tech/detail/tech_tick.md` | 60秒tickの進行判定 |
 | フロントtick制御 | `docs/tech/detail/tech_polling.md` | ポーリング間隔・停止条件 |
 | ショップ処理 | `docs/tech/detail/tech_shop.md` | 日替わりショップの品揃え抽選・購入 |
+| 拠点・施設 | `docs/tech/detail/tech_base.md` | 建設・レベルアップ・施設効果の解決 |
 
 ### 横断規約
 
