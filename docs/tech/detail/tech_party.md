@@ -32,6 +32,8 @@
 3. 付与してもパーティへ自動編入しない（控えとして加入。編成はプレイヤー操作）
 4. 戦闘ログに `type: "character_join"` の行を追加する（生JSON・snake_case。[tech_battle §1](tech_battle.md)）
 
+- 所持判定は Phase 3 では**表示名**で行う（`characters` にマスターID列がないため）。Phase 4 で `master_id`（[tech_db/player.md §4](../basic/tech_db/player.md)）が入り次第、判定をIDへ寄せる（[tech_scout.md](tech_scout.md)）
+
 ### 2. 分岐一覧（単体テスト観点）
 
 | # | 分岐点 | 条件 | 期待する振る舞い |

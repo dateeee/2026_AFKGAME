@@ -118,7 +118,7 @@ VS Code は実行構成 **Full Stack** で同時起動できる（[.vscode/launc
 - [docs/tech/tech_spec.md](docs/tech/tech_spec.md) — 技術仕様の索引
   - [basic/](docs/tech/basic/) 基本設計 — [db](docs/tech/basic/tech_db.md) + [tech_db/](docs/tech/basic/tech_db/)（テーブル定義書）/ data / structure / api / api_common / architecture / logging
   - [nonfunctional/](docs/tech/nonfunctional/) 非機能 — performance / security / operations
-  - [detail/](docs/tech/detail/) 詳細設計 — battle / offline / skill / party / tick / polling / state / rng / numeric / shop / design_system / auth / base
+  - [detail/](docs/tech/detail/) 詳細設計 — battle / offline / skill / party / tick / polling / state / rng / numeric / shop / design_system / auth / base / scout
 - [docs/data/master_data.md](docs/data/master_data.md) — マスターデータの索引 + 塔データ一覧
   - [master/](docs/data/master/) — character / item / equipment / base / endgame
   - [TOWERS_OVERVIEW.md](docs/data/towers/TOWERS_OVERVIEW.md) 塔一覧 / [SKILLS_OVERVIEW.md](docs/data/skills/SKILLS_OVERVIEW.md) スキル概要

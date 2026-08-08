@@ -12,6 +12,12 @@
 
 | ファイル | 内容 |
 |---------|------|
+| tech/detail/tech_scout.md | **新規**。Phase 4 酒場スカウト（`POST /api/base/scout`）の詳細設計。しきい値表からの排出設定の解決、レアリティ→キャラの2段階抽選（排出率は**整数パーセントのまま累積**し `r × 100 < 累積` で判定。小数へ変換して累積しない＝最終累積が100未満になる経路を作らないため）、候補は**マスターID昇順**に並べて離散一様で1体、処理フロー10手順（検証はすべて抽選前・失敗経路で乱数を消費しない）、加入時のキャラ生成（基礎値は**レアリティ倍率を掛けずに保存**し実効値は読み取り時に算出）、API応答（新規・重複で形を変えず `isDuplicate` / `canLimitBreak` で区別）、分岐一覧29件。エラーコードは新設せず `BASE_NOT_BUILT`・`BASE_INSUFFICIENT_GOLD` を再利用 |
+| tech/basic/tech_db/player.md・tech/detail/tech_party.md・tech/basic/tech_data.md | **同一キャラの判定方法を確定**（重複＝限界突破素材の前提）。`characters` はマスターID列を持たず現行実装は**表示名で所持判定**していた（`party_service.py` にコメントあり）ため、§4 へ `master_id`（`VARCHAR(50)`・**Phase 4・未実装**・Phase 3 以前の行は NULL で名前から補完）を追加。tech_party.md §2 へ Phase 4 で判定をIDへ寄せる旨、tech_data.md のゲーム状態JSONへ `masterId` のコメント行を追記 |
+| data/master/character.md | §7.3 の「命名規約」（Phase 4 の詳細設計で定義する、というTODO）を**酒場専用16体の一覧**へ置き換え。4タイプ × 4レアリティ（レアは §7.1 の確定入手4体が占める）、IDはタイプごとにレアリティ昇順で `*_002`〜`*_005`、表示名は2〜4文字のカタカナ和風名 |
+| diagrams/api_sequence/base.md | スカウトの応答を `newCharacter` / `duplicateCharacter` の2形から `character` + `isDuplicate` + `canLimitBreak` の単一形へ。抽選の記述を2段階（累積確率→均等）に修正し、重複でも1行追加することを明記 |
+| tech/detail/tech_base.md | 冒頭の「対象外」注記と §2.3 酒場行から tech_scout.md へリンク（鍛冶屋は未作成である旨も明記） |
+| tech/tech_spec.md・README.md・.claude/project/detail-design.md | 索引へ tech_scout.md を登録 |
 | process/worktree_guide.md | §5.2 手順4へ「編集対象が特定済みのファイルは worktree へ入ってから読む」を追記（retro: 二重Read防止） |
 | process/worktree_guide.md | §5.3 の統合前ユーザー確認を撤廃（作成・統合・削除は確認なしで実施）。統合手順を `worktree.py merge`（main 取り込み→ff統合→片付けの一括コマンド、新設）へ置き換え。§1 表・§2 ルール3・§5.4 も追随 |
 | tech/detail/tech_base.md | **新規**。Phase 4 拠点・施設の詳細設計。建設・レベルアップの処理フロー、段階表（酒場・鍛冶屋）の中間LV解決規則、LV0 の効果値、効果の適用点と丸め、`BASE_` エラーコード一覧、分岐一覧2件（建設・レベルアップ21件／効果値の解決16件） |
