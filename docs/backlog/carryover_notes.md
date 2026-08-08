@@ -14,6 +14,8 @@
 - **同一モジュールに Red が複数並ぶと、片方だけでは Green を検証できない**（2026-08-08。3-A-1a を単独で verify しようとして判明）。Maven はテストソースを一括コンパイルするため、未実装の型を参照する別の Red があると `mvn test` はテスト実行前に止まる。Red を分割して積むときは、Green も同じ単位でまとめて取る
 - **テスト用コンストラクタを足したマスターデータのレジストリは、公開コンストラクタへ `@Autowired` を明示する**（2026-08-08。`CharacterTypes`・`EquipmentSlots`・`InitialPlayer` で発生）。リソースパスを受け取るパッケージプライベートなコンストラクタを併設すると候補が2つになり、Spring は既定コンストラクタを探して `NoSuchMethodException` で Bean 生成に失敗する。単体テストは通り、コンテキストを起こす統合テストだけが落ちる
 - **`characters.rarity` は V1 スキーマに無い**（Phase 3 の列）。`Character` Entity にも持たせていないので、Phase 3 の移植（STEP 5）でスキーマ追加と同時に足す
+- **STEP 4・5 の移植量（2026-08-08 実測）**: STEP 4 = 装備1,512行 / ショップ1,233行、STEP 5 = スキル1,100行 / パーティ461行（`routers`+`services`+`models`+`schemas`+`master_data`+テストの合計。Python 全体は68ファイル10,001行）。**領域ごとに1セグメント**（装備 / ショップ / パーティ / スキル）へ割るとキュー1行の規模に収まる。各領域ともテストが半分以上を占めるため `test-list` → `dev` の2セッションを見込む
+- **Java Entity はスキーマ照合の対象にできない**（2026-08-08 確認）。MyBatis3 のため Entity は `@Table`・`@Column` を持たない素の POJO で、テーブル名・PK・FK・一意制約・NOT NULL のいずれも持たない。Java 側でスキーマの正を持つのは Flyway の `V1__initial_schema.sql` であり、`check_schema_triple.py` はそこを照合する（`7668a7b`）。STEP 6 で `tech_db/` の「実装:」行を Entity 参照へ替えても照合は止まらない（DDL はテーブル名で対応づけるため）
 
 ## 2. 仕様・マスターデータ
 
@@ -30,3 +32,4 @@
 - **JDK / Maven**（2026-08-08 に新規シェルで実行確認済み。実行するコマンド形は next_session.md §1 の「前提」が持つ）: `mvn`・`java` は PATH にも `JAVA_HOME` にも無く、**フルパス + `JAVA_HOME` を毎回与える**（PowerShell からは `mvn.cmd`。JDK は `C:\Program Files\Eclipse Adoptium\jdk-17.0.20.8-hotspot`、Maven は `C:\Users\tubas\AppData\Local\Programs\apache-maven-3.9.11\bin\`）
 - 統合テストDBは zonky 埋め込み PostgreSQL（`@AutoConfigureEmbeddedDatabase(provider = ZONKY)`）で worktree ごとに独立。`@ConfigurationProperties` は `afkgame-env` の `com.afkgame.env.config` へ置く。親POMに JaCoCo branch しきい値100%が入っているため、追加した分岐はすべてテストで通す
 - `docker-compose.yml` は作成済みだが **Docker 環境が未検証**（未起動確認）。`docker compose up -d` → `mvn spring-boot:run` → `GET /health` を通すのは Docker が使えるタイミングで行う
+- **`scripts/tests/test_check_branch_list.py` の35件が setup エラーで実行できない**（2026-08-08 確認）。`fbf2073` が `TEST_DIR` を `PY_TEST_DIR` + `JAVA_TEST_GLOB` へ分けた際にテスト側を追随させなかったため、`monkeypatch.setattr(mod, "TEST_DIR", ...)`（28行目・199行目）が `AttributeError` になる。**本体は動くが回帰テストが無い状態**なので、このスクリプトを触る前にフィクスチャを直す
