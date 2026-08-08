@@ -32,33 +32,9 @@
 | 2 | **レイヤの責務を越えない**（[layering.md](layering.md) §1〜§3 の呼び出し可否、[common.md](common.md) §2 の依存方向） |
 | 3 | **仕様の正はドキュメント**。バランス数値・エラーコード・スキーマをコードに埋め込まない（[spec_ownership.md](../spec_ownership.md)） |
 | 4 | 規約と既存コードが食い違っていたら、直さずに [known_issues.md](../../backlog/known_issues.md) へ記録する |
-| 5 | ガイドラインと違う決め方をするときは、**理由を添えて分冊へ明記し、§3 の一覧へ1行足してから**実装する（暗黙の逸脱を作らない） |
+| 5 | ガイドラインと違う決め方をするときは、**該当する分冊へ「ガイドラインの章番号・本プロジェクトの決定・理由」の3点を書いてから**実装する（暗黙の逸脱を作らない）。差分の**正は各分冊**が持ち、横断の一覧をどこにも二重に持たない（明記済みかどうかは §1 の表で分冊を特定して判定する） |
 
-## 3. ガイドラインからの逸脱一覧
-
-原則 #5 で明記した逸脱の索引。**理由と適用は「正」欄の分冊が持つ**（リンクは §1 の表）。
-
-| # | ガイドラインの推奨 | 本プロジェクトの決定 | 正 |
-|---|------------------|-------------------|-----|
-| 1 | Repository + RepositoryImpl でデータアクセスを抽象化する（2.4.1.2.2） | 作らず Service から Mapper を直接呼ぶ（2.4.2.2 が認める） | layering §3 |
-| 2 | Service はインタフェース + 実装クラスで作る（3.2.5.4.1） | `@Service` を付けた具象クラスのみ | domain_service §3 #1 |
-| 3 | 再利用するロジックは SharedService クラスへ分ける（3.2.5.2） | 分けず、Javadoc と伝播属性で示す | domain_service §2 |
-| 4 | Service の引数・戻り値は `Serializable` にする（3.2.5.4.3） | 課さない | domain_service §3 #3 |
-| 5 | `BusinessException`・`SystemException`・`ResultMessages` を使う（3.2.5.6） | 業務エラーは `AppException` に一本化する | domain_service §6 |
-| 6 | Repository のメソッド名は `findById` / `save` 系（3.2.4.5） | `select` / `insert` / `update` / `delete` + `By<条件>` | domain §5 |
-| 7 | Form ↔ Domain Object の変換は Helper へ委譲する（2.4.1.1.3・2.4.1.1.4） | 作らず Resource の `static from(...)` に集約する | web §3 #3 |
-| 8 | View でレスポンスを組み立てる（2.4.1.1.2） | 持たない。描画は SPA が担い JSON だけを返す | layering §2 |
-| 9 | リソース毎のパッケージへ `[リソース名]RestController` を置く（5.1.4.5.1） | 種類別パッケージに分け、コントローラは `<リソース>Api` | web §6 |
-| 10 | エラー応答は `ApiError` + `ExceptionCodeResolver` で組む（5.1.4.6.1） | `AppException` のコードとステータスを `ApiExceptionHandler` が `ErrorResource` へ写す | web §5 #4 |
-| 11 | 依存は `@Inject` でフィールドへ注入する（3.4.1.6.2） | コンストラクタ注入のみ（`private final`） | common §4 #1 |
-| 12 | ロガーはクラスオブジェクトから取る（`getLogger(Xxx.class)`） | ロガー名体系の文字列を渡す | common §7 #1 |
-| 13 | Repository の単体テストは DBUnit で書く（10.2.2.1.1.2） | 埋め込み PostgreSQL + `JdbcTemplate` を使う | test §5 |
-| 14 | Repository はインフラ層の**単体**テスト（10.2.2.1） | Mapper は結合テストへ分類し、C1 の分母から外す | test §5 |
-| 15 | モックの注入は `@InjectMocks`（10.2.4.3.3.1） | テスト内でコンストラクタへ手渡す | test §5 |
-| 16 | 認証はフォーム認証 + セッション（9.2.2.1・9.2.2.4） | `Authorization: Bearer` の JWT でステートレスにする | web §7 #1 |
-| 17 | CSRF トークンで偽造リクエストを弾く（9.5） | 使わない。Cookie を認証に使わないため | web §7 #2 |
-
-## 4. 適用と検証
+## 3. 適用と検証
 
 | 手段 | 対象 | コマンド・スキル |
 |------|------|----------------|

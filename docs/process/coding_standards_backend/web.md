@@ -16,7 +16,7 @@
 | `.filter` | リクエストIDログ・共通例外ハンドラ | （対応なし） |
 
 - Web層は「受け取る・検証する・ドメインへ渡す・返す」だけを担う。業務判断は [domain_service.md](domain_service.md) §1 の Service が持つ
-- **View と Helper は持たない**（逸脱 #8・#7）。描画は SPA（Vue 3）、変換は Resource の `static from(...)`（§3 #3）
+- **View と Helper は持たない**（ガイドライン 2.4.1.1.2・2.4.1.1.3 との差分。[layering.md](layering.md) §2）。描画は SPA（Vue 3）、変換は Resource の `static from(...)`（§3 #3）
 - Controller から Mapper を直接呼ばない（[layering.md](layering.md) §3）。参照系でも Service を通す
 - API契約（パス・HTTPメソッド・ステータス・JSON構造）の正は [tech_api.md](../../tech/basic/tech_api.md)・[tech_api_common.md](../../tech/basic/tech_api_common.md)。本書で再掲しない
 
@@ -36,7 +36,7 @@
 |---|------|
 | 1 | `record` + Bean Validation（Jakarta）で定義する |
 | 2 | リクエスト用とレスポンス用を**兼用しない** |
-| 3 | ドメイン型 ↔ Resource の変換は `public static from(...)` に集約する。ガイドラインは Helper クラスか MapStruct への委譲を推奨するが、本プロジェクトは**Helper を作らない**（逸脱 #7）。変換対象が Resource ごとに閉じており、Controller の見通しは `from(...)` への集約で足りるため |
+| 3 | ドメイン型 ↔ Resource の変換は `public static from(...)` に集約する。ガイドラインは Helper クラス（2.4.1.1.3・2.4.1.1.4）か MapStruct への委譲を推奨するが、本プロジェクトは**Helper を作らない**。変換対象が Resource ごとに閉じており、Controller の見通しは `from(...)` への集約で足りるため |
 | 4 | **JSON のフィールド名は lowerCamelCase**。Jackson の既定でそのまま出るため `@JsonProperty` での改名をしない（[tech_api_common.md](../../tech/basic/tech_api_common.md) §5.0） |
 | 5 | 業務ロジックを持たせない（判定・計算は Service 側） |
 
@@ -55,7 +55,7 @@
 | 1 | 応答メッセージに内部情報（SQL・スタックトレース・テーブル構造・ライブラリ名）を載せない |
 | 2 | 認証・認可の失敗理由を出し分けない（探索の手がかりになるため）。詳細はログにだけ残す |
 | 3 | エラーコード体系の正は [tech_logging.md](../../tech/basic/tech_logging.md)、レスポンス形式の正は [tech_api_common.md](../../tech/basic/tech_api_common.md) |
-| 4 | 例外から応答への変換は `ApiExceptionHandler`（`@RestControllerAdvice`）へ集約し、`AppException` が持つコードと HTTP ステータスをそのまま `ErrorResource` へ写す。ガイドラインの `ApiError` + `ExceptionCodeResolver` + `ResponseEntityExceptionHandler` 継承（5.1.4.6.1）は**採らない**（逸脱 #10）。コードの正は `tech_logging.md` にあり、例外側がコードとステータスを持てば例外クラス→コードの解決表を二重に持たずに済むため |
+| 4 | 例外から応答への変換は `ApiExceptionHandler`（`@RestControllerAdvice`）へ集約し、`AppException` が持つコードと HTTP ステータスをそのまま `ErrorResource` へ写す。ガイドラインの `ApiError` + `ExceptionCodeResolver` + `ResponseEntityExceptionHandler` 継承（5.1.4.6.1）は**採らない**。コードの正は `tech_logging.md` にあり、例外側がコードとステータスを持てば例外クラス→コードの解決表を二重に持たずに済むため |
 
 ## 6. 命名（Web層）
 
@@ -66,11 +66,11 @@
 
 共通の命名（クラス・メソッド・定数・例外・パッケージ）は [common.md](common.md) §3。
 
-ガイドライン 5.1.4.5.1 は、ルートパッケージ `api` の下に**リソース毎のパッケージ**を切り、そこへ `[リソース名]RestController`・`[リソース名]Resource`・`[リソース名]Validator`・`[リソース名]Helper` をまとめる構成を推奨する。本プロジェクトは**採らない**（逸脱 #9）。
+ガイドライン 5.1.4.5.1 は、ルートパッケージ `api` の下に**リソース毎のパッケージ**を切り、そこへ `[リソース名]RestController`・`[リソース名]Resource`・`[リソース名]Validator`・`[リソース名]Helper` をまとめる構成を推奨する。本プロジェクトは**採らない**。
 
 | # | 理由 |
 |---|------|
-| 1 | Helper を作らず（逸脱 #7）、相関チェックも Bean Validation で書く（§2 #5）ため、リソース毎のパッケージに入るクラスが Controller と Resource の2つだけになり、束ねる意味が薄い |
+| 1 | Helper を作らず（§3 #3）、相関チェックも Bean Validation で書く（§2 #5）ため、リソース毎のパッケージに入るクラスが Controller と Resource の2つだけになり、束ねる意味が薄い |
 | 2 | `.config`・`.filter` は特定リソースに属さない。種類別（`.api` / `.resource` / `.config` / `.filter`）で切るほうが全体の並びがそろう |
 | 3 | 接尾辞 `Api` は Vue 側の呼び出し単位（`api/auth.ts` 等）と名前が一致する。`RestController` は本プロジェクトでは唯一の Controller 種別のため、種別を名前で区別する必要がない |
 
@@ -80,5 +80,5 @@
 
 | # | 規約 |
 |---|------|
-| 1 | 認証は**ステートレス**（`Authorization: Bearer` の JWT）。ガイドラインが前提とするフォーム認証 + セッション（9.2.2.1）と `UserDetailsService` による DB 認証（9.2.2.4）は採らない（逸脱 #16）。クライアントが SPA だけで画面遷移を伴うログインが無く、サーバーにセッションを持たせない構成のため |
-| 2 | CSRF トークンを使わない（逸脱 #17）。Cookie を認証に使わないため、偽造リクエストに資格情報が乗らない（`tech_security.md` §11.2）。**Cookie を使う認証へ変えるときは本行ごと見直す** |
+| 1 | 認証は**ステートレス**（`Authorization: Bearer` の JWT）。ガイドラインが前提とするフォーム認証 + セッション（9.2.2.1）と `UserDetailsService` による DB 認証（9.2.2.4）は採らない。クライアントが SPA だけで画面遷移を伴うログインが無く、サーバーにセッションを持たせない構成のため |
+| 2 | CSRF トークン（9.5）を使わない。Cookie を認証に使わないため、偽造リクエストに資格情報が乗らない（`tech_security.md` §11.2）。**Cookie を使う認証へ変えるときは本行ごと見直す** |

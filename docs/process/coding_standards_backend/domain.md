@@ -63,5 +63,5 @@ Mapper はガイドラインの O/R Mapper に当たり、Repository インタ�
 | Mapper メソッド | `select` / `insert` / `update` / `delete` + `By<条件>` | `selectById`・`revokeAllByUserId` |
 | Service | `<領域>Service` | `AuthService` |
 
-- Mapper メソッド名は、ガイドライン 3.2.4.5 の Repository 命名（`findById`・`findAll`・`save`・`delete`・`findBy<フィールド>` など）とは**別体系**（逸脱 #6）。Mapper は永続化を隠す抽象ではなく SQL の窓口であり、**発行される SQL 種別が名前から分かる**ほうがレビューしやすいため
+- Mapper メソッド名は、ガイドライン 3.2.4.5 の Repository 命名（`findById`・`findAll`・`save`・`delete`・`findBy<フィールド>` など）とは**別体系**。Mapper は永続化を隠す抽象ではなく SQL の窓口であり、**発行される SQL 種別が名前から分かる**ほうがレビューしやすいため
 - 共通の命名（クラス・メソッド・定数・例外・パッケージ）は [common.md](common.md) §3

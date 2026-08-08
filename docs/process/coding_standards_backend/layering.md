@@ -25,9 +25,9 @@
 | ガイドラインのコンポーネント | 役割 | 本プロジェクト |
 |---------------------------|------|--------------|
 | Controller | ルーティング（URL マッピングと応答の返却） | `web.api` の `<リソース>Api` |
-| View | 画面の描画 | **なし**（SPA。描画は Vue 3 が担い、返すのは JSON だけ。逸脱 #8） |
+| View | 画面の描画 | **なし**（ガイドライン 2.4.1.1.2 との差分。SPA のため描画は Vue 3 が担い、返すのは JSON だけ） |
 | Form | 入出力データの表現と入力チェックルールの宣言（Bean Validation） | `web.resource` の `<用途>Resource`（ガイドライン 2.4.1.1.3 Tip: REST では `Resource` が Form の役割を担い、変換は `HttpMessageConverter` が行う） |
-| Helper | Controller を補助する POJO。作成は任意で、Controller の一部として扱ってよい | **作らない**（逸脱 #7）。Resource ↔ ドメイン型の変換は Resource の `static from(...)` に集約する（[web.md](web.md) §3） |
+| Helper | Controller を補助する POJO。作成は任意で、Controller の一部として扱ってよい | **作らない**（ガイドライン 2.4.1.1.3・2.4.1.1.4 との差分）。Resource ↔ ドメイン型の変換は Resource の `static from(...)` に集約する（理由は [web.md](web.md) §3 #3） |
 | Domain Object | 業務データを表すモデル。Entity はこれに含まれる。**状態のみを持つ**（振る舞いは持たせない） | `domain.model` の Entity（[domain.md](domain.md) §2） |
 | Repository | Domain Object の CRUD を担うインタフェース（ドメイン層に定義のみを置く） | **作らない**（§3） |
 | Service | 業務処理の提供とトランザクション境界の宣言。**Form・`HttpServletRequest` など Web の情報を扱わない** | `domain.service`（[domain_service.md](domain_service.md)） |
@@ -37,7 +37,7 @@
 
 ## 3. Repository を作らない構成
 
-ガイドラインは Repository インタフェース（ドメイン層）+ RepositoryImpl（インフラストラクチャ層）を推奨するが、**データアクセスの抽象化が必要ないなら Repository を作らず、Service から O/R Mapper を直接呼んでよい**と明記している（2.4.2.2）。本プロジェクトはこの構成を採る（逸脱 #1）。
+ガイドラインは Repository インタフェース（ドメイン層）+ RepositoryImpl（インフラストラクチャ層）を推奨するが（2.4.1.2.2）、**データアクセスの抽象化が必要ないなら Repository を作らず、Service から O/R Mapper を直接呼んでよい**とも明記している（2.4.2.2）。本プロジェクトは後者を採る（ガイドラインが認める構成のため差分ではない）。
 
 | # | 理由 |
 |---|------|

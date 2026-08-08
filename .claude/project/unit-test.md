@@ -85,4 +85,4 @@
 
 ## 8. Terasoluna 単体テストガイドラインとの差分
 
-**正は [coding_standards_backend/test.md](../../docs/process/coding_standards_backend/test.md) §5**（Boot 流儀への読み替え・意図して採らない項目・新規実装から適用するルール）。逸脱番号の索引は [basis.md](../../docs/process/coding_standards_backend/basis.md) §3 #13〜#15。本書では再掲しない。
+**正は [coding_standards_backend/test.md](../../docs/process/coding_standards_backend/test.md) §5**（Boot 流儀への読み替え・意図して採らない項目・新規実装から適用するルール）。本書では再掲しない。

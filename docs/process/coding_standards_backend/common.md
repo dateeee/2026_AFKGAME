@@ -42,7 +42,7 @@
 
 | # | 規約 |
 |---|------|
-| 1 | **DI はコンストラクタ注入**。フィールド `@Autowired`・setter 注入を使わない。依存は `private final`。ガイドラインの実装例は `@Inject` のフィールド注入だが採らない（逸脱 #11）— 依存を不変にでき、テストで手渡すと欠落がコンパイルエラーになるため（[test.md](test.md) §5 #15 と同じ根拠） |
+| 1 | **DI はコンストラクタ注入**。フィールド `@Autowired`・setter 注入を使わない。依存は `private final`。ガイドラインの実装例は `@Inject` のフィールド注入（3.4.1.6.2）だが採らない — 依存を不変にでき、テストで手渡すと欠落がコンパイルエラーになるため（[test.md](test.md) §5 #3 と同じ根拠） |
 | 2 | 現在時刻・乱数は「外から受ける」。乱数は `RandomFactory` から取得して引数で引き回す（[tech_rng.md](../../tech/detail/tech_rng.md) §2）。静的な共有インスタンスを持たない。**暗号用途の `SecureRandom` だけは例外**（スレッドセーフのため `private static final` で共有可。`RandomFactory` をトークン生成に使うと予測可能になる） |
 | 3 | テーブル定義書に無い列・テーブルが必要になったら、実装で先行させず**基本設計へ差し戻す**（[phases.md](../phases.md) §3.2.1） |
 
@@ -77,7 +77,7 @@
 
 | # | 規約 |
 |---|------|
-| 1 | SLF4J を使う。`private static final Logger logger = LoggerFactory.getLogger("afkgame.<領域>")` の形で、**ロガー名体系の名前**を指定する。名前の正は [tech_logging.md](../../tech/basic/tech_logging.md)「ロガー名体系」。ガイドラインの実装例はクラスオブジェクト（`getLogger(Xxx.class)`）を渡すが採らない（逸脱 #12）— 出力先とレベルを機能単位で切り替えるため、ロガー名をクラスの配置から独立させる |
+| 1 | SLF4J を使う。`private static final Logger logger = LoggerFactory.getLogger("afkgame.<領域>")` の形で、**ロガー名体系の名前**を指定する。名前の正は [tech_logging.md](../../tech/basic/tech_logging.md)「ロガー名体系」。ガイドラインの実装例はクラスオブジェクト（`getLogger(Xxx.class)`）を渡すが採らない — 出力先とレベルを機能単位で切り替えるため、ロガー名をクラスの配置から独立させる |
 | 2 | レベルの使い分け・出力フォーマット・マスク規則も同ファイルが正。本書では再掲しない |
 | 3 | メッセージはプレースホルダ `{}` で組む（文字列連結・`String.format` を使わない） |
 | 4 | パスワード・トークン生値・メールアドレスをそのまま出さない |

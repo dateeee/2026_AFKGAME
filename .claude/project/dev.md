@@ -2,7 +2,7 @@
 
 > 一般手順は [.claude/skills/dev/SKILL.md](../skills/dev/SKILL.md) を参照。本書は AFK GAME 固有の値のみを持つ。
 > 技術スタック・不変条件は [profile.md](profile.md) §3・§5。
-> **コードを書く前に [.claude/references/coding-standards-backend.md](../references/coding-standards-backend.md) と、正の規約から「[common.md](../../docs/process/coding_standards_backend/common.md) + 書く層の分冊（[domain](../../docs/process/coding_standards_backend/domain.md) / [domain_service](../../docs/process/coding_standards_backend/domain_service.md) / [web](../../docs/process/coding_standards_backend/web.md) / [test](../../docs/process/coding_standards_backend/test.md)）」を読む。**クラスの置き場・呼び出し方向に迷ったら [layering.md](../../docs/process/coding_standards_backend/layering.md)。規約のベースは TERASOLUNA 開発ガイドライン 5.11.0.RELEASE 日本語版（[basis.md](../../docs/process/coding_standards_backend/basis.md) §1、逸脱一覧は同 §3）。
+> **コードを書く前に [.claude/references/coding-standards-backend.md](../references/coding-standards-backend.md) と、正の規約から「[common.md](../../docs/process/coding_standards_backend/common.md) + 書く層の分冊（[domain](../../docs/process/coding_standards_backend/domain.md) / [domain_service](../../docs/process/coding_standards_backend/domain_service.md) / [web](../../docs/process/coding_standards_backend/web.md) / [test](../../docs/process/coding_standards_backend/test.md)）」を読む。**クラスの置き場・呼び出し方向に迷ったら [layering.md](../../docs/process/coding_standards_backend/layering.md)。規約のベースは TERASOLUNA 開発ガイドライン 5.11.0.RELEASE 日本語版（[basis.md](../../docs/process/coding_standards_backend/basis.md) §1。ガイドラインとの差分は各分冊が持つ）。
 
 ## 1. 成果物
 
