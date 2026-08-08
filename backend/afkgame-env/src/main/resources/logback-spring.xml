@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ログ設定。仕様の正は docs/tech/basic/tech_logging.md。
+
+  形式は環境変数 LOG_FORMAT（text / json、既定 text）で切り替える。
+  条件分岐タグ（<if>）は Janino を必要とするため使わず、
+  形式ごとの定義ファイルを include で選択する。
+-->
+<configuration>
+
+  <include resource="logback-format-${LOG_FORMAT:-text}.xml"/>
+
+  <!-- ロガー別のレベルは application.yml の logging.level.* が上書きする -->
+  <root level="INFO">
+    <appender-ref ref="CONSOLE"/>
+  </root>
+</configuration>

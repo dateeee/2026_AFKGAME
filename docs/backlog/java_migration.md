@@ -89,37 +89,19 @@ Terasoluna blank project の標準構成に従う。
 |------|------|------|
 | 0 | 技術選定（§2） | 完了 |
 | 1 | 基本設計・規約の改訂（ドキュメント先行） | 完了 |
-| 2 | Java 側の骨格構築（横断基盤） | 着手中（2-A 完了 / 2-B・2-C 未着手） |
+| 2 | Java 側の骨格構築（横断基盤） | 着手中（2-A・2-B 完了 / 2-C 未着手） |
 | 3 | Phase 1 スコープの移植 | 未着手 |
 | 4 | Phase 2 スコープの移植 | 未着手 |
 | 5 | Phase 3 実装済み分の移植 | 未着手 |
 | 6 | 切替と Python 資産の削除 | 未着手 |
 
-### STEP 1: 基本設計・規約の改訂
+### STEP 1: 基本設計・規約の改訂（完了）
 
-コードより先に仕様書を Java/Terasoluna 前提へ改訂する。対象は §2 の技術選定に触れる記述のみで、**ゲーム仕様・API契約・DBスキーマは変更しない**。
+コードより先に仕様書を Java/Terasoluna 前提へ改訂した。対象は §2 の技術選定に触れる記述のみで、**ゲーム仕様・API契約・DBスキーマは変更していない**。改訂したファイルの内訳は [changelog.md](../changelog.md) 2026-08-08 が持つ。
 
-| 対象 | 改訂内容 |
-|------|------|
-| `README.md` | 技術スタック表・セットアップ・ディレクトリ構成・主なコマンド |
-| `CLAUDE.md` | 実装規約・テスト標準 |
-| `tech_structure.md` | §2 ディレクトリ構成・§4 バックエンド構成・設定値 |
-| `tech_architecture.md` | 構成図中の FastAPI 表記・MVP開発方針 |
-| `tech_logging.md` | ロガー実装・フォーマット |
-| `tech_operations.md` | §12.2 環境変数・§12.4 マイグレーション・§12.7 チェック |
-| `tech_security.md` | 入力検証・レート制限の実現方式 |
-| `tech_rng.md` | 乱数実装と再現性の前提 |
-| `tech_tick.md` | 排他・トランザクション境界の実現方式 |
-| `tech_db.md` | 型マッピング・ORM 表記のみ（**スキーマ定義は変更しない**） |
-| `tech_db/` 各テーブル | 変更しない。「実装:」行は `scripts/check_schema_triple.py` が三者一致検証に使うアンカーで、Python models が実体である間は書き換えられない（STEP 6 で切替） |
-| `system_architecture.md` + 配下 | 構成図・tick フロー・デプロイ図 |
-| `glossary.md` | 技術用語 |
-| `development_process.md`・`phases.md` | テスト標準・コマンド |
-| `.claude/project/**` | 対象ファイル一覧・コマンド・技術規約・テストパターン |
+§2 で確定した2点（**PostgreSQL 統一**・**マスターデータの YAML 外出し**）の反映も本 STEP に含む。影響は §5 の該当行を参照。
 
-§2 で確定した2点（**PostgreSQL 統一**・**マスターデータの YAML 外出し**）の仕様書反映も本 STEP に含む。影響は §5 の該当行を参照。
-
-完了基準: `check_doc_size.py` と `check_docs.py` が exit 0、`doc-review` の指摘ゼロ。
+**`tech_db/` 各テーブルの「実装:」行だけは据え置いた** — `scripts/check_schema_triple.py` が三者一致検証に使うアンカーで、Python models が実体である間は書き換えられない（切替は STEP 6）。
 
 ### STEP 2: 骨格構築
 
@@ -130,8 +112,16 @@ Terasoluna blank project の標準構成に従う。
 | セグメント | 内容 | 状態 |
 |-----------|------|------|
 | 2-A | Terasoluna MyBatis3 blank project からモジュール生成 + `local` 用 PostgreSQL の Docker Compose 定義 / Flyway 初期スキーマ（[tech_db.md](../tech/basic/tech_db.md) が正）/ `GET /health` | 完了 |
-| 2-B | 統一エラーレスポンス・例外ハンドラ・リクエストIDログ / Spring Security による JWT・ゲスト認証（CORS・`logback-spring.xml` を含む） | 未着手 |
+| 2-B | 統一エラーレスポンス・例外ハンドラ・リクエストIDログ / Spring Security による JWT・ゲスト認証（CORS・`logback-spring.xml` を含む） | 完了 |
 | 2-C | RNG・設定プロパティ（`@ConfigurationProperties`）・マスターデータの YAML ローダ基盤（起動時に検証し、不正なら起動失敗） | 未着手 |
+
+2-B が横断基盤の範囲外として見送り、STEP 3 へ持ち越した項目:
+
+| 項目 | 見送りの理由 |
+|------|------------|
+| `POST /api/auth/guest` の Player・キャラクター・装備スロット・初期ポーション初期化（現状は User + トークンのみ） | 初期値がマスターデータ側にある |
+| `SecurityConfig` の認証不要パス（現状は `/health`・`/api/auth/{guest,refresh}` のみ） | 未実装のパスを先に開けない。一覧の正は [tech_api_common.md](../tech/basic/tech_api_common.md) §5.0 |
+| `BCryptPasswordEncoder`（strength 12） | 利用者が register・login しか無い |
 
 ### STEP 3〜5: Phase 単位の移植
 

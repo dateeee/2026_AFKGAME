@@ -91,10 +91,12 @@ Logback を使用。Spring Boot 組み込みの Tomcat アクセスログと連�
   "error": {
     "code": "AUTH_PLAYER_NOT_FOUND",
     "message": "指定されたプレイヤーが見つかりません",
-    "request_id": "550e8400-e29b-41d4-a716-446655440000"
+    "requestId": "550e8400-e29b-41d4-a716-446655440000"
   }
 }
 ```
+
+応答ボディのキーは camelCase（[tech_api_common.md](tech_api_common.md) §5.0）。**ログ項目は snake_case**（上記「ログフォーマット」の `request_id` 等）であり、APIボディとは別体系である。
 
 ### エラーコード体系
 

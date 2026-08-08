@@ -16,6 +16,11 @@
   <description>環境依存設定（application.yml・DataSource）</description>
 
   <dependencies>
+    <!-- @ConfigurationProperties の定義（設定値の参照はここへ集約する。tech_operations.md §12.2） -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter</artifactId>
+    </dependency>
     <!-- DataSource（HikariCP）の自動構成。接続情報は application.yml が持つ -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -26,5 +31,20 @@
       <artifactId>postgresql</artifactId>
       <scope>runtime</scope>
     </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
 </project>

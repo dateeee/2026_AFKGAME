@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.afkgame.domain.repository.UserMapper">
+
+  <!-- is_guest はプロパティ名の自動変換（map-underscore-to-camel-case）と食い違うため、
+       列とプロパティの対応を明示する -->
+  <resultMap id="userResultMap" type="com.afkgame.domain.model.User">
+    <id     property="id"            column="id"/>
+    <result property="email"         column="email"/>
+    <result property="passwordHash"  column="password_hash"/>
+    <result property="googleId"      column="google_id"/>
+    <result property="displayName"   column="display_name"/>
+    <result property="guest"         column="is_guest"/>
+    <result property="emailVerified" column="email_verified"/>
+    <result property="createdAt"     column="created_at"/>
+    <result property="lastLoginAt"   column="last_login_at"/>
+  </resultMap>
+
+  <select id="selectById" resultMap="userResultMap">
+    SELECT id, email, password_hash, google_id, display_name,
+           is_guest, email_verified, created_at, last_login_at
+      FROM users
+     WHERE id = #{id}
+  </select>
+
+  <insert id="insert">
+    INSERT INTO users (id, email, password_hash, google_id, display_name,
+                       is_guest, email_verified, created_at, last_login_at)
+    VALUES (#{id}, #{email}, #{passwordHash}, #{googleId}, #{displayName},
+            #{guest}, #{emailVerified}, #{createdAt}, #{lastLoginAt})
+  </insert>
+
+</mapper>

@@ -35,6 +35,7 @@
 
     <terasoluna.version>5.10.1.RELEASE</terasoluna.version>
     <mybatis-spring-boot.version>3.0.5</mybatis-spring-boot.version>
+    <jjwt.version>0.12.6</jjwt.version>
     <embedded-database-spring-test.version>2.6.0</embedded-database-spring-test.version>
     <embedded-postgres.version>2.1.0</embedded-postgres.version>
     <!-- 統合テストで使う埋め込み PostgreSQL のメジャーバージョン（docker-compose.yml と揃える） -->
@@ -49,6 +50,25 @@
         <artifactId>mybatis-spring-boot-starter</artifactId>
         <version>${mybatis-spring-boot.version}</version>
       </dependency>
+      <!-- JWT の発行・検証（tech_auth.md §4）。api のみコンパイル依存、impl/jackson は実行時 -->
+      <dependency>
+        <groupId>io.jsonwebtoken</groupId>
+        <artifactId>jjwt-api</artifactId>
+        <version>${jjwt.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.jsonwebtoken</groupId>
+        <artifactId>jjwt-impl</artifactId>
+        <version>${jjwt.version}</version>
+        <scope>runtime</scope>
+      </dependency>
+      <dependency>
+        <groupId>io.jsonwebtoken</groupId>
+        <artifactId>jjwt-jackson</artifactId>
+        <version>${jjwt.version}</version>
+        <scope>runtime</scope>
+      </dependency>
+
       <dependency>
         <groupId>io.zonky.test</groupId>
         <artifactId>embedded-database-spring-test</artifactId>

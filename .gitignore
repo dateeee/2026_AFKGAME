@@ -24,7 +24,9 @@ build/
 *.egg
 .venv/
 venv/
-env/
+# 仮想環境 env/ はパスを限定する。無指定だと Java パッケージ com/afkgame/env/ まで除外される
+/env/
+backend/env/
 .env
 .env.*
 

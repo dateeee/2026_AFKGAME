@@ -20,6 +20,17 @@ spring:
     # 起動時にマイグレーションを自動適用する（tech_operations.md §12.4 の適用手順③）
     enabled: true
     locations: classpath:db/migration
+  jackson:
+    deserialization:
+      # リクエストの未定義フィールドは 422 で拒否する（tech_api_common.md §5.0・tech_security.md §11.3）
+      fail-on-unknown-properties: true
+  mvc:
+    # 未定義パスを例外にして、404 も統一エラー形式で返す（tech_logging.md「統一エラーレスポンス形式」）
+    throw-exception-if-no-handler-found: true
+  web:
+    resources:
+      # 静的リソースの探索を無効化し、未定義パスを確実に例外へ落とす（APIサーバーのため静的配信は行わない）
+      add-mappings: false
 
 mybatis:
   # Mapper XML は afkgame-domain の Mapper インタフェースと同じパッケージに置く
@@ -30,10 +41,21 @@ mybatis:
 
 logging:
   level:
+    # ロガー名体系は tech_logging.md「ロガー名体系」（afkgame.auth 等）。
+    # クラス名ロガー（com.afkgame.*）と併用するため両方を LOG_LEVEL で制御する
+    afkgame: ${LOG_LEVEL:INFO}
     com.afkgame: ${LOG_LEVEL:INFO}
 
 # アプリケーション設定（tech_structure.md §4「設定値」が正）
 afkgame:
+  auth:
+    # 署名鍵。既定値を置かない（未設定なら起動を中止する。tech_operations.md §12.2）
+    secret: ${JWT_SECRET}
+    access-token-expire: 30m     # アクセストークン有効期限（tech_auth.md §1）
+    refresh-token-expire: 30d    # リフレッシュトークン有効期限（tech_auth.md §1）
+  cors:
+    # 許可オリジン（tech_security.md §11.2）。本番はワイルドカードを使わない
+    origins: ${CORS_ORIGINS:http://localhost:5173}
   tick-interval-seconds: 60      # 1 tick の間隔（秒）
   turns-per-tick: 3              # 1 tick あたりのターン数
   offline-efficiency: 1.0        # オフライン時の報酬効率（オンラインと同一）

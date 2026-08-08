@@ -1,8 +1,14 @@
 # local — 開発・デバッグ（tech_operations.md §12.1）
 #
 # DB はリポジトリ同梱の docker-compose.yml が起動する PostgreSQL（:5432）を既定とする。
-# 開発の起動を止めないため、共通設定では既定値を持たない DATABASE_PASSWORD にのみ既定値を与える。
+# 開発の起動を止めないため、共通設定では既定値を持たない変数にのみ既定値を与える。
+# production では既定値が無く、未設定なら起動に失敗する（tech_operations.md §12.2）。
 
 spring:
   datasource:
     password: ${DATABASE_PASSWORD:afkgame}
+
+afkgame:
+  auth:
+    # HS256 の鍵長は32バイト以上が必要（RFC 7518 §3.2）
+    secret: ${JWT_SECRET:afkgame-dev-secret-change-in-production}
