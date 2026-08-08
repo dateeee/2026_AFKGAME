@@ -1,0 +1,66 @@
+# git worktree 並行作業ガイド
+
+> 複数タスクを並行で進めるための git worktree の使い方と、競合を避ける運用ルールの正。
+> ヘルパーは `scripts/worktree.py`、追記型ファイルの自動マージ設定は `.gitattributes`。
+
+## 1. 仕組みと使い方
+
+worktree は1つのリポジトリから複数の作業ツリーを同時に開く仕組み。タスクごとに独立したディレクトリ + ブランチで作業し、終わったら main へ統合して消す。
+
+- **配置**: `<リポジトリの親>/2026_AFKGAME.worktrees/<名前>`（リポジトリの隣。git 管理外なので .gitignore 不要）
+- **ブランチ命名**: `wt/<名前>`（名前はタスクが分かるもの。例: `step3a2-auth`）
+
+| 操作 | コマンド |
+|------|---------|
+| 作成 | `python scripts/worktree.py add <名前> [--base main]` |
+| 削除 | `python scripts/worktree.py remove <名前> [--delete-branch]` |
+| 一覧 | `python scripts/worktree.py list` |
+
+`add` は worktree 作成に加えて、git 管理外のローカル設定（`.claude/settings.local.json` 等）のコピーと rerere の有効化（§3）まで行う。**frontend を触るタスクは worktree 側で `npm install` が必要**（`node_modules` は共有されない）。Maven のローカルリポジトリ（`~/.m2`）は共有で問題ない。
+
+## 2. マージ競合を避ける運用ルール
+
+| # | ルール |
+|---|-------|
+| 1 | **1 worktree = 1 タスク（工程スキル1件）**。完了したら即 main へ統合して worktree を削除する。長生きブランチが競合の最大要因 |
+| 2 | **触るファイル領域が重ならないタスクだけ並行させる**（backend 実装 × docs 整備は○、同一システムを触る2タスクは×）。`next_session.md` の候補キューから選ぶ時点で担当ファイルの重なりを確認する |
+| 3 | **統合前に main を取り込む**: worktree 側で `git merge main` → 競合解消・テスト → main 側で `git merge wt/<名前>`（fast-forward になる） |
+| 4 | 追記型ファイル（changelog・効率メモ）は自動解決に任せる（§3） |
+| 5 | 単独更新ファイル（§3 の表）は **main のセッションでのみ更新**し、worktree では触らない |
+| 6 | Stop フックの自動コミットは各 worktree で独立に働くため、未コミットのまま放置されない。`remove` が「未コミットあり」で失敗したら消す前にコミットする |
+
+## 3. ファイル別の競合ポリシー
+
+全 worktree が書きに行く「ホットスポット」を性質別に扱いを決めておく。
+
+| ファイル | 性質 | 扱い |
+|---------|------|------|
+| `docs/changelog.md` | 先頭ブロックへ行追記 | `merge=union` で自動統合（`.gitattributes`） |
+| `docs/backlog/efficiency_memo.md` | 末尾へ追記（Stop フック） | `merge=union` で自動統合 |
+| `docs/backlog/next_session.md` | 全面書き換え | **main でのみ更新**。並行タスクの完了報告は統合時に main 側でまとめる |
+| `docs/backlog/java_migration.md`（進捗） | 状態の更新 | main でのみ更新、または進捗を持つ STEP を担当する worktree を1つに限定 |
+| `docs/backlog/` のその他（open_specs 等） | 行の追加・削除 | 触る worktree を1つに限定 |
+
+- **`merge=union` の注意**: 両方の追加行を残すだけで行順は保証しない。changelog で同じ日付見出しが二重になったら統合後に1つへ畳む。追記型以外のファイルには適用しないこと（黙って壊れる）
+- **rerere**: 一度手で解消した競合は記録され、同じ競合に再適用される（`add` 実行時に有効化済み。設定は全 worktree 共通）
+
+## 4. 実行環境の競合（ポート・DB）
+
+マージ以外に、サーバー・DB などの実行資源も worktree 間で衝突する。**既定はサーバー起動を同時に1 worktree のみとする**のが最も安全。並行起動が必要な場合のみ下表で分離する。
+
+| リソース | 共有状況 | 並行起動する場合 |
+|---------|---------|----------------|
+| PostgreSQL `localhost:5432/afkgame` | 全 worktree で共有（docker-compose は1つ） | 別DBを作って分離: `docker exec afkgame-postgres createdb -U afkgame afkgame_wt1` → `$env:DATABASE_URL="jdbc:postgresql://localhost:5432/afkgame_wt1"` |
+| バックエンド :8080 | ポート競合 | `$env:SERVER_PORT=8081` を設定して起動 |
+| フロントエンド :5173 | ポート競合 | `npm run dev -- --port 5174`（Vite は自動で空きポートへ逃げるが明示が確実） |
+| 結合テスト用DB | zonky 埋め込み（worktree ごとに独立） | 対応不要。`mvn verify` は並行実行できる |
+
+**DB 分離が特に重要な理由**: Flyway が起動時にマイグレーションを適用するため、スキーマの異なるブランチのバックエンドを同一DBへ向けると相互に壊し合う。スキーマを変えるブランチは必ず専用DBを使う。
+
+## 5. Claude Code セッションとの関係
+
+- 各 worktree を**別ウィンドウ・別セッション**で開く。`.claude/`（スキル・フック・プロファイル）はコミット済みなので worktree にも同梱され、そのまま動く。`settings.local.json` は `add` がコピーする
+- 効率メモ・Stop フックは各 worktree 内の自分のファイルへ書き、統合時に `merge=union` で合流する
+- Claude Code 内蔵の worktree 機能（`.claude/worktrees/`、gitignore 済み）はエージェントの一時的な隔離用で、本ガイドの並行作業用 worktree とは別物。混在しても干渉しない
+- 自動メモリ（`~/.claude/projects/<パス>/memory/`)はディレクトリパス単位のため、worktree で開いたセッションは main とは別のメモリになる。プロジェクトの正はリポジトリ内ドキュメントに置く方針（`MEMORY.md` 参照）なので実害はない
+- 工程の区切りで `/clear` を提案する既定ルール（CLAUDE.md）は worktree 内でも同じ

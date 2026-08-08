@@ -1,0 +1,5 @@
+# 追記型ドキュメントは union マージで自動解決する（worktree 並行作業の競合回避）。
+# union は「両方の追加行を残す」だけで行順は保証しない。追記型以外に適用しないこと。
+# 運用ルールは docs/process/worktree_guide.md を参照。
+docs/changelog.md merge=union
+docs/backlog/efficiency_memo.md merge=union
