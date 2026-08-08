@@ -38,3 +38,8 @@
 - シグナル: long-turn(calls=110)
 - ターン概要: ツール110回・エラー0回・拒否0回。開始:「<command-message>next</command-message>」
 - 原因と改善案: **long-turn 自体は誤検出**（`/next` → `test-list`（Red）→ `dev`（Green）→ 統合 → 引き継ぎ更新の3工程を1ターンで完走した正当な分量。エラー0）。ただし**Java テストの実行コマンドの試行錯誤で4往復**した: ①`-Dtest=<クラス>` は対象テストの無いモジュールで surefire が落ちるため `-Dsurefire.failIfNoSpecifiedTests=false` が要る ②出力が CP932 で `grep` が "Binary file matches" を返す（ファイルへ落として `iconv -f CP932 -t UTF-8`）③別モジュールのテストだけを回すには先に親 POM を `-N install` してからでないと依存解決に失敗する。→ `commands.md` のバックエンド節へこの3点を「モジュールを絞ってテストする」レシピとして追記する（`dev.md` §5 の注意表からも参照）。
+
+## 2026-08-08 22:21 | session 5fb9f14d | 自動検出
+- シグナル: long-turn(calls=86)
+- ターン概要: ツール86回・エラー0回・拒否0回。開始:「<ide_opened_file>The user opened the file c:\GIT\2026_AFKGAM」
+- 原因と改善案: **long-turn 自体は誤検出**（依頼の前提が未達と判明 → 方針をユーザーへ確認 → 調査で当初計画が不可能と判明して設計変更 → 実装+テスト34件 → ドキュメント6件 → 統合 → 引き継ぎ更新、を1ターンで完走した正当な分量。エラー0・拒否0）。ただし**`carryover_notes.md` を着手前に読まなかった**ため、同ファイルが既に記録していた「`java_migration.md` は残り12字。次の追記は圧縮では吸収できない」を知らずに編集へ入り、残量測定→圧縮案の検討→再測定で3往復した。`next_session.md` §2 末尾と `next.md` §1 は「着手前にそちらも見る」と書いているが、**`/next` SKILL §0「最初に読む」表は profile.md と next.md の2件しか挙げておらず、carryover_notes.md が手順に入っていない**。→ `.claude/skills/next/SKILL.md` §0 の表へ3行目「`docs/backlog/carryover_notes.md`（プロファイル §1 が指す申し送り。既知の制約・環境・前セッションの発見）」を追加し、§1 の「この時点では他の仕様書・コードを読まない」の例外として明記する。
