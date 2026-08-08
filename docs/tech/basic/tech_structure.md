@@ -8,8 +8,8 @@
 2026_AFKGAME/
 ├── README.md                      # プロジェクト概要・セットアップ・ドキュメント索引
 ├── CLAUDE.md                      # AIエージェント向け開発ルール
-├── docs/                          # 仕様書 ※構成は README.md を正とする
-├── diagrams/                      # 設計図（Mermaid）※構成は README.md を正とする
+├── docs/                          # 仕様書・設計図 ※構成は README.md を正とする
+│   └── diagrams/                  # 設計図（Mermaid）
 ├── scripts/                       # 開発補助スクリプト
 │
 ├── frontend/                      # Vue.js SPA

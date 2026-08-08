@@ -21,7 +21,7 @@
 |------|------|------|------------|
 | A | `CLAUDE.md` | 3,000 | **セッション内是正**（台帳登録不可） |
 | B | `README.md`、`**/*_OVERVIEW.md` | 6,000 | 台帳へ登録 → 一括是正 |
-| C | `docs/**`、`diagrams/**` | 8,000 | 同上 |
+| C | `docs/**`（設計図 `docs/diagrams/**` を含む） | 8,000 | 同上 |
 | D | `.claude/**`（スクリプトは `.claude/` 全体をD判定） | 5,000 | **セッション内是正**（台帳登録不可） |
 | 除外 | `docs/reviews/**`、`docs/changelog.md` | — | 追記型アーカイブ（§2・§9） |
 
@@ -45,7 +45,7 @@ H2セクションは2,000字、H3は1,000字（§4）。1ファイルのH2は7�
 | `docs/design/game_spec.md` | `docs/design/systems/` |
 | `docs/tech/tech_spec.md` | `docs/tech/{basic,nonfunctional,detail}/` |
 | `docs/data/master_data.md` | `docs/data/master/` |
-| `diagrams/*.md`（6図） | 同名ディレクトリ（`er_diagram/` 等） |
+| `docs/diagrams/*.md`（6図） | 同名ディレクトリ（`er_diagram/` 等） |
 
 1エンティティ1ファイルの束は `*_OVERVIEW.md` を索引にする（`docs/data/towers/TOWERS_OVERVIEW.md`）。
 

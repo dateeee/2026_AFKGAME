@@ -21,7 +21,7 @@
 | `docs/design/` | 要件定義の成果物（`game_spec.md` 索引 + `systems/`） |
 | `docs/tech/` | 基本設計・詳細設計の成果物（`tech_spec.md` 索引 + `tech_*.md`） |
 | `docs/data/` | マスターデータ（`master_data.md` 索引 + `master/` `towers/` `skills/`） |
-| `diagrams/` | 設計図6点（各図は索引 + 同名ディレクトリ構成） |
+| `docs/diagrams/` | 設計図6点（各図は索引 + 同名ディレクトリ構成） |
 | `docs/reviews/` | レビュー結果の追記型アーカイブ（スキル名ごと + `archive/`。文字数上限の対象外） |
 
 ## 3. 技術スタック

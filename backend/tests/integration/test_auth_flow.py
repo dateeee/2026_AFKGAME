@@ -1,6 +1,6 @@
 """結合テスト: 認証 → ゲーム状態取得 / ゲスト → 正規ユーザー移行
 
-シナリオ導出元: diagrams/api_sequence/core.md §1・§2、diagrams/api_sequence/auth.md §14
+シナリオ導出元: docs/diagrams/api_sequence/core.md §1・§2、docs/diagrams/api_sequence/auth.md §14
 検証対象は**基本設計**（API設計・データ構造）であり、条件分岐の網羅は単体テストが持つ。
 """
 

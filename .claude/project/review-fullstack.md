@@ -32,7 +32,7 @@ python .claude/scripts/review_prep.py --dir docs/reviews/full-review \
 | 仕様書 | `design/game_spec.md` → `systems/`、`tech/tech_spec.md` → `tech_data` / `tech_structure` / `tech_api` / `tech_architecture` / `tech_logging`、`tech_battle.md`・`tech_offline.md`・`tech_auth.md`、`data/master_data.md` → `data/master/` |
 
 索引 + 個別ファイル構成のため、**照合に必要な個別ファイルのみ**読む。
-**設計図（`diagrams/`）は対象外**。図が絡む照合は `diagrams-review` の担当（[review-procedure.md](../references/review-procedure.md) §7）。
+**設計図（`docs/diagrams/`）は対象外**。図が絡む照合は `diagrams-review` の担当（[review-procedure.md](../references/review-procedure.md) §7）。
 
 ### 1.1 全量モードの分担（最大3体・`sonnet`）
 

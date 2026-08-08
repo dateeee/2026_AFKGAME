@@ -1,6 +1,6 @@
 # AFK GAME — 進行状態と操作可否
 
-> 技術仕様の索引は [tech_spec.md](../tech_spec.md)。API一覧は [tech_api.md](../basic/tech_api.md)、戦闘・撤退のゲーム仕様は [battle.md](../../design/systems/battle.md)、画面遷移は [screen_transition.md](../../../diagrams/screen_transition.md)。
+> 技術仕様の索引は [tech_spec.md](../tech_spec.md)。API一覧は [tech_api.md](../basic/tech_api.md)、戦闘・撤退のゲーム仕様は [battle.md](../../design/systems/battle.md)、画面遷移は [screen_transition.md](../../diagrams/screen_transition.md)。
 > 本書はプレイヤーの**進行状態**を状態機械として定義し、各状態で許可される操作とデータの不変条件を確定する。
 
 ---

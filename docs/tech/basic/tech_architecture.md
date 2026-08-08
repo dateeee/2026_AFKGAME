@@ -1,6 +1,6 @@
 # AFK GAME — アーキテクチャ方針
 
-> [tech_spec.md](../tech_spec.md) §6〜§7。ログ設計は [tech_logging.md](tech_logging.md)、システム構成図は [system_architecture.md](../../../diagrams/system_architecture.md)。
+> [tech_spec.md](../tech_spec.md) §6〜§7。ログ設計は [tech_logging.md](tech_logging.md)、システム構成図は [system_architecture.md](../../diagrams/system_architecture.md)。
 > 性能・容量設計は [tech_performance.md](../nonfunctional/tech_performance.md)、セキュリティは [tech_security.md](../nonfunctional/tech_security.md)、運用は [tech_operations.md](../nonfunctional/tech_operations.md)、tick進行制御は [tech_tick.md](../detail/tech_tick.md)。
 
 ```

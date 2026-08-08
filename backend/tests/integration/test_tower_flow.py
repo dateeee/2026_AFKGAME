@@ -1,6 +1,6 @@
 """結合テスト: 塔選択 → 目標階設定
 
-シナリオ導出元: diagrams/api_sequence/gameplay.md §4、docs/tech/basic/tech_api.md 操作系
+シナリオ導出元: docs/diagrams/api_sequence/gameplay.md §4、docs/tech/basic/tech_api.md 操作系
 検証内容: 塔別クリア記録の独立、目標階上限、入塔状態の遷移。
 """
 

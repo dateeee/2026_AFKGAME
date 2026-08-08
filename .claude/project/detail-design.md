@@ -43,7 +43,7 @@
 | 2 | `docs/tech/basic/tech_api.md`・`tech_data.md` | 対象エンドポイント・テーブルの行のみ |
 | 3 | `docs/tech/detail/tech_rng.md`・`tech_numeric.md`・`tech_state.md` | 乱数・丸め・状態を扱う場合のみ |
 | 4 | `docs/data/master/` | 対象の数値定義のみ |
-| 5 | `diagrams/battle_flow/`・`api_sequence/` | 対象処理の図のみ |
+| 5 | `docs/diagrams/battle_flow/`・`api_sequence/` | 対象処理の図のみ |
 
 ## 3. 固有の観点
 

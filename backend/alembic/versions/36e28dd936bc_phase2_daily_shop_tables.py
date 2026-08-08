@@ -1,7 +1,7 @@
 """Phase2 daily shop tables
 
 Phase 2: 日替わりショップ（ShopDailyState / ShopDailySlot）を追加する。
-仕様: docs/tech/detail/tech_shop.md §5、ER図: diagrams/er_diagram/item.md
+仕様: docs/tech/detail/tech_shop.md §5、ER図: docs/diagrams/er_diagram/item.md
 
 Revision ID: 36e28dd936bc
 Revises: 3685584aaa5b

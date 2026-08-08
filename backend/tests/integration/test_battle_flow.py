@@ -1,6 +1,6 @@
 """結合テスト: tick進行 → 戦闘ログ取得 / オフライン復帰 → 一括計算
 
-シナリオ導出元: diagrams/api_sequence/core.md §2・§3、docs/tech/detail/tech_offline.md
+シナリオ導出元: docs/diagrams/api_sequence/core.md §2・§3、docs/tech/detail/tech_offline.md
 不変条件: サーバー権威（計算結果と保存後の状態が一致する）、60秒固定tick。
 """
 

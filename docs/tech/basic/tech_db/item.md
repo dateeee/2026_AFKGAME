@@ -1,7 +1,7 @@
 # テーブル定義 — 装備・アイテム・ショップ・施設
 
 > 親: [tech_db.md](../tech_db.md)。命名規約・型マッピング・共通の列規約・外部キー動作は親が正であり、本書では繰り返さない。
-> 視覚化は [er_diagram/item.md](../../../../diagrams/er_diagram/item.md)（`character_equip_slots` のみキャラクター系の図に属するため [er_diagram/player.md](../../../../diagrams/er_diagram/player.md)）。日替わりショップの処理仕様は [tech_shop.md](../../detail/tech_shop.md)、装備の仕様は [systems/equipment.md](../../../design/systems/equipment.md)。
+> 視覚化は [er_diagram/item.md](../../../diagrams/er_diagram/item.md)（`character_equip_slots` のみキャラクター系の図に属するため [er_diagram/player.md](../../../diagrams/er_diagram/player.md)）。日替わりショップの処理仕様は [tech_shop.md](../../detail/tech_shop.md)、装備の仕様は [systems/equipment.md](../../../design/systems/equipment.md)。
 
 ---
 

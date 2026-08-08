@@ -1,7 +1,7 @@
 # テーブル定義 — 認証・アカウント
 
 > 親: [tech_db.md](../tech_db.md)。命名規約・型マッピング・共通の列規約・外部キー動作は親が正であり、本書では繰り返さない。
-> 視覚化は [er_diagram/player.md](../../../../diagrams/er_diagram/player.md)「認証・アカウント系」、認証フロー・トークン有効期間は [tech_auth.md](../../detail/tech_auth.md) が正。
+> 視覚化は [er_diagram/player.md](../../../diagrams/er_diagram/player.md)「認証・アカウント系」、認証フロー・トークン有効期間は [tech_auth.md](../../detail/tech_auth.md) が正。
 
 ---
 

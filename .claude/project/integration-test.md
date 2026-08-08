@@ -43,8 +43,8 @@
 
 | 順 | 参照先 | 読む範囲 |
 |----|--------|---------|
-| 1 | `diagrams/screen_transition.md` | 対象Phaseの画面遷移のみ |
-| 2 | `diagrams/api_sequence.md` → `api_sequence/` | 対象シーケンスの子ファイルのみ |
+| 1 | `docs/diagrams/screen_transition.md` | 対象Phaseの画面遷移のみ |
+| 2 | `docs/diagrams/api_sequence.md` → `api_sequence/` | 対象シーケンスの子ファイルのみ |
 | 3 | `docs/tech/basic/tech_api.md` | 対象エンドポイントの行のみ |
 | 4 | `docs/design/systems/ui*.md` | 対象画面のセクションのみ |
 

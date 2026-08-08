@@ -1,7 +1,7 @@
 # テーブル定義 — 戦闘・ボスラッシュ
 
 > 親: [tech_db.md](../tech_db.md)。命名規約・型マッピング・共通の列規約・外部キー動作は親が正であり、本書では繰り返さない。
-> 視覚化は [er_diagram/battle.md](../../../../diagrams/er_diagram/battle.md)。戦闘ログの保持ポリシーは [tech_battle.md](../../detail/tech_battle.md) §1、ログ要素の JSON 構造は [tech_data.md](../tech_data.md) §1.3、ボスラッシュの仕様は [systems/endgame.md](../../../design/systems/endgame.md) §2.11 が正。
+> 視覚化は [er_diagram/battle.md](../../../diagrams/er_diagram/battle.md)。戦闘ログの保持ポリシーは [tech_battle.md](../../detail/tech_battle.md) §1、ログ要素の JSON 構造は [tech_data.md](../tech_data.md) §1.3、ボスラッシュの仕様は [systems/endgame.md](../../../design/systems/endgame.md) §2.11 が正。
 > ダンジョン・塔・敵・環境効果はコード上のマスターデータでありDBテーブルを持たない（親 §4-6）。ER図の「ダンジョン・塔・敵系」ブロックは論理設計の視覚化であって、本書の対象外。
 
 ---

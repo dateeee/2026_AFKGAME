@@ -30,8 +30,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 DEF_DIR = ROOT / "docs" / "tech" / "basic" / "tech_db"
-ER_INDEX = ROOT / "diagrams" / "er_diagram.md"
-ER_DIR = ROOT / "diagrams" / "er_diagram"
+ER_INDEX = ROOT / "docs" / "diagrams" / "er_diagram.md"
+ER_DIR = ROOT / "docs" / "diagrams" / "er_diagram"
 MODELS_DIR = ROOT / "backend" / "app" / "models"
 
 ER_TAGS = {"PK", "FK", "UK"}

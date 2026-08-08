@@ -124,7 +124,7 @@ def test_check_reachability_reaches_from_claude_md_too(root):
     assert mod.check_reachability(mod.targets()) == []
 
 
-def test_check_reachability_ignores_orphans_outside_docs_and_diagrams(root):
+def test_check_reachability_ignores_orphans_outside_docs(root):
     write(root, "README.md", "起点\n")
     write(root, ".claude/project/a.md")
     assert mod.check_reachability(mod.targets()) == []
@@ -132,9 +132,9 @@ def test_check_reachability_ignores_orphans_outside_docs_and_diagrams(root):
 
 def test_check_reachability_checks_diagrams_too(root):
     write(root, "README.md", "起点\n")
-    write(root, "diagrams/er_diagram.md")
+    write(root, "docs/diagrams/er_diagram.md")
     errors = mod.check_reachability(mod.targets())
-    assert len(errors) == 1 and "diagrams/er_diagram.md" in errors[0]
+    assert len(errors) == 1 and "docs/diagrams/er_diagram.md" in errors[0]
 
 
 # ── check_ambiguous ──────────────────────────────────────────
@@ -198,7 +198,7 @@ def test_check_pending_skips_the_ledger_itself(root):
     assert mod.check_pending(mod.targets()) == []
 
 
-def test_check_pending_skips_files_outside_docs_and_diagrams(root):
+def test_check_pending_skips_files_outside_docs(root):
     write(root, ".claude/project/a.md", "Phase 3 の基本設計で確定する\n")
     assert mod.check_pending(mod.targets()) == []
 

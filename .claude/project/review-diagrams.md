@@ -16,7 +16,7 @@
 
 ```bash
 python .claude/scripts/review_prep.py --dir docs/reviews/diagrams-review \
-    --paths diagrams docs/design docs/tech backend/app frontend/src \
+    --paths docs/diagrams docs/design docs/tech backend/app frontend/src \
     --title 設計図レビュー結果 \
     --categories "仕様書との整合性 / コードとの整合性 / 設計図間の整合性 / Mermaid構文 / 網羅性"
 ```
@@ -42,7 +42,7 @@ python .claude/scripts/review_prep.py --dir docs/reviews/diagrams-review \
 | 設計図間の整合性 | ER図↔クラス図（属性・リレーション）、画面遷移図↔APIシーケンス図（遷移で発生する呼び出し）、戦闘フロー図↔APIシーケンス図（呼び出しタイミング） |
 | Mermaid構文 | [basic-design.md](basic-design.md) §4 の**機械検証**で判定する（目視しない） |
 | 網羅性 | 主要機能に対応する図があるか、未実装Phaseの追加仕様が反映されているか、図内に TODO/TBD が残っていないか、決定先送りが台帳へリンクしているか（`check_docs.py --pending` の出力をそのまま取り込む） |
-| 規約 | `check_doc_size.py` の `diagrams/` 配下の**未登録** ERROR は重要度=高（対処案 = 台帳登録か図単位の切り出し）。台帳登録済みは指摘に数えない |
+| 規約 | `check_doc_size.py` の `docs/diagrams/` 配下の**未登録** ERROR は重要度=高（対処案 = 台帳登録か図単位の切り出し）。台帳登録済みは指摘に数えない |
 
 ## 2. 重要度の基準
 

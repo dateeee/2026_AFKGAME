@@ -13,7 +13,7 @@
 
 使い方:
     python .claude/scripts/review_prep.py --dir docs/reviews/doc-review \\
-        --paths docs diagrams --title 仕様レビュー結果 --categories "整合性 / 網羅性 / 規約"
+        --paths docs --title 仕様レビュー結果 --categories "整合性 / 網羅性 / 規約"
     python .claude/scripts/review_prep.py --dir docs/reviews/doc-review --paths docs --full
     python .claude/scripts/review_prep.py --dir docs/reviews/doc-review --paths docs --init
 

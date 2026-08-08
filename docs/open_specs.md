@@ -21,13 +21,13 @@
 | 確定している範囲 | 難易度ごとに到達済み最高階を個別管理する（[design/systems/endgame.md](design/systems/endgame.md)）。到達記録の保持先は `towersCleared`（[tech/basic/tech_data.md](tech/basic/tech_data.md)） |
 | 未確定な範囲 | ① 難易度を `towersCleared` のキーへどう畳み込むか（`"{towerId}_{difficulty}"` 形式 / 値をオブジェクト化 など）／② 難易度パラメータを `/api/tower/select` へどう渡すか（追加パラメータ / `towerId` に畳み込む） |
 | 背景 | 難易度は Phase 5（エンドコンテンツ）で追加される。Phase 1〜4 のセーブデータとの後方互換が要る。専用エンドポイントを設けず `/api/tower/*` を再利用する方針までは確定済み |
-| 決定時にすること | `tech_data.md` のセーブデータ構造へキー体系を定義し、[tech/basic/tech_api.md](tech/basic/tech_api.md)「イベントダンジョン」節と [diagrams/api_sequence/endgame.md](../diagrams/api_sequence/endgame.md) §11.5 へ反映し、本書の行を削除する |
+| 決定時にすること | `tech_data.md` のセーブデータ構造へキー体系を定義し、[tech/basic/tech_api.md](tech/basic/tech_api.md)「イベントダンジョン」節と [docs/diagrams/api_sequence/endgame.md](diagrams/api_sequence/endgame.md) §11.5 へ反映し、本書の行を削除する |
 
 ## 4. ボスラッシュ・イベントダンジョンへの導線
 
 | 項目 | 内容 |
 |------|------|
-| 確定している範囲 | ボスラッシュ（[design/systems/endgame.md](design/systems/endgame.md) §2.11）・イベントダンジョン（同 §2.13）は Phase 5 で追加される。現行のタブ構成図（[diagrams/screen_transition/main_nav.md](../diagrams/screen_transition/main_nav.md)「Phase別タブ構成」）は導線確定までタブ構成を Phase 4 のまま据え置いて描いている |
+| 確定している範囲 | ボスラッシュ（[design/systems/endgame.md](design/systems/endgame.md) §2.11）・イベントダンジョン（同 §2.13）は Phase 5 で追加される。現行のタブ構成図（[docs/diagrams/screen_transition/main_nav.md](diagrams/screen_transition/main_nav.md)「Phase別タブ構成」）は導線確定までタブ構成を Phase 4 のまま据え置いて描いている |
 | 未確定な範囲 | 導線をタブ追加とするか、ホーム内セクションとするか |
 | 背景 | タブは Phase 4 で7項目に達しており、タブ追加はモバイル5枠上限（#1）に直結する。#1 の「その他」対象タブの決定と連動する |
-| 決定時にすること | `ui.md` ナビゲーション構造へ導線を明記し、`diagrams/screen_transition/` の2図（endgame / main_nav）を追随させ、本書の行を削除する |
+| 決定時にすること | `ui.md` ナビゲーション構造へ導線を明記し、`docs/diagrams/screen_transition/` の2図（endgame / main_nav）を追随させ、本書の行を削除する |

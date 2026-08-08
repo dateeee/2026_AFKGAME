@@ -1,6 +1,6 @@
 # ゲーム仕様 — UI構成
 
-> [game_spec.md](../game_spec.md) §3。画面遷移は [screen_transition.md](../../../diagrams/screen_transition.md)。
+> [game_spec.md](../game_spec.md) §3。画面遷移は [screen_transition.md](../../diagrams/screen_transition.md)。
 
 ## 描画方針
 - **すべてDOM（HTML/CSS）で構成**。Canvasは使用しない

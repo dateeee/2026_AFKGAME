@@ -71,9 +71,9 @@ VS Code は実行構成 **Full Stack** で同時起動できる（[.vscode/launc
 │   ├── skills/                  # 工程7件 + 支援10件（プロジェクト非依存）
 │   ├── references/              # スキル共通リファレンス（同上）
 │   └── project/                 # プロジェクト固有プロファイル（索引: INDEX.md）
-├── docs/                        # 仕様書（*.md プロセス・規約 / design/ tech/ data/。索引は後述）
+├── docs/                        # 要件定義〜詳細設計の成果物（*.md プロセス・規約 / design/ tech/ data/）
+│   ├── diagrams/                # 設計図（Mermaid）。索引 + 同名ディレクトリに分割
 │   └── reviews/                 # レビュー結果（自動生成。スキル名/日時.md）
-├── diagrams/                    # 設計図（Mermaid）。索引 + 同名ディレクトリに分割
 ├── scripts/                     # 開発補助スクリプト
 ├── frontend/                    # Vue.js SPA
 │   ├── src/views/ components/   # ページ / UIコンポーネント
@@ -133,5 +133,5 @@ VS Code は実行構成 **Full Stack** で同時起動できる（[.vscode/launc
   - [TOWERS_OVERVIEW.md](docs/data/towers/TOWERS_OVERVIEW.md) 全塔概要一覧 / [SKILLS_OVERVIEW.md](docs/data/skills/SKILLS_OVERVIEW.md) スキルシステム概要
 
 ### 設計図
-- 全6図とも索引 + 同名ディレクトリ構成: [er_diagram.md](diagrams/er_diagram.md) / [class_diagram.md](diagrams/class_diagram.md) / [battle_flow.md](diagrams/battle_flow.md) / [api_sequence.md](diagrams/api_sequence.md)
-- [system_architecture.md](diagrams/system_architecture.md)（全体構成 / tick / サーバー権威 / 本番構成）/ [screen_transition.md](diagrams/screen_transition.md)（認証 / ナビ / Phase 5 / モーダル）
+- [docs/diagrams/](docs/diagrams/) 配下。全6図とも索引 + 同名ディレクトリ構成: [er_diagram.md](docs/diagrams/er_diagram.md) / [class_diagram.md](docs/diagrams/class_diagram.md) / [battle_flow.md](docs/diagrams/battle_flow.md) / [api_sequence.md](docs/diagrams/api_sequence.md)
+- [system_architecture.md](docs/diagrams/system_architecture.md)（全体構成 / tick / サーバー権威 / 本番構成）/ [screen_transition.md](docs/diagrams/screen_transition.md)（認証 / ナビ / Phase 5 / モーダル）

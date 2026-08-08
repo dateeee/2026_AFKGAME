@@ -66,11 +66,11 @@ def clear_parse_errors():
 def repo(tmp_path, monkeypatch):
     """三者一致した最小リポジトリを作り、書き換え用のパスを返す。"""
     defs = tmp_path / "docs" / "tech" / "basic" / "tech_db"
-    er = tmp_path / "diagrams" / "er_diagram"
+    er = tmp_path / "docs" / "diagrams" / "er_diagram"
     models = tmp_path / "backend" / "app" / "models"
     for d in (defs, er, models):
         d.mkdir(parents=True)
-    index = tmp_path / "diagrams" / "er_diagram.md"
+    index = tmp_path / "docs" / "diagrams" / "er_diagram.md"
 
     monkeypatch.setattr(mod, "ROOT", tmp_path)
     monkeypatch.setattr(mod, "DEF_DIR", defs)
@@ -563,7 +563,7 @@ def test_check_index_points_to_actual_file_for_misplaced_entity(repo):
     repo.write_er(er_doc(["int id PK"], entity="Item"), name="item.md")
     repo.write_index(index_doc(rows=[("`Player` / `Item`", "player.md"), ("`Item`", "item.md")]))
     errors = mod.check_index(sources())
-    assert any("実際の定義は diagrams/er_diagram/item.md" in e for e in errors)
+    assert any("実際の定義は docs/diagrams/er_diagram/item.md" in e for e in errors)
 
 
 def test_check_index_detects_link_to_nonexistent_file(repo):

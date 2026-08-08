@@ -6,7 +6,7 @@
 
 検証項目:
     1. リンク       相対Markdownリンクの参照先が実在するか
-    2. 索引到達性   docs/**・diagrams/** の全ファイルが README.md / CLAUDE.md から辿れるか
+    2. 索引到達性   docs/** の全ファイルが README.md / CLAUDE.md から辿れるか
     3. 曖昧語       仕様書本文に「適宜」「おおよそ」「TBD」「後日検討」「未定」が残っていないか
     4. 正の逸脱     docs/spec_ownership.md の検出パターンが正・許可ファイル以外に現れていないか
     5. 決定先送り   「Phase N の基本設計で確定する」形の先送りが台帳（open_specs.md）へリンクしているか
@@ -41,7 +41,7 @@ EXCLUDE = (
 # 曖昧語（detail-design スキル §5.1 / doc-review 観点9 を常設化）
 AMBIGUOUS = re.compile(r"適宜|おおよそ|TBD|後日検討|未定(?!義)")
 # 曖昧語検査の対象は仕様書系のみ（管理台帳・プロセス文書は「未定」を扱う場でありうるため除外）
-AMBIGUOUS_DIRS = ("docs/design/", "docs/tech/", "docs/data/", "diagrams/")
+AMBIGUOUS_DIRS = ("docs/design/", "docs/tech/", "docs/data/", "docs/diagrams/")
 AMBIGUOUS_EXCLUDE = ("docs/open_specs.md", "docs/balance_backlog.md", "docs/known_issues.md")
 
 LINK = re.compile(r"!?\[[^\]]*\]\(([^)\s]+)(?:\s+\"[^\"]*\")?\)")
@@ -91,7 +91,7 @@ def check_links(files: list[Path]) -> list[str]:
 
 
 def check_reachability(files: list[Path]) -> list[str]:
-    """README.md / CLAUDE.md を起点に、docs/**・diagrams/** の全 .md へ到達できるか。"""
+    """README.md / CLAUDE.md を起点に、docs/** の全 .md へ到達できるか。"""
     nodes = {p.resolve() for p in files}
     graph: dict[Path, set[Path]] = {}
     for path in files:
@@ -114,7 +114,7 @@ def check_reachability(files: list[Path]) -> list[str]:
     errors = []
     for path in sorted(nodes - seen):
         rel = path.relative_to(ROOT).as_posix()
-        if rel.startswith(("docs/", "diagrams/")):
+        if rel.startswith("docs/"):
             errors.append(f"ERROR {rel}: README.md / CLAUDE.md の索引から到達できない（索引未登録）")
     return errors
 
@@ -137,7 +137,7 @@ def check_ambiguous(files: list[Path]) -> list[str]:
 # 決定先送り（doc-review ISSUE-801/803 の検出パターンを常設化）
 # 「定義する」「追記する」「行う」は選択肢が未決なのではなく後工程で書くだけなので対象外
 PENDING = re.compile(r"Phase\s*[0-9]+\s*の(基本設計|詳細設計)で.{0,40}(確定|決める|決定)")
-PENDING_DIRS = ("docs/", "diagrams/")
+PENDING_DIRS = ("docs/",)
 PENDING_EXCLUDE = ("docs/open_specs.md", "docs/balance_backlog.md")
 
 LEDGER = ROOT / "docs" / "open_specs.md"
@@ -147,7 +147,7 @@ LEDGER_PRESENT = re.compile(r"(現在|現時点).{0,8}([0-9]+\s*(件|項目)|実
 
 
 def check_pending(files: list[Path]) -> list[str]:
-    """決定先送りの行が台帳へリンクしているか（走査対象: docs/**・diagrams/**）。"""
+    """決定先送りの行が台帳へリンクしているか（走査対象: docs/**）。"""
     errors = []
     for path in files:
         rel = path.relative_to(ROOT).as_posix()

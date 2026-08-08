@@ -1,7 +1,7 @@
 # テーブル定義 — プレイヤー・キャラクター
 
 > 親: [tech_db.md](../tech_db.md)。命名規約・型マッピング・共通の列規約・外部キー動作は親が正であり、本書では繰り返さない。
-> 視覚化は [er_diagram/player.md](../../../../diagrams/er_diagram/player.md)「プレイヤー・キャラクター系」、パーティ・スキル操作の処理仕様は [tech_party.md](../../detail/tech_party.md)。認証・アカウント系は [auth.md](auth.md)。
+> 視覚化は [er_diagram/player.md](../../../diagrams/er_diagram/player.md)「プレイヤー・キャラクター系」、パーティ・スキル操作の処理仕様は [tech_party.md](../../detail/tech_party.md)。認証・アカウント系は [auth.md](auth.md)。
 
 ---
 

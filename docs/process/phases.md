@@ -18,7 +18,7 @@
 |------|------|
 | 目的 | システム構造・API・データモデル・画面構成と、非機能要件の実現方式を確定する |
 | 主な作業 | アーキテクチャ設計、API一覧・共通仕様の定義、**DB設計（テーブル定義・キー・インデックス・制約）とER図作成**、画面遷移設計、性能／セキュリティ／運用の実現方式の設計 |
-| 成果物 | [tech_spec.md](../tech/tech_spec.md)（索引）配下の**構造**（data / **db** / structure / api / architecture / logging / auth）と**非機能の実現方式**（performance / security / operations）、[diagrams/](../../diagrams/) 6点 |
+| 成果物 | [tech_spec.md](../tech/tech_spec.md)（索引）配下の**構造**（data / **db** / structure / api / architecture / logging / auth）と**非機能の実現方式**（performance / security / operations）、[docs/diagrams/](../diagrams/) 6点 |
 | 完了基準 | 仕様書・設計図間の矛盾がない（`diagrams-review` の指摘解消）。要件定義の非機能・運用要件がすべて、実現方式を定めたいずれかの成果物に対応づいている。新規・変更テーブルが**テーブル定義書とER図の双方**へ反映されている（§3.2.1） |
 | レビュー | `diagrams-review` スキル、`doc-review` スキル |
 
@@ -29,7 +29,7 @@ DBスキーマは**テキスト（テーブル定義書）を正、ER図を視�
 | 成果物 | 内容 | 位置づけ |
 |-------|------|---------|
 | `docs/tech/basic/tech_db.md`（索引）+ `tech_db/` | 物理テーブル名・列の物理型・NULL/既定・主キー/外部キー/一意制約・インデックス・外部キー動作・命名規約・導入Phase | **正** |
-| [er_diagram.md](../../diagrams/er_diagram.md) + `er_diagram/` | エンティティ・関連・カーディナリティの一望図（属性は視覚化としての再掲） | 視覚化 |
+| [er_diagram.md](../diagrams/er_diagram.md) + `er_diagram/` | エンティティ・関連・カーディナリティの一望図（属性は視覚化としての再掲） | 視覚化 |
 | `backend/app/models/*.py` + `backend/alembic/versions/` | 実装。製造（§3.5）で定義書どおりに作る | 実装 |
 
 - **差し戻しルール**: 詳細設計以降で「定義書にないテーブル・列が要る」と判明したら、実装を先に書かず**基本設計へ戻して定義書とER図を更新**してから進む（§3.4 の分岐一覧と同じ扱い）
@@ -98,5 +98,5 @@ DBスキーマは**テキスト（テーブル定義書）を正、ER図を視�
 | 目的 | 基本設計どおりにAPI・画面が連携して動作することを検証する |
 | レイヤー1: API統合テスト | FastAPI TestClient + SQLite実DB。認証→塔選択→tick→報酬などのAPIシーケンスを検証。配置: `backend/tests/integration/` |
 | レイヤー2: E2Eテスト | **Playwright**。フロントエンド＋バックエンドを通しで起動し、画面操作ベースで検証。配置: `frontend/tests/e2e/` |
-| シナリオの導出元 | [diagrams/screen_transition.md](../../diagrams/screen_transition.md)（画面遷移図）、[diagrams/api_sequence.md](../../diagrams/api_sequence.md)（APIシーケンス図） |
+| シナリオの導出元 | [docs/diagrams/screen_transition.md](../diagrams/screen_transition.md)（画面遷移図）、[docs/diagrams/api_sequence.md](../diagrams/api_sequence.md)（APIシーケンス図） |
 | 完了基準 | 対象Phaseの主要シナリオが全PASS |

@@ -11,7 +11,7 @@ Markdownには文字数上限を設けている。詳細は [docs/documentation_
 |------|------|------|
 | A | `CLAUDE.md` | 3,000字 |
 | B | `README.md`、`*_OVERVIEW.md` | 6,000字 |
-| C | `docs/**`、`diagrams/**` | 8,000字 |
+| C | `docs/**`（設計図 `docs/diagrams/**` を含む） | 8,000字 |
 | D | `.claude/skills/**`、`.claude/references/**`、`.claude/project/**` | 5,000字 |
 
 - 原則: **1ファイル = 1テーマ = 1回の読み込みで完結**
@@ -26,7 +26,7 @@ Markdownには文字数上限を設けている。詳細は [docs/documentation_
 | [docs/design/game_spec.md](docs/design/game_spec.md) | `design/systems/`（システム別8件） |
 | [docs/tech/tech_spec.md](docs/tech/tech_spec.md) | `tech/basic/`・`tech/nonfunctional/`・`tech/detail/` |
 | [docs/data/master_data.md](docs/data/master_data.md) | `data/master/` |
-| `diagrams/*.md`（6図） | 同名ディレクトリ配下（`er_diagram/` 等） |
+| `docs/diagrams/*.md`（6図） | 同名ディレクトリ配下（`er_diagram/` 等） |
 
 ## アーキテクチャ不変条件
 

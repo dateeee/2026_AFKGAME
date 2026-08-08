@@ -1,6 +1,6 @@
 """結合テスト: 装備ドロップ → 装備変更 → ステータス反映
 
-シナリオ導出元: diagrams/api_sequence/gameplay.md §6、docs/design/systems/equipment.md
+シナリオ導出元: docs/diagrams/api_sequence/gameplay.md §6、docs/design/systems/equipment.md
 検証内容: 戦闘のドロップが所持一覧へ入り、装着が実効ステータスと売却可否まで連結すること。
 """
 

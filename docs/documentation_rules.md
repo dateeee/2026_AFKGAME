@@ -30,7 +30,7 @@ AIエージェント（Claude Code）と人間が共同で開発するため、�
 |------|------|------|------|------|
 | **A. 常時読込** | `CLAUDE.md` | 2,500 | **3,000** | 全セッション・全ターンで読み込まれるため最も厳格 |
 | **B. 索引** | `README.md`、`**/*_OVERVIEW.md` | 4,000 | **6,000** | 目次として全体を見渡す。詳細は持たない |
-| **C. 仕様・設計・データ** | `docs/**`、`diagrams/**` | 6,000 | **8,000** | 1テーマを1回の読み込みで完結できる粒度 |
+| **C. 仕様・設計・データ** | `docs/**`（設計図 `docs/diagrams/**` を含む） | 6,000 | **8,000** | 1テーマを1回の読み込みで完結できる粒度 |
 | **D. エージェント定義** | `.claude/skills/**`、`.claude/references/**`、`.claude/project/**` | 4,000 | **5,000** | スキル起動時に読み込まれる |
 | **除外** | `docs/reviews/**`、`docs/changelog.md`、`node_modules/**` | — | — | 追記型アーカイブ（§5.1・§9） |
 
@@ -137,11 +137,11 @@ python scripts/check_docs.py              # リンク・索引到達性・曖昧
 |-----------|-------|--------------|-----------|
 | `docs/design/game_spec.md` | 35,042 | 4,242 | `design/systems/` 7件（3,235〜6,902） |
 | `docs/tech/tech_spec.md` | 27,052 | 2,663 | `tech/tech_{data,structure,api,architecture,logging}.md` 5件（3,550〜6,774） |
-| `diagrams/api_sequence.md` | 19,311 | 887 | `api_sequence/` 6件（2,101〜4,840） |
+| `docs/diagrams/api_sequence.md` | 19,311 | 887 | `api_sequence/` 6件（2,101〜4,840） |
 | `docs/data/master_data.md` | 19,273 | 3,470 | `data/master/` 5件（1,673〜5,302） |
-| `diagrams/class_diagram.md` | 15,301 | 980 | `class_diagram/` 3件（4,302〜5,932） |
-| `diagrams/battle_flow.md` | 11,592 | 641 | `battle_flow/` 4件（1,663〜5,522） |
-| `diagrams/er_diagram.md` | 10,978 | 859 | `er_diagram/` 3件（2,528〜5,279） |
+| `docs/diagrams/class_diagram.md` | 15,301 | 980 | `class_diagram/` 3件（4,302〜5,932） |
+| `docs/diagrams/battle_flow.md` | 11,592 | 641 | `battle_flow/` 4件（1,663〜5,522） |
+| `docs/diagrams/er_diagram.md` | 10,978 | 859 | `er_diagram/` 3件（2,528〜5,279） |
 | `docs/tech/tech_battle_offline.md` | 8,445 | 5,529 | `tech_offline.md`（3,278）。オフライン計算を分離し `tech_battle.md` へ改名 |
 
 - 全81ファイルが上限内（`python scripts/check_doc_size.py` が exit 0）
