@@ -31,6 +31,8 @@
 | 2 | `docs/data/master/` | テストで使う数値のみ |
 | 3 | 共通テストユーティリティ | 一覧は §4（後述）。Java化後の参考実装クラスは STEP 2 骨格構築後に整備する |
 
+**列挙値は定義元を読んでから書く**: 装備スロット・敵ID・塔ID・エラーコード等をテストへ書く前に定義元の節を読む（装備スロットは `docs/tech/basic/tech_db/item.md` §1、用語は `docs/glossary.md`）。**推測で書いて後から照合しない**（実値と食い違うと全ケースの書き直しになる）。
+
 **対象モジュールが未作成の場合**（関数名・データ構造が分岐一覧にない）: `docs/tech/basic/tech_structure.md` の services 一覧を確認する。そこにも無ければ**探索を打ち切り**、テストの docstring で表層（モジュール名・関数シグネチャ）を定義して製造工程へ申し送る。コード側を読み回して表層を推測しない。
 
 ## 4. 共通テストユーティリティ
@@ -45,6 +47,16 @@
 | `towerRecord` | `towerRecord(towerId, highestFloor=0, cleared=false)` で塔別クリア記録を作るファクトリ |
 
 不足するユーティリティはテストクラス内にローカル定義する（共通ユーティリティは全テスト共通のものだけ）。
+
+### Mapper のテスト基盤（`afkgame-domain`）
+
+Mapper を追加するときは以下を使う（毎回の再調査を避けるための台帳）。
+
+| 部品 | パス / 内容 |
+|------|-----------|
+| 基底クラス | `src/test/java/com/afkgame/domain/repository/MapperTestSupport.java`（abstract。`@Tag("integration")` + `@SpringBootTest` + `@AutoConfigureEmbeddedDatabase(ZONKY)` + `@Transactional`。`jdbcTemplate`・時刻固定 `FIXED_NOW`・親レコード生成 `givenUser` / `givenPlayer` / `givenCharacter` / `givenEquipment`・`uuid(prefix)` を提供） |
+| 起動クラス | `src/test/java/com/afkgame/domain/MapperTestApplication.java`（`@SpringBootConfiguration` + `@EnableAutoConfiguration` + `@MapperScan("com.afkgame.domain.repository")`。`afkgame-domain` には本番の起動クラスが無いため、これが最小コンテキストになる） |
+| pom のテスト依存 | `afkgame-domain/pom.xml` に `spring-boot-starter-test` と `io.zonky.test:embedded-database-spring-test` を追加済み（`afkgame-web` の設定を持ち込まない） |
 
 ## 5. 記述規約
 
