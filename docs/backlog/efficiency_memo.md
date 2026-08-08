@@ -74,3 +74,9 @@
 - シグナル: same-command('cd "C:/GIT/2026_AFKGAME" && py'×3) / errors×5 / long-turn(calls=66)
 - ターン概要: ツール66回・エラー5回・拒否0回。開始:「<ide_opened_file>The user opened the file c:\GIT\2026_AFKGAM」
 - 原因と改善案: **統合中にユーザーが main で同じファイル（コーディング規約）を編集し続けたため、`worktree.py merge` が5回連続で弾かれた**（未コミット拒否3回 → 競合2回）。毎回「status 確認 → 相手の作業をコミット → 再実行 → 競合解消」を回し、errors×5 と再測定コマンドの重複はほぼこれ。さらに**相手が同ファイルを索引+4分冊へ分割していたため、字数相殺のために worktree 側で作り込んだ圧縮（§1・§7・§10）が全部無駄になり、取り下げ→別セクションへ付け替え→再度取り下げと3往復した**。→ ① [worktree_guide.md](../process/worktree_guide.md) §5.3 と [.claude/project/next.md](../../.claude/project/next.md) §4 へ「**統合を始める前に main の `git status --short` を見る。dirty なら統合に入らずユーザーへ確認する**（着手時に clean でも、作業中に main が動くことがある）」を追記する。② 同じ2ファイルへ「**自分の変更と同じファイルを main 側が触っている間は、圧縮・再配置など可逆でない調整を worktree 側で作り込まない**。本体の変更（今回なら SecureRandom の例外1行）だけを入れて統合し、字数調整は統合後に測り直す」を足す。前セッションの「圧縮より分割を先に」（23:41 のエントリ）と同じ根で、**残量が逼迫したファイルは触る前に main 側の進行中作業を確認する**のが共通の対策。long-turn 自体は誤検出（指摘5件の適用 → 検証 → 5回の統合リトライ → 引き継ぎ更新まで1ターンで完走）。
+
+## 2026-08-09 00:18 | session fc22a96c | 自動検出
+- シグナル: same-command('cd "C:/GIT/2026_AFKGAME.worktr'×3) / errors×4 / long-turn(calls=209)
+- ターン概要: ツール209回・エラー4回・拒否0回。開始:「<ide_opened_file>The user opened the file c:\GIT\2026_AFKGAM」
+- 原因と改善案: **23:41・23:45 の改善案が未適用のまま同じ壁に3回目** — 統合直前に main が dirty（別セッションが STEP 2R のドキュメント改訂中）で merge が弾かれ、同じ7ファイルを双方が編集していて手動競合が確定した。→ **`retro` を回して 23:45 の①②を反映する**のが第一で、あわせて `worktree_guide.md` §5.2 へ「ホットスポット（`java_migration.md`・`known_issues.md`・`README.md`）を worktree 側で触ると決めた時点で main の進行を確認する」を追記。same-command×3 は `EnterWorktree` 後の cwd が worktree なのに `cd <worktree> &&` を前置していたもの（複合コマンドは分離ガードで弾かれる）→ §5.4 へ1行。errors×4 の2件と long-turn は誤検出。
+- 本ファイル自体が上限超過（8,7xx字 / 8,000字）。未消化3エントリが積んだ結果で、**`retro` の実行が是正そのもの**。
