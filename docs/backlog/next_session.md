@@ -3,7 +3,11 @@
 > **使い方**: 新セッションの最初のメッセージで `/next` と送る（または §1 のコードブロックを貼り付ける）。**着手前に §0 を読む**。
 > 本ファイルは**ポインタ専用**。Phase 進捗の正は [development_process.md](../process/development_process.md) §5、書式の正は [.claude/project/next.md](../../.claude/project/next.md)、worktree 運用の正は [worktree_guide.md](../process/worktree_guide.md)。
 
-最終更新: 2026-08-08 / 対応コミット: `b2f20b1`（移行 STEP 3-A-1c を Red → Green にした）＋ `40d37c4`（Phase 4 鍛冶屋の詳細設計。§2 優先0 から消化）。`PlayerInitializationService`（`tech_auth.md` §8.2 手順2〜6）を新設して `AuthService.createGuest()` へ結線し、`POST /api/auth/guest` が Player・PlayerSettings・初期キャラ1体・9スロット・初期アイテムまで作るようになった。`mvn verify` 全モジュール成功・127件 PASS・JaCoCo branch 100%。**STEP 3-A-1 は完了**。手順・進捗の正は [java_migration.md](java_migration.md)
+最終更新: 2026-08-08 / 対応コミット: `da91521`（移行 STEP 3-A-1 の製造完了ゲート = backend-review を実施）。**STEP 3-A-1 は製造完了ゲートまで到達**し、レビュー結果は [docs/reviews/backend-review/2026-08-08_221814.md](../reviews/backend-review/2026-08-08_221814.md)（差分・11件・高1/中6/低4）。手順・進捗の正は [java_migration.md](java_migration.md)
+
+**レビューで決着が要る2点**（次回セッションの冒頭で決める）: ①**ISSUE-601** `application.yml` の `active: ${APP_ENV:local}` と `application-local.yml` の既定 JWT 鍵の組み合わせで、`APP_ENV` 設定漏れのまま本番起動すると既知鍵で通ってしまう（案1: production へ `secret: ${JWT_SECRET}` を明示 / 案2: 開発既定鍵を廃して毎起動ランダム / 案3: `APP_ENV` の既定値 `local` を外す）②**ISSUE-605** `Instant.now()` の直接取得は STEP 2-B からの既存流儀と規約 §2 の食い違いで、`Clock` 注入へ寄せる案Aと規約へ例外を書く案Bのどちらかに**全サービスまとめて**倒す。
+
+**レビュー由来の未消化2件**（本ファイルの行にしない申し送り。正は [carryover_notes.md](carryover_notes.md)）: Java 規約チェッカーの常設化と、Phase 3 Python 実装（`c3e9a2b`）が未レビューである件。
 
 **分岐マーカーの照合が Java へ効くようになった**（`fbf2073`）。`check_branch_list.py --tests` の走査先が移行前の `backend/tests/unit/*.py` だけで、かつ節番号の正規表現が `§8.3` の枝番に非対応だったため、Java テストのマーカーを1件も見ていなかった。両方を直したので、以後は `--tests` の exit 0 が対応漏れゼロの根拠になる（手で照合しなくてよい）。
 
@@ -27,10 +31,10 @@ worktree を使う複数セッションが同時に走る前提。**着手状態
 ## 1. 次回（コピペ用）
 
 ```
-/backend-review 移行 STEP 3-A-1c の製造完了ゲート: 差分モード（既定）で 3-A-1a〜1c の Java 実装をレビューする。主対象は PlayerInitializationService（新規・手順2〜6）と AuthService の結線、レジストリ3件と Mapper 5件。観点は層の責務・トランザクション境界・規約適合
-完了条件: レポートを docs/reviews/ へ出力し、指摘の要否をユーザーと合意するところまで（**修正の適用は次セッション**へ回す。profile.md §6 規律5）
-参照: .claude/references/coding-standards-backend.md（正は docs/process/coding_standards_backend.md）と docs/reviews/ の既存レポート書式。実装は backend/afkgame-domain/src/main/java/com/afkgame/domain/service/
-前提: `b2f20b1` で 3-A-1c が Green（mvn verify 成功・127件 PASS・JaCoCo branch 100%）。**読み取りのみなので worktree は作らない**（[worktree_guide.md](../process/worktree_guide.md) §5.1）。**判断が要る点2件**: ①新サービスは現在時刻を `Instant.now()` で直接取っている（規約 §2「現在時刻は外から受ける」に対し、既存 AuthService の流儀へ合わせた。`Clock` 注入へ寄せるかは規約側の判断）②新サービスにロガーを置いていない（ゲスト作成のログは AuthService が出す。ロガー名体系の未整備は known_issues #18）。**環境（2026-08-08 に実行確認済み）**: `mvn`・`java` は PATH にも JAVA_HOME にも無く、Bash から動くのは `JAVA_HOME="/c/Program Files/Eclipse Adoptium/jdk-17.0.20.8-hotspot" "/c/Users/tubas/AppData/Local/Programs/apache-maven-3.9.11/bin/mvn" -f backend/pom.xml verify` の形（JAVA_HOME をインラインで与えないと "JAVA_HOME is not defined correctly" で落ちる。出力は CP932 なのでログはファイルへ落として `iconv -f CP932 -t UTF-8` で読む）
+/dev 移行 STEP 3-A-1 レビュー指摘の修正適用: docs/reviews/backend-review/2026-08-08_221814.md の11件を適用する。**セグメント1 = 高・中6件（ISSUE-601〜606）**、セグメント2 = 低4件 + ドキュメント（ISSUE-607〜611）。セグメント1を終えた時点で残量を見て、続けるか §2 へ戻すかを決める。着手の最初に ISSUE-601 と ISSUE-605 の案をユーザーと決める（本ファイル冒頭「レビューで決着が要る2点」）
+完了条件: `mvn verify` 全モジュール成功・JaCoCo branch 100% 維持（ISSUE-603・604・606 は分岐追加を伴うのでテスト追加を同じ変更に含める）。ISSUE-603 は `tech_auth.md` §8.3 への分岐行追加まで行い `python scripts/check_branch_list.py --tests` を exit 0 にする。ドキュメントを触ったら `python scripts/check_doc_size.py` と `python scripts/check_docs.py`
+参照: docs/reviews/backend-review/2026-08-08_221814.md（各 ISSUE に修正案とコード例あり。ここが起点）。規約は docs/process/coding_standards_backend.md §2（ISSUE-605・608 で本文を改訂する場合は派生の .claude/references/coding-standards-backend.md も同時更新 = profile.md §7 規約6）。**`coding_standards_backend.md` は 7,984字 / 残り16字**（2026-08-08 実測）なので、§2 へ書き足すなら同じ編集で既存節の圧縮をまとめる（profile.md §7 規約7）
+前提: `da91521` でレビュー完了（差分・11件・高1/中6/低4）。**ファイルを編集するので worktree を作る**: `python scripts/worktree.py add fix-bereview-3a1` → `EnterWorktree` に `path` で移動（領域は backend + docs。§2 優先3・優先4 と backend が重なるため並行させない）。**環境（2026-08-08 に実行確認済み）**: `mvn`・`java` は PATH にも JAVA_HOME にも無く、Bash から動くのは `JAVA_HOME="/c/Program Files/Eclipse Adoptium/jdk-17.0.20.8-hotspot" "/c/Users/tubas/AppData/Local/Programs/apache-maven-3.9.11/bin/mvn" -f backend/pom.xml verify` の形（JAVA_HOME をインラインで与えないと "JAVA_HOME is not defined correctly" で落ちる。出力は CP932 なのでログはファイルへ落として `iconv -f CP932 -t UTF-8` で読む）
 ```
 
 ## 2. 候補キュー（最大5行・優先順）
@@ -43,6 +47,6 @@ worktree を使う複数セッションが同時に走る前提。**着手状態
 | 1 | **Phase 4 ④ダンジョン3（塔6〜8）のマスターデータ**。`docs/data/towers/` に3ファイルを追加し `TOWERS_OVERVIEW.md` と `master_data.md` の索引を更新する。書式は既存の `009_黄昏の塔.md` 等に揃える | なし | `towers-6to8`<br>docs/data | `detail-design` |
 | 2 | **`test_check_branch_list.py` の35件が setup エラーで実行できない**のを直す。`fbf2073` が `TEST_DIR` を `PY_TEST_DIR` + `JAVA_TEST_GLOB` へ分けた際にテスト側が追随せず、`monkeypatch.setattr(mod, "TEST_DIR", ...)`（28・199行目）が `AttributeError`。**本体は動くが回帰テストが無い状態**。あわせて Java 走査（`JAVA_TEST_GLOB`）のテストを足す | なし（`fbf2073` 済み） | `fix-branchlist-tests`<br>scripts | `dev` |
 | 3 | **Phase 4 テストリスト作成（拠点・施設・鍛冶屋）**。`tech_base.md` §7・§8（36件）と `tech_forge_{enhance,craft,disassemble}.md` §9〜§11（74件）を失敗するテストへ展開する。分岐マーカーの照合は `check_branch_list.py --tests` が Java でも効く（`fbf2073`）ので手照合は不要 | Phase 4 の詳細設計②まで完了。③④とは独立 | `p4base-testlist`<br>backend | `test-list` |
-| 4 | 移行 STEP 3-A-2（register / login / logout）。`BCryptPasswordEncoder`(strength 12) と `SecurityConfig` の認証不要パス追加を含む（持ち越しの正は java_migration.md §4 の 2-B 表）。初期化は `PlayerInitializationService.initialize()` をそのまま呼ぶ（`tech_auth.md` §8 冒頭） | なし（3-A-1c 完了済み） | `step3a2-auth`<br>backend | `test-list` → `dev` |
+| 4 | 移行 STEP 3-A-2（register / login / logout）。`BCryptPasswordEncoder`(strength 12) と `SecurityConfig` の認証不要パス追加を含む（持ち越しの正は java_migration.md §4 の 2-B 表）。初期化は `PlayerInitializationService.initialize()` をそのまま呼ぶ（`tech_auth.md` §8 冒頭） | **§1 のセグメント1（ISSUE-601〜606）を先に済ませる**。register は `initialize()` の2つ目の呼び出し元になるため ISSUE-602（`Propagation.MANDATORY`）と ISSUE-605（時刻の受け取り方）の決着後に書かないと二度手間になる | `step3a2-auth`<br>backend | `test-list` → `dev` |
 
 - 上記に載らない**複数セッションにまたがる申し送り**（移行 STEP の順序・環境・確定済み仕様の波及）は [carryover_notes.md](carryover_notes.md) が持つ。着手前にそちらも見る
