@@ -40,7 +40,7 @@ Repository は Service へ Entity のライフサイクル操作を提供する�
 |---|------|
 | 1 | SQL は XML に置き、値は `#{}` でバインドする。`${}` による文字列組み立てをしない |
 | 2 | マッピング XML は **インタフェースと同名・同パッケージのリソース配下**に置き、`namespace` にインタフェースの FQCN を書く |
-| 3 | **Repository は主体となる Entity に対して作る**（ガイドライン 3.2.4.3 #1）。従の Entity 専用の Repository は作らず、主体の Repository のメソッドとして持たせる（`player_settings`・`inventory_items` は `PlayerRepository`、`character_equip_slots` は `CharacterRepository`）。**テーブル単位では作らない** |
+| 3 | **Repository は主体となる Entity に対して作る**（ガイドライン 3.2.4.3 #1）。従の Entity 専用の Repository は作らず、主体の Repository のメソッドとして持たせる（`player_settings`・`inventory_items` は `PlayerRepository`、`character_equip_slots` は `CharacterRepository`）。**テーブル単位では作らない**。`refresh_tokens` はトークンハッシュで独立に引くため主体として扱う |
 | 4 | **Service へ永続化技術を漏らさない**。`SqlSession` や MyBatis の型を引数・戻り値に出さず、Entity・`record`・プリミティブだけでやり取りする |
 | 5 | **DB 列は snake_case、Java フィールドは lowerCamelCase**。変換は MyBatis の `map-underscore-to-camel-case: true` に任せ、`<result>` の手書きマッピングを増やさない。列名の正は `tech_db.md` |
 | 6 | 取得は N+1 を作らない（JOIN・一括取得） |
@@ -55,6 +55,8 @@ Repository は Service へ Entity のライフサイクル操作を提供する�
 | 1 | マスターデータは `src/main/resources/masterdata/` の YAML を起動時に読み込み、不変の `record` として公開する。値の正は [docs/data/](../../data/master_data.md) |
 | 2 | 読み込み・検証の失敗は起動失敗にする（不正なデータのまま動かさない） |
 | 3 | 乱数は `RandomFactory` から受け取り、引数で引き回す（`common.md` §4 #2） |
+| 4 | **レジストリの形をそろえる**。`(loader, resourcePath)` を受けるパッケージプライベートなコンストラクタ（テスト用）と `contains()` を持たせる。公開コンストラクタ側の `@Autowired` 明示は `common.md` §4 #4 |
+| 5 | 異常系のフィクスチャ（不正な YAML）は **domain 側の `masterdata-invalid/`** に置く。web 側の統合テストはコンテキスト起動失敗の検証だけに使う |
 
 ## 5. 命名（ドメイン層）
 
