@@ -185,6 +185,55 @@ class AuthApiIntegrationTest extends WebIntegrationTestSupport {
                 .andExpect(jsonPath("$.error.code").value("HTTP_404"));
     }
 
+    /**
+     * ログアウトは認証必須（tech_auth_account.md §9・§14 手順1）。アクセストークンが無効なら
+     * AUTH_ コードで 401 を返し、ボディで指したリフレッシュトークンを失効させない。
+     * 期限切れトークンの分岐は {@code JwtAuthenticationFilterTest} が持つ。
+     *
+     * <p>Security フィルタは DispatcherServlet より前に拒否するため、**エンドポイントが未実装でも
+     * 401 は返る**。空振りを防ぐため、末尾に「認証を通せば同じリクエストが成功して失効する」
+     * 対照実験を置く。
+     *
+     * <p>分岐: tech_auth_account.md §15 #2
+     */
+    @Test
+    @DisplayName("アクセストークンが無効なログアウトは 401 になり、リフレッシュトークンを失効させない")
+    void test_無効なアクセストークンのログアウトはトークンを失効させない() throws Exception {
+        JsonNode guest = createGuest();
+        String userId = guest.at("/user/id").asText();
+        String body = refreshBody(guest.at("/refreshToken").asText());
+
+        mockMvc.perform(post("/api/auth/logout")
+                        .contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error.code").value("AUTH_HEADER_MISSING"));
+
+        mockMvc.perform(post("/api/auth/logout").header("Authorization", "Token abc")
+                        .contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error.code").value("AUTH_INVALID_FORMAT"));
+
+        mockMvc.perform(post("/api/auth/logout")
+                        .header("Authorization", "Bearer broken.token.value")
+                        .contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error.code").value("AUTH_INVALID_TOKEN"));
+
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT count(*) FROM refresh_tokens WHERE user_id = ? AND revoked = FALSE",
+                Integer.class, userId)).isEqualTo(1);
+
+        mockMvc.perform(post("/api/auth/logout")
+                        .header("Authorization", "Bearer " + guest.at("/accessToken").asText())
+                        .contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("ok"));
+
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT count(*) FROM refresh_tokens WHERE user_id = ? AND revoked = FALSE",
+                Integer.class, userId)).isZero();
+    }
+
     @Test
     @DisplayName("許可オリジンからの事前リクエストに CORS ヘッダを返す")
     void test_許可オリジンへCORSヘッダを返す() throws Exception {
