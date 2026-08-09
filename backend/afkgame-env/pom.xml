@@ -40,6 +40,11 @@
                     </execution>
                 </executions>
             </plugin>
+            <!-- 単体テストの C1（分岐）100% を mvn verify で判定する（設定は親の pluginManagement） -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+            </plugin>
         </plugins>
     </build>
 
@@ -87,6 +92,12 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- AfkgameSettingsConfig のプロファイル検査で Environment を差し替える（test.md §1） -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
