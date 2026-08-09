@@ -12,16 +12,20 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.Resource;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
+import org.springframework.http.converter.HttpMessageConverters;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.security.web.method.annotation.AuthenticationPrincipalArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.HandlerInterceptor;
-import org.springframework.web.servlet.config.annotation.DefaultServletHandlerConfigurer;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.terasoluna.gfw.common.exception.ExceptionLogger;
 import org.terasoluna.gfw.web.exception.HandlerExceptionResolverLoggingInterceptor;
 import org.terasoluna.gfw.web.logging.TraceLoggingInterceptor;
+
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Configure SpringMVC.
@@ -30,6 +34,17 @@ import org.terasoluna.gfw.web.logging.TraceLoggingInterceptor;
  * ハンドラ・CodeList・トランザクショントークン・RequestDataValueProcessor・画面へ転送する
  * SystemExceptionResolver）。エラー応答は共通例外ハンドラ（{@code com.afkgame.web.filter}）で
  * JSON を返す方式に置き換える（正は tech_api_common.md）。
+ * </p>
+ * <p>
+ * JSON は Jackson 3（{@code tools.jackson}）で扱う。雛形の依存には Jackson 2
+ * （{@code com.fasterxml}）も同居するが、Spring Framework 7 の既定が Jackson 3 であり、
+ * {@code java.time} 対応が databind に内蔵されているため（2 は {@code jackson-datatype-jsr310} の
+ * 登録が要る）3 を採る（移行 STEP 2R-C の確定結果）。
+ * </p>
+ * <p>
+ * 未定義パスは既定サーブレットへ転送せず例外にして、404 も統一エラー形式で返す。このため雛形の
+ * {@code configureDefaultServletHandling} は落としている（Spring Framework 7 の
+ * {@code DispatcherServlet} は常に {@code NoHandlerFoundException} を送出するので追加の設定は要らない）。
  * </p>
  */
 @ComponentScan(basePackages = {"com.afkgame.web.api", "com.afkgame.web.filter"})
@@ -80,10 +95,20 @@ public class SpringMvcConfig implements WebMvcConfigurer {
 
     /**
      * {@inheritDoc}
+     * <p>
+     * JSON の変換器を Jackson 3 のものへ差し替える。未定義フィールドを含むリクエストは 422 で
+     * 拒否するため {@code FAIL_ON_UNKNOWN_PROPERTIES} を有効にする（Jackson 3 の既定は無効。
+     * tech_security.md §11.3・tech_api_common.md §5.0）。
+     * </p>
+     * <p>
+     * 既定の変換器は呼び出し元で登録済みのため、ここでは JSON ぶんだけを上書きする。
+     * </p>
      */
     @Override
-    public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
-        configurer.enable();
+    public void configureMessageConverters(HttpMessageConverters.ServerBuilder builder) {
+        JsonMapper jsonMapper = JsonMapper.builder()
+                .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).build();
+        builder.withJsonConverter(new JacksonJsonHttpMessageConverter(jsonMapper));
     }
 
     /**

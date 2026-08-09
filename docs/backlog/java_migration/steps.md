@@ -42,14 +42,14 @@
 
 STEP 2 で作った骨格は Spring Boot アプリで、ガイドラインのブランクプロジェクトとは別物だった（`terasoluna-gfw-*` への依存も `org.terasoluna` の利用も無く、`terasoluna.version` は未参照のまま残っていた）。[tech_selection.md](tech_selection.md) §2 の改訂に合わせて土台を作り直す。**API契約・DBスキーマ・ゲーム仕様は変更しない**。
 
-影響範囲は Java 80ファイル中 **70ファイルが `org.springframework.boot` を参照**（`@ConfigurationProperties` 9・`@SpringBootTest` 5・`@AutoConfigureMockMvc` 3・`BuildProperties` 11）。設定とテスト基盤は全面的に置き換わる。
+影響範囲は Java 80ファイル中 **70ファイルが Boot を参照**（main は6件のみ＝下記「2R-B の結果」）。設定とテスト基盤は全面的に置き換わる。
 
 | セグメント | 内容 | 状態 |
 |-----------|------|------|
 | 2R-0 | 先行検証（下表のとおり6件を実機で確定） | **完了**（2026-08-09） |
-| 2R-A | 仕様書・規約の再改訂（§2 の変更点を `tech_structure` / `tech_operations` / `coding_standards_backend` へ反映） | **完了**（2026-08-09。`tech_structure`・`tech_operations` は分割した） |
+| 2R-A | 仕様書・規約の再改訂（§2 の変更点を `tech_structure` / `tech_operations` / `coding_standards_backend` へ反映） | **完了**（2026-08-09。仕様書2件は分割した） |
 | 2R-B | Archetype から雛形を生成し、View 一式を落として REST 専用の土台にする（`mvn clean install` で war が出るまで） | **完了**（2026-08-09） |
-| 2R-C | 設定の移植（`web.xml`・Java Config 6種・`*.properties`・`logback.xml`・DataSource・Flyway 起動） | 未着手 |
+| 2R-C | 設定の移植（`web.xml`・Java Config 6種・`*.properties`・`logback.xml`・DataSource・Flyway 起動） | **完了**（2026-08-09） |
 | 2R-D | 既存実装の移植（domain 34 + web 13 + env 5 の main コードから Boot 依存を除去） | 未着手 |
 | 2R-E | テスト基盤の再構築（テスト28ファイル。surefire/failsafe/JaCoCo の分離設定は維持する） | 未着手 |
 | 2R-F | 実行・デプロイの切替（Tomcat 起動、Vite プロキシ、`launch.json`、[tech_operations.md](../../tech/nonfunctional/tech_operations.md) §12 反映） | 未着手 |
@@ -62,7 +62,11 @@ STEP 2 で作った骨格は Spring Boot アプリで、ガイドラインのブ
 
 退避しなかったもの＝マッピング XML 5・マスターデータ YAML 16・`V1__initial_schema.sql`、および **Entity 7件（`domain/model`）**。**main コードで実際に Boot へ依存するのは6件だけ**（`env/config` の `@ConfigurationProperties` 3・`env/logging/JsonLogFormatter`・`AfkgameApplication`・`HealthApi` の `BuildProperties`）で、`domain` 配下31件は Boot 非依存。Entity は非JDK import ゼロの POJO で、退避すると `check_schema_triple.py` の「実装:」照合が7件落ちるため現位置に戻した。残る `domain/{repository,service,masterdata,rng}` は jjwt・`jackson-dataformat-yaml` 等の依存追加が要るので 2R-D で戻す。
 
-Java Config は仕様どおり `com.afkgame.{domain,web,env}.config.*` へ置いた（雛形の既定 `com.afkgame.config.*` から移動）。**2R-C へ送った雛形の残り**は、`afkgame-infra.properties` の接続値（local 固定値のまま）・`build.properties` のリソースフィルタ（`/health` の version）・CSRF の扱い・Flyway の `@Bean(initMethod = "migrate")` 定義。
+Java Config は仕様どおり `com.afkgame.{domain,web,env}.config.*` へ置いた（雛形の既定 `com.afkgame.config.*` から移動）。**`build.properties` のリソースフィルタ（`/health` の version）は 2R-D へ送った**。
+
+#### 2R-C の結果（設定の確定）
+
+設定保持 Bean は `env/config/{Game,Auth,Cors}Settings`（record）で、`AfkgameSettingsConfig` が `@Value` で1か所から組む（期限は分・日の整数で持ち `Duration` 化）。環境差分は `@Profile("local")` + `@PropertySource`（`META-INF/spring/local/` へ置きグロブから外す）で、production は読まないため必須変数の未設定が起動中止になる。環境変数名と合わないキーは値側へ `${ENV:既定値}` を書き、`database.username` は `database.user` へ改名した。JSON は **Jackson 3（`tools.jackson`）**（Spring 7 の既定・`java.time` 内蔵。`FAIL_ON_UNKNOWN_PROPERTIES` は既定 false のため明示的に有効化）、CSRF は無効 + `STATELESS`。
 
 #### 2R-0 の確定結果（実機検証済み）
 
@@ -77,7 +81,7 @@ Archetype `5.11.0.RELEASE` で雛形を生成し（`mvn clean install` 成功）
 | ビルドプラグイン | 競合なし。JaCoCo・surefire・failsafe はそのまま足せる | 親の `pluginManagement` は**版の宣言だけ**（`configuration` を持つのは compiler のみ）。JaCoCo は親の 0.8.14 に揃う。ただし**雛形の failsafe は `integration-test` ゴールしか持たない** ため、`verify` ゴールの execution を足さないと結合テストが失敗してもビルドが落ちない |
 | プロファイル切替 | **環境変数のみ**で切り替える（`SPRING_PROFILES_ACTIVE` ＋ `DATABASE_URL` 等）。雛形の Maven プロファイル（`configs/<env>/resources`）は使わない | `SPRING_PROFILES_ACTIVE=production` で `@Profile("production")` の Bean が選ばれ、`DATABASE_URL` が `${database.url}` を上書きした（素の Spring の環境変数マングリング）。現行の起動時バリデーション（[tech_operations.md](../../tech/nonfunctional/tech_operations.md) §12.2）をそのまま保てる |
 
-OWASP Dependency-Check は親が管理しないため**版を自分で固定して足す**（`12.2.2` で競合なく起動）。ただし NVD データが別途要り、`autoUpdate=false` では `NoDataException` で失敗する。CI で回すなら **NVD API キーの調達が前提**になる（2R-E で決める）。
+OWASP Dependency-Check は親が管理しないため**版を自分で固定して足す**（`12.2.2`）。NVD データが別途要り `autoUpdate=false` では失敗するため、CI で回すなら **NVD API キーの調達が前提**（2R-E で決める）。
 
 ### STEP 3〜5: Phase 単位の移植
 

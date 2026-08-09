@@ -133,6 +133,11 @@
         <artifactId>afkgame-env</artifactId>
         <version>0.1.0</version>
       </dependency>
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>afkgame-initdb</artifactId>
+        <version>0.1.0</version>
+      </dependency>
       <!-- == Begin Database == -->
       <dependency>
         <groupId>org.postgresql</groupId>

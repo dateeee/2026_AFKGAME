@@ -36,6 +36,13 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- Flyway 本体（flyway-core / flyway-database-postgresql）と V1 の SQL を
+             クラスパスへ載せる。起動時マイグレーションは AfkgameEnvConfig#flyway が実行する -->
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>afkgame-initdb</artifactId>
+        </dependency>
+
         <!-- == Begin TERASOLUNA == -->
         <dependency>
             <groupId>org.terasoluna.gfw</groupId>

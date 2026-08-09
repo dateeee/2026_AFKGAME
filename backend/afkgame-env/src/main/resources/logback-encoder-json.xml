@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  本番用の構造化JSON形式（LOG_FORMAT=json）。docs/tech/basic/tech_logging.md「ログフォーマット」。
+
+  【暫定】項目名を仕様どおり（timestamp / level / logger / message / request_id / client_ip /
+  method / path）に組むのは JsonLogFormatter の役割だが、移行前の実装は Spring Boot の
+  StructuredLogEncoder に依存しており、そのままでは使えない。差し替えは移行 STEP 2R-D で行う
+  （java_migration/steps.md）。ここでは Boot 非依存の logback 内蔵エンコーダで JSON 出力に
+  切り替わることまでを担保し、項目名は logback 既定のままとする。
+-->
+<included>
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.JsonEncoder" />
+    </appender>
+</included>

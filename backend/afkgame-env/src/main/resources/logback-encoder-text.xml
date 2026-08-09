@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  開発用テキスト形式（LOG_FORMAT=text）。docs/tech/basic/tech_logging.md「ログフォーマット」。
+
+  出力例:
+    [2026-03-15 14:38:30] WARNING  afkgame.auth: 認証失敗 reason=player_not_found request_id=550e8400
+
+  MDC は「key=value」を空白区切りで末尾に並べる（logback 既定の「, 」区切りを空白へ置換し、
+  MDC が空のときは区切りの空白ごと出力しない）。
+-->
+<included>
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>[%d{yyyy-MM-dd HH:mm:ss, UTC}] %-8(%replace(%level){'WARN','WARNING'}) %logger: %msg%replace(%replace(%mdc){', ',' '}){'^(.+)$',' $1'}%n</pattern>
+        </encoder>
+    </appender>
+</included>

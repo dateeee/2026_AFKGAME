@@ -5,6 +5,7 @@ import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Import;
 
 import com.afkgame.domain.config.mybatis.MybatisConfig;
@@ -20,11 +21,17 @@ public class AfkgameInfraConfig {
 
     /**
      * Configure {@link SqlSessionFactoryBean} bean.
+     * <p>
+     * スキーマ未適用の DB へアクセスしないよう、Flyway のマイグレーション後に生成する
+     * （{@code flyway} Bean の定義は
+     * {@link com.afkgame.env.config.app.AfkgameEnvConfig#flyway(DataSource)}）。
+     * </p>
      * @param dataSource DataSource
      * @see com.afkgame.env.config.app.AfkgameEnvConfig#dataSource()
      * @return Bean of configured {@link SqlSessionFactoryBean}
      */
     @Bean("sqlSessionFactory")
+    @DependsOn("flyway")
     public SqlSessionFactoryBean sqlSessionFactory(DataSource dataSource) {
         SqlSessionFactoryBean bean = new SqlSessionFactoryBean();
         bean.setDataSource(dataSource);

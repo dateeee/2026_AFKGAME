@@ -41,3 +41,8 @@
 - シグナル: long-turn(calls=149)
 - ターン概要: ツール149回・エラー1回・拒否0回。開始:「<command-message>next</command-message>」
 - 原因と改善案: **雛形生成から war 生成・文書反映・統合まで完走した正当な分量**だが、**実在の非効率が2件**: ① worktree セッションの分離ガードが `&&`・ループ・リダイレクトを含む Bash を「複雑すぎる」と拒否するため、退避と配置を**1コマンド1呼び出しへばらして約20回**費やした（`git mv` 8 + `cp` 13）。移送はファイル単位ではなく**ディレクトリ単位**にまとめれば数回で済んだ → [.claude/project/dev.md](../../.claude/project/dev.md) §5 へ「**worktree 内での一括移送（`git mv`・`cp`）はディレクトリ単位でまとめる**。分離ガードが複合コマンドを拒否するため、ファイル単位に展開すると呼び出し回数が跳ねる」を追記 ② **Boot 依存の有無を調べる前に main コード42件を丸ごと退避**し、`check_schema_triple.py` が7件落ちてから調べ直した（実際に Boot へ依存するのは6件だけで、Entity 7件は非JDK import ゼロ）→ 同 §4 の観点表へ「**既存コードを退避・削除する前に、依存の実体を import で分類する**（"Boot 前提"という前提の粒度を鵜呑みにしない）。常設チェッカーは退避の前後で走らせ、緑→赤の変化で巻き込みを検出する」を追記。
+
+## 2026-08-09 11:21 | session 49abca2c | 自動検出
+- シグナル: long-turn(calls=43)
+- ターン概要: ツール43回・エラー1回・拒否0回。開始:「<command-message>next</command-message>」
+- 原因と改善案: **引き継ぎ確認 → 鮮度検証 → 仕様4件の該当節読み → 雛形設定10件の把握 → 計画提示まで到達した分量**で long-turn 自体は概ね誤検出。ただし**実在の非効率が2件**: ① 外部ライブラリの実在確認（Jackson 3/2 の同居・`JacksonJsonHttpMessageConverter` のコンストラクタ・`DispatcherServlet` の既定・logback `JsonEncoder`・Flyway 版）を `javap`/`unzip` で**5回の往復に分けて**投げた（前の答えが次の問いを生む形で芋づる式に増えた）→ [.claude/project/dev.md](../../.claude/project/dev.md) §5 の注意3（版調査はまとめて1回）へ「**API の実在確認（クラス名・コンストラクタ・既定値の有無）も同じ扱い**。着手前に確認項目を列挙し `javap`/`unzip` を1バッチで出す」を併記 ② `mvn dependency:tree` に `-q` を付けてツリー出力ごと消し、1回空振りした → 同§5へ「`dependency:tree` は `-q` を付けない（ツリーは INFO で出るため消える）」を追記。

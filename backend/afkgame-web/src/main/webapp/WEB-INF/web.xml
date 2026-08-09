@@ -32,9 +32,9 @@
         </param-value>
     </context-param>
 
-    <listener>
-        <listener-class>org.terasoluna.gfw.web.logging.HttpSessionEventLoggingListener</listener-class>
-    </listener>
+    <!-- ステートレス（JWT）のため HTTP セッションを持たない。雛形の
+         HttpSessionEventLoggingListener と session-config は落としている
+         （SpringSecurityConfig の SessionCreationPolicy.STATELESS と対。tech_auth.md §1） -->
 
     <filter>
         <filter-name>MDCClearFilter</filter-name>
@@ -54,14 +54,9 @@
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 
-    <filter>
-        <filter-name>XTrackMDCPutFilter</filter-name>
-        <filter-class>org.terasoluna.gfw.web.logging.mdc.XTrackMDCPutFilter</filter-class>
-    </filter>
-    <filter-mapping>
-        <filter-name>XTrackMDCPutFilter</filter-name>
-        <url-pattern>/*</url-pattern>
-    </filter-mapping>
+    <!-- 相関IDは X-Request-ID に一本化するため、雛形の XTrackMDCPutFilter（X-Track を MDC へ
+         入れる）は落としている。X-Request-ID を MDC へ詰めるフィルタは移行 STEP 2R-D で入れる
+         （正は tech_logging.md「ログフォーマット」・「リクエストログ用フィルタ」） -->
 
     <filter>
         <filter-name>CharacterEncodingFilter</filter-name>
@@ -112,15 +107,5 @@
 
     <!-- REST API 専用のため、画面へ転送する error-page は定義しない。
          エラー応答は共通例外ハンドラが JSON で返す（2R-C 以降。正は tech_api_common.md） -->
-
-    <session-config>
-        <!-- 30min -->
-        <session-timeout>30</session-timeout>
-        <cookie-config>
-            <http-only>true</http-only>
-            <!-- <secure>true</secure> -->
-        </cookie-config>
-        <tracking-mode>COOKIE</tracking-mode>
-    </session-config>
 
 </web-app>

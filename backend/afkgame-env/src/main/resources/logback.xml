@@ -1,69 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE configuration>
+<!--
+  ログ設定。仕様の正は docs/tech/basic/tech_logging.md（形式は「ログフォーマット」、
+  ロガー名は「ロガー名体系」、環境変数は「設定値」）。
+
+  形式は LOG_FORMAT（text / json、既定 text）、レベルは LOG_LEVEL（既定 INFO）で切り替える。
+  Spring Boot の <springProfile> は使えず、条件分岐タグ <if> は Janino を必要とするため、
+  形式ごとの定義ファイルを include で読み分ける。
+-->
 <configuration>
 
-    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder>
-            <pattern><![CDATA[date:%d{yyyy-MM-dd HH:mm:ss}\tthread:%thread\tX-Track:%replace(%X{X-Track}){'[\p{IsControl}&&[^\t\r\n]]','<CTRL>'}\tlevel:%-5level\tlogger:%-48logger{48}\tmessage:%replace(%replace(%msg){'[\p{IsControl}&&[^\t\r\n]]','<CTRL>'}){'(\r\n|\r|\n)','$1  '}%n%replace(%replace(%replace(%xEx){'[\p{IsControl}&&[^\t\r\n]]','<CTRL>'}){'(\r\n|\r|\n)','$1  '}){'  $',''}%nopex]]></pattern>
-        </encoder>
-    </appender>
-
-    <appender name="APPLICATION_LOG_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${app.log.dir:-log}/afkgame-application.log</file>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${app.log.dir:-log}/afkgame-application-%d{yyyyMMdd}.log</fileNamePattern>
-            <maxHistory>7</maxHistory>
-        </rollingPolicy>
-        <encoder>
-            <charset>UTF-8</charset>
-            <pattern><![CDATA[date:%d{yyyy-MM-dd HH:mm:ss}\tthread:%thread\tX-Track:%replace(%X{X-Track}){'[\p{IsControl}&&[^\t\r\n]]','<CTRL>'}\tlevel:%-5level\tlogger:%-48logger{48}\tmessage:%replace(%replace(%msg){'[\p{IsControl}&&[^\t\r\n]]','<CTRL>'}){'(\r\n|\r|\n)','$1  '}%n%replace(%replace(%replace(%xEx){'[\p{IsControl}&&[^\t\r\n]]','<CTRL>'}){'(\r\n|\r|\n)','$1  '}){'  $',''}%nopex]]></pattern>
-        </encoder>
-    </appender>
-
-    <appender name="MONITORING_LOG_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${app.log.dir:-log}/afkgame-monitoring.log</file>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${app.log.dir:-log}/afkgame-monitoring-%d{yyyyMMdd}.log</fileNamePattern>
-            <maxHistory>7</maxHistory>
-        </rollingPolicy>
-        <encoder>
-            <charset>UTF-8</charset>
-            <pattern><![CDATA[date:%d{yyyy-MM-dd HH:mm:ss}\tX-Track:%replace(%X{X-Track}){'[\p{IsControl}&&[^\t\r\n]]','<CTRL>'}\tlevel:%-5level\tmessage:%replace(%replace(%msg){'[\p{IsControl}&&[^\t\r\n]]','<CTRL>'}){'(\r\n|\r|\n)','$1  '}%n%replace(%replace(%replace(%xEx){'[\p{IsControl}&&[^\t\r\n]]','<CTRL>'}){'(\r\n|\r|\n)','$1  '}){'  $',''}%nopex]]></pattern>
-        </encoder>
-    </appender>
+    <include resource="logback-encoder-${LOG_FORMAT:-text}.xml" />
 
     <!-- Application Loggers -->
-    <logger name="com.afkgame" level="debug" />
+    <!-- 体系上のロガー（afkgame.auth 等）とクラス名ロガー（com.afkgame.*）を併用するため
+         両方を LOG_LEVEL で制御する -->
+    <logger name="afkgame" level="${LOG_LEVEL:-INFO}" />
 
-    <logger name="com.afkgame.domain.repository" level="trace" />
+    <logger name="com.afkgame" level="${LOG_LEVEL:-INFO}" />
 
     <!-- TERASOLUNA -->
     <logger name="org.terasoluna.gfw" level="info" />
-    <logger name="org.terasoluna.gfw.web.logging.TraceLoggingInterceptor" level="trace" />
+
     <logger name="org.terasoluna.gfw.common.exception.ExceptionLogger" level="info" />
-    <logger name="org.terasoluna.gfw.common.exception.ExceptionLogger.Monitoring" additivity="false" level="error">
-        <appender-ref ref="MONITORING_LOG_FILE" />
-    </logger>
 
     <!-- 3rdparty Loggers -->
     <logger name="org.springframework" level="warn" />
 
-    <logger name="org.springframework.web.servlet" level="info" />
-
-    <logger name="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping" level="trace" />
-
-    <logger name="org.springframework.jdbc.core.JdbcTemplate" level="trace" />
-
-    <!--  REMOVE THIS LINE IF YOU USE JPA
-    <logger name="org.hibernate.SQL" additivity="true" level="debug" />
-    <logger name="org.hibernate.orm.jdbc.bind" level="trace" />
-    <logger name="org.hibernate.engine.transaction" level="debug" />
-          REMOVE THIS LINE IF YOU USE JPA  -->
-    <logger name="org.springframework.jdbc.datasource.DataSourceTransactionManager" level="debug" />
-
     <root level="warn">
-        <appender-ref ref="STDOUT" />
-        <appender-ref ref="APPLICATION_LOG_FILE" />
+        <appender-ref ref="CONSOLE" />
     </root>
 
 </configuration>
