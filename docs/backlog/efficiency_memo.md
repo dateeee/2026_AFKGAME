@@ -108,3 +108,8 @@
 - シグナル: long-turn(calls=225)
 - ターン概要: ツール225回・エラー0回・拒否0回。開始:「<ide_selection>The user selected the lines 38 to 39 from c:\」
 - 原因と改善案: 依頼が規約改訂＝編集確定だったのに main で `layering.md`・`domain.md`・`basis.md` を先に読み、worktree 移動後に Edit 用の再 Read が発生した（worktree_guide §5.2 #4 が禁じる二重読み）。→ [worktree_guide.md](../process/worktree_guide.md) §5.1 に「依頼が仕様・規約・コードの**変更**なら調査の前に worktree を作る（main のまま読んでよいのは質問・レビューだけ）」を明記する。call 数自体は規約25ファイルの追随 + Mapper 8件→Repository 5件の実装・テスト改修という作業量によるもので誤検出。
+
+## 2026-08-09 09:30 | session 951b38b5 | 自動検出
+- シグナル: long-turn(calls=67)
+- ターン概要: ツール67回・エラー0回・拒否0回。開始:「<ide_selection>The user selected the lines 38 to 39 from c:\」
+- 原因と改善案: **直前エントリ（09:15）とまったく同じ原因の再発** — 規約改定＝編集確定の依頼なのに main で `common.md`・`basis.md`・`web.md`・`domain_service.md` を先に読み、worktree 移動後に Edit 用の再 Read を4ファイル分やり直した。前回提案した [worktree_guide.md](../process/worktree_guide.md) §5.1 への1行（「依頼が仕様・規約・コードの**変更**なら調査の前に worktree を作る」）が**未適用のまま**なので、次の `retro` で最優先に反映する。call 数自体は誤検出（新分冊の作成 + 6ファイルの追随 + 派生2件 + 2チェッカー + 統合を1ターンで完走）。
