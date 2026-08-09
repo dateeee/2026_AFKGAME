@@ -18,6 +18,11 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
             </plugin>
+            <!-- 単体テストの C1（分岐）100% を mvn verify で判定する（設定は親の pluginManagement） -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+            </plugin>
         </plugins>
     </build>
 
@@ -111,6 +116,25 @@
         <dependency>
             <groupId>org.apache.tomcat.embed</groupId>
             <artifactId>tomcat-embed-el</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- Repository の統合テスト。埋め込み PostgreSQL へ Flyway でスキーマを作り SQL を実行する
+             （V1 は afkgame-env 経由で afkgame-initdb が同梱する）。起動と DB 払い出しは
+             afkgame-env の test-jar が持つ EmbeddedPostgresSupport が担う -->
+        <dependency>
+            <groupId>io.zonky.test</groupId>
+            <artifactId>embedded-postgres</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>afkgame-env</artifactId>
+            <type>test-jar</type>
             <scope>test</scope>
         </dependency>
         <!--  REMOVE THIS LINE IF YOU USE Spring Test DBUnit

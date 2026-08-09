@@ -1,0 +1,84 @@
+package com.afkgame.web.integration;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
+import org.springframework.transaction.IllegalTransactionStateException;
+
+import com.afkgame.domain.repository.PlayerRepository;
+import com.afkgame.domain.service.PlayerInitializationService;
+
+/**
+ * ゲスト作成の初期化が途中で失敗したとき、単一トランザクションが全体をロールバックすることの統合テスト。
+ *
+ * <p>仕様: docs/tech/detail/tech_auth.md §8.2 手順8（手順1〜7を単一トランザクションでコミット）。
+ *
+ * <p>失敗を DB 制約で作れない（公開APIからは一意制約違反へ到達できない）ため、
+ * 手順6（初期所持アイテムの付与）だけが失敗するよう {@link PlayerRepository} を spy にして
+ * {@code saveItem} に例外を投げさせる。手順2〜5 は実際に INSERT させないと
+ * ロールバックの検証にならないため、モックではなく spy を使う。
+ * ロールバックの確認には「他のテストが作った行が無い」ことが要るため、
+ * {@link AuthApiIntegrationTest} と同居させず専用クラスに置く（{@code @MockitoSpyBean} により
+ * テスト用コンテキストも別になり、{@code WebIntegrationTestSupport} が専用のデータベースを払い出す）。
+ */
+class GuestInitializationRollbackIntegrationTest extends WebIntegrationTestSupport {
+
+    @MockitoSpyBean
+    private PlayerRepository playerRepository;
+
+    @Autowired
+    private PlayerInitializationService playerInitializationService;
+
+    private int countOf(String table) {
+        return jdbcTemplate.queryForObject("SELECT count(*) FROM " + table, Integer.class);
+    }
+
+    /**
+     * 分岐: tech_auth.md #13
+     */
+    @Test
+    @DisplayName("初期化の途中で失敗したら、ユーザーを含めて何も残らない")
+    void test_初期化の途中で失敗したら全体をロールバックする() throws Exception {
+        doThrow(new DataIntegrityViolationException("初期アイテムの付与に失敗"))
+                .when(playerRepository).saveItem(any());
+
+        // 業務例外へ写さないため、統一エラー形式の 500 になる（tech_logging.md「グローバル例外ハンドラ」）
+        mockMvc.perform(post("/api/auth/guest"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.error.code").value("INTERNAL_UNEXPECTED_ERROR"));
+
+        assertThat(countOf("users")).isZero();
+        assertThat(countOf("players")).isZero();
+        assertThat(countOf("player_settings")).isZero();
+        assertThat(countOf("characters")).isZero();
+        assertThat(countOf("character_equip_slots")).isZero();
+        assertThat(countOf("inventory_items")).isZero();
+        assertThat(countOf("refresh_tokens")).isZero();
+    }
+
+    /**
+     * トランザクション境界を持たない呼び出しは、実行時に落として中途半端なデータを作らせない。
+     *
+     * <p>{@code initialize()} は2つの Repository へ12行以上を INSERT するため、呼び出し側が
+     * {@code @Transactional} を付け忘れると手順8（全体をロールバック）が破れる。契約を Javadoc
+     * だけで担保せず {@code Propagation.MANDATORY} で強制していることを確かめる。
+     */
+    @Test
+    @DisplayName("トランザクションの外から初期化を呼ぶと実行時に落ちる")
+    void test_トランザクションの外から呼ぶと落ちる() {
+        assertThatThrownBy(() -> playerInitializationService.initialize("user_no_tx"))
+                .isInstanceOf(IllegalTransactionStateException.class);
+
+        assertThat(countOf("players")).isZero();
+    }
+}

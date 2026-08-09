@@ -25,6 +25,21 @@
                     <encoding>${encoding}</encoding>
                 </configuration>
             </plugin>
+            <!-- テスト基盤（EmbeddedPostgresSupport）を afkgame-domain / afkgame-web の
+                 統合テストへ配るため test-jar を作る。DataSource の供給元は本モジュールなので、
+                 テスト用の差し替えも同じ場所に置く（移行 STEP 2R-E） -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>test-jar</id>
+                        <goals>
+                            <goal>test-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
@@ -67,5 +82,24 @@
             <type>pom</type>
         </dependency>
         <!-- == End TERASOLUNA == -->
+
+        <!-- == Begin Unit Test == -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- test-jar が配る EmbeddedPostgresSupport が使う（統合テストの DB 起動） -->
+        <dependency>
+            <groupId>io.zonky.test</groupId>
+            <artifactId>embedded-postgres</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- == End Unit Test == -->
     </dependencies>
 </project>

@@ -39,7 +39,7 @@
 
 | ユーティリティ | 内容 |
 |------------|------|
-| `db` | 埋め込み PostgreSQL（`@AutoConfigureEmbeddedDatabase(provider = ZONKY)`）への接続。`@SpringBootTest` ごとにスキーマを作り直す |
+| `db` | 埋め込み PostgreSQL。`afkgame-env` の test-jar が持つ `EmbeddedPostgresSupport`（`EmbeddedPostgres.builder().start()` を JVM に1つ。DB はテスト用コンテキストごとに払い出す）を `@DynamicPropertySource` で `database.*` へ差し込む。スキーマは起動時に Flyway が適用する |
 | `user` | `test-user` / 非ゲスト |
 | `player` | gold=1000、`PlayerSettings(potionThreshold=0.3)`、hp_potion×5、初期キャラを持つ |
 | `character` | `player` の初期キャラクター |
@@ -54,9 +54,11 @@ Repository を追加するときは以下を使う（毎回の再調査を避け
 
 | 部品 | パス / 内容 |
 |------|-----------|
-| 基底クラス | `src/test/java/com/afkgame/domain/repository/RepositoryTestSupport.java`（abstract。`@Tag("integration")` + `@SpringBootTest` + `@AutoConfigureEmbeddedDatabase(ZONKY)` + `@Transactional`。`jdbcTemplate`・時刻固定 `FIXED_NOW`・親レコード生成 `givenUser` / `givenPlayer` / `givenCharacter` / `givenEquipment`・`uuid(prefix)` を提供） |
-| 起動クラス | `src/test/java/com/afkgame/domain/RepositoryTestApplication.java`（`@SpringBootConfiguration` + `@EnableAutoConfiguration` + `@MapperScan("com.afkgame.domain.repository")`。`afkgame-domain` には本番の起動クラスが無いため、これが最小コンテキストになる） |
-| pom のテスト依存 | `afkgame-domain/pom.xml` に `spring-boot-starter-test` と `io.zonky.test:embedded-database-spring-test` を追加済み（`afkgame-web` の設定を持ち込まない） |
+| 基底クラス | `src/test/java/com/afkgame/domain/repository/RepositoryTestSupport.java`（abstract。`@Tag("integration")` + `@ExtendWith(SpringExtension)` + `@ContextConfiguration` + `@ActiveProfiles("local")` + `@Transactional`。`jdbcTemplate`・時刻固定 `FIXED_NOW`・親レコード生成 `givenUser` / `givenPlayer` / `givenCharacter` / `givenEquipment`・`uuid(prefix)` を提供） |
+| コンテキスト定義 | `src/test/java/com/afkgame/domain/RepositoryTestConfig.java`（`@Import(AfkgameInfraConfig)` + `PropertySourcesPlaceholderConfigurer` + `JdbcTemplate`。`afkgame-domain` には本番の起動クラスが無いため、これが最小コンテキストになる） |
+| pom のテスト依存 | `afkgame-domain/pom.xml` に `assertj-core`・`io.zonky.test:embedded-postgres`・`afkgame-env` の test-jar を追加済み（`afkgame-web` の設定を持ち込まない） |
+
+Web の統合テストは `afkgame-web` の `WebIntegrationTestSupport`（`@WebAppConfiguration` + 本番の設定クラス3件 + `WebIntegrationTestConfig`。`web.xml` と同じ順で `RequestLogFilter` → `springSecurityFilterChain` を積んだ `mockMvc` を提供）を継承する。
 
 ## 5. 記述規約
 

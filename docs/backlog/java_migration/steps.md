@@ -51,7 +51,7 @@ STEP 2 で作った骨格は Spring Boot アプリで、ガイドラインのブ
 | 2R-B | Archetype から雛形を生成し、View 一式を落として REST 専用の土台にする（`mvn clean install` で war が出るまで） | **完了**（2026-08-09） |
 | 2R-C | 設定の移植（`web.xml`・Java Config 6種・`*.properties`・`logback.xml`・DataSource・Flyway 起動） | **完了**（2026-08-09） |
 | 2R-D | 既存実装の移植（main 48件を戻し Boot 依存を除去） | **完了**（2026-08-09） |
-| 2R-E | テスト基盤の再構築（テスト28ファイル。surefire/failsafe/JaCoCo の分離設定は維持する） | 未着手 |
+| 2R-E | テスト基盤の再構築（テスト25件を素の Spring 用へ。設定と方式は changelog） | **完了**（2026-08-09） |
 | 2R-F | 実行・デプロイの切替（Tomcat 起動、Vite プロキシ、`launch.json`、[tech_operations.md](../../tech/nonfunctional/tech_operations.md) §12 反映） | 未着手 |
 
 完了条件は STEP 2 と同じ「`GET /health` が 200（`db:ok`）・ゲスト認証が通る」に加え、**移植済みの単体テストが branch 100% のまま通ること**。
