@@ -11,7 +11,7 @@
 
 **Phase 1〜3 の機能はどの言語でも未実装の期間**に入っている（Python 削除を STEP 3〜5 より先に実施したため）。E2E はハーネスと `GET /health` まで疎通済みだが、テスト本体は STEP 5 完了まで赤が正常。
 
-**Phase 4 詳細設計**: 拠点・施設（`tech_base.md`）・①酒場スカウト（`tech_scout.md`）・②鍛冶屋（`tech_forge.md` + 操作別3件）は完了。残りは③限界突破（§1）と④塔6〜8（§2）。
+**⚠ 未統合の worktree が1本ある**: `wt/docs-cleanup`（`6804046`。ドキュメント整理94ファイル＝リンク重複の解消と Java 移行で陳腐化した記述の削除）。**完了済みで main へ未統合**なので、着手前に `python scripts/worktree.py merge docs-cleanup` を実行してよいかユーザーへ確認する。`docs/**` 全域に触れるため、統合前に docs 系のタスクを始めると衝突する。あわせて **`efficiency_memo.md` が 8,570字で上限超過**（本ファイルの整理では解消しない。`/retro` で棚卸しする）。
 
 **複数セッションにまたがる申し送りの正は [carryover_notes.md](carryover_notes.md)**（移行 STEP の順序 / Java 実装の流儀と落とし穴 / 確定済み仕様の波及 / 環境・ツール）。着手前にそちらも見る。
 
@@ -46,8 +46,7 @@ worktree を使う複数セッションが同時に走る前提。**着手状態
 | 1 | **移行 STEP 3-A-2 のテストリスト作成**。§1 で作った register / login / logout の分岐一覧を JUnit の Red へ展開する。`afkgame-web` の `AuthApi` と `afkgame-domain` の `AuthService` が対象。**同一モジュールに Red が複数並ぶと片方だけでは Green を検証できない**（`carryover_notes.md` §1）ので、Red と Green は同じ単位で積む | **§1 の分岐一覧が完成してから** | `auth-3a2-testlist`<br>backend | `test-list` |
 | 2 | **`afkgame-env` を JaCoCo の分岐100%ゲートへ載せる**。`AfkgameSettingsConfig` のプロファイル検査（4分岐）に単体テストが無く 100% を満たせないため、env だけゲート対象外にしてある。テストを足して `afkgame-env/pom.xml` へ jacoco プラグインを宣言する | なし（2R-F 完了で backend が空いた） | `env-jacoco`<br>backend | `unit-test` |
 | 3 | **移行バックログの文字数是正**。[carryover_notes.md](carryover_notes.md)（**残り6字**）を分割する。H2 `## 2` が上限超過で圧縮では解消しない（残量WARN 24件の棚卸しも同時に） | なし。ただし**移行 STEP と同時に走らせない**（同じファイルを触る） | `docsize-migration`<br>docs/backlog | `doc-size` |
-| 4 | **Phase 4 ③限界突破の詳細設計**。`POST /api/character/limit-break` の処理フロー・計算式・分岐一覧を `docs/tech/detail/tech_limitbreak.md`（新規）へ。素材＝同一 `master_id` のキャラ1体で `limit_break` +1（上限5回）。`check_branch_list.py` を exit 0 にする。起点は [character.md](../data/master/character.md) §8・§8.1（ボーナス数値の正）、可否は [tech_state.md](../tech/detail/tech_state.md) §4、`canLimitBreak` は [tech_scout.md](../tech/detail/tech_scout.md) §6。**`characters.master_id` は Phase 4 で追加する未実装列**（定義書とER図のみ記載済み） | なし | `p4limitbreak-detail`<br>docs/tech | `detail-design` |
-| 5 | **Phase 4 ④ダンジョン3（塔6〜8）のマスターデータ**。`docs/data/towers/` に3ファイルを追加し `TOWERS_OVERVIEW.md` と `master_data.md` の索引を更新する。書式は既存の `009_黄昏の塔.md` 等に揃える | なし | `towers-6to8`<br>docs/data | `detail-design` |
 
-- **キューが空いたら戻す行**: 移行 STEP 3-A-2 の製造（`dev`。上記1の後）、3-A-3（link-account / verify-email / password-reset）、Phase 4 テストリスト作成（拠点・施設・鍛冶屋。`tech_base.md` §7・§8 の36件 + `tech_forge_*` の74件）。順序の正は [carryover_notes.md](carryover_notes.md) §1
+- **キューが空いたら戻す行**: 移行 STEP 3-A-2 の製造（`dev`。上記1の後）、3-A-3（link-account / verify-email / password-reset）。順序の正は [carryover_notes.md](carryover_notes.md) §1
+- **Phase 4 は Java 移行が終わるまで本キューから外している**（2026-08-09・ユーザー判断）。再開時に戻す3件 — ①**③限界突破の詳細設計**: `POST /api/character/limit-break` を `tech_limitbreak.md`（新規）へ。素材＝同一 `master_id` のキャラ1体で `limit_break` +1（上限5回）。起点は `master/character.md` §8・§8.1、可否は `tech_state.md` §4、`canLimitBreak` は `tech_scout.md` §6。`characters.master_id` は Phase 4 で追加する未実装列 ②**④ダンジョン3（塔6〜8）のマスターデータ**: `docs/data/towers/` へ3ファイル追加し `TOWERS_OVERVIEW.md`・`master_data.md` の索引を更新（書式は `009_黄昏の塔.md` に倣う） ③**テストリスト作成**: 拠点・施設・鍛冶屋（`tech_base.md` §7・§8 の36件 + `tech_forge_*` の74件）。**詳細設計は拠点・施設・①酒場スカウト・②鍛冶屋まで完了済み**
 - 上記に載らない**複数セッションにまたがる申し送り**は [carryover_notes.md](carryover_notes.md) が持つ。着手前にそちらも見る
