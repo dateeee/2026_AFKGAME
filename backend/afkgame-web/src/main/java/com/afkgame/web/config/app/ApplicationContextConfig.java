@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Import;
@@ -23,13 +24,44 @@ import org.terasoluna.gfw.web.exception.ExceptionLoggingFilter;
 
 import com.afkgame.domain.config.app.AfkgameDomainConfig;
 
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.json.JsonMapper;
+
 /**
  * Application context.
+ * <p>
+ * {@code com.afkgame.web.filter} を**ルートコンテキストで**走査する（サーブレットコンテキスト側の
+ * {@code SpringMvcConfig} では走査しない）。{@code RequestLogFilter} は {@code web.xml} の
+ * {@code DelegatingFilterProxy} から、{@code ApiAuthenticationEntryPoint} は
+ * {@link SpringSecurityConfig} から引かれ、どちらもルートコンテキストを見るため。
+ * {@code ApiExceptionHandler}（{@code @RestControllerAdvice}）は
+ * {@code DispatcherServlet} が祖先コンテキストまで探すのでルートに置いても効く。
+ * </p>
  */
 @Configuration
 @EnableAspectJAutoProxy
+@ComponentScan(basePackages = {"com.afkgame.web.filter"})
 @Import({AfkgameDomainConfig.class})
 public class ApplicationContextConfig {
+
+    /**
+     * Configure {@link JsonMapper} bean.
+     * <p>
+     * JSON は Jackson 3（{@code tools.jackson}）で扱う（移行 STEP 2R-C の確定結果）。未定義
+     * フィールドを含むリクエストは 422 で拒否するため {@code FAIL_ON_UNKNOWN_PROPERTIES} を
+     * 有効にする（Jackson 3 の既定は無効。tech_security.md §11.3・tech_api_common.md §5.0）。
+     * </p>
+     * <p>
+     * Spring MVC の変換器（{@code SpringMvcConfig}）と、フィルタ内で応答を組み立てる
+     * {@code ApiAuthenticationEntryPoint} が同じインスタンスを使い、JSON の形式をそろえる。
+     * </p>
+     * @return Bean of configured {@link JsonMapper}
+     */
+    @Bean("jsonMapper")
+    public JsonMapper jsonMapper() {
+        return JsonMapper.builder().enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                .build();
+    }
 
     /**
      * Configure {@link PasswordEncoder} bean.

@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.afkgame.domain.exception.AppException;
-import com.afkgame.env.config.AuthProperties;
+import com.afkgame.env.config.AuthSettings;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -41,10 +41,10 @@ public class JwtService {
     private final Duration accessTokenExpire;
     private final Clock clock;
 
-    public JwtService(AuthProperties authProperties, Clock clock) {
+    public JwtService(AuthSettings authSettings, Clock clock) {
         // 鍵長が不足していれば起動時に例外となる（32バイト以上。tech_security.md §11.8）
-        this.signingKey = Keys.hmacShaKeyFor(authProperties.secret().getBytes(StandardCharsets.UTF_8));
-        this.accessTokenExpire = authProperties.accessTokenExpire();
+        this.signingKey = Keys.hmacShaKeyFor(authSettings.secret().getBytes(StandardCharsets.UTF_8));
+        this.accessTokenExpire = authSettings.accessTokenExpire();
         this.clock = clock;
     }
 

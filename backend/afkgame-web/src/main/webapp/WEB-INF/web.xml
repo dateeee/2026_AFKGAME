@@ -55,8 +55,19 @@
     </filter-mapping>
 
     <!-- 相関IDは X-Request-ID に一本化するため、雛形の XTrackMDCPutFilter（X-Track を MDC へ
-         入れる）は落としている。X-Request-ID を MDC へ詰めるフィルタは移行 STEP 2R-D で入れる
-         （正は tech_logging.md「ログフォーマット」・「リクエストログ用フィルタ」） -->
+         入れる）は落としている。X-Request-ID の採番と MDC への格納は RequestLogFilter が担う
+         （正は tech_logging.md「ログフォーマット」・「リクエストログ用フィルタ」）。
+         Bean はルートコンテキストにある（ApplicationContextConfig が com.afkgame.web.filter を走査）。
+         認証失敗の応答にもリクエストIDを載せるため springSecurityFilterChain より前に置く -->
+
+    <filter>
+        <filter-name>requestLogFilter</filter-name>
+        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>requestLogFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
 
     <filter>
         <filter-name>CharacterEncodingFilter</filter-name>

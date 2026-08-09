@@ -57,6 +57,28 @@
         </dependency>
         <!-- == End TERASOLUNA == -->
 
+        <!-- マスターデータ YAML の読み込みと起動時スキーマ検証（java_migration.md §2「マスターデータ」）。
+             JSON と同じ Jackson 3（tools.jackson）で読む（2R-C の確定結果。版は親が管理） -->
+        <dependency>
+            <groupId>tools.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-yaml</artifactId>
+        </dependency>
+
+        <!-- JWT の発行・検証（tech_auth.md §1・§4）。jjwt-jackson は Jackson 2 databind を使うが、
+             これは jjwt 内部のクレーム変換に閉じる（自前コードの JSON は Jackson 3 で統一する） -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+        </dependency>
+
         <!-- == Begin Database == -->
         <!--         <dependency> -->
         <!--             <groupId>org.postgresql</groupId> -->

@@ -36,10 +36,16 @@ public class MybatisConfig {
 
     /**
      * Settings type aliases.
+     * <p>
+     * {@code com.afkgame.domain.model} は登録しない。Entity の {@code Character} が MyBatis 組み込みの
+     * エイリアス {@code Character}（{@code java.lang.Character}）と衝突し、
+     * {@code SqlSessionFactory} の生成が {@code TypeException} で落ちるため。マッピング XML は
+     * どれも完全修飾名で型を書いており（{@code type="com.afkgame.domain.model.User"} など）、
+     * エイリアスに依存していない。
+     * </p>
      * @param typeAliasRegistry Accepted at configuration
      */
     private static void setTypeAliases(TypeAliasRegistry typeAliasRegistry) {
-        typeAliasRegistry.registerAliases("com.afkgame.domain.model");
         typeAliasRegistry.registerAliases("com.afkgame.domain.repository");
         // typeAliasRegistry.registerAliases("com.afkgame.infra.mybatis.typehandler");
     }

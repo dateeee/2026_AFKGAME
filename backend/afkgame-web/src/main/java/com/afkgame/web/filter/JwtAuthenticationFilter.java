@@ -28,13 +28,13 @@ import jakarta.servlet.http.HttpServletResponse;
  * docs/tech/basic/tech_logging.md「認証エラーの詳細ログ」「AUTH_ コード一覧」。
  *
  * <p>本フィルタは認証の可否を判定するだけで、拒否の応答は返さない。認証不要な
- * エンドポイント（{@link com.afkgame.web.config.SecurityConfig}）では失敗しても素通りさせる必要が
- * あるため、失敗理由はリクエスト属性に記録し、実際に拒否する段になって
+ * エンドポイント（{@code com.afkgame.web.config.app.SpringSecurityConfig}）では失敗しても
+ * 素通りさせる必要があるため、失敗理由はリクエスト属性に記録し、実際に拒否する段になって
  * {@link ApiAuthenticationEntryPoint} が応答へ変換する。
  *
- * <p>Bean にはしない。{@code Filter} 型の Bean は Spring Boot がサーブレットフィルタとしても
- * 自動登録するため、Security のフィルタチェーンへの追加と二重に登録されてしまう。
- * 生成は {@link com.afkgame.web.config.SecurityConfig} が行う。
+ * <p>Bean にはしない。Security のフィルタチェーンにだけ載せたいものであり、コンポーネント走査で
+ * Bean になると {@code web.xml} 側の登録と取り違えやすいため。生成は
+ * {@code com.afkgame.web.config.app.SpringSecurityConfig} が行う。
  */
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 

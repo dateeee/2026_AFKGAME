@@ -24,7 +24,6 @@ import org.terasoluna.gfw.common.exception.ExceptionLogger;
 import org.terasoluna.gfw.web.exception.HandlerExceptionResolverLoggingInterceptor;
 import org.terasoluna.gfw.web.logging.TraceLoggingInterceptor;
 
-import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.json.JsonMapper;
 
 /**
@@ -39,7 +38,12 @@ import tools.jackson.databind.json.JsonMapper;
  * JSON は Jackson 3（{@code tools.jackson}）で扱う。雛形の依存には Jackson 2
  * （{@code com.fasterxml}）も同居するが、Spring Framework 7 の既定が Jackson 3 であり、
  * {@code java.time} 対応が databind に内蔵されているため（2 は {@code jackson-datatype-jsr310} の
- * 登録が要る）3 を採る（移行 STEP 2R-C の確定結果）。
+ * 登録が要る）3 を採る（移行 STEP 2R-C の確定結果）。{@link JsonMapper} 自体はルートコンテキスト
+ * （{@code ApplicationContextConfig}）が持ち、フィルタ側の応答組み立てと共用する。
+ * </p>
+ * <p>
+ * {@code com.afkgame.web.filter} は本設定では走査しない（ルートコンテキストが持つ。
+ * {@code ApplicationContextConfig} を参照）。
  * </p>
  * <p>
  * 未定義パスは既定サーブレットへ転送せず例外にして、404 も統一エラー形式で返す。このため雛形の
@@ -47,11 +51,21 @@ import tools.jackson.databind.json.JsonMapper;
  * {@code DispatcherServlet} は常に {@code NoHandlerFoundException} を送出するので追加の設定は要らない）。
  * </p>
  */
-@ComponentScan(basePackages = {"com.afkgame.web.api", "com.afkgame.web.filter"})
+@ComponentScan(basePackages = {"com.afkgame.web.api"})
 @EnableAspectJAutoProxy
 @EnableWebMvc
 @Configuration
 public class SpringMvcConfig implements WebMvcConfigurer {
+
+    private final JsonMapper jsonMapper;
+
+    /**
+     * @param jsonMapper Bean defined by ApplicationContextConfig#jsonMapper
+     * @see com.afkgame.web.config.app.ApplicationContextConfig#jsonMapper()
+     */
+    public SpringMvcConfig(JsonMapper jsonMapper) {
+        this.jsonMapper = jsonMapper;
+    }
 
     /**
      * Configure {@link PropertySourcesPlaceholderConfigurer} bean.
@@ -96,9 +110,8 @@ public class SpringMvcConfig implements WebMvcConfigurer {
     /**
      * {@inheritDoc}
      * <p>
-     * JSON の変換器を Jackson 3 のものへ差し替える。未定義フィールドを含むリクエストは 422 で
-     * 拒否するため {@code FAIL_ON_UNKNOWN_PROPERTIES} を有効にする（Jackson 3 の既定は無効。
-     * tech_security.md §11.3・tech_api_common.md §5.0）。
+     * JSON の変換器を Jackson 3 のものへ差し替える（{@code FAIL_ON_UNKNOWN_PROPERTIES} の有効化を
+     * 含む設定はルートコンテキストの {@link JsonMapper} が持つ）。
      * </p>
      * <p>
      * 既定の変換器は呼び出し元で登録済みのため、ここでは JSON ぶんだけを上書きする。
@@ -106,8 +119,6 @@ public class SpringMvcConfig implements WebMvcConfigurer {
      */
     @Override
     public void configureMessageConverters(HttpMessageConverters.ServerBuilder builder) {
-        JsonMapper jsonMapper = JsonMapper.builder()
-                .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).build();
         builder.withJsonConverter(new JacksonJsonHttpMessageConverter(jsonMapper));
     }
 

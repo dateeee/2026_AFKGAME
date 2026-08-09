@@ -1,27 +1,31 @@
 package com.afkgame.env.logging;
 
+import java.nio.charset.StandardCharsets;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
-
-import org.springframework.boot.logging.structured.StructuredLogFormatter;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.IThrowableProxy;
 import ch.qos.logback.classic.spi.ThrowableProxyUtil;
+import ch.qos.logback.core.encoder.EncoderBase;
 
 /**
  * 本番用の構造化JSONログを組み立てる（{@code LOG_FORMAT=json}）。
  *
  * <p>仕様: docs/tech/basic/tech_logging.md「ログフォーマット」。
  * 固定項目（timestamp・level・logger・message）に MDC の項目を同じ階層で並べ、
- * 例外があれば {@code exception} を加える。logback-format-json.xml から参照する。
+ * 例外があれば {@code exception} を加える。logback-encoder-json.xml から参照する。
  *
  * <p>MDC のキーはログ項目名そのものとして扱う（付与は
  * {@code com.afkgame.web.filter.RequestLogFilter} 他）。
+ *
+ * <p>logback の {@link EncoderBase} として直接アペンダへ挿す。Spring Boot の
+ * {@code StructuredLogFormatter}／{@code StructuredLogEncoder} は使わない（移行 STEP 2R-D）。
+ * 項目の組み立ては {@link #format(ILoggingEvent)} が持ち、エンコードは UTF-8 に固定する。
  */
-public class JsonLogFormatter implements StructuredLogFormatter<ILoggingEvent> {
+public class JsonLogFormatter extends EncoderBase<ILoggingEvent> {
 
     private static final DateTimeFormatter TIMESTAMP =
             DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").withZone(ZoneOffset.UTC);
@@ -30,6 +34,26 @@ public class JsonLogFormatter implements StructuredLogFormatter<ILoggingEvent> {
     private static final String WARNING = "WARNING";
 
     @Override
+    public byte[] headerBytes() {
+        return null;
+    }
+
+    @Override
+    public byte[] encode(ILoggingEvent event) {
+        return format(event).getBytes(StandardCharsets.UTF_8);
+    }
+
+    @Override
+    public byte[] footerBytes() {
+        return null;
+    }
+
+    /**
+     * 1件のログイベントを1行の JSON へ組み立てる。
+     *
+     * @param event ログイベント
+     * @return 改行終端の JSON 1行
+     */
     public String format(ILoggingEvent event) {
         StringBuilder json = new StringBuilder(256).append('{');
         appendField(json, "timestamp", TIMESTAMP.format(event.getInstant()));

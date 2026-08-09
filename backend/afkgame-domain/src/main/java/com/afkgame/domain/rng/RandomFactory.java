@@ -4,7 +4,7 @@ import java.util.Random;
 
 import org.springframework.stereotype.Component;
 
-import com.afkgame.env.config.GameProperties;
+import com.afkgame.env.config.GameSettings;
 
 /**
  * 乱数源のファクトリ。
@@ -21,8 +21,8 @@ public class RandomFactory {
 
     private final Long seed;
 
-    public RandomFactory(GameProperties gameProperties) {
-        this.seed = gameProperties.battleRngSeed();
+    public RandomFactory(GameSettings gameSettings) {
+        this.seed = gameSettings.battleRngSeed();
     }
 
     /**

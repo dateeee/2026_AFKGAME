@@ -21,7 +21,7 @@ import com.afkgame.domain.model.RefreshToken;
 import com.afkgame.domain.model.User;
 import com.afkgame.domain.repository.RefreshTokenRepository;
 import com.afkgame.domain.repository.UserRepository;
-import com.afkgame.env.config.AuthProperties;
+import com.afkgame.env.config.AuthSettings;
 
 /**
  * 認証のドメインサービス。
@@ -55,12 +55,12 @@ public class AuthService {
     private final Clock clock;
 
     public AuthService(UserRepository userRepository, RefreshTokenRepository refreshTokenRepository,
-            JwtService jwtService, AuthProperties authProperties,
+            JwtService jwtService, AuthSettings authSettings,
             PlayerInitializationService playerInitializationService, Clock clock) {
         this.userRepository = userRepository;
         this.refreshTokenRepository = refreshTokenRepository;
         this.jwtService = jwtService;
-        this.refreshTokenExpire = authProperties.refreshTokenExpire();
+        this.refreshTokenExpire = authSettings.refreshTokenExpire();
         this.playerInitializationService = playerInitializationService;
         this.clock = clock;
     }

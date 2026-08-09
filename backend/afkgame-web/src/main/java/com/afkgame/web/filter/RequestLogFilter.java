@@ -6,8 +6,6 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -24,9 +22,11 @@ import jakarta.servlet.http.HttpServletResponse;
  * （{@link com.afkgame.web.resource.ErrorResource}）へ載せてログとの突合を可能にする。
  *
  * <p>Spring Security のフィルタチェーンより先に動かす。認証失敗の応答にもリクエストIDが要るため。
+ * war 構成では順序を {@code web.xml} の {@code filter-mapping} が決めるので、本クラスの登録
+ * （{@code DelegatingFilterProxy} の {@code requestLogFilter}）を
+ * {@code springSecurityFilterChain} より前に置く。
  */
 @Component
-@Order(Ordered.HIGHEST_PRECEDENCE)
 public class RequestLogFilter extends OncePerRequestFilter {
 
     /** リクエストIDのレスポンスヘッダ名（tech_api_common.md「共通ヘッダ」）。 */

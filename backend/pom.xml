@@ -145,11 +145,33 @@
         <version>${postgresql.version}</version>
       </dependency>
       <!-- == End Database == -->
+      <!-- == Begin JWT ==
+           jjwt は親（terasoluna-gfw-parent）が管理しないため版を自分で固定する。
+           JSON シリアライザは jjwt-jackson（Jackson 2 databind を使う）を採る -->
+      <dependency>
+        <groupId>io.jsonwebtoken</groupId>
+        <artifactId>jjwt-api</artifactId>
+        <version>${jjwt.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.jsonwebtoken</groupId>
+        <artifactId>jjwt-impl</artifactId>
+        <version>${jjwt.version}</version>
+        <scope>runtime</scope>
+      </dependency>
+      <dependency>
+        <groupId>io.jsonwebtoken</groupId>
+        <artifactId>jjwt-jackson</artifactId>
+        <version>${jjwt.version}</version>
+        <scope>runtime</scope>
+      </dependency>
+      <!-- == End JWT == -->
     </dependencies>
   </dependencyManagement>
   <properties>
     <!-- == Dependency Versions == -->
     <postgresql.version>42.7.9</postgresql.version>
+    <jjwt.version>0.12.6</jjwt.version>
     <!-- == Project Properties == -->
     <encoding>UTF-8</encoding>
     <java-version>17</java-version>

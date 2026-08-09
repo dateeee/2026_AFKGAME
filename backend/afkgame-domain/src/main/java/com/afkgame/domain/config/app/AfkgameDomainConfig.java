@@ -8,8 +8,11 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.terasoluna.gfw.common.exception.ExceptionLogger;
 import org.terasoluna.gfw.common.exception.ResultMessagesLoggingInterceptor;
+
+import jakarta.validation.Validator;
 
 /**
  * Bean definitions for domain layer.
@@ -19,6 +22,21 @@ import org.terasoluna.gfw.common.exception.ResultMessagesLoggingInterceptor;
 @ComponentScan(basePackages = {"com.afkgame.domain"})
 @Import({AfkgameInfraConfig.class})
 public class AfkgameDomainConfig {
+
+    /**
+     * Configure {@link Validator} bean.
+     * <p>
+     * マスターデータの起動時スキーマ検証（{@code MasterDataLoader}）が使う。Spring MVC の
+     * {@code mvcValidator} はサーブレットコンテキスト側にあり domain からは引けないため、
+     * ルートコンテキストにも Bean Validation の実装を1つ載せる
+     * （移行前は Spring Boot の spring-boot-starter-validation が補っていた）。
+     * </p>
+     * @return Bean of configured {@link LocalValidatorFactoryBean}
+     */
+    @Bean("validator")
+    public LocalValidatorFactoryBean validator() {
+        return new LocalValidatorFactoryBean();
+    }
 
     /**
      * Configure {@link ResultMessagesLoggingInterceptor} bean.

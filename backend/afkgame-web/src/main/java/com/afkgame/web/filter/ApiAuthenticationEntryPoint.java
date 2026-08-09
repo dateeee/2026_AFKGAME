@@ -12,10 +12,10 @@ import org.springframework.stereotype.Component;
 
 import com.afkgame.domain.exception.AppException;
 import com.afkgame.web.resource.ErrorResource;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * 未認証リクエストの拒否応答を、統一エラー形式の 401 で返す。
@@ -25,16 +25,18 @@ import jakarta.servlet.http.HttpServletResponse;
  * （＝{@code Authorization} ヘッダ自体が無い）は {@code AUTH_HEADER_MISSING} とする。
  *
  * <p>フィルタ内の失敗は {@link ApiExceptionHandler} を通らないため、応答の組み立てを本クラスが担う。
+ * JSON は Spring MVC の変換器と同じ {@link JsonMapper}（Jackson 3。定義は
+ * {@code com.afkgame.web.config.app.ApplicationContextConfig}）で書き出し、形式をそろえる。
  */
 @Component
 public class ApiAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
     private static final Logger logger = LoggerFactory.getLogger("afkgame.auth");
 
-    private final ObjectMapper objectMapper;
+    private final JsonMapper jsonMapper;
 
-    public ApiAuthenticationEntryPoint(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
+    public ApiAuthenticationEntryPoint(JsonMapper jsonMapper) {
+        this.jsonMapper = jsonMapper;
     }
 
     @Override
@@ -50,7 +52,7 @@ public class ApiAuthenticationEntryPoint implements AuthenticationEntryPoint {
         response.setStatus(failure.getStatus());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-        objectMapper.writeValue(response.getOutputStream(),
+        jsonMapper.writeValue(response.getOutputStream(),
                 ErrorResource.of(failure.getCode(), failure.getMessage()));
     }
 }

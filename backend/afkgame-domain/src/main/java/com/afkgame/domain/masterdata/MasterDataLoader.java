@@ -14,12 +14,12 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.JavaType;
+import tools.jackson.dataformat.yaml.YAMLMapper;
 
 /**
  * マスターデータ YAML の読み込みと起動時スキーマ検証。
@@ -32,8 +32,14 @@ import jakarta.validation.Validator;
 @Component
 public class MasterDataLoader {
 
-    /** スキーマに無いキーは既定でエラーになる（項目名の誤りを起動時に検出するため無効化しない）。 */
-    private static final ObjectMapper YAML_MAPPER = new ObjectMapper(new YAMLFactory());
+    /**
+     * スキーマに無いキーはエラーにする（項目名の誤りを起動時に検出するため）。
+     *
+     * <p>Jackson 3 の {@code FAIL_ON_UNKNOWN_PROPERTIES} は既定が無効のため明示的に有効化する
+     * （Jackson 2 は既定で有効だった。移行 STEP 2R-C・2R-D）。
+     */
+    private static final YAMLMapper YAML_MAPPER = YAMLMapper.builder()
+            .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).build();
 
     private final Validator validator;
 
@@ -97,7 +103,8 @@ public class MasterDataLoader {
         }
         try (InputStream in = resource.getInputStream()) {
             return YAML_MAPPER.readValue(in, targetType);
-        } catch (IOException e) {
+        } catch (IOException | JacksonException e) {
+            // Jackson 3 のパース・マッピング失敗は非検査例外（JacksonException）で飛ぶ
             throw new MasterDataException(resourcePath + ": マスターデータの読み込みに失敗", e);
         }
     }

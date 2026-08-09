@@ -13,7 +13,26 @@
     <description>アプリケーション層（@RestController・Resource・設定）。war を作る</description>
 
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+            <!-- GET /health が返すバージョンを ${project.version} から埋める。war のマニフェストでは
+                 なくリソースにするのは、war を作らない単体・結合テストでも同じ値を返すため
+                 （2R-0 の確定結果。tech_operations.md §12.3） -->
+            <resource>
+                <directory>src/main/resources-filtered</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <configuration>
+                    <encoding>${encoding}</encoding>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
