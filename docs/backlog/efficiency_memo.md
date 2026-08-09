@@ -103,3 +103,8 @@
 - ターン概要: ツール58回・エラー0回・拒否0回。開始:「<ide_selection>The user selected the lines 37 to 38 from c:\」
 - 原因と改善案: **前ターンで作った「逸脱の通し番号 #1〜#17」を6ファイルへ張った構造が、削除時に18か所の追随修正を強いた**（横断一覧＝二重管理のツケ。本ターンで `basis.md` 原則 #5 へ「差分の正は各分冊が持ち、横断の一覧をどこにも二重に持たない」を明記して再発は塞いだ）。→ [.claude/project/basic-design.md](../../.claude/project/basic-design.md) の規約改訂手順へ「**索引に一覧表を新設するときは、番号で参照させず「どの分冊が正か」だけを持たせる**（番号は分冊内の連番にする）」を1行足す。long-turn 自体は概ね妥当（8ファイル18か所の追随 + 2チェッカー + 変更履歴）。
 - 別件: `Grep` が長行を `[Omitted long matching line]` に落とすため、分冊の該当行を掴むのに `Read` を小刻みに7回叩いた。→ 横断置換の下調べでは `Grep` の結果を当てにせず、**対象ファイルを1回ずつ全文 Read する**（分冊は上限8,000字で全文でも安い）。
+
+## 2026-08-09 09:15 | session 25119a5c | 自動検出
+- シグナル: long-turn(calls=225)
+- ターン概要: ツール225回・エラー0回・拒否0回。開始:「<ide_selection>The user selected the lines 38 to 39 from c:\」
+- 原因と改善案: 依頼が規約改訂＝編集確定だったのに main で `layering.md`・`domain.md`・`basis.md` を先に読み、worktree 移動後に Edit 用の再 Read が発生した（worktree_guide §5.2 #4 が禁じる二重読み）。→ [worktree_guide.md](../process/worktree_guide.md) §5.1 に「依頼が仕様・規約・コードの**変更**なら調査の前に worktree を作る（main のまま読んでよいのは質問・レビューだけ）」を明記する。call 数自体は規約25ファイルの追随 + Mapper 8件→Repository 5件の実装・テスト改修という作業量によるもので誤検出。
