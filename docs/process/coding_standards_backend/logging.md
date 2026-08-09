@@ -125,11 +125,27 @@
 
 ## 4. アプリケーションログ②：業務ログ（AppLogger）
 
-AOP が残すのは「**どこを通ったか**」だけ。「**なぜその結果になったか**」は業務コードが `AppLogger` で残す。
+AOP が残すのは「**どこを通ったか**」だけ。「**なぜその結果になったか**」は業務コードが `AppLogger` で残す。共通部品は `afkgame-env` の `com.afkgame.env.logging` にあり、ロガー名・項目名・`reason` の値を各クラスの文字列リテラルから追い出すためのもの。
+
+| 部品 | 役割 |
+|------|------|
+| `AppLogger` | 入口。`AppLogger.of(LoggerName.AUTH)` で得る |
+| `LoggerName` | ロガー名（体系の正は `tech_logging.md`「ロガー名体系」） |
+| `LogKey` | ログ項目名（正は「ログ項目」）。マスク規則も本 enum が持つ |
+| `LogReason` | `reason` の値（正は「失敗理由（reason）の値」） |
+| `LogEntry` | 項目を積み、`log()` で出力する |
+
+```java
+private static final AppLogger logger = AppLogger.of(LoggerName.AUTH);
+
+logger.info("ログイン").with(LogKey.USER_ID, user.getId()).log();
+logger.warn("ログイン失敗").reason(LogReason.PASSWORD_MISMATCH).log();
+logger.error("未捕捉例外").cause(e).log();
+```
 
 | # | 規約 |
 |---|------|
-| 1 | `private static final AppLogger logger = AppLogger.of(LoggerName.<領域>)` の形で持つ（使い方の正は `tech_logging.md`「ログの書き方（共通部品）」） |
+| 1 | `private static final AppLogger logger = AppLogger.of(LoggerName.<領域>)` の形で持つ。インスタンスフィールドにしない |
 | 2 | **項目はメッセージへ埋め込まず `with()` / `reason()` で積む**（`"reason=" + r` や `user_id={}` を書かない）。JSON 形式で独立フィールドになる形を唯一の書き方にする |
 | 3 | **境界の通過・引数・所要時間を書かない**（§3 の AOP が出す）。業務ログが持つのは分岐の理由と結果の要約だけ |
 | 4 | 想定内の失敗は WARNING + `reason`。`reason` の値は `LogReason` へ足す（文字列リテラルで書かない）。レベルの使い分けの正は `tech_logging.md`「ログレベル方針」 |
@@ -177,7 +193,7 @@ AOP が残すのは「**どこを通ったか**」だけ。「**なぜその結�
 
 | 決めていること | 正 |
 |---------------|-----|
-| ログ3種別・出力先・ローテーション・出力主体・書き方 | **本書** |
+| ログ3種別・出力先・ローテーション・出力主体・共通部品（`AppLogger` ほか）の使い方 | **本書** |
 | ログフォーマット・ログ項目名・ロガー名体系・マスク規則・`reason` の値・エラーコード体系 | [tech_logging.md](../../tech/basic/tech_logging.md) |
 | 例外の3分類・送出・応答への変換 | [exception.md](exception.md) |
 | フィルタの作り方・登録順・採らないもの | [filter.md](filter.md) |

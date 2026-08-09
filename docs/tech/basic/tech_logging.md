@@ -5,7 +5,7 @@
 ## ログライブラリ
 Logback を使用。設定は `afkgame-env` の `logback.xml`（Boot 拡張の `logback-spring.xml` と `<springProfile>` は使えない）。Tomcat のアクセスログは Tomcat 側（`AccessLogValve`）が出力し、アプリのログとは別系統とする。
 
-ログは**用途で3種別に分け、別ファイルへ出す**（通信ログ / アプリケーションログ / エラーログ）。種別の定義・出力先ファイル・ローテーション・出力主体・書き方の正は [logging.md](../../process/coding_standards_backend/logging.md)。本書は種別を問わない**形式と語彙**（フォーマット・項目名・ロガー名・`reason`・エラーコード）を持つ。
+ログは**用途で3種別に分け、別ファイルへ出す**（通信 / アプリケーション / エラー）。種別の定義・出力先・ローテーション・書き方の正は [logging.md](../../process/coding_standards_backend/logging.md)。本書は種別を問わない**形式と語彙**（フォーマット・項目名・ロガー名・`reason`・エラーコード）を持つ。
 
 ## ログの書き方（共通部品）
 
@@ -100,11 +100,7 @@ Logback を使用。設定は `afkgame-env` の `logback.xml`（Boot 拡張の `
 
 ## リクエストログ用フィルタ
 
-全APIリクエストに対して以下を実行する。出力先は**通信ログ**で、START / END の対や送信（外部API・SMTP）側の規約は [logging.md](../../process/coding_standards_backend/logging.md) §2 が正。
-
-1. **リクエストID付与**: 各リクエストにUUID v4を生成し、レスポンスヘッダー `X-Request-ID` に含める
-2. **処理時間計測**: リクエスト開始〜レスポンス完了の時間をミリ秒単位で計測
-3. **START / END の出力**: 受信時に `direction`・`method`・`path`・`client_ip`、応答時に `status_code`・`duration_ms`・`player_id`（認証済みの場合）
+全APIリクエストで、UUID v4 のリクエストID採番（レスポンスヘッダ `X-Request-ID`）と処理時間計測を行い、**通信ログ**へ START / END を出す。START は `direction`・`method`・`path`・`client_ip`、END は加えて `status_code`・`duration_ms`・`player_id`（認証済みの場合）。START / END の対や送信（外部API・SMTP）側の規約は [logging.md](../../process/coding_standards_backend/logging.md) §2 が正。
 
 ```
 [2026-08-09 14:38:30] INFO  afkgame.comm: START direction=in method=POST path=/api/battle/tick client_ip=127.0.0.1 request_id=xxx
