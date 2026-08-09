@@ -192,7 +192,7 @@ JWT（JSON Web Token）によるステートレス認証。アクセストーク
 | 対象 | 正 | YAML |
 |------|-----|------|
 | 初期キャラの ID・名前・タイプ・LV | [master/character.md](../../data/master/character.md) §1.1 | `initial_player.yml` |
-| タイプ別 LV1 基礎ステータス | [master/character.md](../../data/master/character.md) §1.2 | `character_types.yml` |
+| タイプ別 LV1 基礎ステータス | `master/character.md` §1.2 | `character_types.yml` |
 | 初期所持アイテム | [master/item.md](../../data/master/item.md) §3.5 | `initial_player.yml` |
 | 装備スロット9種 | [systems/equipment.md](../../design/systems/equipment.md) §2.4 | `equipment_slots.yml` |
 | Player・PlayerSettings の既定値 | [tech_db/player.md](../basic/tech_db/player.md) §1・§2 | —（DB既定値） |

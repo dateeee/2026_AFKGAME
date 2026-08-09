@@ -15,12 +15,12 @@
 |----------------|---------|
 | 戦闘結果の偽装 | §11.4 サーバー権威の徹底 |
 | 端末時計の改ざん | §11.4（時刻はサーバーUTCのみ）＋ [tech_tick.md](../detail/tech_tick.md) §1 |
-| tick連打・多重タブによる多重取得 | [tech_tick.md](../detail/tech_tick.md) §3 排他ロック／§11.6 レート制限 |
+| tick連打・多重タブによる多重取得 | `tech_tick.md` §3 排他ロック／§11.6 レート制限 |
 | API直接呼び出し | §11.5 認可（オーナーシップ検証） |
 | 入力値の改ざん | §11.3 入力バリデーション方針 |
-| 認証情報への攻撃 | §11.6 レート制限 ＋ [tech_auth.md](../detail/tech_auth.md) |
-| 秘密情報の露出 | §11.8 ＋ [tech_operations.md](tech_operations.md) §12.2（起動時バリデーション） |
-| ログからの漏洩 | [tech_logging.md](../basic/tech_logging.md) 機密情報のマスク規則 |
+| 認証情報への攻撃 | §11.6 レート制限 ＋ `tech_auth.md` |
+| 秘密情報の露出 | §11.8 ＋ `tech_operations.md` §12.2（起動時バリデーション） |
+| ログからの漏洩 | `tech_logging.md` 機密情報のマスク規則 |
 
 要件に明示がないが本書で扱う脅威:
 
@@ -44,7 +44,7 @@
 | 許可ヘッダ | `Authorization, Content-Type` |
 | 公開ヘッダ | `X-Request-ID`（クライアントの問い合わせ時にログと突合するため） |
 
-- フロントとバックエンドは別オリジンでのデプロイを前提とする（本番構成は [tech_operations.md](tech_operations.md) §12.1）
+- フロントとバックエンドは別オリジンでのデプロイを前提とする（本番構成は `tech_operations.md` §12.1）
 
 ## 11.3 入力バリデーション方針
 

@@ -40,7 +40,7 @@
 
 ### STEP 2R: ブランクプロジェクト構成への再構築（完了）
 
-STEP 2 で作った骨格は Spring Boot アプリで、ガイドラインのブランクプロジェクトとは別物だった（`terasoluna-gfw-*` への依存も `org.terasoluna` の利用も無く、`terasoluna.version` は未参照のまま残っていた）。[tech_selection.md](tech_selection.md) §2 の改訂に合わせて土台を作り直す。**API契約・DBスキーマ・ゲーム仕様は変更しない**。
+STEP 2 で作った骨格は Spring Boot アプリで、ガイドラインのブランクプロジェクトとは別物だった（`terasoluna-gfw-*` への依存も `org.terasoluna` の利用も無く、`terasoluna.version` は未参照のまま残っていた）。`tech_selection.md` §2 の改訂に合わせて土台を作り直す。**API契約・DBスキーマ・ゲーム仕様は変更しない**。
 
 影響範囲は Java 80ファイル中 **70ファイルが Boot を参照**（main は6件のみ＝下記「2R-B の結果」）。設定とテスト基盤は全面的に置き換わる。
 
@@ -79,7 +79,7 @@ Archetype `5.11.0.RELEASE` で雛形を生成し（`mvn clean install` 成功）
 | Flyway | `@Bean(initMethod = "migrate")` で明示起動し、DB を使う Bean へ `@DependsOn("flyway")` を付ける | 素の Spring コンテキスト（`SpringExtension` + `@ContextConfiguration`）で既存の `V1` を適用し、16テーブルが揃うことを確認 |
 | `/health` の version | **Maven のリソースフィルタ**を採用（`src/main/resources-filtered/META-INF/spring/build.properties` へ `${project.version}` を埋める） | war のマニフェストと `Package.getImplementationVersion()` も両コンテナで解決できたが、**war を作らない単体・結合テストでは読めない**。フィルタ済みリソースはテストでも同じ値を返す |
 | ビルドプラグイン | 競合なし。JaCoCo・surefire・failsafe はそのまま足せる | 親の `pluginManagement` は**版の宣言だけ**（`configuration` を持つのは compiler のみ）。JaCoCo は親の 0.8.14 に揃う。ただし**雛形の failsafe は `integration-test` ゴールしか持たない** ため、`verify` ゴールの execution を足さないと結合テストが失敗してもビルドが落ちない |
-| プロファイル切替 | **環境変数のみ**で切り替える（`SPRING_PROFILES_ACTIVE` ＋ `DATABASE_URL` 等）。雛形の Maven プロファイル（`configs/<env>/resources`）は使わない | `SPRING_PROFILES_ACTIVE=production` で `@Profile("production")` の Bean が選ばれ、`DATABASE_URL` が `${database.url}` を上書きした（素の Spring の環境変数マングリング）。現行の起動時バリデーション（[tech_operations.md](../../tech/nonfunctional/tech_operations.md) §12.2）をそのまま保てる |
+| プロファイル切替 | **環境変数のみ**で切り替える（`SPRING_PROFILES_ACTIVE` ＋ `DATABASE_URL` 等）。雛形の Maven プロファイル（`configs/<env>/resources`）は使わない | `SPRING_PROFILES_ACTIVE=production` で `@Profile("production")` の Bean が選ばれ、`DATABASE_URL` が `${database.url}` を上書きした（素の Spring の環境変数マングリング）。現行の起動時バリデーション（`tech_operations.md` §12.2）をそのまま保てる |
 
 OWASP Dependency-Check は親が管理しないため**版を自分で固定して足す**（`12.2.2`）。NVD データが別途要り `autoUpdate=false` では失敗するため、CI で回すなら **NVD API キーの調達が前提**（2R-E で決める）。
 
@@ -114,6 +114,6 @@ OWASP Dependency-Check は親が管理しないため**版を自分で固定し�
 | 4 | `.vscode/launch.json`（gitignore 済み）の実行構成を Java 側へ向ける | 完了（2R-F で war + Tomcat へ差し替え済み） |
 | 5 | デプロイ手順（war + Tomcat）の反映は 2R-F で済ませ、本 STEP では最終構成での再確認のみ | 完了（2R-F） |
 | 6 | E2E 全PASS の確認 | STEP 5 完了後 |
-| 7 | 本ファイル群（`java_migration.md` と `java_migration/`）を削除し、[changelog.md](../../changelog.md) へ完了を1行記録 | STEP 5 完了後 |
+| 7 | 本ファイル群（`java_migration.md` と `java_migration/`）を削除し、`changelog.md` へ完了を1行記録 | STEP 5 完了後 |
 
 **E2E は STEP 5 まで通らない**。`serve-backend.mjs` は 2R-F で war + Tomcat 起動（専用 `CATALINA_BASE` で :8100）へ切り替え済みで `/health` までは通るが、Phase 1〜3 の API が無いためテスト本体は失敗する。

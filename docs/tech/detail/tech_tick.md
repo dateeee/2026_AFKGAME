@@ -85,20 +85,20 @@ C1網羅の対象分岐。[phases.md §3.4](../../process/phases.md) のテス�
 | 6 | `elapsed = 24時間ちょうど` | `pending_ticks=1440`、`capped=false` |
 | 7 | `elapsed > 24時間` | `pending_ticks=1440`、`capped=true`、`last_tick_at ← now` |
 | 8 | `last_tick_at > now` | `pending_ticks=0`、WARNINGログ |
-| 9 | 塔外待機中（`IDLE`） | 戦闘なし。HP自然回復のみ（[tech_offline.md §4](tech_offline.md)） |
+| 9 | 塔外待機中（`IDLE`） | 戦闘なし。HP自然回復のみ（`tech_offline.md` §4） |
 | 10 | パーティが空 | 戦闘なし・状態のみ返却 |
 | 11 | ロック競合（`busy_timeout` 超過） | `503 BATTLE_TICK_BUSY` |
 | 12 | tick処理中の例外 | 全ロールバック・`last_tick_at` 不変 |
 
 ## 6. Java 実装時に満たすこと（未実装）
 
-旧 Python 実装が本仕様と乖離していた点。移植時に本仕様どおり実装する
-（[java_migration.md](../../backlog/java_migration.md) STEP 3）。
+本仕様のうち Java 実装が未達の項目。移行 STEP 3 の実装で本仕様どおり満たす
+（[java_migration.md](../../backlog/java_migration.md)）。
 
 | 項目 | 満たすべき仕様 |
 |------|--------------|
 | 24時間超のクランプ | 無言で切り詰めない。§2 の `capped` をサマリーに含める |
 | tick の排他 | 行ロックを取り、二重tickを成立させない（§3） |
-| 簡略計算 | 10tickサンプルの平均 × 残り ではなく、[tech_offline.md §4](tech_offline.md) の期待値計算を使う |
+| 簡略計算 | 10tickサンプルの平均 × 残り ではなく、`tech_offline.md` §4 の期待値計算を使う |
 
 §1 の端数繰り越しは仕様どおり実装する（旧実装でも満たしていた）。

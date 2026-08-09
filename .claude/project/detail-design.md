@@ -84,7 +84,7 @@
 ### 記載ルール
 
 一般ルール（真偽の両方・ループの0/1/2周以上・例外経路・仕様上の意味で書く・1行1観点）は
-[detail-design/SKILL.md](../skills/detail-design/SKILL.md) §4「分岐一覧を作る」に従う。以下は AFK GAME の追加ルール。
+`detail-design/SKILL.md` §4「分岐一覧を作る」に従う。以下は AFK GAME の追加ルール。
 
 | # | ルール |
 |---|-------|

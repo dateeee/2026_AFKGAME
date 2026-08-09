@@ -16,9 +16,9 @@
 | `player_id` | `VARCHAR(36)` | 不可 | — | FK → `players.id` |
 | `tick_number` | `INTEGER` | 不可 | — | tick通番。プレイヤー単位の連番で、ログの並び順と削除順の判定に使う |
 | `timestamp` | `DATETIME(tz)` | 不可 | 現在時刻 | tick処理時刻。日時列の `_at` 規約（親 §2）の**例外**で、実装済みのため現名を正とする |
-| `entries` | `JSON` | 不可 | — | そのtickの行動ログ**配列**。要素の構造は [tech_data.md](../tech_data.md) §1.3 が正 |
+| `entries` | `JSON` | 不可 | — | そのtickの行動ログ**配列**。要素の構造は `tech_data.md` §1.3 が正 |
 
-保持は直近100件を上限とし、超過分はtick処理時に古い順へ削除する（[tech_battle.md](../../detail/tech_battle.md) §1）。件数の上限をアプリ側で管理するため、保持期限を表す列は持たない。
+保持は直近100件を上限とし、超過分はtick処理時に古い順へ削除する（`tech_battle.md` §1）。件数の上限をアプリ側で管理するため、保持期限を表す列は持たない。
 
 `entries` の中身はDB側で検索しない（DBMS の JSON 関数に依存しない。親 §3 の型マッピング方針）。行の絞り込みは `player_id` と `tick_number` だけで行い、ログ要素の解釈はサービス層とフロントが担う。
 
@@ -39,7 +39,7 @@
 
 自己ベストを別テーブルに分けず同一行に置く。ランキング（`GET /api/boss-rush/ranking`）が1プレイヤー1行の走査で済み、挑戦の開始・終了で行を作り直す必要がなくなるため。
 
-真偽値は形容詞そのままの `active` とする（親 §2。行の主語がボスラッシュ状態そのもので曖昧さがなく、API の `bossRush.active`（[tech_state.md](../../detail/tech_state.md) §1）とも一致する）。
+真偽値は形容詞そのままの `active` とする（親 §2。行の主語がボスラッシュ状態そのもので曖昧さがなく、API の `bossRush.active`（`tech_state.md` §1）とも一致する）。
 
 ## 3. `boss_rush_milestones`（Phase 5・未実装）
 
@@ -49,7 +49,7 @@
 |----|----|------|------|-----------|
 | `id` | `VARCHAR(36)` | 不可 | UUID4 | PK |
 | `boss_rush_state_id` | `VARCHAR(36)` | 不可 | — | FK → `boss_rush_states.id` |
-| `wave` | `INTEGER` | 不可 | — | 到達ウェーブ。刻み幅は [systems/endgame.md](../../../design/systems/endgame.md) §2.11 が正 |
+| `wave` | `INTEGER` | 不可 | — | 到達ウェーブ。刻み幅は `systems/endgame.md` §2.11 が正 |
 | `claimed` | `BOOLEAN` | 不可 | `false` | 報酬を付与済みか |
 | `claimed_at` | `DATETIME(tz)` | 可 | — | 付与時刻。未付与は NULL |
 
@@ -59,7 +59,7 @@
 
 ## 4. インデックスと検索パターン
 
-主キーと一意制約が張るインデックスのみを持ち、二次インデックスは持たない（方針は [tech_db.md](../tech_db.md) §6）。
+主キーと一意制約が張るインデックスのみを持ち、二次インデックスは持たない（方針は `tech_db.md` §6）。
 
 | 検索パターン | 使うインデックス | 判断 |
 |------------|---------------|------|
@@ -67,4 +67,4 @@
 | 100件超の古いログを削除する | 同上 | 同上。削除は同じ走査結果を使う |
 | プレイヤーのボスラッシュ状態を引く | `boss_rush_states.player_id`（UNIQUE） | 充足 |
 | 到達済みマイルストーンを引く | `uq_boss_rush_milestones_state_wave` | 充足（左端が `boss_rush_state_id`） |
-| ランキング上位100件を `best_wave` 降順で引く | なし（全行走査 + ソート） | 全プレイヤー横断クエリの1つで（もう1本は [player.md](player.md) §9 の深淵の塔ランキング）、行数が利用者数に比例する。(`best_wave`, `best_wave_hp`) の複合インデックス追加は [tech_db.md](../tech_db.md) §6-3 の再評価ラインで判断する |
+| ランキング上位100件を `best_wave` 降順で引く | なし（全行走査 + ソート） | 全プレイヤー横断クエリの1つで（もう1本は [player.md](player.md) §9 の深淵の塔ランキング）、行数が利用者数に比例する。(`best_wave`, `best_wave_hp`) の複合インデックス追加は `tech_db.md` §6-3 の再評価ラインで判断する |

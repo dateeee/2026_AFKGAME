@@ -25,12 +25,12 @@
 
 ## 2. キャラクター獲得（塔クリア報酬・tick処理内）
 
-階クリア処理で、確定入手キャラ（[master/character.md §7.1](../../data/master/character.md)）の入手条件（塔・階）に一致するかを判定する。
+階クリア処理で、確定入手キャラ（`master/character.md` §7.1）の入手条件（塔・階）に一致するかを判定する。
 
-1. 対象階のクリア時、該当キャラを**未所持なら**付与する。初期状態は LV1・EXP0・SP0・スキル未習得・装備なし・HP=maxHP（加入時LV1 の根拠は [master/character.md §7.1](../../data/master/character.md)）
+1. 対象階のクリア時、該当キャラを**未所持なら**付与する。初期状態は LV1・EXP0・SP0・スキル未習得・装備なし・HP=maxHP（加入時LV1 の根拠は `master/character.md` §7.1）
 2. 既所持（周回・再クリア）なら何もしない（Phase 3 に重複の概念はない。重複→限界突破素材は Phase 4 の酒場ガチャのみ）
 3. 付与してもパーティへ自動編入しない（控えとして加入。編成はプレイヤー操作）
-4. 戦闘ログに `type: "character_join"` の行を追加する（生JSON・snake_case。[tech_battle §1](tech_battle.md)）
+4. 戦闘ログに `type: "character_join"` の行を追加する（生JSON・snake_case。`tech_battle.md` §1）
 
 - 所持判定は Phase 3 では**表示名**で行う（`characters` にマスターID列がないため）。Phase 4 で `master_id`（[tech_db/player.md §4](../basic/tech_db/player.md)）が入り次第、判定をIDへ寄せる（[tech_scout.md](tech_scout.md)）
 
@@ -52,11 +52,11 @@
 1. `characterId` の所持を確認する。未所持・不存在は `404 CHARACTER_NOT_FOUND`
 2. `skillId` がスキルマスターに存在するか確認する。未知IDは `422 SKILL_UNKNOWN`
 3. 習得済みなら `400 SKILL_ALREADY_LEARNED`
-4. 前提スキル（ツリー上の直前スキル。[skills/](../../data/skills/SKILLS_OVERVIEW.md) 各系統ファイル §2）が未習得なら `400 SKILL_PREREQUISITE_NOT_MET`
+4. 前提スキル（ツリー上の直前スキル。`SKILLS_OVERVIEW.md` 各系統ファイル §2）が未習得なら `400 SKILL_PREREQUISITE_NOT_MET`
 5. 必要SPが未使用SP（`Character.skill_points`）を超えるなら `400 SKILL_INSUFFICIENT_SP`
 6. `LearnedSkill` を追加し `skill_points` を減算して `200`
 
-探索中も許可する（[tech_state §4](tech_state.md)。次tickの戦闘から反映）。
+探索中も許可する（`tech_state.md` §4。次tickの戦闘から反映）。
 
 ### 3. 分岐一覧（単体テスト観点）
 
@@ -79,7 +79,7 @@
 2. `activeSlots`（スキルID配列・0〜2件。配列順がセット枠1・2）を検証する
 3. `ActiveSkillSlot` を全置換して `200`
 
-CDカウンターは**習得スキルごとに保持**し、セット変更で変化しない（未セット中もターン経過で減算される。塔出発時の全CD=0が唯一のリセット。[tech_battle §3.1](tech_battle.md)）。探索中も許可する。
+CDカウンターは**習得スキルごとに保持**し、セット変更で変化しない（未セット中もターン経過で減算される。塔出発時の全CD=0が唯一のリセット。`tech_battle.md` §3.1）。探索中も許可する。
 
 ### 4. 分岐一覧（単体テスト観点）
 
@@ -147,4 +147,4 @@ CDカウンターは**習得スキルごとに保持**し、セット変更で�
 | `SKILL_NOTHING_TO_RESET` | 400 | §5 |
 | `SKILL_INSUFFICIENT_GOLD` | 400 | §5 |
 
-既存コード `PARTY_LOCKED_IN_TOWER`・`SKILL_INSUFFICIENT_SP`・`SKILL_PREREQUISITE_NOT_MET` は [tech_state.md](tech_state.md)・[tech_logging.md](../basic/tech_logging.md) を参照。
+既存コード `PARTY_LOCKED_IN_TOWER`・`SKILL_INSUFFICIENT_SP`・`SKILL_PREREQUISITE_NOT_MET` は `tech_state.md`・`tech_logging.md` を参照。

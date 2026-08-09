@@ -8,7 +8,7 @@
 
 ## 12.4 DBマイグレーション運用
 
-移行時に**満たすべき要件**（Phase進行時の既存データ引き継ぎ・マスタIDの再利用禁止・リセット禁止）は [operation_requirements.md](../../design/requirements/operation_requirements.md) §2 が正。本節はその適用手順を定める。
+移行時に**満たすべき要件**（Phase進行時の既存データ引き継ぎ・マスタIDの再利用禁止・リセット禁止）は `operation_requirements.md` §2 が正。本節はその適用手順を定める。
 
 | 項目 | 仕様 |
 |------|------|
@@ -47,26 +47,26 @@
 | ゲストアカウント | 日次バッチ | 最終アクセスから90日（`GUEST_ACCOUNT_EXPIRE_DAYS`）超過で関連データごと削除 |
 | リフレッシュトークン | 日次バッチ | 期限切れ・revoked のものを物理削除 |
 | メール確認 / パスワードリセットトークン | 日次バッチ | 期限切れ（24時間）を物理削除 |
-| DBサイズ記録 | 日次バッチ | サイズをINFOログに出力（[tech_operations.md](tech_operations.md) §12.3 の監視指標） |
+| DBサイズ記録 | 日次バッチ | サイズをINFOログに出力（`tech_operations.md` §12.3 の監視指標） |
 | 戦闘ログ | tick処理内 | 100件超を古い順に削除（バッチ不要） |
 | 日替わりショップ | 遅延評価 | `GET /api/shop/lineup` 取得時に 00:00 UTC を跨いだかを判定して再生成（[systems/economy.md](../../design/systems/economy.md)。バッチ不要） |
 
-- 実行方式は本番 EC2 の OS cron（1日1回 03:00 UTC。[tech_operations.md](tech_operations.md) §12.1）。実装は Phase 2 のテスト工程以降に行う
+- 実行方式は本番 EC2 の OS cron（1日1回 03:00 UTC。`tech_operations.md` §12.1）。実装は Phase 2 のテスト工程以降に行う
 - ジョブは **べき等**とし、二重実行しても結果が変わらないよう実装する（削除対象を条件で特定する形にする）
-- **ゲスト削除は事前告知できない**（連絡先を持たないため）。緩和策（本登録導線の常設・データ復旧不可の明示）は [non_functional_requirements.md](../../design/requirements/non_functional_requirements.md) §5 が正
-- 退会（アカウント削除）要求も本節のジョブと同じ削除処理を用いる（**Phase 2** で実装。要件は [non_functional_requirements.md](../../design/requirements/non_functional_requirements.md) §5）
+- **ゲスト削除は事前告知できない**（連絡先を持たないため）。緩和策（本登録導線の常設・データ復旧不可の明示）は `non_functional_requirements.md` §5 が正
+- 退会（アカウント削除）要求も本節のジョブと同じ削除処理を用いる（**Phase 2** で実装。要件は `non_functional_requirements.md` §5）
 
 ## 12.7 リリース時の技術チェックと障害対応
 
-リリースの**フロー**（仕様反映 → Phase完了ゲート → 告知 → バックアップ・マイグレーション・デプロイ → スモークテスト）は [operation_requirements.md](../../design/requirements/operation_requirements.md) §4 が正。本節は各手順で実行する技術的な確認項目を補う。
+リリースの**フロー**（仕様反映 → Phase完了ゲート → 告知 → バックアップ・マイグレーション・デプロイ → スモークテスト）は `operation_requirements.md` §4 が正。本節は各手順で実行する技術的な確認項目を補う。
 
 | 手順 | 技術チェック |
 |------|------------|
 | ゲート通過前 | `python scripts/check_doc_size.py` が exit 0 |
-| デプロイ直前 | `META-INF/spring/*.properties` / 環境変数の必須項目が揃っている（[tech_operations.md](tech_operations.md) §12.2 の起動時バリデーションで検知） |
+| デプロイ直前 | `META-INF/spring/*.properties` / 環境変数の必須項目が揃っている（`tech_operations.md` §12.2 の起動時バリデーションで検知） |
 | デプロイ直後 | `GET /health` が 200 かつ `db: ok`。`version` が配備した war の版と一致する |
 | スモークテスト | 起動 → tick → 報酬取得 の主要導線を通す |
-| リリース後10分 | ERROR ログ件数・5xx 率・tick の p95 を確認（[tech_operations.md](tech_operations.md) §12.3） |
+| リリース後10分 | ERROR ログ件数・5xx 率・tick の p95 を確認（`tech_operations.md` §12.3） |
 
 **障害時の切り分け順**
 

@@ -19,21 +19,21 @@
 | 項目 | 内容 |
 |------|------|
 | 対象 | `POST /api/forge/enhance`（強化）・`POST /api/forge/craft`（製作）・`POST /api/forge/disassemble`（分解） |
-| 施設 | `forge` のみ。LV0（未建設）では3操作とも実行不可（[tech_base.md §2.2](tech_base.md)） |
+| 施設 | `forge` のみ。LV0（未建設）では3操作とも実行不可（`tech_base.md` §2.2） |
 | 回数 | 1リクエスト＝**1回**（強化は+1のみ、製作は1件のみ。連続実行・一括処理を持たない） |
 | 完了 | すべて**即時完了**（待ち時間・製作キューを持たない） |
 | 進行状態 | 全状態で許可（[tech_state.md §4](tech_state.md) の `POST /api/base/*` / `forge/*` 行） |
 | 乱数 | ランダム製作のみ使用（[tech_rng.md §1](tech_rng.md) #15）。強化・分解・固定レシピ製作は**乱数を消費しない** |
 | 永続化 | `equipment`・`inventory_items`・`players.gold`（[tech_db/item.md](../basic/tech_db/item.md)）。同一トランザクション |
-| エラーコード | §8。ゴールド不足と未建設は `BASE_` を流用する（[tech_base.md §6](tech_base.md)） |
+| エラーコード | §8。ゴールド不足と未建設は `BASE_` を流用する（`tech_base.md` §6） |
 
 - 未認証は共通の `401`、リクエストボディの型・必須・範囲違反は `422`（[tech_api_common.md](../basic/tech_api_common.md)）。分岐一覧では `401` を扱わない
 - 3操作とも**検証をすべて消費の前に行う**。消費したのに成果が得られない経路を持たない
-- 3操作とも、まず `players` 行を**行ロック**して取得する（[tech_base.md §3](tech_base.md) 手順2 と同じ方式）
+- 3操作とも、まず `players` 行を**行ロック**して取得する（`tech_base.md` §3 手順2 と同じ方式）
 
 ## 2. 鍛冶屋LVからの効果解決
 
-鍛冶屋は [economy.md §2.9](../../design/systems/economy.md) 鍛冶屋表の **LV1〜LV10 全レベル列挙**であり、解決は [tech_base.md §2.1](tech_base.md) に従い**施設LVと一致する行を引くだけ**（しきい値検索・補間を行わない）。採用行から3つを引く。
+鍛冶屋は `economy.md` §2.9 鍛冶屋表の **LV1〜LV10 全レベル列挙**であり、解決は `tech_base.md` §2.1 に従い**施設LVと一致する行を引くだけ**（しきい値検索・補間を行わない）。採用行から3つを引く。
 
 | 引くもの | 使う操作 |
 |---------|---------|
@@ -41,7 +41,7 @@
 | 製作可能レアリティ | 製作 |
 | 強化コスト倍率 | 強化 |
 
-- `facilities` に鍛冶屋の行が無いプレイヤーは LV0 とみなす（[tech_base.md §1](tech_base.md)）
+- `facilities` に鍛冶屋の行が無いプレイヤーは LV0 とみなす（`tech_base.md` §1）
 - 3つの値を実装へハードコードしない（不変条件「データ駆動」）。分解は鍛冶屋LVに依存しない（LV1以上なら結果は同じ）
 
 ## 7. API
@@ -65,5 +65,5 @@
 | `FORGE_INVENTORY_FULL` | 400 | 製作で所持枠が上限に達している |
 | `FORGE_EQUIPMENT_LOCKED` | 400 | 分解対象が装備中またはロック中 |
 
-- 未建設は `BASE_NOT_BUILT`、ゴールド不足は `BASE_INSUFFICIENT_GOLD`（[tech_base.md §6](tech_base.md)）、装備が見つからない場合は `EQUIP_NOT_FOUND`（[tech_logging.md](../basic/tech_logging.md)）を流用する
+- 未建設は `BASE_NOT_BUILT`、ゴールド不足は `BASE_INSUFFICIENT_GOLD`（`tech_base.md` §6）、装備が見つからない場合は `EQUIP_NOT_FOUND`（`tech_logging.md`）を流用する
 - `equipmentId` の欠落、`rank` の範囲外、未知の `recipeId`、`rank` と `recipeId` の排他違反は Bean Validation の `422` とし、`FORGE_` コードを使わない

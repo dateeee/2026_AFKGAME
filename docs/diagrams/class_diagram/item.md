@@ -138,7 +138,7 @@ classDiagram
 ```
 
 - 抽選結果（レアリティ・レベル・ステータス）は生成時に確定して保存する（[tech_shop.md §5](../../tech/detail/tech_shop.md)）
-- `EquipCategory`（3値）は `EquipSlot`（9値）とは別概念。カテゴリ→スロットの対応は [systems/equipment.md §2.4](../../design/systems/equipment.md)
+- `EquipCategory`（3値）は `EquipSlot`（9値）とは別概念。カテゴリ→スロットの対応は `systems/equipment.md` §2.4
 
 ## 施設・ボスラッシュ
 

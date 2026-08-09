@@ -138,4 +138,4 @@ flowchart TB
 
 - DBMS（`local`・`production` とも PostgreSQL）とデプロイ構成は [tech_operations.md](../../tech/nonfunctional/tech_operations.md) §12 が正。デプロイ構成の図は [deployment.md](deployment.md)
 - Components の3層構成（トークン / UIプリミティブ / アプリシェル）と各層の責務は [tech_design_system.md](../../tech/detail/tech_design_system.md) が正。UIプリミティブはトークンだけを参照し、ストアには触れない
-- Resources は `afkgame-web` の `resource/` に実装済みのクラスのみを描く。Phase 3〜5 で追加する Resource（`PartyEditResource` 等）は Controllers の Phase 注記と [tech_structure_backend.md](../../tech/basic/tech_structure_backend.md) §4.1 を参照
+- Resources は `afkgame-web` の `resource/` に実装済みのクラスのみを描く。Phase 3〜5 で追加する Resource（`PartyEditResource` 等）は Controllers の Phase 注記と `tech_structure_backend.md` §4.1 を参照

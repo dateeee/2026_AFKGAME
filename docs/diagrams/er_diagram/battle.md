@@ -1,7 +1,7 @@
 # ER図 — 戦闘・ボスラッシュ・マスターデータ
 
 > 親: [er_diagram.md](../er_diagram.md)。**DBスキーマの正は** [tech_db/battle.md](../../tech/basic/tech_db/battle.md) であり、本図は視覚化として属性を再掲する（食い違いは定義書側へ揃える）。データ構造は [tech_data.md](../../tech/basic/tech_data.md)、数値は [master_data.md](../../data/master_data.md)。
-> 「ダンジョン・塔・敵系」はコード上のマスターデータでDBテーブルを持たないため、定義書の対象外（正は [master_data.md](../../data/master_data.md)）。
+> 「ダンジョン・塔・敵系」はコード上のマスターデータでDBテーブルを持たないため、定義書の対象外（正は `master_data.md`）。
 
 ## 戦闘・ボスラッシュ系
 
@@ -42,7 +42,7 @@ erDiagram
 
 ## ダンジョン・塔・敵系（マスターデータ）
 
-> **注**: このブロックのエンティティはDBテーブルではなく、コード内定義のマスターデータ（`backend/app/master_data/` 配下のdataclass）。FK表記は論理参照を示す（DBレベルのFK制約はない）。Dungeon・TowerModifier・recommended_lv等は将来のDB化を見据えた論理設計であり、現実装のTowerDataには未実装（Phase 3以降で追随）。
+> **注**: このブロックのエンティティはDBテーブルではなく、アプリが起動時に読み込むマスターデータ（Java 実装では YAML リソース）。FK表記は論理参照を示す（DBレベルのFK制約はない）。Dungeon・TowerModifier・recommended_lv等は将来のDB化を見据えた論理設計であり、TowerData には未実装（Phase 3以降で追随）。
 
 ```mermaid
 %%{init: {'theme': 'default', 'themeVariables': {'fontSize': '16px'}} }%%

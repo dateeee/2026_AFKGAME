@@ -37,7 +37,7 @@
 | `potion_threshold` | `FLOAT` | 不可 | `0.3` | ポーション使用HP閾値（0.1〜0.5、0.1刻み。選択肢の正は [systems/ui.md](../../../design/systems/ui.md)「設定項目」） |
 | `battle_log_count` | `INTEGER` | 不可 | `50` | 表示ログ件数（20 / 50 / 100） |
 | `toast_enabled` | `BOOLEAN` | 不可 | `true` | — |
-| `auto_sell_rarity` | `VARCHAR(20)` | 可 | — | `common` / `uncommon`。自動売却の対象レアリティ上限で、NULL は自動売却なし（選択肢の正は [systems/ui.md](../../../design/systems/ui.md)「設定項目」） |
+| `auto_sell_rarity` | `VARCHAR(20)` | 可 | — | `common` / `uncommon`。自動売却の対象レアリティ上限で、NULL は自動売却なし（選択肢の正は `systems/ui.md`「設定項目」） |
 
 ## 3. `tower_clear_records`（Phase 1）
 
@@ -74,12 +74,12 @@
 | `limit_break` | `INTEGER` | 不可 | `0` | 限界突破回数 |
 | `skill_points` | `INTEGER` | 不可 | `0` | 未使用SP |
 | `created_at` | `DATETIME(tz)` | 不可 | 現在時刻 | — |
-| `rarity` | `VARCHAR(20)` | 可 | — | **Phase 3・未実装**。`common` / `uncommon` / `rare` / `epic` / `legendary`。倍率は [master/character.md](../../../data/master/character.md) §7.2 が正 |
-| `master_id` | `VARCHAR(50)` | 可 | — | **Phase 4・未実装**。マスターキャラのID（`hero_002` 等。[master/character.md](../../../data/master/character.md) §7.1・§7.3 が正）。FKなし。同一キャラの判定（重複・限界突破）は `name` ではなくこの列で行う。Phase 3 以前に作られた行は NULL とし、Phase 4 の実装時に名前から補完する |
+| `rarity` | `VARCHAR(20)` | 可 | — | **Phase 3・未実装**。`common` / `uncommon` / `rare` / `epic` / `legendary`。倍率は `master/character.md` §7.2 が正 |
+| `master_id` | `VARCHAR(50)` | 可 | — | **Phase 4・未実装**。マスターキャラのID（`hero_002` 等。`master/character.md` §7.1・§7.3 が正）。FKなし。同一キャラの判定（重複・限界突破）は `name` ではなくこの列で行う。Phase 3 以前に作られた行は NULL とし、Phase 4 の実装時に名前から補完する |
 
 ## 5. `party_members`（Phase 3）
 
-実装予定: `com.afkgame.domain.model.PartyMember`。編成の処理仕様は [tech_party.md](../../detail/tech_party.md) §1。
+実装予定: `com.afkgame.domain.model.PartyMember`。編成の処理仕様は `tech_party.md` §1。
 
 | 列 | 型 | NULL | 既定 | 制約・備考 |
 |----|----|------|------|-----------|
@@ -92,7 +92,7 @@
 
 ## 6. `learned_skills`（Phase 3）
 
-実装予定: `com.afkgame.domain.model.LearnedSkill`。習得の処理仕様は [tech_party.md](../../detail/tech_party.md) §3。
+実装予定: `com.afkgame.domain.model.LearnedSkill`。習得の処理仕様は `tech_party.md` §3。
 
 | 列 | 型 | NULL | 既定 | 制約・備考 |
 |----|----|------|------|-----------|
@@ -106,7 +106,7 @@
 
 ## 7. `active_skill_slots`（Phase 3）
 
-実装予定: `com.afkgame.domain.model.ActiveSkillSlot`。セットの処理仕様は [tech_party.md](../../detail/tech_party.md) §4。
+実装予定: `com.afkgame.domain.model.ActiveSkillSlot`。セットの処理仕様は `tech_party.md` §4。
 
 | 列 | 型 | NULL | 既定 | 制約・備考 |
 |----|----|------|------|-----------|
@@ -136,7 +136,7 @@
 
 ## 9. インデックスと検索パターン
 
-主キーと一意制約が張るインデックスのみを持ち、二次インデックスは持たない（方針は [tech_db.md](../tech_db.md) §6）。
+主キーと一意制約が張るインデックスのみを持ち、二次インデックスは持たない（方針は `tech_db.md` §6）。
 
 | 検索パターン | 使うインデックス | 判断 |
 |------------|---------------|------|
@@ -146,5 +146,5 @@
 | パーティ編成を `slot_index` 順に引く | `uq_party_members_player_slot` | 充足（左端が `player_id`） |
 | キャラの習得スキルを引く | `uq_learned_skills_character_skill` | 充足（左端が `character_id`） |
 | キャラのセット枠を引く | `uq_active_skill_slots_character_slot` | 充足（左端が `character_id`） |
-| tick処理でプレイヤーの全キャラを引く | なし（`characters.player_id`） | 二次インデックスを張らない。行数が小さい間は全走査で足り、追加は [tech_db.md](../tech_db.md) §6-3 の再評価ラインで判断する |
-| 深淵の塔ランキング上位100件を `highest_floor` 降順・`highest_floor_at` 昇順で引く | なし（`tower_id = 'abyss_tower'` で絞って全行走査 + ソート） | 全プレイヤー横断クエリ（もう1本は [battle.md](battle.md) §4 のボスラッシュランキング）。行数が利用者数に比例するため、(`tower_id`, `highest_floor`) の複合インデックス追加は [tech_db.md](../tech_db.md) §6-3 の再評価ラインで判断する |
+| tick処理でプレイヤーの全キャラを引く | なし（`characters.player_id`） | 二次インデックスを張らない。行数が小さい間は全走査で足り、追加は `tech_db.md` §6-3 の再評価ラインで判断する |
+| 深淵の塔ランキング上位100件を `highest_floor` 降順・`highest_floor_at` 昇順で引く | なし（`tower_id = 'abyss_tower'` で絞って全行走査 + ソート） | 全プレイヤー横断クエリ（もう1本は [battle.md](battle.md) §4 のボスラッシュランキング）。行数が利用者数に比例するため、(`tower_id`, `highest_floor`) の複合インデックス追加は `tech_db.md` §6-3 の再評価ラインで判断する |

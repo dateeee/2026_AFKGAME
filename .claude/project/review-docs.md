@@ -65,7 +65,7 @@ python .claude/scripts/review_prep.py --dir docs/reviews/doc-review \
 
 ## 4. `diagrams-review` の観点
 
-[review-diagrams.md](review-diagrams.md) へ切り出した（§0 パラメータ・§1 観点・§2 重要度基準）。
+`review-diagrams.md` へ切り出した（§0 パラメータ・§1 観点・§2 重要度基準）。
 
 ## 5. 重要度の基準（`doc-review`）
 
@@ -75,7 +75,7 @@ python .claude/scripts/review_prep.py --dir docs/reviews/doc-review \
 | **中** | 実装時に混乱を招く不整合（用語の不一致、参照の欠落） |
 | **低** | 文書構成・記載漏れ。H2の2,000字 WARN（Mermaid図1枚のセクションは報告不要）。台帳登録済みの既知超過は**指摘に数えない**（機械的検証欄に転記のみ） |
 
-担当範囲の切り分けは [review-procedure.md](../references/review-procedure.md) §7 を参照。
+担当範囲の切り分けは `review-procedure.md` §7 を参照。
 
 ## 6. 修正適用の固有ルール（`fix-specs`）
 

@@ -21,9 +21,9 @@
 | ログ | Logback + MDC | `X-Request-ID` は MDC で引き回す。設定は `logback.xml`（Boot 拡張の `logback-spring.xml` と `<springProfile>` は使えない） |
 | 単体テスト | JUnit 5 + Mockito + JaCoCo | surefire で `unit` タグのみ。C1 = **branch 100%** |
 | 依存脆弱性スキャン | OWASP Dependency-Check（Maven プラグイン） | `pip-audit` の置き換え |
-| 統合テスト | MockMvc（`@ExtendWith(SpringExtension)` + `@ContextConfiguration` + `@WebAppConfiguration`）+ **埋め込み PostgreSQL** | failsafe で `integration` タグのみ（計測外）。DBは `embedded-postgres` を `EmbeddedPostgres.builder().start()` で直接起動する（`local` と同じ 16 系・Docker 不要）。**`embedded-database-spring-test` は Boot 前提のため使わない**。実測は [steps.md](steps.md) §4 |
+| 統合テスト | MockMvc（`@ExtendWith(SpringExtension)` + `@ContextConfiguration` + `@WebAppConfiguration`）+ **埋め込み PostgreSQL** | failsafe で `integration` タグのみ（計測外）。DBは `embedded-postgres` を `EmbeddedPostgres.builder().start()` で直接起動する（`local` と同じ 16 系・Docker 不要）。**`embedded-database-spring-test` は Boot 前提のため使わない**。実測は `steps.md` §4 |
 | E2E | Playwright（既存を流用） | 変更なし |
-| 設定 | `META-INF/spring/*.properties` + 環境変数 | `.env` / `config.py` の置き換え。`@ConfigurationProperties` は Boot 機能のため使わない。環境の切替は `SPRING_PROFILES_ACTIVE`、値の上書きは `DATABASE_URL` 等の環境変数で行う（雛形の Maven プロファイルは使わない。[steps.md](steps.md) §4） |
+| 設定 | `META-INF/spring/*.properties` + 環境変数 | `.env` / `config.py` の置き換え。`@ConfigurationProperties` は Boot 機能のため使わない。環境の切替は `SPRING_PROFILES_ACTIVE`、値の上書きは `DATABASE_URL` 等の環境変数で行う（雛形の Maven プロファイルは使わない。`steps.md` §4） |
 | DB | **PostgreSQL に統一** | `local` は Docker Compose、`production` は EC2 同居。ドライバは `postgresql` JDBC。SQLite は採用しない（[changes.md](changes.md) §5） |
 | マスターデータ | **YAML リソース + 起動時ローダ** | `afkgame-domain` の `src/main/resources/masterdata/`。起動時に `record` へ読み込み、不変 Map で公開する |
 

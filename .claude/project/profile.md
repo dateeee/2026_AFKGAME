@@ -82,8 +82,8 @@
 |---|------|
 | 1 | 文字数上限は [docs/process/documentation_rules.md](../../docs/process/documentation_rules.md) §3（`.claude/**` は区分D = 5,000字） |
 | 2 | **変更履歴セクションを個々のファイルに置かない**。改稿時は [docs/changelog.md](../../docs/changelog.md) の先頭へ1行追記する（§5.1） |
-| 3 | 作成・改稿後は §4 の規約チェックと機械検証を実行する。超過は [documentation_rules.md](../../docs/process/documentation_rules.md) §7 の台帳運用（B・Cは登録して一括是正へ、A・Dはセッション内是正） |
-| 4 | 同じ数値・仕様の正は1ファイル。トピックごとの正は [docs/process/spec_ownership.md](../../docs/process/spec_ownership.md) で宣言する |
+| 3 | 作成・改稿後は §4 の規約チェックと機械検証を実行する。超過は `documentation_rules.md` §7 の台帳運用（B・Cは登録して一括是正へ、A・Dはセッション内是正） |
+| 4 | 同じ数値・仕様の正は1ファイル。トピックごとの正は `docs/process/spec_ownership.md` で宣言する |
 | 5 | 機械検証は §4 の常設スクリプトを優先し、使い捨ては常設で賄えない検証のみ（繰り返すなら常設化を提案する） |
 | 6 | CLAUDE.md と `.claude/project/**` で重複するルールを改稿する際は、もう一方を必ず突合して同時に更新する |
 | 7 | **書く前に残量を測る**（`check_doc_size.py --sections <path>`）。**追記予定の字数も `len()` で実測する**（目分量禁止。表は見出し・ヘッダ2行・各行4字以上の付帯文字が乗る）。超えるなら完了済みセクションの圧縮を**同じ編集にまとめる**。新規ファイル作成・索引への行追加も同様 |

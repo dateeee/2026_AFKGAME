@@ -164,7 +164,7 @@ def select_target_with_taunt(enemies_or_allies, taunters):
   - 例: `1-2体` → 各50%、`2-3体` → 各50%
 - ボス階: 出現数1体固定、重み100%
 
-敵数抽選の分岐一覧は [tech_skill.md §8](tech_skill.md) が持つ。
+敵数抽選の分岐一覧は `tech_skill.md` §8 が持つ。
 
 #### 複数敵の処理
 - 各階に1-3体の敵が出現（階層データの `floorEncounters` で定義）
@@ -201,7 +201,7 @@ def select_target(actor, action_type, allies, enemies):
 
 ## 5. 分岐一覧（1tick内のターン処理）
 
-C1網羅の対象分岐。tick の外枠（何tick処理するか）は [tech_tick.md §5](tech_tick.md)、乱数の分岐は [tech_rng.md §5](tech_rng.md)、スキル発動・状態異常・環境効果の分岐は [tech_skill.md](tech_skill.md)、パーティ・スキル操作APIの分岐は [tech_party.md](tech_party.md) が持つ。本節は**1ターン内のアクター進行**（§3.1 手順2）を対象とする。
+C1網羅の対象分岐。tick の外枠（何tick処理するか）は [tech_tick.md §5](tech_tick.md)、乱数の分岐は [tech_rng.md §5](tech_rng.md)、スキル発動・状態異常・環境効果の分岐は `tech_skill.md`、パーティ・スキル操作APIの分岐は [tech_party.md](tech_party.md) が持つ。本節は**1ターン内のアクター進行**（§3.1 手順2）を対象とする。
 
 | # | 分岐点 | 条件 | 期待する振る舞い |
 |---|-------|------|----------------|

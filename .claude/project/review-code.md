@@ -36,7 +36,7 @@ python .claude/scripts/review_prep.py --dir docs/reviews/frontend-review \
 | `frontend-review` | `frontend/src/` 配下の全 `.vue` `.ts` `.css` + `index.html`・`vite.config.ts`・`package.json`・`tsconfig.json` |
 
 **全量モードの分担: 分担なし＝1体全量**。対象規模が小さいため、複数体へ分割せずメインコンテキストで完結させる
-（[review-procedure.md](../references/review-procedure.md) §1 規律7 の「`sonnet` 1体へ全体委譲」は可）。
+（`review-procedure.md` §1 規律7 の「`sonnet` 1体へ全体委譲」は可）。
 
 ## 2. `backend-review` の観点
 
@@ -89,4 +89,4 @@ python .claude/scripts/review_prep.py --dir docs/reviews/frontend-review \
 | **中** | ベストプラクティスからの逸脱、将来的な問題の原因 | ベストプラクティスからの逸脱、型安全性の欠如 |
 | **低** | コードスタイル、動作に影響しない改善 | コードスタイル、パフォーマンス最適化の余地 |
 
-担当範囲の切り分けは [review-procedure.md](../references/review-procedure.md) §7 を参照。
+担当範囲の切り分けは `review-procedure.md` §7 を参照。

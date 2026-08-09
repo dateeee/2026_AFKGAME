@@ -25,6 +25,6 @@ API契約は不変だが、以下は言語差・実行形態の違いにより�
 | tick のロック | SQLite の `BEGIN IMMEDIATE` 前提をやめ、`SELECT ... FOR UPDATE` の行ロックに一本化する（[tech_tick.md](../../tech/detail/tech_tick.md) §3.1 が正） |
 | マスターデータ | Python 定数 → YAML リソース。数値の正は `docs/data/master/` のまま変わらないが、**再ビルドなしで差し替え可能**になる。ローダは起動時にスキーマ検証し、不正なら起動を中止する |
 | 実行形態 | 実行可能 jar + systemd を廃止し、**war を Tomcat へデプロイ**する。Nginx 配下に置く点は変わらない。運用手順（起動・停止・ログ出力先・ヘルスチェック）は Tomcat 前提へ全面的に書き直す |
-| APIドキュメント | springdoc-openapi（未実装）を採らない。**`/docs`（Swagger UI）は提供しない**。API仕様の正は [tech_api.md](../../tech/basic/tech_api.md)・[tech_api_common.md](../../tech/basic/tech_api_common.md) の記述だけになる |
+| APIドキュメント | springdoc-openapi（未実装）を採らない。**`/docs`（Swagger UI）は提供しない**。API仕様の正は `tech_api.md`・[tech_api_common.md](../../tech/basic/tech_api_common.md) の記述だけになる |
 | 設定ファイル | `application.yml`（YAML・Spring プロファイル）→ `META-INF/spring/*.properties`。`@ConfigurationProperties` による束ね方も使えないため、設定値の受け取り方を再設計する |
 | ログ設定 | `logback-spring.xml` の `<springProfile>` は Boot 拡張のため使えない。`logback.xml` へ移し、環境別の切り替えを別方式にする |

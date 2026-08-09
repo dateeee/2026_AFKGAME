@@ -1,7 +1,7 @@
 # AFK GAME — オフライン計算仕様
 
 > 戦闘処理フローは [tech_battle.md](tech_battle.md)、技術仕様の全体は [tech_spec.md](../tech_spec.md) を参照。
-> 本書は [tech_battle.md](tech_battle.md) の §2 / §4 を分離したもの（節番号は維持）。
+> 本書は `tech_battle.md` の §2 / §4 を分離したもの（節番号は維持）。
 
 ## 2. オフラインまとめ計算のパフォーマンス対策
 

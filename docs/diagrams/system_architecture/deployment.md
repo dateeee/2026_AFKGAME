@@ -39,6 +39,6 @@ flowchart TB
     style EC2 fill:#e3f2fd
 ```
 
-- フロント（CloudFront）と API（EC2）は**別オリジン**。許可オリジンは [tech_operations.md](../../tech/nonfunctional/tech_operations.md) §12.2 の `CORS_ORIGINS` が正
+- フロント（CloudFront）と API（EC2）は**別オリジン**。許可オリジンは `tech_operations.md` §12.2 の `CORS_ORIGINS` が正
 - 復旧は論理バックアップを第一手段とし、ボリューム障害時にスナップショットから復元する（§12.5）
 - マネージドコンテナ（App Runner・ECS Fargate）は採用しない（§12.1）

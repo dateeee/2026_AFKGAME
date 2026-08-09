@@ -32,15 +32,15 @@
 | Phase 5（転生導入） | 転生回数0・転生ポイント0で初期化する |
 | マスタIDの扱い | 既存データが参照するIDは**削除・再利用しない**（追番のみ） |
 | DBインフラ変更（ノード分離・バージョン更新） | 変更時に既存データを引き継げること |
-| ダウンタイム | 移行に伴う停止は24時間未満に収めること（[non_functional_requirements.md §3](non_functional_requirements.md)） |
+| ダウンタイム | 移行に伴う停止は24時間未満に収めること（`non_functional_requirements.md` §3） |
 
-- 移行ツール・リビジョン粒度・前方互換・ロールバック手順は [tech_operations_procedure.md §12.4](../../tech/nonfunctional/tech_operations_procedure.md) が正
+- 移行ツール・リビジョン粒度・前方互換・ロールバック手順は `tech_operations_procedure.md` §12.4 が正
 
 ## 3. 障害・メンテナンス時の扱い
 
 | 事象 | 要件 |
 |------|------|
-| 計画メンテナンス | 事前にゲーム内お知らせで告知する。停止時間分の進行は復帰後のオフライン計算で回収される（[non_functional_requirements.md §3](non_functional_requirements.md)） |
+| 計画メンテナンス | 事前にゲーム内お知らせで告知する。停止時間分の進行は復帰後のオフライン計算で回収される（`non_functional_requirements.md` §3） |
 | 24時間を超える停止 | オフライン上限（24時間）を超えた分は失われるため、超過分を一律のゴールド／アイテムで補填する |
 | データ破損 | バックアップから復旧する。失われた期間の進行は補填の対象とする |
 | 不具合による損失 | 影響範囲を特定できる場合は該当ユーザーに、特定できない場合は全ユーザーに一律補填する |
@@ -56,11 +56,11 @@
 | データ保持 | お知らせ本文はマスターデータとして持つ。DBテーブル・管理画面は設けず、更新はデプロイで行う |
 | 掲示 | 全画面共通のヘッダから参照でき、未読件数がわかること（[systems/ui.md](../systems/ui.md)） |
 | 既読管理 | クライアントの localStorage 専用キーで保持する（**本行が正**。Pinia ストアはメモリ上の参照のみで永続化プラグインは使わない）。サーバーはプレイヤーごとの既読状態を持たない。機種変更・ブラウザ変更で既読が引き継がれないことは許容する。キー不在時の初期化規則は [master_data.md §17.3](../../data/master_data.md) が正 |
-| 保持件数 | 掲示件数に上限を設け、古いものはマスターデータから削除する（[non_functional_requirements.md](non_functional_requirements.md) §2「上限のないデータを新設しない」） |
+| 保持件数 | 掲示件数に上限を設け、古いものはマスターデータから削除する（`non_functional_requirements.md` §2「上限のないデータを新設しない」） |
 
-- お知らせマスターの項目定義と掲示件数の上限値（20件）の正は [master_data.md §17](../../data/master_data.md)。上限値は**確定値**（配信は本節の運用告知3種のみで月2〜3件を想定し、20件で6〜10ヶ月分を保持できる）
+- お知らせマスターの項目定義と掲示件数の上限値（20件）の正は `master_data.md` §17。上限値は**確定値**（配信は本節の運用告知3種のみで月2〜3件を想定し、20件で6〜10ヶ月分を保持できる）
 - Phase 3 の実装完了までは告知手段を持たないため、**下方修正を伴う改定は行わない**
-- ゲスト削除の事前告知には使えない（**一定期間アクセスのないプレイヤー**には届かないため。期限は [tech_auth.md](../../tech/detail/tech_auth.md) が正）。緩和策は [non_functional_requirements.md](non_functional_requirements.md) §5 が正
+- ゲスト削除の事前告知には使えない（**一定期間アクセスのないプレイヤー**には届かないため。期限は [tech_auth.md](../../tech/detail/tech_auth.md) が正）。緩和策は `non_functional_requirements.md` §5 が正
 
 ## 4. リリース・変更適用フロー
 
@@ -72,7 +72,7 @@
 | 4 | DBバックアップ取得 → マイグレーション → デプロイ |
 | 5 | 主要導線のスモークテスト（起動・tick・ショップ・装備変更） |
 
-- 各手順で実行する技術的な確認項目（`check_doc_size.py`・`GET /health`・リリース後の指標確認）は [tech_operations_procedure.md §12.7](../../tech/nonfunctional/tech_operations_procedure.md) が正
+- 各手順で実行する技術的な確認項目（`check_doc_size.py`・`GET /health`・リリース後の指標確認）は `tech_operations_procedure.md` §12.7 が正
 
 ## 5. サポート・問い合わせ
 

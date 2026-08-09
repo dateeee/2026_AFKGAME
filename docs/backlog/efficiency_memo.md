@@ -66,3 +66,8 @@
 - シグナル: same-command('cd "C:/GIT/2026_AFKGAME.worktr'×5, 'cd "C:/GIT/2026_AFKGAME.worktr'×5) / errors×4 / long-turn(calls=173)
 - ターン概要: ツール173回・エラー4回・拒否0回。開始:「<command-message>next</command-message>」
 - 原因と改善案: 実機検証と15ファイル改修の分量で long-turn は誤検出（エラー4件も軽微）。**実在の非効率2件**: ① 残量1字の `README.md`・23字の `carryover_notes.md` で編集→測定→圧縮を繰り返し `check_doc_size.py` を5回叩いた（§7 規約7「追記予定の字数も `len()` で実測」を守らず目分量で見積もった）→ [profile.md](../../.claude/project/profile.md) §7 へ「**残量が上限の1割を切るファイルは Edit 前に置換後テキストの `len()` を実測する**」を追記 ② `ctx_execute` の shell が `/tmp` へ落としたログを `language: "python"` から読めず失敗 → [commands.md](../../.claude/project/commands.md) §2 へ「**生成と読み取りは同じ `language` で完結させる**」を追記。
+
+## 2026-08-09 13:41 | session 01a71ad0 | 自動検出
+- シグナル: errors×3 / long-turn(calls=80)
+- ターン概要: ツール80回・エラー3回・拒否0回。開始:「<ide_opened_file>The user opened the file c:\GIT\2026_AFKGAM」
+- 原因と改善案: 94ファイル整形を1ターンで完走した分量で long-turn は誤検出。**実在の非効率2件**: ① Grep の `glob` に否定 `!reviews/**` を渡したが効かず24KB を退避する羽目に → [commands.md](../../.claude/project/commands.md) §2 へ「**Grep の `glob` に否定は使えない。除外を伴う横断調査は `ctx_execute` 内でフィルタする**」を追記 ② worktree 隔離セッションから main へ `cd` する Bash が拒否された → [worktree_guide.md](../process/worktree_guide.md) §5.4 へ「**main 側の状態確認は `EnterWorktree` の前に済ませる**」を明記。

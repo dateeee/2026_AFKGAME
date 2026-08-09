@@ -8,7 +8,7 @@
 
 ## 2. モジュールとパッケージ
 
-ガイドラインのマルチプロジェクト構成（`[projectName]-domain` / `-web` / `-env`）との対応は [layering.md](layering.md) §4。
+ガイドラインのマルチプロジェクト構成（`[projectName]-domain` / `-web` / `-env`）との対応は `layering.md` §4。
 
 | モジュール | パッケージ | 置くもの | 依存してよい先 |
 |-----------|-----------|---------|--------------|
@@ -23,7 +23,7 @@
 
 ## 3. 命名
 
-層に依存する名前（コントローラ・Resource・Entity・Repository・Service）は [domain.md](domain.md) §5・[web.md](web.md) §6 が正。
+層に依存する名前（コントローラ・Resource・Entity・Repository・Service）は `domain.md` §5・`web.md` §6 が正。
 
 | 対象 | 規約 | 例 |
 |------|------|-----|
@@ -38,11 +38,11 @@
 
 ## 4. 全層共通のルール
 
-層別の責務は [domain.md](domain.md)・[domain_service.md](domain_service.md)・[web.md](web.md) が持つ。本節は層に依らないもの。
+層別の責務は `domain.md`・`domain_service.md`・`web.md` が持つ。本節は層に依らないもの。
 
 | # | 規約 |
 |---|------|
-| 1 | **DI はコンストラクタ注入**。フィールド `@Autowired`・setter 注入を使わない。依存は `private final`。ガイドラインの実装例は `@Inject` のフィールド注入（3.4.1.6.2）だが採らない — 依存を不変にでき、テストで手渡すと欠落がコンパイルエラーになるため（[test.md](test.md) §5 #3 と同じ根拠） |
+| 1 | **DI はコンストラクタ注入**。フィールド `@Autowired`・setter 注入を使わない。依存は `private final`。ガイドラインの実装例は `@Inject` のフィールド注入（3.4.1.6.2）だが採らない — 依存を不変にでき、テストで手渡すと欠落がコンパイルエラーになるため（`test.md` §5 #3 と同じ根拠） |
 | 2 | 現在時刻・乱数は「外から受ける」。乱数は `RandomFactory` から取得して引数で引き回す（[tech_rng.md](../../tech/detail/tech_rng.md) §2）。静的な共有インスタンスを持たない。**暗号用途の `SecureRandom` だけは例外**（スレッドセーフのため `private static final` で共有可。`RandomFactory` をトークン生成に使うと予測可能になる） |
 | 3 | テーブル定義書に無い列・テーブルが必要になったら、実装で先行させず**基本設計へ差し戻す**（[phases.md](../phases.md) §3.2.1） |
 
@@ -96,14 +96,14 @@
 | 禁止 | 代わりに |
 |------|---------|
 | フィールド `@Autowired`・setter 注入 | コンストラクタ注入（`private final`） |
-| コントローラへの業務ロジック記述 | Service へ集約（[domain_service.md](domain_service.md) §1） |
-| コントローラから Repository の直接呼び出し | Service を通す（[layering.md](layering.md) §3 の呼び出し可否） |
+| コントローラへの業務ロジック記述 | Service へ集約（`domain_service.md` §1） |
+| コントローラから Repository の直接呼び出し | Service を通す（`layering.md` §3 の呼び出し可否） |
 | SQL の `${}` による文字列組み立て | `#{}` によるパラメータバインド |
 | ワイルドカード import | 個別 import |
 | ゲームバランス数値のハードコード | マスターデータ YAML・`META-INF/spring/*.properties` |
 | `System.out` / `printStackTrace` | SLF4J のロガー |
-| 空の `catch`・例外の握りつぶし | 3分類のいずれかへ変換するか再スロー（[exception.md](exception.md) §3） |
+| 空の `catch`・例外の握りつぶし | 3分類のいずれかへ変換するか再スロー（`exception.md` §3） |
 | 静的な可変フィールド（共有状態） | DI か引数で受け渡す |
 | `java.util.Date` / `Calendar` | `java.time`（既定は `Instant`） |
-| テーブル定義書に無い列・テーブルの追加 | 基本設計へ差し戻し（[phases.md](../phases.md) §3.2.1） |
+| テーブル定義書に無い列・テーブルの追加 | 基本設計へ差し戻し（`phases.md` §3.2.1） |
 | 対象Phaseより後の機能の先行実装 | Phase 厳守（将来拡張を考慮した設計は可） |

@@ -15,7 +15,7 @@
 
 ## 2. 区分と上限
 
-正は [documentation_rules.md](../../docs/process/documentation_rules.md) §3。
+正は `documentation_rules.md` §3。
 
 | 区分 | 対象 | 上限 | 超過時の扱い |
 |------|------|------|------------|

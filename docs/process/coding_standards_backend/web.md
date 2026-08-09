@@ -2,7 +2,7 @@
 
 > [coding_standards_backend.md](../coding_standards_backend.md) の分冊。全層共通の規約は [common.md](common.md) が先、層の位置づけは [layering.md](layering.md)。
 > ベースは TERASOLUNA 開発ガイドライン 5.11.0.RELEASE 日本語版（[basis.md](basis.md) §1）の `ImplementationAtEachLayer/ApplicationLayer` と `Security`。本書はそこからの差分だけを持つ。
-> `afkgame-web` はガイドラインの**アプリケーション層**に当たる。**実装はできるだけ薄く保ち、ビジネスルールを含めない**（[layering.md](layering.md) §1）。
+> `afkgame-web` はガイドラインの**アプリケーション層**に当たる。**実装はできるだけ薄く保ち、ビジネスルールを含めない**（`layering.md` §1）。
 
 ---
 
@@ -16,8 +16,8 @@
 | `.filter` | リクエストIDログ・共通例外ハンドラ | （対応なし） |
 
 - Web層は「受け取る・検証する・ドメインへ渡す・返す」だけを担う。業務判断は [domain_service.md](domain_service.md) §1 の Service が持つ
-- **View と Helper は持たない**（ガイドライン 2.4.1.1.2・2.4.1.1.3 との差分。[layering.md](layering.md) §2）。描画は SPA（Vue 3）、変換は Resource の `static from(...)`（§3 #3）
-- Controller から Repository を直接呼ばない（[layering.md](layering.md) §3）。参照系でも Service を通す
+- **View と Helper は持たない**（ガイドライン 2.4.1.1.2・2.4.1.1.3 との差分。`layering.md` §2）。描画は SPA（Vue 3）、変換は Resource の `static from(...)`（§3 #3）
+- Controller から Repository を直接呼ばない（`layering.md` §3）。参照系でも Service を通す
 - API契約（パス・HTTPメソッド・ステータス・JSON構造）の正は [tech_api.md](../../tech/basic/tech_api.md)・[tech_api_common.md](../../tech/basic/tech_api_common.md)。本書で再掲しない
 
 ## 2. コントローラ（`api`）
@@ -28,7 +28,7 @@
 | 2 | ボディは `@Valid @RequestBody` で受ける |
 | 3 | 戻り値は Resource（`ResponseEntity` はステータスやヘッダを変える場合のみ） |
 | 4 | `try-catch` しない。応答への変換は `ApiExceptionHandler`（`@RestControllerAdvice`）へ集約する |
-| 5 | **単項目チェック・相関項目チェックは本層**（Bean Validation）で行う。ビジネスルールのチェックは Service（責任分界点の全体像は [domain_service.md](domain_service.md) §1） |
+| 5 | **単項目チェック・相関項目チェックは本層**（Bean Validation）で行う。ビジネスルールのチェックは Service（責任分界点の全体像は `domain_service.md` §1） |
 
 ## 3. Resource（`resource`）
 
@@ -37,7 +37,7 @@
 | 1 | `record` + Bean Validation（Jakarta）で定義する |
 | 2 | リクエスト用とレスポンス用を**兼用しない** |
 | 3 | ドメイン型 ↔ Resource の変換は `public static from(...)` に集約する。ガイドラインは Helper クラス（2.4.1.1.3・2.4.1.1.4）か MapStruct への委譲を推奨するが、本プロジェクトは**Helper を作らない**。変換対象が Resource ごとに閉じており、Controller の見通しは `from(...)` への集約で足りるため |
-| 4 | **JSON のフィールド名は lowerCamelCase**。Jackson の既定でそのまま出るため `@JsonProperty` での改名をしない（[tech_api_common.md](../../tech/basic/tech_api_common.md) §5.0） |
+| 4 | **JSON のフィールド名は lowerCamelCase**。Jackson の既定でそのまま出るため `@JsonProperty` での改名をしない（`tech_api_common.md` §5.0） |
 | 5 | 業務ロジックを持たせない（判定・計算は Service 側） |
 
 ## 4. 設定・フィルタ（`config`・`filter`）
@@ -46,7 +46,7 @@
 |---|------|
 | 1 | 設定値は `afkgame-env` の設定保持 Bean を注入して読む。Web層で `@Value` を直書きしない（`@ConfigurationProperties` は Boot 機能のため使わない。組み立て方は [tech_structure_backend.md](../../tech/basic/tech_structure_backend.md) §4.2） |
 | 2 | 個別機能の業務ロジックをフィルタ・インターセプタに置かない（横断処理だけ） |
-| 3 | `request_id` などの横断項目は MDC（`RequestLogFilter`）が載せる（[common.md](common.md) §7 #5） |
+| 3 | `request_id` などの横断項目は MDC（`RequestLogFilter`）が載せる（`common.md` §7 #5） |
 
 ## 5. エラー応答
 
@@ -59,7 +59,7 @@
 | コントローラ | `<リソース>Api`。`Controller` 接尾辞は使わない | `AuthApi`・`HealthApi` |
 | Resource（DTO） | `<用途>Resource` | `AuthResource`・`ErrorResource` |
 
-共通の命名（クラス・メソッド・定数・例外・パッケージ）は [common.md](common.md) §3。
+共通の命名（クラス・メソッド・定数・例外・パッケージ）は `common.md` §3。
 
 ガイドライン 5.1.4.5.1 は、ルートパッケージ `api` の下に**リソース毎のパッケージ**を切り、そこへ `[リソース名]RestController`・`[リソース名]Resource`・`[リソース名]Validator`・`[リソース名]Helper` をまとめる構成を推奨する。本プロジェクトは**採らない**。
 

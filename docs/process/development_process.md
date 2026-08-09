@@ -7,10 +7,10 @@
 ## 1. 目的と適用範囲
 
 - 開発を **要件定義 → 基本設計 → 詳細設計 → テストリスト作成 → 製造 → 単体テスト → 結合テスト** の7工程で管理する
-- 製造は **TDD（テスト駆動開発）** で進める。適用範囲はバックエンドのみ（[process/phases.md](phases.md) §3.4）
+- 製造は **TDD（テスト駆動開発）** で進める。適用範囲はバックエンドのみ（`process/phases.md` §3.4）
 - 適用範囲は AFK GAME の全開発（Phase 1〜5）
 - 各工程の成果物（Markdown）の記述規約（文字数上限・分割ルール）は [documentation_rules.md](documentation_rules.md) に従う
-- **実装コードの記述規約（コーディング規約）は基本設計工程で定め、製造工程が従う**。バックエンドとフロントエンドで別冊とする（[process/phases.md](phases.md) §3.2.2）
+- **実装コードの記述規約（コーディング規約）は基本設計工程で定め、製造工程が従う**。バックエンドとフロントエンドで別冊とする（`process/phases.md` §3.2.2）
 
 ## 2. 工程モデル
 
@@ -41,7 +41,7 @@ graph LR
 | 工程 | 適用単位 | 状態 |
 |------|---------|------|
 | 要件定義 | 全Phase一括 | 完了（未確定仕様ゼロ。生じたら `open_specs.md` を作成して管理する） |
-| 基本設計 | 全Phase一括 | 完了（変更時は差分更新）。ただし**DB設計（テーブル定義書）は未着手** — 2026-08-07 に成果物へ追加（[process/phases.md](phases.md) §3.2.1）。Phase 3 製造の着手前に作成する |
+| 基本設計 | 全Phase一括 | 完了（変更時は差分更新）。ただし**DB設計（テーブル定義書）は未着手** — 2026-08-07 に成果物へ追加（`process/phases.md` §3.2.1）。Phase 3 製造の着手前に作成する |
 | 詳細設計 | Phase単位 | Phase単位で数値・アルゴリズムを確定 |
 | テストリスト作成 | 機能単位 | 分岐一覧を失敗するテストへ落とす（バックエンドのみ） |
 | 製造 | 機能単位 | TDDで実装。フロントエンドは従来どおり |
@@ -65,19 +65,19 @@ graph LR
 
 **各工程スキルは工程内検証を持つ**（機械的検証 → 読んで確認 → 矛盾時の対応）。
 横断レビューへ丸投げせず、その工程で潰せる矛盾は工程内で解消してからゲートへ渡す。機械的検証は常設スクリプト（`scripts/check_*.py`）を優先する。
-例外: 文字数上限の超過（区分B・C）は工程内で是正せず、台帳へ登録して一括是正に回す（[documentation_rules.md](documentation_rules.md) §7）。
+例外: 文字数上限の超過（区分B・C）は工程内で是正せず、台帳へ登録して一括是正に回す（`documentation_rules.md` §7）。
 
 ## 3. 工程定義
 
-各工程（§3.1 要件定義 〜 §3.7 結合テスト）の目的・成果物・完了基準・テスト標準は [process/phases.md](phases.md) で定義する（節番号 §3.x は分割後も維持）。
+各工程（§3.1 要件定義 〜 §3.7 結合テスト）の目的・成果物・完了基準・テスト標準は `process/phases.md` で定義する（節番号 §3.x は分割後も維持）。
 
 ## 4. 工程ゲート
 
 | ゲート | タイミング | 判定手段 |
 |-------|----------|---------|
 | 仕様確定ゲート | 要件・詳細設計の変更時 | `doc-review` 指摘ゼロ、`check_docs.py` exit 0、`open_specs.md` の未解消が対象Phaseの期限内 |
-| ドキュメント規約ゲート | 仕様書・設計図の変更時 | `python scripts/check_doc_size.py` が `違反 0`（exit 0。台帳登録済みの既知超過は可 — [documentation_rules.md](documentation_rules.md) §7） |
-| 設計整合ゲート | 基本設計の変更時 | `diagrams-review` 指摘ゼロ（仕様確定ゲートと並走し、修正は1パスに統合）。DB変更時は**テーブル定義書 ↔ ER図 ↔ Flyway DDL の一致**（[process/phases.md](phases.md) §3.2.1） |
+| ドキュメント規約ゲート | 仕様書・設計図の変更時 | `python scripts/check_doc_size.py` が `違反 0`（exit 0。台帳登録済みの既知超過は可 — `documentation_rules.md` §7） |
+| 設計整合ゲート | 基本設計の変更時 | `diagrams-review` 指摘ゼロ（仕様確定ゲートと並走し、修正は1パスに統合）。DB変更時は**テーブル定義書 ↔ ER図 ↔ Flyway DDL の一致**（`process/phases.md` §3.2.1） |
 | テストリストゲート | 製造着手前 | 分岐一覧の全項目にテストが存在し（`check_branch_list.py --tests` で照合）、実行して全件 FAIL（Red）を確認 |
 | 製造完了ゲート | 実装完了時 | テスト全PASS（Green）+ コードレビュー指摘対応（**コーディング規約からの逸脱ゼロ** — [coding_standards_backend.md](coding_standards_backend.md)）+ `vue-tsc` 型チェックPASS + テーブル変更時は Flyway マイグレーションが存在し `flyway migrate` が通る |
 | 単体テストゲート | 製造完了後 | 全PASS + C1カバレッジ100% |
@@ -93,18 +93,18 @@ graph LR
 | Phase 4〜5 | 完了（数値は仮置き。分岐一覧は各Phase着手時に整備） | 未着手 | — | — |
 
 - テスト基盤は導入済み（Playwright）。Phase 1〜2 は**遡及整備**で完了
-- **Java/Terasoluna への移行中**（手順・進捗の正は [java_migration.md](../backlog/java_migration.md)）。上表の「製造」「単体テスト」「結合テスト」の完了は Python 実装に対する到達状況であり、移行 STEP 3〜5 で Java 実装として再度満たす必要がある。Phase 3 製造は移行完了まで中断する
+- **Java/Terasoluna への移行中**（手順・進捗の正は [java_migration.md](../backlog/java_migration.md)）。上表の「製造」「単体テスト」「結合テスト」の完了は**移行前の到達状況**であり、移行 STEP 3〜5 で Java 実装として再度満たす必要がある。Phase 3 製造は移行完了まで中断する
 
 ### 5.1 単体テストの整備状況（C1カバレッジ）
 
-**単体テストゲート通過（2026-08-03 レビュー指摘反映後に再測定。Python 実装での測定値）**: `app/` 全42モジュールが C1 100%、402件 PASS（単体373・結合29）、1,819 stmts / 308 branches。カバレッジ除外の使用はゼロ。
+**移行前の測定値は失効した**（対象コードが STEP 6 で削除されたため。当時の到達値は [changelog.md](../changelog.md) に残す）。Java 実装での値は `mvn clean verify` の JaCoCo レポートで取り直し、本節へ記録する。ゲート対象は `afkgame-domain`・`afkgame-web`（`afkgame-env` は単体テスト未整備のため対象外）。
 
-- 上記は移行前の到達状況。Java 実装での測定値は `mvn verify`（JaCoCo）で取り直し、本節を置き換える
+- Phase 1〜3 の機能テストは移行 STEP 3〜5 の実装で積み直すため、本節の記録更新はそれ以降になる
 - 数値は測定のたびに更新する。製造の追加・変更時は同一変更内で100%を維持する
 
 ### 5.2 TDDの適用範囲
 
-- TDD（[process/phases.md](phases.md) §3.4〜§3.5）は**新規実装から適用**する。Phase 2 の残り（日替わりショップ）と Phase 3〜5 が対象
+- TDD（`process/phases.md` §3.4〜§3.5）は**新規実装から適用**する。Phase 2 の残り（日替わりショップ）と Phase 3〜5 が対象
 - 実装済み（Phase 1〜2）のテストは遡及整備で C1 100% に到達済みのため、**書き直さない**
 - 既存機能の修正・リファクタ時は、先に**その変更を表すテストを追加**してから実装に着手する
 
@@ -121,6 +121,6 @@ graph LR
 - 未確定仕様・仕様変更は `docs/backlog/open_specs.md` で管理する。**原則ゼロ**とし、生じた場合のみ作成・登録する（不在＝未確定ゼロ）
 - 確定 → 成果物（仕様書・設計図）へ反映 → [changelog.md](../changelog.md) に追記 → open_specs.md から削除（全解消でファイルごと削除）
 - **仕様は確定済みで数値のみ調整待ち**の項目は [docs/backlog/balance_backlog.md](../backlog/balance_backlog.md) で管理する。実装をブロックしないため open_specs.md には残さず、結合テスト〜リリース後の実測で確定する
-- **実装側の疑義**（仕様との乖離・デッドコード・規約違反）は [docs/backlog/known_issues.md](../backlog/known_issues.md) で管理する。対応時は「仕様書を実装に合わせる」か「実装を修正する」かを都度判断する
+- **実装側の疑義**（仕様との乖離・デッドコード・規約違反）は `docs/backlog/known_issues.md` で管理する。対応時は「仕様書を実装に合わせる」か「実装を修正する」かを都度判断する
 - **重複記載の解消時**は正を1ファイルに決め、[spec_ownership.md](spec_ownership.md) で宣言する（`check_docs.py --owner` が逸脱を検出）
 - 実装と仕様の乖離は `full-review` スキルで検出し、上記フローで記録する

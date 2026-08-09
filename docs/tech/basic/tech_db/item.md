@@ -64,7 +64,7 @@
 |----|----|------|------|-----------|
 | `id` | `VARCHAR(36)` | 不可 | UUID4 | PK |
 | `player_id` | `VARCHAR(36)` | 不可 | — | FK → `players.id`、UNIQUE。同時リクエストで重複した状態が作られると以後どちらが読まれるか不定になるためDB側で防ぐ |
-| `reset_at` | `DATETIME(tz)` | 不可 | — | 次回リセット時刻。確定規則は [tech_shop.md](../../detail/tech_shop.md) §2.1 が正 |
+| `reset_at` | `DATETIME(tz)` | 不可 | — | 次回リセット時刻。確定規則は `tech_shop.md` §2.1 が正 |
 
 ## 5. `shop_daily_slots`（Phase 2）
 
@@ -77,13 +77,13 @@
 | `slot_index` | `INTEGER` | 不可 | — | 枠番号（0〜4） |
 | `category` | `VARCHAR(20)` | 不可 | — | `weapon` / `armor` / `accessory` |
 | `base_id` | `VARCHAR(50)` | 不可 | — | 装備マスターの ID。FKなし（親 §4-6） |
-| `rarity` | `VARCHAR(20)` | 不可 | — | 抽選結果。取りうる値は [tech_shop.md](../../detail/tech_shop.md) §2.3 が正 |
-| `level` | `INTEGER` | 不可 | — | 装備レベル。算出規則は [tech_shop.md](../../detail/tech_shop.md) §3.1 が正 |
+| `rarity` | `VARCHAR(20)` | 不可 | — | 抽選結果。取りうる値は `tech_shop.md` §2.3 が正 |
+| `level` | `INTEGER` | 不可 | — | 装備レベル。算出規則は `tech_shop.md` §3.1 が正 |
 | `stat_atk` | `INTEGER` | 可 | — | 未付与は NULL |
 | `stat_def` | `INTEGER` | 可 | — | 未付与は NULL |
 | `stat_hp` | `INTEGER` | 可 | — | 未付与は NULL |
 | `stat_spd` | `INTEGER` | 可 | — | 未付与は NULL |
-| `price` | `INTEGER` | 不可 | — | 購入価格。算出規則は [tech_shop.md](../../detail/tech_shop.md) §3.2 が正 |
+| `price` | `INTEGER` | 不可 | — | 購入価格。算出規則は `tech_shop.md` §3.2 が正 |
 | `sold` | `BOOLEAN` | 不可 | `false` | 購入済みの枠は行を消さずフラグで表す（リセットまで枠を残すため） |
 
 一意制約: `uq_shop_daily_slots_state_slot` = (`shop_daily_state_id`, `slot_index`)
@@ -105,7 +105,7 @@
 
 ## 7. インデックスと検索パターン
 
-主キーと一意制約が張るインデックスのみを持ち、二次インデックスは持たない（方針は [tech_db.md](../tech_db.md) §6）。
+主キーと一意制約が張るインデックスのみを持ち、二次インデックスは持たない（方針は `tech_db.md` §6）。
 
 | 検索パターン | 使うインデックス | 判断 |
 |------------|---------------|------|
@@ -114,4 +114,4 @@
 | プレイヤーのショップ状態を引く | `shop_daily_states.player_id`（UNIQUE） | 充足 |
 | 品揃えを `slot_index` 順に引く | `uq_shop_daily_slots_state_slot` | 充足（左端が `shop_daily_state_id`） |
 | プレイヤーの施設を引く | `uq_facilities_player_type` | 充足（左端が `player_id`） |
-| 装備一覧を `acquired_at` 順に引く | なし（`equipment.player_id`） | 二次インデックスを張らない。1プレイヤーの所持上限が倉庫枠で抑えられており、追加は [tech_db.md](../tech_db.md) §6-3 の再評価ラインで判断する |
+| 装備一覧を `acquired_at` 順に引く | なし（`equipment.player_id`） | 二次インデックスを張らない。1プレイヤーの所持上限が倉庫枠で抑えられており、追加は `tech_db.md` §6-3 の再評価ラインで判断する |

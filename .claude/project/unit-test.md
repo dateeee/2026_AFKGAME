@@ -40,22 +40,22 @@
 | 戦闘 | 先攻/後攻（SPD比較の同値含む）、HP がちょうど0、最低ダメージのクランプ（プレイヤー1 / 敵0）、全滅、ボス/通常敵 |
 | 回復・在庫 | ポーション閾値の境界（`hp/max == threshold`）、在庫あり / 0個 |
 | 経済 | gold 不足 / ちょうど / 十分、インベントリ上限、自動売却 有効/無効 |
-| ルーター | 正常系 200 + **各エラーコードごと**の 4xx、Bean Validation エラー、権限違反 |
+| API（`afkgame-web` の `api/`） | 正常系 200 + **各エラーコードごと**の 4xx、Bean Validation エラー、権限違反 |
 
 ## 4. 除外規則
 
-除外は各モジュール `pom.xml` の `jacoco-maven-plugin` の `<configuration><excludes>` で行い、**理由コメント必須**。許容されるのは `main` メソッド等の起動コードと、実行環境依存で再現できない例外ハンドラのみ。
+除外は各モジュール `pom.xml` の `jacoco-maven-plugin` の `<configuration><excludes>` で行い、**理由コメント必須**。許容されるのは分岐を持たない起動・設定クラスと、実行環境依存で再現できない例外ハンドラのみ。
 
 ```xml
 <configuration>
   <excludes>
-    <!-- 起動クラス。Spring Boot の SpringApplication.run のみで分岐を持たない -->
-    <exclude>com/afkgame/web/AfkgameApplication.class</exclude>
+    <!-- 除外する理由をこの行に書く（分岐を持たない起動・設定クラス等） -->
+    <exclude>com/afkgame/web/config/&lt;クラス名&gt;.class</exclude>
   </excludes>
 </configuration>
 ```
 
-上は書式の例で、**現時点の除外指定は0件**（全モジュール branch 100%）。`@Generated` が付いた自動生成コードは JaCoCo が自動的に除外するため、手書きの指定は要らない。
+上は書式の例で、**現時点の除外指定は0件**（`afkgame-domain`・`afkgame-web` が branch 100%。`afkgame-env` は単体テスト未整備でゲート対象外）。`@Generated` が付いた自動生成コードは JaCoCo が自動的に除外するため、手書きの指定は要らない。
 
 カバレッジを通すためだけに除外を足すことは**禁止**（新規に足す場合は理由コメントを必須とし、完了報告で明示する）。
 

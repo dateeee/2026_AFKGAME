@@ -29,7 +29,7 @@
 | トークン保存先 | アクセストークン: メモリ保持 / リフレッシュトークン: LocalStorage（キー: `refresh_token`） |
 | APIリクエスト | `Authorization: Bearer <access_token>` ヘッダーで識別 |
 | サーバー側 | アカウントに紐づくプレイヤーデータを PostgreSQL に保存 |
-| 本登録移行 | ゲスト→本登録フロー（[tech_auth.md](../detail/tech_auth.md) 参照）で既存データを引き継ぎ |
+| 本登録移行 | ゲスト→本登録フロー（`tech_auth.md` 参照）で既存データを引き継ぎ |
 | データロスト | リフレッシュトークン消失時、ゲストのままではデータ復旧不可（本登録で回避可能） |
 
 ```
@@ -68,7 +68,7 @@
 
 ## 同時実行制御・tickの冪等性
 
-tick処理の排他・トランザクション境界・端数繰り越しは [tech_tick.md](../detail/tech_tick.md) を正とする。アーキテクチャ上の不変条件として、以下だけを本書で押さえる。
+tick処理の排他・トランザクション境界・端数繰り越しは `tech_tick.md` を正とする。アーキテクチャ上の不変条件として、以下だけを本書で押さえる。
 
 - **時刻の権威はサーバー（UTC）のみ**。クライアントが送る時刻・経過秒は一切採用しない
 - **`lastTickAt` は単調増加**し、その更新は排他される。巻き戻す処理を実装してはならない（バックアップ復元は例外。[tech_operations_procedure.md](../nonfunctional/tech_operations_procedure.md) §12.5）

@@ -29,10 +29,10 @@
 | Form | 入出力データの表現と入力チェックルールの宣言（Bean Validation） | `web.resource` の `<用途>Resource`（ガイドライン 2.4.1.1.3 Tip: REST では `Resource` が Form の役割を担い、変換は `HttpMessageConverter` が行う） |
 | Helper | Controller を補助する POJO。作成は任意で、Controller の一部として扱ってよい | **作らない**（ガイドライン 2.4.1.1.3・2.4.1.1.4 との差分）。Resource ↔ ドメイン型の変換は Resource の `static from(...)` に集約する（理由は [web.md](web.md) §3 #3） |
 | Domain Object | 業務データを表すモデル。Entity はこれに含まれる。**状態のみを持つ**（振る舞いは持たせない） | `domain.model` の Entity（[domain.md](domain.md) §2） |
-| Repository | Domain Object の CRUD を担うインタフェース（ドメイン層に定義のみを置く） | `domain.repository` の `<主体Entity>Repository`（§3・[domain.md](domain.md) §3） |
+| Repository | Domain Object の CRUD を担うインタフェース（ドメイン層に定義のみを置く） | `domain.repository` の `<主体Entity>Repository`（§3・`domain.md` §3） |
 | Service | 業務処理の提供とトランザクション境界の宣言。**Form・`HttpServletRequest` など Web の情報を扱わない** | `domain.service`（[domain_service.md](domain_service.md)） |
 | RepositoryImpl | Repository インタフェースの実装 | **書かない**（§3）。MyBatis3 が Mapper インタフェースの仕組みで実装を生成するため不要（ガイドライン 3.3.1.1。差分ではない） |
-| O/R Mapper | DB と Entity の相互マッピング。MyBatis3 では Mapper インタフェースと `SqlSession` が該当する | MyBatis3 の `SqlSession` と、Repository と同名・同パッケージのマッピング XML（[domain.md](domain.md) §3） |
+| O/R Mapper | DB と Entity の相互マッピング。MyBatis3 では Mapper インタフェースと `SqlSession` が該当する | MyBatis3 の `SqlSession` と、Repository と同名・同パッケージのマッピング XML（`domain.md` §3） |
 | Integration System Connector | DB 以外のデータストア（KVS・Web サービス・外部システム）との連携 | **なし**（外部連携を持たない。持つことになったら本表へ追記してから作る） |
 
 ## 3. Repository でデータアクセスを抽象化する
@@ -48,7 +48,7 @@ MyBatis3 を使うため **RepositoryImpl は書かない**。Repository イン�
 | Repository インタフェース（メソッド定義） | `domain.repository` の `<主体Entity>Repository` | ドメイン層 |
 | マッピングファイル（SQL と O/R マッピング） | 同名・同パッケージの `<主体Entity>Repository.xml` | インフラストラクチャ層 |
 
-Java のパッケージとしては両者をドメイン層に同居させる（ガイドライン 3.2.4.3 #2。§1 の「モジュールを分けない」と同じ扱い）。作成単位・命名・SQL の書き方は [domain.md](domain.md) §3・§5 が正。
+Java のパッケージとしては両者をドメイン層に同居させる（ガイドライン 3.2.4.3 #2。§1 の「モジュールを分けない」と同じ扱い）。作成単位・命名・SQL の書き方は `domain.md` §3・§5 が正。
 
 **コンポーネント間の呼び出し可否**（ガイドライン 2.4.2.1 の表を本プロジェクトの実体名にしたもの）。これが層の依存の正。
 
@@ -57,9 +57,9 @@ Java のパッケージとしては両者をドメイン層に同居させる（
 | `web.api`（Controller） | × | ○ | **×** |
 | `domain.service`（Service） | × | **△** | ○ |
 
-- **○** 可 / **×** 禁止 / **△** 原則禁止（許す条件と書き方は [domain_service.md](domain_service.md) §2）
+- **○** 可 / **×** 禁止 / **△** 原則禁止（許す条件と書き方は `domain_service.md` §2）
 - Controller から Repository を直接呼ぶと**トランザクション境界が Web 層へ漏れる**。参照系でも Service を通す
-- Repository から Service を呼ばない（逆流。[common.md](common.md) §2）
+- Repository から Service を呼ばない（逆流。`common.md` §2）
 
 ## 4. モジュール構成の対応
 
@@ -72,4 +72,4 @@ Java のパッケージとしては両者をドメイン層に同居させる（
 | `[projectName]-env` | `afkgame-env` | jar | 環境依存の設定を集約し、環境ごとのビルドし直しを避けるための層 |
 | （対応なし） | `afkgame-initdb` | — | Flyway マイグレーション SQL |
 
-パッケージの割り当てと依存方向は [common.md](common.md) §2、ディレクトリツリーは [tech_structure_backend.md](../../tech/basic/tech_structure_backend.md) §4.1 が正。
+パッケージの割り当てと依存方向は `common.md` §2、ディレクトリツリーは [tech_structure_backend.md](../../tech/basic/tech_structure_backend.md) §4.1 が正。

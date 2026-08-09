@@ -19,7 +19,7 @@ Service は次の2つを担う（ガイドライン 3.2.5.1）。
 | 処理 | 担当 |
 |------|------|
 | リクエストデータの単項目チェック・相関項目チェック | Controller（Bean Validation。[web.md](web.md) §2） |
-| Service へ渡すデータへの変換（型変換・形式変換・Bean 変換） | Controller（Resource。[web.md](web.md) §3） |
+| Service へ渡すデータへの変換（型変換・形式変換・Bean 変換） | Controller（Resource。`web.md` §3） |
 | **ビジネスルールに関わる処理**と、そのための業務データへのアクセス | **Service** |
 | Service が返したデータのレスポンス向け変換 | Controller（Resource） |
 
@@ -44,11 +44,11 @@ Service は次の2つを担う（ガイドライン 3.2.5.1）。
 | # | 規約 |
 |---|------|
 | 1 | `@Service` を付けた**具象クラスのみ**を作り、Service インタフェースを設けない（ガイドライン 3.2.5.4.1 との差分）。インタフェースを推奨する理由は AOP のプロキシ方式とスタブ化だが、Spring AOP はインタフェースを持たないクラスを CGLIB でプロキシでき、テストは Mockito が具象クラスをモックできるため |
-| 2 | 依存は**コンストラクタ注入**で `private final`（[common.md](common.md) §4 #1）。ガイドラインの例はフィールド `@Inject` だが、本プロジェクトはコンストラクタ注入に統一する |
+| 2 | 依存は**コンストラクタ注入**で `private final`（`common.md` §4 #1）。ガイドラインの例はフィールド `@Inject` だが、本プロジェクトはコンストラクタ注入に統一する |
 | 3 | 引数・戻り値に `Serializable` を課さない（ガイドライン 3.2.5.4.3 との差分）。単一 war で分散デプロイをしないため |
 | 4 | 複数の値を返すときは `.service` に不変の `record` を置く（例: `AuthResult`）。Entity をそのまま返してもよい |
-| 5 | 計算式・判定のしきい値は詳細設計が正。Service に数値を直書きしない（[common.md](common.md) §5 #10） |
-| 6 | 現在時刻は `Clock`、乱数は `RandomFactory` を注入して受ける（[common.md](common.md) §4 #2） |
+| 5 | 計算式・判定のしきい値は詳細設計が正。Service に数値を直書きしない（`common.md` §5 #10） |
+| 6 | 現在時刻は `Clock`、乱数は `RandomFactory` を注入して受ける（`common.md` §4 #2） |
 
 ## 4. トランザクション管理
 
@@ -72,7 +72,7 @@ Service は次の2つを担う（ガイドライン 3.2.5.1）。
 | # | 規約 |
 |---|------|
 | 1 | 原則**主体となる Entity（業務データ）ごとに1 Service**。ユースケース単位の Service は、複数 Entity をまたぐ初期化・集約処理に限って作ってよい（例: `PlayerInitializationService`） |
-| 2 | 名前は `<領域>Service`（[domain.md](domain.md) §5）。Phase をまたいで機能が増えるときは Service を分けて足す（既存 Service を肥大させない） |
+| 2 | 名前は `<領域>Service`（`domain.md` §5）。Phase をまたいで機能が増えるときは Service を分けて足す（既存 Service を肥大させない） |
 
 ## 6. 例外とメッセージ
 

@@ -19,7 +19,7 @@
 
 ### 2.1 効果表の読み方
 
-[economy.md](../../design/systems/economy.md) §2.9 の効果表は、**5施設すべてが LV1〜LV10 を全レベル列挙する**。解決は施設LVと同じ行を引くだけで、補間・しきい値検索は行わない。
+`economy.md` §2.9 の効果表は、**5施設すべてが LV1〜LV10 を全レベル列挙する**。解決は施設LVと同じ行を引くだけで、補間・しきい値検索は行わない。
 
 1. 施設LVが1以上なら、その施設の表から**施設LVと一致する行**の値を採用する
 2. 施設LVが0（未建設）の場合は §2.2 に従う
@@ -43,11 +43,11 @@
 
 | 施設 | 効果値 | 適用点と式 |
 |------|-------|-----------|
-| 市場 | ゴールドボーナス率 `m` | 敵撃破時のゴールド報酬を `floor(base × (1 + m + e))` とする。`e` は環境効果の `bonus`（[tech_data.md §1.5](../basic/tech_data.md)）。**加算で合算**し、乗算後に1回だけ `floor`（[tech_numeric.md §2](tech_numeric.md)）。換金アイテムの売却価格には適用しない |
+| 市場 | ゴールドボーナス率 `m` | 敵撃破時のゴールド報酬を `floor(base × (1 + m + e))` とする。`e` は環境効果の `bonus`（`tech_data.md` §1.5）。**加算で合算**し、乗算後に1回だけ `floor`（[tech_numeric.md §2](tech_numeric.md)）。換金アイテムの売却価格には適用しない |
 | 訓練場 | EXP獲得率 `t` | tick でパーティがEXPを得た時、**パーティ外の全キャラ**へ `floor(gainedExp × t)`（下限0）を加算する。パーティ内キャラには二重付与しない |
 | 倉庫 | 所持枠上限 | 装備・素材・換金アイテムの**合計**枠。ポーションは対象外。**装備1件＝1枠、素材・換金アイテムは1種類＝1枠**（数量はスタック上限まで1枠に収まる。数量0の行は数えない）。判定箇所は [tech_shop.md §4](tech_shop.md) 手順5・戦闘ドロップ・鍛冶屋の製作／分解（[tech_forge_disassemble.md §6](tech_forge_disassemble.md)） |
-| 酒場 | スカウト可能レアリティ・費用 | `POST /api/base/scout`（処理は [tech_scout.md](tech_scout.md)、排出率は [master/character.md §7.3](../../data/master/character.md)） |
-| 鍛冶屋 | 強化上限・製作可能レアリティ・強化コスト倍率 | `/api/forge/*`（処理は [tech_forge.md](tech_forge.md)、コストは [master/equipment.md §12〜§14](../../data/master/equipment.md)） |
+| 酒場 | スカウト可能レアリティ・費用 | `POST /api/base/scout`（処理は `tech_scout.md`、排出率は `master/character.md` §7.3） |
+| 鍛冶屋 | 強化上限・製作可能レアリティ・強化コスト倍率 | `/api/forge/*`（処理は `tech_forge.md`、コストは [master/equipment.md §12〜§14](../../data/master/equipment.md)） |
 
 - 市場・訓練場の効果値は economy.md の表で `LV × 5%` と一致するが、**参照は表**とする。式に置き換えない（不変条件「データ駆動」）
 
@@ -59,7 +59,7 @@
 2. プレイヤーの `players` 行を**行ロック**して取得する（ゴールド消費の競合を防ぐ。[tech_tick.md §3.1](tech_tick.md) と同じ方式）
 3. 対象施設の現在LVを取得する（`facilities` に行が無ければ LV0）
 4. 現在LV が **1以上** → `400 BASE_ALREADY_BUILT`（状態は変更しない）
-5. [master/base.md](../../data/master/base.md) §11 の **LV1 行**を建設コストとして引く
+5. `master/base.md` §11 の **LV1 行**を建設コストとして引く
 6. 所持ゴールドがコストに満たない → `400 BASE_INSUFFICIENT_GOLD`（状態は変更しない）
 7. 必要素材のいずれか1種でも所持数が不足 → `400 BASE_INSUFFICIENT_MATERIALS`（状態は変更しない）
 8. 所持ゴールドからコストを引く

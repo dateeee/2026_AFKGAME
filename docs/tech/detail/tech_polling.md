@@ -17,12 +17,12 @@
 | プレイヤー操作API成功時 | レスポンスの最新状態で上書き。tickは追加発火しない |
 | ログアウト・コンポーネント破棄 | タイマー停止・イベントリスナー解除 |
 
-- 通信エラー時のリトライ（3回・指数バックオフ）は [tech_architecture.md](../basic/tech_architecture.md) が正。本書では重複定義しない
+- 通信エラー時のリトライ（3回・指数バックオフ）は `tech_architecture.md` が正。本書では重複定義しない
 - `401` はトークンリフレッシュ後に1回だけ再試行する（[tech_auth.md](tech_auth.md)）。リフレッシュ失敗時はポーリングを停止しログイン画面へ
 
 ## 2. 多重tickの抑止
 
-サーバー側にも排他がある（[tech_tick.md §3](tech_tick.md)）が、無駄なリクエストと画面のちらつきを避けるためフロント側でも抑止する。
+サーバー側にも排他がある（`tech_tick.md` §3）が、無駄なリクエストと画面のちらつきを避けるためフロント側でも抑止する。
 
 | 抑止対象 | 方式 |
 |---------|------|
@@ -50,7 +50,7 @@
 
 | 事象 | 対処 |
 |------|------|
-| バックグラウンドでのスロットリング | 許容する。遅延分は次回tickでまとめて計算される（[tech_tick.md §1](tech_tick.md) の端数繰り越し） |
+| バックグラウンドでのスロットリング | 許容する。遅延分は次回tickでまとめて計算される（`tech_tick.md` §1 の端数繰り越し） |
 | 端末スリープ・PC休止からの復帰 | `visibilitychange` が発火しないケースがあるため `focus` でも即時tickを行う |
 | タイマーのドリフト蓄積 | 補正しない。進行量はサーバーの `last_tick_at` が決めるため、発火間隔のズレは進行量に影響しない |
 | フロントでの経過時間計算 | **行わない**（サーバー権威。端末時計は信用しない） |
@@ -98,7 +98,7 @@ tickレスポンスの反映順序を固定し、部分反映による表示不�
 | 箇所 | 現行実装 | 本仕様 |
 |------|---------|-------|
 | [usePolling.ts:14](../../../frontend/src/composables/usePolling.ts) | in-flightフラグなし（再入可能） | §2 再入抑止 |
-| [usePolling.ts:50](../../../frontend/src/composables/usePolling.ts) | `visible` のたびに無条件で即時tick | §2 5秒以内は抑止 |
-| [usePolling.ts](../../../frontend/src/composables/usePolling.ts) | 多重タブ制御なし | §2.1 リーダー選出 |
-| [usePolling.ts](../../../frontend/src/composables/usePolling.ts) | `focus` 未購読（スリープ復帰で取りこぼす） | §3 `focus` でも即時tick |
-| [usePolling.ts:18](../../../frontend/src/composables/usePolling.ts) | 検証なしで逐次ストアへ代入 | §4 検証してから反映 |
+| `usePolling.ts:50` | `visible` のたびに無条件で即時tick | §2 5秒以内は抑止 |
+| `usePolling.ts` | 多重タブ制御なし | §2.1 リーダー選出 |
+| `usePolling.ts` | `focus` 未購読（スリープ復帰で取りこぼす） | §3 `focus` でも即時tick |
+| `usePolling.ts:18` | 検証なしで逐次ストアへ代入 | §4 検証してから反映 |

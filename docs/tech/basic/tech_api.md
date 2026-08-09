@@ -47,7 +47,7 @@
 | PUT | `/api/tower/mode` | 進行モードの切り替え（進行中でも変更可） |
 | PUT | `/api/tower/retreat-conditions` | 撤退条件の更新（`hpThreshold`: 0〜1） |
 | GET | `/api/shop/lineup` | ショップの現在の品揃えを取得。Phase 1: 常設のみ。Phase 2〜: 常設＋日替わり5枠＋次回更新時刻（[tech_shop.md §6](../detail/tech_shop.md)） |
-| POST | `/api/shop/buy` | ショップでアイテム購入。常設商品: `itemId` + `quantity`（ポーションID等は常設扱い、在庫無制限）。Phase 2〜: 日替わり商品は `dailySlotIndex`（枠番号指定、各1個限り）を追加。両方の指定・どちらも未指定は 422（[tech_shop.md §4](../detail/tech_shop.md)） |
+| POST | `/api/shop/buy` | ショップでアイテム購入。常設商品: `itemId` + `quantity`（ポーションID等は常設扱い、在庫無制限）。Phase 2〜: 日替わり商品は `dailySlotIndex`（枠番号指定、各1個限り）を追加。両方の指定・どちらも未指定は 422（`tech_shop.md` §4） |
 | GET | `/api/equipment/list` | プレイヤーの全装備一覧を取得（Phase 2〜） |
 | POST | `/api/equipment/equip` | 装備の変更（Phase 2〜） |
 | POST | `/api/equipment/sell` | 装備売却（`equipmentIds`）。装備を消費してゴールドを獲得（売却価格 = 5 × レアリティ倍率 × 装備レベル）（Phase 2〜） |
@@ -101,7 +101,7 @@
 
 ## イベントダンジョン（Phase 5〜）
 
-機能仕様は [systems/endgame.md §2.13](../../design/systems/endgame.md)（常設3種 × 固定難易度3段階）。進行は通常の塔と同じ階層制のため、専用エンドポイントは設けず `/api/tower/*` を難易度パラメータ付きで再利用する。ダンジョンIDは `trial_maze` / `treasure_vault` / `training_hall`（正は [glossary.md](../../glossary.md)）。
+機能仕様は `systems/endgame.md` §2.13（常設3種 × 固定難易度3段階）。進行は通常の塔と同じ階層制のため、専用エンドポイントは設けず `/api/tower/*` を難易度パラメータ付きで再利用する。ダンジョンIDは `trial_maze` / `treasure_vault` / `training_hall`（正は [glossary.md](../../glossary.md)）。
 
 | 項目 | 仕様 |
 |------|------|
@@ -115,7 +115,7 @@
 | GET | `/api/notice/list` | お知らせ一覧の取得。`notices`: `noticeId`・`title`・`body`・`publishedAt` の配列を `publishedAt` 降順（新しい順）で返す。本文はマスターデータ配信（DBテーブルなし・更新はデプロイ）。掲示件数はマスター側の上限で抑えるためページングなし |
 
 > 要件は [operation_requirements.md](../../design/requirements/operation_requirements.md) §3.1（既読はクライアントの localStorage 保持。保持先の正は同節）。サーバーは既読状態を持たないため、エンドポイントは一覧取得のみ。未読件数はクライアントが一覧と既読 `noticeId` の突合で算出し、一覧を開いた時点で表示中の全件を既読として保存する。既読キーが存在しない場合の初期化規則は [master_data.md §17.3](../../data/master_data.md) が正。
-> 取得は起動時（`GET /api/game/state` 後）の1回のみ（内容の更新はデプロイでしか起きないため。フローは [api_sequence/core.md §3.7](../../diagrams/api_sequence/core.md)）。マスターの項目定義・掲示件数の上限（20件）は [master_data.md §17](../../data/master_data.md) が正。
+> 取得は起動時（`GET /api/game/state` 後）の1回のみ（内容の更新はデプロイでしか起きないため。フローは [api_sequence/core.md §3.7](../../diagrams/api_sequence/core.md)）。マスターの項目定義・掲示件数の上限（20件）は `master_data.md` §17 が正。
 
 ## 転生（Phase 5〜）
 | メソッド | パス | 説明 |
