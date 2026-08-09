@@ -74,10 +74,13 @@ import com.afkgame.env.config.AuthSettings;
  *       {@code purpose}・{@code expiresAt}・{@code used}・{@code createdAt}。列定義は
  *       docs/tech/basic/tech_db/auth.md §3）と {@code EmailVerificationTokenRepository#save}</li>
  *   <li>{@code VerificationMailSender#send(User user, String rawToken)}: 確認メールの送信境界。
- *       「コミット後・トランザクションの外」（§10 手順9）を満たす仕組みは実装側が持ち、
- *       {@code AuthService} は送信例外を握って WARN ログにとどめる。送信手段（SMTP設定・本文・
- *       再送）は verify-email の詳細設計（STEP 3-A-3）で確定する</li>
+ *       「コミット後・トランザクションの外」（§10 手順9）を満たす仕組みも、送信失敗を WARN に
+ *       とどめる責務も実装側が持つ（ISSUE-702 の是正で {@code AuthService} から移した）。
+ *       送信手段（SMTP設定・本文・再送）は verify-email の詳細設計（STEP 3-A-3）で確定する</li>
  * </ul>
+ *
+ * <p>登録・ログインが受け取るメールは §9「メールの正規化」に従って前後の空白除去と小文字化を
+ * 経てから検索・保存される。正規化そのものの分岐は §11 #15・#16 と §13 #14・#15 が持つ。
  */
 @Tag("unit")
 @ExtendWith(MockitoExtension.class)
@@ -219,6 +222,9 @@ class AuthServiceImplTest {
             assertThat(saved.getValue().getTokenHash())
                     .isNotEqualTo(result.refreshToken())
                     .hasSize(64);
+            // 生値は48バイトを Base64URL（パディングなし）で表した64文字（§9）。
+            // ハッシュと桁数が同じため、生値側も明示して取り違えを防ぐ
+            assertThat(result.refreshToken()).hasSize(64);
             assertThat(saved.getValue().isRevoked()).isFalse();
             // 有効期限は30日（tech_auth.md §1）。時刻を2回取ると誤差が乗るため、
             // expires_at − created_at はちょうど有効期限であること
@@ -244,6 +250,7 @@ class AuthServiceImplTest {
         @Test
         void test_正常時は旧トークンを失効させ新しいペアを返す() {
             String rawToken = issueAndStore();
+            when(refreshTokenRepository.updateRevokedById(1)).thenReturn(1);
             when(userRepository.findById("guest_001")).thenReturn(storedUser());
 
             AuthResult result = authService().refresh(rawToken);
@@ -279,6 +286,27 @@ class AuthServiceImplTest {
             verify(refreshTokenRepository, never()).updateRevokedById(any());
         }
 
+        /**
+         * 同じ生トークンで2本のリクエストが並走した場合。読んだ時点では未失効でも、失効更新が
+         * 0件なら他方が先にローテーションを済ませている＝再利用であり、revoked済みを読んだ場合
+         * （上のテスト）と同じ全失効経路へ寄せる（tech_auth.md §4「不正検知」）。
+         *
+         * <p>READ COMMITTED では両方が失効判定を通過するため、判定ではなく更新件数で勝者を決める。
+         */
+        @Test
+        void test_失効更新が0件なら再利用として全トークンを失効させる() {
+            when(refreshTokenRepository.findByTokenHash(any())).thenReturn(storedToken("dummy-hash"));
+            when(refreshTokenRepository.updateRevokedById(1)).thenReturn(0);
+
+            assertThatThrownBy(() -> authService().refresh("raced-token"))
+                    .isInstanceOf(AppException.class)
+                    .extracting("code", "status")
+                    .containsExactly("AUTH_REFRESH_INVALID", 401);
+
+            verify(refreshTokenRepository).updateRevokedByUserId("guest_001");
+            verify(refreshTokenRepository, never()).save(any());
+        }
+
         @Test
         void test_期限切れはAUTH_REFRESH_INVALIDになる() {
             RefreshToken expired = storedToken("dummy-hash");
@@ -296,6 +324,7 @@ class AuthServiceImplTest {
         @Test
         void test_トークンは正当でもユーザーが居なければAUTH_REFRESH_INVALIDになる() {
             when(refreshTokenRepository.findByTokenHash(any())).thenReturn(storedToken("dummy-hash"));
+            when(refreshTokenRepository.updateRevokedById(1)).thenReturn(1);
             when(userRepository.findById("guest_001")).thenReturn(null);
 
             assertThatThrownBy(() -> authService().refresh("orphan-token"))
@@ -402,6 +431,60 @@ class AuthServiceImplTest {
         }
 
         /**
+         * {@code uq_users_email} 以外の一意制約違反は業務例外へ写像しない。§11 #9 が扱うのは
+         * メール重複だけで、それ以外は「予期しないエラー」としてそのまま伝播させる
+         * （coding_standards_backend/exception.md の3分類 ③）。原因と表示が食い違うと
+         * 切り分けができなくなるため、link-account が {@code google_id} を設定するより前に絞る。
+         */
+        @Test
+        void test_メール以外の一意制約違反は変換せず伝播する() {
+            when(userRepository.findByEmail(EMAIL)).thenReturn(null);
+            doThrow(new DuplicateKeyException("uq_users_google_id")).when(userRepository).save(any());
+
+            assertThatThrownBy(() -> authService().register(EMAIL, PASSWORD))
+                    .isInstanceOf(DuplicateKeyException.class);
+
+            verify(refreshTokenRepository, never()).save(any());
+        }
+
+        /**
+         * 受け取った表記の大小・前後の空白を落とした値で重複を確認する（§9「メールの正規化」）。
+         *
+         * <p>分岐: tech_auth/account.md §11 #15
+         */
+        @Test
+        void test_大小だけが異なる表記は正規化後に一致して409になる() {
+            when(userRepository.findByEmail(EMAIL)).thenReturn(existing());
+
+            assertThatThrownBy(() -> authService().register("  User@Example.COM  ", PASSWORD))
+                    .isInstanceOf(AppException.class)
+                    .extracting("code", "status")
+                    .containsExactly("AUTH_EMAIL_TAKEN", 409);
+
+            // 検索キーは受け取った表記ではなく正規化後の値
+            verify(userRepository).findByEmail(EMAIL);
+            verify(userRepository, never()).save(any());
+        }
+
+        /**
+         * 正規化しても既存と一致しなければ登録を続行する。DBへ渡るのは正規化後の値なので、
+         * {@code uq_users_email} がそのまま大小違いの重複を捕まえる（§9）。
+         *
+         * <p>分岐: tech_auth/account.md §11 #16
+         */
+        @Test
+        void test_一致しなければ正規化後の値で登録する() {
+            when(userRepository.findByEmail(EMAIL)).thenReturn(null);
+
+            AuthResult result = authService().register("  User@Example.COM  ", PASSWORD);
+
+            ArgumentCaptor<User> saved = ArgumentCaptor.forClass(User.class);
+            verify(userRepository).save(saved.capture());
+            assertThat(saved.getValue().getEmail()).isEqualTo(EMAIL);
+            assertThat(result.user().getEmail()).isEqualTo(EMAIL);
+        }
+
+        /**
          * 手順3〜7がすべて成功する経路。手順5（初期化）の中身は
          * {@code PlayerInitializationServiceImplTest} が持ち、ここでは順序と委譲だけを見る。
          *
@@ -501,25 +584,6 @@ class AuthServiceImplTest {
             verify(verificationMailSender).send(any(User.class), any(String.class));
             assertThat(result.accessToken()).isNotBlank();
             assertThat(result.refreshToken()).isNotBlank();
-        }
-
-        /**
-         * 送信失敗は WARN ログだけを残し、登録は成功として扱う。確認トークンの行も消さない
-         * （§10 手順9）。
-         *
-         * <p>分岐: tech_auth/account.md §11 #13
-         */
-        @Test
-        void test_確認メールの送信に失敗しても登録は成功する() {
-            when(userRepository.findByEmail(EMAIL)).thenReturn(null);
-            doThrow(new IllegalStateException("SMTP unreachable"))
-                    .when(verificationMailSender).send(any(), any());
-
-            AuthResult result = authService().register(EMAIL, PASSWORD);
-
-            assertThat(result.accessToken()).isNotBlank();
-            assertThat(result.refreshToken()).isNotBlank();
-            verify(emailVerificationTokenRepository).save(any(EmailVerificationToken.class));
         }
     }
 
@@ -691,6 +755,40 @@ class AuthServiceImplTest {
             assertThat(result.user().isEmailVerified()).isFalse();
             assertThat(result.accessToken()).isNotBlank();
             assertThat(result.refreshToken()).isNotBlank();
+        }
+
+        /**
+         * 登録時と大小が異なる表記でも、正規化後の値で検索するため同じ行に一致する（§9）。
+         *
+         * <p>分岐: tech_auth/account.md §13 #14
+         */
+        @Test
+        void test_大小が異なる表記でも正規化後に一致して認証を続行する() {
+            when(userRepository.findByEmail(EMAIL)).thenReturn(registered(true));
+            when(passwordEncoder.matches(PASSWORD, HASHED)).thenReturn(true);
+
+            AuthResult result = authService().login("  User@Example.COM  ", PASSWORD);
+
+            // 検索キーは受け取った表記ではなく正規化後の値
+            verify(userRepository).findByEmail(EMAIL);
+            assertThat(result.user().getId()).isEqualTo("user_001");
+        }
+
+        /**
+         * 正規化しても一致する行が無ければ、未登録と同じ 401 で止める（§12 末尾）。
+         *
+         * <p>分岐: tech_auth/account.md §13 #15
+         */
+        @Test
+        void test_正規化しても一致しなければ401になる() {
+            when(userRepository.findByEmail("other@example.com")).thenReturn(null);
+
+            assertThatThrownBy(() -> authService().login("  Other@Example.COM  ", PASSWORD))
+                    .isInstanceOf(AppException.class)
+                    .extracting("code", "status")
+                    .containsExactly("AUTH_INVALID_CREDENTIALS", 401);
+
+            verify(passwordEncoder, never()).matches(any(), any());
         }
     }
 

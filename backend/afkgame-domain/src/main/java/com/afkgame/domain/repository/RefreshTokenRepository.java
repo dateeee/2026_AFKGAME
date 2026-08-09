@@ -28,9 +28,13 @@ public interface RefreshTokenRepository {
     /**
      * 指定の1件を無効化する（ローテーションで旧トークンを失効させる）。
      *
+     * <p>未失効の行だけを更新する。同じトークンで並走したリクエストのうち更新できるのは1本だけになり、
+     * 呼び出し側は更新件数0を「他のリクエストが先に失効させた＝再利用」として扱える。
+     *
      * @param id レコードID
+     * @return 更新件数（0 なら対象が既に失効済み）
      */
-    void updateRevokedById(Integer id);
+    int updateRevokedById(Integer id);
 
     /**
      * 指定ユーザーの有効なトークンをすべて無効化する（再利用検知時の全失効）。

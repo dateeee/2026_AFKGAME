@@ -27,6 +27,7 @@
     UPDATE refresh_tokens
        SET revoked = TRUE
      WHERE id = #{id}
+       AND revoked = FALSE
   </update>
 
   <update id="updateRevokedByUserId">

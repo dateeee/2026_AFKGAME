@@ -9,6 +9,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.HexFormat;
+import java.util.Locale;
 import java.util.UUID;
 
 import org.springframework.dao.DuplicateKeyException;
@@ -40,8 +41,11 @@ public class AuthServiceImpl implements AuthService {
 
     private static final AppLogger logger = AppLogger.of(LoggerName.AUTH);
 
-    /** リフレッシュトークンの生値のバイト数（Base64URL で44文字になる）。 */
-    private static final int REFRESH_TOKEN_BYTES = 48;
+    /** 生トークンの乱数バイト数（Base64URL パディングなしで64文字になる）。 */
+    private static final int RAW_TOKEN_BYTES = 48;
+
+    /** メールの一意制約名（V1__initial_schema.sql）。重複の判別を制約名で行うため定数で持つ。 */
+    private static final String EMAIL_UNIQUE_CONSTRAINT = "uq_users_email";
 
     /** 確認トークンの用途（tech_db/auth.md §3）。用途をまたいだ流用を防ぐため発行時に固定する。 */
     private static final String VERIFY_EMAIL_PURPOSE = "verify_email";
@@ -118,16 +122,18 @@ public class AuthServiceImpl implements AuthService {
         }
 
         if (stored.isRevoked()) {
-            logger.warn("不正リフレッシュトークン検知").with(LogKey.USER_ID, stored.getUserId()).log();
-            refreshTokenRepository.updateRevokedByUserId(stored.getUserId());
-            throw refreshInvalid("Refresh token reuse detected");
+            throw detectReuse(stored.getUserId());
         }
 
         if (stored.getExpiresAt().isBefore(clock.instant())) {
             throw refreshInvalid("Refresh token expired");
         }
 
-        refreshTokenRepository.updateRevokedById(stored.getId());
+        // 失効させられるのは未失効の1本だけ。0件なら同じトークンで並走した他のリクエストが
+        // 先にローテーションを済ませており、READ COMMITTED では上の失効判定を通り抜けている
+        if (refreshTokenRepository.updateRevokedById(stored.getId()) == 0) {
+            throw detectReuse(stored.getUserId());
+        }
 
         User user = userRepository.findById(stored.getUserId());
         if (user == null) {
@@ -156,12 +162,14 @@ public class AuthServiceImpl implements AuthService {
      *
      * <p>重複確認からトークン発行までを本メソッドの境界で1つにまとめる
      * （tech_auth/account.md §10 手順8）。確認メールの送信要求だけは境界の外へ出さず、
-     * 送信側（{@link VerificationMailSender}）が「コミット後」の扱いを持つ。
+     * 送信側（{@link VerificationMailSender}）が「コミット後・トランザクションの外」で送る担保と、
+     * 失敗を WARN ログにとどめる責務を持つ（mail.md §16.1）。本メソッドは送信結果を待たない。
      */
     @Override
     @Transactional
     public AuthResult register(String email, String rawPassword) {
-        if (userRepository.findByEmail(email) != null) {
+        String normalizedEmail = normalizeEmail(email);
+        if (userRepository.findByEmail(normalizedEmail) != null) {
             logger.warn("登録失敗").reason(LogReason.EMAIL_TAKEN).log();
             throw emailTaken();
         }
@@ -170,7 +178,7 @@ public class AuthServiceImpl implements AuthService {
 
         User user = new User();
         user.setId("user_" + UUID.randomUUID());
-        user.setEmail(email);
+        user.setEmail(normalizedEmail);
         user.setPasswordHash(passwordEncoder.encode(rawPassword));
         user.setGuest(false);
         user.setEmailVerified(false);
@@ -179,6 +187,11 @@ public class AuthServiceImpl implements AuthService {
         try {
             userRepository.save(user);
         } catch (DuplicateKeyException e) {
+            if (!isEmailConstraintViolation(e)) {
+                // §11 #9 が扱うのはメール重複だけ。ほかの一意制約違反を 409 へ写像すると
+                // 原因と表示が食い違うため、予期しないエラーとしてそのまま伝播させる
+                throw e;
+            }
             // 手順2の通過後に同時登録で uq_users_email 違反が起きた場合も重複として扱う（§11 #9）
             logger.warn("登録失敗").reason(LogReason.EMAIL_TAKEN_CONFLICT).log();
             throw emailTaken();
@@ -198,7 +211,7 @@ public class AuthServiceImpl implements AuthService {
 
         AuthResult result = issueTokens(user);
         logger.info("アカウント登録").with(LogKey.USER_ID, user.getId()).log();
-        sendVerificationMail(user, rawVerificationToken);
+        verificationMailSender.send(user, rawVerificationToken);
         return result;
     }
 
@@ -210,7 +223,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public AuthResult login(String email, String rawPassword) {
-        User user = userRepository.findByEmail(email);
+        User user = userRepository.findByEmail(normalizeEmail(email));
         if (user == null) {
             logger.warn("ログイン失敗").reason(LogReason.EMAIL_NOT_FOUND).log();
             throw invalidCredentials();
@@ -262,17 +275,39 @@ public class AuthServiceImpl implements AuthService {
     }
 
     /**
-     * 確認メールの送信を要求する。
+     * メールアドレスを正規化する。
      *
-     * <p>送信の成否は登録の成否へ反映せず、失敗は WARN ログだけを残す（§10 手順9・§11 #13）。
-     * 「コミット後・トランザクションの外」で送るための仕組みは {@link VerificationMailSender} 側が持つ。
+     * <p>前後の空白を除いて小文字化する（tech_auth/account.md §9「メールの正規化」）。
+     * DBへ渡る値を常に正規化済みにすることで、{@code uq_users_email} がそのまま
+     * 大小違いの重複を捕まえる。ロケール依存の変換を避けるため {@link Locale#ROOT} を使う。
      */
-    private void sendVerificationMail(User user, String rawVerificationToken) {
-        try {
-            verificationMailSender.send(user, rawVerificationToken);
-        } catch (RuntimeException e) {
-            logger.warn("確認メールの送信に失敗").with(LogKey.USER_ID, user.getId()).cause(e).log();
-        }
+    private static String normalizeEmail(String email) {
+        return email.trim().toLowerCase(Locale.ROOT);
+    }
+
+    /**
+     * メールの一意制約違反かどうかを判定する。
+     *
+     * <p>{@code users} は {@code uq_users_email} と {@code uq_users_google_id} の2本を持つため、
+     * 制約名を見ずに重複と決めつけると、Google連携の重複が「メールが既に使われています」として
+     * 返る（link-account で {@code google_id} を設定するようになった時点で顕在化する）。
+     */
+    private static boolean isEmailConstraintViolation(DuplicateKeyException e) {
+        String message = String.valueOf(e.getMostSpecificCause().getMessage());
+        return message.contains(EMAIL_UNIQUE_CONSTRAINT);
+    }
+
+    /**
+     * 再利用を検知し、当該ユーザーのトークンを全失効させたうえで返す例外を作る。
+     *
+     * <p>失効済みの行を読んだ場合と、失効更新に負けた場合（同時実行）の両方から呼ぶ
+     * （tech_auth.md §4「不正検知」）。{@code @Transactional(noRollbackFor = AppException.class)}
+     * により、401 を返す経路でも全失効は確定する。
+     */
+    private AppException detectReuse(String userId) {
+        logger.warn("不正リフレッシュトークン検知").with(LogKey.USER_ID, userId).log();
+        refreshTokenRepository.updateRevokedByUserId(userId);
+        return refreshInvalid("Refresh token reuse detected");
     }
 
     /** アクセストークンを発行し、リフレッシュトークンを新規保存する。 */
@@ -300,7 +335,7 @@ public class AuthServiceImpl implements AuthService {
      * 同じ方式を使う（tech_auth/account.md §9）。
      */
     private static String generateRawToken() {
-        byte[] raw = new byte[REFRESH_TOKEN_BYTES];
+        byte[] raw = new byte[RAW_TOKEN_BYTES];
         RANDOM.nextBytes(raw);
         return Base64.getUrlEncoder().withoutPadding().encodeToString(raw);
     }
