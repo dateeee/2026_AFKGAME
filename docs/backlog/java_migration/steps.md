@@ -46,7 +46,7 @@ STEP 2 で作った骨格は Spring Boot アプリで、ガイドラインのブ
 
 | セグメント | 内容 | 状態 |
 |-----------|------|------|
-| 2R-0 | 先行検証（下表の不確定要素を潰す。ここで詰まったら §2 の版・方式を見直す） | 未着手 |
+| 2R-0 | 先行検証（下表のとおり6件を実機で確定） | **完了**（2026-08-09） |
 | 2R-A | 仕様書・規約の再改訂（§2 の変更点を `tech_structure` / `tech_operations` / `coding_standards_backend` へ反映） | 未着手 |
 | 2R-B | Archetype から雛形を生成し、View 一式を落として REST 専用の土台にする（`mvn clean install` で war が出るまで） | 未着手 |
 | 2R-C | 設定の移植（`web.xml`・Java Config 6種・`*.properties`・`logback.xml`・DataSource・Flyway 起動） | 未着手 |
@@ -56,16 +56,20 @@ STEP 2 で作った骨格は Spring Boot アプリで、ガイドラインのブ
 
 完了条件は STEP 2 と同じ「`GET /health` が 200（`db:ok`）・ゲスト認証が通る」に加え、**移植済みの単体テストが branch 100% のまま通ること**。
 
-#### 2R-0 で先に潰す不確定要素
+#### 2R-0 の確定結果（実機検証済み）
 
-| 項目 | 確認すること |
-|------|------------|
-| Tomcat の版 | 雛形の `web.xml` は Servlet 6.0 宣言だが、Spring Framework 7.0 系が要求する実際の下限を実機で確定する |
-| 埋め込み PostgreSQL | `embedded-database-spring-test` は Boot 前提。`embedded-postgres` の直接起動へ置き換えられるか |
-| Flyway | Boot の自動マイグレーションが無くなるため、`@Bean` での明示起動に移せるか（`V1` は据え置き） |
-| `/health` の version | `BuildProperties` が使えない。マニフェストまたは Maven のリソースフィルタで代替する |
-| ビルドプラグイン | JaCoCo・surefire/failsafe・OWASP Dependency-Check が `terasoluna-gfw-parent` の pluginManagement と競合しないか |
-| プロファイル切替 | `application-{local,production}.yml` 相当を Boot 無しでどう切り替えるか |
+Archetype `5.11.0.RELEASE` で雛形を生成し（`mvn clean install` 成功）、そこへ検証コードを足して確かめた。
+
+| 項目 | 確定した方式 | 根拠 |
+|------|------------|------|
+| Tomcat の版 | **11.0（Servlet 6.1）を標準**とする。10.1（6.0）でも動く | 雛形が解決する `jakarta.servlet-api` は **6.1.0**（`web.xml` の 6.0 宣言と不一致だが実害なし）。war を 11.0.24 と 10.1.57 の双方へ配備して `/health` が 200。spring-web / webmvc / core・spring-security-web・terasoluna-gfw-web を逆アセンブルし、6.1 だけにあるメンバーへの参照が **0件**であることも確認した |
+| 埋め込み PostgreSQL | `embedded-postgres` を `EmbeddedPostgres.builder().start()` で**直接起動**する。`embedded-database-spring-test` は使わない | Boot 無しで PostgreSQL 16.9 が Docker 非依存で起動し、`mvn verify` が通った |
+| Flyway | `@Bean(initMethod = "migrate")` で明示起動し、DB を使う Bean へ `@DependsOn("flyway")` を付ける | 素の Spring コンテキスト（`SpringExtension` + `@ContextConfiguration`）で既存の `V1` を適用し、16テーブルが揃うことを確認 |
+| `/health` の version | **Maven のリソースフィルタ**を採用（`src/main/resources-filtered/META-INF/spring/build.properties` へ `${project.version}` を埋める） | war のマニフェストと `Package.getImplementationVersion()` も両コンテナで解決できたが、**war を作らない単体・結合テストでは読めない**。フィルタ済みリソースはテストでも同じ値を返す |
+| ビルドプラグイン | 競合なし。JaCoCo・surefire・failsafe はそのまま足せる | 親の `pluginManagement` は**版の宣言だけ**（`configuration` を持つのは compiler のみ）。JaCoCo は親の 0.8.14 に揃う。ただし**雛形の failsafe は `integration-test` ゴールしか持たない** ため、`verify` ゴールの execution を足さないと結合テストが失敗してもビルドが落ちない |
+| プロファイル切替 | **環境変数のみ**で切り替える（`SPRING_PROFILES_ACTIVE` ＋ `DATABASE_URL` 等）。雛形の Maven プロファイル（`configs/<env>/resources`）は使わない | `SPRING_PROFILES_ACTIVE=production` で `@Profile("production")` の Bean が選ばれ、`DATABASE_URL` が `${database.url}` を上書きした（素の Spring の環境変数マングリング）。現行の起動時バリデーション（[tech_operations.md](../../tech/nonfunctional/tech_operations.md) §12.2）をそのまま保てる |
+
+OWASP Dependency-Check は親が管理しないため**版を自分で固定して足す**（`12.2.2` で競合なく起動）。ただし NVD データが別途要り、`autoUpdate=false` では `NoDataException` で失敗する。CI で回すなら **NVD API キーの調達が前提**になる（2R-E で決める）。
 
 ### STEP 3〜5: Phase 単位の移植
 

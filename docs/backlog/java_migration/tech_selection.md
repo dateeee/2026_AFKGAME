@@ -9,11 +9,11 @@
 | 領域 | 採用 | 補足 |
 |------|------|------|
 | フレームワーク | TERASOLUNA Server Framework for Java (5.x) **5.11.0.RELEASE** | **Spring Boot は使わない**。ブランクプロジェクト準拠の Spring MVC 構成（Spring Framework 7.0 系） |
-| 実行形態 | **war を Tomcat（Servlet 6.0 以上）へデプロイ** | Nginx 配下に置く点は変わらない。実行可能 jar + systemd は採らない |
+| 実行形態 | **war を Tomcat 11.0（Servlet 6.1）へデプロイ** | 版の根拠と 10.1 での実測は [steps.md](steps.md) §4「2R-0 の確定結果」。Nginx 配下に置く点は変わらない。実行可能 jar + systemd は採らない |
 | 言語・ビルド | Java 17 / Maven マルチモジュール | 親POMは `terasoluna-gfw-parent`。**Java Config 版**のブランクプロジェクト準拠 |
 | データアクセス | **MyBatis3** | ブランクプロジェクトの MyBatis3 版を起点にする |
 | マイグレーション | Flyway | Alembic の既存5リビジョンは初期スキーマ `V1` へ畳む |
-| JSON | Jackson | camelCase 維持（`CamelModel` 相当の変換は不要） |
+| JSON | Jackson | camelCase 維持（`CamelModel` 相当の変換は不要）。**雛形の依存には Jackson 3（`tools.jackson`）と 2（`com.fasterxml`）が同居する**ため、どちらの `HttpMessageConverter` を使うかは 2R-C で明示的に決める（`fail-on-unknown-properties` 相当の設定先が変わる） |
 | APIドキュメント | **提供しない** | springdoc は Spring Boot 前提のため廃止。API仕様の正は [tech_api.md](../../tech/basic/tech_api.md)（`/docs` は無くなる） |
 | 入力検証 | Bean Validation（Jakarta） | Pydantic のフィールド制約を移す |
 | 認証 | Spring Security + JJWT | 方式・期限は [tech_auth.md](../../tech/detail/tech_auth.md) が正（変更なし） |
@@ -21,9 +21,9 @@
 | ログ | Logback + MDC | `X-Request-ID` は MDC で引き回す。設定は `logback.xml`（Boot 拡張の `logback-spring.xml` と `<springProfile>` は使えない） |
 | 単体テスト | JUnit 5 + Mockito + JaCoCo | surefire で `unit` タグのみ。C1 = **branch 100%** |
 | 依存脆弱性スキャン | OWASP Dependency-Check（Maven プラグイン） | `pip-audit` の置き換え |
-| 統合テスト | MockMvc（`@ExtendWith(SpringExtension)` + `@ContextConfiguration` + `@WebAppConfiguration`）+ **埋め込み PostgreSQL** | failsafe で `integration` タグのみ（計測外）。DBは `embedded-postgres`（`local` と同じ 16 系）を Boot 連携なしで起動し、`mvn verify` は Docker 不要 |
+| 統合テスト | MockMvc（`@ExtendWith(SpringExtension)` + `@ContextConfiguration` + `@WebAppConfiguration`）+ **埋め込み PostgreSQL** | failsafe で `integration` タグのみ（計測外）。DBは `embedded-postgres` を `EmbeddedPostgres.builder().start()` で直接起動する（`local` と同じ 16 系・Docker 不要）。**`embedded-database-spring-test` は Boot 前提のため使わない**。実測は [steps.md](steps.md) §4 |
 | E2E | Playwright（既存を流用） | 変更なし |
-| 設定 | `META-INF/spring/*.properties` + 環境変数 | `.env` / `config.py` の置き換え。`@ConfigurationProperties` は Boot 機能のため使わない |
+| 設定 | `META-INF/spring/*.properties` + 環境変数 | `.env` / `config.py` の置き換え。`@ConfigurationProperties` は Boot 機能のため使わない。環境の切替は `SPRING_PROFILES_ACTIVE`、値の上書きは `DATABASE_URL` 等の環境変数で行う（雛形の Maven プロファイルは使わない。[steps.md](steps.md) §4） |
 | DB | **PostgreSQL に統一** | `local` は Docker Compose、`production` は EC2 同居。ドライバは `postgresql` JDBC。SQLite は採用しない（[changes.md](changes.md) §5） |
 | マスターデータ | **YAML リソース + 起動時ローダ** | `afkgame-domain` の `src/main/resources/masterdata/`。起動時に `record` へ読み込み、不変 Map で公開する |
 
