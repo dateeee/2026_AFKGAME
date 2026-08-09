@@ -3,6 +3,7 @@
 > [coding_standards_backend.md](../coding_standards_backend.md) の分冊。**どの層を書くときも本書を先に読む**。
 > ベースは TERASOLUNA 開発ガイドライン 5.11.0.RELEASE 日本語版（[basis.md](basis.md) §1）の `ArchitectureInDetail`。本書はそこからの差分だけを持つ。
 > レイヤの定義とコンポーネント間の呼び出し可否は [layering.md](layering.md)、層固有の規約は [domain.md](domain.md)（Entity・Repository）・[domain_service.md](domain_service.md)（Service）・[web.md](web.md)（Web層）・[test.md](test.md)（テスト）。
+> 層を問わない横断規約は [exception.md](exception.md)（例外）・[logging.md](logging.md)（ログ）。
 
 ---
 
@@ -71,16 +72,15 @@
 
 ## 7. ログ
 
+**正は [logging.md](logging.md)**（層を問わない。ログ3種別＝通信ログ・アプリケーションログ・エラーログの定義と出力先、AOP による境界ログ、業務ログの書き方、禁止事項）。本書では再掲しない。
+
+最低限おさえるのは次の3点で、詳細はすべて `logging.md` にある。
+
 | # | 規約 |
 |---|------|
-| 1 | **`AppLogger` を使う**（`afkgame-env` の `com.afkgame.env.logging`）。`private static final AppLogger logger = AppLogger.of(LoggerName.<領域>)` の形で持ち、`LoggerFactory` を直接呼ばない。ロガー名・項目名・`reason` の値を各クラスの文字列リテラルから追い出すための共通部品で、使い方の正は [tech_logging.md](../../tech/basic/tech_logging.md)「ログの書き方（共通部品）」 |
-| 2 | ロガー名は `LoggerName` の値を使い、クラスの配置から独立させる。ガイドラインの実装例はクラスオブジェクト（`getLogger(Xxx.class)`）を渡すが採らない — 出力先とレベルを機能単位で切り替えるため |
-| 3 | **ログ項目はメッセージへ埋め込まず `with()` / `reason()` で積む**（`reason=...` `user_id={}` を文字列に書かない）。JSON 形式で独立フィールドになる形をコード側の唯一の書き方にする |
-| 4 | レベルの使い分け・出力フォーマット・項目名・マスク規則の正は `tech_logging.md`。本書では再掲しない |
-| 5 | メッセージのプレースホルダは `{}` で組む（文字列連結・`String.format` を使わない） |
-| 6 | パスワード・トークン生値・メールアドレスをそのまま出さない。トークン・メールは `LogKey.TOKEN` / `LogKey.EMAIL` へ渡せば自動でマスクされる |
-| 7 | `request_id` などの横断項目は MDC（`RequestLogFilter`）が載せる。各所で詰め直さない |
-| 8 | `System.out.println`・`printStackTrace` を使わない |
+| 1 | **入口は `AppLogger` だけ**（`afkgame-env` の `com.afkgame.env.logging`）。`LoggerFactory` の直接呼び出し・`System.out.println`・`printStackTrace` を使わない |
+| 2 | ロガー名は `LoggerName` の値を使い、クラスの配置から独立させる（`getLogger(Xxx.class)` を採らない）。**出力先の振り分けはロガー名とレベルだけで決まる** |
+| 3 | **ログ項目はメッセージへ埋め込まず `with()` / `reason()` で積む**（`reason=...` `user_id={}` を文字列に書かない） |
 
 ## 8. Javadoc・コメント
 
@@ -108,6 +108,7 @@
 | `System.out` / `printStackTrace` | `AppLogger`（§7 #1） |
 | `LoggerFactory.getLogger(...)` の直接呼び出し | `AppLogger.of(LoggerName.…)`（§7 #1） |
 | ログ項目をメッセージへ埋め込む（`reason=...`） | `with()` / `reason()` で積む（§7 #3） |
+| 業務コードで START / END・所要時間を手書き | 通信ログ・AOP に任せる（[logging.md](logging.md) §6） |
 | 空の `catch`・例外の握りつぶし | 3分類のいずれかへ変換するか再スロー（`exception.md` §3） |
 | 静的な可変フィールド（共有状態） | DI か引数で受け渡す |
 | `java.util.Date` / `Calendar` | `java.time`（既定は `Instant`） |
