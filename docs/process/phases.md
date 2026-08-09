@@ -44,7 +44,7 @@ DBスキーマは**テキスト（テーブル定義書）を正、ER図を視�
 
 | 規約 | 対象 | 状態 |
 |------|------|------|
-| `coding_standards_backend.md`（索引 + [coding_standards_backend/](coding_standards_backend/) の7分冊: basis / layering / common / domain / domain_service / web / test） | `backend/` の Java（Terasoluna / MyBatis3）。**TERASOLUNA 開発ガイドライン 5.11.0.RELEASE 日本語版をベースとし、規約はその差分だけを持つ**（準拠元URLは [basis.md](coding_standards_backend/basis.md) §1、個々の差分は各分冊が正） | 整備済み |
+| `coding_standards_backend.md`（索引 + [coding_standards_backend/](coding_standards_backend/) の13分冊: basis / layering / common / exception / logging（+ `logging/` 2件）/ domain（+ `domain/service.md`）/ web / filter / interceptor / test） | `backend/` の Java（Terasoluna / MyBatis3）。**TERASOLUNA 開発ガイドライン 5.11.0.RELEASE 日本語版をベースとし、規約はその差分だけを持つ**（準拠元URLは [basis.md](coding_standards_backend/basis.md) §1、個々の差分は各分冊が正） | 整備済み |
 | `coding_standards_frontend.md` | `frontend/` の Vue 3 / TypeScript | **未整備**。フロントエンドの製造再開前に作成する |
 
 - **正は `docs/process/` 側**。エージェントが実装・レビュー時に読む要約を [.claude/references/coding-standards-backend.md](../../.claude/references/coding-standards-backend.md) へ派生させる。改訂は**正 → 派生の順に同じ変更で**行う（派生側に固有値を書かない）

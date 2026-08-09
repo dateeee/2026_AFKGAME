@@ -1,7 +1,7 @@
 # バックエンドコーディング規約 — 準拠元と原則
 
 > [coding_standards_backend.md](../coding_standards_backend.md) の分冊。**規約に無い判断をするとき・規約を改訂するとき**に読む。
-> 個々の規約は [layering.md](layering.md)（層）・[common.md](common.md)（全層共通）・[domain.md](domain.md) / [domain_service.md](domain_service.md) / [web.md](web.md) / [test.md](test.md) が持つ。
+> 個々の規約は [layering.md](layering.md)（層）・[common.md](common.md)（全層共通）・[domain.md](domain.md) / [domain/service.md](domain/service.md) / [web.md](web.md) / [test.md](test.md) が持つ。
 
 ---
 
@@ -21,7 +21,7 @@
 | `common.md` | `ArchitectureInDetail`（7.1 ロギングほかの横断機能） |
 | [exception.md](exception.md) | `ArchitectureInDetail/WebApplicationDetail/ExceptionHandling`（4.3） |
 | `domain.md` | `ImplementationAtEachLayer/DomainLayer`（3.2.1〜3.2.4）、`ImplementationAtEachLayer/InfrastructureLayer`（MyBatis3） |
-| `domain_service.md` | `ImplementationAtEachLayer/DomainLayer`（3.2.5〜3.2.7） |
+| `domain/service.md` | `ImplementationAtEachLayer/DomainLayer`（3.2.5〜3.2.7） |
 | `web.md` | `ImplementationAtEachLayer/ApplicationLayer`（3.4）、`ArchitectureInDetail/WebServiceDetail/REST`（5.1）、`Security`（9） |
 | [filter.md](filter.md) / [interceptor.md](interceptor.md) | `ArchitectureInDetail/GeneralFuncDetail/Logging`（7.1 のフィルタ・インターセプタ群）、`Security`（9） |
 | `test.md` | `UnitTest`（10） |

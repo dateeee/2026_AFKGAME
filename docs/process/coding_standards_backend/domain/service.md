@@ -1,7 +1,7 @@
 # バックエンドコーディング規約 — ドメイン層の Service（`afkgame-domain`）
 
-> [coding_standards_backend.md](../coding_standards_backend.md) の分冊。全層共通の規約は [common.md](common.md) が先、Entity・Repository は [domain.md](domain.md)、層の位置づけは [layering.md](layering.md)。
-> ベースはガイドライン `ImplementationAtEachLayer/DomainLayer`（3.2.5〜3.2.7）。本書はそこからの差分だけを持つ（準拠元は [basis.md](basis.md) §1）。
+> [coding_standards_backend.md](../../coding_standards_backend.md) の分冊。全層共通の規約は [common.md](../common.md) が先、Entity・Repository は [domain.md](../domain.md)、層の位置づけは [layering.md](../layering.md)。
+> ベースはガイドライン `ImplementationAtEachLayer/DomainLayer`（3.2.5〜3.2.7）。本書はそこからの差分だけを持つ（準拠元は [basis.md](../basis.md) §1）。
 
 ---
 
@@ -18,7 +18,7 @@ Service は次の2つを担う（ガイドライン 3.2.5.1）。
 
 | 処理 | 担当 |
 |------|------|
-| リクエストデータの単項目チェック・相関項目チェック | Controller（Bean Validation。[web.md](web.md) §2） |
+| リクエストデータの単項目チェック・相関項目チェック | Controller（Bean Validation。[web.md](../web.md) §2） |
 | Service へ渡すデータへの変換（型変換・形式変換・Bean 変換） | Controller（Resource。`web.md` §3） |
 | **ビジネスルールに関わる処理**と、そのための業務データへのアクセス | **Service** |
 | Service が返したデータのレスポンス向け変換 | Controller（Resource） |
@@ -78,6 +78,6 @@ Service は次の2つを担う（ガイドライン 3.2.5.1）。
 
 ## 6. 例外とメッセージ
 
-**正は [exception.md](exception.md)**（3分類・クラスの対応・送出の作法。ガイドライン 3.2.5.6 の業務例外／システム例外／`ResultMessages` との対応もそちらが持つ）。本書では再掲しない。
+**正は [exception.md](../exception.md)**（3分類・クラスの対応・送出の作法。ガイドライン 3.2.5.6 の業務例外／システム例外／`ResultMessages` との対応もそちらが持つ）。本書では再掲しない。
 
 トランザクションとの関係だけ本書が持つ: ビジネス例外・システム例外はいずれも `RuntimeException` 派生のため `@Transactional` の既定でロールバックされる（ガイドライン 3.2.5.6.4 Note と同じ理由）。ロールバックさせたくない副作用は §4 #6。

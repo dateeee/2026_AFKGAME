@@ -8,9 +8,9 @@
 
 | 節 | 操作 | ファイル | 分岐一覧 |
 |----|------|---------|---------|
-| §3・§9 | 強化 `POST /api/forge/enhance` | [tech_forge_enhance.md](tech_forge_enhance.md) | 24件 |
-| §4・§10 | 製作 `POST /api/forge/craft` | [tech_forge_craft.md](tech_forge_craft.md) | 30件 |
-| §5・§6・§11 | 分解 `POST /api/forge/disassemble` | [tech_forge_disassemble.md](tech_forge_disassemble.md) | 20件 |
+| §3・§9 | 強化 `POST /api/forge/enhance` | [tech_forge/enhance.md](tech_forge/enhance.md) | 24件 |
+| §4・§10 | 製作 `POST /api/forge/craft` | [tech_forge/craft.md](tech_forge/craft.md) | 30件 |
+| §5・§6・§11 | 分解 `POST /api/forge/disassemble` | [tech_forge/disassemble.md](tech_forge/disassemble.md) | 20件 |
 
 節番号は分割前の通し番号を維持する。素材の増減と所持枠の共通規則（§6）は分解のファイルにあり、3操作すべてに適用する。
 

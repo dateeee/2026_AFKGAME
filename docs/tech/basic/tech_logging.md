@@ -9,7 +9,7 @@ Logback を使用。設定は `afkgame-env` の `logback.xml`（Boot 拡張の `
 
 ## ログの書き方（共通部品）
 
-各クラスは `LoggerFactory` を直接使わず、`afkgame-env` の `com.afkgame.env.logging` が提供する共通部品（`AppLogger` / `LoggerName` / `LogKey` / `LogReason` / `LogEntry`）で書く。**役割と書き方の正は [logging_application.md](../../process/coding_standards_backend/logging_application.md) §4**。
+各クラスは `LoggerFactory` を直接使わず、`afkgame-env` の `com.afkgame.env.logging` が提供する共通部品（`AppLogger` / `LoggerName` / `LogKey` / `LogReason` / `LogEntry`）で書く。**役割と書き方の正は [logging/application.md](../../process/coding_standards_backend/logging/application.md) §4**。
 
 `with()` で積んだ値は出力の間だけ MDC へ載り、text 形式では末尾の `key=value`、JSON 形式では独立フィールドとして出る。出力後は元の MDC へ戻すため、横断項目を壊さない。
 
@@ -75,8 +75,8 @@ Logback を使用。設定は `afkgame-env` の `logback.xml`（Boot 拡張の `
 | `reason` | 失敗理由 | 各処理 |
 | `user_id` | 処理対象のユーザーID（認証済みを表す `player_id` とは別） | 各処理 |
 | `token` / `email` | トークン・メールアドレス（**自動マスク**） | 各処理 |
-| `direction` / `target` | 通信の方向（`in` / `out`）・送信先 | 通信ログ（`logging_communication.md`） |
-| `signature` / `args` / `result` | 境界のメソッド・引数・戻り値 | AOP（`logging_application.md` §3） |
+| `direction` / `target` | 通信の方向（`in` / `out`）・送信先 | 通信ログ（`logging/communication.md`） |
+| `signature` / `args` / `result` | 境界のメソッド・引数・戻り値 | AOP（`logging/application.md` §3） |
 
 横断項目はフィルタが MDC へ載せ、各所で詰め直さない（`common.md` §7 #5）。
 
@@ -100,7 +100,7 @@ Logback を使用。設定は `afkgame-env` の `logback.xml`（Boot 拡張の `
 
 ## リクエストログ用フィルタ
 
-全APIリクエストで、UUID v4 のリクエストID採番（レスポンスヘッダ `X-Request-ID`）と処理時間計測を行い、**通信ログ**へ START / END を出す。出力項目・START / END の対・送信（外部API・SMTP）側の規約は [logging_communication.md](../../process/coding_standards_backend/logging_communication.md) §2 が正。
+全APIリクエストで、UUID v4 のリクエストID採番（レスポンスヘッダ `X-Request-ID`）と処理時間計測を行い、**通信ログ**へ START / END を出す。出力項目・START / END の対・送信（外部API・SMTP）側の規約は [logging/communication.md](../../process/coding_standards_backend/logging/communication.md) §2 が正。
 
 ```
 [2026-08-09 14:38:30] INFO  afkgame.comm: START direction=in method=POST path=/api/battle/tick client_ip=127.0.0.1 request_id=xxx

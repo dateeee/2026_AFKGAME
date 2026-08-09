@@ -1,7 +1,7 @@
 # バックエンドコーディング規約 — ドメイン層のデータ（`afkgame-domain`）
 
 > [coding_standards_backend.md](../coding_standards_backend.md) の分冊。全層共通の規約は [common.md](common.md) が先、層の位置づけは [layering.md](layering.md)。
-> **Service は [domain_service.md](domain_service.md) が正**。本書は Entity・Repository・マスターデータを扱う。
+> **Service は [domain/service.md](domain/service.md) が正**。本書は Entity・Repository・マスターデータを扱う。
 > ベースはガイドライン `ImplementationAtEachLayer/DomainLayer`（3.2.1〜3.2.4）と `InfrastructureLayer`（MyBatis3）。本書はそこからの差分だけを持つ（準拠元は [basis.md](basis.md) §1）。
 
 ---
@@ -14,7 +14,7 @@
 |-----------|---------|------------------|
 | `.model` | Entity（永続化の器） | Domain Object |
 | `.repository` | Repository インタフェース + 同名・同パッケージのマッピング XML | Repository（インタフェースはドメイン層、XML はインフラストラクチャ層。`layering.md` §3） |
-| `.service` | ビジネスロジック | Service（`domain_service.md`） |
+| `.service` | ビジネスロジック | Service（`domain/service.md`） |
 | `.masterdata` | マスターデータの `record` と YAML ローダ | （対応なし） |
 | `.rng` | 乱数（`RandomFactory`） | （対応なし） |
 | `.exception` | **作らない**。例外は `terasoluna-gfw` の `BusinessException` / `SystemException` を直接使う | ビジネス例外・システム例外（[exception.md](exception.md) §2.1） |

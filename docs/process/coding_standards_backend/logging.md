@@ -11,8 +11,8 @@
 
 | 分冊 | 担当節 | 読むとき |
 |------|-------|---------|
-| [logging_communication.md](logging_communication.md) | §2 通信ログ | リクエスト受信・外部サービス呼び出しのログを触るとき |
-| [logging_application.md](logging_application.md) | §3 AOP による境界ログ / §4 業務ログ（`AppLogger`） | 業務コードでログを書くとき・AOP の境界ログを触るとき |
+| [logging/communication.md](logging/communication.md) | §2 通信ログ | リクエスト受信・外部サービス呼び出しのログを触るとき |
+| [logging/application.md](logging/application.md) | §3 AOP による境界ログ / §4 業務ログ（`AppLogger`） | 業務コードでログを書くとき・AOP の境界ログを触るとき |
 
 ---
 
@@ -61,7 +61,7 @@
 
 | # | 規約 |
 |---|------|
-| 1 | `error.log` は **ERROR レベルの転記**であり、専用の出力 API を作らない。`AppLogger.error()`（[logging_application.md](logging_application.md) §4）を通常どおり使えば自動で載る |
+| 1 | `error.log` は **ERROR レベルの転記**であり、専用の出力 API を作らない。`AppLogger.error()`（[logging/application.md](logging/application.md) §4）を通常どおり使えば自動で載る |
 | 2 | ERROR を出すのは**運用者・開発者の対処が要るとき**だけ（`exception.md` §1 の分類2・分類3）。利用者の操作で解消するもの（分類1）は WARNING + `reason` に留める |
 | 3 | ERROR には**必ず原因例外を `cause(e)` で添える**（スタックトレース付き）。メッセージだけの ERROR を出さない |
 | 4 | **同じ例外を二重に ERROR しない**。出すのは**送出元（分類2）**か **`ApiExceptionHandler`（分類3）**のどちらか一方 |
@@ -70,7 +70,7 @@
 
 ## 6. 禁止事項とレビュー観点
 
-§2 の実体は [logging_communication.md](logging_communication.md)、§3・§4 の実体は [logging_application.md](logging_application.md) にある。
+§2 の実体は [logging/communication.md](logging/communication.md)、§3・§4 の実体は [logging/application.md](logging/application.md) にある。
 
 | 禁止 | 代わりに |
 |------|---------|
@@ -98,8 +98,8 @@
 | 決めていること | 正 |
 |---------------|-----|
 | ログ3種別・出力先・ローテーション・出力主体、エラーログ、禁止事項、テスト | **本書** |
-| 通信ログ（受信・送信）の START / END と出力項目 | [logging_communication.md](logging_communication.md) |
-| AOP による境界ログ・引数／戻り値のマスク、業務ログ（`AppLogger` ほか共通部品）の使い方 | [logging_application.md](logging_application.md) |
+| 通信ログ（受信・送信）の START / END と出力項目 | [logging/communication.md](logging/communication.md) |
+| AOP による境界ログ・引数／戻り値のマスク、業務ログ（`AppLogger` ほか共通部品）の使い方 | [logging/application.md](logging/application.md) |
 | ログフォーマット・ログ項目名・ロガー名体系・マスク規則・`reason` の値・エラーコード体系 | [tech_logging.md](../../tech/basic/tech_logging.md) |
 | 例外の3分類・送出・応答への変換 | [exception.md](exception.md) |
 | フィルタの作り方・登録順・採らないもの | [filter.md](filter.md) |

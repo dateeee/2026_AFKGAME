@@ -32,7 +32,7 @@
 |---|------|
 | 1 | `org.springframework.web.filter.OncePerRequestFilter` を継承する。`jakarta.servlet.Filter` を直接 implements しない（forward・include・非同期ディスパッチでの二重実行を避けるため） |
 | 2 | パッケージは `com.afkgame.web.filter`、クラス名は `<役割>Filter`（`common.md` §3） |
-| 3 | 業務ロジック・DB 更新を置かない。`@Transactional` を付けない（トランザクション境界は Service の public メソッド。[domain_service.md](domain_service.md) §4） |
+| 3 | 業務ロジック・DB 更新を置かない。`@Transactional` を付けない（トランザクション境界は Service の public メソッド。[domain/service.md](domain/service.md) §4） |
 | 4 | **リクエストボディを読まない**。フィルタで読むと下流（`HttpMessageConverter`）が読めなくなる。どうしても要るなら `ContentCachingRequestWrapper` で包み、理由を Javadoc に書く |
 | 5 | `filterChain.doFilter(...)` を必ず呼ぶ。呼ばずに戻ってよいのは、そのフィルタが応答を**書き切った**ときだけ |
 | 6 | MDC へ入れた項目は `finally` で必ず捨てる（スレッドが使い回されるため。`common.md` §7 #5） |

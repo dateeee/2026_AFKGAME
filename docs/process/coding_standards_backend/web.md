@@ -15,7 +15,7 @@
 | `.config.app` / `.config.web` | Security・Jackson（`ApplicationContextConfig`・`SpringSecurityConfig`）、Spring MVC 設定（`SpringMvcConfig`） | （対応なし） |
 | `.filter` | リクエストIDログ・共通例外ハンドラ | （対応なし） |
 
-- Web層は「受け取る・検証する・ドメインへ渡す・返す」だけを担う。業務判断は [domain_service.md](domain_service.md) §1 の Service が持つ
+- Web層は「受け取る・検証する・ドメインへ渡す・返す」だけを担う。業務判断は [domain/service.md](domain/service.md) §1 の Service が持つ
 - **View と Helper は持たない**（ガイドライン 2.4.1.1.2・2.4.1.1.3 との差分。`layering.md` §2）。描画は SPA（Vue 3）、変換は Resource の `static from(...)`（§3 #3）
 - Controller から Repository を直接呼ばない（`layering.md` §3）。参照系でも Service を通す
 - API契約（パス・HTTPメソッド・ステータス・JSON構造）の正は [tech_api.md](../../tech/basic/tech_api.md)・[tech_api_common.md](../../tech/basic/tech_api_common.md)。本書で再掲しない
@@ -28,7 +28,7 @@
 | 2 | ボディは `@Valid @RequestBody` で受ける |
 | 3 | 戻り値は Resource（`ResponseEntity` はステータスやヘッダを変える場合のみ） |
 | 4 | `try-catch` しない。応答への変換は `ApiExceptionHandler`（`@RestControllerAdvice`）へ集約する |
-| 5 | **単項目チェック・相関項目チェックは本層**（Bean Validation）で行う。ビジネスルールのチェックは Service（責任分界点の全体像は `domain_service.md` §1） |
+| 5 | **単項目チェック・相関項目チェックは本層**（Bean Validation）で行う。ビジネスルールのチェックは Service（責任分界点の全体像は `domain/service.md` §1） |
 
 ## 3. Resource（`resource`）
 

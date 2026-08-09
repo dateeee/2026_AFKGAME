@@ -2,7 +2,7 @@
 
 > [coding_standards_backend.md](../coding_standards_backend.md) の分冊。**どの層を書くときも本書を先に読む**。
 > ベースは TERASOLUNA 開発ガイドライン 5.11.0.RELEASE 日本語版（[basis.md](basis.md) §1）の `ArchitectureInDetail`。本書はそこからの差分だけを持つ。
-> レイヤの定義とコンポーネント間の呼び出し可否は [layering.md](layering.md)、層固有の規約は [domain.md](domain.md)（Entity・Repository）・[domain_service.md](domain_service.md)（Service）・[web.md](web.md)（Web層）・[test.md](test.md)（テスト）。
+> レイヤの定義とコンポーネント間の呼び出し可否は [layering.md](layering.md)、層固有の規約は [domain.md](domain.md)（Entity・Repository）・[domain/service.md](domain/service.md)（Service）・[web.md](web.md)（Web層）・[test.md](test.md)（テスト）。
 > 層を問わない横断規約は [exception.md](exception.md)（例外）・[logging.md](logging.md)（ログ）。
 
 ---
@@ -39,7 +39,7 @@
 
 ## 4. 全層共通のルール
 
-層別の責務は `domain.md`・`domain_service.md`・`web.md` が持つ。本節は層に依らないもの。
+層別の責務は `domain.md`・`domain/service.md`・`web.md` が持つ。本節は層に依らないもの。
 
 | # | 規約 |
 |---|------|
@@ -72,7 +72,7 @@
 
 ## 7. ログ
 
-**正は [logging.md](logging.md)**（層を問わない。ログ3種別＝通信ログ・アプリケーションログ・エラーログの定義と出力先、エラーログ、禁止事項。種別ごとの書き方は [logging_communication.md](logging_communication.md)（§2 通信ログ）と [logging_application.md](logging_application.md)（§3 AOP 境界ログ・§4 業務ログ）が持つ）。本書では再掲しない。
+**正は [logging.md](logging.md)**（層を問わない。ログ3種別＝通信ログ・アプリケーションログ・エラーログの定義と出力先、エラーログ、禁止事項。種別ごとの書き方は [logging/communication.md](logging/communication.md)（§2 通信ログ）と [logging/application.md](logging/application.md)（§3 AOP 境界ログ・§4 業務ログ）が持つ）。本書では再掲しない。
 
 最低限おさえるのは次の3点で、詳細はすべて `logging.md` とその分冊にある。
 
@@ -100,7 +100,7 @@
 | 禁止 | 代わりに |
 |------|---------|
 | フィールド `@Autowired`・setter 注入 | コンストラクタ注入（`private final`） |
-| コントローラへの業務ロジック記述 | Service へ集約（`domain_service.md` §1） |
+| コントローラへの業務ロジック記述 | Service へ集約（`domain/service.md` §1） |
 | コントローラから Repository の直接呼び出し | Service を通す（`layering.md` §3 の呼び出し可否） |
 | SQL の `${}` による文字列組み立て | `#{}` によるパラメータバインド |
 | ワイルドカード import | 個別 import |

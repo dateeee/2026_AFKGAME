@@ -1,8 +1,8 @@
 # AFK GAME — 鍛冶屋: 装備製作
 
-> [tech_forge.md](tech_forge.md) の子ファイル（§4・§10）。`POST /api/forge/craft` の処理を定める。
+> [tech_forge.md](../tech_forge.md) の子ファイル（§4・§10）。`POST /api/forge/craft` の処理を定める。
 > 共通の適用範囲・鍛冶屋LVからの効果解決（§2）・API・エラーコードは索引側にある。
-> **数値の正**: ランダム製作のレシピは [master/equipment.md §13](../../data/master/equipment.md)、固定レシピは同 §5.5.3、製作可能レアリティは [economy.md §2.9](../../design/systems/economy.md)。
+> **数値の正**: ランダム製作のレシピは [master/equipment.md §13](../../../data/master/equipment.md)、固定レシピは同 §5.5.3、製作可能レアリティは [economy.md §2.9](../../../design/systems/economy.md)。
 
 ## 4. 製作処理（`POST /api/forge/craft`）
 
@@ -15,13 +15,13 @@
 | 1 | 要求レアリティ | `rank` 1〜5 を `master/equipment.md` §13 の行順（コモン→レジェンダリー）で引く |
 | 2 | 可否 | 要求レアリティが `tech_forge.md` §2 の製作可能レアリティを**上回る**なら `400 FORGE_LEVEL_TOO_LOW`（同じなら可） |
 | 3 | 必要素材・ゴールド | §13 の該当行。**鍛冶屋LVによる割引はない**（コスト倍率は強化のみ） |
-| 4 | 装備レベル `L` | `max(1, 最高到達階層)`（[tech_shop.md §3.1](tech_shop.md) 手順1 と同一） |
+| 4 | 装備レベル `L` | `max(1, 最高到達階層)`（[tech_shop.md §3.1](../tech_shop.md) 手順1 と同一） |
 | 5 | ベース装備 | `master/equipment.md` §6.0 の15種全体からベースID昇順・離散一様で1件。スロットと持ち手はベースから引く |
 | 6 | ステータス | `tech_shop.md` §3.1 手順3〜6 と同じ手順。ただし**ショップ性能係数 `0.7` を掛けない**（`max(1, floor(B × レアリティ倍率 × ステータス補正))`） |
 | 7 | HP吸収 | 付与しない（`lifesteal` は `null`）。吸収装備はドロップと §4.2 でのみ得られる |
 
-- レアリティの序列は [systems/equipment.md §2.4](../../design/systems/equipment.md)「レアリティ」表の行順。可否判定はこの序列の比較で行う
-- 乱数は**ベース → 付与数 → ステータス種**の順に消費する（[tech_rng.md §3](tech_rng.md) の消費順序固定）。付与数の範囲の下限と上限が等しいレアリティでは付与数の抽選を行わない
+- レアリティの序列は [systems/equipment.md §2.4](../../../design/systems/equipment.md)「レアリティ」表の行順。可否判定はこの序列の比較で行う
+- 乱数は**ベース → 付与数 → ステータス種**の順に消費する（[tech_rng.md §3](../tech_rng.md) の消費順序固定）。付与数の範囲の下限と上限が等しいレアリティでは付与数の抽選を行わない
 - ショップと違いカテゴリ枠を持たないため、候補からの除外（`tech_shop.md` §2.4 手順2）は行わない
 
 ### 4.2 固定レシピ製作（`recipeId`）
@@ -48,7 +48,7 @@
 2. 鍛冶屋の現在LVを取得する。**0** なら `400 BASE_NOT_BUILT`
 3. §4.1／§4.2 の手順1〜2 で製作方式とレシピを決め、可否を判定する
 4. 必要素材が不足なら `400 FORGE_INSUFFICIENT_MATERIALS`（`details` に不足分を全件列挙）、ゴールドが不足なら `400 BASE_INSUFFICIENT_GOLD`
-5. 所持枠に空きがなければ `400 FORGE_INVENTORY_FULL`（[tech_forge_disassemble.md §6](tech_forge_disassemble.md)）
+5. 所持枠に空きがなければ `400 FORGE_INVENTORY_FULL`（[disassemble.md §6](disassemble.md)）
 6. §4.1／§4.2 の生成規則で装備1件を組み立てる
 7. 素材とゴールドを減算し、`equipment` へ1行追加する
 8. 手順7を1トランザクションでコミットする。途中で失敗した場合は全件ロールバックする

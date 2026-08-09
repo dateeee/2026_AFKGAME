@@ -1,6 +1,7 @@
 # AFK GAME — バックエンドコーディング規約（Java）索引
 
 > `backend/` の Java 実装が従う規約の**正**。本書は**索引だけ**を持ち、規約の本体はすべて `coding_standards_backend/` の分冊にある。
+> 分冊がさらに子を持つものは**同名ディレクトリ**へ入れる（`logging.md` + `logging/`、`domain.md` + `domain/`。[documentation_rules.md](documentation_rules.md) §6.1）。`└` の行がその子。
 > ベースは [TERASOLUNA Server Framework for Spring 開発ガイドライン 5.11.0.RELEASE 日本語版](https://terasolunaorg.github.io/guideline/current/ja/)。**規約はそこからの差分だけを持つ**（適用範囲・準拠元・原則・検証手段は [basis.md](coding_standards_backend/basis.md) が正。個々の差分は各分冊が正）。
 > フロントエンド（Vue 3 / TypeScript）は別書 `coding_standards_frontend.md`（未整備）。
 > 位置づけ・改訂手順は [phases.md](phases.md) §3.2.2、遵守の判定は [development_process.md](development_process.md) §4「製造完了ゲート」。
@@ -16,11 +17,11 @@
 | [layering.md](coding_standards_backend/layering.md) | §1 3レイヤの定義 / §2 コンポーネントの担当 / §3 Repository による抽象化と呼び出し可否 / §4 モジュール構成の対応 | 新しいクラスの置き場・呼び出し方向に迷ったとき |
 | [common.md](coding_standards_backend/common.md) | §2 モジュールとパッケージ / §3 命名 / §4 全層共通のルール / §5 Java 記述規約 / §6 例外（→ `exception.md`） / §7 ログ / §8 Javadoc / §9 禁止事項 | **常に最初に読む** |
 | [exception.md](coding_standards_backend/exception.md) | §1 例外の3分類（ビジネス例外・システム例外・予期しないエラー） / §2 ガイドラインの種類との対応 / §3 送出 / §4 応答への変換 / §5 ログ / §6 分担 | 例外を投げる・捕まえる・応答へ変換するとき |
-| [logging.md](coding_standards_backend/logging.md) | **ログ規約の索引**。§1 ログ3種別と出力先 / §5 エラーログ / §6 禁止事項 / §7 テストと分担 | ログを書くとき・ログの出力先を触るとき |
-| [logging_communication.md](coding_standards_backend/logging_communication.md) | §2 通信ログ（受信・送信の START / END と出力項目） | リクエスト受信・外部サービス呼び出しのログを触るとき |
-| [logging_application.md](coding_standards_backend/logging_application.md) | §3 AOP による境界ログ（引数・戻り値のマスク含む） / §4 業務ログ（`AppLogger`） | 業務コードでログを書くとき・AOP の境界ログを触るとき |
+| [logging.md](coding_standards_backend/logging.md) | **ログ規約の索引 + 3種別共通**。§1 ログ3種別と出力先 / §5 エラーログ / §6 禁止事項 / §7 テストと分担 | ログを書くとき・ログの出力先を触るとき |
+| └ [logging/communication.md](coding_standards_backend/logging/communication.md) | §2 通信ログ（受信・送信の START / END と出力項目） | リクエスト受信・外部サービス呼び出しのログを触るとき |
+| └ [logging/application.md](coding_standards_backend/logging/application.md) | §3 AOP による境界ログ（引数・戻り値のマスク含む） / §4 業務ログ（`AppLogger`） | 業務コードでログを書くとき・AOP の境界ログを触るとき |
 | [domain.md](coding_standards_backend/domain.md) | `afkgame-domain`: §1 責務 / §2 Entity / §3 Repository / §4 マスターデータ・乱数 / §5 命名 | Entity・Repository を書くとき |
-| [domain_service.md](coding_standards_backend/domain_service.md) | `afkgame-domain`: §1 Service の役割 / §2 クラス構成 / §3 作り方 / §4 トランザクション / §5 作成単位 / §6 例外とメッセージ（→ `exception.md`） | Service を書くとき |
+| └ [domain/service.md](coding_standards_backend/domain/service.md) | `afkgame-domain`: §1 Service の役割 / §2 クラス構成 / §3 作り方 / §4 トランザクション / §5 作成単位 / §6 例外とメッセージ（→ `exception.md`） | Service を書くとき |
 | [web.md](coding_standards_backend/web.md) | `afkgame-web`: §1 責務 / §2 コントローラ / §3 Resource / §4 設定・フィルタ / §5 エラー応答（→ `exception.md`） / §6 命名 / §7 セキュリティ | Web層を書くとき |
 | [filter.md](coding_standards_backend/filter.md) | §1 フィルタとインターセプタの**使い分け** / §2 作り方 / §3 登録と順序 / §4 例外と応答 / §5 採らないもの / §6 テスト | 横断処理をどちらで書くか決めるとき・フィルタを触るとき |
 | [interceptor.md](coding_standards_backend/interceptor.md) | §1 位置づけ / §2 3つのフックの使い分け / §3 規約 / §4 採らないもの / §5 テスト | `HandlerInterceptor` を作る・登録するとき |

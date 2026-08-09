@@ -1,8 +1,8 @@
 # AFK GAME — 鍛冶屋: 装備強化
 
-> [tech_forge.md](tech_forge.md) の子ファイル（§3・§9）。`POST /api/forge/enhance` の処理を定める。
+> [tech_forge.md](../tech_forge.md) の子ファイル（§3・§9）。`POST /api/forge/enhance` の処理を定める。
 > 共通の適用範囲・鍛冶屋LVからの効果解決（§2）・API・エラーコードは索引側にある。
-> **数値の正**: 強化コストは [master/equipment.md §12](../../data/master/equipment.md)、強化上限とコスト倍率は [economy.md §2.9](../../design/systems/economy.md)。
+> **数値の正**: 強化コストは [master/equipment.md §12](../../../data/master/equipment.md)、強化上限とコスト倍率は [economy.md §2.9](../../../design/systems/economy.md)。
 
 ## 3. 強化処理（`POST /api/forge/enhance`）
 
@@ -12,7 +12,7 @@
 2. `master/equipment.md` §12.1 から `n` の行を引き、強化石の基本個数 `s` とゴールド `g` を得る
 3. `tech_forge.md` §2 の強化コスト倍率 `m` を掛け、`max(1, floor(s × m))` / `max(1, floor(g × m))` とする
 
-- 丸めは倍率適用後に1回だけ行い、下限を1とする（[tech_numeric.md §2](tech_numeric.md)「売却価格・強化費用」）。計算例は §12.1 の末尾にある
+- 丸めは倍率適用後に1回だけ行い、下限を1とする（[tech_numeric.md §2](../tech_numeric.md)「売却価格・強化費用」）。計算例は §12.1 の末尾にある
 - `n` は必ず1〜10に収まる（強化上限は鍛冶屋LVと一致し、鍛冶屋LVは最大10）。§12.1 に該当行が無い経路は存在しない
 
 ### 3.2 処理フロー
@@ -30,8 +30,8 @@
 
 出口条件: 素材・ゴールドの減算と強化段階の更新が**ともに成立**しているか、**いずれも起きていない**かのどちらか。
 
-- 装備中・ロック中でも強化できる（装備を失う操作ではないため、売却の制限（[tech_state.md §4](tech_state.md)）を持ち込まない）
-- 所持枠は増減しないため判定しない（[tech_forge_disassemble.md §6](tech_forge_disassemble.md)）
+- 装備中・ロック中でも強化できる（装備を失う操作ではないため、売却の制限（[tech_state.md §4](../tech_state.md)）を持ち込まない）
+- 所持枠は増減しないため判定しない（[disassemble.md §6](disassemble.md)）
 
 ### 3.3 強化後ステータスの扱い
 
@@ -39,7 +39,7 @@
 
 `実効値 = 保存値 + floor(強化段階 × 保存値 × 0.1)`（付与されていない（`null`）ステータスには算出しない）
 
-- 保存値へ書き戻すと、次回の強化で強化済みの値を基準に再計算してしまい二重適用になる（[tech_scout.md §5](tech_scout.md) の実効値と同じ方針）
+- 保存値へ書き戻すと、次回の強化で強化済みの値を基準に再計算してしまい二重適用になる（[tech_scout.md §5](../tech_scout.md) の実効値と同じ方針）
 - 丸めは最後に1回だけ行う（`tech_numeric.md` §1）。保存値が10未満なら +1 でも加算は0になり、**下限1による嵩上げをしない**（強化していない状態と同値になる経路を許容する）
 - 戦闘での適用点は最終ステータス（`tech_numeric.md` §2「最終ステータス」）。本書では再定義しない
 

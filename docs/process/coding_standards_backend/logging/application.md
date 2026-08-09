@@ -1,10 +1,10 @@
 # バックエンドコーディング規約 — アプリケーションログ
 
-> [logging.md](logging.md)（ログ規約の索引）の分冊。**§3 AOP による境界ログ**と**§4 業務ログ**を担当する。
+> [logging.md](../logging.md)（ログ規約の索引）の分冊。**§3 AOP による境界ログ**と**§4 業務ログ**を担当する。
 > どちらも `application.log` へ出る。「どこを通ったか」が §3、「なぜその結果になったか」が §4。
-> 3種別の定義・出力先は [logging.md](logging.md) §1、禁止事項とテストは同 §6・§7、通信ログは [logging_communication.md](logging_communication.md)。
-> ログフォーマット・項目名・ロガー名体系・マスク規則・`reason` の値の正は [tech_logging.md](../../tech/basic/tech_logging.md)（重複させない）。
-> 例外の3分類と送出・変換は [exception.md](exception.md)。
+> 3種別の定義・出力先は [logging.md](../logging.md) §1、禁止事項とテストは同 §6・§7、通信ログは [communication.md](communication.md)。
+> ログフォーマット・項目名・ロガー名体系・マスク規則・`reason` の値の正は [tech_logging.md](../../../tech/basic/tech_logging.md)（重複させない）。
+> 例外の3分類と送出・変換は [exception.md](../exception.md)。
 
 ---
 
@@ -17,14 +17,14 @@
 | 1 | **Web ↔ Domain** | `com.afkgame.domain.service` の Service（`ServiceImpl`）の public メソッド |
 | 2 | **Domain ↔ Repository** | `com.afkgame.domain.repository` の Repository の public メソッド |
 
-コントローラそのものは対象にしない（受信の START / END は [logging_communication.md](logging_communication.md) §2 の通信ログが持つ。二重に出さない）。
+コントローラそのものは対象にしない（受信の START / END は [communication.md](communication.md) §2 の通信ログが持つ。二重に出さない）。
 
 | # | 規約 |
 |---|------|
 | 1 | 境界ログは **`LayerLoggingInterceptor`（`afkgame-env` の `com.afkgame.env.logging`）だけが出す**。同じ内容を業務コードで手書きしない |
 | 2 | 適用は `AspectJExpressionPointcutAdvisor` を境界ごとに1本ずつ Bean 定義して行い、**ポイントカット式は `META-INF/spring/afkgame.properties` が持つ**。`@Aspect` のアノテーションへ定数で書くと `afkgame-env` が `afkgame-domain` のパッケージ名を抱え、依存方向（`common.md` §2）に反するため |
-| 3 | **START / END を対で出す**。END は例外で抜けた経路でも必ず出し、その場合は `reason=exception` を付ける（例外そのものの記録は [logging.md](logging.md) §5 の担当で、ここでは ERROR にしない） |
-| 4 | レベルは **INFO 固定**。引数・戻り値まで常時出力する（本番で事後追跡できることを優先する。ログ量は [logging.md](logging.md) §1 のローテーションで受け止める） |
+| 3 | **START / END を対で出す**。END は例外で抜けた経路でも必ず出し、その場合は `reason=exception` を付ける（例外そのものの記録は [logging.md](../logging.md) §5 の担当で、ここでは ERROR にしない） |
+| 4 | レベルは **INFO 固定**。引数・戻り値まで常時出力する（本番で事後追跡できることを優先する。ログ量は [logging.md](../logging.md) §1 のローテーションで受け止める） |
 | 5 | ロガー名は `afkgame.layer`。出力するのは `signature`（`AuthServiceImpl#login` 形式）・`args`・`result`・`duration_ms` |
 | 6 | **Spring AOP はプロキシ経由でのみ効く**。同一クラス内の自己呼び出しは記録されない（`@Transactional` と同じ制約）。境界をまたぐ呼び出しを内部呼び出しへ畳まない |
 | 7 | Interceptor に**ログ以外の副作用を持たせない**。例外は必ずそのまま再スローする（握らない・差し替えない） |
@@ -43,7 +43,7 @@
 | # | 規約 |
 |---|------|
 | 1 | **パラメータ名が機密名に一致したら値を伏せる**。機密名は共通部品が持つ固定表（`password`・`rawPassword`・`newPassword`・`token`・`accessToken`・`refreshToken`・`secret`・`credential` → `****`／`email` → `LogKey.EMAIL` と同じマスク） |
-| 2 | 名前で判定できないもの（戻り値・Entity・Resource のフィールド）は、**機密フィールドを `toString()` から外す**ことで担保する。Lombok は `@ToString.Exclude`、手書きは対象フィールドを含めない。**機密項目を持つクラスを新設・改修したら同時に対応する**（レビュー観点。[logging.md](logging.md) §6） |
+| 2 | 名前で判定できないもの（戻り値・Entity・Resource のフィールド）は、**機密フィールドを `toString()` から外す**ことで担保する。Lombok は `@ToString.Exclude`、手書きは対象フィールドを含めない。**機密項目を持つクラスを新設・改修したら同時に対応する**（レビュー観点。[logging.md](../logging.md) §6） |
 | 3 | 生のトークン・パスワードを返すメソッドは、**戻り値を出力対象から外す注釈**を付けて `****` にする（例: `JwtService#createAccessToken`） |
 | 4 | **コレクション・配列・`Map` は要素を展開せず件数だけ**出す（`List(size=12)`）。ログ量とマスク漏れの両方を同時に抑える |
 | 5 | 1値あたり **200文字で打ち切り**、末尾に `...` を付ける |

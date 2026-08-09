@@ -1,8 +1,8 @@
 # AFK GAME — 鍛冶屋: 装備分解と素材・所持枠
 
-> [tech_forge.md](tech_forge.md) の子ファイル（§5・§6・§11）。`POST /api/forge/disassemble` の処理と、**3操作すべてに適用する**素材・所持枠の共通規則（§6）を定める。
+> [tech_forge.md](../tech_forge.md) の子ファイル（§5・§6・§11）。`POST /api/forge/disassemble` の処理と、**3操作すべてに適用する**素材・所持枠の共通規則（§6）を定める。
 > 共通の適用範囲・鍛冶屋LVからの効果解決（§2）・API・エラーコードは索引側にある。
-> **数値の正**: 分解テーブルは [master/equipment.md §14](../../data/master/equipment.md)、素材の定義とスタック上限は [master/base.md §10.1](../../data/master/base.md)、所持枠の上限は [economy.md §2.9](../../design/systems/economy.md)。
+> **数値の正**: 分解テーブルは [master/equipment.md §14](../../../data/master/equipment.md)、素材の定義とスタック上限は [master/base.md §10.1](../../../data/master/base.md)、所持枠の上限は [economy.md §2.9](../../../design/systems/economy.md)。
 
 ## 5. 分解処理（`POST /api/forge/disassemble`）
 
@@ -19,7 +19,7 @@
 
 出口条件: 装備の削除と素材の付与が**ともに成立**しているか、**いずれも起きていない**かのどちらか。
 
-- 獲得素材は**レアリティのみ**で決まる。強化段階・装備レベル・スロットは影響しない（強化に使った素材は返却しない。[systems/equipment.md §2.10](../../design/systems/equipment.md)）
+- 獲得素材は**レアリティのみ**で決まる。強化段階・装備レベル・スロットは影響しない（強化に使った素材は返却しない。[systems/equipment.md §2.10](../../../design/systems/equipment.md)）
 - ゴールドを消費しない（分解は無償）。鍛冶屋LVによる獲得量の増減も持たない
 
 ## 6. 素材と所持枠の共通規則
@@ -27,9 +27,9 @@
 | # | 規則 |
 |---|------|
 | 1 | 素材は `inventory_items` の1行（`item_id` = `master/base.md` §10.1 の素材ID）として持ち、数量で表す。減算で0になった行は**削除せず数量0で残す** |
-| 2 | 所持枠の上限は倉庫LVで決まる（`economy.md` §2.9「倉庫」）。数え方は [tech_base.md §2.3](tech_base.md) が正 |
+| 2 | 所持枠の上限は倉庫LVで決まる（`economy.md` §2.9「倉庫」）。数え方は [tech_base.md §2.3](../tech_base.md) が正 |
 | 3 | 素材のスタック上限は `master/base.md` §10.1 が正（値を本書へ再掲しない） |
-| 4 | **増やす操作（製作）は枠不足で失敗させる**。素材・ゴールドを消費せず `400 FORGE_INVENTORY_FULL` を返す（[tech_shop.md §4](tech_shop.md) の購入と同じ扱い） |
+| 4 | **増やす操作（製作）は枠不足で失敗させる**。素材・ゴールドを消費せず `400 FORGE_INVENTORY_FULL` を返す（[tech_shop.md §4](../tech_shop.md) の購入と同じ扱い） |
 | 5 | **減らす操作（分解）は枠・スタック上限を理由に失敗させない**。上限を超える分は付与せず切り捨てる。枠が埋まったプレイヤーが装備を整理できなくなるのを避けるため |
 
 - 数量0の行を残すのは、枠を数える対象を「数量1以上の行」に限れば枠の増減が起きず、行の作り直しも不要になるため（`tech_base.md` §2.3 の数え方に従う）

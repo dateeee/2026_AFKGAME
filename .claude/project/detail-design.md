@@ -18,7 +18,7 @@
 | ショップ処理 | `docs/tech/detail/tech_shop.md` | 日替わりショップの品揃え抽選・購入 |
 | 拠点・施設 | `docs/tech/detail/tech_base.md` | 建設・レベルアップ・施設効果の解決 |
 | 酒場スカウト | `docs/tech/detail/tech_scout.md` | 排出設定の解決・ガチャ抽選・重複判定 |
-| 鍛冶屋 | `docs/tech/detail/tech_forge.md`（索引）+ `tech_forge_{enhance,craft,disassemble}.md` | 強化コスト・製作の生成規則・分解・所持枠 |
+| 鍛冶屋 | `docs/tech/detail/tech_forge.md`（索引）+ `tech_forge/{enhance,craft,disassemble}.md` | 強化コスト・製作の生成規則・分解・所持枠 |
 
 ### 横断規約
 

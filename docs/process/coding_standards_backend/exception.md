@@ -62,7 +62,7 @@
 | 3 | 起動時（Bean 生成中）に検知するマスターデータの不正は `MasterDataException` で**起動を止める**。分類2だが、リクエスト外で起きるため応答を持たない（[domain.md](domain.md) §4 #2） |
 | 4 | ライブラリの例外は**捕まえて分類し直す**。利用者の再操作で解消するなら `BusinessException`、システム異常なら `SystemException`、到達しないはずなら理由コメントを添えて `IllegalStateException`（＝分類3・バグとして扱う） |
 | 5 | Service は**メッセージ文言を解決しない**。`ResultMessage` に持たせるのはコードと埋め込み値（`args`）だけで、`fromText` を使わない（ガイドライン 3.2.5.6.2）。文言はフロントエンドが持つ |
-| 6 | 分類1・2はいずれも `@Transactional` の既定でロールバックされる。ロールバックさせたくない副作用は `noRollbackFor` を明示する（[domain_service.md](domain_service.md) §4 #6） |
+| 6 | 分類1・2はいずれも `@Transactional` の既定でロールバックされる。ロールバックさせたくない副作用は `noRollbackFor` を明示する（[domain/service.md](domain/service.md) §4 #6） |
 | 7 | **例外を握りつぶさない**。空の `catch` を書かない。継続させる場合も理由をコメントに書き、ログを残す |
 
 ## 4. 応答への変換（Web層）
@@ -106,5 +106,5 @@
 | HTTP ステータスコードの使い分け | `tech_api_common.md` |
 | コントローラ・Resource の書き方、セキュリティ | `web.md` |
 | フィルタ内・インターセプタ内で起きた例外の扱い | [filter.md](filter.md) §4・[interceptor.md](interceptor.md) §3 #4 |
-| Service の責務・トランザクションと伝播属性 | `domain_service.md` |
+| Service の責務・トランザクションと伝播属性 | `domain/service.md` |
 | 例外のテスト（送出の検証・ハンドラ経由の応答検証） | [test.md](test.md)・[.claude/project/test-patterns.md](../../../.claude/project/test-patterns.md) |
