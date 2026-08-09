@@ -34,7 +34,7 @@ DBスキーマは**テキスト（テーブル定義書）を正、ER図を視�
 
 - **差し戻しルール**: 詳細設計以降で「定義書にないテーブル・列が要る」と判明したら、実装を先に書かず**基本設計へ戻して定義書とER図を更新**してから進む（§3.4 の分岐一覧と同じ扱い）
 - インデックスは**それを使う検索パターンとセット**で書く。パターンの無いインデックスは作らない
-- 列の追加は `nullable` または `server_default` を付ける（前方互換。[tech_operations.md](../tech/nonfunctional/tech_operations.md) §12.4）
+- 列の追加は `nullable` または `server_default` を付ける（前方互換。[tech_operations_procedure.md](../tech/nonfunctional/tech_operations_procedure.md) §12.4）
 
 ### 3.2.2 コーディング規約
 
@@ -81,7 +81,7 @@ DBスキーマは**テキスト（テーブル定義書）を正、ER図を視�
 | 項目 | 内容 |
 |------|------|
 | 目的 | §3.4 のテストを満たす実装をTDDで作る |
-| 主な作業 | backend/（Terasoluna(Spring Boot)）は Red-Green-Refactor を1テストずつ回す。frontend/（Vue 3）は従来どおり実装 |
+| 主な作業 | backend/（Terasoluna）は Red-Green-Refactor を1テストずつ回す。frontend/（Vue 3）は従来どおり実装 |
 | 成果物 | 実装コード一式（テーブルの追加・変更を伴う場合は Flyway マイグレーションを含む） |
 | 規約 | **バックエンドは [coding_standards_backend.md](coding_standards_backend.md) に従う**（層の責務・命名・例外・ログ・Javadoc）。フロントエンドは規約整備まで既存コードの流儀に倣う（§3.2.2）。Entity/Repository は §3.2.1 のテーブル定義書どおりに作り、定義書に無い列を足さない |
 | 完了基準 | §3.4 の全テストがPASS、`backend-review`・`frontend-review` の指摘対応完了（コーディング規約からの逸脱ゼロ）。テーブル変更がある場合は Flyway マイグレーションが存在し `flyway migrate` が通る |
@@ -112,7 +112,7 @@ DBスキーマは**テキスト（テーブル定義書）を正、ER図を視�
 | 項目 | 内容 |
 |------|------|
 | 目的 | 基本設計どおりにAPI・画面が連携して動作することを検証する |
-| レイヤー1: API統合テスト | MockMvc（`@SpringBootTest`）+ テスト用 PostgreSQL。認証→塔選択→tick→報酬などのAPIシーケンスを検証。配置: 各モジュールの `src/test/java`（統合テストパッケージ） |
+| レイヤー1: API統合テスト | MockMvc（`@ExtendWith(SpringExtension)` + `@ContextConfiguration` + `@WebAppConfiguration`）+ 埋め込み PostgreSQL。認証→塔選択→tick→報酬などのAPIシーケンスを検証。配置: 各モジュールの `src/test/java`（統合テストパッケージ） |
 | レイヤー2: E2Eテスト | **Playwright**。フロントエンド＋バックエンドを通しで起動し、画面操作ベースで検証。配置: `frontend/tests/e2e/` |
 | シナリオの導出元 | [docs/diagrams/screen_transition.md](../diagrams/screen_transition.md)（画面遷移図）、[docs/diagrams/api_sequence.md](../diagrams/api_sequence.md)（APIシーケンス図） |
 | 完了基準 | 対象Phaseの主要シナリオが全PASS |

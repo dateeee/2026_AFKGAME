@@ -9,7 +9,7 @@
 sequenceDiagram
     participant B as ブラウザ
     participant LS as LocalStorage
-    participant API as Terasoluna(Spring Boot)
+    participant API as Terasoluna(Spring MVC)
     participant DB as Database
 
     B->>LS: guest_token を確認
@@ -43,7 +43,7 @@ sequenceDiagram
 sequenceDiagram
     participant B as ブラウザ
     participant LS as LocalStorage
-    participant API as Terasoluna(Spring Boot)
+    participant API as Terasoluna(Spring MVC)
     participant DB as Database
 
     B->>LS: refresh_token を確認
@@ -88,7 +88,7 @@ sequenceDiagram
 %%{init: {'theme': 'default', 'sequence': {'actorFontSize': 18, 'messageFontSize': 16, 'noteFontSize': 14}} }%%
 sequenceDiagram
     participant B as ブラウザ
-    participant API as Terasoluna(Spring Boot)
+    participant API as Terasoluna(Spring MVC)
     participant DB as Database
 
     Note over B: usePolling.ts:<br/>setInterval(60秒)
@@ -136,7 +136,7 @@ sequenceDiagram
 %%{init: {'theme': 'default', 'sequence': {'actorFontSize': 18, 'messageFontSize': 16, 'noteFontSize': 14}} }%%
 sequenceDiagram
     participant B as ブラウザ
-    participant API as Terasoluna(Spring Boot)
+    participant API as Terasoluna(Spring MVC)
     participant DB as Database
 
     Note over B: 設定画面で項目を変更<br/>(保存ボタンは無し = 変更即時反映)
@@ -162,7 +162,7 @@ sequenceDiagram
 sequenceDiagram
     participant B as ブラウザ
     participant LS as LocalStorage
-    participant API as Terasoluna(Spring Boot)
+    participant API as Terasoluna(Spring MVC)
 
     Note over B: 起動時 (GET /api/game/state 後) に1回だけ取得
 
@@ -187,7 +187,7 @@ sequenceDiagram
 %%{init: {'theme': 'default', 'sequence': {'actorFontSize': 18, 'messageFontSize': 16, 'noteFontSize': 14}} }%%
 sequenceDiagram
     participant B as ブラウザ
-    participant API as Terasoluna(Spring Boot)
+    participant API as Terasoluna(Spring MVC)
 
     B->>API: POST /api/battle/tick
     API--xB: 500 Internal Server Error

@@ -10,7 +10,7 @@
 | 技術仕様（索引） | `docs/tech/tech_spec.md` | 個別ファイルへの索引 |
 | DB設計 | `docs/tech/basic/tech_db.md` + `tech_db/` | 物理テーブル名・列の型・キー・一意制約・インデックス・命名規約。**DBスキーマの正** |
 | データ構造 | `docs/tech/basic/tech_data.md` | API レスポンス／マスターデータの JSON 構造（永続化スキーマは持たない） |
-| 実装配置 | `docs/tech/basic/tech_structure.md` | ディレクトリ構成・モジュール責務 |
+| 実装配置 | `docs/tech/basic/tech_structure.md`（§2〜§3）+ 同 `_backend.md`（§4） | ディレクトリ構成・モジュール責務 |
 | API設計 | `docs/tech/basic/tech_api.md` | エンドポイント一覧 |
 | API共通仕様 | `docs/tech/basic/tech_api_common.md` | 規約・共通ヘッダ・ステータスコード |
 | アーキテクチャ | `docs/tech/basic/tech_architecture.md` | 層構成・依存方向 |
@@ -18,7 +18,7 @@
 | 認証方式 | `docs/tech/detail/tech_auth.md` | 認証フロー・トークン |
 | 性能・容量 | `docs/tech/nonfunctional/tech_performance.md` | 非機能要件の実現方式 |
 | セキュリティ | `docs/tech/nonfunctional/tech_security.md` | 非機能要件の実現方式 |
-| 運用 | `docs/tech/nonfunctional/tech_operations.md` | 運用要件の実現方式 |
+| 運用 | `tech_operations.md`（§12.1〜3 環境）+ 同 `_procedure.md`（§12.4〜7 手順） | 運用要件の実現方式 |
 
 **執筆前の分量見積もり**: 表形式の定義書は1テーブル約550字。区分Cの8,000字を超える構成は、**書き上げてから測るのではなく執筆前に**系統単位へ分割する（`tech_db/` が認証系・プレイヤー系・装備系…と分かれているのはこのため）。
 

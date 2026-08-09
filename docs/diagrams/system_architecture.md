@@ -7,7 +7,7 @@
 
 | 図 | 内容 | ファイル |
 |----|------|---------|
-| 全体アーキテクチャ | フロント（Vue 3 SPA）・バックエンド（Terasoluna(Spring Boot)）・DB のモジュール構成と依存関係 | [system_architecture/application.md](system_architecture/application.md) |
+| 全体アーキテクチャ | フロント（Vue 3 SPA）・バックエンド（Terasoluna(Spring MVC)）・DB のモジュール構成と依存関係 | [system_architecture/application.md](system_architecture/application.md) |
 | tick処理のデータフロー | `POST /api/battle/tick` がルーター→サービス→モデル→DBを通る経路 | [system_architecture/tick_flow.md](system_architecture/tick_flow.md) |
 | サーバー権威モデル / エラーハンドリング | 処理ごとの実行場所（サーバー/クライアント）と通信失敗時のリトライ方針 | [system_architecture/authority.md](system_architecture/authority.md) |
-| 本番構成（AWS） | S3/CloudFront + EC2（Nginx・Spring Boot jar・EBS・cron）のデプロイ構成とバックアップ経路 | [system_architecture/deployment.md](system_architecture/deployment.md) |
+| 本番構成（AWS） | S3/CloudFront + EC2（Nginx・Tomcat + war・EBS・cron）のデプロイ構成とバックアップ経路 | [system_architecture/deployment.md](system_architecture/deployment.md) |

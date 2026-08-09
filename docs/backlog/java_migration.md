@@ -1,7 +1,7 @@
 # AFK GAME — Java/Terasoluna 移行計画
 
 > 状態ファイル（[documentation_rules.md](../process/documentation_rules.md) §10）。移行完了時に本ファイルと `java_migration/` をまとめて削除する。
-> 移行後の構成の正は [tech_structure.md](../tech/basic/tech_structure.md) §2〜§4。本書群は**手順と進捗**のみを持ち、仕様は各成果物へ反映して重複させない。
+> 移行後の構成の正は [tech_structure.md](../tech/basic/tech_structure.md) §2〜§3 と [tech_structure_backend.md](../tech/basic/tech_structure_backend.md) §4。本書群は**手順と進捗**のみを持ち、仕様は各成果物へ反映して重複させない。
 > 本ファイルは索引で、**進捗（§4 の STEP 一覧表）の正**を持つ。各節の本文は分冊にある。
 
 ---
@@ -38,9 +38,9 @@
 | STEP | 内容 | 状態 |
 |------|------|------|
 | 0 | 技術選定（§2） | 完了（Spring Boot 前提 → ブランクプロジェクト準拠へ改訂済み） |
-| 1 | 基本設計・規約の改訂（ドキュメント先行） | 完了。2R-A で再改訂する |
+| 1 | 基本設計・規約の改訂（ドキュメント先行） | 完了（2R-A で再改訂済み） |
 | 2 | Java 側の骨格構築（横断基盤） | 完了。ただし Spring Boot 前提のため **2R で作り直す** |
-| 2R | **ブランクプロジェクト構成への再構築** | 着手中（2R-0 完了。次は 2R-A） |
+| 2R | **ブランクプロジェクト構成への再構築** | 着手中（2R-A 完了。次は 2R-B） |
 | 3 | Phase 1 スコープの移植 | 着手中（2R 完了まで中断） |
 | 4 | Phase 2 スコープの移植 | 未着手 |
 | 5 | Phase 3 実装済み分の移植 | 未着手 |

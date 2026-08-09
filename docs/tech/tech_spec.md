@@ -12,14 +12,16 @@
 |----|------|---------|
 | 0. DB設計 | 物理テーブル名・列の型・NULL／既定・キー・一意制約・インデックス・命名規約（**DBスキーマの正**） | [tech_db.md](basic/tech_db.md) |
 | 1. データ設計 | ゲーム状態JSON・敵／塔／環境効果・戦闘ログ・施設／装備強化のデータ構造 | [tech_data.md](basic/tech_data.md) |
-| 2. ディレクトリ構成<br>3. フロントエンド構成<br>4. バックエンド構成 | リポジトリ構成、Vue 3 / Terasoluna の内部構成・設定値 | [tech_structure.md](basic/tech_structure.md) |
+| 2. ディレクトリ構成<br>3. フロントエンド構成 | リポジトリ構成と Vue 3 SPA の内部構成・レスポンシブ設計 | [tech_structure.md](basic/tech_structure.md) |
+| 4. バックエンド構成 | Terasoluna の技術スタック・モジュール構成・設定値 | [tech_structure_backend.md](basic/tech_structure_backend.md) |
 | 5. API設計 | 全エンドポイント一覧（認証・ゲーム状態・tick・操作系・Phase 3〜5） | [tech_api.md](basic/tech_api.md) |
 | 5.0 API共通仕様 | 規約（パス・ボディ・日時・認証）・共通ヘッダ・ステータスコードの使い分け | [tech_api_common.md](basic/tech_api_common.md) |
 | 6. アーキテクチャ方針<br>7. ゲームループ | サーバー権威・ゲスト永続化・エラーハンドリング・ハイブリッドtick制 | [tech_architecture.md](basic/tech_architecture.md) |
 | 6. ログ設計 | ログレベル・フォーマット・マスク規則・統一エラーレスポンス | [tech_logging.md](basic/tech_logging.md) |
 | 10. 性能・容量設計 | 負荷見積り・平滑化・容量見積り・劣化時の対処順序・検証方法 | [tech_performance.md](nonfunctional/tech_performance.md) |
 | 11. セキュリティ設計 | 通信／CORS・入力検証・認可・レート制限・秘密情報管理 | [tech_security.md](nonfunctional/tech_security.md) |
-| 12. 運用設計 | 環境区分・環境変数・ヘルスチェック／監視・マイグレーション・バックアップ・定期ジョブ | [tech_operations.md](nonfunctional/tech_operations.md) |
+| 12.1〜12.3 運用設計（環境） | 環境区分・環境変数・ヘルスチェック／監視 | [tech_operations.md](nonfunctional/tech_operations.md) |
+| 12.4〜12.7 運用設計（手順） | マイグレーション・バックアップ・定期ジョブ・リリース／障害対応 | [tech_operations_procedure.md](nonfunctional/tech_operations_procedure.md) |
 
 > §10〜§12 は **実現方式**を扱う。目標値・満たすべき要件は要件定義工程の成果物（[non_functional_requirements.md](../design/requirements/non_functional_requirements.md)・[operation_requirements.md](../design/requirements/operation_requirements.md)）が正であり、本章群では再掲しない。
 
@@ -48,6 +50,6 @@
 ## 8. 今後の検討事項
 
 - [x] デプロイ先の選定 → **AWS**（EC2 1台 + S3/CloudFront）。[tech_operations.md](nonfunctional/tech_operations.md) §12.1 に反映済み
-- [x] ブラウザ対応範囲 → [tech_structure.md](basic/tech_structure.md) §3 レスポンシブ設計に反映済み
+- [x] ブラウザ対応範囲 → [tech_structure.md](basic/tech_structure.md) §3.2 レスポンシブ設計に反映済み
 - [x] アクセシビリティ対応 → [tech_architecture.md](basic/tech_architecture.md) アクセシビリティ対応方針に反映済み
 - [x] パフォーマンス目標（ログ保持件数の上限など）→ 目標値は [non_functional_requirements.md](../design/requirements/non_functional_requirements.md) §1〜§2、実現方式は [tech_performance.md](nonfunctional/tech_performance.md) に反映済み

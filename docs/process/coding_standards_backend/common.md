@@ -12,14 +12,14 @@
 
 | モジュール | パッケージ | 置くもの | 依存してよい先 |
 |-----------|-----------|---------|--------------|
-| `afkgame-env` | `com.afkgame.env.config` / `.logging` | `@ConfigurationProperties`、ログ基盤 | （なし） |
+| `afkgame-env` | `com.afkgame.env.config` / `.logging` | 設定保持 Bean・DataSource・Flyway 起動、ログ基盤 | （なし） |
 | `afkgame-domain` | `com.afkgame.domain.model` / `.repository` / `.service` / `.masterdata` / `.rng` / `.exception` | Entity、Repository、Service、マスターデータ、RNG、業務例外 | `afkgame-env` |
 | `afkgame-web` | `com.afkgame.web.api` / `.resource` / `.config` / `.filter` | `@RestController`、Resource、Security・フィルタ | `afkgame-domain`、`afkgame-env` |
 | `afkgame-initdb` | （Java なし） | Flyway マイグレーション SQL | （なし） |
 
 - **依存方向は `web → domain → env` の一方向**。逆流・循環を作らない
 - `afkgame-domain` に Web 層の型（Spring MVC・`jakarta.servlet`・`HttpStatus`）を持ち込まない。HTTP ステータスを扱う必要がある場合は `int` で保持する（`AppException` がその例）
-- 新しいパッケージを切るときは [tech_structure.md](../../tech/basic/tech_structure.md) §2 のツリーへ同時に追記する
+- 新しいパッケージを切るときは [tech_structure_backend.md](../../tech/basic/tech_structure_backend.md) §4.1 のツリーへ同時に追記する
 
 ## 3. 命名
 
@@ -59,7 +59,7 @@
 | 7 | `null` を返しうるメソッドは Javadoc に明記する。`Optional` は**戻り値にのみ**使い、フィールド・引数に使わない |
 | 8 | 日時は `java.time`。既定は `Instant`（DB は `timestamptz`）。`java.util.Date`・`Calendar` を使わない |
 | 9 | ゴールド・経験値などの整数は `long`。浮動小数で保持しない。丸めは [tech_numeric.md](../../tech/detail/tech_numeric.md) に従う |
-| 10 | **マジックナンバー禁止**。技術的な定数は `private static final` + Javadoc、運用値は `application.yml`、ゲームバランス値はマスターデータ（YAML）へ置く |
+| 10 | **マジックナンバー禁止**。技術的な定数は `private static final` + Javadoc、運用値は `META-INF/spring/*.properties`、ゲームバランス値はマスターデータ（YAML）へ置く |
 | 11 | 早期 return でネストを浅くする（3段以上ネストさせない）。ループ内で文字列を `+` 連結しない |
 | 12 | 可視性は最小に。`@Override` を省略せず、`@SuppressWarnings` には理由コメントを添える |
 
@@ -100,7 +100,7 @@
 | コントローラから Repository の直接呼び出し | Service を通す（[layering.md](layering.md) §3 の呼び出し可否） |
 | SQL の `${}` による文字列組み立て | `#{}` によるパラメータバインド |
 | ワイルドカード import | 個別 import |
-| ゲームバランス数値のハードコード | マスターデータ YAML・`application.yml` |
+| ゲームバランス数値のハードコード | マスターデータ YAML・`META-INF/spring/*.properties` |
 | `System.out` / `printStackTrace` | SLF4J のロガー |
 | 空の `catch`・例外の握りつぶし | 3分類のいずれかへ変換するか再スロー（[exception.md](exception.md) §3） |
 | 静的な可変フィールド（共有状態） | DI か引数で受け渡す |

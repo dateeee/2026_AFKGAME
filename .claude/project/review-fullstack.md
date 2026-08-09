@@ -29,7 +29,7 @@ python .claude/scripts/review_prep.py --dir docs/reviews/full-review \
 | 区分 | 対象 |
 |------|------|
 | コード | `backend/` 配下の全 `.java`（`target/` のビルド生成物除外）、`frontend/src/` 配下の全 `.vue` `.ts` `.css` |
-| 仕様書 | `design/game_spec.md` → `systems/`、`tech/tech_spec.md` → `tech_data` / `tech_structure` / `tech_api` / `tech_architecture` / `tech_logging`、`tech_battle.md`・`tech_offline.md`・`tech_auth.md`、`data/master_data.md` → `data/master/` |
+| 仕様書 | `design/game_spec.md` → `systems/`、`tech/tech_spec.md` → `tech_data` / `tech_structure{,_backend}` / `tech_api` / `tech_architecture` / `tech_logging`、`tech_battle.md`・`tech_offline.md`・`tech_auth.md`、`data/master_data.md` → `data/master/` |
 
 索引 + 個別ファイル構成のため、**照合に必要な個別ファイルのみ**読む。
 **設計図（`docs/diagrams/`）は対象外**。図が絡む照合は `diagrams-review` の担当（[review-procedure.md](../references/review-procedure.md) §7）。

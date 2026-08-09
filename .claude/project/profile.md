@@ -7,7 +7,7 @@
 | 項目 | 値 |
 |------|-----|
 | 種別 | 放置系ファンタジーRPG（Webブラウザゲーム） |
-| 構成 | フロントエンド（Vue 3 SPA）+ バックエンド（Java/Terasoluna Spring Boot）の2層 |
+| 構成 | フロントエンド（Vue 3 SPA）+ バックエンド（Java/Terasoluna・war + Tomcat）の2層 |
 | 開発工程 | 7工程。工程の定義と**Phase進捗の正**は [development_process.md](../../docs/process/development_process.md)（進捗は §5） |
 
 ## 2. ディレクトリ
@@ -15,7 +15,7 @@
 | パス | 内容 |
 |------|------|
 | `backend/` | `afkgame-domain`（Entity・Repository・Service・マスターデータ）、`afkgame-web`（Controller・Resource・Security）、`afkgame-env`（DataSource・設定）、`afkgame-initdb`（Flyway） |
-| 各モジュールの `src/test/java/` | 単体（JUnit5+Mockito）と統合（`@SpringBootTest`+MockMvc）をパッケージで分離 |
+| 各モジュールの `src/test/java/` | 単体（JUnit5+Mockito）と統合（`SpringExtension`+MockMvc）をパッケージで分離 |
 | `frontend/src/` | `components/` `views/` `stores/` `api/` `types/` `composables/` `router/` `utils/` `assets/` |
 | `frontend/tests/e2e/` | E2Eテスト（Playwright） |
 | `docs/design/` | 要件定義の成果物（`game_spec.md` 索引 + `systems/`） |
@@ -34,7 +34,7 @@
 | スキーマ(DTO) | Resource + Bean Validation（Jakarta） | `afkgame-web` に配置。Jackson が camelCase を維持（変換不要） |
 | ロジック | Java 17 | `afkgame-domain` の Service に集約。Controller にビジネスロジックを書かない |
 | API | Spring MVC（Terasoluna） | `@RestController`（`afkgame-web`）、DIはコンストラクタ注入 |
-| ログ | Logback + MDC | `logback-spring.xml` 準拠。`X-Request-ID` は MDC で引き回す |
+| ログ | Logback + MDC | `logback.xml` 準拠。`X-Request-ID` は MDC で引き回す |
 | UI | Vue 3 | `<script setup lang="ts">` + Composition API |
 | 状態管理 | Pinia | `defineStore` の **Setup Store 形式** |
 | 型 | TypeScript | 厳密な型定義。`any` を避ける |

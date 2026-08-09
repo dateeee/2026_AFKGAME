@@ -8,7 +8,7 @@
 %%{init: {'theme': 'default', 'sequence': {'actorFontSize': 18, 'messageFontSize': 16, 'noteFontSize': 14}} }%%
 sequenceDiagram
     participant B as ブラウザ
-    participant API as Terasoluna(Spring Boot)
+    participant API as Terasoluna(Spring MVC)
     participant DB as Database
 
     B->>API: GET /api/tower/list
@@ -67,7 +67,7 @@ sequenceDiagram
 %%{init: {'theme': 'default', 'sequence': {'actorFontSize': 18, 'messageFontSize': 16, 'noteFontSize': 14}} }%%
 sequenceDiagram
     participant B as ブラウザ
-    participant API as Terasoluna(Spring Boot)
+    participant API as Terasoluna(Spring MVC)
     participant DB as Database
 
     B->>API: GET /api/shop/lineup
@@ -118,7 +118,7 @@ sequenceDiagram
 %%{init: {'theme': 'default', 'sequence': {'actorFontSize': 18, 'messageFontSize': 16, 'noteFontSize': 14}} }%%
 sequenceDiagram
     participant B as ブラウザ
-    participant API as Terasoluna(Spring Boot)
+    participant API as Terasoluna(Spring MVC)
     participant DB as Database
 
     Note over B: === 装備一覧取得 ===

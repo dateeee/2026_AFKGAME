@@ -12,8 +12,8 @@
 |------|------|
 | 配置 | 各モジュールの `src/test/java/.../<対象クラス>Test.java`（対象クラスと同じパッケージ） |
 | 単体テスト | `@Tag("unit")`。Service・Controller・フィルタ・マスターデータが対象。依存は Mockito でモックする |
-| 統合テスト | `@Tag("integration")`。Repository・`@SpringBootTest` + MockMvc。DB は埋め込み PostgreSQL |
-| 実行の分離 | surefire が `integration` を除外し、failsafe が `integration` だけを回す。**C1（分岐カバレッジ）は単体テストだけで測る** |
+| 統合テスト | `@Tag("integration")`。Repository・`@ExtendWith(SpringExtension)` + `@ContextConfiguration`（Web層は `@WebAppConfiguration` + MockMvc）。DB は `EmbeddedPostgres.builder().start()` で起動する埋め込み PostgreSQL |
+| 実行の分離 | surefire が `integration` を除外し、failsafe が `integration` だけを回す（**failsafe には `verify` ゴールを持たせる** — 無いと結合テストが失敗してもビルドが落ちない）。**C1（分岐カバレッジ）は単体テストだけで測る** |
 | パッケージ | 単体と統合をパッケージで分ける（[profile.md](../../../.claude/project/profile.md) §2） |
 
 ## 2. 記述規約
@@ -32,7 +32,7 @@
 | # | 規約 |
 |---|------|
 | 1 | 時刻・乱数は必ず固定する（モック・シード）。実装側が「外から受ける」形になっているのはこのため（[common.md](common.md) §4 #2） |
-| 2 | テスト間で状態を共有しない（static な可変フィールドを持たない）。統合テストは `@SpringBootTest` ごとにスキーマを作り直す |
+| 2 | テスト間で状態を共有しない（static な可変フィールドを持たない）。統合テストはテスト用コンテキストごとにスキーマを作り直す |
 | 3 | マスターデータ・エラーコード・列挙値は定義元のドキュメントを読んでから書く（推測で書かない） |
 
 ## 4. 本書が持たないもの（分担）
@@ -46,11 +46,11 @@
 
 ## 5. ガイドラインとの差分
 
-ガイドラインの `@SpringJUnitConfig` + `test-context.xml` 構成は **Boot 流儀（`@SpringBootTest`・`@AutoConfigureMockMvc`）へ読み替えて適用する**。読み替えは逸脱ではない（10.1.2.2 の OSS 表も JUnit・AssertJ・Mockito・Spring Test を Boot 管理としている）。そのうえで**意図して採らない**と決めたものは以下。ここに無い差分を見つけたらガイドライン側へ寄せる。
+ガイドラインの `@SpringJUnitConfig` + `test-context.xml` 構成は、**Java Config 版の同等構成**（`@ExtendWith(SpringExtension)` + `@ContextConfiguration(classes = ...)`、Web層は `@WebAppConfiguration` + `MockMvc`）へ読み替えて適用する。**Spring Boot のテスト支援（`@SpringBootTest`・`@AutoConfigureMockMvc`）は使わない**（[tech_selection.md](../../backlog/java_migration/tech_selection.md) §2）。そのうえで**意図して採らない**と決めたものは以下。ここに無い差分を見つけたらガイドライン側へ寄せる。
 
 | # | ガイドライン | 本書の決定と理由 |
 |---|------------|----------------|
-| 1 | Repository の単体テストは DBUnit / Spring Test DBUnit で書く（10.2.2.1.1.2） | 採らない。埋め込み PostgreSQL（zonky）+ `JdbcTemplate` でフィクスチャを作る。`@Transactional` ロールバック・固定時刻・親レコード生成が既に成立済みで、Excel のデータ定義ファイルは保守対象を増やすだけ。Boot 管理外の依存2件も避けられる |
+| 1 | Repository の単体テストは DBUnit / Spring Test DBUnit で書く（10.2.2.1.1.2） | 採らない。埋め込み PostgreSQL（`embedded-postgres` を直接起動）+ `JdbcTemplate` でフィクスチャを作る。`@Transactional` ロールバック・固定時刻・親レコード生成が既に成立済みで、Excel のデータ定義ファイルは保守対象を増やすだけ。**`embedded-database-spring-test` は Boot 前提のため使わない** |
 | 2 | Repository はインフラストラクチャ層の**単体**テスト（10.2.2.1） | Repository は `@Tag("integration")`（結合側）へ分類する。実 DB 起動を伴うため。**C1 の分母を実 DB なしで閉じる**ための線引き（§1「実行の分離」） |
 | 3 | モックの注入は `@InjectMocks`（10.2.4.3.3.1） | テスト内でコンストラクタへ手渡す。本体がコンストラクタ注入（[common.md](common.md) §4 #1）のため、手渡しなら依存の欠落がコンパイルエラーで出る。`@InjectMocks` はリフレクション注入で失敗が静かになる |
 | — | `MockMvcTester`（10.2.4.2.3） | 既存は旧 `MockMvc#perform().andExpect()` のままとし、新規テストでの採用は任意。旧 API は非推奨ではなく、移行の得は記述の簡潔さのみ。**決め切っていないため差分として確定させない**（採否は書き手に委ねる） |

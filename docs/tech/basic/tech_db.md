@@ -51,7 +51,7 @@ DBMS は `local`・`production` とも **PostgreSQL** に統一する（[tech_op
 | # | 規約 |
 |---|------|
 | 1 | 主キーは `id`。採番はアプリ側で行う（`users` は `user_<uuid4>` / `guest_<uuid4>` の接頭辞つき、他は UUID4 文字列。`refresh_tokens`・`email_verification_tokens` のみ `INTEGER` の自動採番） |
-| 2 | 既定値はアプリ側（Entity フィールドの初期値）で付与し、`server_default` は使わない。**既存テーブルへ列を追加する場合のみ** `nullable` または `server_default` を必須とする（前方互換。[tech_operations.md](../nonfunctional/tech_operations.md) §12.4） |
+| 2 | 既定値はアプリ側（Entity フィールドの初期値）で付与し、`server_default` は使わない。**既存テーブルへ列を追加する場合のみ** `nullable` または `server_default` を必須とする（前方互換。[tech_operations_procedure.md](../nonfunctional/tech_operations_procedure.md) §12.4） |
 | 3 | `NULL` 欄が「可」の列だけが NULL を取りうる。Entity のボックス型フィールドと一対一に対応させる |
 | 4 | 時刻列は UTC で保存する。ローカル時刻への変換は表示層が行う |
 | 5 | 列挙値は `VARCHAR(n)` + 取りうる値の列挙で表現し、DBMS の ENUM 型は使わない（値の追加にDDLを要さず、マイグレーションを軽くするため） |

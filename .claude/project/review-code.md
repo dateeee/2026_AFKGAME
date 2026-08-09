@@ -58,7 +58,7 @@ python .claude/scripts/review_prep.py --dir docs/reviews/frontend-review \
 | 一貫性 | 11 | 全エンドポイントで統一エラーレスポンス形式（`error.code`）が使われているか |
 | 一貫性 | 12 | レスポンス構造の統一、命名パターンの統一 |
 | 一貫性 | 13 | ログ出力の箇所とログレベルが `logging_config` 準拠で一貫しているか |
-| 一貫性 | 14 | 環境変数・設定値が `@ConfigurationProperties` クラスで一元管理されているか |
+| 一貫性 | 14 | 環境変数・設定値が `afkgame-env` の設定保持 Bean で一元管理されているか |
 | 一貫性 | 15 | ロジックが `services/` に集約され、ルーターに漏れていないか |
 
 ## 3. `frontend-review` の観点

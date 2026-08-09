@@ -12,7 +12,7 @@
 |-----------|---------|------------------|
 | `.api` | `@RestController` | Controller |
 | `.resource` | Resource(DTO) + Bean Validation | Form（2.4.1.1.3 Tip: REST では `Resource` が Form の役割を担う） |
-| `.config` | Security・Jackson・`@ConfigurationProperties` | （対応なし） |
+| `.config.app` / `.config.web` | Security・Jackson（`ApplicationContextConfig`・`SpringSecurityConfig`）、Spring MVC 設定（`SpringMvcConfig`） | （対応なし） |
 | `.filter` | リクエストIDログ・共通例外ハンドラ | （対応なし） |
 
 - Web層は「受け取る・検証する・ドメインへ渡す・返す」だけを担う。業務判断は [domain_service.md](domain_service.md) §1 の Service が持つ
@@ -44,7 +44,7 @@
 
 | # | 規約 |
 |---|------|
-| 1 | 設定値は `@ConfigurationProperties`（`afkgame.*`）で受ける。`@Value` の直書きをしない |
+| 1 | 設定値は `afkgame-env` の設定保持 Bean を注入して読む。Web層で `@Value` を直書きしない（`@ConfigurationProperties` は Boot 機能のため使わない。組み立て方は [tech_structure_backend.md](../../tech/basic/tech_structure_backend.md) §4.2） |
 | 2 | 個別機能の業務ロジックをフィルタ・インターセプタに置かない（横断処理だけ） |
 | 3 | `request_id` などの横断項目は MDC（`RequestLogFilter`）が載せる（[common.md](common.md) §7 #5） |
 

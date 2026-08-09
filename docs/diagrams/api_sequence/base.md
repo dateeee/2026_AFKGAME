@@ -8,7 +8,7 @@
 %%{init: {'theme': 'default', 'sequence': {'actorFontSize': 18, 'messageFontSize': 16, 'noteFontSize': 14}} }%%
 sequenceDiagram
     participant B as ブラウザ
-    participant API as Terasoluna(Spring Boot)
+    participant API as Terasoluna(Spring MVC)
     participant DB as Database
 
     Note over B: === 施設建設 (LV0→LV1) ===
@@ -59,7 +59,7 @@ sequenceDiagram
 %%{init: {'theme': 'default', 'sequence': {'actorFontSize': 18, 'messageFontSize': 16, 'noteFontSize': 14}} }%%
 sequenceDiagram
     participant B as ブラウザ
-    participant API as Terasoluna(Spring Boot)
+    participant API as Terasoluna(Spring MVC)
     participant DB as Database
 
     Note over B: === 装備強化 ===

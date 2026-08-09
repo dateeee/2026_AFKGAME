@@ -3,7 +3,7 @@
 > [tech_spec.md](../tech_spec.md) §6「ログ設計」。アーキテクチャ方針は [tech_architecture.md](tech_architecture.md)。
 
 ## ログライブラリ
-Logback を使用。Spring Boot 組み込みの Tomcat アクセスログと連携する。
+Logback を使用。設定は `afkgame-env` の `logback.xml`（Boot 拡張の `logback-spring.xml` と `<springProfile>` は使えない）。Tomcat のアクセスログは Tomcat 側（`AccessLogValve`）が出力し、アプリのログとは別系統とする。
 
 ## ログレベル方針
 
@@ -145,9 +145,9 @@ Logback を使用。Spring Boot 組み込みの Tomcat アクセスログと連�
 
 ## 設定値
 
-```yaml
-# afkgame-env の application.yml に追加
-logging:
-  level: INFO      # ログレベル（環境変数 LOG_LEVEL で上書き可）
-  format: text     # ログフォーマット（text / json、環境変数 LOG_FORMAT で上書き可）
-```
+`logback.xml` が環境変数を直接読む（プロパティファイルを経由しない）。値の正は [tech_operations.md](../nonfunctional/tech_operations.md) §12.2。
+
+| 変数 | 既定 | 効果 |
+|------|------|------|
+| `LOG_LEVEL` | `INFO` | ロガー `afkgame` のレベル（`${LOG_LEVEL:-INFO}`） |
+| `LOG_FORMAT` | `text` | エンコーダの切替。`<include resource="logback-encoder-${LOG_FORMAT}.xml"/>` で `text` / `json` の定義を読み分ける（`<springProfile>` が使えないため、logback の変数置換で切り替える） |

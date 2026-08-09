@@ -47,7 +47,7 @@
 | `afkgame-env` | `.config.app` | `AfkgameEnvConfig`（DataSource）・`META-INF/spring/*.properties` |
 | `afkgame-initdb` | — | Flyway マイグレーション（雛形の SQL Maven Plugin は使わず既存の `V1` を維持） |
 
-`afkgame-web` は war を作り、`src/main/webapp/WEB-INF/web.xml` に `ContextLoaderListener`・`DispatcherServlet`・サーブレットフィルタを定義する。配置の正は [tech_structure.md](../../tech/basic/tech_structure.md) §2。
+`afkgame-web` は war を作り、`src/main/webapp/WEB-INF/web.xml` に `ContextLoaderListener`・`DispatcherServlet`・サーブレットフィルタを定義する。配置の正は [tech_structure_backend.md](../../tech/basic/tech_structure_backend.md) §4.1。
 
 起点は Java Config + MyBatis3 のマルチプロジェクト用 Archetype `terasoluna-gfw-multi-web-blank-thymeleaf-mybatis3-archetype`（`5.11.0.RELEASE`）。REST 専用のため、生成物から Thymeleaf・Welcome画面・エラー画面・静的リソース一式を落とす（JSP 版ではなく Thymeleaf 版を起点にするのは、削除後に残る依存が少ないため）。
 

@@ -1,6 +1,6 @@
 # システム構成図 — 本番構成（AWS）
 
-> 親: [system_architecture.md](../system_architecture.md)。構成・数値・設定値は [tech_operations.md](../../tech/nonfunctional/tech_operations.md) §12 が正（本図には再掲しない）。
+> 親: [system_architecture.md](../system_architecture.md)。構成・数値・設定値は [tech_operations.md](../../tech/nonfunctional/tech_operations.md) §12.1〜§12.3 と [tech_operations_procedure.md](../../tech/nonfunctional/tech_operations_procedure.md) §12.4〜§12.7 が正（本図には再掲しない）。
 
 ## 本番構成（AWS）
 
@@ -17,7 +17,7 @@ flowchart TB
 
         subgraph EC2["EC2 (1台)"]
             Nginx["Nginx\nリバースプロキシ"]
-            AppJar["Spring Boot 実行可能jar\nTerasoluna(Spring Boot) 常駐"]
+            AppWar["Tomcat 11.0 (systemd)\nafkgame-web.war"]
             Cron["OS cron\n日次バッチ (§12.6)"]
             EBS["PostgreSQL\nデータディレクトリは EBS 上"]
         end
@@ -29,8 +29,8 @@ flowchart TB
     Browser -->|"HTTPS"| CloudFront
     CloudFront -->|"SPA配信"| S3spa
     Browser -->|"REST API (JSON)\n別オリジン・CORS"| Nginx
-    Nginx --> AppJar
-    AppJar -->|"DB読み書き"| EBS
+    Nginx --> AppWar
+    AppWar -->|"DB読み書き"| EBS
     Cron -->|"日次バッチ・論理バックアップ"| EBS
     EBS -->|"日次スナップショット"| Snapshot
     EBS -->|"論理バックアップを転送"| S3backup

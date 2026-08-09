@@ -192,4 +192,4 @@
 
 - 小数は**1桁固定・切り捨て**（例: 999,999 → 999.9K。1.0M に繰り上げない）
 - 単位の境界では常に下位単位を優先（1,000,000 未満は K 表記のまま）
-- 実装は `src/utils/format.ts` の共通ユーティリティに集約する（[tech_structure.md](../../tech/basic/tech_structure.md) §3）
+- 実装は `src/utils/format.ts` の共通ユーティリティに集約する（[tech_structure.md](../../tech/basic/tech_structure.md) §3.2）

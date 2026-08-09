@@ -38,7 +38,7 @@
 
 **この STEP の成果は 2R で作り直す**（下記）。上表の見送り項目は 2R 後の STEP 3 へそのまま引き継ぐ。
 
-### STEP 2R: ブランクプロジェクト構成への再構築（未着手）
+### STEP 2R: ブランクプロジェクト構成への再構築（着手中）
 
 STEP 2 で作った骨格は Spring Boot アプリで、ガイドラインのブランクプロジェクトとは別物だった（`terasoluna-gfw-*` への依存も `org.terasoluna` の利用も無く、`terasoluna.version` は未参照のまま残っていた）。[tech_selection.md](tech_selection.md) §2 の改訂に合わせて土台を作り直す。**API契約・DBスキーマ・ゲーム仕様は変更しない**。
 
@@ -47,7 +47,7 @@ STEP 2 で作った骨格は Spring Boot アプリで、ガイドラインのブ
 | セグメント | 内容 | 状態 |
 |-----------|------|------|
 | 2R-0 | 先行検証（下表のとおり6件を実機で確定） | **完了**（2026-08-09） |
-| 2R-A | 仕様書・規約の再改訂（§2 の変更点を `tech_structure` / `tech_operations` / `coding_standards_backend` へ反映） | 未着手 |
+| 2R-A | 仕様書・規約の再改訂（§2 の変更点を `tech_structure` / `tech_operations` / `coding_standards_backend` へ反映） | **完了**（2026-08-09。`tech_structure`・`tech_operations` は分割した） |
 | 2R-B | Archetype から雛形を生成し、View 一式を落として REST 専用の土台にする（`mvn clean install` で war が出るまで） | 未着手 |
 | 2R-C | 設定の移植（`web.xml`・Java Config 6種・`*.properties`・`logback.xml`・DataSource・Flyway 起動） | 未着手 |
 | 2R-D | 既存実装の移植（domain 34 + web 13 + env 5 の main コードから Boot 依存を除去） | 未着手 |

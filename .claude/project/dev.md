@@ -34,7 +34,7 @@
 | 順 | 参照先 | 内容 |
 |----|--------|------|
 | 1 | `docs/design/game_spec.md` → `design/systems/` | ゲームシステム・バランス仕様 |
-| 2 | `docs/tech/tech_spec.md` → `tech_api.md` / `tech_data.md` / `tech_structure.md` | API設計・データ構造・実装配置 |
+| 2 | `docs/tech/tech_spec.md` → `tech_api.md` / `tech_data.md` / `tech_structure{,_backend}.md` | API設計・データ構造・実装配置 |
 | 3 | `docs/tech/detail/tech_<機能>.md` | 対象機能の処理フローと**分岐一覧の正**（機能名は索引 `tech_spec.md` で特定する） |
 | 4 | `docs/tech/basic/tech_db/<領域>.md` | 列・NULL・一意制約の正（**モデルを新設・変更する場合**。`check_schema_triple.py` の照合元） |
 | 5 | `docs/tech/detail/tech_battle.md`・`tech_offline.md`・`tech_auth.md` | 戦闘処理・オフライン計算・認証（該当する場合の補助） |
@@ -69,7 +69,7 @@
 | 4 | サーバー権威 | 戦闘計算・報酬決定をフロント側に置いていないか |
 | 5 | 開発時フォールバック | `frontend/src/composables/useBattleLocal.ts` の単体動作を壊していないか |
 | 6 | 既存パターン踏襲 | 命名規則・ディレクトリ構造・import規約がコーディング規約どおりか（バックエンドは [common.md](../../docs/process/coding_standards_backend/common.md) §2〜§5 + 層別の分冊、フロントは既存コードの流儀） |
-| 7 | ログ | `logback-spring.xml` 準拠か（ロガー名体系は `tech_logging.md` が正） |
+| 7 | ログ | `logback.xml` 準拠か（ロガー名体系は `tech_logging.md` が正） |
 
 ## 5. 動作確認
 

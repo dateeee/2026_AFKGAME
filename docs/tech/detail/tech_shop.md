@@ -9,7 +9,7 @@
 
 | 項目 | 仕様 |
 |------|------|
-| 更新方式 | **遅延評価**。定期ジョブを持たず、`GET /api/shop/lineup` と `POST /api/shop/buy` の入口で鮮度を判定する（[tech_operations.md §12.6](../nonfunctional/tech_operations.md)） |
+| 更新方式 | **遅延評価**。定期ジョブを持たず、`GET /api/shop/lineup` と `POST /api/shop/buy` の入口で鮮度を判定する（[tech_operations_procedure.md §12.6](../nonfunctional/tech_operations_procedure.md)） |
 | 更新境界 | UTC日付の変わり目（00:00 UTC） |
 | 枠数 | 5枠固定（武器2・防具2・アクセサリー1） |
 | 在庫 | 各枠1個。購入すると次の更新まで売り切れ |

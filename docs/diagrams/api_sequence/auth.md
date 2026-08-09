@@ -8,7 +8,7 @@
 %%{init: {'theme': 'default', 'sequence': {'actorFontSize': 18, 'messageFontSize': 16, 'noteFontSize': 14}} }%%
 sequenceDiagram
     participant B as ブラウザ
-    participant API as Terasoluna(Spring Boot)
+    participant API as Terasoluna(Spring MVC)
     participant DB as Database
     participant Google as Google OAuth
 
