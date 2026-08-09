@@ -24,5 +24,4 @@
 
 ## 3. 環境・ツール
 
-- **Java の規約チェックに常設スクリプトが無い**（2026-08-08。backend-review で判明）。タブ・120字超・ワイルドカード/未使用 import・`System.out`/`printStackTrace`・`@Autowired` フィールド注入・マッピング XML の `${}`・ログの文字列連結・`Instant.now()` 直取得・静的乱数・`java.util.Date` を機械判定できず、レビューで毎回使い捨てを書くことになる（ISSUE-605・608 はこれで検出）。`scripts/check_java_conventions.py` として常設化し `commands.md` §1 へ足すと `dev` 工程で潰せる
 - **`afkgame-initdb` は surefire・failsafe とも `<skip>true</skip>` にしてある**（2R-B）。SQL のみで `src/test` を持たないため、親POMで surefire に `groups`/`excludedGroups` を与えると `require TestNG, JUnit48+ or JUnit 5` でビルドが落ちる（**増分ビルドのときだけ出る**）。このガードを外さないこと
