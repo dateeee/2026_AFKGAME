@@ -1,8 +1,6 @@
 package com.afkgame.web.config.app;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.Map;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
@@ -14,15 +12,14 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.core.io.Resource;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
 import org.terasoluna.gfw.common.exception.ExceptionCodeResolver;
 import org.terasoluna.gfw.common.exception.ExceptionLogger;
 import org.terasoluna.gfw.common.exception.SimpleMappingExceptionCodeResolver;
 import org.terasoluna.gfw.web.exception.ExceptionLoggingFilter;
 
 import com.afkgame.domain.config.app.AfkgameDomainConfig;
+import com.afkgame.env.config.AuthSettings;
 
 import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.json.JsonMapper;
@@ -65,49 +62,19 @@ public class ApplicationContextConfig {
 
     /**
      * Configure {@link PasswordEncoder} bean.
-     * @return Bean of configured {@link DelegatingPasswordEncoder}
-     */
-    @Bean("passwordEncoder")
-    public PasswordEncoder passwordEncoder() {
-        Map<String, PasswordEncoder> idToPasswordEncoder = new HashMap<>();
-        idToPasswordEncoder.put("pbkdf2", pbkdf2PasswordEncoder());
-        idToPasswordEncoder.put("bcrypt", bCryptPasswordEncoder());
-        /*
-         * When using commented out PasswordEncoders, you need to add bcprov-jdk18on.jar to the
-         * dependency. idToPasswordEncoder.put("argon2", argon2PasswordEncoder());
-         * idToPasswordEncoder.put("scrypt", sCryptPasswordEncoder());
-         */
-        return new DelegatingPasswordEncoder("pbkdf2", idToPasswordEncoder);
-    }
-
-    /**
-     * Configure {@link Pbkdf2PasswordEncoder} bean.
-     * @return Bean of configured {@link Pbkdf2PasswordEncoder}
-     */
-    @Bean
-    public Pbkdf2PasswordEncoder pbkdf2PasswordEncoder() {
-        return Pbkdf2PasswordEncoder.defaultsForSpringSecurity_v5_8();
-    }
-
-    /**
-     * Configure {@link BCryptPasswordEncoder} bean.
+     * <p>
+     * ハッシュ方式は bcrypt だけを使う（ストレッチ回数の正は
+     * docs/tech/detail/tech_auth.md §1、適用箇所は tech_auth_account.md §9）。雛形が定義していた
+     * {@code DelegatingPasswordEncoder}（pbkdf2 既定）と pbkdf2 の Bean は、複数の
+     * {@link PasswordEncoder} が候補になると名前解決で pbkdf2 側が注入され仕様と食い違うため置かない。
+     * </p>
+     * @param authSettings bcrypt のストレッチ回数
      * @return Bean of configured {@link BCryptPasswordEncoder}
      */
-    @Bean
-    public BCryptPasswordEncoder bCryptPasswordEncoder() {
-        return new BCryptPasswordEncoder();
+    @Bean("passwordEncoder")
+    public PasswordEncoder passwordEncoder(AuthSettings authSettings) {
+        return new BCryptPasswordEncoder(authSettings.bcryptStrength());
     }
-
-    /*
-     * When using commented out PasswordEncoders, you need to add bcprov-jdk18on.jar to the
-     * dependency.
-     * 
-     * @Bean public Argon2PasswordEncoder argon2PasswordEncoder() { return
-     * Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8(); }
-     * 
-     * @Bean public SCryptPasswordEncoder sCryptPasswordEncoder() { return
-     * SCryptPasswordEncoder.defaultsForSpringSecurity_v5_8(); }
-     */
 
     /**
      * Configure {@link PropertySourcesPlaceholderConfigurer} bean.

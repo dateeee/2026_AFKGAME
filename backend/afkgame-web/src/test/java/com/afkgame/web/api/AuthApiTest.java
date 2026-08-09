@@ -116,10 +116,30 @@ class AuthApiTest {
         return "{\"email\":\"" + email + "\",\"password\":\"" + password + "\"}";
     }
 
-    /** 全体がちょうど {@code length} 文字になるメールアドレスを組み立てる。 */
+    /** ローカル部の上限（RFC 5321）。{@code @Email} が長さも検査するため境界内に収める。 */
+    private static final int MAX_LOCAL_PART_LENGTH = 64;
+
+    /** ドメインラベルの上限（RFC 1035）。超えると {@code @Email} が形式違反として弾く。 */
+    private static final int MAX_DOMAIN_LABEL_LENGTH = 63;
+
+    /**
+     * 全体がちょうど {@code length} 文字になるメールアドレスを組み立てる。
+     *
+     * <p>見たいのは長さの境界（§11 #3・#4）だけなので、**形式は妥当なまま**にする。
+     * ローカル部を単純に伸ばすと上限64文字を超えて形式違反になり、長さの分岐へ到達しない。
+     */
     private static String emailOfLength(int length) {
-        String domain = "@example.com";
-        return "a".repeat(length - domain.length()) + domain;
+        String localPart = "a".repeat(MAX_LOCAL_PART_LENGTH);
+        int domainLength = length - localPart.length() - 1;
+        StringBuilder domain = new StringBuilder();
+        while (domain.length() < domainLength) {
+            if (domain.length() > 0) {
+                domain.append('.');
+            }
+            domain.append("a".repeat(
+                    Math.min(domainLength - domain.length(), MAX_DOMAIN_LABEL_LENGTH)));
+        }
+        return localPart + "@" + domain;
     }
 
     @Nested

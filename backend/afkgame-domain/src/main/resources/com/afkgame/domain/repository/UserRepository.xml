@@ -24,11 +24,24 @@
      WHERE id = #{id}
   </select>
 
+  <select id="findByEmail" resultMap="userResultMap">
+    SELECT id, email, password_hash, google_id, display_name,
+           is_guest, email_verified, created_at, last_login_at
+      FROM users
+     WHERE email = #{email}
+  </select>
+
   <insert id="save">
     INSERT INTO users (id, email, password_hash, google_id, display_name,
                        is_guest, email_verified, created_at, last_login_at)
     VALUES (#{id}, #{email}, #{passwordHash}, #{googleId}, #{displayName},
             #{guest}, #{emailVerified}, #{createdAt}, #{lastLoginAt})
   </insert>
+
+  <update id="updateLastLoginAt">
+    UPDATE users
+       SET last_login_at = #{lastLoginAt}
+     WHERE id = #{id}
+  </update>
 
 </mapper>

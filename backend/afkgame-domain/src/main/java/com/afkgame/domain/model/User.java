@@ -7,14 +7,21 @@ import java.time.Instant;
  *
  * <p>スキーマ定義の正は docs/tech/basic/tech_db.md、認証仕様は
  * docs/tech/detail/tech_auth.md §6。ID は {@code user_<UUID>} または {@code guest_<UUID>}。
+ *
+ * <p>{@code display_name} は NOT NULL で既定値 {@code 冒険者}（tech_db/auth.md §1）。既定値は
+ * {@code server_default} ではなくフィールドの初期値で付与する（tech_db.md §4-2）ため、
+ * 登録・ゲスト作成のいずれも表示名を明示的に設定しない。
  */
 public class User {
+
+    /** 表示名の既定値。列の既定値はアプリ側で付与する（tech_db.md §4-2）ため、ここが唯一の定義。 */
+    private static final String DEFAULT_DISPLAY_NAME = "冒険者";
 
     private String id;
     private String email;
     private String passwordHash;
     private String googleId;
-    private String displayName;
+    private String displayName = DEFAULT_DISPLAY_NAME;
     private boolean guest;
     private boolean emailVerified;
     private Instant createdAt;

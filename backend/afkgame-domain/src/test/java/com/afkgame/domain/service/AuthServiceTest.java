@@ -415,11 +415,13 @@ class AuthServiceTest {
 
             ArgumentCaptor<User> saved = ArgumentCaptor.forClass(User.class);
             verify(userRepository).save(saved.capture());
-            // ID は user_<UUID>。表示名は列の既定値に任せ、google_id は NULL（§10 手順4）
+            // ID は user_<UUID>。表示名は列の既定値に任せ、google_id は NULL（§10 手順4）。
+            // 列の既定値はアプリ側（Entity フィールドの初期値）で付与する（tech_db.md §4-2）ため、
+            // register が設定しない結果は null ではなく tech_db/auth.md §1 の既定値になる
             assertThat(saved.getValue().getId()).startsWith("user_");
             assertThat(saved.getValue().isGuest()).isFalse();
             assertThat(saved.getValue().isEmailVerified()).isFalse();
-            assertThat(saved.getValue().getDisplayName()).isNull();
+            assertThat(saved.getValue().getDisplayName()).isEqualTo("冒険者");
             assertThat(saved.getValue().getGoogleId()).isNull();
             assertThat(saved.getValue().getCreatedAt()).isNotNull();
             assertThat(saved.getValue().getLastLoginAt()).isNotNull();
