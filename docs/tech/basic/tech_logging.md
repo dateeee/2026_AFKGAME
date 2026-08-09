@@ -9,23 +9,7 @@ Logback を使用。設定は `afkgame-env` の `logback.xml`（Boot 拡張の `
 
 ## ログの書き方（共通部品）
 
-各クラスで `LoggerFactory` を直接使わず、`afkgame-env` の `com.afkgame.env.logging` が提供する共通部品で書く（規約は [common.md §7](../../process/coding_standards_backend/common.md)）。
-
-| 部品 | 役割 |
-|------|------|
-| `AppLogger` | 入口。`AppLogger.of(LoggerName.AUTH)` で得る |
-| `LoggerName` | ロガー名（正は「ロガー名体系」） |
-| `LogKey` | ログ項目名（正は「ログ項目」）。マスク規則も本 enum が持つ |
-| `LogReason` | `reason` の値（正は「失敗理由（reason）の値」） |
-| `LogEntry` | 項目を積み、`log()` で出力する |
-
-```java
-private static final AppLogger logger = AppLogger.of(LoggerName.AUTH);
-
-logger.info("ログイン").with(LogKey.USER_ID, user.getId()).log();
-logger.warn("ログイン失敗").reason(LogReason.PASSWORD_MISMATCH).log();
-logger.error("未捕捉例外").cause(e).log();
-```
+各クラスは `LoggerFactory` を直接使わず、`afkgame-env` の `com.afkgame.env.logging` が提供する共通部品（`AppLogger` / `LoggerName` / `LogKey` / `LogReason` / `LogEntry`）で書く。**部品の役割と書き方の正は [logging.md](../../process/coding_standards_backend/logging.md) §4**。
 
 `with()` で積んだ値は出力の間だけ MDC へ載り、text 形式では末尾の `key=value`、JSON 形式では独立フィールドとして出る。出力後は元の MDC へ戻すため、横断項目を壊さない。
 
@@ -33,8 +17,8 @@ logger.error("未捕捉例外").cause(e).log();
 
 | レベル | 用途 | 例 |
 |--------|------|-----|
-| DEBUG | 開発用の詳細情報 | SQLクエリ、リクエストボディ、レスポンスボディ |
-| INFO | 正常系イベント | リクエスト受信、tick処理完了（処理tick数・結果）、ゲストアカウント作成 |
+| DEBUG | 開発用の詳細情報 | SQLクエリ |
+| INFO | 正常系イベント | 通信の START / END、層をまたぐ呼び出しの START / END（AOP）、tick処理完了（処理tick数・結果）、ゲストアカウント作成 |
 | WARNING | 想定内のエラー | 認証失敗（401）、バリデーションエラー（422）、リソース不足（ゴールド不足等） |
 | ERROR | 想定外のエラー | 未捕捉例外、DB接続失敗、データ整合性エラー |
 
@@ -207,4 +191,5 @@ logger.error("未捕捉例外").cause(e).log();
 | 変数 | 既定 | 効果 |
 |------|------|------|
 | `LOG_LEVEL` | `INFO` | ロガー `afkgame` のレベル（`${LOG_LEVEL:-INFO}`） |
-| `LOG_FORMAT` | `text` | エンコーダの切替。`<include resource="logback-encoder-${LOG_FORMAT}.xml"/>` で `text` / `json` の定義を読み分ける（`<springProfile>` が使えないため、logback の変数置換で切り替える） |
+| `LOG_FORMAT` | `text` | エンコーダと appender の切替。`<include resource="logback-appenders-${LOG_FORMAT}.xml"/>` で `text` / `json` の定義を読み分ける（`<springProfile>` が使えないため、logback の変数置換で切り替える） |
+| `LOG_DIR` | `${catalina.base:-.}/logs` | 3種別のログファイルの出力先ディレクトリ（`logging.md` §1） |
