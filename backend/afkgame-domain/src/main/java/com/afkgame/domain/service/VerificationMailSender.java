@@ -24,7 +24,7 @@ public interface VerificationMailSender {
      * 送信結果を待たず、握るための {@code try-catch} も持たない。
      *
      * @param user 宛先のユーザー
-     * @param rawToken 確認トークンの生値（メール本文のリンクに載せる）
+     * @param token 確認トークンの生値（メール本文のリンクに載せる）
      */
-    void send(User user, String rawToken);
+    void send(User user, String token);
 }

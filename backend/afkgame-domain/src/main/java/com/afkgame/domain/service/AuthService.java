@@ -35,11 +35,11 @@ public interface AuthService {
      * <p>revoked 済みのトークンが使われた場合は窃取とみなし、そのユーザーの全トークンを失効させる
      * （tech_auth.md §4「不正検知」）。この失効は 401 を返す場合でも確定する。
      *
-     * @param rawRefreshToken クライアントが持つ生のリフレッシュトークン
+     * @param refreshToken クライアントが持つ生のリフレッシュトークン
      * @return 新しいトークンペア
      * @throws AppException {@code AUTH_REFRESH_INVALID}（不正・再利用・期限切れ）
      */
-    AuthResult refresh(String rawRefreshToken);
+    AuthResult refresh(String refreshToken);
 
     /**
      * アクセストークンのユーザーIDから認証ユーザーを取得する。
@@ -88,8 +88,8 @@ public interface AuthService {
      * 期限内と同じく失効させる（手順6）。
      *
      * @param userId 手順1で特定した認証ユーザーのID
-     * @param rawRefreshToken クライアントが持つ生のリフレッシュトークン
+     * @param refreshToken クライアントが持つ生のリフレッシュトークン
      * @throws AppException {@code AUTH_REFRESH_INVALID}（該当なし・他人のトークン）
      */
-    void logout(String userId, String rawRefreshToken);
+    void logout(String userId, String refreshToken);
 }

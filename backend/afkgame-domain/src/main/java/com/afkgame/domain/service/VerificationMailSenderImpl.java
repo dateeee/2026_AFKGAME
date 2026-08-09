@@ -36,17 +36,17 @@ public class VerificationMailSenderImpl implements VerificationMailSender {
 
     /** {@inheritDoc} */
     @Override
-    public void send(User user, String rawToken) {
+    public void send(User user, String token) {
         if (!TransactionSynchronizationManager.isSynchronizationActive()) {
             // 待つ相手が無いまま遅延させると送信要求が失われるため、その場で送る
-            sendQuietly(user, rawToken);
+            sendQuietly(user, token);
             return;
         }
 
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
             @Override
             public void afterCommit() {
-                sendQuietly(user, rawToken);
+                sendQuietly(user, token);
             }
         });
     }
@@ -56,9 +56,9 @@ public class VerificationMailSenderImpl implements VerificationMailSender {
      *
      * <p>コミット後に呼ばれるため、ここで例外を投げるとコミット済みの登録処理が失敗として扱われる。
      */
-    private void sendQuietly(User user, String rawToken) {
+    private void sendQuietly(User user, String token) {
         try {
-            doSend(user, rawToken);
+            doSend(user, token);
         } catch (RuntimeException e) {
             logger.warn("確認メールの送信に失敗").with(LogKey.USER_ID, user.getId()).cause(e).log();
         }
@@ -72,9 +72,9 @@ public class VerificationMailSenderImpl implements VerificationMailSender {
      * 通信ログ（START / END）は送信の成否によらず対で出す（communication.md §2 規約3）。
      *
      * @param user 宛先のユーザー
-     * @param rawToken 確認トークンの生値（メール本文のリンクに載せる）
+     * @param token 確認トークンの生値（メール本文のリンクに載せる）
      */
-    void doSend(User user, String rawToken) {
+    void doSend(User user, String token) {
         commLogger.info("START").with(LogKey.DIRECTION, DIRECTION_OUT).with(LogKey.TARGET, TARGET_SMTP).log();
         try {
             logger.warn("確認メールは未送信（送信手段は移行 STEP 3-A-3 で実装）")

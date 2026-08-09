@@ -3,11 +3,14 @@ package com.afkgame.env.logging;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.aopalliance.intercept.MethodInvocation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -51,6 +54,10 @@ class LayerLoggingInterceptorTest {
         String secret();
 
         String boom();
+
+        /** 固定表8語（application.md §3.1 規約1）をパラメータ名で1度に通すためのメソッド。 */
+        String maskedNames(String password, String rawPassword, String newPassword, String token,
+                String accessToken, String refreshToken, String secret, String credential);
     }
 
     static class SampleImpl implements Sample {
@@ -88,6 +95,17 @@ class LayerLoggingInterceptorTest {
         public String boom() {
             throw new IllegalStateException("失敗");
         }
+
+        @Override
+        public String maskedNames(String password, String rawPassword, String newPassword, String token,
+                String accessToken, String refreshToken, String secret, String credential) {
+            return "ignored";
+        }
+
+        /** {@link Sample} が宣言していない public メソッド（インタフェース探索の空振り経路用）。 */
+        public String implOnly() {
+            return "impl-only";
+        }
     }
 
     private final LayerLoggingInterceptor interceptor = new LayerLoggingInterceptor();
@@ -123,6 +141,42 @@ class LayerLoggingInterceptorTest {
                 Sample.class.getClassLoader(),
                 new Class<?>[] {Sample.class},
                 (target, method, args) -> method.invoke(delegate, args));
+    }
+
+    /**
+     * 実装クラスの {@link Method} をそのまま渡す呼び出しを組み立てる。
+     *
+     * <p>CGLIB プロキシは実装メソッドを {@code getMethod()} で渡すため、その状況を
+     * プロキシ方式に依存せず再現する（{@link ProxyFactory} は既定で JDK 動的プロキシを選ぶ）。
+     */
+    private static MethodInvocation invocationOf(Object target, Method method, Object... args) {
+        return new MethodInvocation() {
+
+            @Override
+            public Method getMethod() {
+                return method;
+            }
+
+            @Override
+            public Object[] getArguments() {
+                return args;
+            }
+
+            @Override
+            public Object proceed() throws Throwable {
+                return method.invoke(target, args);
+            }
+
+            @Override
+            public Object getThis() {
+                return target;
+            }
+
+            @Override
+            public AccessibleObject getStaticPart() {
+                return method;
+            }
+        };
     }
 
     @Nested
@@ -203,10 +257,40 @@ class LayerLoggingInterceptorTest {
         }
 
         @Test
+        void test_固定表の機密名はすべて伏せる() {
+            proxy(new SampleImpl()).maskedNames("p", "rp", "np", "t", "at", "rt", "s", "c");
+
+            assertThat(logs.list.get(0).getMDCPropertyMap())
+                    .containsEntry("args", "[****, ****, ****, ****, ****, ****, ****, ****]");
+        }
+
+        @Test
         void test_MaskReturnValueを付けた戻り値は伏せる() {
             proxy(new SampleImpl()).secret();
 
             assertThat(logs.list.get(1).getMDCPropertyMap()).containsEntry("result", "****");
+        }
+
+        @Test
+        void test_実装メソッドが渡ってもインタフェース側のMaskReturnValueで伏せる() throws Throwable {
+            interceptor.invoke(invocationOf(new SampleImpl(), SampleImpl.class.getMethod("secret")));
+
+            assertThat(logs.list.get(1).getMDCPropertyMap()).containsEntry("result", "****");
+        }
+
+        @Test
+        void test_インタフェース側にも注釈が無ければ実装メソッドでも伏せない() throws Throwable {
+            interceptor.invoke(invocationOf(new SampleImpl(),
+                    SampleImpl.class.getMethod("identity", Object.class), "x"));
+
+            assertThat(logs.list.get(1).getMDCPropertyMap()).containsEntry("result", "x");
+        }
+
+        @Test
+        void test_インタフェースが同じシグネチャを宣言していなければ伏せない() throws Throwable {
+            interceptor.invoke(invocationOf(new SampleImpl(), SampleImpl.class.getMethod("implOnly")));
+
+            assertThat(logs.list.get(1).getMDCPropertyMap()).containsEntry("result", "impl-only");
         }
     }
 

@@ -98,10 +98,28 @@ public class LayerLoggingInterceptor implements MethodInterceptor {
         if (method.getReturnType() == void.class) {
             return null;
         }
-        if (method.isAnnotationPresent(MaskReturnValue.class)) {
+        if (isMaskedReturn(method)) {
             return FULL_MASK;
         }
         return formatValue(result);
+    }
+
+    /** CGLIB では実装メソッドが渡るため、インタフェース側の宣言も探す（注釈は実装へ継承されない）。 */
+    private static boolean isMaskedReturn(Method method) {
+        if (method.isAnnotationPresent(MaskReturnValue.class)) {
+            return true;
+        }
+        for (Class<?> type : method.getDeclaringClass().getInterfaces()) {
+            try {
+                if (type.getMethod(method.getName(), method.getParameterTypes())
+                        .isAnnotationPresent(MaskReturnValue.class)) {
+                    return true;
+                }
+            } catch (NoSuchMethodException e) {
+                // このインタフェースは同じシグネチャを宣言していない
+            }
+        }
+        return false;
     }
 
     /** コレクション・配列・{@link Map} は件数のみ、それ以外は200文字で打ち切る（{@link Optional} は中身へ適用）。 */

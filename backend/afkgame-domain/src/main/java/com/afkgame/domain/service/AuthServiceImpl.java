@@ -114,8 +114,8 @@ public class AuthServiceImpl implements AuthService {
      */
     @Override
     @Transactional(noRollbackFor = AppException.class)
-    public AuthResult refresh(String rawRefreshToken) {
-        RefreshToken stored = refreshTokenRepository.findByTokenHash(hashToken(rawRefreshToken));
+    public AuthResult refresh(String refreshToken) {
+        RefreshToken stored = refreshTokenRepository.findByTokenHash(hashToken(refreshToken));
         if (stored == null) {
             logger.warn("リフレッシュ失敗").reason(LogReason.REFRESH_NOT_FOUND).log();
             throw refreshInvalid("Invalid refresh token");
@@ -139,6 +139,8 @@ public class AuthServiceImpl implements AuthService {
 
         User user = userRepository.findById(stored.getUserId());
         if (user == null) {
+            logger.warn("リフレッシュ失敗").reason(LogReason.USER_NOT_FOUND)
+                    .with(LogKey.USER_ID, stored.getUserId()).log();
             throw refreshInvalid("User not found");
         }
         return issueTokens(user);
@@ -260,8 +262,8 @@ public class AuthServiceImpl implements AuthService {
      */
     @Override
     @Transactional
-    public void logout(String userId, String rawRefreshToken) {
-        RefreshToken stored = refreshTokenRepository.findByTokenHash(hashToken(rawRefreshToken));
+    public void logout(String userId, String refreshToken) {
+        RefreshToken stored = refreshTokenRepository.findByTokenHash(hashToken(refreshToken));
         if (stored == null) {
             logger.warn("ログアウト失敗").reason(LogReason.REFRESH_NOT_FOUND)
                     .with(LogKey.USER_ID, userId).log();
