@@ -84,6 +84,15 @@
             <artifactId>jjwt-jackson</artifactId>
         </dependency>
 
+        <!-- 外部API呼び出し（tech_backend.md §4.3）。RestClient の ClientHttpRequestFactory に
+             HttpComponentsClientHttpRequestFactory を使うため入れる（Terasoluna ガイドラインの推奨。
+             classpath 検出の自動選択に任せず Bean で明示構成する）。利用は Phase 2〜 の Google OAuth で、
+             それまでは未使用の依存になる。版は親（spring-boot-dependencies）が管理する -->
+        <dependency>
+            <groupId>org.apache.httpcomponents.client5</groupId>
+            <artifactId>httpclient5</artifactId>
+        </dependency>
+
         <!-- == Begin Database == -->
         <!--         <dependency> -->
         <!--             <groupId>org.postgresql</groupId> -->

@@ -18,6 +18,7 @@
 | 入力検証 | Bean Validation（Jakarta） | Pydantic のフィールド制約を移す |
 | 認証 | Spring Security + JJWT | 方式・期限は [tech_auth.md](../../tech/detail/tech_auth.md) が正（変更なし） |
 | パスワード | `BCryptPasswordEncoder`（strength 12） | 既存ハッシュと互換（同一 bcrypt 形式） |
+| RESTクライアント | **`RestClient`**（`ClientHttpRequestFactory` は `HttpComponentsClientHttpRequestFactory` を明示構成） | 外部API呼び出しの唯一の手段。**`RestTemplate` は採らない**（Spring 7.1 で非推奨・8.0 で削除予定。ガイドラインも新規は `RestClient` を推奨）。利用先は Phase 2〜 の Google OAuth のみ。`httpclient5` は `afkgame-domain` へ入れる（版は `spring-boot-dependencies` が管理）。タイムアウト・プールの値の正は [tech_backend.md](../../tech/basic/tech_backend.md) §4.3 |
 | ログ | Logback + MDC | `X-Request-ID` は MDC で引き回す。設定は `logback.xml`（Boot 拡張の `logback-spring.xml` と `<springProfile>` は使えない） |
 | 単体テスト | JUnit 5 + Mockito + JaCoCo | surefire で `unit` タグのみ。C1 = **branch 100%** |
 | 依存脆弱性スキャン | OWASP Dependency-Check（Maven プラグイン） | `pip-audit` の置き換え |

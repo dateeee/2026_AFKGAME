@@ -18,6 +18,7 @@
 | マスターデータ | YAML リソース + 起動時ローダ | 数値の正は `docs/data/`。再ビルドなしで差し替え可能 |
 | 認証 | Spring Security + JWT（Phase 2〜） | ユーザー認証・セッション管理 |
 | OAuth | Google OAuth 2.0（Phase 2〜） | Googleアカウント連携 |
+| RESTクライアント | `RestClient` + `HttpComponentsClientHttpRequestFactory`（Phase 2〜） | 外部API呼び出し。**`RestTemplate` は使わない**（§4.3） |
 | パスワードハッシュ | `BCryptPasswordEncoder`（strength = 12） | パスワード保存 |
 
 - `afkgame-web` は war を作り、`WEB-INF/web.xml` に `ContextLoaderListener`・`DispatcherServlet`・サーブレットフィルタを定義する（Boot の起動クラスは持たない）
@@ -78,3 +79,25 @@ backend/                           # Terasoluna サーバー（war を Tomcat �
 - **キーはドット区切りのみ**にする。環境変数での上書きは素の Spring の変換（`database.url` ↔ `DATABASE_URL`）に依存し、ハイフンは変換されないため（[tech_operations.md](../nonfunctional/tech_operations.md) §12.2）
 - 認証系の定数（トークン期限・bcrypt strength・パスワード要件・ゲスト期限・確認/再設定トークンの有効期間）も同ファイルに置く（値の正は [tech_auth.md](../detail/tech_auth.md)、確認/再設定トークンは [tech_auth/mail.md](../detail/tech_auth/mail.md) §16.3。本書では列挙しない）
 - メール送信の設定（SMTP接続先・認証・タイムアウト・差出人・リンク生成元）も同ファイルに置く。キー名が `afkgame.` 始まりでないのは、キー・既定値の正が [tech_auth/mail.md](../detail/tech_auth/mail.md) §16.2 の表だからである（本書では列挙しない）
+
+## 4.3 外部API呼び出し（RESTクライアント）
+
+外部サービスへの HTTP 呼び出しは `RestClient` で行う。`RestTemplate` は Spring 7.1 で非推奨・8.0 で削除予定のため新規実装では採らない（採用の正は [tech_selection.md](../../backlog/java_migration/tech_selection.md) §2）。利用先は Phase 2〜 の Google OAuth（認可コード → トークン交換、アクセストークン → ユーザー情報取得）だけである。
+
+| 項目 | 規約 |
+|------|------|
+| `ClientHttpRequestFactory` | `HttpComponentsClientHttpRequestFactory` を **Bean で明示構成する**（高機能な通信設定が行えるため、というガイドラインの推奨に従う）。classpath 検出による自動選択に任せない（下表の値が効かず既定のままになる） |
+| 置き場所 | `RestClient` は `AfkgameInfraConfig`（`afkgame-domain` の `config.app`）で1つ組み立て、呼び出す Service へ注入する。値の保持 Bean は `afkgame-env` 側に置く（`MailSettings` と同じ流儀。§4.2） |
+| 失敗の扱い | 再試行はしない。タイムアウト・接続不能は例外として呼び出し元へ伝播させ、API のエラー応答へ変換する（エラーコードは Google OAuth の詳細設計で確定する） |
+| ログ | START / END を通信ログへ出す（`direction=out`・`target=google_oauth`）。**アクセストークン・IDトークン・認可コードの生値をログへ出さない**。規約の正は [logging/communication.md](../../process/coding_standards_backend/logging/communication.md) §2 |
+
+設定値は §4.2 と同じファイル・同じ受け取り方（設定保持 Bean 経由）とする。
+
+| 設定 | プロパティキー | 環境変数 | 既定値 |
+|------|--------------|---------|-------|
+| 接続タイムアウト | `http.client.connect.timeout` | —（環境変数で上書きしない） | `3000`（ミリ秒） |
+| 応答タイムアウト | `http.client.response.timeout` | —（同上） | `5000`（ミリ秒） |
+| プール上限（全体） | `http.client.pool.max.total` | —（同上） | `20` |
+| プール上限（ルート単位） | `http.client.pool.max.per.route` | —（同上） | `10` |
+
+シングルプレイ専用で外部呼び出しはログイン時に限られるため、プールは小さく取る。応答タイムアウトはメール送信（[tech_auth/mail.md](../detail/tech_auth/mail.md) §16.1）と同じ5秒に揃えた。
