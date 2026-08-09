@@ -3,7 +3,7 @@
 > **使い方**: 新セッションの最初のメッセージで `/next` と送る（または §1 のコードブロックを貼り付ける）。**着手前に §0 を読む**。
 > 本ファイルは**ポインタ専用**。Phase 進捗の正は [development_process.md](../process/development_process.md) §5、書式の正は [.claude/project/next.md](../../.claude/project/next.md)、worktree 運用の正は [worktree_guide.md](../process/worktree_guide.md)。
 
-最終更新: 2026-08-10 / main `8ac9dcd`（**3-A-2 レビュー指摘の修正セグメントB（ログと設定値）を完了した**。ISSUE-704 `userIdMDCPutFilter` を除去（`known_issues.md` #20 ⑤を解消済みへ更新）／705 識別子の無かった認証失敗ログ3か所へ `LogKey.EMAIL` でマスク済みメールを付与し、`emailTaken()` の誤った Javadoc を訂正／706 `refresh`・`logout` の無言分岐へ WARN を足し、`LogReason` へ `refresh_not_found`・`refresh_expired`・`refresh_reused`・`refresh_owner_mismatch` の4値を追加（`tech_logging.md` の reason 表へ反映。**4つ目はレビューの列挙に無く、持ち主不一致に当たる値が既存に無いため足した**）／710 ハードコードだった確認トークン24時間を `AuthSettings` へ移し、再設定トークン1時間と `mail.md` §16.2 のメール設定を `MailSettings`（新規）+ `afkgame.properties` へ用意した。**SMTP の利用自体は STEP 3-A-3 の担当で、本セグメントは設定の受け皿まで**（`VerificationMailSenderImpl` はスタブのまま）。`mvn verify` 単体195件 + 結合46件 Green・C1 100%（128/128）。**セグメントA（main `badc375`）・B が済み、残る C（下記）で 3-A-2 の指摘は打ち止め**。直前までの成果は [changelog.md](../changelog.md) の 2026-08-10 ブロックが正。
+最終更新: 2026-08-10 / main `13e709f`（**3-A-2 レビュー指摘の修正セグメントC（テスト補強）を完了し、A〜C で指摘の修正は打ち止め**。ISSUE-707 `AuthApiIntegrationTest` へ register 成功・register 重複・login 成功の3本を足し、bcrypt ハッシュの永続化（`$2a$12$`・生パスワードを保存しない）／確認トークン `purpose=verify_email` が未使用で1件／409 でユーザーもプレイヤーも増えない／`last_login_at` が進む／**既存のリフレッシュトークンがログインで失効しない**を実DBの行で検証した／708 `UserRepositoryTest` を新設して `findByEmail` の該当あり・該当なし・ゲスト行（`email` が NULL）と `updateLastLoginAt` を実DBで確認し、分岐 §13 #7 のマーカーをそこへ移した（`AuthServiceImplTest` の同名テストは #6 と同一経路のため削除し、#6 の Javadoc へ受け皿を明記）／入力長は**仕様どおりに本番コードも直した**（`RegisterResource` を email 254・password 8〜128 へ）。**前提では「本番コードは触らない見込み」としていたが、`@Size(max = 255)`・password 上限なしのままでは ③④ のテストが通らないため踏み込んだ**。あわせて `.claude/project/integration-test.md` §3 へ再発防止の1行（移行 STEP で追加したエンドポイントは実DBの行を検証する L1 テストを最低1本持つ）を追記した。`mvn verify` 単体196件 + 結合58件 Green・C1 100%（128/128）で、**2回実行して結果は同一**。セグメントA は main `badc375`、B は `8ac9dcd`。直前までの成果は [changelog.md](../changelog.md) の 2026-08-10 ブロックが正。
 
 **STEP 2R は完了済みで backend の Phase 機能へ着手してよい**。以後の移行順序は **3-A-2 → 3-A-3 → 3-B（Phase 1: game / battle / tower）→ 4（Phase 2）→ 5（Phase 3）→ 6（切替と後始末）**。順序の正は [carryover_notes.md](carryover_notes.md) §1、手順・進捗の正は [java_migration.md](java_migration.md)（索引 + `java_migration/` 3分冊）。**tower は `tech_tower.md` が無く分岐一覧も未作成**なので、3-B は `detail-design` から始める。
 
@@ -27,10 +27,10 @@ worktree を使う複数セッションが同時に走る前提。**着手状態
 ## 1. 次回（コピペ用）
 
 ```
-/integration-test 移行 STEP 3-A-2 レビュー指摘の修正・セグメントC（テスト補強）: ISSUE-707・708 と入力長テストの追随
-完了条件: ①ISSUE-707 `AuthApiIntegrationTest` へ register 成功・register 重複・login 成功の3本を足す（実DBで未検証の5点＝`password_hash` が bcrypt で永続化される／`email_verification_tokens` に `purpose=verify_email` の行が1件残る／`uq_users_email` 違反が409になりユーザー・プレイヤー行が残らない／ログイン成功で `last_login_at` が更新される／**既存のリフレッシュトークンがログインで失効しない**）②ISSUE-708 `UserRepositoryTest` を新設し（`RepositoryTestSupport` を継承）、`findByEmail` の該当あり／該当なし／ゲスト行（`email` が NULL）と `updateLastLoginAt` を実DBで確認する。分岐 §13 #7 のマーカーをそこへ移す③`AuthApiTest` をメール長 **254** へ追随させる（現在は 255 を正として書いてある）④パスワード上限128の分岐 §11 #14（129文字以上）のテストを足し、`python scripts/check_branch_list.py --tests` を違反0にする⑤`mvn verify` が Green で C1 100% を維持
-参照: 指摘の詳細は [2026-08-09_230636.md](../reviews/backend-review/2026-08-09_230636.md) の ISSUE-707・708（起点）、分岐一覧の正は [tech_auth/account.md](../tech/detail/tech_auth/account.md) §11・§13、テスト基盤は `WebIntegrationTestSupport`（結合）と `RepositoryTestSupport`（リポジトリ）
-前提: セグメントB は統合済み（main `8ac9dcd`）で `mvn verify` 単体195件 + 結合46件 Green・C1 100%（128/128）。`check_branch_list.py --tests` は**現在 §11 #14 の1件だけが違反**（本ターンで実行確認済み。④がそれを消す）。入力長を仕様側だけ確定して実装が未追随である経緯は [carryover_notes.md](carryover_notes.md) §2 の①②。触るのは `afkgame-web` の `AuthApiTest`・`AuthApiIntegrationTest` と `afkgame-domain` の `UserRepositoryTest`（新規）で、**本番コードは触らない見込み**。JDK 17.0.20（Temurin）・Maven 3.9.11・docker 29.6.2 は新規シェルで実行確認済み（**結合テストは埋め込み Postgres を使うので docker が要る**）。worktree は `python scripts/worktree.py add auth-3a2-test`。`docs/backlog/open_specs.md` は**不在＝未確定ゼロ**
+/backend-review 移行 STEP 3-A-2（register / login / logout）: 製造完了ゲートの差分レビュー
+完了条件: ①前回レビュー（`2026-08-09_230636.md`）以降の差分を対象に、`docs/reviews/backend-review/` へレポートを1本出す②セグメントA〜C の修正（ISSUE-701〜711）が指摘どおりに閉じているかを判定する③修正で新たに入ったコード（`AuthSettings`・`MailSettings`・`LogReason` の4値・`LayerLoggingInterceptor` 周辺・`RegisterResource` の入力長・`UserRepositoryTest`・`AuthApiIntegrationTest` の3本）に新規の指摘が無いかを見る④残す指摘には ISSUE 番号を採番し、重要度と検出可能工程を付ける
+参照: 前回レビューは [2026-08-09_230636.md](../reviews/backend-review/2026-08-09_230636.md)（起点。ISSUE 一覧と対応表）、観点・重要度基準は [.claude/project/review-code.md](../../.claude/project/review-code.md)、仕様の正は [tech_auth/account.md](../tech/detail/tech_auth/account.md)
+前提: セグメントC まで統合済み（main `13e709f`）。`mvn verify` は単体196件 + 結合58件 Green・C1 100%（128/128）で、**2回実行して結果は同一**（本ターンで実行確認済み）。`check_branch_list.py --tests`・`check_doc_size.py`・`check_docs.py` はいずれも違反0（同上）。**読み取りのみなので worktree は作らない**（[worktree_guide.md](../process/worktree_guide.md) §5.1 #1）。**レビュー→修正適用は別セッションに分ける**（`profile.md` §6 規律5）ので、指摘の修正は次回キューへ行として戻す。JDK 17.0.20（Temurin）・Maven 3.9.11・docker 29.6.2 は新規シェルで実行確認済み（レビュー自体はビルド不要）。`docs/backlog/open_specs.md` は**不在＝未確定ゼロ**
 ```
 
 ## 2. 候補キュー（最大5行・優先順）
@@ -43,6 +43,6 @@ worktree を使う複数セッションが同時に走る前提。**着手状態
 | 2 | **3-A-3 のテストリスト作成②（password-reset / メール送信）**。§23（16件）・§25（19件）・§17（8件）を Red へ展開する。**§17 は #1・#2・#6 の振る舞いだけ実装済み**（`VerificationMailSenderImplTest`）なので、残り5件を足したうえで8行すべてにマーカーを行き渡らせる | 同上（キュー1とは対象APIが重ならないので並行可） | `auth-3a3-testlist-b`<br>backend | `test-list` |
 | 3 | **3-B: tower の詳細設計**。`tech_tower.md`（新規）へ処理フローと分岐一覧を作る（`tech_tower.md` が無く分岐一覧も未作成のため 3-B は詳細設計から始める） | なし（3-A と領域が重ならないので並行可） | `tower-detail`<br>docs | `detail-design` |
 
-- **セグメントA〜C が揃ったら `backend-review`（差分モード）で製造完了ゲートを通す**。指摘元のレビューは [2026-08-09_230636.md](../reviews/backend-review/2026-08-09_230636.md)
+- **3-A-2 の指摘修正（セグメントA〜C）は完了済み**。製造完了ゲートの `backend-review` が §1 の「次回」。その指摘の修正適用は、レビュー完了時にキューへ行として戻す
 - **キューが空いたら戻す行**: 3-A-3 の製造（分岐82件のためセグメント2本を見込む。`auth-3a3-dev-a` / `-b` / backend / `dev`。前提はキュー2・3 のテストリスト）→ 3-B の残り（Phase 1: game / battle）とそれぞれの テストリスト作成 → 製造（順序の正は [carryover_notes.md](carryover_notes.md) §1）
 - **Phase 4 は Java 移行が終わるまで本キューから外している**（2026-08-09・ユーザー判断）。再開時に戻す3件の内訳は [carryover_notes.md](carryover_notes.md) §2 が持つ
