@@ -98,6 +98,7 @@ Logback を使用。設定は `afkgame-env` の `logback.xml`（Boot 拡張の `
 | `email_not_found` | ログイン失敗 | 該当するメールのユーザーが存在しない |
 | `password_not_set` | ログイン失敗 | Google連携のみでパスワード未設定 |
 | `password_mismatch` | ログイン失敗 | パスワードが一致しない |
+| `exception` | — | AOP境界ログ（`afkgame.layer`）のEND出力時、例外で抜けた（`logging/application.md` §3 規約3。ERRORにはしない） |
 
 ## リクエストログ用フィルタ
 

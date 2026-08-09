@@ -12,7 +12,7 @@ import org.slf4j.MDC;
  *
  * <p>仕様: docs/tech/basic/tech_logging.md「ログフォーマット」。
  * 項目は**メッセージへ埋め込まず** MDC へ載せる。text 形式では末尾へ {@code key=value} が並び、
- * JSON 形式では独立フィールドになる（エンコーダは {@code logback-encoder-*.xml}）。
+ * JSON 形式では独立フィールドになる（エンコーダは {@code logback-appenders-*.xml}）。
  *
  * <p>生成は {@link AppLogger} が行う。{@link #log()} を呼ぶまで何も出力されない。
  */

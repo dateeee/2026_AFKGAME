@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
   ログ設定。仕様の正は docs/tech/basic/tech_logging.md（形式は「ログフォーマット」、
-  ロガー名は「ロガー名体系」、環境変数は「設定値」）。
+  ロガー名は「ロガー名体系」、環境変数は「設定値」）。appender・ロガー割り当ての正は
+  coding_standards_backend/logging.md §1・§1.1。
 
   形式は LOG_FORMAT（text / json、既定 text）、レベルは LOG_LEVEL（既定 INFO）で切り替える。
   Spring Boot の <springProfile> は使えず、条件分岐タグ <if> は Janino を必要とするため、
@@ -9,7 +10,14 @@
 -->
 <configuration>
 
-    <include resource="logback-encoder-${LOG_FORMAT:-text}.xml" />
+    <include resource="logback-appenders-${LOG_FORMAT:-text}.xml" />
+
+    <!-- 通信ログ。additivity=false のため ERROR_ALERT を明示的に紐づける（漏らすと監視から抜ける） -->
+    <logger name="afkgame.comm" level="${LOG_LEVEL:-INFO}" additivity="false">
+        <appender-ref ref="COMMUNICATION" />
+        <appender-ref ref="ERROR_ALERT" />
+        <appender-ref ref="CONSOLE" />
+    </logger>
 
     <!-- Application Loggers -->
     <!-- 体系上のロガー（afkgame.auth 等）とクラス名ロガー（com.afkgame.*）を併用するため
@@ -27,6 +35,8 @@
     <logger name="org.springframework" level="warn" />
 
     <root level="warn">
+        <appender-ref ref="APPLICATION" />
+        <appender-ref ref="ERROR_ALERT" />
         <appender-ref ref="CONSOLE" />
     </root>
 

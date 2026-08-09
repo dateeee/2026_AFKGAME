@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  開発用テキスト形式（LOG_FORMAT=text）。docs/tech/basic/tech_logging.md「ログフォーマット」。
+  3appender（COMMUNICATION / APPLICATION / ERROR_ALERT / CONSOLE）の定義は
+  coding_standards_backend/logging.md §1・§1.1 が正。ファイルは日次ローテ・保持14日・gz圧縮。
+
+  出力例:
+    [2026-03-15 14:38:30] WARNING  afkgame.auth: 認証失敗 reason=player_not_found request_id=550e8400
+
+  MDC は「key=value」を空白区切りで末尾に並べる（logback 既定の「, 」区切りを空白へ置換し、
+  MDC が空のときは区切りの空白ごと出力しない）。
+-->
+<included>
+    <property name="LOG_DIR" value="${LOG_DIR:-${catalina.base:-.}/logs}" />
+
+    <property name="TEXT_PATTERN"
+        value="[%d{yyyy-MM-dd HH:mm:ss, UTC}] %-8(%replace(%level){'WARN','WARNING'}) %logger: %msg%replace(%replace(%mdc){', ',' '}){'^(.+)$',' $1'}%n" />
+
+    <appender name="COMMUNICATION" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_DIR}/communication.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_DIR}/communication.%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+            <maxHistory>14</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>${TEXT_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="APPLICATION" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_DIR}/application.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_DIR}/application.%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+            <maxHistory>14</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>${TEXT_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="ERROR_ALERT" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_DIR}/error.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_DIR}/error.%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+            <maxHistory>14</maxHistory>
+        </rollingPolicy>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>${TEXT_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>${TEXT_PATTERN}</pattern>
+        </encoder>
+    </appender>
+</included>
+

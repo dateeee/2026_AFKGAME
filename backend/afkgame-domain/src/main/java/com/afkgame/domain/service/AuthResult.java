@@ -13,4 +13,13 @@ import com.afkgame.domain.model.User;
  * @param refreshToken リフレッシュトークン（生値。クライアントへ返す唯一の機会）
  */
 public record AuthResult(User user, String accessToken, String refreshToken) {
+
+    /**
+     * トークンを伏せた表現を返す（AOP境界ログの {@code result} 出力対策。
+     * logging/application.md §3.1 規約2「戻り値のフィールドをtoString()から外す」）。
+     */
+    @Override
+    public String toString() {
+        return "AuthResult[user=" + user + ", accessToken=****, refreshToken=****]";
+    }
 }

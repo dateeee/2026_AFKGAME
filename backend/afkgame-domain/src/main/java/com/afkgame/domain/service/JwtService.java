@@ -1,6 +1,7 @@
 package com.afkgame.domain.service;
 
 import com.afkgame.domain.exception.AppException;
+import com.afkgame.env.logging.MaskReturnValue;
 
 /**
  * アクセストークン（JWT）の発行と検証。
@@ -29,6 +30,7 @@ public interface JwtService {
      * @param guest  ゲストアカウントかどうか
      * @return 署名済みJWT
      */
+    @MaskReturnValue
     String createAccessToken(String userId, boolean guest);
 
     /**

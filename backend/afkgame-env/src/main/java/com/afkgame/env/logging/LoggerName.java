@@ -19,7 +19,13 @@ public enum LoggerName {
     MIDDLEWARE("afkgame.middleware"),
 
     /** ヘルスチェック（運用監視向け）。 */
-    HEALTH("afkgame.health");
+    HEALTH("afkgame.health"),
+
+    /** 通信の START / END（受信・送信）。通信ログファイルへ出る唯一のロガー。 */
+    COMM("afkgame.comm"),
+
+    /** AOP による境界ログ（Service・Repository の START / END）。 */
+    LAYER("afkgame.layer");
 
     private final String loggerName;
 

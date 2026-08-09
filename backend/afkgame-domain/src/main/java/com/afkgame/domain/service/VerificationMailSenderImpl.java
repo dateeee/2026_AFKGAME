@@ -26,6 +26,14 @@ public class VerificationMailSenderImpl implements VerificationMailSender {
 
     private static final AppLogger logger = AppLogger.of(LoggerName.AUTH);
 
+    private static final AppLogger commLogger = AppLogger.of(LoggerName.COMM);
+
+    /** 送信先（communication.md §2「target」の固定値）。 */
+    private static final String TARGET_SMTP = "smtp";
+
+    /** 送信の方向（communication.md §2「direction」）。 */
+    private static final String DIRECTION_OUT = "out";
+
     /** {@inheritDoc} */
     @Override
     public void send(User user, String rawToken) {
@@ -61,13 +69,19 @@ public class VerificationMailSenderImpl implements VerificationMailSender {
      *
      * <p>仮実装のため送信を行わず、送信要求の記録だけを残す（解消時期は移行 STEP 3-A-3）。
      * 送信失敗を試験から再現できるよう、可視性をパッケージ内に限って開いている。
+     * 通信ログ（START / END）は送信の成否によらず対で出す（communication.md §2 規約3）。
      *
      * @param user 宛先のユーザー
      * @param rawToken 確認トークンの生値（メール本文のリンクに載せる）
      */
     void doSend(User user, String rawToken) {
-        logger.warn("確認メールは未送信（送信手段は移行 STEP 3-A-3 で実装）")
-                .with(LogKey.USER_ID, user.getId())
-                .log();
+        commLogger.info("START").with(LogKey.DIRECTION, DIRECTION_OUT).with(LogKey.TARGET, TARGET_SMTP).log();
+        try {
+            logger.warn("確認メールは未送信（送信手段は移行 STEP 3-A-3 で実装）")
+                    .with(LogKey.USER_ID, user.getId())
+                    .log();
+        } finally {
+            commLogger.info("END").with(LogKey.DIRECTION, DIRECTION_OUT).with(LogKey.TARGET, TARGET_SMTP).log();
+        }
     }
 }

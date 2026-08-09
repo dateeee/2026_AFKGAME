@@ -45,7 +45,22 @@ public enum LogKey {
     TOKEN("token", LogMasker::maskToken),
 
     /** メールアドレス。ローカル部の先頭2文字とドメインだけを残す。 */
-    EMAIL("email", LogMasker::maskEmail);
+    EMAIL("email", LogMasker::maskEmail),
+
+    /** 通信の方向。{@code in} / {@code out}（通信ログ）。 */
+    DIRECTION("direction"),
+
+    /** 送信先（通信ログの送信のみ。{@code smtp}・{@code google_oauth} 等の固定値）。 */
+    TARGET("target"),
+
+    /** 境界のメソッド（{@code Xxx#yyy} 形式。AOP境界ログ）。 */
+    SIGNATURE("signature"),
+
+    /** 境界の引数（AOP境界ログ。マスク・整形済みの文字列を渡す）。 */
+    ARGS("args"),
+
+    /** 境界の戻り値（AOP境界ログ。マスク・整形済みの文字列を渡す）。 */
+    RESULT("result");
 
     private final String field;
     private final UnaryOperator<String> masker;

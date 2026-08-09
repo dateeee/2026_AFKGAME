@@ -16,7 +16,7 @@ import ch.qos.logback.core.encoder.EncoderBase;
  *
  * <p>仕様: docs/tech/basic/tech_logging.md「ログフォーマット」。
  * 固定項目（timestamp・level・logger・message）に MDC の項目を同じ階層で並べ、
- * 例外があれば {@code exception} を加える。logback-encoder-json.xml から参照する。
+ * 例外があれば {@code exception} を加える。logback-appenders-json.xml から参照する。
  *
  * <p>MDC のキーはログ項目名そのものとして扱う（付与は
  * {@code com.afkgame.web.filter.RequestLogFilter} 他）。

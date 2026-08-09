@@ -25,8 +25,9 @@ import jakarta.servlet.ServletException;
 /**
  * {@link RequestLogFilter} の単体テスト。
  *
- * <p>仕様: docs/tech/basic/tech_logging.md「リクエストログ用フィルタ」。
- * リクエストIDの採番・{@code X-Request-ID} ヘッダ付与・処理時間計測・INFOログ出力を担う。
+ * <p>仕様: docs/tech/basic/tech_logging.md「リクエストログ用フィルタ」、
+ * 出力項目・START/END対の規約は coding_standards_backend/logging/communication.md §2。
+ * リクエストIDの採番・{@code X-Request-ID} ヘッダ付与・処理時間計測・通信ログ出力を担う。
  *
  * <p>分岐観点: 正常終了 / 後続で例外が起きた場合（いずれも MDC を後始末する）。
  * ログ本文は {@link ListAppender} で受けて検証する（Terasoluna 単体テストガイドライン 10.2.3）。
@@ -41,18 +42,18 @@ class RequestLogFilterTest {
     /** ログ出力そのものを検証するための受け皿（coding_standards_backend/test.md §5「新規実装から適用する」1）。 */
     private final ListAppender<ILoggingEvent> logs = new ListAppender<>();
 
-    private ch.qos.logback.classic.Logger middlewareLogger;
+    private ch.qos.logback.classic.Logger commLogger;
 
     @BeforeEach
     void setUp() {
         logs.start();
-        middlewareLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("afkgame.middleware");
-        middlewareLogger.addAppender(logs);
+        commLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("afkgame.comm");
+        commLogger.addAppender(logs);
     }
 
     @AfterEach
     void tearDown() {
-        middlewareLogger.detachAppender(logs);
+        commLogger.detachAppender(logs);
         logs.stop();
         MDC.clear();
     }
@@ -93,18 +94,24 @@ class RequestLogFilterTest {
     }
 
     @Test
-    @DisplayName("処理時間つきの INFO ログを afkgame.middleware へ出す")
-    void test_リクエストログをINFOで出力する() throws Exception {
+    @DisplayName("START / END の通信ログを afkgame.comm へ対で出す")
+    void test_通信ログをSTART_END対でafkgame_commへ出力する() throws Exception {
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         filter.doFilter(request(), response, new MockFilterChain());
 
-        assertThat(logs.list).hasSize(1);
-        ILoggingEvent event = logs.list.get(0);
-        assertThat(event.getLevel()).isEqualTo(Level.INFO);
-        assertThat(event.getFormattedMessage()).matches("POST /api/auth/guest 200 \\d+ms");
+        assertThat(logs.list).hasSize(2);
+        ILoggingEvent start = logs.list.get(0);
+        assertThat(start.getLevel()).isEqualTo(Level.INFO);
+        assertThat(start.getFormattedMessage()).isEqualTo("START");
+        assertThat(start.getMDCPropertyMap()).containsEntry("direction", "in");
+
+        ILoggingEvent end = logs.list.get(1);
+        assertThat(end.getLevel()).isEqualTo(Level.INFO);
+        assertThat(end.getFormattedMessage()).isEqualTo("END");
         // MDC は finally で clear されるが、ログイベントには出力時点の値が焼き込まれている
-        assertThat(event.getMDCPropertyMap())
+        assertThat(end.getMDCPropertyMap())
+                .containsEntry("direction", "in")
                 .containsEntry("status_code", "200")
                 .containsKeys("request_id", "duration_ms");
     }

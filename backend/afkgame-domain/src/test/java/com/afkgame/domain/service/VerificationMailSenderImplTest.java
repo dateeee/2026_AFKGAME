@@ -4,14 +4,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionSynchronizationUtils;
 
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import com.afkgame.domain.model.User;
+import com.afkgame.env.logging.LoggerName;
 
 /**
  * {@link VerificationMailSenderImpl} の単体テスト。
@@ -144,6 +149,48 @@ class VerificationMailSenderImplTest {
             assertThatCode(TransactionSynchronizationUtils::triggerAfterCommit)
                     .doesNotThrowAnyException();
             assertThat(sender.sent).isEqualTo(1);
+        }
+    }
+
+    @Nested
+    @DisplayName("送信の通信ログ")
+    class TestCommunicationLog {
+
+        /** ログ出力そのものを検証するための受け皿（coding_standards_backend/test.md §5「新規実装から適用する」1）。 */
+        private final ListAppender<ILoggingEvent> logs = new ListAppender<>();
+
+        private ch.qos.logback.classic.Logger commLogger;
+
+        @BeforeEach
+        void setUp() {
+            logs.start();
+            commLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(LoggerName.COMM.loggerName());
+            commLogger.addAppender(logs);
+        }
+
+        @AfterEach
+        void tearDown() {
+            commLogger.detachAppender(logs);
+            logs.stop();
+        }
+
+        /**
+         * 送信（送信手段確定前の仮実装でも）は通信ログのSTART / ENDを対で出す
+         * （communication.md §2 規約2・3。方向はout、相手はsmtp）。
+         */
+        @Test
+        void test_送信のSTART_ENDをdirection_out_target_smtpで出す() {
+            new VerificationMailSenderImpl().doSend(user(), RAW_TOKEN);
+
+            assertThat(logs.list).hasSize(2);
+            assertThat(logs.list.get(0).getFormattedMessage()).isEqualTo("START");
+            assertThat(logs.list.get(1).getFormattedMessage()).isEqualTo("END");
+            assertThat(logs.list.get(0).getMDCPropertyMap())
+                    .containsEntry("direction", "out")
+                    .containsEntry("target", "smtp");
+            assertThat(logs.list.get(1).getMDCPropertyMap())
+                    .containsEntry("direction", "out")
+                    .containsEntry("target", "smtp");
         }
     }
 }

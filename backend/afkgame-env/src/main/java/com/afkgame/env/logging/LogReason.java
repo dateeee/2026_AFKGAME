@@ -42,7 +42,10 @@ public enum LogReason {
     PASSWORD_NOT_SET("password_not_set"),
 
     /** パスワードが一致しない。 */
-    PASSWORD_MISMATCH("password_mismatch");
+    PASSWORD_MISMATCH("password_mismatch"),
+
+    /** AOP境界ログのEND出力時、例外で抜けた（logging/application.md §3 規約3）。 */
+    EXCEPTION("exception");
 
     private final String value;
 
