@@ -624,6 +624,11 @@ class AuthServiceImplTest {
         /**
          * どちらが誤りかを区別させないため、パスワード不一致と同じコードを返す（§12 末尾）。
          *
+         * <p>#7（ゲストアカウントでのログイン）も {@code findByEmail} が null を返す同じ経路に落ちる。
+         * サービス層で見分けられるのは「行が引けたか」だけで、ゲスト行が引けないこと自体は
+         * {@code email} が NULL である {@code users} と SQL の性質のため、{@code UserRepositoryTest}
+         * が実DBで持つ（Repository をモックしたままでは検証できない）。
+         *
          * <p>分岐: tech_auth/account.md §13 #6
          */
         @Test
@@ -636,24 +641,6 @@ class AuthServiceImplTest {
                     .containsExactly("AUTH_INVALID_CREDENTIALS", 401);
 
             verify(refreshTokenRepository, never()).save(any());
-        }
-
-        /**
-         * ゲスト行は {@code email} が NULL のため、どのメールで引いても手順2に一致しない
-         * （§12 末尾）。メールログインの対象外であることが未登録と同じ応答になる。
-         *
-         * <p>分岐: tech_auth/account.md §13 #7
-         */
-        @Test
-        void test_ゲストアカウントはメールログインの対象外で401になる() {
-            when(userRepository.findByEmail("guest@example.com")).thenReturn(null);
-
-            assertThatThrownBy(() -> authService().login("guest@example.com", PASSWORD))
-                    .isInstanceOf(AppException.class)
-                    .extracting("code", "status")
-                    .containsExactly("AUTH_INVALID_CREDENTIALS", 401);
-
-            verify(passwordEncoder, never()).matches(any(), any());
         }
 
         /**

@@ -62,8 +62,8 @@ import com.afkgame.web.filter.ApiExceptionHandler;
  *   <li>{@code AuthApi#logout(@AuthenticationPrincipal User, @Valid @RequestBody LogoutResource)}
  *       → {@code StatusResource}（{@code {"status": "ok"}}）</li>
  *   <li>{@code RegisterResource(String email, String password)}:
- *       {@code email} は {@code @NotBlank @Email @Size(max = 255)}、
- *       {@code password} は {@code @NotBlank @Size(min = 8)}（§10 手順1）</li>
+ *       {@code email} は {@code @NotBlank @Email @Size(max = 254)}、
+ *       {@code password} は {@code @NotBlank @Size(min = 8, max = 128)}（§10 手順1・§9「入力長」）</li>
  *   <li>{@code LoginResource(String email, String password)}: {@code email} は
  *       {@code @NotBlank @Email}、{@code password} は {@code @NotBlank}
  *       （**8文字以上はログインでは課さない**。§12 手順1）</li>
@@ -225,30 +225,30 @@ class AuthApiTest {
         }
 
         /**
-         * 上限ちょうど（255文字）は受け付ける。
+         * 上限ちょうど（254文字）は受け付ける。上限の正は §9「入力長」（RFC 5321）。
          *
          * <p>分岐: tech_auth/account.md §11 #3
          */
         @Test
-        void test_255文字ちょうどのメールは受け付ける() throws Exception {
+        void test_254文字ちょうどのメールは受け付ける() throws Exception {
             when(authService.register(any(), any())).thenReturn(registeredResult());
 
             mockMvc.perform(post("/api/auth/register")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(credentialBody(emailOfLength(255), PASSWORD)))
+                            .content(credentialBody(emailOfLength(254), PASSWORD)))
                     .andExpect(status().isOk());
         }
 
         /**
-         * 上限超過（256文字）は 422。
+         * 上限超過（255文字）は 422。
          *
          * <p>分岐: tech_auth/account.md §11 #4
          */
         @Test
-        void test_256文字のメールは422を返す() throws Exception {
+        void test_255文字のメールは422を返す() throws Exception {
             mockMvc.perform(post("/api/auth/register")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(credentialBody(emailOfLength(256), PASSWORD)))
+                            .content(credentialBody(emailOfLength(255), PASSWORD)))
                     .andExpect(status().isUnprocessableEntity())
                     .andExpect(jsonPath("$.error.code").value("VALIDATION_ERROR"));
 
@@ -256,17 +256,19 @@ class AuthApiTest {
         }
 
         /**
-         * 下限ちょうど（8文字）は受け付ける（tech_auth.md §1「パスワード要件」）。
+         * 許容範囲の両端（8文字・128文字ちょうど）は受け付ける（tech_auth.md §1「パスワード要件」、
+         * 長さの正は §9「入力長」）。
          *
          * <p>分岐: tech_auth/account.md §11 #5
          */
-        @Test
-        void test_8文字ちょうどのパスワードは受け付ける() throws Exception {
+        @ParameterizedTest(name = "length={0}")
+        @ValueSource(ints = {8, 128})
+        void test_8文字以上128文字以下のパスワードは受け付ける(int length) throws Exception {
             when(authService.register(any(), any())).thenReturn(registeredResult());
 
             mockMvc.perform(post("/api/auth/register")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(credentialBody("user@example.com", "12345678")))
+                            .content(credentialBody("user@example.com", "a".repeat(length))))
                     .andExpect(status().isOk());
         }
 
@@ -284,6 +286,22 @@ class AuthApiTest {
             mockMvc.perform(post("/api/auth/register")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(credentialBody("user@example.com", password)))
+                    .andExpect(status().isUnprocessableEntity())
+                    .andExpect(jsonPath("$.error.code").value("VALIDATION_ERROR"));
+
+            verify(authService, never()).register(any(), any());
+        }
+
+        /**
+         * 上限超過（129文字）は 422。ハッシュ化のコストを入力側で頭打ちにする（§9「入力長」）。
+         *
+         * <p>分岐: tech_auth/account.md §11 #14
+         */
+        @Test
+        void test_129文字以上のパスワードは422を返す() throws Exception {
+            mockMvc.perform(post("/api/auth/register")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(credentialBody("user@example.com", "a".repeat(129))))
                     .andExpect(status().isUnprocessableEntity())
                     .andExpect(jsonPath("$.error.code").value("VALIDATION_ERROR"));
 

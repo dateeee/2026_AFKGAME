@@ -8,6 +8,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.sql.Timestamp;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +29,9 @@ import tools.jackson.databind.json.JsonMapper;
  */
 class AuthApiIntegrationTest extends WebIntegrationTestSupport {
 
+    /** 登録・ログインで使う生パスワード（DBへ保存されないことの照合にも使う）。 */
+    private static final String PASSWORD = "securepass123";
+
     /** 応答の読み取りは本番と同じ Jackson 3 の {@code JsonMapper} を使う。 */
     @Autowired
     private JsonMapper jsonMapper;
@@ -41,6 +46,26 @@ class AuthApiIntegrationTest extends WebIntegrationTestSupport {
 
     private static String refreshBody(String refreshToken) {
         return "{\"refreshToken\":\"" + refreshToken + "\"}";
+    }
+
+    private static String credentialBody(String email, String password) {
+        return "{\"email\":\"" + email + "\",\"password\":\"" + password + "\"}";
+    }
+
+    /** メールとパスワードで登録し、応答（accessToken / refreshToken / user）を返す。 */
+    private JsonNode register(String email) throws Exception {
+        String body = mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(credentialBody(email, PASSWORD)))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        return jsonMapper.readTree(body);
+    }
+
+    /** {@code users.last_login_at} の現在値。 */
+    private Timestamp lastLoginAt(String userId) {
+        return jdbcTemplate.queryForObject(
+                "SELECT last_login_at FROM users WHERE id = ?", Timestamp.class, userId);
     }
 
     @Test
@@ -102,6 +127,104 @@ class AuthApiIntegrationTest extends WebIntegrationTestSupport {
         assertThat(jdbcTemplate.queryForObject(
                 "SELECT quantity FROM inventory_items WHERE player_id = ? AND item_id = 'hp_potion'",
                 Integer.class, playerId)).isEqualTo(5);
+    }
+
+    /**
+     * 登録が「ユーザー + 確認トークン + プレイヤー」までを1つのトランザクションで作り、コミットする
+     * ことを実DBの行で確認する。手順ごとの分岐は {@code AuthServiceImplTest} が持ち、ここでは連結と
+     * 永続化（生パスワードを保存しない・確認トークンが残る）を見る。
+     *
+     * <p>分岐: tech_auth/account.md §11 #10
+     */
+    @Test
+    @DisplayName("POST /api/auth/register は bcrypt ハッシュ・確認トークン・プレイヤーを永続化する")
+    void test_登録が実DBへ反映される() throws Exception {
+        String email = "register@example.com";
+
+        JsonNode registered = register(email);
+
+        String userId = registered.at("/user/id").asText();
+        assertThat(userId).startsWith("user_");
+        assertThat(registered.at("/user/isGuest").asBoolean()).isFalse();
+        // 未確認のままログイン・プレイできる（tech_auth.md §3）
+        assertThat(registered.at("/user/emailVerified").asBoolean()).isFalse();
+
+        // 保存するのは bcrypt（strength 12）のハッシュだけで、生パスワードは残さない（§9）
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT password_hash FROM users WHERE id = ?", String.class, userId))
+                .startsWith("$2a$12$").isNotEqualTo(PASSWORD);
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT email FROM users WHERE id = ?", String.class, userId)).isEqualTo(email);
+
+        // 確認メール用のトークンが未使用で1件残る（§10 手順6）
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT count(*) FROM email_verification_tokens"
+                        + " WHERE user_id = ? AND purpose = 'verify_email' AND used = FALSE",
+                Integer.class, userId)).isEqualTo(1);
+
+        // プレイヤーの初期化まで同じトランザクションで終える（§10 手順7）
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT count(*) FROM players WHERE user_id = ?",
+                Integer.class, userId)).isEqualTo(1);
+    }
+
+    /**
+     * 重複は 409 で止まり、2人目のユーザーもプレイヤーも確認トークンも残さない。
+     *
+     * <p>分岐: tech_auth/account.md §11 #8
+     */
+    @Test
+    @DisplayName("同じメールでの再登録は 409 になり、ユーザーもプレイヤーも増やさない")
+    void test_メール重複の登録は409で何も作らない() throws Exception {
+        String email = "duplicate@example.com";
+        String userId = register(email).at("/user/id").asText();
+
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(credentialBody(email, "anotherpass123")))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.error.code").value("AUTH_EMAIL_TAKEN"));
+
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT count(*) FROM users WHERE email = ?", Integer.class, email)).isEqualTo(1);
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT count(*) FROM players WHERE user_id = ?",
+                Integer.class, userId)).isEqualTo(1);
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT count(*) FROM email_verification_tokens WHERE user_id = ?",
+                Integer.class, userId)).isEqualTo(1);
+    }
+
+    /**
+     * ログインが `last_login_at` を進め、**既存のリフレッシュトークンを失効させない**ことを
+     * 実DBの行で確認する（複数端末の同時ログインを許容する。§12 手順6・手順7）。
+     *
+     * <p>分岐: tech_auth/account.md §13 #10
+     */
+    @Test
+    @DisplayName("POST /api/auth/login は last_login_at を進め、既存のリフレッシュトークンを残す")
+    void test_ログインが実DBへ反映される() throws Exception {
+        String email = "login@example.com";
+        JsonNode registered = register(email);
+        String userId = registered.at("/user/id").asText();
+        Timestamp registeredAt = lastLoginAt(userId);
+
+        String body = mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(credentialBody(email, PASSWORD)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.user.id").value(userId))
+                .andReturn().getResponse().getContentAsString();
+        JsonNode loggedIn = jsonMapper.readTree(body);
+
+        assertThat(lastLoginAt(userId)).isAfter(registeredAt);
+
+        // 登録で発行した1本と、ログインで発行した1本が、どちらも有効なまま並ぶ
+        assertThat(loggedIn.at("/refreshToken").asText())
+                .isNotEqualTo(registered.at("/refreshToken").asText());
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT count(*) FROM refresh_tokens WHERE user_id = ? AND revoked = FALSE",
+                Integer.class, userId)).isEqualTo(2);
     }
 
     @Test
