@@ -240,10 +240,25 @@ def test_analyze_ignores_successful_tool_results():
 
 # ── analyze: long-turn ───────────────────────────────────────
 
-def test_analyze_detects_long_turn_at_threshold():
+def test_analyze_adds_long_turn_at_threshold_when_other_signal_exists():
+    entries = [user("依頼"), *reads("a.md", mod.SAME_READ_MIN),
+               *[tool_use("Grep", f"g{i}", pattern=str(i))
+                 for i in range(mod.CALLS_MIN - mod.SAME_READ_MIN)]]
+    assert f"long-turn(calls={mod.CALLS_MIN})" in signals(entries)
+
+
+def test_analyze_omits_long_turn_below_threshold_with_other_signal():
+    entries = [user("依頼"), *reads("a.md", mod.SAME_READ_MIN),
+               *[tool_use("Grep", f"g{i}", pattern=str(i))
+                 for i in range(mod.CALLS_MIN - mod.SAME_READ_MIN - 1)]]
+    assert not any(s.startswith("long-turn") for s in signals(entries))
+
+
+def test_analyze_never_reports_long_turn_alone():
+    """呼び出し数だけが多いターンは記録しない（1ターンで工程を完走する運用）。"""
     entries = [user("依頼"), *[tool_use("Grep", f"g{i}", pattern=str(i))
                               for i in range(mod.CALLS_MIN)]]
-    assert f"long-turn(calls={mod.CALLS_MIN})" in signals(entries)
+    assert signals(entries) == []
 
 
 def test_analyze_allows_turn_below_call_threshold():

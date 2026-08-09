@@ -45,7 +45,7 @@ worktree は1つのリポジトリから複数の作業ツリーを同時に開�
 | `docs/backlog/java_migration.md`（進捗） | 状態の更新 | main でのみ更新、または進捗を持つ STEP を担当する worktree を1つに限定。分冊 `java_migration/**` も同じ扱い |
 | `docs/backlog/` のその他（open_specs 等） | 行の追加・削除 | 触る worktree を1つに限定 |
 
-- **`merge=union` の注意**: 両方の追加行を残すだけで行順は保証しない。changelog で同じ日付見出しが二重になったら統合後に1つへ畳む。追記型以外のファイルには適用しないこと（黙って壊れる）
+- **`merge=union` の注意**: 両方の追加行を残すだけで行順は保証しない。changelog で同じ日付見出しが二重になったら統合後に1つへ畳む。追記型以外のファイルには適用しないこと（黙って壊れる）。**削除は伝播しない**ため、行を消す作業（効率メモの消化・changelog の重複畳み）は worktree 側で行わず**統合後に main で**行う（worktree で消すと両側の行が残って復活する）
 - **rerere**: 一度手で解消した競合は記録され、同じ競合に再適用される（`add` 実行時に有効化済み。設定は全 worktree 共通）
 
 ## 4. 実行環境の競合（ポート・DB）
@@ -104,7 +104,8 @@ worktree の作成・統合（main への merge）・削除は**ユーザーへ�
 - `ExitWorktree` が削除できるのは自分が `name` で作った worktree だけ。`path` で入ったものは `"keep"` で戻るのみ（実体は §5.3 の 3 の `merge` が消す）
 - `.claude/`（スキル・フック・プロファイル）はコミット済みなので worktree にも同梱されそのまま動く。`settings.local.json` は `add` がコピーする
 - 効率メモ・Stop フックは各 worktree 内の自分のファイルへ書き、統合時に `merge=union` で合流する（`efficiency_check.py` はフック入力の `cwd` から作業ツリーの根を解決するため、main の `CLAUDE_PROJECT_DIR` から起動されても worktree 側のメモへ書く）
-- **worktree 中の Bash は1コマンド1目的に割る**。`&&` 連結・リダイレクト・複数パスを1つに詰めると分離ガードが「worktree 内に留まるか検証できない」として拒否する。`EnterWorktree` 後の cwd は既に worktree なので `cd <worktree> &&` の前置も不要（付けると複合コマンド扱いで弾かれる）。main を指す `git -C <mainのパス> ...` も拒否されるため、main の状態は §5.3 の 2 で戻ってから見る
+- **worktree 中の Bash は1コマンド1目的に割る**。`&&` 連結・ループ・コマンド置換（`$(...)`）・リダイレクト・複数パスを1つに詰めると分離ガードが「worktree 内に留まるか検証できない」として拒否する。`EnterWorktree` 後の cwd は既に worktree なので `cd <worktree> &&` の前置も不要（付けると複合コマンド扱いで弾かれる）。main を指す `git -C <mainのパス> ...` や main への `cd` も拒否されるため、**main 側の状態確認は `EnterWorktree` の前に済ませる**（済んでいなければ §5.3 の 2 で戻ってから見る）
+- **一括移送（`git mv`・`cp`）はディレクトリ単位でまとめる**。上の制約でファイル単位に展開すると呼び出し回数が跳ねる（実績: ディレクトリ単位なら数回で済む移送を21回に割った）
 - **`worktree.py merge` は main で実行する**（worktree の中から呼ぶと相対パス解決に失敗する。§5.3 の 3）
 - **worktree 内のファイル解析は `ctx_execute` にパスを直書きして行う**。`ctx_execute_file` はプロジェクトルート外として拒否される
 - 自動メモリ（`~/.claude/projects/<パス>/memory/`）はディレクトリパス単位のため worktree では別になる。プロジェクトの正はリポジトリ内ドキュメントに置く方針（`MEMORY.md` 参照）なので実害はない

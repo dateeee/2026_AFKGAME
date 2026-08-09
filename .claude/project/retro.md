@@ -9,7 +9,7 @@
 | メモのパス | `docs/backlog/efficiency_memo.md`（作業用の台帳。区分C 8,000字上限・doc検査の対象。超過は `/retro` を回す合図） |
 | 自動追記フック | `.claude/hooks/efficiency_check.py`（Stop フック。`stop-chain.sh` 経由で登録済み） |
 | 実行順 | `stop-chain.sh` が efficiency_check → stop-commit の順で実行。メモ記入をコミットより先に済ませ、メモの変更も同じコミットへ含める（メモだけの追いコミットを作らない） |
-| エントリの寿命 | 反映済み・対応不要になったら削除（`docs/backlog/open_specs.md` と同じ運用） |
+| エントリの寿命 | 反映済み・対応不要になったら削除（`docs/backlog/open_specs.md` と同じ運用）。**削除は main で行う**（worktree 側で消しても `merge=union` は削除を伝播せず、統合後に全エントリが復活する。[worktree_guide.md](../../docs/process/worktree_guide.md) §3） |
 
 ## 検出シグナルとしきい値
 
@@ -21,7 +21,7 @@
 | same-command | 同一コマンドの繰り返し実行 | 3回 |
 | errors | ツールエラーの多発（ユーザー拒否・検査系の「違反あり exit 1」は除く） | 3件 |
 | denials | ユーザーによる許可拒否 | 2件 |
-| long-turn | ターン内ツール呼び出し総数 | 30回 |
+| long-turn | ターン内ツール呼び出し総数。**単独では追記しない**（他シグナルを伴うときだけ規模として添える） | 150回 |
 | correction | ターン冒頭の発話の手戻り語（「違う」「やり直し」等） | 1語 |
 
 `errors` から除外するコマンドは同ファイルの `EXPECTED_NONZERO`（既定: `check_*.py` /

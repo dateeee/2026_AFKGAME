@@ -19,7 +19,7 @@ stop-commit.sh より先に実行する（メモの追記をコミット確認�
   same-command  同一コマンドの Bash/PowerShell 実行の繰り返し（試行錯誤の空回り）
   errors        ツールエラーの多発（検査・リンタ・テストの「違反あり exit 1」は除く）
   denials       ユーザーによる許可拒否が複数（進め方の食い違い）
-  long-turn     ターン内のツール呼び出し総数が過大
+  long-turn     ターン内のツール呼び出し総数が過大（単独では記録しない）
   correction    ターン冒頭のユーザー発話に手戻り語（前ターンの手戻りを示す）
 
 出力先:
@@ -48,7 +48,7 @@ SAME_READ_MIN = 2   # 同一 (file_path, offset, limit) の Read 回数
 SAME_CMD_MIN = 3    # 同一コマンド文字列の実行回数
 ERRORS_MIN = 3      # is_error なツール結果の数（拒否を除く）
 DENIALS_MIN = 2     # ユーザーによる拒否の数
-CALLS_MIN = 30      # ターン内のツール呼び出し総数
+CALLS_MIN = 150     # ターン内のツール呼び出し総数（単独では記録しない）
 
 # 手戻りを示す語（ターン冒頭のユーザー発話に含まれたら前ターンの手戻りを疑う）
 CORRECTION_WORDS = ("違う", "ちがう", "そうじゃな", "やり直", "やりなおし",
@@ -187,14 +187,17 @@ def analyze(entries):
         signals.append(f"errors×{errors}")
     if denials >= DENIALS_MIN:
         signals.append(f"denials×{denials}")
-    if calls >= CALLS_MIN:
-        signals.append(f"long-turn(calls={calls})")
-
     btext = text_of((entries[boundary].get("message") or {}).get("content")).strip()
     if btext and not btext.startswith("<"):
         hits = [w for w in CORRECTION_WORDS if w in btext]
         if hits:
             signals.append("correction(" + ",".join(hits[:3]) + ")")
+
+    # long-turn は単独では記録しない。1ターンで工程を完走する運用では呼び出し数の
+    # 多さ自体が非効率の証拠にならず、実測（2026-08-09 の10件）は 43〜173 回の全件が
+    # 「正当な分量」と判定された。他シグナルを伴うときだけ規模の情報として添える。
+    if calls >= CALLS_MIN and signals:
+        signals.append(f"long-turn(calls={calls})")
 
     head = next((ln.strip() for ln in btext.splitlines() if ln.strip()), "")[:60]
     return {"signals": signals, "calls": calls, "errors": errors,

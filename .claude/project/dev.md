@@ -70,6 +70,7 @@
 | 5 | 開発時フォールバック | `frontend/src/composables/useBattleLocal.ts` の単体動作を壊していないか |
 | 6 | 既存パターン踏襲 | 命名規則・ディレクトリ構造・import規約がコーディング規約どおりか（バックエンドは `common.md` §2〜§5 + 層別の分冊、フロントは既存コードの流儀） |
 | 7 | ログ | `logback.xml` 準拠か（ロガー名体系は `tech_logging.md` が正） |
+| 8 | 退避・削除の巻き込み | 既存コードを退避・削除する前に **import で依存の実体を分類**したか（「Boot 前提」等の粒度を鵜呑みにしない）。常設チェッカーを退避の前後で走らせ、緑→赤の変化で巻き込みを検出する |
 
 ## 5. 動作確認
 
@@ -82,8 +83,9 @@
 | # | 確認時の注意 |
 |---|------------|
 | 1 | テスト件数は **`<testcase` の出現数**（`grep -c "<testcase" target/*-reports/TEST-*.xml`）か、`mvn` 出力のモジュール別 `Tests run:` 行で数える。**`*.txt` の「Tests run」も XML ルートの `tests=` 属性も、JUnit 5 の `@Nested` 配下を 0 と報告する**（2026-08-09 実測: `MasterDataLoaderTest` は `tests="0"` だが `<testcase` は11件。`tests=` で集計すると domain 60件が15件に見える）。失敗は `<failure` / `<error` で数える |
-| 2 | 外部依存の版は**推測で書かない**。Maven Central へ1回問い合わせてから POM へ入れる（誤った版はビルド1回ぶんの空振りになる） |
+| 2 | 外部依存の版・API の実在確認は**推測で書かず、着手前に項目を列挙して1バッチで問い合わせる**（問い合わせ先と落とし穴は [commands.md](commands.md) §4） |
 | 3 | 既存 POM の版調査は properties と dependencyManagement を**まとめて1回**で出す（キーを推測した grep の空振りを繰り返さない） |
+| 4 | **DI コンテナを起こす確認をビルドと別に置く**（Bean 生成時にしか出ない型エイリアス衝突・未解決プレースホルダはコンパイルでは出ない）。DB 無しで回すときは `dataSource` と `flyway` だけスタブへ差し替える |
 
 ## 6. 完了基準
 
