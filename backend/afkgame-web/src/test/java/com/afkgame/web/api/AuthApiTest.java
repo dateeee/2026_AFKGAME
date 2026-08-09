@@ -47,7 +47,7 @@ import com.afkgame.web.filter.ApiExceptionHandler;
  *
  * <p><b>登録・ログイン・ログアウト（移行 STEP 3-A-2）</b>: 本クラスは分岐一覧 §11・§13・§15 の
  * うち **Bean Validation・HTTP ステータス・エラーコード・引数の受け渡し**が決める分岐を持つ。
- * サービス層が決める分岐（重複判定・照合・失効）は {@code AuthServiceTest}、認証必須の拒否
+ * サービス層が決める分岐（重複判定・照合・失効）は {@code AuthServiceImplTest}、認証必須の拒否
  * （§15 #2）は Security フィルタチェーンが要るため {@code AuthApiIntegrationTest} が持つ。
  *
  * <p>Bean Validation 違反を 422 で受けるため {@link ApiExceptionHandler} を、ログアウトの
@@ -292,7 +292,7 @@ class AuthApiTest {
 
         /**
          * 成功時の応答（§5「POST /api/auth/register」）。サービス層のコミットは
-         * {@code AuthServiceTest} が持ち、ここでは 200 と本文の形だけを見る。
+         * {@code AuthServiceImplTest} が持ち、ここでは 200 と本文の形だけを見る。
          *
          * <p>分岐: tech_auth_account.md §11 #10
          */

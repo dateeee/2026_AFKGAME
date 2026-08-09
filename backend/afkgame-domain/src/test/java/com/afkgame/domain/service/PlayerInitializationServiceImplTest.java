@@ -45,7 +45,7 @@ import com.afkgame.domain.repository.CharacterRepository;
 import com.afkgame.domain.repository.PlayerRepository;
 
 /**
- * {@link PlayerInitializationService} の単体テスト。
+ * {@link PlayerInitializationServiceImpl} の単体テスト。
  *
  * <p>仕様: docs/tech/detail/tech_auth.md §8.2「処理フロー」手順2〜6・§8.3「分岐一覧」。
  * 既定値の正は docs/tech/basic/tech_db/player.md §1（players）・§2（player_settings）・§4（characters）。
@@ -56,11 +56,11 @@ import com.afkgame.domain.repository.PlayerRepository;
  * 本クラスでは検証しない（{@code InitialPlayerTest}・{@code EquipmentSlotsTest} が担当）。
  *
  * <p>手順1（ユーザー作成）・手順7（トークン発行）・手順8（トランザクション境界）は
- * {@link AuthService} 側の責務であり、{@code AuthServiceTest} が持つ（#11・#12）。
+ * {@link AuthService} 側の責務であり、{@code AuthServiceImplTest} が持つ（#11・#12）。
  */
 @Tag("unit")
 @ExtendWith(MockitoExtension.class)
-class PlayerInitializationServiceTest {
+class PlayerInitializationServiceImplTest {
 
     /** 初期キャラの定義（initial_player.yml 相当。正は master/character.md §1.1）。 */
     private static final InitialCharacterData INITIAL_CHARACTER =
@@ -94,7 +94,7 @@ class PlayerInitializationServiceTest {
     private static final Instant FIXED_NOW = Instant.parse("2026-08-08T12:00:00Z");
 
     private PlayerInitializationService service() {
-        return new PlayerInitializationService(playerRepository, characterRepository,
+        return new PlayerInitializationServiceImpl(playerRepository, characterRepository,
                 characterTypes, equipmentSlots, initialPlayer,
                 Clock.fixed(FIXED_NOW, ZoneOffset.UTC));
     }

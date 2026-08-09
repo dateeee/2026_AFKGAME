@@ -33,7 +33,7 @@ backend/                           # Terasoluna サーバー（war を Tomcat �
 │   │   ├── Player, Character, Item / Equipment, ShopDailyState, ShopDailySlot（Phase 2〜）
 │   │   └── User, RefreshToken, EmailVerificationToken（Phase 2〜）/ Party, PartyMember, CharacterSkill（Phase 3〜）
 │   ├── repository/                # Repository インタフェース + 同名のマッピング XML（MyBatis3）
-│   ├── service/                   # ビジネスロジック
+│   ├── service/                   # ビジネスロジック（インタフェース `〜Service` + 実装 `〜ServiceImpl`）
 │   │   ├── BattleService（戦闘計算・エンカウント。オフライン報酬含む）, GameStateBuilder（状態レスポンス構築）
 │   │   ├── EquipmentService / ShopDailyService / AuthService（Phase 2〜）
 │   │   └── PartyService / SkillService（Phase 3〜）, BaseService / ForgeService（Phase 4〜）

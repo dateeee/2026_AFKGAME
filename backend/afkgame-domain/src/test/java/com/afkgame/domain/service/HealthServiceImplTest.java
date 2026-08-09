@@ -16,7 +16,7 @@ import org.springframework.dao.DataAccessResourceFailureException;
 import com.afkgame.domain.repository.HealthRepository;
 
 /**
- * {@link HealthService} の単体テスト。
+ * {@link HealthServiceImpl} の単体テスト。
  *
  * <p>仕様: docs/tech/nonfunctional/tech_operations.md §12.3（ヘルスチェック）。
  * DBへの {@code SELECT 1} が成功したか失敗したかだけを真偽値で表す。
@@ -26,7 +26,7 @@ import com.afkgame.domain.repository.HealthRepository;
  * 分岐マーカーは付けない。
  */
 @Tag("unit")
-class HealthServiceTest {
+class HealthServiceImplTest {
 
     @Nested
     @ExtendWith(MockitoExtension.class)
@@ -41,7 +41,7 @@ class HealthServiceTest {
         // モックはコンストラクタへ手渡す（coding_standards_backend/test.md §5 #3）
         @BeforeEach
         void setUp() {
-            healthService = new HealthService(healthRepository);
+            healthService = new HealthServiceImpl(healthRepository);
         }
 
         @Test

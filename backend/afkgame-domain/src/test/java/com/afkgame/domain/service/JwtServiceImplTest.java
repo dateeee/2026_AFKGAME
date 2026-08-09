@@ -22,7 +22,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 
 /**
- * {@link JwtService} の単体テスト。
+ * {@link JwtServiceImpl} の単体テスト。
  *
  * <p>仕様: docs/tech/detail/tech_auth.md §1（有効期限）・§4（JWT構造）、
  * docs/tech/basic/tech_logging.md「AUTH_ コード一覧」（期限切れと不正の区別）。
@@ -33,12 +33,12 @@ import io.jsonwebtoken.security.Keys;
  * 分岐マーカーは付けない。
  */
 @Tag("unit")
-class JwtServiceTest {
+class JwtServiceImplTest {
 
     private static final String SECRET = "afkgame-test-secret-value-32bytes-or-longer";
 
     // 発行時刻と JJWT の期限判定を同じ時間軸に置くため、実時間のクロックを渡す
-    private final JwtService jwtService = new JwtService(
+    private final JwtService jwtService = new JwtServiceImpl(
             new AuthSettings(SECRET, Duration.ofMinutes(30), Duration.ofDays(30),
                     12, 8, 128, Duration.ofDays(90)),
             Clock.systemUTC());

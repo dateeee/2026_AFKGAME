@@ -12,7 +12,7 @@
 |----|----|------|------|
 | 1 | モデル | `afkgame-domain` の Entity + Repository | インタフェース + マッピング XML（MyBatis3。RepositoryImpl は書かない） |
 | 2 | スキーマ | `afkgame-web` の Resource | Bean Validation（Jakarta）でフィールド制約 |
-| 3 | サービス | `afkgame-domain` の Service | ビジネスロジックを集約 |
+| 3 | サービス | `afkgame-domain` の Service | インタフェース `〜Service` + 実装 `〜ServiceImpl`（`@Service`・`@Transactional` は実装側）。ビジネスロジックを集約 |
 | 4 | コントローラ | `afkgame-web` の `@RestController` | Spring MVC（マッピング・バリデーション） |
 
 ### フロントエンド（実装順）

@@ -30,7 +30,7 @@
 | Helper | Controller を補助する POJO。作成は任意で、Controller の一部として扱ってよい | **作らない**（ガイドライン 2.4.1.1.3・2.4.1.1.4 との差分）。Resource ↔ ドメイン型の変換は Resource の `static from(...)` に集約する（理由は [web.md](web.md) §3 #3） |
 | Domain Object | 業務データを表すモデル。Entity はこれに含まれる。**状態のみを持つ**（振る舞いは持たせない） | `domain.model` の Entity（[domain.md](domain.md) §2） |
 | Repository | Domain Object の CRUD を担うインタフェース（ドメイン層に定義のみを置く） | `domain.repository` の `<主体Entity>Repository`（§3・`domain.md` §3） |
-| Service | 業務処理の提供とトランザクション境界の宣言。**Form・`HttpServletRequest` など Web の情報を扱わない** | `domain.service`（[domain_service.md](domain_service.md)） |
+| Service | 業務処理の提供とトランザクション境界の宣言。**Form・`HttpServletRequest` など Web の情報を扱わない** | `domain.service` の `<領域>Service`（インタフェース）+ `<領域>ServiceImpl`（[domain_service.md](domain_service.md) §3 #1） |
 | RepositoryImpl | Repository インタフェースの実装 | **書かない**（§3）。MyBatis3 が Mapper インタフェースの仕組みで実装を生成するため不要（ガイドライン 3.3.1.1。差分ではない） |
 | O/R Mapper | DB と Entity の相互マッピング。MyBatis3 では Mapper インタフェースと `SqlSession` が該当する | MyBatis3 の `SqlSession` と、Repository と同名・同パッケージのマッピング XML（`domain.md` §3） |
 | Integration System Connector | DB 以外のデータストア（KVS・Web サービス・外部システム）との連携 | **なし**（外部連携を持たない。持つことになったら本表へ追記してから作る） |

@@ -36,7 +36,7 @@ import com.afkgame.domain.repository.UserRepository;
 import com.afkgame.env.config.AuthSettings;
 
 /**
- * {@link AuthService} の単体テスト。
+ * {@link AuthServiceImpl} の単体テスト。
  *
  * <p>仕様: docs/tech/detail/tech_auth.md §1（期限・ローテーション）・§3「ゲストプレイ」・
  * §4「リフレッシュトークン」（再利用検知で全トークン失効）、
@@ -49,7 +49,7 @@ import com.afkgame.env.config.AuthSettings;
  *
  * <p>ゲスト作成は tech_auth.md §8.2「処理フロー」のトランザクション境界（手順1・7・8）を担うため、
  * §8.3 の #11・#12 に対応するテストだけマーカーを持つ。手順2〜6（#1・#2・#5・#7〜#9）は
- * {@link PlayerInitializationService} 側の責務で、{@code PlayerInitializationServiceTest} が持つ。
+ * {@link PlayerInitializationService} 側の責務で、{@code PlayerInitializationServiceImplTest} が持つ。
  *
  * <p><b>登録・ログイン・ログアウト（移行 STEP 3-A-2）</b>: 仕様は
  * docs/tech/detail/tech_auth_account.md §9〜§15。分岐一覧 §11（登録）・§13（ログイン）・
@@ -81,7 +81,7 @@ import com.afkgame.env.config.AuthSettings;
  */
 @Tag("unit")
 @ExtendWith(MockitoExtension.class)
-class AuthServiceTest {
+class AuthServiceImplTest {
 
     private static final AuthSettings AUTH_SETTINGS = new AuthSettings(
             "afkgame-test-secret-value-32bytes-or-longer",
@@ -118,8 +118,8 @@ class AuthServiceTest {
 
     private AuthService authService() {
         if (authService == null) {
-            authService = new AuthService(userRepository, refreshTokenRepository,
-                    new JwtService(AUTH_SETTINGS, CLOCK), AUTH_SETTINGS,
+            authService = new AuthServiceImpl(userRepository, refreshTokenRepository,
+                    new JwtServiceImpl(AUTH_SETTINGS, CLOCK), AUTH_SETTINGS,
                     playerInitializationService, CLOCK, passwordEncoder,
                     emailVerificationTokenRepository, verificationMailSender);
         }
@@ -171,7 +171,7 @@ class AuthServiceTest {
 
         /**
          * 手順1〜7がすべて成功する経路。手順2〜6の中身は
-         * {@code PlayerInitializationServiceTest} が持ち、ここでは順序と委譲だけを見る。
+         * {@code PlayerInitializationServiceImplTest} が持ち、ここでは順序と委譲だけを見る。
          *
          * <p>分岐: tech_auth.md #11
          */
@@ -403,7 +403,7 @@ class AuthServiceTest {
 
         /**
          * 手順3〜7がすべて成功する経路。手順5（初期化）の中身は
-         * {@code PlayerInitializationServiceTest} が持ち、ここでは順序と委譲だけを見る。
+         * {@code PlayerInitializationServiceImplTest} が持ち、ここでは順序と委譲だけを見る。
          *
          * <p>分岐: tech_auth_account.md §11 #10
          */

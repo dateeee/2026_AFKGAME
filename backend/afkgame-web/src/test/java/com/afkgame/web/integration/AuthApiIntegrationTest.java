@@ -64,7 +64,7 @@ class AuthApiIntegrationTest extends WebIntegrationTestSupport {
 
     /**
      * ゲスト作成が「プレイ可能な初期状態」まで作ることを、実DBの行で確認する。
-     * 手順ごとの分岐は PlayerInitializationServiceTest が持ち、ここでは連結と永続化（コミット）を見る。
+     * 手順ごとの分岐は PlayerInitializationServiceImplTest が持ち、ここでは連結と永続化（コミット）を見る。
      *
      * <p>分岐: tech_auth.md #12
      */

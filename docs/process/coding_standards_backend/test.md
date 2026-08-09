@@ -10,8 +10,8 @@
 
 | 項目 | 規約 |
 |------|------|
-| 配置 | 各モジュールの `src/test/java/.../<対象クラス>Test.java`（対象クラスと同じパッケージ） |
-| 単体テスト | `@Tag("unit")`。Service・Controller・フィルタ・マスターデータが対象。依存は Mockito でモックする |
+| 配置 | 各モジュールの `src/test/java/.../<対象クラス>Test.java`（対象クラスと同じパッケージ）。**インタフェースと実装に分かれるものは実装クラスが対象**（`AuthServiceImplTest`。`domain_service.md` §3 #1） |
+| 単体テスト | `@Tag("unit")`。Service・Controller・フィルタ・マスターデータが対象。依存は Mockito でモックする（Service の依存は**インタフェース型**でモックする） |
 | 統合テスト | `@Tag("integration")`。Repository・`@ExtendWith(SpringExtension)` + `@ContextConfiguration`（Web層は `@WebAppConfiguration` + MockMvc）。DB は `EmbeddedPostgres.builder().start()` で起動する埋め込み PostgreSQL |
 | 統合テストの DB とプロファイル | DB は `EmbeddedPostgresSupport`（`afkgame-env` の test-jar）が払い出し、**worktree ごとに独立**する。`SPRING_PROFILES_ACTIVE` は既定値を持たないため（[tech_operations.md](../../tech/nonfunctional/tech_operations.md) §12）、統合テストには `@ActiveProfiles("local")` が要る |
 | カバレッジのゲート | 親 POM に JaCoCo の branch しきい値100%が入っている。**追加した分岐はすべてテストで通す**（`mvn verify` の check で落ちる） |

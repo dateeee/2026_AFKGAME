@@ -65,7 +65,7 @@ Repository は Service へ Entity のライフサイクル操作を提供する�
 | Entity | テーブル名の単数形 | `User`（`users`）・`RefreshToken` |
 | Repository | `<主体Entity>Repository`。XML は**同名・同パッケージのリソース配下** | `UserRepository.java` ↔ `com/afkgame/domain/repository/UserRepository.xml` |
 | Repository メソッド | ガイドライン 3.2.4.5.2 に従う。1件取得 `findBy<条件>` / 複数件取得 `findAllBy<条件>` / 存在確認 `existsBy<条件>` / 登録 `save` / 更新 `updateBy<条件>` / 削除 `deleteBy<条件>` | `findById`・`findAllByPlayerId`・`updateRevokedByUserId` |
-| Service | `<領域>Service` | `AuthService` |
+| Service | インタフェース `<領域>Service` + 実装 `<領域>ServiceImpl`（同パッケージ。`@Service` は実装側） | `AuthService` ↔ `AuthServiceImpl` |
 
 - **発行される SQL 種別を名前に出さない**（`selectById` ではなく `findById`）。Service に SQL を意識させないことが Repository を挟む目的（§3・`layering.md` §3）
 - 主体以外の Entity を扱うメソッドは、動詞と `By` の間に対象の Entity 名を入れて区別する（`findSettingsByPlayerId`・`findAllItemsByPlayerId`・`saveEquipSlot`）
