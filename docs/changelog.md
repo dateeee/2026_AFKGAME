@@ -8,6 +8,12 @@
 
 ---
 
+## 2026-08-10
+
+| ファイル | 内容 |
+|---------|------|
+| `afkgame-env`（`logback.xml`・`logback-appenders-{text,json}.xml`・`LoggerName`・`LogKey`・`LogReason`・`LayerLoggingInterceptor`・`MaskReturnValue` 新規）・`afkgame-domain`（`AfkgameDomainConfig`・`AuthResult`・`JwtService`・`VerificationMailSenderImpl`）・`afkgame-web`（`RequestLogFilter`）・`tech_logging.md` | **ログ3種別（通信・アプリケーション・エラー）を実装**。`carryover_notes.md` §3 の差分5点を解消: ①`logback.xml` へ `COMMUNICATION`/`APPLICATION`/`ERROR_ALERT` の3appender・`LOG_DIR`・日次ローテ14日・gz圧縮を追加（`logback-encoder-*.xml` を `logback-appenders-*.xml` へ改名）②`RequestLogFilter` を `afkgame.comm` ロガー・START/END対（`direction=in`）へ書き換え③`LayerLoggingInterceptor` + `AspectJExpressionPointcutAdvisor` 2本（Service/Repository境界。ポイントカット式は `afkgame.properties`。引数・戻り値はパラメータ名一致・`MaskReturnValue`・コレクション類の件数表示・200文字打ち切りでマスク）④`LoggerName.COMM`/`LAYER`・`LogKey.DIRECTION`/`TARGET`/`SIGNATURE`/`ARGS`/`RESULT` を追加⑤`VerificationMailSenderImpl` の送信を通信ログ（`direction=out target=smtp`）で挟んだ。付随して `LogReason.EXCEPTION`（AOP境界ログの例外時reason）と `AuthResult#toString()` のトークンマスクを追加。`mvn verify` 195件（単体）+ 46件（結合）Green・C1 100%維持
+
 ## 2026-08-09
 
 | ファイル | 内容 |
