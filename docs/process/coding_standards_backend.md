@@ -22,7 +22,7 @@
 | └ [logging/application.md](coding_standards_backend/logging/application.md) | §3 AOP による境界ログ（引数・戻り値のマスク含む） / §4 業務ログ（`AppLogger`） | 業務コードでログを書くとき・AOP の境界ログを触るとき |
 | [domain.md](coding_standards_backend/domain.md) | `afkgame-domain`: §1 責務 / §2 Entity / §3 Repository / §4 マスターデータ・乱数 / §5 命名 | Entity・Repository を書くとき |
 | └ [domain/service.md](coding_standards_backend/domain/service.md) | `afkgame-domain`: §1 Service の役割 / §2 クラス構成 / §3 作り方 / §4 トランザクション / §5 作成単位 / §6 例外とメッセージ（→ `exception.md`） | Service を書くとき |
-| [web.md](coding_standards_backend/web.md) | `afkgame-web`: §1 責務 / §2 コントローラ / §3 Resource / §4 設定・フィルタ / §5 エラー応答（→ `exception.md`） / §6 命名 / §7 セキュリティ | Web層を書くとき |
+| [web.md](coding_standards_backend/web.md) | `afkgame-web`: §1 責務 / §2 コントローラ / §3 Resource / §4 設定・フィルタ / §5 エラー応答（→ `exception.md`） / §6 命名 / §7 セキュリティ / §8 REST API 設計（5.1）との差分 | Web層を書くとき・URI やステータスを決めるとき |
 | [filter.md](coding_standards_backend/filter.md) | §1 フィルタとインターセプタの**使い分け** / §2 作り方 / §3 登録と順序 / §4 例外と応答 / §5 採らないもの / §6 テスト | 横断処理をどちらで書くか決めるとき・フィルタを触るとき |
 | [interceptor.md](coding_standards_backend/interceptor.md) | §1 位置づけ / §2 3つのフックの使い分け / §3 規約 / §4 採らないもの / §5 テスト | `HandlerInterceptor` を作る・登録するとき |
 | [test.md](coding_standards_backend/test.md) | §1 配置と分離 / §2 記述規約 / §3 再現性 / §4 分担 / §5 ガイドラインとの差分 | テストを書くとき |

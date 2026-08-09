@@ -19,6 +19,33 @@
 
 応答ボディのキーは camelCase（[tech_api/common.md](tech_api/common.md) §5.0）。**ログ項目は snake_case**（[tech_logging.md](tech_logging.md)「ログフォーマット」の `request_id` 等）であり、APIボディとは別体系である。
 
+### 入力チェック違反の `details`
+
+`VALIDATION_ERROR`（422）のときだけ `error.details` を添える。**どの項目が落ちたかをクライアントが特定できるようにする**ため（TERASOLUNA ガイドライン 5.1.3.4.5「クライアントが再操作で解消できる場合は詳細を含める」）。ほかのコードでは付けない。
+
+```json
+{
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "リクエストの入力値が不正です",
+    "requestId": "550e8400-e29b-41d4-a716-446655440000",
+    "details": [
+      { "target": "password", "code": "Size" },
+      { "target": "email", "code": "Email" }
+    ]
+  }
+}
+```
+
+| キー | 内容 |
+|------|------|
+| `target` | 違反したリクエストボディのプロパティ名（camelCase。ネストは `party.members[0].id` のようにドット区切り） |
+| `code` | Bean Validation の制約名（`NotBlank`・`Size`・`Email` 等）。**文言はフロントエンドが `target` + `code` から組み立てる**（サーバーは文言を解決しない） |
+
+- **`rejectedValue`（入力値そのもの）は含めない**。パスワード・トークンが応答とアクセスログへ回るため
+- 順序は保証しない。クライアントは `target` で引く
+- ガイドラインの例（`{code, message, details}` をトップレベルに置く）とは入れ子が異なるが、**本プロジェクトは全エラーを `error` の下にそろえる方針を優先する**（本節冒頭の形式）
+
 ## エラーコード体系
 
 | プレフィックス | 対象 | 例 |
@@ -36,7 +63,8 @@
 | `FORGE_` | 鍛冶屋関連 | `FORGE_INSUFFICIENT_MATERIALS`, `FORGE_LEVEL_TOO_LOW` |
 | `RATE_LIMIT_` | レート制限 | `RATE_LIMIT_EXCEEDED`(429)。`Retry-After` ヘッダを併せて返す |
 | `INTERNAL_` | サーバー内部エラー | `INTERNAL_UNEXPECTED_ERROR` |
-| `HTTP_` | 業務コードを持たない Spring MVC 標準例外（**4xx のみ**。404・405・415 等） | `HTTP_405`。クライアントは個別分岐せず汎用エラー表示に倒す |
+| `VALIDATION_` | 入力チェック違反（422） | `VALIDATION_ERROR`。違反項目は `details`（上記） |
+| `HTTP_` | 業務コードを持たない Spring MVC 標準例外（**4xx のみ**。400・404・405・415 等） | `HTTP_400`（JSON の構文破損）・`HTTP_405`。クライアントは個別分岐せず汎用エラー表示に倒す |
 
 ## AUTH_ コード一覧
 

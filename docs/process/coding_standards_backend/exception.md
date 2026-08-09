@@ -73,21 +73,24 @@
 |-----------|------|------|------|
 | `BusinessException` | 1 | 対応表が決める 4xx（既定 422） + `code` | WARN（送出元で出す） |
 | `ResourceNotFoundException` | 1 | 404 + `code` | WARN（送出元で出す） |
-| Bean Validation 違反・本文が読めない | 1 | 422 + `VALIDATION_ERROR` | WARN |
+| Bean Validation 違反・未知フィールド・型不一致 | 1 | 422 + `VALIDATION_ERROR` + `details`（#9） | WARN |
+| JSON として解析できない（構文破損） | 1 | 400 + `HTTP_400`（#10） | WARN |
 | ほかの Spring MVC 標準例外（4xx） | 1 | そのまま + `HTTP_<status>` | WARN |
 | `SystemException` | 2 | 500 + `INTERNAL_UNEXPECTED_ERROR` | ERROR（例外のコードとメッセージ + スタックトレース） |
 | 上記以外の `Exception`・5xx の標準例外 | 3 | 500 + `INTERNAL_UNEXPECTED_ERROR` | ERROR + スタックトレース |
 
 | # | 規約 |
 |---|------|
-| 1 | 応答に内部情報（SQL・スタックトレース・テーブル構造・ライブラリ名・クラス名）を載せない。5xx の標準例外はメッセージに内部の型名が入るため定型文へそろえる |
+| 1 | 応答に内部情報（SQL・スタックトレース・テーブル構造・ライブラリ名・クラス名）を載せない（ガイドライン 5.1.3.4.5「システムの脆弱性をさらす情報は含めない」）。**5xx・4xx とも例外の `getMessage()` を応答へ写さない** — 5xx は内部の型名が入り、4xx も `MethodArgumentTypeMismatchException` 等が変換先のクラス名を含むため。`message` は #4 の対応表 / #9 の定型文から採る |
 | 2 | 認証・認可の失敗理由を出し分けない（探索の手がかりになるため）。詳細はログにだけ残す |
-| 3 | エラーコード体系と統一エラーレスポンス形式の正は `tech_logging.md`、ステータスの使い分けの正は [tech_api/common.md](../../tech/basic/tech_api/common.md)。本書で再掲しない |
+| 3 | エラーコード体系と統一エラーレスポンス形式の正は [tech_error_handling.md](../../tech/basic/tech_error_handling.md)、ステータスの使い分けの正は [tech_api/common.md](../../tech/basic/tech_api/common.md)。本書で再掲しない |
 | 4 | `getResultMessages()` の**先頭** `ResultMessage#getCode()` を `ErrorResource.code` へ写し、HTTP ステータスは Web 層が持つ**コード→ステータス対応表**で引く（未登録は 422）。応答の `message` は同表の定型文とし、**例外の `getMessage()` は使わない**（§2.1）。ガイドラインの `ApiError` + `ExceptionCodeResolver`（5.1.4.6.1）は**採らない** — 解決したいのは「例外クラス→コード」ではなく「コード→ステータス」で向きが違うため |
 | 5 | 対応表は `tech_logging.md`（コード体系の正）の写しなので、**一致を機械照合する**（`scripts/check_error_codes.py`。仕様に無いコード・ステータス違い・仕様にあって表に無いコードを落とす）。手で同期させない |
 | 6 | `ResponseEntityExceptionHandler` の継承は**採る**（5.1.4.6.1）。Spring MVC が投げる標準例外（404・405・415 など）も統一形式へ寄せるため |
 | 7 | ガイドラインの `SystemExceptionResolver` + 遷移先ビューのマッピング（4.3.3.1.3）は**採らない**。REST 専用で遷移先の画面が無く、応答は #4 の対応表で決まるため。サーブレットコンテナのエラーページ設定（4.3.3.1.4）も同じ理由で使わない |
 | 8 | フィルタ内で起きた認証エラーはハンドラを通らない。Spring Security の `ApiAuthenticationEntryPoint` が**同じ形式で**応答する（形式を変えない） |
+| 9 | **入力チェック違反は `details` に「どの項目が・なぜ落ちたか」を載せる**（ガイドライン 5.1.3.4.5。項目の定義は `tech_error_handling.md`）。`BindingResult` の `FieldError` を項目ごとに写し、`message` 側は `VALIDATION_ERROR` の定型文にする。**入力値そのものは載せない**（パスワード等が応答とログへ回るため。`rejectedValue` を使わない） |
+| 10 | **400 と 422 を「解析できたか」で切り分ける**。JSON として解析できない構文破損（`JsonParseException` 起因）は **400 + `HTTP_400`**、解析はできたがスキーマに合わない未知フィールド・型不一致・制約違反は **422 + `VALIDATION_ERROR`**。どちらも `HttpMessageNotReadableException` で届くため、**原因例外で判定する**。ガイドライン 5.1.3.5.2 (1) は両方を 400 とするが、クライアントの対処が「送信処理のバグ修正」と「入力のやり直し」で異なるため分ける（422 を使う決定の正は `tech_api/common.md` §5.0） |
 
 ## 5. ログ
 
@@ -102,7 +105,8 @@
 
 | 内容 | 正 |
 |------|-----|
-| エラーコード体系・統一エラーレスポンス形式・ロガー名体系 | `tech_logging.md` |
+| エラーコード体系・統一エラーレスポンス形式（`details` の項目定義を含む） | `tech_error_handling.md` |
+| ロガー名体系 | `tech_logging.md` |
 | HTTP ステータスコードの使い分け | `tech_api/common.md` |
 | コントローラ・Resource の書き方、セキュリティ | `web.md` |
 | フィルタ内・インターセプタ内で起きた例外の扱い | [filter.md](filter.md) §4・[interceptor.md](interceptor.md) §3 #4 |

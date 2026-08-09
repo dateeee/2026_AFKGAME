@@ -1,7 +1,7 @@
 # バックエンドコーディング規約 — Web層（`afkgame-web`）
 
 > [coding_standards_backend.md](../coding_standards_backend.md) の分冊。全層共通の規約は [common.md](common.md) が先、層の位置づけは [layering.md](layering.md)。
-> ベースは TERASOLUNA 開発ガイドライン 5.11.0.RELEASE 日本語版（[basis.md](basis.md) §1）の `ImplementationAtEachLayer/ApplicationLayer` と `Security`。本書はそこからの差分だけを持つ。
+> ベースは TERASOLUNA 開発ガイドライン 5.11.0.RELEASE 日本語版（[basis.md](basis.md) §1）の `ImplementationAtEachLayer/ApplicationLayer`、`ArchitectureInDetail/WebServiceDetail/REST`（5.1）、`Security`。本書はそこからの差分だけを持つ。
 > `afkgame-web` はガイドラインの**アプリケーション層**に当たる。**実装はできるだけ薄く保ち、ビジネスルールを含めない**（`layering.md` §1）。
 
 ---
@@ -79,3 +79,17 @@
 |---|------|
 | 1 | 認証は**ステートレス**（`Authorization: Bearer` の JWT）。ガイドラインが前提とするフォーム認証 + セッション（9.2.2.1）と `UserDetailsService` による DB 認証（9.2.2.4）は採らない。クライアントが SPA だけで画面遷移を伴うログインが無く、サーバーにセッションを持たせない構成のため |
 | 2 | CSRF トークン（9.5）を使わない。Cookie を認証に使わないため、偽造リクエストに資格情報が乗らない（`tech_security.md` §11.2）。**Cookie を使う認証へ変えるときは本行ごと見直す** |
+
+## 8. REST API 設計（5.1）との差分
+
+ガイドライン 5.1 に対する決定を「章番号・決定・理由」で持つ（`basis.md` §2 #5）。**適合している事項は書かない** — ステートレス性（5.1.2.6）は §7 #1、パッケージ構成（5.1.4.5.1）は §6、例外ハンドリングとエラー応答（5.1.3.4.5・5.1.3.5.2・5.1.4.6）は [exception.md](exception.md) §4 が持つ。
+
+| # | ガイドライン | 本プロジェクトの決定 | 理由 |
+|---|------------|------------------|------|
+| 1 | 5.1.2.2 Warning・5.1.3.1 (3): URI に操作を表す**動詞を含めない**。イベント自体をリソースにしない | **全APIで「機能 + 操作」の動詞パスを採る**（`/api/tower/select`・`/api/shop/buy`・`/api/auth/login` 等。一覧の正は [tech_api.md](../../tech/basic/tech_api.md)） | 操作の大半が「1プレイヤーの単一の状態」への遷移で、CRUD へ写すと `PUT /api/players/me/tower` のように**同じ資源へ意味の違う更新が集まり**、どの遷移かをボディで分岐させることになる。動詞パスなら操作とエラーコードが1対1で対応する。**代償として `PUT`・`DELETE` をほぼ使わず `POST` に寄る**（べき等性はサーバー側の状態で担保する） |
+| 2 | 5.1.2.2: コレクションのリソース名は**複数形** | 単数形（`/api/tower/list`・`/api/equipment/list`。決定の正は [tech_api/common.md](../../tech/basic/tech_api/common.md) §5.0） | #1 によりコレクション自体を表す URI を持たないため、複数形にする対象が無い |
+| 3 | 5.1.3.2.2: URI に API バージョンを含める（`/api/{版}/...`） | 含めない。破壊的変更が要るときだけ `/api/v2/...` を併設する（決定の正は `tech_api/common.md` §5.0） | シングルプレイ専用で、クライアントは自社 SPA の1種類だけ。旧版クライアントが残留しないため全APIに版を背負わせる利得が無い |
+| 4 | 5.1.4.3.2: `/api/v1/*` を REST 用 `DispatcherServlet` の `url-pattern` に置き、Controller は資源名だけを持つ | `DispatcherServlet` は `/` にマップし、`@RequestMapping` へ `/api/...` を書く | 画面用サーブレットが無く分割の必要が無い。**代償として #3 の `/api/v2` 併設時に全 Controller を触る**（版を増やすときはサーブレット分割へ寄せ直す） |
+| 5 | 5.1.3.5.1 (2): POST で新規リソースを作成したら **201 + `Location`** | 作成系も **200** で作成後の状態を返す（204 も使わない。決定の正は `tech_api/common.md` §5.0） | 作成直後の状態をクライアントが必ず使うため本文が要る。`Location` を出しても対応する単体取得APIが無い（#1 によりリソース単位の GET を持たない） |
+| 6 | 5.1.4.5.2 (1): Resource は `Serializable` を実装し `serialVersionUID` を持つ | `record` で定義し実装しない（§3 #1） | 直列化するのは Jackson の JSON だけで Java 直列化の経路が無い。ガイドラインの記述は `record` 導入前のもの |
+| 7 | 5.1.4.5.5 (3): 入力チェックは `@Validated`（検証グループを指定できる） | `@Valid` を使う（§2 #2） | リクエスト用とレスポンス用の Resource を兼用しない（§3 #2）ため、1つの Resource に複数の検証グループが要る場面が無い。**グループが要る Resource が出たらその箇所だけ `@Validated` にする** |
