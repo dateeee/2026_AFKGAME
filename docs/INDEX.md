@@ -20,7 +20,7 @@
 - [docs/tech/tech_spec.md](tech/tech_spec.md) — 技術仕様の索引
   - [basic/](tech/basic/) 基本設計 — db + [tech_db/](tech/basic/tech_db/)（テーブル定義書）/ data / structure / structure_backend / api / api_common / architecture / logging
   - [nonfunctional/](tech/nonfunctional/) 非機能 — performance / security / operations（+_procedure）
-  - [detail/](tech/detail/) 詳細設計 — battle / offline / skill / party / tick / polling / state / rng / numeric / shop / design_system / auth / base / scout / forge（索引+enhance・craft・disassemble）
+  - [detail/](tech/detail/) 詳細設計 — battle / offline / skill / party / tick / polling / state / rng / numeric / shop / design_system / auth（+auth_account: 登録・ログイン・ログアウト）/ base / scout / forge（索引+enhance・craft・disassemble）
 - [docs/data/master_data.md](data/master_data.md) — マスターデータの索引 + 塔データ一覧
   - [master/](data/master/) — character / item / equipment / base / endgame
   - [TOWERS_OVERVIEW.md](data/towers/TOWERS_OVERVIEW.md) 塔一覧 / [SKILLS_OVERVIEW.md](data/skills/SKILLS_OVERVIEW.md) スキル概要

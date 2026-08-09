@@ -42,7 +42,7 @@
 | 数値・丸め規約（丸め方向・キャップ・適用順序） | [tech_numeric.md](detail/tech_numeric.md) |
 | 進行状態と操作可否（状態機械・不変条件・探索セッション） | [tech_state.md](detail/tech_state.md) |
 | フロントエンドのtick制御（ポーリング・多重タブ・ストア反映） | [tech_polling.md](detail/tech_polling.md) |
-| 認証システム（JWT・ゲスト・Google OAuth） | [tech_auth.md](detail/tech_auth.md) |
+| 認証システム（JWT・ゲスト・Google OAuth） | [tech_auth.md](detail/tech_auth.md) → [登録・ログイン・ログアウト](detail/tech_auth_account.md) |
 | デザインシステム（トークン・UIプリミティブ・アプリシェル） | [tech_design_system.md](detail/tech_design_system.md) |
 
 ---

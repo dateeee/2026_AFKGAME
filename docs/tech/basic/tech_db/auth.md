@@ -30,7 +30,7 @@
 | `id` | `INTEGER` | 不可 | 自動採番 | PK |
 | `user_id` | `VARCHAR(50)` | 不可 | — | FK → `users.id` |
 | `token_hash` | `VARCHAR(255)` | 不可 | — | UNIQUE。平文トークンは保存しない |
-| `expires_at` | `DATETIME(tz)` | 不可 | — | 有効期間は `tech_auth.md` §6 が正 |
+| `expires_at` | `DATETIME(tz)` | 不可 | — | 有効期間（30日）は `tech_auth.md` §1 が正 |
 | `revoked` | `BOOLEAN` | 不可 | `false` | 失効はレコード削除ではなくフラグで表す |
 | `created_at` | `DATETIME(tz)` | 不可 | 現在時刻 | — |
 
@@ -44,7 +44,7 @@
 | `user_id` | `VARCHAR(50)` | 不可 | — | FK → `users.id` |
 | `token_hash` | `VARCHAR(255)` | 不可 | — | UNIQUE |
 | `purpose` | `VARCHAR(20)` | 不可 | `verify_email` | `verify_email` / `password_reset`。用途をまたいだ流用を防ぐため発行・検証の双方で一致を要求する |
-| `expires_at` | `DATETIME(tz)` | 不可 | — | 有効期間は `tech_auth.md` §6 が正 |
+| `expires_at` | `DATETIME(tz)` | 不可 | — | 有効期間（発行から24時間）は `tech_auth.md` §3 が正 |
 | `used` | `BOOLEAN` | 不可 | `false` | 使用済みトークンの再利用を防ぐ |
 | `created_at` | `DATETIME(tz)` | 不可 | 現在時刻 | — |
 
