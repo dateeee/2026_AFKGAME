@@ -20,7 +20,7 @@
 
 - **依存方向は `web → domain → env` の一方向**。逆流・循環を作らない
 - `afkgame-domain` に Web 層の型（Spring MVC・`jakarta.servlet`・`HttpStatus`）を持ち込まない。**HTTP ステータスはドメイン層で扱わない**（業務例外はエラーコードだけを持ち、ステータスは Web 層が決める。[exception.md](exception.md) §4 #4）
-- 新しいパッケージを切るときは [tech_structure_backend.md](../../tech/basic/tech_structure_backend.md) §4.1 のツリーへ同時に追記する
+- 新しいパッケージを切るときは [tech_backend.md](../../tech/basic/tech_backend.md) §4.1 のツリーへ同時に追記する
 
 ## 3. 命名
 

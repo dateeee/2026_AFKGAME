@@ -28,7 +28,7 @@
 
 - **3種別は排他ではない**。エラーログは種別1・2から ERROR を転記した**アラート用の集約**で、原本は元のファイルにも残る。監視（`tech_operations.md` §12.3「ERROR ログ件数」）は `error.log` だけを見れば足りる状態を保つ
 - 出力先は環境変数 `LOG_DIR`（既定 `${catalina.base:-.}/logs`）。**コードからファイル名・パスを参照しない**
-- ローテーションは `TimeBasedRollingPolicy` で日次・`gz` 圧縮・**保持14日**（バックアップの保持期間 `tech_operations_procedure.md` §12.5 と揃える）
+- ローテーションは `TimeBasedRollingPolicy` で日次・`gz` 圧縮・**保持14日**（バックアップの保持期間 `tech_maintenance.md` §12.5 と揃える）
 - コンソール（`catalina.out`）は `LOG_FORMAT=text`（local）で全レベル、`json`（production）は **ERROR のみ**。本番でファイルとコンソールの二重肥大を作らない
 
 ### 1.1 appender とロガーの割り当て

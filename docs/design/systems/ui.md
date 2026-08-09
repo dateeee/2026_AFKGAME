@@ -63,7 +63,7 @@
 
 ## 認証画面・チュートリアル
 
-ログイン画面（登録タブを含む）・ゲスト→本登録バナー（Phase 2〜）と初回プレイ時のヒント一覧（Phase 1〜）は [ui_onboarding.md](ui_onboarding.md) を参照。
+ログイン画面（登録タブを含む）・ゲスト→本登録バナー（Phase 2〜）と初回プレイ時のヒント一覧（Phase 1〜）は [ui/onboarding.md](ui/onboarding.md) を参照。
 
 ## ナビゲーション構造（Phase 1〜）
 

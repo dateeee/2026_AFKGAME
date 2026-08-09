@@ -12,7 +12,7 @@
 | データ構造 | `docs/tech/basic/tech_data.md` | API レスポンス／マスターデータの JSON 構造（永続化スキーマは持たない） |
 | 実装配置 | `docs/tech/basic/tech_structure.md`（§2〜§3）+ 同 `_backend.md`（§4） | ディレクトリ構成・モジュール責務 |
 | API設計 | `docs/tech/basic/tech_api.md` | エンドポイント一覧 |
-| API共通仕様 | `docs/tech/basic/tech_api_common.md` | 規約・共通ヘッダ・ステータスコード |
+| API共通仕様 | `docs/tech/basic/tech_api/common.md` | 規約・共通ヘッダ・ステータスコード |
 | アーキテクチャ | `docs/tech/basic/tech_architecture.md` | 層構成・依存方向 |
 | ログ設計 | `docs/tech/basic/tech_logging.md` | ログレベル・出力項目 |
 | 認証方式 | `docs/tech/detail/tech_auth.md` | 認証フロー・トークン |

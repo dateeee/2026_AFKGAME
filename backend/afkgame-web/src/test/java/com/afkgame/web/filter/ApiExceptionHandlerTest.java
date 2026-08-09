@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  * {@link ApiExceptionHandler} の単体テスト。
  *
  * <p>仕様: docs/tech/basic/tech_logging.md「統一エラーレスポンス形式」「グローバル例外ハンドラ」、
- * docs/tech/basic/tech_api_common.md「HTTPステータスコードの使い分け」。
+ * docs/tech/basic/tech_api/common.md「HTTPステータスコードの使い分け」。
  *
  * <p>分岐観点: {@code AppException}（コードとステータスをそのまま返す）/
  * Bean Validation 違反（422）/ 本文が読めない・未知フィールド（422）/

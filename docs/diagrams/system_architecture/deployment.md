@@ -1,6 +1,6 @@
 # システム構成図 — 本番構成（AWS）
 
-> 親: [system_architecture.md](../system_architecture.md)。構成・数値・設定値は [tech_operations.md](../../tech/nonfunctional/tech_operations.md) §12.1〜§12.3 と [tech_operations_procedure.md](../../tech/nonfunctional/tech_operations_procedure.md) §12.4〜§12.7 が正（本図には再掲しない）。
+> 親: [system_architecture.md](../system_architecture.md)。構成・数値・設定値は [tech_operations.md](../../tech/nonfunctional/tech_operations.md) §12.1〜§12.3 と [tech_maintenance.md](../../tech/nonfunctional/tech_maintenance.md) §12.4〜§12.7 が正（本図には再掲しない）。
 
 ## 本番構成（AWS）
 

@@ -1,6 +1,6 @@
 # AFK GAME — ディレクトリ・フロントエンド構成
 
-> [tech_spec.md](../tech_spec.md) §2〜§3。バックエンド構成（§4）は [tech_structure_backend.md](tech_structure_backend.md) が正。
+> [tech_spec.md](../tech_spec.md) §2〜§3。バックエンド構成（§4）は [tech_backend.md](tech_backend.md) が正。
 
 ## 2. ディレクトリ構成
 
@@ -13,7 +13,7 @@
 ├── scripts/                       # 開発補助スクリプト
 ├── docker-compose.yml             # `local` 用 PostgreSQL（:5432）
 ├── frontend/                      # Vue.js SPA（構成は §3.1）
-└── backend/                       # Terasoluna サーバー（war を Tomcat へ配備。構成は tech_structure_backend.md §4.1）
+└── backend/                       # Terasoluna サーバー（war を Tomcat へ配備。構成は tech_backend.md §4.1）
 ```
 
 ## 3. フロントエンド構成

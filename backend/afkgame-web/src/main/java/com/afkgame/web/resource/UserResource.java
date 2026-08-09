@@ -6,7 +6,7 @@ import com.afkgame.domain.model.User;
  * 認証応答に含めるユーザー情報。
  *
  * <p>仕様: docs/tech/detail/tech_auth.md §5。プロパティ名は camelCase
- * （docs/tech/basic/tech_api_common.md §5.0）。パスワードハッシュ等の機密は含めない。
+ * （docs/tech/basic/tech_api/common.md §5.0）。パスワードハッシュ等の機密は含めない。
  *
  * @param id            ユーザーID（{@code user_<UUID>} / {@code guest_<UUID>}）
  * @param email         メールアドレス。ゲストは null

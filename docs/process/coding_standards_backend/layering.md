@@ -72,4 +72,4 @@ Java のパッケージとしては両者をドメイン層に同居させる（
 | `[projectName]-env` | `afkgame-env` | jar | 環境依存の設定を集約し、環境ごとのビルドし直しを避けるための層 |
 | （対応なし） | `afkgame-initdb` | — | Flyway マイグレーション SQL |
 
-パッケージの割り当てと依存方向は `common.md` §2、ディレクトリツリーは [tech_structure_backend.md](../../tech/basic/tech_structure_backend.md) §4.1 が正。
+パッケージの割り当てと依存方向は `common.md` §2、ディレクトリツリーは [tech_backend.md](../../tech/basic/tech_backend.md) §4.1 が正。

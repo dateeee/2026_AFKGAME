@@ -21,8 +21,8 @@ import jakarta.validation.Valid;
  * 認証エンドポイント。
  *
  * <p>仕様: docs/tech/detail/tech_auth.md §5、登録・ログイン・ログアウトは
- * docs/tech/detail/tech_auth_account.md §9〜§15。**ログアウトだけが認証必須**で、他は認証不要
- * （docs/tech/basic/tech_api_common.md §5.0「認証不要な例外」）。
+ * docs/tech/detail/tech_auth/account.md §9〜§15。**ログアウトだけが認証必須**で、他は認証不要
+ * （docs/tech/basic/tech_api/common.md §5.0「認証不要な例外」）。
  *
  * <p>link-account・verify-email・google・password-reset は STEP 3-A-3 以降で追加する
  * （docs/backlog/java_migration.md）。

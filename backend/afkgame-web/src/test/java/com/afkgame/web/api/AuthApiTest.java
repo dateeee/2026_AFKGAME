@@ -37,8 +37,8 @@ import com.afkgame.web.filter.ApiExceptionHandler;
  * {@link AuthApi} の単体テスト。
  *
  * <p>仕様: docs/tech/detail/tech_auth.md §5（リクエスト/レスポンス例）、
- * docs/tech/detail/tech_auth_account.md §9〜§15（登録・ログイン・ログアウト）、
- * docs/tech/basic/tech_api_common.md §5.0（ボディのキーは camelCase）。
+ * docs/tech/detail/tech_auth/account.md §9〜§15（登録・ログイン・ログアウト）、
+ * docs/tech/basic/tech_api/common.md §5.0（ボディのキーは camelCase）。
  *
  * <p>分岐観点: ゲスト作成 / リフレッシュ（いずれも同じ応答形式）。エラー系はサービス層が
  * {@code AppException} を投げ、{@code ApiExceptionHandler} が応答へ変換する。
@@ -189,7 +189,7 @@ class AuthApiTest {
         /**
          * 妥当な形式なら検証を通り、そのままサービスへ渡る（手順2へ進む）。
          *
-         * <p>分岐: tech_auth_account.md §11 #1
+         * <p>分岐: tech_auth/account.md §11 #1
          */
         @Test
         void test_妥当な形式のメールはサービスへ渡る() throws Exception {
@@ -206,7 +206,7 @@ class AuthApiTest {
         /**
          * 形式違反は 422 で止め、ユーザーを作らない（手順1）。
          *
-         * <p>分岐: tech_auth_account.md §11 #2
+         * <p>分岐: tech_auth/account.md §11 #2
          */
         @ParameterizedTest(name = "email={0}")
         @ValueSource(strings = {
@@ -227,7 +227,7 @@ class AuthApiTest {
         /**
          * 上限ちょうど（255文字）は受け付ける。
          *
-         * <p>分岐: tech_auth_account.md §11 #3
+         * <p>分岐: tech_auth/account.md §11 #3
          */
         @Test
         void test_255文字ちょうどのメールは受け付ける() throws Exception {
@@ -242,7 +242,7 @@ class AuthApiTest {
         /**
          * 上限超過（256文字）は 422。
          *
-         * <p>分岐: tech_auth_account.md §11 #4
+         * <p>分岐: tech_auth/account.md §11 #4
          */
         @Test
         void test_256文字のメールは422を返す() throws Exception {
@@ -258,7 +258,7 @@ class AuthApiTest {
         /**
          * 下限ちょうど（8文字）は受け付ける（tech_auth.md §1「パスワード要件」）。
          *
-         * <p>分岐: tech_auth_account.md §11 #5
+         * <p>分岐: tech_auth/account.md §11 #5
          */
         @Test
         void test_8文字ちょうどのパスワードは受け付ける() throws Exception {
@@ -273,7 +273,7 @@ class AuthApiTest {
         /**
          * 下限未満は 422。空文字も同じ分岐に含む。
          *
-         * <p>分岐: tech_auth_account.md §11 #6
+         * <p>分岐: tech_auth/account.md §11 #6
          */
         @ParameterizedTest(name = "password=\"{0}\"")
         @ValueSource(strings = {
@@ -294,7 +294,7 @@ class AuthApiTest {
          * 成功時の応答（§5「POST /api/auth/register」）。サービス層のコミットは
          * {@code AuthServiceImplTest} が持ち、ここでは 200 と本文の形だけを見る。
          *
-         * <p>分岐: tech_auth_account.md §11 #10
+         * <p>分岐: tech_auth/account.md §11 #10
          */
         @Test
         void test_登録が成功すれば200でトークンペアとユーザー情報を返す() throws Exception {
@@ -320,7 +320,7 @@ class AuthApiTest {
         private static final String PASSWORD = "securepass123";
 
         /**
-         * <p>分岐: tech_auth_account.md §13 #1
+         * <p>分岐: tech_auth/account.md §13 #1
          */
         @Test
         void test_妥当な形式のメールはサービスへ渡る() throws Exception {
@@ -336,7 +336,7 @@ class AuthApiTest {
         }
 
         /**
-         * <p>分岐: tech_auth_account.md §13 #2
+         * <p>分岐: tech_auth/account.md §13 #2
          */
         @ParameterizedTest(name = "email={0}")
         @ValueSource(strings = {
@@ -358,7 +358,7 @@ class AuthApiTest {
          * 空でない値があれば手順2へ進む。**登録時の「8文字以上」はログインでは課さない**ため、
          * 要件変更より前に作られた短いパスワードもそのままサービスへ渡る（§12 手順1）。
          *
-         * <p>分岐: tech_auth_account.md §13 #3
+         * <p>分岐: tech_auth/account.md §13 #3
          */
         @Test
         void test_8文字未満のパスワードもサービスへ渡る() throws Exception {
@@ -373,7 +373,7 @@ class AuthApiTest {
         }
 
         /**
-         * <p>分岐: tech_auth_account.md §13 #4
+         * <p>分岐: tech_auth/account.md §13 #4
          */
         @ParameterizedTest(name = "body={0}")
         @ValueSource(strings = {
@@ -410,7 +410,7 @@ class AuthApiTest {
          * 無効なアクセストークンを拒む側（#2）は Security フィルタチェーンが要るため
          * {@code AuthApiIntegrationTest} が持つ。
          *
-         * <p>分岐: tech_auth_account.md §15 #1
+         * <p>分岐: tech_auth/account.md §15 #1
          */
         @Test
         void test_有効なアクセストークンなら認証ユーザーのIDでログアウトする() throws Exception {
@@ -427,7 +427,7 @@ class AuthApiTest {
         /**
          * ボディに {@code refreshToken} があれば手順3へ進み、成功応答を返す（§14 出口条件）。
          *
-         * <p>分岐: tech_auth_account.md §15 #3
+         * <p>分岐: tech_auth/account.md §15 #3
          */
         @Test
         void test_refreshTokenを受け取り成功応答を返す() throws Exception {
@@ -441,7 +441,7 @@ class AuthApiTest {
         }
 
         /**
-         * <p>分岐: tech_auth_account.md §15 #4
+         * <p>分岐: tech_auth/account.md §15 #4
          */
         @ParameterizedTest(name = "body={0}")
         @ValueSource(strings = {

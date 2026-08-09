@@ -11,7 +11,7 @@ import com.afkgame.domain.exception.AppException;
  * {@code AUTH_INVALID_TOKEN} なら再ログインへ倒すため、両者を混ぜない。
  *
  * <p>共有 Service。{@link AuthService} と Web 層の認証フィルタから利用する
- * （docs/process/coding_standards_backend/domain_service.md §2 #1）。
+ * （docs/process/coding_standards_backend/domain/service.md §2 #1）。
  * トランザクション境界を持たないため伝播属性は宣言しない。
  *
  * <p>実装は {@link JwtServiceImpl}。

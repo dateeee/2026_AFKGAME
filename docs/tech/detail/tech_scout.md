@@ -17,7 +17,7 @@
 | エラーコード | 新設しない。`BASE_NOT_BUILT`・`BASE_INSUFFICIENT_GOLD` は `tech_base.md` §6 が正 |
 
 - リクエストボディを持たないため、Bean Validation による `422` は発生しない
-- 未認証は共通の `401`（[tech_api_common.md](../basic/tech_api_common.md)）。本書の分岐一覧では扱わない
+- 未認証は共通の `401`（[tech_api/common.md](../basic/tech_api/common.md)）。本書の分岐一覧では扱わない
 
 ## 2. 排出設定の解決（酒場LV → 排出率・費用）
 

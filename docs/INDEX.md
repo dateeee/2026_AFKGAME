@@ -16,11 +16,11 @@
 ## 仕様書
 - [docs/design/game_spec.md](design/game_spec.md) — ゲーム仕様の索引
   - [requirements/](design/requirements/) 要件 — product / non_functional / operation
-  - [systems/](design/systems/) — character / battle / equipment / economy / dungeon / endgame / ui / ui_onboarding
+  - [systems/](design/systems/) — character / battle / equipment / economy / dungeon / endgame / ui（索引+[ui/](design/systems/ui/) onboarding: 認証画面・チュートリアル）
 - [docs/tech/tech_spec.md](tech/tech_spec.md) — 技術仕様の索引
-  - [basic/](tech/basic/) 基本設計 — db + [tech_db/](tech/basic/tech_db/)（テーブル定義書）/ data / structure / structure_backend / api / api_common / architecture / logging
-  - [nonfunctional/](tech/nonfunctional/) 非機能 — performance / security / operations（+_procedure）
-  - [detail/](tech/detail/) 詳細設計 — battle / offline / skill / party / tick / polling / state / rng / numeric / shop / design_system / auth（+auth_account: 登録・ログイン・ログアウト）/ base / scout / forge（索引+enhance・craft・disassemble）
+  - [basic/](tech/basic/) 基本設計 — db（索引+[tech_db/](tech/basic/tech_db/) テーブル定義書）/ data / structure（§2〜§3）/ backend（§4）/ api（索引+[tech_api/](tech/basic/tech_api/) common: §5.0 共通仕様）/ architecture / logging
+  - [nonfunctional/](tech/nonfunctional/) 非機能 — performance / security / operations（§12.1〜§12.3 環境・設定・監視）/ maintenance（§12.4〜§12.7 手順）
+  - [detail/](tech/detail/) 詳細設計 — battle / offline / skill / party / tick / polling / state / rng / numeric / shop / design_system / auth（索引+[tech_auth/](tech/detail/tech_auth/) account: 登録・ログイン・ログアウト）/ base / scout / forge（索引+[tech_forge/](tech/detail/tech_forge/) enhance・craft・disassemble）
 - [docs/data/master_data.md](data/master_data.md) — マスターデータの索引 + 塔データ一覧
   - [master/](data/master/) — character / item / equipment / base / endgame
   - [TOWERS_OVERVIEW.md](data/towers/TOWERS_OVERVIEW.md) 塔一覧 / [SKILLS_OVERVIEW.md](data/skills/SKILLS_OVERVIEW.md) スキル概要

@@ -1,7 +1,7 @@
 # AFK GAME — Java/Terasoluna 移行計画
 
 > 状態ファイル（[documentation_rules.md](../process/documentation_rules.md) §10）。移行完了時に本ファイルと `java_migration/` をまとめて削除する。
-> 移行後の構成の正は [tech_structure.md](../tech/basic/tech_structure.md) §2〜§3 と [tech_structure_backend.md](../tech/basic/tech_structure_backend.md) §4。本書群は**手順と進捗**のみを持ち、仕様は各成果物へ反映して重複させない。
+> 移行後の構成の正は [tech_structure.md](../tech/basic/tech_structure.md) §2〜§3 と [tech_backend.md](../tech/basic/tech_backend.md) §4。本書群は**手順と進捗**のみを持ち、仕様は各成果物へ反映して重複させない。
 > 本ファイルは索引で、**進捗（§4 の STEP 一覧表）の正**を持つ。各節の本文は分冊にある。
 
 ---
@@ -25,7 +25,7 @@
 | 着手時点 | Phase 1〜2 完了、Phase 3 製造①（パーティ・スキル基盤）まで実装済み |
 | 完了条件 | フロント無改修で Phase 1〜3 の E2E が全PASS、かつ単体テストが分岐100% |
 
-**API契約を変えないことが全体の制約**。[tech_api.md](../tech/basic/tech_api.md)・[tech_api_common.md](../tech/basic/tech_api_common.md) が正であり、移行で変更しない。JSON のプロパティ名は camelCase を維持する。
+**API契約を変えないことが全体の制約**。[tech_api.md](../tech/basic/tech_api.md)・[tech_api/common.md](../tech/basic/tech_api/common.md) が正であり、移行で変更しない。JSON のプロパティ名は camelCase を維持する。
 
 ## 2. 技術選定
 

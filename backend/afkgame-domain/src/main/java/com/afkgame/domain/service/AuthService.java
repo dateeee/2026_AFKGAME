@@ -7,7 +7,7 @@ import com.afkgame.domain.model.User;
  * 認証のドメインサービス。
  *
  * <p>仕様: docs/tech/detail/tech_auth.md §2「ゲストプレイ」・§3「認証フロー」・
- * §4「リフレッシュトークン」と docs/tech/detail/tech_auth_account.md §9〜§15
+ * §4「リフレッシュトークン」と docs/tech/detail/tech_auth/account.md §9〜§15
  * （登録・ログイン・ログアウト）、エラーコードは docs/tech/basic/tech_logging.md「AUTH_ コード一覧」。
  *
  * <p>ゲスト作成・リフレッシュ・登録・ログイン・ログアウトと、ユーザー作成時のプレイヤー初期化
@@ -53,7 +53,7 @@ public interface AuthService {
     /**
      * メールアドレスとパスワードでアカウントを登録し、トークンペアを発行する。
      *
-     * <p>tech_auth_account.md §10 の手順2（重複確認）→ 手順3〜7（ユーザー・初期化・確認トークン・
+     * <p>tech_auth/account.md §10 の手順2（重複確認）→ 手順3〜7（ユーザー・初期化・確認トークン・
      * トークンペア）を1つのトランザクション境界にまとめる（手順8）。途中で失敗した場合は
      * ユーザーを含めて何も残さない。
      *
@@ -70,7 +70,7 @@ public interface AuthService {
     /**
      * メールアドレスとパスワードで認証し、トークンペアを発行する。
      *
-     * <p>tech_auth_account.md §12。手順2〜4 の失敗はいずれも同じコードを返し、メールとパスワードの
+     * <p>tech_auth/account.md §12。手順2〜4 の失敗はいずれも同じコードを返し、メールとパスワードの
      * どちらが誤りかを区別させない。既存のリフレッシュトークンは失効させない（手順7）。
      *
      * @param email メールアドレス
@@ -83,7 +83,7 @@ public interface AuthService {
     /**
      * リフレッシュトークンを失効させてログアウトする。
      *
-     * <p>tech_auth_account.md §14。失効済みのトークンでも 200 を返す冪等な操作であり、
+     * <p>tech_auth/account.md §14。失効済みのトークンでも 200 を返す冪等な操作であり、
      * §4 の再利用検知（ユーザーの全トークン失効）は行わない（手順5）。期限切れのトークンも
      * 期限内と同じく失効させる（手順6）。
      *

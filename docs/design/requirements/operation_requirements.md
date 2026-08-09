@@ -3,7 +3,7 @@
 > リリース後にマスターデータを調整し、Phase を追加していく前提での要件を定義する。
 > プロダクト要件は [product_requirements.md](product_requirements.md)、非機能要件は [non_functional_requirements.md](non_functional_requirements.md)、工程の進め方は [development_process.md](../../process/development_process.md) を参照。
 >
-> 本書は **「何を守るか（ポリシー）」** を定義し、実現方式は持たない。環境・監視は [tech_operations.md](../../tech/nonfunctional/tech_operations.md)（§12.1〜§12.3）、ジョブ・移行手順は [tech_operations_procedure.md](../../tech/nonfunctional/tech_operations_procedure.md)（§12.4〜§12.7）が正。
+> 本書は **「何を守るか（ポリシー）」** を定義し、実現方式は持たない。環境・監視は [tech_operations.md](../../tech/nonfunctional/tech_operations.md)（§12.1〜§12.3）、ジョブ・移行手順は [tech_maintenance.md](../../tech/nonfunctional/tech_maintenance.md)（§12.4〜§12.7）が正。
 
 ---
 
@@ -34,7 +34,7 @@
 | DBインフラ変更（ノード分離・バージョン更新） | 変更時に既存データを引き継げること |
 | ダウンタイム | 移行に伴う停止は24時間未満に収めること（`non_functional_requirements.md` §3） |
 
-- 移行ツール・リビジョン粒度・前方互換・ロールバック手順は `tech_operations_procedure.md` §12.4 が正
+- 移行ツール・リビジョン粒度・前方互換・ロールバック手順は `tech_maintenance.md` §12.4 が正
 
 ## 3. 障害・メンテナンス時の扱い
 
@@ -72,7 +72,7 @@
 | 4 | DBバックアップ取得 → マイグレーション → デプロイ |
 | 5 | 主要導線のスモークテスト（起動・tick・ショップ・装備変更） |
 
-- 各手順で実行する技術的な確認項目（`check_doc_size.py`・`GET /health`・リリース後の指標確認）は `tech_operations_procedure.md` §12.7 が正
+- 各手順で実行する技術的な確認項目（`check_doc_size.py`・`GET /health`・リリース後の指標確認）は `tech_maintenance.md` §12.7 が正
 
 ## 5. サポート・問い合わせ
 

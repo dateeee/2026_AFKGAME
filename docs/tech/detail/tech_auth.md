@@ -185,7 +185,7 @@ JWT（JSON Web Token）によるステートレス認証。アクセストーク
 `POST /api/auth/guest` でユーザーを作った直後に、プレイ可能な初期状態を1トランザクションで組み立てる。
 `POST /api/auth/register` も手順2以降を同じ順序で再利用する（異なるのは入口のユーザー生成のみ）。
 
-register / login / logout の処理フローと分岐一覧は子ファイル [tech_auth_account.md](tech_auth_account.md)（§9〜§15）が正。
+register / login / logout の処理フローと分岐一覧は子ファイル [tech_auth/account.md](tech_auth/account.md)（§9〜§15）が正。
 
 ### 8.1 初期値の参照先
 

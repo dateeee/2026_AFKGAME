@@ -35,7 +35,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 
     private static final AppLogger middlewareLogger = AppLogger.of(LoggerName.MIDDLEWARE);
 
-    /** 型・範囲・必須の違反（tech_api_common.md「HTTPステータスコードの使い分け」の 422）。 */
+    /** 型・範囲・必須の違反（tech_api/common.md「HTTPステータスコードの使い分け」の 422）。 */
     private static final String VALIDATION_ERROR = "VALIDATION_ERROR";
 
     private static final String VALIDATION_MESSAGE = "リクエストの入力値が不正です";

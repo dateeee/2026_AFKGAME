@@ -1,19 +1,19 @@
 # AFK GAME — 認証: 登録・ログイン・ログアウト
 
-> [tech_auth.md](tech_auth.md) の子ファイル（§9〜§15）。`POST /api/auth/register` / `/login` / `/logout` の処理を定める。
+> [tech_auth.md](../tech_auth.md) の子ファイル（§9〜§15）。`POST /api/auth/register` / `/login` / `/logout` の処理を定める。
 > 認証方式とトークン有効期限（§1）・フロー概要（§3）・JWT構造と不正検知（§4）・応答例（§5）・プレイヤー初期化（§8）は索引側が正。
-> API一覧は [tech_api.md](../basic/tech_api.md)、共通規約は [tech_api_common.md](../basic/tech_api_common.md)、エラーコードは [tech_logging.md](../basic/tech_logging.md)「AUTH_ コード一覧」、列定義は [tech_db/auth.md](../basic/tech_db/auth.md)。
+> API一覧は [tech_api.md](../../basic/tech_api.md)、共通規約は [tech_api/common.md](../../basic/tech_api/common.md)、エラーコードは [tech_logging.md](../../basic/tech_logging.md)「AUTH_ コード一覧」、列定義は [tech_db/auth.md](../../basic/tech_db/auth.md)。
 
 ## 9. 3操作に共通する規約
 
 | 項目 | 規約 |
 |------|------|
-| 認証の要否 | register・login は認証不要。**logout は `Authorization: Bearer <access_token>` が必須**（`tech_api_common.md` §5.0 の認証不要リストに logout は無い） |
+| 認証の要否 | register・login は認証不要。**logout は `Authorization: Bearer <access_token>` が必須**（`tech_api/common.md` §5.0 の認証不要リストに logout は無い） |
 | パスワードハッシュ | bcrypt（`BCryptPasswordEncoder`・strength 12）。値の正は §1 |
 | リフレッシュトークン | 48バイトの乱数を Base64URL（パディングなし）で表した生値をクライアントへ返し、DBには SHA-256（16進小文字）だけを保存する。ゲスト作成（§8.2 手順7）・refresh と同じ方式 |
 | 有効期限 | アクセス30分・リフレッシュ30日（§1）。いずれも現在時刻からの相対で決める |
 | 現在時刻 | 1リクエストにつき同一の時刻源から1回だけ取得した UTC 値を使う（テストで固定するため） |
-| バリデーション違反 | 422 `VALIDATION_ERROR`（Bean Validation。対応表は [exception.md](../../process/coding_standards_backend/exception.md)） |
+| バリデーション違反 | 422 `VALIDATION_ERROR`（Bean Validation。対応表は [exception.md](../../../process/coding_standards_backend/exception.md)） |
 | エラー応答 | `{"error": {"code", "message", "requestId"}}`。コードは AUTH_ 一覧から選び、本工程で新設しない |
 | ログ | メールはマスクして出す（`tech_logging.md`「ログフォーマット」）。パスワードとトークン生値は出力しない |
 
@@ -32,7 +32,7 @@
 8. 手順3〜7 を単一トランザクションでコミットする
 9. コミット後に確認メールの送信を要求する。**送信はトランザクションの外**で行い、成否を応答へ反映しない（失敗は WARN ログだけを残す）。送信手段（SMTP設定・本文・再送）は verify-email の詳細設計で定める
 
-パスワード確認欄はフロントだけで照合し、APIは受け取らない（[ui_onboarding.md](../../design/systems/ui_onboarding.md)「登録タブ」）。
+パスワード確認欄はフロントだけで照合し、APIは受け取らない（[ui/onboarding.md](../../../design/systems/ui/onboarding.md)「登録タブ」）。
 
 ## 11. 分岐一覧（アカウント登録）
 

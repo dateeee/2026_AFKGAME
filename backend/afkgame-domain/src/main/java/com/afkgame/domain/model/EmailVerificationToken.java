@@ -6,7 +6,7 @@ import java.time.Instant;
  * {@code email_verification_tokens} テーブルの Entity。
  *
  * <p>スキーマ定義の正は docs/tech/basic/tech_db/auth.md §3、発行の仕様は
- * docs/tech/detail/tech_auth_account.md §10 手順6。生のトークンは保存せず、SHA-256 ハッシュのみを持つ。
+ * docs/tech/detail/tech_auth/account.md §10 手順6。生のトークンは保存せず、SHA-256 ハッシュのみを持つ。
  */
 public class EmailVerificationToken {
 

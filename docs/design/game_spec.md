@@ -90,7 +90,7 @@
 
 ## 3. UI構成
 
-描画方針・レスポンシブ設計・アクセシビリティ・画面レイアウト・ナビゲーション・通知・数値表示フォーマットは [systems/ui.md](systems/ui.md)、認証画面とチュートリアルは [systems/ui_onboarding.md](systems/ui_onboarding.md) を参照。
+描画方針・レスポンシブ設計・アクセシビリティ・画面レイアウト・ナビゲーション・通知・数値表示フォーマットは [systems/ui.md](systems/ui.md)、認証画面とチュートリアルは [systems/ui/onboarding.md](systems/ui/onboarding.md) を参照。
 
 ---
 

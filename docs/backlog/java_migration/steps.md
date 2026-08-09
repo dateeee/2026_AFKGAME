@@ -33,7 +33,7 @@
 | 項目 | 見送りの理由 |
 |------|------------|
 | `POST /api/auth/guest` の Player・キャラクター・装備スロット・初期ポーション初期化（現状は User + トークンのみ） | 初期値がマスターデータ側にある |
-| `SecurityConfig` の認証不要パス（現状は `/health`・`/api/auth/{guest,refresh}` のみ） | 未実装のパスを先に開けない。一覧の正は [tech_api_common.md](../../tech/basic/tech_api_common.md) §5.0 |
+| `SecurityConfig` の認証不要パス（現状は `/health`・`/api/auth/{guest,refresh}` のみ） | 未実装のパスを先に開けない。一覧の正は [tech_api/common.md](../../tech/basic/tech_api/common.md) §5.0 |
 | `BCryptPasswordEncoder`（strength 12） | 利用者が register・login しか無い |
 
 **この STEP の成果は 2R で作り直す**（下記）。上表の見送り項目は 2R 後の STEP 3 へそのまま引き継ぐ。

@@ -20,6 +20,7 @@ WARN の抑止（`WARN許容`）:
     対象は backend/*/src/test/java/**/*Test.java（JUnit 5）。
     マーカー形式: 「分岐: tech_shop.md §7 #3」（節番号は §8.3 のような枝番も可。
     一覧が1つだけの文書は §番号 を省略可。#3,4 と複数可）
+    索引の子ファイルは親ディレクトリ名を付ける（「分岐: tech_forge/craft.md §10 #1」）。
     マーカーが1件も参照していない文書・セクションは照合対象外（レガシーテストに影響しない）。
 
 使い方:
@@ -43,10 +44,33 @@ ALLOW_WARN = re.compile(r"WARN許容\s*([#0-9,、・\s]+)[:：]")
 LAP_COUNT = re.compile(r"\d+\s*周")
 
 
-def parse_tables() -> dict[tuple[str, str], dict]:
-    """{(ファイル名, セクション番号): {rows, structured, allow_warn, path, line}} を返す。"""
+def doc_key(path: Path) -> str:
+    """マーカーが指す文書名。層ディレクトリ（basic / detail / nonfunctional）だけ落とす。
+
+    `detail/tech_shop.md` → `tech_shop.md`、`detail/tech_forge/craft.md` → `tech_forge/craft.md`。
+    索引の子は親ディレクトリ名を残すため、基底名だけでは失われる文脈（どの索引の子か）が
+    マーカー側にも残り、別の索引に同名の子ができても一意になる。
+    """
+    parts = path.relative_to(TECH_DIR).parts
+    return "/".join(parts[1:]) if len(parts) > 1 else parts[0]
+
+
+def parse_tables() -> tuple[dict[tuple[str, str], dict], list[str]]:
+    """({(文書名, セクション番号): {rows, structured, allow_warn, path, line}}, 重複エラー) を返す。
+
+    走査は `docs/tech/**/*.md` 全件。索引の子ディレクトリ（`tech_forge/craft.md` など）は
+    `tech_` 接頭辞を持たないため、パターンで絞ると分岐一覧が黙って照合から落ちる。
+    """
     sections = {}
-    for path in sorted(TECH_DIR.rglob("tech_*.md")):
+    seen: dict[str, Path] = {}
+    dup_errors: list[str] = []
+    for path in sorted(TECH_DIR.rglob("*.md")):
+        prev = seen.setdefault(doc_key(path), path)
+        if prev != path:
+            dup_errors.append(
+                f"ERROR {path.relative_to(ROOT).as_posix()}: 文書名 {doc_key(path)} が "
+                f"{prev.relative_to(ROOT).as_posix()} と衝突している（分岐一覧のキーとテストのマーカーが一意にならない）"
+            )
         lines = path.read_text(encoding="utf-8").splitlines()
         current, header, in_code = None, None, False
         for no, line in enumerate(lines, 1):
@@ -57,8 +81,8 @@ def parse_tables() -> dict[tuple[str, str], dict]:
                 continue
             m = HEADING.match(line)
             if m:
-                key = (path.name, m.group(2) or "")
-                current = {"rows": [], "structured": False, "allow_warn": set(), "path": path.name, "line": no}
+                key = (doc_key(path), m.group(2) or "")
+                current = {"rows": [], "structured": False, "allow_warn": set(), "path": doc_key(path), "line": no}
                 sections[key] = current
                 header = None
                 continue
@@ -80,7 +104,7 @@ def parse_tables() -> dict[tuple[str, str], dict]:
             if set("".join(cells)) <= {"-", ":", " "}:
                 continue
             current["rows"].append((no, cells))
-    return sections
+    return sections, dup_errors
 
 
 def check_structure(sections) -> tuple[list[str], list[str]]:
@@ -166,8 +190,9 @@ def main() -> int:
     except (AttributeError, OSError):  # pragma: no cover - 実行環境依存
         pass
 
-    sections = parse_tables()
+    sections, dup_errors = parse_tables()
     errors, warns = check_structure(sections)
+    errors += dup_errors
     if "--tests" in sys.argv[1:]:
         errors += check_tests(sections)
 

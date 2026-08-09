@@ -1,6 +1,6 @@
 # AFK GAME — 運用設計（環境・設定・監視）
 
-> [tech_spec.md](../tech_spec.md) §12.1〜§12.3。マイグレーション・バックアップ・定期ジョブ・リリース手順は [tech_operations_procedure.md](tech_operations_procedure.md) §12.4〜§12.7。
+> [tech_spec.md](../tech_spec.md) §12.1〜§12.3。マイグレーション・バックアップ・定期ジョブ・リリース手順は [tech_maintenance.md](tech_maintenance.md) §12.4〜§12.7。
 > 性能設計は [tech_performance.md](tech_performance.md)、秘密情報の扱いは [tech_security.md](tech_security.md) §11.8、ログ仕様は [tech_logging.md](../basic/tech_logging.md) を参照。
 >
 > **運用「要件」（バランス改定ポリシー・補填・告知・サポート窓口）は [operation_requirements.md](../../design/requirements/operation_requirements.md) が正**。本書はその実現方式（環境・設定・監視）のみを扱う。
@@ -26,8 +26,8 @@
 | フロント（SPA） | S3（静的ホスティング）+ CloudFront。HTTPS は CloudFront が終端する |
 | API | EC2 1台。Nginx をリバースプロキシに **Tomcat 11.0（Servlet 6.1）を systemd で常駐**させ、`afkgame-web` の war を配備する（実行可能 jar は作らない） |
 | DB | 同一 EC2 上に PostgreSQL を常駐させ、データディレクトリを EBS に置く（マネージドDBは使わない） |
-| 定期ジョブ | 同一 EC2 の OS cron（`tech_operations_procedure.md` §12.6） |
-| バックアップ | EBS の日次スナップショットを取得する。方式・頻度・保持期間・保管先は **`tech_operations_procedure.md` §12.5 が正** |
+| 定期ジョブ | 同一 EC2 の OS cron（`tech_maintenance.md` §12.6） |
+| バックアップ | EBS の日次スナップショットを取得する。方式・頻度・保持期間・保管先は **`tech_maintenance.md` §12.5 が正** |
 
 - フロントとバックエンドは**別オリジン**（CloudFront / EC2）になる。許可オリジンは §12.2 の `CORS_ORIGINS` が正
 - マネージドコンテナ（App Runner・ECS Fargate）は採用しない。ファイルシステムが揮発し、DBのデータディレクトリと OS cron を同一ノードで継続できないため
@@ -47,7 +47,7 @@ SPRING_PROFILES_ACTIVE=local "$CATALINA_HOME/bin/catalina.sh" run   # :8080
 
 ## 12.2 環境変数一覧
 
-設定値の参照は `afkgame-env` の設定保持 Bean に集約し、アプリケーションコードから環境変数を直接読まない（`@ConfigurationProperties` は Boot 機能のため使わない。受け取り方は [tech_structure_backend.md](../basic/tech_structure_backend.md) §4.2）。値は `META-INF/spring/*.properties` の既定値を環境変数で上書きする。
+設定値の参照は `afkgame-env` の設定保持 Bean に集約し、アプリケーションコードから環境変数を直接読まない（`@ConfigurationProperties` は Boot 機能のため使わない。受け取り方は [tech_backend.md](../basic/tech_backend.md) §4.2）。値は `META-INF/spring/*.properties` の既定値を環境変数で上書きする。
 
 | 変数名 | 用途 | 既定値 | 本番必須 |
 |--------|------|--------|---------|
@@ -79,7 +79,7 @@ SPRING_PROFILES_ACTIVE=local "$CATALINA_HOME/bin/catalina.sh" run   # :8080
 | 異常時 | `503` / `{"status":"degraded","db":"error"}`（DBへの `SELECT 1` が失敗した場合） |
 | 用途 | デプロイ先のヘルスチェック、外部死活監視 |
 
-- `version` の取得方法（Maven のリソースフィルタ）は `tech_structure_backend.md` §4.1 が正
+- `version` の取得方法（Maven のリソースフィルタ）は `tech_backend.md` §4.1 が正
 
 監視項目（ログ集計ベース。専用の監視基盤は導入しない）:
 
@@ -88,6 +88,6 @@ SPRING_PROFILES_ACTIVE=local "$CATALINA_HOME/bin/catalina.sh" run   # :8080
 | 5xx 率 | 1% 超で調査 | Filter/Interceptor の `status_code` |
 | `POST /api/battle/tick` の p95 | [non_functional_requirements.md](../../design/requirements/non_functional_requirements.md) §1 の目標超過で調査 | Filter/Interceptor の `duration_ms` |
 | ERROR ログ件数 | 1件でも出たら内容を確認 | ロガー `afkgame.*` |
-| DBサイズ（`pg_database_size`） | `tech_performance.md` §10.3 の試算を上回る増加傾向で調査 | 日次バッチ（`tech_operations_procedure.md` §12.6）で記録 |
+| DBサイズ（`pg_database_size`） | `tech_performance.md` §10.3 の試算を上回る増加傾向で調査 | 日次バッチ（`tech_maintenance.md` §12.6）で記録 |
 
 - アラート通知はベストエフォート（個人運用）。定期的にログを確認する運用とし、SLA は提示しない

@@ -15,7 +15,7 @@
 
     <!-- 雛形の sql-maven-plugin と local-postgres/oracle プロファイルは使わない。
          スキーマ適用は Flyway が src/main/resources/db/migration の V1 を起動時に流す
-         （正は tech_structure_backend.md §4） -->
+         （正は tech_backend.md §4） -->
 
     <dependencies>
         <dependency>

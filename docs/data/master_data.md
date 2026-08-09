@@ -67,7 +67,7 @@
 | `noticeId` | string | ✓ | 一意なID。`notice_` + 3桁連番（例: `notice_001`）。削除後も採番を再利用しない |
 | `title` | string | ✓ | 見出し。40字以内 |
 | `body` | string | ✓ | 本文。400字以内。改行は `\n` で表現する |
-| `publishedAt` | string | ✓ | 掲示日時。ISO 8601 の UTC（例: `2026-03-15T12:00:00Z`。[tech_api_common.md §5](../tech/basic/tech_api_common.md)） |
+| `publishedAt` | string | ✓ | 掲示日時。ISO 8601 の UTC（例: `2026-03-15T12:00:00Z`。[tech_api/common.md §5](../tech/basic/tech_api/common.md)） |
 
 ### 17.2 上限値
 

@@ -3,7 +3,7 @@ package com.afkgame.web.resource;
 /**
  * 返す値を持たない操作の成功応答（{@code {"status": "ok"}}）。
  *
- * <p>仕様: docs/tech/detail/tech_auth_account.md §14「出口条件」。
+ * <p>仕様: docs/tech/detail/tech_auth/account.md §14「出口条件」。
  *
  * @param status 処理結果。成功は {@code ok}
  */

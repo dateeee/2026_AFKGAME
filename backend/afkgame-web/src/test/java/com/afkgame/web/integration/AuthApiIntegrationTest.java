@@ -162,7 +162,7 @@ class AuthApiIntegrationTest extends WebIntegrationTestSupport {
         mockMvc.perform(get("/api/game/state"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.error.code").value("AUTH_HEADER_MISSING"))
-                // ログ突合のためリクエストIDを常に返す（tech_api_common.md「共通ヘッダ」）
+                // ログ突合のためリクエストIDを常に返す（tech_api/common.md「共通ヘッダ」）
                 .andExpect(header().exists("X-Request-ID"));
 
         mockMvc.perform(get("/api/game/state").header("Authorization", "Token abc"))
@@ -186,7 +186,7 @@ class AuthApiIntegrationTest extends WebIntegrationTestSupport {
     }
 
     /**
-     * ログアウトは認証必須（tech_auth_account.md §9・§14 手順1）。アクセストークンが無効なら
+     * ログアウトは認証必須（tech_auth/account.md §9・§14 手順1）。アクセストークンが無効なら
      * AUTH_ コードで 401 を返し、ボディで指したリフレッシュトークンを失効させない。
      * 期限切れトークンの分岐は {@code JwtAuthenticationFilterTest} が持つ。
      *
@@ -194,7 +194,7 @@ class AuthApiIntegrationTest extends WebIntegrationTestSupport {
      * 401 は返る**。空振りを防ぐため、末尾に「認証を通せば同じリクエストが成功して失効する」
      * 対照実験を置く。
      *
-     * <p>分岐: tech_auth_account.md §15 #2
+     * <p>分岐: tech_auth/account.md §15 #2
      */
     @Test
     @DisplayName("アクセストークンが無効なログアウトは 401 になり、リフレッシュトークンを失効させない")

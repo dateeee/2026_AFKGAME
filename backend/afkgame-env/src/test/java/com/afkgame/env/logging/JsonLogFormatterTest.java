@@ -53,7 +53,7 @@ class JsonLogFormatterTest {
             assertThat(json).contains("\"level\":\"INFO\"");
             assertThat(json).contains("\"logger\":\"afkgame.auth\"");
             assertThat(json).contains("\"message\":\"ゲストアカウント作成\"");
-            // ISO 8601 の UTC（tech_api_common.md §5.0 の日時規約と揃える）
+            // ISO 8601 の UTC（tech_api/common.md §5.0 の日時規約と揃える）
             assertThat(json).containsPattern("\"timestamp\":\"\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z\"");
         }
 

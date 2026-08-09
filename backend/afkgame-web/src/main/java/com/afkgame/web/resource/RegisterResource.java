@@ -7,8 +7,8 @@ import jakarta.validation.constraints.Size;
 /**
  * {@code POST /api/auth/register} のリクエストボディ。
  *
- * <p>仕様: docs/tech/detail/tech_auth_account.md §10 手順1。制約違反は 422
- * （docs/tech/basic/tech_api_common.md「HTTPステータスコードの使い分け」）。
+ * <p>仕様: docs/tech/detail/tech_auth/account.md §10 手順1。制約違反は 422
+ * （docs/tech/basic/tech_api/common.md「HTTPステータスコードの使い分け」）。
  *
  * @param email    登録するメールアドレス（255文字以内）
  * @param password 生のパスワード（8文字以上。tech_auth.md §1「パスワード要件」）

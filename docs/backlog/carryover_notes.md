@@ -20,7 +20,7 @@
 
 - **バランス調整バックログ B-9 の波及**: 酒場・鍛冶屋のしきい値方式を廃止し5施設とも全10LV定義にした結果、**`tech_base.md` §8 の分岐一覧が16→15件**になっている。Phase 4 のテストリストは新番号を起点にする
 - **未確定仕様はゼロ**（2026-08-08。`open_specs.md` は削除済み・不在＝未確定ゼロ）。Phase 5 の基本設計前に仕様確定ゲート（`doc-review` → `fix-specs`）を一度通す。主な照合対象は `towersCleared` のキー体系（正は `tech_data.md` §1.1）と Phase 5「探索」タブへの導線集約（正は `systems/ui.md`）
-- **認証の入力長で仕様が2点ぶれている**（2026-08-09・STEP 3-A-2 のテストリスト作成で検出）。①メール長が `tech_security.md` §11.3「254文字」と `tech_auth_account.md` §11 #3/#4「255文字」で食い違う（`users.email` は `VARCHAR(255)`）②`AuthSettings.passwordMaxLength`（128）と `tech_security.md` §11.3「8〜128文字」が定めるパスワード上限に対応する分岐行が §11 に無い（下限 #5/#6 のみ）。**テストは分岐一覧（255文字・上限なし）を正として書いてある**ので、確定した側へ寄せる際は `AuthApiTest` の該当テストも直す。3-A-3（`tech_auth_account.md` へ追記する回）か Phase 5 の仕様確定ゲートで片付ける
+- **認証の入力長で仕様が2点ぶれている**（2026-08-09・STEP 3-A-2 のテストリスト作成で検出）。①メール長が `tech_security.md` §11.3「254文字」と `tech_auth/account.md` §11 #3/#4「255文字」で食い違う（`users.email` は `VARCHAR(255)`）②`AuthSettings.passwordMaxLength`（128）と `tech_security.md` §11.3「8〜128文字」が定めるパスワード上限に対応する分岐行が §11 に無い（下限 #5/#6 のみ）。**テストは分岐一覧（255文字・上限なし）を正として書いてある**ので、確定した側へ寄せる際は `AuthApiTest` の該当テストも直す。3-A-3（`tech_auth/account.md` へ追記する回）か Phase 5 の仕様確定ゲートで片付ける
 - 獣の塔（`docs/data/towers/003_獣の塔.md`）をマスターデータへ追加する際、`FLOOR_CHARACTERS` へ `scout_001` ハヤテ（獣の塔10Fクリア。`master/character.md` §7.1 の3体目）を足す。製造①では塔IDが未宣言で ID を発明しないため見送った（塔6〜8 のマスターデータ追加または移行 STEP 5 へ合流させる）
 
 ## 3. 環境・ツール

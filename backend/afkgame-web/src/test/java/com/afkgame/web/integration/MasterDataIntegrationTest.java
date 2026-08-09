@@ -21,7 +21,7 @@ import jakarta.validation.Validator;
 /**
  * 設定値のバインドとマスターデータの起動時ロードが、実際のアプリケーション起動で成立することの統合テスト。
  *
- * <p>仕様: docs/tech/basic/tech_structure_backend.md §4.2「設定値」（{@code afkgame.*} の値）、
+ * <p>仕様: docs/tech/basic/tech_backend.md §4.2「設定値」（{@code afkgame.*} の値）、
  * docs/tech/nonfunctional/tech_operations.md §12.2（環境変数と起動時バリデーション）、
  * docs/backlog/java_migration.md §2「マスターデータ」（不正なら起動を中止する）。
  *

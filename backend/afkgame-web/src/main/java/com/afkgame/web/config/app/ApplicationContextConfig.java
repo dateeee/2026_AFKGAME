@@ -46,7 +46,7 @@ public class ApplicationContextConfig {
      * <p>
      * JSON は Jackson 3（{@code tools.jackson}）で扱う（移行 STEP 2R-C の確定結果）。未定義
      * フィールドを含むリクエストは 422 で拒否するため {@code FAIL_ON_UNKNOWN_PROPERTIES} を
-     * 有効にする（Jackson 3 の既定は無効。tech_security.md §11.3・tech_api_common.md §5.0）。
+     * 有効にする（Jackson 3 の既定は無効。tech_security.md §11.3・tech_api/common.md §5.0）。
      * </p>
      * <p>
      * Spring MVC の変換器（{@code SpringMvcConfig}）と、フィルタ内で応答を組み立てる
@@ -64,7 +64,7 @@ public class ApplicationContextConfig {
      * Configure {@link PasswordEncoder} bean.
      * <p>
      * ハッシュ方式は bcrypt だけを使う（ストレッチ回数の正は
-     * docs/tech/detail/tech_auth.md §1、適用箇所は tech_auth_account.md §9）。雛形が定義していた
+     * docs/tech/detail/tech_auth.md §1、適用箇所は tech_auth/account.md §9）。雛形が定義していた
      * {@code DelegatingPasswordEncoder}（pbkdf2 既定）と pbkdf2 の Bean は、複数の
      * {@link PasswordEncoder} が候補になると名前解決で pbkdf2 側が注入され仕様と食い違うため置かない。
      * </p>

@@ -46,7 +46,7 @@ public class AuthServiceImpl implements AuthService {
     /** 確認トークンの用途（tech_db/auth.md §3）。用途をまたいだ流用を防ぐため発行時に固定する。 */
     private static final String VERIFY_EMAIL_PURPOSE = "verify_email";
 
-    /** 確認トークンの有効期間（tech_auth_account.md §10 手順6）。 */
+    /** 確認トークンの有効期間（tech_auth/account.md §10 手順6）。 */
     private static final Duration VERIFICATION_TOKEN_EXPIRE = Duration.ofHours(24);
 
     /** トークン生成用の暗号乱数。ゲーム乱数（{@code RandomFactory}）とは用途が異なり、共有してよい。 */
@@ -155,7 +155,7 @@ public class AuthServiceImpl implements AuthService {
      * {@inheritDoc}
      *
      * <p>重複確認からトークン発行までを本メソッドの境界で1つにまとめる
-     * （tech_auth_account.md §10 手順8）。確認メールの送信要求だけは境界の外へ出さず、
+     * （tech_auth/account.md §10 手順8）。確認メールの送信要求だけは境界の外へ出さず、
      * 送信側（{@link VerificationMailSender}）が「コミット後」の扱いを持つ。
      */
     @Override
@@ -205,7 +205,7 @@ public class AuthServiceImpl implements AuthService {
     /**
      * {@inheritDoc}
      *
-     * <p>最終ログイン時刻の更新を含むため境界を持つ（tech_auth_account.md §12 手順5）。
+     * <p>最終ログイン時刻の更新を含むため境界を持つ（tech_auth/account.md §12 手順5）。
      */
     @Override
     @Transactional
@@ -237,7 +237,7 @@ public class AuthServiceImpl implements AuthService {
     /**
      * {@inheritDoc}
      *
-     * <p>失効の更新を伴うため境界を持つ（tech_auth_account.md §14）。
+     * <p>失効の更新を伴うため境界を持つ（tech_auth/account.md §14）。
      */
     @Override
     @Transactional
@@ -297,7 +297,7 @@ public class AuthServiceImpl implements AuthService {
      * クライアントへ渡す生トークンを作る。
      *
      * <p>48バイトの乱数を Base64URL（パディングなし）で表す。リフレッシュトークンと確認トークンで
-     * 同じ方式を使う（tech_auth_account.md §9）。
+     * 同じ方式を使う（tech_auth/account.md §9）。
      */
     private static String generateRawToken() {
         byte[] raw = new byte[REFRESH_TOKEN_BYTES];

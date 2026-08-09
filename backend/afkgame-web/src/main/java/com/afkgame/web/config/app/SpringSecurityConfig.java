@@ -29,7 +29,7 @@ import com.afkgame.web.filter.RequestLogFilter;
  * </p>
  * <p>
  * 仕様: docs/tech/nonfunctional/tech_security.md §11.2（CORS）・§11.5（認証必須の既定）、
- * docs/tech/basic/tech_api_common.md §5.0（認証不要な例外の一覧）、
+ * docs/tech/basic/tech_api/common.md §5.0（認証不要な例外の一覧）、
  * docs/tech/detail/tech_auth.md §1（ステートレスなJWT認証）。
  * </p>
  * <p>
@@ -46,12 +46,12 @@ public class SpringSecurityConfig {
     /**
      * 認証不要なエンドポイント。
      * <p>
-     * 一覧の正は tech_api_common.md §5.0「認証不要な例外」。ここには**実装済みのものだけ**を
+     * 一覧の正は tech_api/common.md §5.0「認証不要な例外」。ここには**実装済みのものだけ**を
      * 並べる（未実装のパスを先に開けない）。verify-email・google・password-reset は移植時
      * （java_migration.md STEP 3-A-3・4）に追加する。
      * </p>
      * <p>
-     * **logout は載せない**。認証必須であり（tech_auth_account.md §9・§14 手順1）、
+     * **logout は載せない**。認証必須であり（tech_auth/account.md §9・§14 手順1）、
      * ここへ足すと無効なアクセストークンでも他人のリフレッシュトークンを指せてしまう。
      * </p>
      */

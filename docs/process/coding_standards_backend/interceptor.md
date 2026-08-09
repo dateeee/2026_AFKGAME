@@ -15,7 +15,7 @@
 - 逆に、`DispatcherServlet` へ届かないリクエスト（コンテナが弾くもの）と**応答ボディ**には手が届かない（§2）
 - 登録経路は `SpringMvcConfig#addInterceptors` の1系統だけ。サーブレットコンテキスト側の設定であり、フィルタの `web.xml` とは別
 
-**現時点で自作インターセプタは無い**（登録されているのは §4 で不採用とした雛形のものだけ）。作るときは新設パッケージ `com.afkgame.web.interceptor` に置き、クラス名は `<役割>Interceptor` とする。**先に `web.md` §1 の表と `tech_structure_backend.md` §4.1 のツリーへ追記してから**作る（[layering.md](layering.md) §2 と同じ扱い）。
+**現時点で自作インターセプタは無い**（登録されているのは §4 で不採用とした雛形のものだけ）。作るときは新設パッケージ `com.afkgame.web.interceptor` に置き、クラス名は `<役割>Interceptor` とする。**先に `web.md` §1 の表と `tech_backend.md` §4.1 のツリーへ追記してから**作る（[layering.md](layering.md) §2 と同じ扱い）。
 
 ## 2. 3つのフックの使い分け
 
@@ -67,4 +67,4 @@
 | ロガー名体系・ログ項目・マスク規則 | [tech_logging.md](../../tech/basic/tech_logging.md) |
 | 認可の既定・レート制限の仕様 | [tech_security.md](../../tech/nonfunctional/tech_security.md) |
 | Web層の責務・コントローラ・Resource・設定 | [web.md](web.md) |
-| ディレクトリツリー・モジュール構成 | [tech_structure_backend.md](../../tech/basic/tech_structure_backend.md) §4 |
+| ディレクトリツリー・モジュール構成 | [tech_backend.md](../../tech/basic/tech_backend.md) §4 |

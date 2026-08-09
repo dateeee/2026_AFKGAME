@@ -16,7 +16,7 @@ import com.afkgame.env.config.GameSettings;
 /**
  * 設定ファイルの値を読み、設定保持 Bean を組み立てる。
  *
- * <p>キー・既定値の正は docs/tech/basic/tech_structure_backend.md §4.2、環境変数の正は
+ * <p>キー・既定値の正は docs/tech/basic/tech_backend.md §4.2、環境変数の正は
  * docs/tech/nonfunctional/tech_operations.md §12.2。{@code @ConfigurationProperties} は
  * Spring Boot の機能のため使わず、{@code @Value} で読む場所を**本クラス1か所**に閉じる
  * （他層は {@link GameSettings} 等を注入して参照し、環境変数もプロパティも直接読まない）。

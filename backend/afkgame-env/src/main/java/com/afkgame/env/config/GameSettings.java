@@ -3,7 +3,7 @@ package com.afkgame.env.config;
 /**
  * ゲーム進行の設定値を保持する。
  *
- * <p>キー・既定値の正は docs/tech/basic/tech_structure_backend.md §4.2、環境変数の正は
+ * <p>キー・既定値の正は docs/tech/basic/tech_backend.md §4.2、環境変数の正は
  * docs/tech/nonfunctional/tech_operations.md §12.2。アプリケーションコードから環境変数と
  * プロパティを直接読まず、本 Bean を注入して参照する。
  *

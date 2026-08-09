@@ -111,4 +111,4 @@
 | ロガー名体系・ログ項目・マスク規則・リクエストログの仕様 | [tech_logging.md](../../tech/basic/tech_logging.md) |
 | 認証方式・CORS・セキュリティ対策の一覧 | [tech_auth.md](../../tech/detail/tech_auth.md)・[tech_security.md](../../tech/nonfunctional/tech_security.md) |
 | Web層の責務・コントローラ・Resource | [web.md](web.md) |
-| ディレクトリツリー・モジュール構成 | [tech_structure_backend.md](../../tech/basic/tech_structure_backend.md) §4 |
+| ディレクトリツリー・モジュール構成 | [tech_backend.md](../../tech/basic/tech_backend.md) §4 |

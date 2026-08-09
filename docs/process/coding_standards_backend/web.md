@@ -18,7 +18,7 @@
 - Web層は「受け取る・検証する・ドメインへ渡す・返す」だけを担う。業務判断は [domain/service.md](domain/service.md) §1 の Service が持つ
 - **View と Helper は持たない**（ガイドライン 2.4.1.1.2・2.4.1.1.3 との差分。`layering.md` §2）。描画は SPA（Vue 3）、変換は Resource の `static from(...)`（§3 #3）
 - Controller から Repository を直接呼ばない（`layering.md` §3）。参照系でも Service を通す
-- API契約（パス・HTTPメソッド・ステータス・JSON構造）の正は [tech_api.md](../../tech/basic/tech_api.md)・[tech_api_common.md](../../tech/basic/tech_api_common.md)。本書で再掲しない
+- API契約（パス・HTTPメソッド・ステータス・JSON構造）の正は [tech_api.md](../../tech/basic/tech_api.md)・[tech_api/common.md](../../tech/basic/tech_api/common.md)。本書で再掲しない
 
 ## 2. コントローラ（`api`）
 
@@ -37,14 +37,14 @@
 | 1 | `record` + Bean Validation（Jakarta）で定義する |
 | 2 | リクエスト用とレスポンス用を**兼用しない** |
 | 3 | ドメイン型 ↔ Resource の変換は `public static from(...)` に集約する。ガイドラインは Helper クラス（2.4.1.1.3・2.4.1.1.4）か MapStruct への委譲を推奨するが、本プロジェクトは**Helper を作らない**。変換対象が Resource ごとに閉じており、Controller の見通しは `from(...)` への集約で足りるため |
-| 4 | **JSON のフィールド名は lowerCamelCase**。Jackson の既定でそのまま出るため `@JsonProperty` での改名をしない（`tech_api_common.md` §5.0） |
+| 4 | **JSON のフィールド名は lowerCamelCase**。Jackson の既定でそのまま出るため `@JsonProperty` での改名をしない（`tech_api/common.md` §5.0） |
 | 5 | 業務ロジックを持たせない（判定・計算は Service 側） |
 
 ## 4. 設定・フィルタ（`config`・`filter`）
 
 | # | 規約 |
 |---|------|
-| 1 | 設定値は `afkgame-env` の設定保持 Bean を注入して読む。Web層で `@Value` を直書きしない（`@ConfigurationProperties` は Boot 機能のため使わない。組み立て方は [tech_structure_backend.md](../../tech/basic/tech_structure_backend.md) §4.2） |
+| 1 | 設定値は `afkgame-env` の設定保持 Bean を注入して読む。Web層で `@Value` を直書きしない（`@ConfigurationProperties` は Boot 機能のため使わない。組み立て方は [tech_backend.md](../../tech/basic/tech_backend.md) §4.2） |
 | 2 | 個別機能の業務ロジックをフィルタ・インターセプタに置かない（横断処理だけ） |
 | 3 | `request_id` などの横断項目は MDC（`RequestLogFilter`）が載せる（`common.md` §7 #5） |
 

@@ -82,7 +82,7 @@
 |---|------|
 | 1 | 応答に内部情報（SQL・スタックトレース・テーブル構造・ライブラリ名・クラス名）を載せない。5xx の標準例外はメッセージに内部の型名が入るため定型文へそろえる |
 | 2 | 認証・認可の失敗理由を出し分けない（探索の手がかりになるため）。詳細はログにだけ残す |
-| 3 | エラーコード体系と統一エラーレスポンス形式の正は `tech_logging.md`、ステータスの使い分けの正は [tech_api_common.md](../../tech/basic/tech_api_common.md)。本書で再掲しない |
+| 3 | エラーコード体系と統一エラーレスポンス形式の正は `tech_logging.md`、ステータスの使い分けの正は [tech_api/common.md](../../tech/basic/tech_api/common.md)。本書で再掲しない |
 | 4 | `getResultMessages()` の**先頭** `ResultMessage#getCode()` を `ErrorResource.code` へ写し、HTTP ステータスは Web 層が持つ**コード→ステータス対応表**で引く（未登録は 422）。応答の `message` は同表の定型文とし、**例外の `getMessage()` は使わない**（§2.1）。ガイドラインの `ApiError` + `ExceptionCodeResolver`（5.1.4.6.1）は**採らない** — 解決したいのは「例外クラス→コード」ではなく「コード→ステータス」で向きが違うため |
 | 5 | 対応表は `tech_logging.md`（コード体系の正）の写しなので、**一致を機械照合する**（`scripts/check_error_codes.py`。仕様に無いコード・ステータス違い・仕様にあって表に無いコードを落とす）。手で同期させない |
 | 6 | `ResponseEntityExceptionHandler` の継承は**採る**（5.1.4.6.1）。Spring MVC が投げる標準例外（404・405・415 など）も統一形式へ寄せるため |
@@ -103,7 +103,7 @@
 | 内容 | 正 |
 |------|-----|
 | エラーコード体系・統一エラーレスポンス形式・ロガー名体系 | `tech_logging.md` |
-| HTTP ステータスコードの使い分け | `tech_api_common.md` |
+| HTTP ステータスコードの使い分け | `tech_api/common.md` |
 | コントローラ・Resource の書き方、セキュリティ | `web.md` |
 | フィルタ内・インターセプタ内で起きた例外の扱い | [filter.md](filter.md) §4・[interceptor.md](interceptor.md) §3 #4 |
 | Service の責務・トランザクションと伝播属性 | `domain/service.md` |

@@ -57,7 +57,7 @@ sequenceDiagram
 
 ## 11.7. 深淵の塔ランキング（Phase 5）
 
-> 入塔・目標階設定・リタイアは通常の塔と同じ `/api/tower/*` を `towerId: "abyss_tower"` で使用する（[gameplay.md](gameplay.md) §4）。専用エンドポイントはランキング取得のみで、`AbyssApi`（afkgame-web）が担当する（[tech_structure_backend.md](../../tech/basic/tech_structure_backend.md) §4.1）。
+> 入塔・目標階設定・リタイアは通常の塔と同じ `/api/tower/*` を `towerId: "abyss_tower"` で使用する（[gameplay.md](gameplay.md) §4）。専用エンドポイントはランキング取得のみで、`AbyssApi`（afkgame-web）が担当する（[tech_backend.md](../../tech/basic/tech_backend.md) §4.1）。
 
 ```mermaid
 %%{init: {'theme': 'default', 'sequence': {'actorFontSize': 18, 'messageFontSize': 16, 'noteFontSize': 14}} }%%

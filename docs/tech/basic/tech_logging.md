@@ -133,7 +133,7 @@ Logback を使用。設定は `afkgame-env` の `logback.xml`（Boot 拡張の `
 }
 ```
 
-応答ボディのキーは camelCase（[tech_api_common.md](tech_api_common.md) §5.0）。**ログ項目は snake_case**（上記「ログフォーマット」の `request_id` 等）であり、APIボディとは別体系である。
+応答ボディのキーは camelCase（[tech_api/common.md](tech_api/common.md) §5.0）。**ログ項目は snake_case**（上記「ログフォーマット」の `request_id` 等）であり、APIボディとは別体系である。
 
 ### エラーコード体系
 

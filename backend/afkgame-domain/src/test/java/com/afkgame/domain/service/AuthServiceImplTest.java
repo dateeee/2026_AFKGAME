@@ -52,7 +52,7 @@ import com.afkgame.env.config.AuthSettings;
  * {@link PlayerInitializationService} 側の責務で、{@code PlayerInitializationServiceImplTest} が持つ。
  *
  * <p><b>登録・ログイン・ログアウト（移行 STEP 3-A-2）</b>: 仕様は
- * docs/tech/detail/tech_auth_account.md §9〜§15。分岐一覧 §11（登録）・§13（ログイン）・
+ * docs/tech/detail/tech_auth/account.md §9〜§15。分岐一覧 §11（登録）・§13（ログイン）・
  * §15（ログアウト）のうち、サービス層が決める分岐を本クラスが持つ。Bean Validation と
  * HTTP ステータスは {@code AuthApiTest}、認証必須の拒否（§15 #2）は
  * {@code AuthApiIntegrationTest} が持つ。
@@ -349,7 +349,7 @@ class AuthServiceImplTest {
         /**
          * 手順2でメールが空いていれば、ユーザー作成（手順3〜4）へ進む。
          *
-         * <p>分岐: tech_auth_account.md §11 #7
+         * <p>分岐: tech_auth/account.md §11 #7
          */
         @Test
         void test_同じメールのユーザーが無ければ登録を続行する() {
@@ -364,7 +364,7 @@ class AuthServiceImplTest {
         /**
          * 相手がゲスト・Google連携のみのアカウントでも同じ扱いで、行を1つも作らない。
          *
-         * <p>分岐: tech_auth_account.md §11 #8
+         * <p>分岐: tech_auth/account.md §11 #8
          */
         @Test
         void test_メールが登録済みならAUTH_EMAIL_TAKENで何も作らない() {
@@ -386,7 +386,7 @@ class AuthServiceImplTest {
          * ロールバック自体は {@code @Transactional} が行うため、ここでは 409 への変換と、
          * 後続のトークン発行を行わないことを見る。
          *
-         * <p>分岐: tech_auth_account.md §11 #9
+         * <p>分岐: tech_auth/account.md §11 #9
          */
         @Test
         void test_挿入時のメール重複違反もAUTH_EMAIL_TAKENになる() {
@@ -405,7 +405,7 @@ class AuthServiceImplTest {
          * 手順3〜7がすべて成功する経路。手順5（初期化）の中身は
          * {@code PlayerInitializationServiceImplTest} が持ち、ここでは順序と委譲だけを見る。
          *
-         * <p>分岐: tech_auth_account.md §11 #10
+         * <p>分岐: tech_auth/account.md §11 #10
          */
         @Test
         void test_手順3から7を順に実行しトークンペアを返す() {
@@ -440,7 +440,7 @@ class AuthServiceImplTest {
         /**
          * 同じ成功経路が残す値。手順3（bcrypt）と手順6（確認トークン）はいずれも生値を保存しない。
          *
-         * <p>分岐: tech_auth_account.md §11 #10
+         * <p>分岐: tech_auth/account.md §11 #10
          */
         @Test
         void test_パスワードと確認トークンはハッシュだけを保存する() {
@@ -471,7 +471,7 @@ class AuthServiceImplTest {
          * 確認トークン・リフレッシュトークンを残さないことを見る。
          * DBへ何も残らないことの検証は統合テストが持つ。
          *
-         * <p>分岐: tech_auth_account.md §11 #11
+         * <p>分岐: tech_auth/account.md §11 #11
          */
         @Test
         void test_途中で失敗したら例外を伝播しトークンを発行しない() {
@@ -490,7 +490,7 @@ class AuthServiceImplTest {
         /**
          * 送信の成否は応答へ反映しない（§10 手順9）。成功時は登録結果をそのまま返す。
          *
-         * <p>分岐: tech_auth_account.md §11 #12
+         * <p>分岐: tech_auth/account.md §11 #12
          */
         @Test
         void test_確認メールの送信に成功しても応答は変わらない() {
@@ -507,7 +507,7 @@ class AuthServiceImplTest {
          * 送信失敗は WARN ログだけを残し、登録は成功として扱う。確認トークンの行も消さない
          * （§10 手順9）。
          *
-         * <p>分岐: tech_auth_account.md §11 #13
+         * <p>分岐: tech_auth/account.md §11 #13
          */
         @Test
         void test_確認メールの送信に失敗しても登録は成功する() {
@@ -541,7 +541,7 @@ class AuthServiceImplTest {
         /**
          * 手順2でメールが一致すれば、パスワード設定の確認（手順3）へ進む。
          *
-         * <p>分岐: tech_auth_account.md §13 #5
+         * <p>分岐: tech_auth/account.md §13 #5
          */
         @Test
         void test_該当ユーザーが居ればパスワード照合へ進む() {
@@ -558,7 +558,7 @@ class AuthServiceImplTest {
         /**
          * どちらが誤りかを区別させないため、パスワード不一致と同じコードを返す（§12 末尾）。
          *
-         * <p>分岐: tech_auth_account.md §13 #6
+         * <p>分岐: tech_auth/account.md §13 #6
          */
         @Test
         void test_未登録のメールはAUTH_INVALID_CREDENTIALSになる() {
@@ -576,7 +576,7 @@ class AuthServiceImplTest {
          * ゲスト行は {@code email} が NULL のため、どのメールで引いても手順2に一致しない
          * （§12 末尾）。メールログインの対象外であることが未登録と同じ応答になる。
          *
-         * <p>分岐: tech_auth_account.md §13 #7
+         * <p>分岐: tech_auth/account.md §13 #7
          */
         @Test
         void test_ゲストアカウントはメールログインの対象外で401になる() {
@@ -593,7 +593,7 @@ class AuthServiceImplTest {
         /**
          * 手順4は保存済みハッシュとの照合であり、生値どうしを比べない。
          *
-         * <p>分岐: tech_auth_account.md §13 #8
+         * <p>分岐: tech_auth/account.md §13 #8
          */
         @Test
         void test_パスワードハッシュを持つなら保存済みハッシュと照合する() {
@@ -608,7 +608,7 @@ class AuthServiceImplTest {
         /**
          * Google連携のみのアカウント。bcrypt 照合そのものを行わない（§12 手順3）。
          *
-         * <p>分岐: tech_auth_account.md §13 #9
+         * <p>分岐: tech_auth/account.md §13 #9
          */
         @Test
         void test_パスワード未設定のアカウントは照合せず401になる() {
@@ -627,7 +627,7 @@ class AuthServiceImplTest {
         /**
          * 照合が一致した後の手順6〜7。既存のリフレッシュトークンは失効させない（§12 手順7）。
          *
-         * <p>分岐: tech_auth_account.md §13 #10
+         * <p>分岐: tech_auth/account.md §13 #10
          */
         @Test
         void test_照合が一致すれば最終ログイン時刻を更新しトークンペアを返す() {
@@ -646,7 +646,7 @@ class AuthServiceImplTest {
         /**
          * 不一致は 401 で止め、手順6（最終ログイン時刻の更新）まで進まない。
          *
-         * <p>分岐: tech_auth_account.md §13 #11
+         * <p>分岐: tech_auth/account.md §13 #11
          */
         @Test
         void test_照合が不一致なら401で最終ログイン時刻を更新しない() {
@@ -663,7 +663,7 @@ class AuthServiceImplTest {
         }
 
         /**
-         * <p>分岐: tech_auth_account.md §13 #12
+         * <p>分岐: tech_auth/account.md §13 #12
          */
         @Test
         void test_メール確認済みならログインできる() {
@@ -679,7 +679,7 @@ class AuthServiceImplTest {
         /**
          * 未確認でもログイン・プレイは可能（§12 手順5）。確認済みと応答の形も変えない。
          *
-         * <p>分岐: tech_auth_account.md §13 #13
+         * <p>分岐: tech_auth/account.md §13 #13
          */
         @Test
         void test_メール未確認でも同じ応答でログインできる() {
@@ -717,7 +717,7 @@ class AuthServiceImplTest {
         /**
          * 手順3の検索は生値ではなく SHA-256 で行う（§9・§14 手順3）。
          *
-         * <p>分岐: tech_auth_account.md §15 #5
+         * <p>分岐: tech_auth/account.md §15 #5
          */
         @Test
         void test_ハッシュが一致する行があれば持ち主の確認へ進む() {
@@ -731,7 +731,7 @@ class AuthServiceImplTest {
         }
 
         /**
-         * <p>分岐: tech_auth_account.md §15 #6
+         * <p>分岐: tech_auth/account.md §15 #6
          */
         @Test
         void test_一致する行が無ければAUTH_REFRESH_INVALIDになる() {
@@ -748,7 +748,7 @@ class AuthServiceImplTest {
         /**
          * 手順4の持ち主判定。認証ユーザーとトークンの {@code user_id} が一致すれば手順5へ進む。
          *
-         * <p>分岐: tech_auth_account.md §15 #7
+         * <p>分岐: tech_auth/account.md §15 #7
          */
         @Test
         void test_自分のトークンなら失効状態の確認へ進む() {
@@ -763,7 +763,7 @@ class AuthServiceImplTest {
         /**
          * 他人のトークンを失効させない（§14 手順4）。
          *
-         * <p>分岐: tech_auth_account.md §15 #8
+         * <p>分岐: tech_auth/account.md §15 #8
          */
         @Test
         void test_他人のトークンは失効させず401になる() {
@@ -782,7 +782,7 @@ class AuthServiceImplTest {
         /**
          * 手順5の失効状態判定。未失効なら {@code revoked} を true へ更新する。
          *
-         * <p>分岐: tech_auth_account.md §15 #9
+         * <p>分岐: tech_auth/account.md §15 #9
          */
         @Test
         void test_未失効のトークンを失効させる() {
@@ -799,7 +799,7 @@ class AuthServiceImplTest {
          * 二重ログアウトは再送信・複数タブで起きる正常操作なので、再利用検知（全端末の切断）を
          * 行わない（§14 手順5）。
          *
-         * <p>分岐: tech_auth_account.md §15 #10
+         * <p>分岐: tech_auth/account.md §15 #10
          */
         @Test
         void test_失効済みのトークンは更新せず冪等に成功する() {
@@ -814,7 +814,7 @@ class AuthServiceImplTest {
         }
 
         /**
-         * <p>分岐: tech_auth_account.md §15 #11
+         * <p>分岐: tech_auth/account.md §15 #11
          */
         @Test
         void test_期限内のトークンを失効させる() {
@@ -831,7 +831,7 @@ class AuthServiceImplTest {
          * 期限切れと失効は両立するため、期限内と同じく失効させる（§14 手順6）。
          * リフレッシュ（{@code AUTH_REFRESH_INVALID}）との違いに注意する。
          *
-         * <p>分岐: tech_auth_account.md §15 #12
+         * <p>分岐: tech_auth/account.md §15 #12
          */
         @Test
         void test_期限切れのトークンも失効させる() {

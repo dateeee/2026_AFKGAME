@@ -31,7 +31,7 @@ import jakarta.servlet.http.HttpServletResponse;
 @Component
 public class RequestLogFilter extends OncePerRequestFilter {
 
-    /** リクエストIDのレスポンスヘッダ名（tech_api_common.md「共通ヘッダ」）。 */
+    /** リクエストIDのレスポンスヘッダ名（tech_api/common.md「共通ヘッダ」）。 */
     public static final String REQUEST_ID_HEADER = "X-Request-ID";
 
     private static final AppLogger logger = AppLogger.of(LoggerName.MIDDLEWARE);

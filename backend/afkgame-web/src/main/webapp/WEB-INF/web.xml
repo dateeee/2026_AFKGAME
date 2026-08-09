@@ -117,6 +117,6 @@
     </servlet-mapping>
 
     <!-- REST API 専用のため、画面へ転送する error-page は定義しない。
-         エラー応答は共通例外ハンドラが JSON で返す（2R-C 以降。正は tech_api_common.md） -->
+         エラー応答は共通例外ハンドラが JSON で返す（2R-C 以降。正は tech_api/common.md） -->
 
 </web-app>

@@ -32,7 +32,7 @@ import tools.jackson.databind.json.JsonMapper;
  * REST API 専用のため、雛形の画面向け設定は落としている（ViewResolver・Thymeleaf・静的リソース
  * ハンドラ・CodeList・トランザクショントークン・RequestDataValueProcessor・画面へ転送する
  * SystemExceptionResolver）。エラー応答は共通例外ハンドラ（{@code com.afkgame.web.filter}）で
- * JSON を返す方式に置き換える（正は tech_api_common.md）。
+ * JSON を返す方式に置き換える（正は tech_api/common.md）。
  * </p>
  * <p>
  * JSON は Jackson 3（{@code tools.jackson}）で扱う。雛形の依存には Jackson 2

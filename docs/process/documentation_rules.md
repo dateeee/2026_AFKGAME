@@ -88,14 +88,20 @@ AIエージェント（Claude Code）と人間が共同で開発するため、�
 
 ### 6.1 ハブ&スポーク（推奨・本プロジェクトの標準形）
 
-親を索引（区分B）にし、詳細を子ファイル（区分C）へ移す。`docs/data/towers/` が既にこの形。
+親を索引にし、詳細を子ファイル（区分C）へ移す。**索引 `X.md` と子ディレクトリ `X/` は兄弟に置く**（§10）。
 
 ```
-docs/data/towers/
-├── TOWERS_OVERVIEW.md   # 索引: 全塔の一覧表・共通ルール
-├── 001_ゴブリンの塔.md   # 詳細: 1塔 = 1ファイル
-└── 002_森の塔.md
+docs/tech/detail/
+├── tech_forge.md        # 索引: 鍛冶屋の共通ルール・分冊リンク表
+└── tech_forge/          # 子: 1テーマ = 1ファイル
+    ├── enhance.md
+    ├── craft.md
+    └── disassemble.md
 ```
+
+索引を `X/` の**中**に置かないのは、分割の前後で索引のパスを変えないため。`X.md` が育って分割に至っても `X.md` は動かず、外部（他の仕様書・`.claude/**`・Javadoc）からの参照が生き残る。内側方式は分割の瞬間に `X.md` → `X/X_OVERVIEW.md` の移動が必ず起き、最も参照の多いファイルを動かすことになる。
+
+`docs/data/{towers,skills}/` は索引が内側（`*_OVERVIEW.md`）の旧形。揃えるには区分Bの判定（§3）と `check_doc_size.py` を同時に変える必要があり未着手。
 
 ### 6.2 サブシステム分割
 
@@ -114,7 +120,16 @@ docs/data/towers/
 5. 子ファイルのヘッダに **親へのリンク**と担当節を明記する
 6. [docs/INDEX.md](../INDEX.md) と、`.claude/project/**` の対象ファイル一覧を更新する
 7. リンク切れがないことを確認する（相対パスは移動先を基準に張り直す）
-8. **`docs/tech/detail/` の子ファイル名は `tech_*.md` にする**。`check_branch_list.py` の走査が `TECH_DIR.rglob("tech_*.md")` のため、外れた子ファイルの分岐一覧は照合から黙って落ちる（`tech_forge.md` + `tech_forge_{enhance,craft,disassemble}.md` が実例）
+8. `docs/tech/**` の子ファイルは、テスト側の分岐マーカーを**親ディレクトリ名つき**にする（`分岐: tech_forge/craft.md §10 #1`）。`check_branch_list.py` は層ディレクトリ（`basic`/`detail`/`nonfunctional`）だけを落とした名前で照合する
+
+### 6.4 ファイル名の付け方
+
+**`親_子.md` は使わない**（親子か対等かが名前から判別できない）。判定は**子のヘッダが親を索引と宣言しているか**で行う。
+
+| 関係 | ヘッダの書き方 | 形 | 例 |
+|------|--------------|----|----|
+| 親子 | 「親: X.md」「X.md の子ファイル」「索引側が正」 | `X.md` + `X/子.md` | `tech_api.md` + `tech_api/common.md` |
+| 対等 | 相互に「〜が正」と参照し合うだけ | 共通接頭辞を持たない別名（索引は上流） | `tech_structure.md`（§2〜§3）と `tech_backend.md`（§4）。索引は `tech_spec.md` |
 
 ## 7. 判定と超過時の運用サイクル
 

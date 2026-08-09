@@ -13,7 +13,7 @@ import com.afkgame.env.logging.LoggerName;
  * <p><b>仮実装</b>: 送信手段（SMTP設定・本文・再送）と「コミット後・トランザクションの外」で
  * 送るための仕組みは verify-email の詳細設計で確定するため、現時点では送信要求を WARN ログに
  * 記録するだけで実際の送信を行わない。解消時期は移行 STEP 3-A-3
- * （docs/backlog/java_migration.md）。生のトークンはログへ出さない（tech_auth_account.md §9）。
+ * （docs/backlog/java_migration.md）。生のトークンはログへ出さない（tech_auth/account.md §9）。
  */
 @Service
 public class VerificationMailSenderImpl implements VerificationMailSender {

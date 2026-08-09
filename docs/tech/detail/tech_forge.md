@@ -27,7 +27,7 @@
 | 永続化 | `equipment`・`inventory_items`・`players.gold`（[tech_db/item.md](../basic/tech_db/item.md)）。同一トランザクション |
 | エラーコード | §8。ゴールド不足と未建設は `BASE_` を流用する（`tech_base.md` §6） |
 
-- 未認証は共通の `401`、リクエストボディの型・必須・範囲違反は `422`（[tech_api_common.md](../basic/tech_api_common.md)）。分岐一覧では `401` を扱わない
+- 未認証は共通の `401`、リクエストボディの型・必須・範囲違反は `422`（[tech_api/common.md](../basic/tech_api/common.md)）。分岐一覧では `401` を扱わない
 - 3操作とも**検証をすべて消費の前に行う**。消費したのに成果が得られない経路を持たない
 - 3操作とも、まず `players` 行を**行ロック**して取得する（`tech_base.md` §3 手順2 と同じ方式）
 

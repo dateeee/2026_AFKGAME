@@ -1,6 +1,6 @@
 # ゲーム仕様 — 認証画面・チュートリアル
 
-> [ui.md](ui.md) から分割（[game_spec.md](../game_spec.md) §3）。認証の仕組みは [tech_auth.md](../../tech/detail/tech_auth.md)。
+> [ui.md](../ui.md) から分割（[game_spec.md](../../game_spec.md) §3）。認証の仕組みは [tech_auth.md](../../../tech/detail/tech_auth.md)。
 
 ## 認証画面（Phase 2〜）
 
@@ -55,7 +55,7 @@
 ```
 
 - バナーは非表示にできない（ゲストプレイ中は常時表示）
-- [登録] ボタンで本登録フォーム（登録タブと同一UI）を開く。ゲストデータを引き継ぐため `POST /api/auth/link-account` を呼ぶ（新規登録ではない。[api_sequence/auth.md](../../diagrams/api_sequence/auth.md) §14）
+- [登録] ボタンで本登録フォーム（登録タブと同一UI）を開く。ゲストデータを引き継ぐため `POST /api/auth/link-account` を呼ぶ（新規登録ではない。[api_sequence/auth.md](../../../diagrams/api_sequence/auth.md) §14）
 - 本登録完了後にバナーは自動で消える
 
 ## チュートリアル（Phase 1〜）

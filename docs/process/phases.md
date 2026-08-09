@@ -34,7 +34,7 @@ DBスキーマは**テキスト（テーブル定義書）を正、ER図を視�
 
 - **差し戻しルール**: 詳細設計以降で「定義書にないテーブル・列が要る」と判明したら、実装を先に書かず**基本設計へ戻して定義書とER図を更新**してから進む（§3.4 の分岐一覧と同じ扱い）
 - インデックスは**それを使う検索パターンとセット**で書く。パターンの無いインデックスは作らない
-- 列の追加は `nullable` または `server_default` を付ける（前方互換。[tech_operations_procedure.md](../tech/nonfunctional/tech_operations_procedure.md) §12.4）
+- 列の追加は `nullable` または `server_default` を付ける（前方互換。[tech_maintenance.md](../tech/nonfunctional/tech_maintenance.md) §12.4）
 
 ### 3.2.2 コーディング規約
 
