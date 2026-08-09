@@ -1,87 +1,126 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>afkgame-web</artifactId>
+    <packaging>war</packaging>
+    <parent>
+        <groupId>com.afkgame</groupId>
+        <artifactId>afkgame</artifactId>
+        <version>0.1.0</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+    <name>afkgame-web</name>
+    <description>アプリケーション層（@RestController・Resource・設定）。war を作る</description>
 
-  <parent>
-    <groupId>com.afkgame</groupId>
-    <artifactId>afkgame</artifactId>
-    <version>0.1.0</version>
-  </parent>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 
-  <artifactId>afkgame-web</artifactId>
-  <packaging>jar</packaging>
-  <name>afkgame-web</name>
-  <description>アプリケーション層（@RestController・Resource・設定）</description>
+    <!-- 雛形の local / warpack / warpack-with-env プロファイルは使わない。
+         環境の切替は SPRING_PROFILES_ACTIVE と DATABASE_URL 等の環境変数で行うため、
+         afkgame-env は常に war へ同梱する（2R-0 の確定結果。tech_selection.md §2） -->
 
-  <dependencies>
-    <dependency>
-      <groupId>com.afkgame</groupId>
-      <artifactId>afkgame-domain</artifactId>
-    </dependency>
-    <!-- Flyway は起動時にマイグレーションを自動適用するため実行時クラスパスに載せる -->
-    <dependency>
-      <groupId>com.afkgame</groupId>
-      <artifactId>afkgame-initdb</artifactId>
-    </dependency>
+    <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>afkgame-domain</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>afkgame-env</artifactId>
+        </dependency>
 
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-web</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-validation</artifactId>
-    </dependency>
-    <!-- 認証・CORS（tech_security.md §11.2・§11.5。方式の正は tech_auth.md） -->
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-security</artifactId>
-    </dependency>
+        <!-- == Begin TERASOLUNA == -->
+        <dependency>
+            <groupId>org.terasoluna.gfw</groupId>
+            <artifactId>terasoluna-gfw-web-dependencies</artifactId>
+            <type>pom</type>
+        </dependency>
+        <dependency>
+            <groupId>org.terasoluna.gfw</groupId>
+            <artifactId>terasoluna-gfw-security-web-dependencies</artifactId>
+            <type>pom</type>
+        </dependency>
+        <dependency>
+            <groupId>org.terasoluna.gfw</groupId>
+            <artifactId>terasoluna-gfw-recommended-web-dependencies</artifactId>
+            <type>pom</type>
+        </dependency>
+        <!-- == End TERASOLUNA == -->
 
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-test</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.security</groupId>
-      <artifactId>spring-security-test</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <!-- 統合テスト用の埋め込み PostgreSQL（Docker 非依存） -->
-    <dependency>
-      <groupId>io.zonky.test</groupId>
-      <artifactId>embedded-database-spring-test</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>io.zonky.test</groupId>
-      <artifactId>embedded-postgres</artifactId>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
+        <!-- REST API 専用のため Thymeleaf は使わない（thymeleaf / thymeleaf-spring6 /
+             thymeleaf-extras-springsecurity6 は雛形から落とした） -->
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
 
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-maven-plugin</artifactId>
-        <executions>
-          <!-- /health が返す version の供給元（BuildProperties） -->
-          <execution>
-            <id>build-info</id>
-            <goals>
-              <goal>build-info</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.jacoco</groupId>
-        <artifactId>jacoco-maven-plugin</artifactId>
-      </plugin>
-    </plugins>
-  </build>
+        <!-- == Begin Database == -->
+        <!--  JDBC Driver is normally provided by application server .
+              But if you want to include JDBC Driver in the application,
+              add this dependency . -->
+        <!--         <dependency> -->
+        <!--             <groupId>org.postgresql</groupId> -->
+        <!--             <artifactId>postgresql</artifactId> -->
+        <!--             <scope>runtime</scope> -->
+        <!--         </dependency> -->
+        <!--         <dependency> -->
+        <!--             <groupId>com.oracle.database.jdbc</groupId> -->
+        <!--             <artifactId>ojdbc17</artifactId> -->
+        <!--             <scope>runtime</scope> -->
+        <!--         </dependency> -->
+        <!-- == End Database == -->
+
+        <!-- == Begin Unit Test == -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-el</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!--  REMOVE THIS LINE IF YOU USE Spring Test DBUnit
+        <dependency>
+            <groupId>org.dbunit</groupId>
+            <artifactId>dbunit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.springtestdbunit</groupId>
+            <artifactId>spring-test-dbunit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        -->
+        <!-- == End Unit Test == -->
+
+        <!-- == Begin Coding Support == -->
+        <!--
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        -->
+        <!-- == End Coding Support == -->
+
+    </dependencies>
 </project>

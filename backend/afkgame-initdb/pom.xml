@@ -1,28 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>com.afkgame</groupId>
-    <artifactId>afkgame</artifactId>
-    <version>0.1.0</version>
-  </parent>
+    <parent>
+        <groupId>com.afkgame</groupId>
+        <artifactId>afkgame</artifactId>
+        <version>0.1.0</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
 
-  <artifactId>afkgame-initdb</artifactId>
-  <packaging>jar</packaging>
-  <name>afkgame-initdb</name>
-  <description>Flyway マイグレーション（1リリース = 1バージョン）</description>
+    <artifactId>afkgame-initdb</artifactId>
+    <name>afkgame-initdb</name>
+    <description>Flyway マイグレーション（1リリース = 1バージョン）</description>
 
-  <dependencies>
-    <dependency>
-      <groupId>org.flywaydb</groupId>
-      <artifactId>flyway-core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.flywaydb</groupId>
-      <artifactId>flyway-database-postgresql</artifactId>
-    </dependency>
-  </dependencies>
+    <!-- 雛形の sql-maven-plugin と local-postgres/oracle プロファイルは使わない。
+         スキーマ適用は Flyway が src/main/resources/db/migration の V1 を起動時に流す
+         （正は tech_structure_backend.md §4） -->
+
+    <dependencies>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-database-postgresql</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- 本モジュールは SQL だけで src/test を持たないため、親で surefire に
+                 groups/excludedGroups を与えると「JUnit48+ or JUnit 5 が要る」で
+                 ビルドが落ちる。テスト実行自体をスキップして回避する -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

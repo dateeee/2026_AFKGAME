@@ -1,50 +1,64 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>afkgame-env</artifactId>
+    <packaging>jar</packaging>
+    <parent>
+        <groupId>com.afkgame</groupId>
+        <artifactId>afkgame</artifactId>
+        <version>0.1.0</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+    <name>afkgame-env</name>
+    <description>環境依存設定（META-INF/spring/*.properties・DataSource・logback.xml）</description>
 
-  <parent>
-    <groupId>com.afkgame</groupId>
-    <artifactId>afkgame</artifactId>
-    <version>0.1.0</version>
-  </parent>
+    <!-- 雛形の local / test-server / production-server プロファイル（configs/<env>/resources の
+         差し替え）は使わない。環境の切替は SPRING_PROFILES_ACTIVE、値の上書きは DATABASE_URL 等の
+         環境変数で行う（2R-0 の確定結果。tech_operations.md §12.2） -->
 
-  <artifactId>afkgame-env</artifactId>
-  <packaging>jar</packaging>
-  <name>afkgame-env</name>
-  <description>環境依存設定（application.yml・DataSource）</description>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <configuration>
+                    <encoding>${encoding}</encoding>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
-  <dependencies>
-    <!-- @ConfigurationProperties の定義（設定値の参照はここへ集約する。tech_operations.md §12.2） -->
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter</artifactId>
-    </dependency>
-    <!-- DataSource（HikariCP）の自動構成。接続情報は application.yml が持つ -->
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-jdbc</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.postgresql</groupId>
-      <artifactId>postgresql</artifactId>
-      <scope>runtime</scope>
-    </dependency>
+    <dependencies>
+        <!-- DB は PostgreSQL に統一する（H2 は使わない。tech_selection.md §2） -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
 
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-test</artifactId>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
-
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.jacoco</groupId>
-        <artifactId>jacoco-maven-plugin</artifactId>
-      </plugin>
-    </plugins>
-  </build>
+        <!-- == Begin TERASOLUNA == -->
+        <dependency>
+            <groupId>org.terasoluna.gfw</groupId>
+            <artifactId>terasoluna-gfw-common-dependencies</artifactId>
+            <type>pom</type>
+        </dependency>
+        <!--  REMOVE THIS LINE IF YOU USE JPA
+        <dependency>
+            <groupId>org.terasoluna.gfw</groupId>
+            <artifactId>terasoluna-gfw-jpa-dependencies</artifactId>
+            <type>pom</type>
+        </dependency>
+              REMOVE THIS LINE IF YOU USE JPA  -->
+        <dependency>
+            <groupId>org.terasoluna.gfw</groupId>
+            <artifactId>terasoluna-gfw-mybatis3-dependencies</artifactId>
+            <type>pom</type>
+        </dependency>
+        <dependency>
+            <groupId>org.terasoluna.gfw</groupId>
+            <artifactId>terasoluna-gfw-recommended-dependencies</artifactId>
+            <type>pom</type>
+        </dependency>
+        <!-- == End TERASOLUNA == -->
+    </dependencies>
 </project>

@@ -48,13 +48,21 @@ STEP 2 で作った骨格は Spring Boot アプリで、ガイドラインのブ
 |-----------|------|------|
 | 2R-0 | 先行検証（下表のとおり6件を実機で確定） | **完了**（2026-08-09） |
 | 2R-A | 仕様書・規約の再改訂（§2 の変更点を `tech_structure` / `tech_operations` / `coding_standards_backend` へ反映） | **完了**（2026-08-09。`tech_structure`・`tech_operations` は分割した） |
-| 2R-B | Archetype から雛形を生成し、View 一式を落として REST 専用の土台にする（`mvn clean install` で war が出るまで） | 未着手 |
+| 2R-B | Archetype から雛形を生成し、View 一式を落として REST 専用の土台にする（`mvn clean install` で war が出るまで） | **完了**（2026-08-09） |
 | 2R-C | 設定の移植（`web.xml`・Java Config 6種・`*.properties`・`logback.xml`・DataSource・Flyway 起動） | 未着手 |
 | 2R-D | 既存実装の移植（domain 34 + web 13 + env 5 の main コードから Boot 依存を除去） | 未着手 |
 | 2R-E | テスト基盤の再構築（テスト28ファイル。surefire/failsafe/JaCoCo の分離設定は維持する） | 未着手 |
 | 2R-F | 実行・デプロイの切替（Tomcat 起動、Vite プロキシ、`launch.json`、[tech_operations.md](../../tech/nonfunctional/tech_operations.md) §12 反映） | 未着手 |
 
 完了条件は STEP 2 と同じ「`GET /health` が 200（`db:ok`）・ゲスト認証が通る」に加え、**移植済みの単体テストが branch 100% のまま通ること**。
+
+#### 2R-B の結果（既存コードの退避先）
+
+雛形を `backend/` へ展開する前に、既存コード73件（main Java 42・test Java 25・`application*.yml` 3・`logback*.xml` 3）を **`backend/_migration/` へ `git mv` で退避**した。Maven の `src` 配下から外れるためビルドに載らない。**2R-D・2R-E は同ディレクトリから `git mv` で戻し、2R-E 完了時に空にして削除する**。
+
+退避しなかったもの＝マッピング XML 5・マスターデータ YAML 16・`V1__initial_schema.sql`、および **Entity 7件（`domain/model`）**。**main コードで実際に Boot へ依存するのは6件だけ**（`env/config` の `@ConfigurationProperties` 3・`env/logging/JsonLogFormatter`・`AfkgameApplication`・`HealthApi` の `BuildProperties`）で、`domain` 配下31件は Boot 非依存。Entity は非JDK import ゼロの POJO で、退避すると `check_schema_triple.py` の「実装:」照合が7件落ちるため現位置に戻した。残る `domain/{repository,service,masterdata,rng}` は jjwt・`jackson-dataformat-yaml` 等の依存追加が要るので 2R-D で戻す。
+
+Java Config は仕様どおり `com.afkgame.{domain,web,env}.config.*` へ置いた（雛形の既定 `com.afkgame.config.*` から移動）。**2R-C へ送った雛形の残り**は、`afkgame-infra.properties` の接続値（local 固定値のまま）・`build.properties` のリソースフィルタ（`/health` の version）・CSRF の扱い・Flyway の `@Bean(initMethod = "migrate")` 定義。
 
 #### 2R-0 の確定結果（実機検証済み）
 
