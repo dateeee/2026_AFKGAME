@@ -76,13 +76,6 @@ Service は次の2つを担う（ガイドライン 3.2.5.1）。
 
 ## 6. 例外とメッセージ
 
-ガイドラインは業務例外 `BusinessException`、システム例外 `SystemException`、メッセージオブジェクト `ResultMessages`（`terasoluna-gfw`）を用意し、要件を満たせない場合はプロジェクトで作ることを認めている（3.2.5.6.4・3.2.5.6.5）。**本プロジェクトは `AppException` に一本化する**。HTTP ステータスを持たせて Web 層での変換を1か所にまとめられるため。
+**正は [exception.md](exception.md)**（3分類・クラスの対応・送出の作法。ガイドライン 3.2.5.6 の業務例外／システム例外／`ResultMessages` との対応もそちらが持つ）。本書では再掲しない。
 
-| ガイドライン | 本プロジェクト | 使う場面 |
-|------------|--------------|---------|
-| `BusinessException` + `ResultMessages` | `AppException(code, message, status)` | ビジネスルール違反をクライアントへ通知する。HTTP ステータスは `int` で保持し、応答への変換は Web 層（[web.md](web.md) §5） |
-| `SystemException` | `IllegalStateException` / `MasterDataException` | 事前に存在するはずのマスターデータ・設定が無いなど、クライアントが対処できない異常 |
-| `ResultMessages`（警告メッセージ） | 戻り値の `record` に載せる | 処理は成功するが注意を促す場合。例外にしない（ガイドライン 3.2.5.6.3 と同じ「戻り値で返す」方式） |
-
-- どちらも `RuntimeException` 派生にする。`@Transactional` の既定ロールバック対象に載せるためで、ガイドライン 3.2.5.6.4 の Note と同じ理由。検査例外を新設しない（[common.md](common.md) §6 #2）
-- Service は**メッセージ文言を解決しない**。持つのは**エラーコードと埋め込み値だけ**（ガイドライン 3.2.5.6.2 の考え方）。文言はフロントエンドが持ち、コード体系の正は [tech_logging.md](../../tech/basic/tech_logging.md)
+トランザクションとの関係だけ本書が持つ: ビジネス例外・システム例外はいずれも `RuntimeException` 派生のため `@Transactional` の既定でロールバックされる（ガイドライン 3.2.5.6.4 Note と同じ理由）。ロールバックさせたくない副作用は §4 #6。

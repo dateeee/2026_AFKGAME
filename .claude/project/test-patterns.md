@@ -58,7 +58,7 @@ void 有限塔は総階数でクランプされる(int highest, int total, int e
 
 ## 例外・エラーレスポンス
 
-Service層が送出する例外型は `AppException`（`code` と `statusCode` を持つ）。
+Service層が送出する例外は、ビジネス例外 `AppException`（`code` と `status` を持つ）とシステム例外 `SystemException`（`code` を持ち、応答は 500 + `INTERNAL_UNEXPECTED_ERROR` に丸まる）の2種類（3分類の正は [coding_standards_backend/exception.md](../../docs/process/coding_standards_backend/exception.md)）。
 
 ```java
 @Test
@@ -67,7 +67,7 @@ void gold不足なら購入できない() {
     AppException ex = assertThrows(AppException.class,
         () -> shopService.buyItem(player, "hp_potion", 1, db));
     assertThat(ex.getCode()).isEqualTo("INSUFFICIENT_GOLD");
-    assertThat(ex.getStatusCode()).isEqualTo(400);
+    assertThat(ex.getStatus()).isEqualTo(400);
 }
 ```
 

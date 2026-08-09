@@ -65,13 +65,7 @@
 
 ## 6. 例外とエラー
 
-応答への変換とメッセージの作法は [web.md](web.md) §5、ガイドラインの業務例外・システム例外との対応とトランザクションとの関係は [domain_service.md](domain_service.md) §6・§4。
-
-| # | 規約 |
-|---|------|
-| 1 | クライアントへ返す業務エラーは **`AppException(code, message, status)` のみ**を投げる。コード体系の正は [tech_logging.md](../../tech/basic/tech_logging.md) |
-| 2 | 検査例外を新設しない（`RuntimeException` 派生にする）。ライブラリの検査例外は捕捉して `AppException` か `IllegalStateException` に変換する |
-| 3 | **例外を握りつぶさない**。空の `catch` を書かない。到達しない `catch` は理由コメントを添えて `IllegalStateException` にする |
+**正は [exception.md](exception.md)**（層を問わない。ビジネス例外・システム例外・予期しないエラーの3分類と、送出・変換・ログの規約）。本書では再掲しない。
 
 ## 7. ログ
 
@@ -108,7 +102,7 @@
 | ワイルドカード import | 個別 import |
 | ゲームバランス数値のハードコード | マスターデータ YAML・`application.yml` |
 | `System.out` / `printStackTrace` | SLF4J のロガー |
-| 空の `catch`・例外の握りつぶし | `AppException` へ変換するか再スロー |
+| 空の `catch`・例外の握りつぶし | 3分類のいずれかへ変換するか再スロー（[exception.md](exception.md) §3） |
 | 静的な可変フィールド（共有状態） | DI か引数で受け渡す |
 | `java.util.Date` / `Calendar` | `java.time`（既定は `Instant`） |
 | テーブル定義書に無い列・テーブルの追加 | 基本設計へ差し戻し（[phases.md](../phases.md) §3.2.1） |
