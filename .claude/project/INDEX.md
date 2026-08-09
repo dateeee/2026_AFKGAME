@@ -49,7 +49,9 @@
 | ファイル | 参照元 | 内容 |
 |---------|-------|------|
 | [test-patterns.md](test-patterns.md) | `test-list`、`unit-test` | AFK GAME のモジュール名・エラーコードを使ったテスト実装の実例 |
-| [commands.md](commands.md) | 全スキル（[profile.md](profile.md) §4 経由） | 全工程共通の常用コマンド表 |
+| [commands.md](commands.md) | 全スキル（[profile.md](profile.md) §4 経由） | 全工程共通の常用コマンド表（索引・§1） |
+| [commands/backend.md](commands/backend.md) | `dev`、`unit-test`、`integration-test` | §2 出力の受け取り方 / §3 モジュールを絞ったテスト / §5 外部ツールの所在 / §6 起動と疎通確認 |
+| [commands/adhoc.md](commands/adhoc.md) | 使い捨て調査を行うスキル | §4 使い捨て調査の作法 |
 
 ## 共有リファレンス（`.claude/references/`）
 

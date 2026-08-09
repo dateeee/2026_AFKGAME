@@ -2,7 +2,7 @@
 """Java テスト結果の集計出力（surefire・failsafe・JaCoCo・mvn ログ）
 
 `mvn` の生出力は長く CP932 で、会話へ持ち込むと文脈を食い潰す
-（`.claude/project/commands.md` §2）。本スクリプトは XML レポートから
+（`.claude/project/commands/backend.md` §2）。本スクリプトは XML レポートから
 **そのまま取り込める要約**だけを標準出力へ出す。
 
 出力する節:
@@ -25,7 +25,7 @@
     python scripts/report_java_tests.py --coverage --uncovered           # 節を絞る
 
 `--module` は親 POM の `mvn -N install -q` を先に流し、`--test` は
-`-Dsurefire.failIfNoSpecifiedTests=false` を自動で足す（commands.md §3 の
+`-Dsurefire.failIfNoSpecifiedTests=false` を自動で足す（commands/backend.md §3 の
 「セットで使う4点」を取りこぼさないため）。
 """
 
@@ -351,7 +351,7 @@ def run_maven(args: argparse.Namespace, log_path: Path) -> tuple[list[str], int]
     """mvn を実行してログをファイルへ落とし、`(コマンド, 終了コード)` を返す。"""
     mvn = shutil.which("mvn")
     if mvn is None:
-        raise SystemExit("ERROR mvn が PATH に見つからない（commands.md §5 を参照）")
+        raise SystemExit("ERROR mvn が PATH に見つからない（commands/backend.md §5 を参照）")
 
     log_path.parent.mkdir(parents=True, exist_ok=True)
     captured = bytearray()
