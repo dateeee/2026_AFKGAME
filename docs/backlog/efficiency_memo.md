@@ -34,3 +34,8 @@
 - ターン概要: ツール81回・エラー5回・拒否0回。開始:「<ide_opened_file>The user opened the file c:\GIT\2026_AFKGAM」
 - 原因と改善案: main の working tree で**別セッションがログ規約作業を進行中**だったため、`worktree.py merge` の「未コミット変更あり」が解消せず `status` → コミット → `merge` 失敗を4周した。他人の作業中ファイルを「前セッションのステージ漏れ」と誤認して 5件コミットしてしまった（`3bed24b`〜`eb574c5`）。`worktree_guide.md` §5.3 手順3「main の未コミット変更はコミットする」は**単独セッション前提**で、§0 の並行作業ルールと噛み合っていない。
   → §5.3 手順3を「未コミット変更が**自分の担当外**なら**コミットせずユーザーへ確認**する（`git log -1 --format=%cr` と mtime で進行中か判定。stat キャッシュが古いと差分が小出しに出るので `git update-index --really-refresh` を先に実行）」へ改め、`worktree.py merge` のエラーにも同案内を出す。
+
+## 2026-08-09 22:15 | session 0c6a9603 | 自動検出
+- シグナル: correction(間違)
+- ターン概要: ツール11回・エラー0回・拒否0回。開始:「待って、間違えて直近の作業をとめてしまったかも」
+- 原因と改善案: 誤検出: 「間違えて」は**ユーザー自身が直近の作業を中断させたかも**という発話で、Claude の出力への訂正ではない。中断箇所の特定は `git worktree list` → worktree 側の `git status` → `check_docs.py` の3手で完了しており、`next_session.md` §0 ルール1（着手状態は git 側に持たせる）が意図どおり機能した例。
