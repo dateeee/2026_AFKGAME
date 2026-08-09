@@ -2,6 +2,16 @@
 
 > 技術仕様の全体は [tech_spec.md](../tech_spec.md)、ゲーム仕様は [game_spec.md](../../design/game_spec.md) を参照。
 
+各操作の処理フローと分岐一覧は子ファイルが正（**節番号は本書からの通し**）。
+
+| 節 | 子ファイル | 対象 |
+|----|-----------|------|
+| §9〜§15 | [tech_auth/account.md](tech_auth/account.md) | 3操作の共通規約 / register / login / logout |
+| §16〜§17 | [tech_auth/mail.md](tech_auth/mail.md) | 確認メール・再設定メールの送信 |
+| §18〜§19 | [tech_auth/link.md](tech_auth/link.md) | link-account（ゲスト→本登録） |
+| §20〜§21 | [tech_auth/verify.md](tech_auth/verify.md) | verify-email |
+| §22〜§25 | [tech_auth/password_reset.md](tech_auth/password_reset.md) | password-reset（request / confirm） |
+
 ---
 
 ## 1. 認証方式
@@ -14,7 +24,7 @@ JWT（JSON Web Token）によるステートレス認証。アクセストーク
 | リフレッシュトークン有効期限 | 30日 |
 | リフレッシュトークンローテーション | あり（リフレッシュ時に新トークン発行、旧トークン無効化） |
 | パスワードハッシュ | bcrypt。`BCryptPasswordEncoder`（strength 12）で実装する（既存ハッシュと互換） |
-| パスワード要件 | 8文字以上 |
+| パスワード要件 | 長さの正は §9「入力長」 |
 
 ## 2. 登録方法
 
@@ -184,8 +194,6 @@ JWT（JSON Web Token）によるステートレス認証。アクセストーク
 
 `POST /api/auth/guest` でユーザーを作った直後に、プレイ可能な初期状態を1トランザクションで組み立てる。
 `POST /api/auth/register` も手順2以降を同じ順序で再利用する（異なるのは入口のユーザー生成のみ）。
-
-register / login / logout の処理フローと分岐一覧は子ファイル [tech_auth/account.md](tech_auth/account.md)（§9〜§15）が正。
 
 ### 8.1 初期値の参照先
 

@@ -54,9 +54,9 @@
 | `AUTH_REFRESH_INVALID` | 401 | リフレッシュトークンが不正・再利用検知 |
 | `AUTH_EMAIL_TAKEN` | 409 | 登録・アカウント移行でメールが使用済み |
 | `AUTH_ALREADY_REGISTERED` | 400 | 本登録済みアカウントへの移行要求 |
-| `AUTH_LINK_PAYLOAD_INVALID` | 400 | 移行要求に `email`+`password` も `googleAuthCode` も無い |
-| `AUTH_VERIFICATION_INVALID` | 400 | メール確認トークンが不正・期限切れ・用途違い |
-| `AUTH_RESET_TOKEN_INVALID` | 400 | パスワードリセットトークンが不正・期限切れ・用途違い |
+| `AUTH_LINK_PAYLOAD_INVALID` | 400 | 移行要求のボディが `email`+`password` / `googleAuthCode` のちょうど一方でない（どちらも無い・両方ある） |
+| `AUTH_VERIFICATION_INVALID` | 400 | メール確認トークンが不正・期限切れ・用途違い（**使用済みは 200。冪等**） |
+| `AUTH_RESET_TOKEN_INVALID` | 400 | パスワードリセットトークンが不正・期限切れ・用途違い・使用済み |
 | `AUTH_GOOGLE_NOT_CONFIGURED` | 501 | `GOOGLE_CLIENT_ID` 未設定 |
 | `AUTH_GOOGLE_NOT_IMPLEMENTED` | 501 | Google OAuth 未実装 |
 
