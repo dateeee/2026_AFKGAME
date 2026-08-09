@@ -11,7 +11,8 @@
 - **手動追記**: ユーザー・Claude が下の書式で直接追記してよい
   （「今のやり取りは非効率だったのでメモして」等）
 - **反映**: `/retro` スキルがエントリを読み、スキル・プロファイル・成果物の改善へ
-  反映する。**反映済み・対応不要のエントリは削除する**（open_specs と同じ運用。履歴は Git が持つ）
+  反映する。**反映済み・対応不要のエントリは削除する**（open_specs と同じ運用。履歴は Git が持つ）。
+  **削除は main で行う**（`merge=union` は削除を伝播せず、worktree 側で消した行は統合時に復活する）
 
 ## エントリ書式
 
@@ -21,53 +22,3 @@
     - 原因と改善案: <原因 + どのスキル/プロファイル/成果物をどう直すか（1〜2行）>
 
 ---
-
-## 2026-08-09 09:42 | session 3543ebbc | 自動検出
-- シグナル: long-turn(calls=71)
-- ターン概要: ツール71回・エラー1回・拒否0回。開始:「<command-message>retro</command-message>」
-- 原因と改善案: **`/retro` でメモ16件を消化し10ファイル改稿 + チェッカー改修 + テスト9件追加 + 統合まで完走した正当な分量**（long-turn は誤検出。errors×1 は測定スクリプトのラベル解析バグで、必要な数値は取得済み）。ただし**実在の欠陥が1件**: 効率メモの**エントリ削除を worktree 内で行ったため、`merge=union`（`.gitattributes`）が両側の行を残し、統合後に全エントリが復活した**。union は追加行の自動統合が目的で**削除を伝播しない**。→ ① [.claude/project/retro.md](../../.claude/project/retro.md) の「エントリの寿命」行へ「**削除は main で行う**（worktree 側の削除は `merge=union` で復活する）」を追記 ② [worktree_guide.md](../process/worktree_guide.md) §3 の「`merge=union` の注意」へ「**削除は伝播しない**。行を消す作業（効率メモの消化・changelog の重複畳み）は統合後に main で行う」を追記。同じ罠は `carryover_notes.md` の行削除にもかかる。
-
-## 2026-08-09 10:17 | session b2f7200f | 自動検出
-- シグナル: long-turn(calls=141)
-- ターン概要: ツール141回・エラー2回・拒否0回。開始:「<command-message>next</command-message>」
-- 原因と改善案: **2R-0 の6項目を実機検証（雛形生成・Tomcat 2版へ配備・逆アセンブル走査・`mvn verify`）し、文書反映と統合まで完走した正当な分量**（long-turn は概ね誤検出）。ただし**実在の非効率が2件**: ① Servlet API 差分の使い捨てスクリプトを**4回書き直した**（サブシェル内で相対 jar パスが壊れる → `unzip` の glob `jakarta/*.class` が入れ子に当たらない → awk が `;` で終わる `descriptor:` 行を飲む → 引数約1,300件でコマンドラインが溢れ javap が黙って失敗）。いずれも出力が「0件」「51件」と**一見もっともらしく**、最終値しか見ていなかったため1段ずつしか露見しなかった → [.claude/project/basic-design.md](../../.claude/project/basic-design.md) §4 へ「**使い捨ての検証スクリプトは1件で検算してから全量へ回し、中間件数が期待の桁と合うかを必ず確かめる**（0件や極端に少ない件数は"異常なし"ではなく解析失敗を疑う）」を追記 ② worktree へ移った後に `ctx_batch_execute` を**プロジェクトルートの cwd で走らせ1バッチ丸ごと無駄にした**（全コマンドが `No such file or directory`）→ 同 §4 へ「**worktree 作業中は context-mode 系ツールへ `cwd` を明示する**（既定はプロジェクトルートで worktree を指さない）」を併記。
-
-## 2026-08-09 10:43 | session f3ab426d | 自動検出
-- シグナル: same-read(tech_structure.md×2) / long-turn(calls=101)
-- ターン概要: ツール101回・エラー1回・拒否0回。開始:「<command-message>next</command-message>」
-- 原因と改善案: **`--sections` で「H2 が上限超過（`!`）＋ ファイル残量 329字」と測ったうえで、分割ではなく圧縮を選んで書き始めた**のが原因。フロントのツリーを4回圧縮しても 3字超過にしかならず、結局ユーザー指摘で分割し直したため `tech_structure.md` を再Readして書き戻す往復が発生した（`tech_operations.md` も同じ道をたどり、残り71字になってから分割した）→ [.claude/project/doc-size.md](../../.claude/project/doc-size.md) §3.1 の判断 #0 へ「**`--sections` が `!`（H2 超過）を出しているファイルは、残量が追記予定字数を下回るなら圧縮ではなく分割を既定にする**（圧縮で捻出できるのは数百字で、H2 超過は解消しない）」を追記し、[basic-design.md](../../.claude/project/basic-design.md) §1 の「執筆前の分量見積もり」へ同じ判断への導線を張る。long-turn は分割2件 + 参照29箇所の付け替え + 検証を1ターンで完走した分量で誤検出。
-
-## 2026-08-09 11:10 | session 72f49117 | 自動検出
-- シグナル: long-turn(calls=149)
-- ターン概要: ツール149回・エラー1回・拒否0回。開始:「<command-message>next</command-message>」
-- 原因と改善案: **雛形生成から war 生成・文書反映・統合まで完走した正当な分量**だが、**実在の非効率が2件**: ① worktree セッションの分離ガードが `&&`・ループ・リダイレクトを含む Bash を「複雑すぎる」と拒否するため、退避と配置を**1コマンド1呼び出しへばらして約20回**費やした（`git mv` 8 + `cp` 13）。移送はファイル単位ではなく**ディレクトリ単位**にまとめれば数回で済んだ → [.claude/project/dev.md](../../.claude/project/dev.md) §5 へ「**worktree 内での一括移送（`git mv`・`cp`）はディレクトリ単位でまとめる**。分離ガードが複合コマンドを拒否するため、ファイル単位に展開すると呼び出し回数が跳ねる」を追記 ② **Boot 依存の有無を調べる前に main コード42件を丸ごと退避**し、`check_schema_triple.py` が7件落ちてから調べ直した（実際に Boot へ依存するのは6件だけで、Entity 7件は非JDK import ゼロ）→ 同 §4 の観点表へ「**既存コードを退避・削除する前に、依存の実体を import で分類する**（"Boot 前提"という前提の粒度を鵜呑みにしない）。常設チェッカーは退避の前後で走らせ、緑→赤の変化で巻き込みを検出する」を追記。
-
-## 2026-08-09 11:21 | session 49abca2c | 自動検出
-- シグナル: long-turn(calls=43)
-- ターン概要: ツール43回・エラー1回・拒否0回。開始:「<command-message>next</command-message>」
-- 原因と改善案: **引き継ぎ確認 → 鮮度検証 → 仕様4件の該当節読み → 雛形設定10件の把握 → 計画提示まで到達した分量**で long-turn 自体は概ね誤検出。ただし**実在の非効率が2件**: ① 外部ライブラリの実在確認（Jackson 3/2 の同居・`JacksonJsonHttpMessageConverter` のコンストラクタ・`DispatcherServlet` の既定・logback `JsonEncoder`・Flyway 版）を `javap`/`unzip` で**5回の往復に分けて**投げた（前の答えが次の問いを生む形で芋づる式に増えた）→ [.claude/project/dev.md](../../.claude/project/dev.md) §5 の注意3（版調査はまとめて1回）へ「**API の実在確認（クラス名・コンストラクタ・既定値の有無）も同じ扱い**。着手前に確認項目を列挙し `javap`/`unzip` を1バッチで出す」を併記 ② `mvn dependency:tree` に `-q` を付けてツリー出力ごと消し、1回空振りした → 同§5へ「`dependency:tree` は `-q` を付けない（ツリーは INFO で出るため消える）」を追記。
-
-## 2026-08-09 11:38 | session 49abca2c | 自動検出
-- シグナル: long-turn(calls=70)
-- ターン概要: ツール70回・エラー0回・拒否0回。開始:「<ide_selection>The user selected the lines 44 to 45 from c:\」
-- 原因と改善案: **2R-C の実装18ファイル・ビルド・起動スモーク・文書反映・統合・引き継ぎ更新まで1ターンで完走した分量**で long-turn は概ね誤検出（エラー0）。ただし**実在の非効率が2件**: ① 既存ファイルを確認するつもりで `Write` を呼び、`AfkgameDomainConfig.java.probe` を作って消す往復をした（ツールの取り違え。既存ファイルの確認は `Read` か `ctx_execute` に限る） ② **残量250字の [steps.md](java_migration/steps.md) へ「圧縮 + 追記」を同時に行う際、置換前後の `len()` 差で net を見積もって書いたが、チェッカー実測は 51字 超過**で2回追加圧縮した（複数箇所の増減を積み上げると誤差が乗り、`len()` は見積もりにしかならない）→ [.claude/project/doc-size.md](../../.claude/project/doc-size.md) §3.1 の判断 #0 へ「**残量300字未満のファイルで圧縮と追記を同時に行うときは見積もりで確定させず、編集後に `--sections` を再実行して確認する**」を追記し、[profile.md](../../.claude/project/profile.md) §7 規約7（`len()` で実測）にも同じ但し書きを付ける。
-
-## 2026-08-09 12:04 | session 2f94d0c2 | 自動検出
-- シグナル: long-turn(calls=149)
-- ターン概要: ツール149回・エラー0回・拒否0回。開始:「<command-message>next</command-message>」
-- 原因と改善案: **main 42ファイル（2,222行）の移植・6件の書き直し・POM3件・起動検証・文書反映・統合まで完走した分量**で long-turn 自体は概ね誤検出（エラー0）。ただし**実在の非効率が2件**: ① 使い捨ての Java 検証クラスを Maven のクラスパスで動かす際、Git Bash の `/c/...` を `javac -d` / `java -cp` がそのまま解釈できず `ClassNotFoundException` で1往復、Flyway スタブの URL で1往復と、**環境の作法で3回空振り**した → [.claude/project/commands.md](../../.claude/project/commands.md) へ「**使い捨て Java を Maven のクラスパスで動かすレシピ**（`dependency:build-classpath -Dmdep.includeScope=test` → `-cp`・`-d` に渡すパスは `cygpath -w` で Windows 形式へ。区切りは `;`）」を追記 ② `mvn clean install` は通るのに**コンテキスト起動で落ちる不具合**（`MybatisConfig` の型エイリアス衝突）が 2R-C から潜伏しており、検出用のスタブ Bean を今回その場で書き起こした → [.claude/project/dev.md](../../.claude/project/dev.md) §5 の動作確認表へ「**DI コンテナを起こす確認をビルドと別に置く**（Bean 生成時にしか出ない衝突・未解決プレースホルダはコンパイルでは出ない）。DB 無しで回すときは `dataSource` と `flyway` だけスタブへ差し替える」を追記する。
-
-## 2026-08-09 12:34 | session feb638ea | 自動検出
-- シグナル: long-turn(calls=136)
-- ターン概要: ツール136回・エラー2回・拒否0回。開始:「<command-message>next</command-message>」
-- 原因と改善案: **テスト25件の移植・POM4件・テスト基盤3クラス新設・`mvn clean install`／`verify`・文書反映・統合・引き継ぎ更新まで1ターンで完走した分量**で long-turn 自体は概ね誤検出。ただし**実在の非効率が2件**（エラー2回はこれ）: ① worktree 隔離セッションで `git mv` を `for` ループ + `$(find ...)` で1回にまとめて投げ、「隔離先に収まるか検証できない」と拒否されて素の1ファイル1コマンドへ書き直した → [worktree_guide.md](../process/worktree_guide.md) §5.4 の「Bash は1コマンド1目的」へ「**worktree 隔離セッションではループ・コマンド置換・リダイレクトを含む git 操作は拒否される。`git mv` は1ファイル1行で並べる**」を明記 ② ライブラリ版の確認に `search.maven.org` の solrsearch API を使い、5件目でタイムアウトして `repo1.maven.org/.../maven-metadata.xml` へ切り替えた → [.claude/project/dev.md](../../.claude/project/dev.md) §5 の版調査へ「**Maven Central の版は `https://repo1.maven.org/maven2/<groupId のスラッシュ表記>/<artifactId>/maven-metadata.xml` の `<release>` を見る**（solrsearch は遅く落ちやすい）」を追記する。
-
-## 2026-08-09 13:23 | session 2b5c3b32 | 自動検出
-- シグナル: same-command('cd "C:/GIT/2026_AFKGAME.worktr'×5, 'cd "C:/GIT/2026_AFKGAME.worktr'×5) / errors×4 / long-turn(calls=173)
-- ターン概要: ツール173回・エラー4回・拒否0回。開始:「<command-message>next</command-message>」
-- 原因と改善案: 実機検証と15ファイル改修の分量で long-turn は誤検出（エラー4件も軽微）。**実在の非効率2件**: ① 残量1字の `README.md`・23字の `carryover_notes.md` で編集→測定→圧縮を繰り返し `check_doc_size.py` を5回叩いた（§7 規約7「追記予定の字数も `len()` で実測」を守らず目分量で見積もった）→ [profile.md](../../.claude/project/profile.md) §7 へ「**残量が上限の1割を切るファイルは Edit 前に置換後テキストの `len()` を実測する**」を追記 ② `ctx_execute` の shell が `/tmp` へ落としたログを `language: "python"` から読めず失敗 → [commands.md](../../.claude/project/commands.md) §2 へ「**生成と読み取りは同じ `language` で完結させる**」を追記。
-
-## 2026-08-09 13:41 | session 01a71ad0 | 自動検出
-- シグナル: errors×3 / long-turn(calls=80)
-- ターン概要: ツール80回・エラー3回・拒否0回。開始:「<ide_opened_file>The user opened the file c:\GIT\2026_AFKGAM」
-- 原因と改善案: 94ファイル整形を1ターンで完走した分量で long-turn は誤検出。**実在の非効率2件**: ① Grep の `glob` に否定 `!reviews/**` を渡したが効かず24KB を退避する羽目に → [commands.md](../../.claude/project/commands.md) §2 へ「**Grep の `glob` に否定は使えない。除外を伴う横断調査は `ctx_execute` 内でフィルタする**」を追記 ② worktree 隔離セッションから main へ `cd` する Bash が拒否された → [worktree_guide.md](../process/worktree_guide.md) §5.4 へ「**main 側の状態確認は `EnterWorktree` の前に済ませる**」を明記。

@@ -12,6 +12,7 @@
 
 | ファイル | 内容 |
 |---------|------|
+| `docs/backlog/efficiency_memo.md` | `/retro` で10エントリすべてを消化して削除（8,570字→864字・上限超過を解消）。ヘッダの「反映」へ**削除は main で行う**旨を明記した |
 | `.claude/project/commands.md` | §4「使い捨て調査の作法」を新設（検算・`cwd` 明示・`language` 統一・`Grep` の否定glob不可・API実在確認の1バッチ化・Maven版の参照先・使い捨てJavaのクラスパス）。`/retro` 反映 |
 | `.claude/project/dev.md` | §4に観点8（退避前に import で依存分類）、§5に注意4（DIコンテナ起動確認をビルドと別に置く）を追加し、注意2の版調査を commands.md §4 へ寄せた。`/retro` 反映 |
 | `.claude/project/doc-size.md` | §3.1 判断#0に「`!`（H2超過）+ 残量不足なら分割を既定」、判断#4「残量300字未満の圧縮+追記は編集後に `--sections` で再測定」を追加。`/retro` 反映 |
