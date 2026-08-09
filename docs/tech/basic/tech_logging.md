@@ -5,6 +5,8 @@
 ## ログライブラリ
 Logback を使用。設定は `afkgame-env` の `logback.xml`（Boot 拡張の `logback-spring.xml` と `<springProfile>` は使えない）。Tomcat のアクセスログは Tomcat 側（`AccessLogValve`）が出力し、アプリのログとは別系統とする。
 
+ログは**用途で3種別に分け、別ファイルへ出す**（通信ログ / アプリケーションログ / エラーログ）。種別の定義・出力先ファイル・ローテーション・出力主体・書き方の正は [logging.md](../../process/coding_standards_backend/logging.md)。本書は種別を問わない**形式と語彙**（フォーマット・項目名・ロガー名・`reason`・エラーコード）を持つ。
+
 ## ログの書き方（共通部品）
 
 各クラスで `LoggerFactory` を直接使わず、`afkgame-env` の `com.afkgame.env.logging` が提供する共通部品で書く（規約は [common.md §7](../../process/coding_standards_backend/common.md)）。
@@ -25,7 +27,7 @@ logger.warn("ログイン失敗").reason(LogReason.PASSWORD_MISMATCH).log();
 logger.error("未捕捉例外").cause(e).log();
 ```
 
-**項目はメッセージへ埋め込まない**。`with()` で積んだ値は出力の間だけ MDC へ載り、text 形式では末尾の `key=value`、JSON 形式では独立フィールドとして出る。出力後は元の MDC へ戻すため、横断項目を壊さない。
+`with()` で積んだ値は出力の間だけ MDC へ載り、text 形式では末尾の `key=value`、JSON 形式では独立フィールドとして出る。出力後は元の MDC へ戻すため、横断項目を壊さない。
 
 ## ログレベル方針
 
@@ -69,7 +71,9 @@ logger.error("未捕捉例外").cause(e).log();
 | `afkgame.game` | ゲーム状態取得・更新 |
 | `afkgame.shop` | ショップ購入 |
 | `afkgame.tower` | 塔選択・リタイア |
-| `afkgame.middleware` | リクエストログミドルウェア |
+| `afkgame.comm` | 通信の START / END。**通信ログファイルへ出る唯一のロガー**（`logging.md` §1.1） |
+| `afkgame.layer` | AOP による境界ログ（Service・Repository の START / END） |
+| `afkgame.middleware` | 例外ハンドラなどの横断処理 |
 | `afkgame.health` | ヘルスチェック（運用監視向け） |
 
 コード側の正は `LoggerName`。**実際に出力している領域だけ**を enum に持ち、新しい領域を書くときに追加する。
@@ -87,6 +91,8 @@ logger.error("未捕捉例外").cause(e).log();
 | `reason` | 失敗理由 | 各処理 |
 | `user_id` | 処理対象のユーザーID（認証済みを表す `player_id` とは別） | 各処理 |
 | `token` / `email` | トークン・メールアドレス（**自動マスク**） | 各処理 |
+| `direction` / `target` | 通信の方向（`in` / `out`）・送信先 | 通信ログ（`logging.md` §2） |
+| `signature` / `args` / `result` | 境界のメソッド・引数・戻り値 | AOP（`logging.md` §3） |
 
 横断項目はフィルタが MDC へ載せ、各所で詰め直さない（`common.md` §7 #5）。
 
@@ -110,14 +116,15 @@ logger.error("未捕捉例外").cause(e).log();
 
 ## リクエストログ用フィルタ
 
-全APIリクエストに対して以下を実行する:
+全APIリクエストに対して以下を実行する。出力先は**通信ログ**で、START / END の対や送信（外部API・SMTP）側の規約は [logging.md](../../process/coding_standards_backend/logging.md) §2 が正。
 
 1. **リクエストID付与**: 各リクエストにUUID v4を生成し、レスポンスヘッダー `X-Request-ID` に含める
 2. **処理時間計測**: リクエスト開始〜レスポンス完了の時間をミリ秒単位で計測
-3. **INFOログ出力**: `method`, `path`, `status_code`, `duration_ms`, `player_id`（認証済みの場合）
+3. **START / END の出力**: 受信時に `direction`・`method`・`path`・`client_ip`、応答時に `status_code`・`duration_ms`・`player_id`（認証済みの場合）
 
 ```
-[2026-03-15 14:38:30] INFO  middleware: POST /api/battle/tick 200 45ms player_id=550e8400 request_id=xxx
+[2026-08-09 14:38:30] INFO  afkgame.comm: START direction=in method=POST path=/api/battle/tick client_ip=127.0.0.1 request_id=xxx
+[2026-08-09 14:38:30] INFO  afkgame.comm: END   direction=in method=POST path=/api/battle/tick status_code=200 duration_ms=45 player_id=550e8400 request_id=xxx
 ```
 
 ## 機密情報のマスク規則
