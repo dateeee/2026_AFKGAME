@@ -9,8 +9,9 @@ import java.util.Date; // 規約例外: JJWT の expiration(Date) / issuedAt(Dat
 import javax.crypto.SecretKey;
 
 import org.springframework.stereotype.Service;
+import org.terasoluna.gfw.common.exception.BusinessException;
+import org.terasoluna.gfw.common.message.ResultMessages;
 
-import com.afkgame.domain.exception.AppException;
 import com.afkgame.env.config.AuthSettings;
 import com.afkgame.env.logging.AppLogger;
 import com.afkgame.env.logging.LogReason;
@@ -34,6 +35,9 @@ public class JwtServiceImpl implements JwtService {
 
     /** アクセストークンの用途クレーム。用途の違うトークンを取り違えないために検証する（tech_auth.md §4）。 */
     private static final String TOKEN_TYPE_ACCESS = "access";
+
+    /** 再ログインが必要な失敗。署名不正・用途違い・{@code sub} 欠落を区別させない。 */
+    private static final String INVALID_TOKEN = "AUTH_INVALID_TOKEN";
 
     private final SecretKey signingKey;
     private final Duration accessTokenExpire;
@@ -64,7 +68,9 @@ public class JwtServiceImpl implements JwtService {
     /**
      * {@inheritDoc}
      *
-     * <p>JJWT の例外はここで {@link AppException} へ振り直す（期限切れと不正を混ぜない）。
+     * <p>JJWT の例外はここで {@link BusinessException} へ振り直す（期限切れと不正を混ぜない）。
+     * 正常稼働時にも起こりうるライブラリ例外の分類し直しであり、規約 exception.md §2 の
+     * 「ライブラリ例外 → ビジネス例外」に当たる。
      */
     @Override
     public String parseUserId(String token) {
@@ -77,22 +83,31 @@ public class JwtServiceImpl implements JwtService {
                     .getPayload();
         } catch (ExpiredJwtException e) {
             logger.warn("認証失敗").reason(LogReason.TOKEN_EXPIRED).log();
-            throw new AppException("AUTH_TOKEN_EXPIRED", "Token expired", 401);
+            throw authError("AUTH_TOKEN_EXPIRED");
         } catch (JwtException | IllegalArgumentException e) {
             logger.warn("認証失敗").reason(LogReason.INVALID_TOKEN).log();
-            throw new AppException("AUTH_INVALID_TOKEN", "Invalid token", 401);
+            throw authError(INVALID_TOKEN);
         }
 
         if (!TOKEN_TYPE_ACCESS.equals(claims.get("type", String.class))) {
             logger.warn("認証失敗").reason(LogReason.INVALID_TOKEN_TYPE).log();
-            throw new AppException("AUTH_INVALID_TOKEN", "Invalid token type", 401);
+            throw authError(INVALID_TOKEN);
         }
 
         String userId = claims.getSubject();
         if (userId == null) {
             logger.warn("認証失敗").reason(LogReason.INVALID_TOKEN).log();
-            throw new AppException("AUTH_INVALID_TOKEN", "Invalid token payload", 401);
+            throw authError(INVALID_TOKEN);
         }
         return userId;
+    }
+
+    /**
+     * 認証失敗のビジネス例外を作る。
+     *
+     * <p>載せるのはコードだけで、文言もステータスも持たせない（規約 exception.md §3 #5・§4 #4）。
+     */
+    private static BusinessException authError(String code) {
+        return new BusinessException(ResultMessages.error().add(code));
     }
 }

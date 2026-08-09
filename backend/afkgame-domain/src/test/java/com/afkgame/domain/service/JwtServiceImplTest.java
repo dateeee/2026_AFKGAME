@@ -13,8 +13,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.terasoluna.gfw.common.exception.BusinessException;
 
-import com.afkgame.domain.exception.AppException;
 import com.afkgame.env.config.AuthSettings;
 
 import io.jsonwebtoken.Claims;
@@ -42,6 +42,16 @@ class JwtServiceImplTest {
             new AuthSettings(SECRET, Duration.ofMinutes(30), Duration.ofDays(30),
                     12, 8, 128, Duration.ofDays(90), Duration.ofHours(24), Duration.ofHours(1)),
             Clock.systemUTC());
+
+    /**
+     * 業務例外が載せたエラーコードを取り出す。
+     *
+     * <p>HTTP ステータスは例外が持たず Web 層の対応表が決めるため、コードだけを検証する
+     * （規約 exception.md §4 #4）。
+     */
+    private static String codeOf(Throwable e) {
+        return ((BusinessException) e).getResultMessages().getList().get(0).getCode();
+    }
 
     private static Claims claimsOf(String token, String secret) {
         return Jwts.parser()
@@ -100,9 +110,9 @@ class JwtServiceImplTest {
                     .compact();
 
             assertThatThrownBy(() -> jwtService.parseUserId(expired))
-                    .isInstanceOf(AppException.class)
-                    .extracting("code", "status")
-                    .containsExactly("AUTH_TOKEN_EXPIRED", 401);
+                    .isInstanceOf(BusinessException.class)
+                    .extracting(JwtServiceImplTest::codeOf)
+                    .isEqualTo("AUTH_TOKEN_EXPIRED");
         }
 
         @Test
@@ -115,16 +125,16 @@ class JwtServiceImplTest {
                     .compact();
 
             assertThatThrownBy(() -> jwtService.parseUserId(forged))
-                    .isInstanceOf(AppException.class)
-                    .extracting("code", "status")
-                    .containsExactly("AUTH_INVALID_TOKEN", 401);
+                    .isInstanceOf(BusinessException.class)
+                    .extracting(JwtServiceImplTest::codeOf)
+                    .isEqualTo("AUTH_INVALID_TOKEN");
         }
 
         @Test
         void test_トークンの体をなさない文字列はAUTH_INVALID_TOKENになる() {
             assertThatThrownBy(() -> jwtService.parseUserId("not-a-token"))
-                    .isInstanceOf(AppException.class)
-                    .extracting("code")
+                    .isInstanceOf(BusinessException.class)
+                    .extracting(JwtServiceImplTest::codeOf)
                     .isEqualTo("AUTH_INVALID_TOKEN");
         }
 
@@ -138,9 +148,9 @@ class JwtServiceImplTest {
                     .compact();
 
             assertThatThrownBy(() -> jwtService.parseUserId(wrongType))
-                    .isInstanceOf(AppException.class)
-                    .extracting("code", "status")
-                    .containsExactly("AUTH_INVALID_TOKEN", 401);
+                    .isInstanceOf(BusinessException.class)
+                    .extracting(JwtServiceImplTest::codeOf)
+                    .isEqualTo("AUTH_INVALID_TOKEN");
         }
 
         @Test
@@ -152,8 +162,8 @@ class JwtServiceImplTest {
                     .compact();
 
             assertThatThrownBy(() -> jwtService.parseUserId(noSubject))
-                    .isInstanceOf(AppException.class)
-                    .extracting("code")
+                    .isInstanceOf(BusinessException.class)
+                    .extracting(JwtServiceImplTest::codeOf)
                     .isEqualTo("AUTH_INVALID_TOKEN");
         }
     }

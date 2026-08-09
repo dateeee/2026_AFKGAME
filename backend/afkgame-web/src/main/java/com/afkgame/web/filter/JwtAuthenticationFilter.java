@@ -8,8 +8,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.terasoluna.gfw.common.exception.BusinessException;
+import org.terasoluna.gfw.common.message.ResultMessages;
 
-import com.afkgame.domain.exception.AppException;
 import com.afkgame.domain.model.User;
 import com.afkgame.domain.service.AuthService;
 import com.afkgame.domain.service.JwtService;
@@ -41,7 +42,7 @@ import jakarta.servlet.http.HttpServletResponse;
  */
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    /** 認証失敗の理由（{@link AppException}）を保持するリクエスト属性のキー。 */
+    /** 認証失敗の理由（{@link BusinessException}）を保持するリクエスト属性のキー。 */
     public static final String AUTH_FAILURE_ATTRIBUTE = JwtAuthenticationFilter.class.getName() + ".failure";
 
     private static final String BEARER_PREFIX = "Bearer ";
@@ -73,7 +74,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (!authorization.startsWith(BEARER_PREFIX)) {
             logger.warn("認証失敗").reason(LogReason.INVALID_FORMAT).log();
             request.setAttribute(AUTH_FAILURE_ATTRIBUTE,
-                    new AppException("AUTH_INVALID_FORMAT", "Invalid authorization header", 401));
+                    new BusinessException(ResultMessages.error().add("AUTH_INVALID_FORMAT")));
             return;
         }
 
@@ -84,7 +85,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             MDC.put(LogKey.PLAYER_ID.field(), user.getId());
             SecurityContextHolder.getContext().setAuthentication(
                     new UsernamePasswordAuthenticationToken(user, null, List.of()));
-        } catch (AppException e) {
+        } catch (BusinessException e) {
             request.setAttribute(AUTH_FAILURE_ATTRIBUTE, e);
         }
     }

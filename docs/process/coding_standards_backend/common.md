@@ -14,7 +14,7 @@
 | モジュール | パッケージ | 置くもの | 依存してよい先 |
 |-----------|-----------|---------|--------------|
 | `afkgame-env` | `com.afkgame.env.config` / `.logging` | 設定保持 Bean・DataSource・Flyway 起動、ログ基盤 | （なし） |
-| `afkgame-domain` | `com.afkgame.domain.model` / `.repository` / `.service` / `.masterdata` / `.rng` / `.exception` | Entity、Repository、Service、マスターデータ、RNG、業務例外 | `afkgame-env` |
+| `afkgame-domain` | `com.afkgame.domain.model` / `.repository` / `.service` / `.masterdata` / `.rng` | Entity、Repository、Service、マスターデータ、RNG | `afkgame-env` |
 | `afkgame-web` | `com.afkgame.web.api` / `.resource` / `.config` / `.filter` | `@RestController`、Resource、Security・フィルタ | `afkgame-domain`、`afkgame-env` |
 | `afkgame-initdb` | （Java なし） | Flyway マイグレーション SQL | （なし） |
 

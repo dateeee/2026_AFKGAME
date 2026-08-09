@@ -25,8 +25,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.terasoluna.gfw.common.exception.BusinessException;
 
-import com.afkgame.domain.exception.AppException;
 import com.afkgame.domain.model.EmailVerificationToken;
 import com.afkgame.domain.model.RefreshToken;
 import com.afkgame.domain.model.User;
@@ -129,6 +129,17 @@ class AuthServiceImplTest {
                     emailVerificationTokenRepository, verificationMailSender);
         }
         return authService;
+    }
+
+    /**
+     * 業務例外が載せたエラーコードを取り出す。
+     *
+     * <p>HTTP ステータスは例外が持たず Web 層の対応表が決めるため、サービス層の検証はコードだけを見る
+     * （規約 exception.md §4 #4）。ステータスとの対応は {@code ErrorCatalogTest} と
+     * {@code scripts/check_error_codes.py} が担保する。
+     */
+    private static String codeOf(Throwable e) {
+        return ((BusinessException) e).getResultMessages().getList().get(0).getCode();
     }
 
     /** 有効なリフレッシュトークンのレコードを組み立てる。 */
@@ -268,9 +279,9 @@ class AuthServiceImplTest {
             when(refreshTokenRepository.findByTokenHash(any())).thenReturn(null);
 
             assertThatThrownBy(() -> authService().refresh("unknown-token"))
-                    .isInstanceOf(AppException.class)
-                    .extracting("code", "status")
-                    .containsExactly("AUTH_REFRESH_INVALID", 401);
+                    .isInstanceOf(BusinessException.class)
+                    .extracting(AuthServiceImplTest::codeOf)
+                    .isEqualTo("AUTH_REFRESH_INVALID");
         }
 
         @Test
@@ -280,8 +291,8 @@ class AuthServiceImplTest {
             when(refreshTokenRepository.findByTokenHash(any())).thenReturn(revoked);
 
             assertThatThrownBy(() -> authService().refresh("reused-token"))
-                    .isInstanceOf(AppException.class)
-                    .extracting("code")
+                    .isInstanceOf(BusinessException.class)
+                    .extracting(AuthServiceImplTest::codeOf)
                     .isEqualTo("AUTH_REFRESH_INVALID");
 
             verify(refreshTokenRepository).updateRevokedByUserId("guest_001");
@@ -301,9 +312,9 @@ class AuthServiceImplTest {
             when(refreshTokenRepository.updateRevokedById(1)).thenReturn(0);
 
             assertThatThrownBy(() -> authService().refresh("raced-token"))
-                    .isInstanceOf(AppException.class)
-                    .extracting("code", "status")
-                    .containsExactly("AUTH_REFRESH_INVALID", 401);
+                    .isInstanceOf(BusinessException.class)
+                    .extracting(AuthServiceImplTest::codeOf)
+                    .isEqualTo("AUTH_REFRESH_INVALID");
 
             verify(refreshTokenRepository).updateRevokedByUserId("guest_001");
             verify(refreshTokenRepository, never()).save(any());
@@ -316,8 +327,8 @@ class AuthServiceImplTest {
             when(refreshTokenRepository.findByTokenHash(any())).thenReturn(expired);
 
             assertThatThrownBy(() -> authService().refresh("expired-token"))
-                    .isInstanceOf(AppException.class)
-                    .extracting("code")
+                    .isInstanceOf(BusinessException.class)
+                    .extracting(AuthServiceImplTest::codeOf)
                     .isEqualTo("AUTH_REFRESH_INVALID");
 
             verify(refreshTokenRepository, never()).updateRevokedByUserId(any());
@@ -330,8 +341,8 @@ class AuthServiceImplTest {
             when(userRepository.findById("guest_001")).thenReturn(null);
 
             assertThatThrownBy(() -> authService().refresh("orphan-token"))
-                    .isInstanceOf(AppException.class)
-                    .extracting("code")
+                    .isInstanceOf(BusinessException.class)
+                    .extracting(AuthServiceImplTest::codeOf)
                     .isEqualTo("AUTH_REFRESH_INVALID");
         }
     }
@@ -352,9 +363,9 @@ class AuthServiceImplTest {
             when(userRepository.findById("guest_404")).thenReturn(null);
 
             assertThatThrownBy(() -> authService().findAuthenticatedUser("guest_404"))
-                    .isInstanceOf(AppException.class)
-                    .extracting("code", "status")
-                    .containsExactly("AUTH_USER_NOT_FOUND", 401);
+                    .isInstanceOf(BusinessException.class)
+                    .extracting(AuthServiceImplTest::codeOf)
+                    .isEqualTo("AUTH_USER_NOT_FOUND");
         }
     }
 
@@ -402,9 +413,9 @@ class AuthServiceImplTest {
             when(userRepository.findByEmail(EMAIL)).thenReturn(existing());
 
             assertThatThrownBy(() -> authService().register(EMAIL, PASSWORD))
-                    .isInstanceOf(AppException.class)
-                    .extracting("code", "status")
-                    .containsExactly("AUTH_EMAIL_TAKEN", 409);
+                    .isInstanceOf(BusinessException.class)
+                    .extracting(AuthServiceImplTest::codeOf)
+                    .isEqualTo("AUTH_EMAIL_TAKEN");
 
             verify(userRepository, never()).save(any());
             verify(playerInitializationService, never()).initialize(any());
@@ -425,9 +436,9 @@ class AuthServiceImplTest {
             doThrow(new DuplicateKeyException("uq_users_email")).when(userRepository).save(any());
 
             assertThatThrownBy(() -> authService().register(EMAIL, PASSWORD))
-                    .isInstanceOf(AppException.class)
-                    .extracting("code", "status")
-                    .containsExactly("AUTH_EMAIL_TAKEN", 409);
+                    .isInstanceOf(BusinessException.class)
+                    .extracting(AuthServiceImplTest::codeOf)
+                    .isEqualTo("AUTH_EMAIL_TAKEN");
 
             verify(refreshTokenRepository, never()).save(any());
         }
@@ -459,9 +470,9 @@ class AuthServiceImplTest {
             when(userRepository.findByEmail(EMAIL)).thenReturn(existing());
 
             assertThatThrownBy(() -> authService().register("  User@Example.COM  ", PASSWORD))
-                    .isInstanceOf(AppException.class)
-                    .extracting("code", "status")
-                    .containsExactly("AUTH_EMAIL_TAKEN", 409);
+                    .isInstanceOf(BusinessException.class)
+                    .extracting(AuthServiceImplTest::codeOf)
+                    .isEqualTo("AUTH_EMAIL_TAKEN");
 
             // 検索キーは受け取った表記ではなく正規化後の値
             verify(userRepository).findByEmail(EMAIL);
@@ -636,9 +647,9 @@ class AuthServiceImplTest {
             when(userRepository.findByEmail("unknown@example.com")).thenReturn(null);
 
             assertThatThrownBy(() -> authService().login("unknown@example.com", PASSWORD))
-                    .isInstanceOf(AppException.class)
-                    .extracting("code", "status")
-                    .containsExactly("AUTH_INVALID_CREDENTIALS", 401);
+                    .isInstanceOf(BusinessException.class)
+                    .extracting(AuthServiceImplTest::codeOf)
+                    .isEqualTo("AUTH_INVALID_CREDENTIALS");
 
             verify(refreshTokenRepository, never()).save(any());
         }
@@ -670,9 +681,9 @@ class AuthServiceImplTest {
             when(userRepository.findByEmail(EMAIL)).thenReturn(googleOnly);
 
             assertThatThrownBy(() -> authService().login(EMAIL, PASSWORD))
-                    .isInstanceOf(AppException.class)
-                    .extracting("code", "status")
-                    .containsExactly("AUTH_INVALID_CREDENTIALS", 401);
+                    .isInstanceOf(BusinessException.class)
+                    .extracting(AuthServiceImplTest::codeOf)
+                    .isEqualTo("AUTH_INVALID_CREDENTIALS");
 
             verify(passwordEncoder, never()).matches(any(), any());
         }
@@ -707,9 +718,9 @@ class AuthServiceImplTest {
             when(passwordEncoder.matches(PASSWORD, HASHED)).thenReturn(false);
 
             assertThatThrownBy(() -> authService().login(EMAIL, PASSWORD))
-                    .isInstanceOf(AppException.class)
-                    .extracting("code", "status")
-                    .containsExactly("AUTH_INVALID_CREDENTIALS", 401);
+                    .isInstanceOf(BusinessException.class)
+                    .extracting(AuthServiceImplTest::codeOf)
+                    .isEqualTo("AUTH_INVALID_CREDENTIALS");
 
             verify(userRepository, never()).updateLastLoginAt(any(), any());
             verify(refreshTokenRepository, never()).save(any());
@@ -773,9 +784,9 @@ class AuthServiceImplTest {
             when(userRepository.findByEmail("other@example.com")).thenReturn(null);
 
             assertThatThrownBy(() -> authService().login("  Other@Example.COM  ", PASSWORD))
-                    .isInstanceOf(AppException.class)
-                    .extracting("code", "status")
-                    .containsExactly("AUTH_INVALID_CREDENTIALS", 401);
+                    .isInstanceOf(BusinessException.class)
+                    .extracting(AuthServiceImplTest::codeOf)
+                    .isEqualTo("AUTH_INVALID_CREDENTIALS");
 
             verify(passwordEncoder, never()).matches(any(), any());
         }
@@ -825,9 +836,9 @@ class AuthServiceImplTest {
             when(refreshTokenRepository.findByTokenHash(any())).thenReturn(null);
 
             assertThatThrownBy(() -> authService().logout(USER_ID, RAW_TOKEN))
-                    .isInstanceOf(AppException.class)
-                    .extracting("code", "status")
-                    .containsExactly("AUTH_REFRESH_INVALID", 401);
+                    .isInstanceOf(BusinessException.class)
+                    .extracting(AuthServiceImplTest::codeOf)
+                    .isEqualTo("AUTH_REFRESH_INVALID");
 
             verify(refreshTokenRepository, never()).updateRevokedById(any());
         }
@@ -859,9 +870,9 @@ class AuthServiceImplTest {
             when(refreshTokenRepository.findByTokenHash(any())).thenReturn(others);
 
             assertThatThrownBy(() -> authService().logout(USER_ID, RAW_TOKEN))
-                    .isInstanceOf(AppException.class)
-                    .extracting("code", "status")
-                    .containsExactly("AUTH_REFRESH_INVALID", 401);
+                    .isInstanceOf(BusinessException.class)
+                    .extracting(AuthServiceImplTest::codeOf)
+                    .isEqualTo("AUTH_REFRESH_INVALID");
 
             verify(refreshTokenRepository, never()).updateRevokedById(any());
         }

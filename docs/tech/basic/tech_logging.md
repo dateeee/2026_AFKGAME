@@ -74,6 +74,7 @@ Logback を使用。設定は `afkgame-env` の `logback.xml`（Boot 拡張の `
 | `client_ip` / `method` / `path` | 接続元・メソッド・パス | `RequestLogFilter`（横断） |
 | `status_code` / `duration_ms` | ステータス・処理時間 | `RequestLogFilter`・例外ハンドラ |
 | `reason` | 失敗理由 | 各処理 |
+| `error_code` | システム例外のエラーコード（`INTERNAL_` 接頭辞）。応答には出さない | 例外ハンドラ |
 | `user_id` | 処理対象のユーザーID（認証済みを表す `player_id` とは別） | 各処理 |
 | `token` / `email` | トークン・メールアドレス（**自動マスク**） | 各処理 |
 | `direction` / `target` | 通信の方向（`in` / `out`）・送信先 | 通信ログ（`logging/communication.md`） |
