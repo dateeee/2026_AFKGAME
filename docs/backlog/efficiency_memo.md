@@ -31,3 +31,8 @@
 - シグナル: long-turn(calls=141)
 - ターン概要: ツール141回・エラー2回・拒否0回。開始:「<command-message>next</command-message>」
 - 原因と改善案: **2R-0 の6項目を実機検証（雛形生成・Tomcat 2版へ配備・逆アセンブル走査・`mvn verify`）し、文書反映と統合まで完走した正当な分量**（long-turn は概ね誤検出）。ただし**実在の非効率が2件**: ① Servlet API 差分の使い捨てスクリプトを**4回書き直した**（サブシェル内で相対 jar パスが壊れる → `unzip` の glob `jakarta/*.class` が入れ子に当たらない → awk が `;` で終わる `descriptor:` 行を飲む → 引数約1,300件でコマンドラインが溢れ javap が黙って失敗）。いずれも出力が「0件」「51件」と**一見もっともらしく**、最終値しか見ていなかったため1段ずつしか露見しなかった → [.claude/project/basic-design.md](../../.claude/project/basic-design.md) §4 へ「**使い捨ての検証スクリプトは1件で検算してから全量へ回し、中間件数が期待の桁と合うかを必ず確かめる**（0件や極端に少ない件数は"異常なし"ではなく解析失敗を疑う）」を追記 ② worktree へ移った後に `ctx_batch_execute` を**プロジェクトルートの cwd で走らせ1バッチ丸ごと無駄にした**（全コマンドが `No such file or directory`）→ 同 §4 へ「**worktree 作業中は context-mode 系ツールへ `cwd` を明示する**（既定はプロジェクトルートで worktree を指さない）」を併記。
+
+## 2026-08-09 10:43 | session f3ab426d | 自動検出
+- シグナル: same-read(tech_structure.md×2) / long-turn(calls=101)
+- ターン概要: ツール101回・エラー1回・拒否0回。開始:「<command-message>next</command-message>」
+- 原因と改善案: **`--sections` で「H2 が上限超過（`!`）＋ ファイル残量 329字」と測ったうえで、分割ではなく圧縮を選んで書き始めた**のが原因。フロントのツリーを4回圧縮しても 3字超過にしかならず、結局ユーザー指摘で分割し直したため `tech_structure.md` を再Readして書き戻す往復が発生した（`tech_operations.md` も同じ道をたどり、残り71字になってから分割した）→ [.claude/project/doc-size.md](../../.claude/project/doc-size.md) §3.1 の判断 #0 へ「**`--sections` が `!`（H2 超過）を出しているファイルは、残量が追記予定字数を下回るなら圧縮ではなく分割を既定にする**（圧縮で捻出できるのは数百字で、H2 超過は解消しない）」を追記し、[basic-design.md](../../.claude/project/basic-design.md) §1 の「執筆前の分量見積もり」へ同じ判断への導線を張る。long-turn は分割2件 + 参照29箇所の付け替え + 検証を1ターンで完走した分量で誤検出。
