@@ -93,13 +93,13 @@ flowchart TB
             forgeService["ForgeService.java\n装備強化・製作・分解\nPhase 4~"]
         end
 
-        subgraph Models["Entities / Mappers (MyBatis3)"]
-            playerModel["Player.java 等 (Entity + Mapper)\nPlayer, PlayerSettings\nTowerClearRecord\nParty (Phase3~)"]
-            charModel["Character.java 等 (Entity + Mapper)\nCharacter\nPrestigeBonus (Phase5~)\nLearnedSkill (Phase3~)\nActiveSkillSlot (Phase3~)"]
-            equipModel["Equipment.java 等 (Entity + Mapper)\nEquipment\nCharacterEquipSlot"]
-            itemModel["Item.java 等 (Entity + Mapper)\nBattleLog, InventoryItem\nFacility (Phase4~)\nBossRushState (Phase5~)"]
-            shopModel["Shop.java 等 (Entity + Mapper) Phase2~\nShopDailyState\nShopDailySlot"]
-            userModel["User.java 等 (Entity + Mapper) Phase2~\nUser, RefreshToken\nEmailVerificationToken"]
+        subgraph Models["Entities / Repositories (MyBatis3)"]
+            playerModel["Entity + PlayerRepository\nPlayer, PlayerSettings\nInventoryItem\nTowerClearRecord\nParty (Phase3~)"]
+            charModel["Entity + CharacterRepository\nCharacter, CharacterEquipSlot\nPrestigeBonus (Phase5~)\nLearnedSkill (Phase3~)\nActiveSkillSlot (Phase3~)"]
+            equipModel["Entity + EquipmentRepository\nEquipment"]
+            itemModel["Entity + ItemRepository\nBattleLog\nFacility (Phase4~)\nBossRushState (Phase5~)"]
+            shopModel["Entity + ShopRepository Phase2~\nShopDailyState\nShopDailySlot"]
+            userModel["Entity + UserRepository / RefreshTokenRepository Phase2~\nUser, RefreshToken\nEmailVerificationToken"]
         end
 
         subgraph Schemas["Resources (Bean Validation)"]

@@ -15,21 +15,21 @@ import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
 import io.zonky.test.db.AutoConfigureEmbeddedDatabase.DatabaseProvider;
 
 /**
- * Mapper 統合テストの共通基盤。スキーマ定義の正は docs/tech/basic/tech_db/（実体は
+ * Repository 統合テストの共通基盤。スキーマ定義の正は docs/tech/basic/tech_db/（実体は
  * afkgame-initdb の V1__initial_schema.sql）。
  *
  * <p>DB は埋め込み PostgreSQL（zonky）。Docker を必要としない（docs/backlog/java_migration.md §2）。
  * 各テストは {@code @Transactional} でロールバックするため、テスト間で状態を共有しない。
  *
- * <p>親レコード（users → players → characters → equipment）の作成は、検証対象の Mapper へ依存させない
- * ため {@link JdbcTemplate} で直接行う。
+ * <p>親レコード（users → players → characters → equipment）の作成は、検証対象の Repository へ
+ * 依存させないため {@link JdbcTemplate} で直接行う。
  */
 @Tag("integration")
 @SpringBootTest
 @ActiveProfiles("local")
 @AutoConfigureEmbeddedDatabase(provider = DatabaseProvider.ZONKY)
 @Transactional
-abstract class MapperTestSupport {
+abstract class RepositoryTestSupport {
 
     /** 時刻はすべてこの固定値から作る（実行のたびに結果が変わらないようにする）。 */
     protected static final Instant FIXED_NOW = Instant.parse("2026-08-08T12:00:00Z");

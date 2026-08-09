@@ -75,7 +75,7 @@
 │   │   │   ├── Equipment / ShopDailyState / ShopDailySlot（Phase 2〜）
 │   │   │   ├── User / RefreshToken / EmailVerificationToken（Phase 2〜）
 │   │   │   └── Party / PartyMember / CharacterSkill（Phase 3〜）
-│   │   ├── repository/            # MyBatis3 Mapper インタフェース + 同名の Mapper XML
+│   │   ├── repository/            # Repository インタフェース + 同名のマッピング XML（MyBatis3）
 │   │   ├── service/               # ビジネスロジック
 │   │   │   ├── BattleService      # 戦闘計算・エンカウント（オフライン報酬含む）
 │   │   │   ├── GameStateBuilder   # ゲーム状態レスポンス構築
@@ -139,7 +139,7 @@
 |---------|------|------|
 | フレームワーク | Terasoluna Server Framework for Spring 5.x（Spring Boot 3 / Java 17） | REST API。実行可能 jar |
 | ビルド | Maven（マルチモジュール） | 依存管理・テスト実行 |
-| データアクセス | MyBatis3 | DB操作（Mapper インタフェース + XML） |
+| データアクセス | MyBatis3 | DB操作（Repository インタフェース + マッピング XML） |
 | バリデーション | Bean Validation（Jakarta） | リクエストの制約定義 |
 | JSON | Jackson | camelCase でのシリアライズ |
 | APIドキュメント | springdoc-openapi | Swagger UI の自動生成（`/docs`） |

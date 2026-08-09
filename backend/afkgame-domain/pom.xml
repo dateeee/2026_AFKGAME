@@ -13,7 +13,7 @@
   <artifactId>afkgame-domain</artifactId>
   <packaging>jar</packaging>
   <name>afkgame-domain</name>
-  <description>ドメイン層（Entity・Mapper・Service・マスターデータ）</description>
+  <description>ドメイン層（Entity・Repository・Service・マスターデータ）</description>
 
   <dependencies>
     <dependency>
@@ -54,7 +54,7 @@
       <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
     </dependency>
-    <!-- Mapper の統合テスト（埋め込み PostgreSQL に Flyway でスキーマを作り、SQL を実際に実行する）。
+    <!-- Repository の統合テスト（埋め込み PostgreSQL に Flyway でスキーマを作り、SQL を実際に実行する）。
          afkgame-initdb はマイグレーションの供給元で、テスト実行時のみクラスパスに載せる -->
     <dependency>
       <groupId>com.afkgame</groupId>

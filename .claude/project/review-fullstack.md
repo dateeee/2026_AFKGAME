@@ -39,7 +39,7 @@ python .claude/scripts/review_prep.py --dir docs/reviews/full-review \
 | 担当 | 対象ファイル |
 |------|------------|
 | API・型整合 | `afkgame-web` の `@RestController`・Resource、`frontend/src/api/`、`frontend/src/types/`、`tech_api.md` |
-| ロジック・マスターデータ | `afkgame-domain` の Service・Entity/Mapper・マスターデータ、`design/systems/`、`tech_battle.md`、`tech_offline.md`、`tech_data.md`、`data/master/` |
+| ロジック・マスターデータ | `afkgame-domain` の Service・Entity/Repository・マスターデータ、`design/systems/`、`tech_battle.md`、`tech_offline.md`、`tech_data.md`、`data/master/` |
 | 画面・アーキテクチャ | `frontend/src/views/`・`components/`・`stores/`・`router/`、`design/systems/ui*.md`、`tech_architecture.md`、[profile.md](profile.md) §5 |
 
 差分モードは分担しない（[review-procedure.md](../references/review-procedure.md) §1 規律2）。
@@ -49,7 +49,7 @@ python .claude/scripts/review_prep.py --dir docs/reviews/full-review \
 | 変更ファイル | 照合先 |
 |------------|--------|
 | `afkgame-web` の `@RestController` | `tech_api.md`、`frontend/src/api/` |
-| `afkgame-domain` の Entity/Mapper | `tech_data.md` |
+| `afkgame-domain` の Entity/Repository | `tech_data.md` |
 | `afkgame-web` の Resource | `frontend/src/types/`、`tech_api.md` |
 | `afkgame-domain` の Service | `design/systems/`、`tech_battle.md`・`tech_offline.md` |
 | `afkgame-domain` のマスターデータ | `docs/data/master/`、`docs/data/towers/`、`docs/data/skills/` |

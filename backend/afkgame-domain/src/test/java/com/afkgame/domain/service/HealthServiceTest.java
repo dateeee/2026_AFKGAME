@@ -13,7 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataAccessResourceFailureException;
 
-import com.afkgame.domain.repository.HealthMapper;
+import com.afkgame.domain.repository.HealthRepository;
 
 /**
  * {@link HealthService} の単体テスト。
@@ -34,21 +34,21 @@ class HealthServiceTest {
     class TestIsDatabaseReachable {
 
         @Mock
-        private HealthMapper healthMapper;
+        private HealthRepository healthRepository;
 
         @InjectMocks
         private HealthService healthService;
 
         @Test
         void test_DB疎通に成功したらtrueを返す() {
-            when(healthMapper.selectOne()).thenReturn(1);
+            when(healthRepository.findOne()).thenReturn(1);
 
             assertThat(healthService.isDatabaseReachable()).isTrue();
         }
 
         @Test
         void test_DB疎通に失敗したらfalseを返す() {
-            when(healthMapper.selectOne())
+            when(healthRepository.findOne())
                     .thenThrow(new DataAccessResourceFailureException("DB接続に失敗"));
 
             assertThat(healthService.isDatabaseReachable()).isFalse();

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.afkgame.domain.repository.CharacterMapper">
+<mapper namespace="com.afkgame.domain.repository.CharacterRepository">
 
   <resultMap id="characterResultMap" type="com.afkgame.domain.model.Character">
     <id     property="id"          column="id"/>
@@ -20,29 +20,49 @@
     <result property="createdAt"   column="created_at"/>
   </resultMap>
 
+  <!-- 主キーは (character_id, slot) の複合主キー（tech_db/item.md §2） -->
+  <resultMap id="characterEquipSlotResultMap" type="com.afkgame.domain.model.CharacterEquipSlot">
+    <id     property="characterId" column="character_id"/>
+    <id     property="slot"        column="slot"/>
+    <result property="equipmentId" column="equipment_id"/>
+  </resultMap>
+
   <sql id="characterColumns">
     id, player_id, name, type, level, exp, hp, max_hp,
     base_atk, base_def, base_spd, limit_break, skill_points, created_at
   </sql>
 
-  <select id="selectById" resultMap="characterResultMap">
+  <select id="findById" resultMap="characterResultMap">
     SELECT <include refid="characterColumns"/>
       FROM characters
      WHERE id = #{id}
   </select>
 
-  <select id="selectByPlayerId" resultMap="characterResultMap">
+  <select id="findAllByPlayerId" resultMap="characterResultMap">
     SELECT <include refid="characterColumns"/>
       FROM characters
      WHERE player_id = #{playerId}
      ORDER BY created_at, id
   </select>
 
-  <insert id="insert">
+  <insert id="save">
     INSERT INTO characters (id, player_id, name, type, level, exp, hp, max_hp,
                             base_atk, base_def, base_spd, limit_break, skill_points, created_at)
     VALUES (#{id}, #{playerId}, #{name}, #{type}, #{level}, #{exp}, #{hp}, #{maxHp},
             #{baseAtk}, #{baseDef}, #{baseSpd}, #{limitBreak}, #{skillPoints}, #{createdAt})
+  </insert>
+
+  <!-- 従 Entity: character_equip_slots -->
+  <select id="findAllEquipSlotsByCharacterId" resultMap="characterEquipSlotResultMap">
+    SELECT character_id, slot, equipment_id
+      FROM character_equip_slots
+     WHERE character_id = #{characterId}
+     ORDER BY slot
+  </select>
+
+  <insert id="saveEquipSlot">
+    INSERT INTO character_equip_slots (character_id, slot, equipment_id)
+    VALUES (#{characterId}, #{slot}, #{equipmentId})
   </insert>
 
 </mapper>

@@ -26,7 +26,7 @@
 
 | 図 | パス | 検証対象 |
 |----|------|---------|
-| ER図 | `docs/diagrams/er_diagram.md` + `er_diagram/` | `tech_db.md`（正）・`afkgame-domain` の Entity + MyBatis3 Mapper |
+| ER図 | `docs/diagrams/er_diagram.md` + `er_diagram/` | `tech_db.md`（正）・`afkgame-domain` の Entity + Repository（マッピング XML） |
 | クラス図 | `docs/diagrams/class_diagram.md` + `class_diagram/` | `afkgame-domain`・`afkgame-web`・`frontend/src/` の構造 |
 | 画面遷移図 | `docs/diagrams/screen_transition.md` + `screen_transition/` | `design/systems/ui*.md`・`frontend/src/router/` |
 | 戦闘フロー図 | `docs/diagrams/battle_flow.md` + `battle_flow/` | `tech_battle.md`・`afkgame-domain` の戦闘 Service |
@@ -53,7 +53,7 @@
 | 3 | API網羅性 | `game_spec.md` の各機能に対応するエンドポイントが `tech_api.md` に存在するか |
 | 4 | データ構造の表現力 | `tech_db.md` のテーブル・列が `game_spec.md` の仕様を表現できているか |
 | 5 | 図とテキストの一致 | ER図のPK/FK・APIシーケンスのエンドポイント名が `tech_*.md` と一致しているか |
-| 8 | DBスキーマ三者一致 | テーブル定義書 ↔ ER図 ↔ `afkgame-domain` の Entity + Mapper（テーブル名・列・キーの対応）が一致しているか（正は定義書） |
+| 8 | DBスキーマ三者一致 | テーブル定義書 ↔ ER図 ↔ `afkgame-domain` の Entity + Repository のマッピング XML（テーブル名・列・キーの対応）が一致しているか（正は定義書） |
 | 9 | インデックスの根拠 | 各インデックスに、それを使う検索パターン（サービス層のクエリ）が定義書へ書かれているか |
 | 6 | オフライン復帰 | 復帰時の一括計算が API・データ構造の両面で成立しているか |
 | 7 | 非機能の実現方式 | 非機能・運用要件の各項目が `tech_performance` / `tech_security` / `tech_operations` のいずれかに対応づいているか |

@@ -19,11 +19,8 @@ import com.afkgame.domain.model.CharacterEquipSlot;
 import com.afkgame.domain.model.InventoryItem;
 import com.afkgame.domain.model.Player;
 import com.afkgame.domain.model.PlayerSettings;
-import com.afkgame.domain.repository.CharacterEquipSlotMapper;
-import com.afkgame.domain.repository.CharacterMapper;
-import com.afkgame.domain.repository.InventoryItemMapper;
-import com.afkgame.domain.repository.PlayerMapper;
-import com.afkgame.domain.repository.PlayerSettingsMapper;
+import com.afkgame.domain.repository.CharacterRepository;
+import com.afkgame.domain.repository.PlayerRepository;
 
 /**
  * プレイヤーの初期状態を組み立てるドメインサービス。
@@ -57,26 +54,18 @@ public class PlayerInitializationService {
     /** トースト通知の既定値（tech_db/player.md §2）。 */
     private static final boolean DEFAULT_TOAST_ENABLED = true;
 
-    private final PlayerMapper playerMapper;
-    private final PlayerSettingsMapper playerSettingsMapper;
-    private final CharacterMapper characterMapper;
-    private final CharacterEquipSlotMapper characterEquipSlotMapper;
-    private final InventoryItemMapper inventoryItemMapper;
+    private final PlayerRepository playerRepository;
+    private final CharacterRepository characterRepository;
     private final CharacterTypes characterTypes;
     private final EquipmentSlots equipmentSlots;
     private final InitialPlayer initialPlayer;
     private final Clock clock;
 
-    public PlayerInitializationService(PlayerMapper playerMapper,
-            PlayerSettingsMapper playerSettingsMapper, CharacterMapper characterMapper,
-            CharacterEquipSlotMapper characterEquipSlotMapper,
-            InventoryItemMapper inventoryItemMapper, CharacterTypes characterTypes,
+    public PlayerInitializationService(PlayerRepository playerRepository,
+            CharacterRepository characterRepository, CharacterTypes characterTypes,
             EquipmentSlots equipmentSlots, InitialPlayer initialPlayer, Clock clock) {
-        this.playerMapper = playerMapper;
-        this.playerSettingsMapper = playerSettingsMapper;
-        this.characterMapper = characterMapper;
-        this.characterEquipSlotMapper = characterEquipSlotMapper;
-        this.inventoryItemMapper = inventoryItemMapper;
+        this.playerRepository = playerRepository;
+        this.characterRepository = characterRepository;
         this.characterTypes = characterTypes;
         this.equipmentSlots = equipmentSlots;
         this.initialPlayer = initialPlayer;
@@ -120,7 +109,7 @@ public class PlayerInitializationService {
         player.setHighestFloor(0);
         player.setLastTickAt(now);
         player.setCreatedAt(now);
-        playerMapper.insert(player);
+        playerRepository.save(player);
         return player;
     }
 
@@ -132,7 +121,7 @@ public class PlayerInitializationService {
         settings.setPotionThreshold(DEFAULT_POTION_THRESHOLD);
         settings.setBattleLogCount(DEFAULT_BATTLE_LOG_COUNT);
         settings.setToastEnabled(DEFAULT_TOAST_ENABLED);
-        playerSettingsMapper.insert(settings);
+        playerRepository.saveSettings(settings);
     }
 
     /** 手順4: 初期キャラを1体作る。ステータスはタイプ別 LV1 基礎値をそのまま写し、全快で始める。 */
@@ -155,7 +144,7 @@ public class PlayerInitializationService {
         character.setLimitBreak(0);
         character.setSkillPoints(0);
         character.setCreatedAt(now);
-        characterMapper.insert(character);
+        characterRepository.save(character);
         return character;
     }
 
@@ -165,7 +154,7 @@ public class PlayerInitializationService {
             CharacterEquipSlot slot = new CharacterEquipSlot();
             slot.setCharacterId(characterId);
             slot.setSlot(slotId);
-            characterEquipSlotMapper.insert(slot);
+            characterRepository.saveEquipSlot(slot);
         }
     }
 
@@ -177,7 +166,7 @@ public class PlayerInitializationService {
             item.setPlayerId(playerId);
             item.setItemId(initial.id());
             item.setQuantity(initial.quantity());
-            inventoryItemMapper.insert(item);
+            playerRepository.saveItem(item);
         }
     }
 

@@ -14,7 +14,7 @@
 
 | パス | 内容 |
 |------|------|
-| `backend/` | `afkgame-domain`（Entity・Mapper・Service・マスターデータ）、`afkgame-web`（Controller・Resource・Security）、`afkgame-env`（DataSource・設定）、`afkgame-initdb`（Flyway） |
+| `backend/` | `afkgame-domain`（Entity・Repository・Service・マスターデータ）、`afkgame-web`（Controller・Resource・Security）、`afkgame-env`（DataSource・設定）、`afkgame-initdb`（Flyway） |
 | 各モジュールの `src/test/java/` | 単体（JUnit5+Mockito）と統合（`@SpringBootTest`+MockMvc）をパッケージで分離 |
 | `frontend/src/` | `components/` `views/` `stores/` `api/` `types/` `composables/` `router/` `utils/` `assets/` |
 | `frontend/tests/e2e/` | E2Eテスト（Playwright） |
@@ -30,7 +30,7 @@
 
 | 層 | 技術 | 規約 |
 |----|------|------|
-| DBアクセス | MyBatis3 | Entity + Mapper（インタフェース+XML）。`afkgame-domain` に配置 |
+| DBアクセス | MyBatis3 | Entity + Repository（インタフェース+マッピングXML）。`afkgame-domain` に配置 |
 | スキーマ(DTO) | Resource + Bean Validation（Jakarta） | `afkgame-web` に配置。Jackson が camelCase を維持（変換不要） |
 | ロジック | Java 17 | `afkgame-domain` の Service に集約。Controller にビジネスロジックを書かない |
 | API | Spring MVC（Terasoluna） | `@RestController`（`afkgame-web`）、DIはコンストラクタ注入 |

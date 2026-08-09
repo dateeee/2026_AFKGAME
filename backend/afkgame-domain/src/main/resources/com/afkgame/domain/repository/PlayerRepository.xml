@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.afkgame.domain.repository.PlayerMapper">
+<mapper namespace="com.afkgame.domain.repository.PlayerRepository">
 
   <resultMap id="playerResultMap" type="com.afkgame.domain.model.Player">
     <id     property="id"             column="id"/>
@@ -20,31 +20,74 @@
     <result property="createdAt"      column="created_at"/>
   </resultMap>
 
+  <resultMap id="playerSettingsResultMap" type="com.afkgame.domain.model.PlayerSettings">
+    <id     property="id"              column="id"/>
+    <result property="playerId"        column="player_id"/>
+    <result property="potionThreshold" column="potion_threshold"/>
+    <result property="battleLogCount"  column="battle_log_count"/>
+    <result property="toastEnabled"    column="toast_enabled"/>
+    <result property="autoSellRarity"  column="auto_sell_rarity"/>
+  </resultMap>
+
+  <resultMap id="inventoryItemResultMap" type="com.afkgame.domain.model.InventoryItem">
+    <id     property="id"       column="id"/>
+    <result property="playerId" column="player_id"/>
+    <result property="itemId"   column="item_id"/>
+    <result property="quantity" column="quantity"/>
+  </resultMap>
+
   <sql id="playerColumns">
     id, user_id, gold, current_tower_id, current_floor, target_floor, tower_mode,
     hp_threshold, current_enemy_id, current_enemy_hp, run_gold, highest_floor,
     last_tick_at, created_at
   </sql>
 
-  <select id="selectById" resultMap="playerResultMap">
+  <select id="findById" resultMap="playerResultMap">
     SELECT <include refid="playerColumns"/>
       FROM players
      WHERE id = #{id}
   </select>
 
-  <select id="selectByUserId" resultMap="playerResultMap">
+  <select id="findByUserId" resultMap="playerResultMap">
     SELECT <include refid="playerColumns"/>
       FROM players
      WHERE user_id = #{userId}
   </select>
 
-  <insert id="insert">
+  <insert id="save">
     INSERT INTO players (id, user_id, gold, current_tower_id, current_floor, target_floor,
                          tower_mode, hp_threshold, current_enemy_id, current_enemy_hp,
                          run_gold, highest_floor, last_tick_at, created_at)
     VALUES (#{id}, #{userId}, #{gold}, #{currentTowerId}, #{currentFloor}, #{targetFloor},
             #{towerMode}, #{hpThreshold}, #{currentEnemyId}, #{currentEnemyHp},
             #{runGold}, #{highestFloor}, #{lastTickAt}, #{createdAt})
+  </insert>
+
+  <!-- 従 Entity: player_settings（players と 1:1） -->
+  <select id="findSettingsByPlayerId" resultMap="playerSettingsResultMap">
+    SELECT id, player_id, potion_threshold, battle_log_count, toast_enabled, auto_sell_rarity
+      FROM player_settings
+     WHERE player_id = #{playerId}
+  </select>
+
+  <insert id="saveSettings">
+    INSERT INTO player_settings (id, player_id, potion_threshold, battle_log_count,
+                                 toast_enabled, auto_sell_rarity)
+    VALUES (#{id}, #{playerId}, #{potionThreshold}, #{battleLogCount},
+            #{toastEnabled}, #{autoSellRarity})
+  </insert>
+
+  <!-- 従 Entity: inventory_items -->
+  <select id="findAllItemsByPlayerId" resultMap="inventoryItemResultMap">
+    SELECT id, player_id, item_id, quantity
+      FROM inventory_items
+     WHERE player_id = #{playerId}
+     ORDER BY item_id
+  </select>
+
+  <insert id="saveItem">
+    INSERT INTO inventory_items (id, player_id, item_id, quantity)
+    VALUES (#{id}, #{playerId}, #{itemId}, #{quantity})
   </insert>
 
 </mapper>

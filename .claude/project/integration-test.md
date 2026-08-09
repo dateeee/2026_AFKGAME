@@ -18,7 +18,7 @@
 | 実行 | `cd backend && mvn test -Dgroups=integration` |
 | ファイル分割 | 導線ごとに1クラス（`AuthFlowIntegrationTest` / `TowerFlowIntegrationTest` / `BattleFlowIntegrationTest` / `ShopFlowIntegrationTest` / `EquipmentFlowIntegrationTest`） |
 | プレイヤー生成 | 直接作らず **`POST /api/auth/guest` から始める** |
-| DBセッション | 実際の MyBatis Mapper（`@SpringBootTest` の `SqlSessionFactory`）を使う。単体テストのモック Mapper とは差し替え、本番と同じマッピング設定で検証する |
+| DBセッション | 実際の Repository（`@SpringBootTest` の `SqlSessionFactory` が実装を供給）を使う。単体テストのモック Repository とは差し替え、本番と同じマッピング設定で検証する |
 | 乱数 | 固定シードの `Random` を DI で注入する（`tech_rng.md`） |
 | 時刻 | `rewind(player, 秒)` で `last_tick_at` を過去へ戻す。スリープしない |
 | ドロップ | 固定した `Random` 注入で抽選を成立させる（ドロップ率は検証対象外） |

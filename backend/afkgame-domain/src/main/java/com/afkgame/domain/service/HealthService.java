@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
-import com.afkgame.domain.repository.HealthMapper;
+import com.afkgame.domain.repository.HealthRepository;
 
 /**
  * ヘルスチェックのドメインサービス。
@@ -17,10 +17,10 @@ public class HealthService {
 
     private static final Logger logger = LoggerFactory.getLogger(HealthService.class);
 
-    private final HealthMapper healthMapper;
+    private final HealthRepository healthRepository;
 
-    public HealthService(HealthMapper healthMapper) {
-        this.healthMapper = healthMapper;
+    public HealthService(HealthRepository healthRepository) {
+        this.healthRepository = healthRepository;
     }
 
     /**
@@ -32,7 +32,7 @@ public class HealthService {
      */
     public boolean isDatabaseReachable() {
         try {
-            healthMapper.selectOne();
+            healthRepository.findOne();
             return true;
         } catch (DataAccessException e) {
             logger.error("ヘルスチェック: DB疎通に失敗", e);

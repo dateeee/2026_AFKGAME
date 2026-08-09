@@ -41,11 +41,8 @@ import com.afkgame.domain.model.CharacterEquipSlot;
 import com.afkgame.domain.model.InventoryItem;
 import com.afkgame.domain.model.Player;
 import com.afkgame.domain.model.PlayerSettings;
-import com.afkgame.domain.repository.CharacterEquipSlotMapper;
-import com.afkgame.domain.repository.CharacterMapper;
-import com.afkgame.domain.repository.InventoryItemMapper;
-import com.afkgame.domain.repository.PlayerMapper;
-import com.afkgame.domain.repository.PlayerSettingsMapper;
+import com.afkgame.domain.repository.CharacterRepository;
+import com.afkgame.domain.repository.PlayerRepository;
 
 /**
  * {@link PlayerInitializationService} の単体テスト。
@@ -79,19 +76,10 @@ class PlayerInitializationServiceTest {
     private static final String USER_ID = "guest_001";
 
     @Mock
-    private PlayerMapper playerMapper;
+    private PlayerRepository playerRepository;
 
     @Mock
-    private PlayerSettingsMapper playerSettingsMapper;
-
-    @Mock
-    private CharacterMapper characterMapper;
-
-    @Mock
-    private CharacterEquipSlotMapper characterEquipSlotMapper;
-
-    @Mock
-    private InventoryItemMapper inventoryItemMapper;
+    private CharacterRepository characterRepository;
 
     @Mock
     private CharacterTypes characterTypes;
@@ -106,9 +94,9 @@ class PlayerInitializationServiceTest {
     private static final Instant FIXED_NOW = Instant.parse("2026-08-08T12:00:00Z");
 
     private PlayerInitializationService service() {
-        return new PlayerInitializationService(playerMapper, playerSettingsMapper, characterMapper,
-                characterEquipSlotMapper, inventoryItemMapper, characterTypes, equipmentSlots,
-                initialPlayer, Clock.fixed(FIXED_NOW, ZoneOffset.UTC));
+        return new PlayerInitializationService(playerRepository, characterRepository,
+                characterTypes, equipmentSlots, initialPlayer,
+                Clock.fixed(FIXED_NOW, ZoneOffset.UTC));
     }
 
     /** 装備スロット9種のマスターデータ（記載順を保つ）。 */
@@ -139,13 +127,13 @@ class PlayerInitializationServiceTest {
 
     private Player capturedPlayer() {
         ArgumentCaptor<Player> captor = ArgumentCaptor.forClass(Player.class);
-        verify(playerMapper).insert(captor.capture());
+        verify(playerRepository).save(captor.capture());
         return captor.getValue();
     }
 
     private Character capturedCharacter() {
         ArgumentCaptor<Character> captor = ArgumentCaptor.forClass(Character.class);
-        verify(characterMapper).insert(captor.capture());
+        verify(characterRepository).save(captor.capture());
         return captor.getValue();
     }
 
@@ -184,7 +172,7 @@ class PlayerInitializationServiceTest {
             assertThat(player.getCurrentEnemyHp()).isNull();
 
             ArgumentCaptor<PlayerSettings> settings = ArgumentCaptor.forClass(PlayerSettings.class);
-            verify(playerSettingsMapper).insert(settings.capture());
+            verify(playerRepository).saveSettings(settings.capture());
             assertThat(UUID.fromString(settings.getValue().getId()))
                     .hasToString(settings.getValue().getId());
             assertThat(settings.getValue().getPlayerId()).isEqualTo(player.getId());
@@ -244,16 +232,16 @@ class PlayerInitializationServiceTest {
             lenient().when(characterTypes.all()).thenReturn(Map.of("melee", MELEE));
             lenient().when(equipmentSlots.all()).thenReturn(nineSlots());
             doThrow(new DuplicateKeyException("uq_players_user_id"))
-                    .when(playerMapper).insert(any());
+                    .when(playerRepository).save(any());
 
             assertThatThrownBy(() -> service().initialize(USER_ID))
                     .isInstanceOf(DuplicateKeyException.class);
 
             // 既存データを変更しない（手順3以降へ進まない）
-            verify(playerSettingsMapper, never()).insert(any());
-            verify(characterMapper, never()).insert(any());
-            verify(characterEquipSlotMapper, never()).insert(any());
-            verify(inventoryItemMapper, never()).insert(any());
+            verify(playerRepository, never()).saveSettings(any());
+            verify(characterRepository, never()).save(any());
+            verify(characterRepository, never()).saveEquipSlot(any());
+            verify(playerRepository, never()).saveItem(any());
         }
     }
 
@@ -276,7 +264,7 @@ class PlayerInitializationServiceTest {
             String characterId = capturedCharacter().getId();
             ArgumentCaptor<CharacterEquipSlot> slots =
                     ArgumentCaptor.forClass(CharacterEquipSlot.class);
-            verify(characterEquipSlotMapper, times(9)).insert(slots.capture());
+            verify(characterRepository, times(9)).saveEquipSlot(slots.capture());
             assertThat(slots.getAllValues())
                     .extracting(CharacterEquipSlot::getSlot)
                     .containsExactlyInAnyOrderElementsOf(SLOT_IDS);
@@ -304,10 +292,10 @@ class PlayerInitializationServiceTest {
 
             service().initialize(USER_ID);
 
-            verify(inventoryItemMapper, never()).insert(any());
+            verify(playerRepository, never()).saveItem(any());
             // 手順2〜5は実行済み（アイテム0種で中断しない）
-            verify(characterMapper).insert(any());
-            verify(characterEquipSlotMapper, times(9)).insert(any());
+            verify(characterRepository).save(any());
+            verify(characterRepository, times(9)).saveEquipSlot(any());
         }
 
         /**
@@ -321,7 +309,7 @@ class PlayerInitializationServiceTest {
             service().initialize(USER_ID);
 
             ArgumentCaptor<InventoryItem> items = ArgumentCaptor.forClass(InventoryItem.class);
-            verify(inventoryItemMapper).insert(items.capture());
+            verify(playerRepository).saveItem(items.capture());
             InventoryItem item = items.getValue();
             assertThat(UUID.fromString(item.getId())).hasToString(item.getId());
             assertThat(item.getPlayerId()).isEqualTo(capturedPlayer().getId());
@@ -344,7 +332,7 @@ class PlayerInitializationServiceTest {
             service().initialize(USER_ID);
 
             ArgumentCaptor<InventoryItem> items = ArgumentCaptor.forClass(InventoryItem.class);
-            verify(inventoryItemMapper, times(2)).insert(items.capture());
+            verify(playerRepository, times(2)).saveItem(items.capture());
             assertThat(items.getAllValues())
                     .extracting(InventoryItem::getItemId, InventoryItem::getQuantity)
                     .containsExactlyInAnyOrder(tuple("hp_potion", 5), tuple("mp_potion", 2));

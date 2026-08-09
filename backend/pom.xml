@@ -167,7 +167,7 @@
       </plugin>
 
       <!-- 結合テスト（mvn verify の integration-test フェーズ）。@Tag("integration") のみを実行する。
-           クラス名は *IntegrationTest / *MapperTest と単体テストで揃っているため、includes は
+           クラス名は *IntegrationTest / *RepositoryTest と単体テストで揃っているため、includes は
            failsafe 既定の *IT ではなく *Test とし、実際の選別は groups（JUnit 5 のタグ）で行う。
 
            argLine を明示して JaCoCo の javaagent（prepare-agent が argLine へ前置する）を意図的に

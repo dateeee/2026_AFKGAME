@@ -9,7 +9,7 @@
 
 | 項目 | 内容 |
 |------|------|
-| 対象 | `backend/` 配下の全 `.java`、Mapper XML、`application*.yml`、`logback-*.xml`、Flyway SQL |
+| 対象 | `backend/` 配下の全 `.java`、マッピング XML、`application*.yml`、`logback-*.xml`、Flyway SQL |
 | 非対象 | `frontend/`（別書）、`scripts/`・`.claude/scripts/`（開発補助の Python） |
 | 準拠元 | [TERASOLUNA Server Framework for Spring 開発ガイドライン 5.11.0.RELEASE 日本語版](https://github.com/terasolunaorg/terasolunaorg.github.com/tree/master/guideline/5.11.0.RELEASE/ja)（以下「ガイドライン」。HTML は [terasolunaorg.github.io](https://terasolunaorg.github.io/guideline/current/ja/)） |
 

@@ -51,7 +51,7 @@
 | 項目 | 仕様 |
 |------|------|
 | トランザクション境界 | tick処理の Service メソッドに `@Transactional` を付与し、Spring 管理のトランザクションとして開始する |
-| ロック取得 | トランザクション内で対象 `players` 行を `SELECT ... FOR UPDATE` で**行ロック**して読む（MyBatis Mapper が発行する） |
+| ロック取得 | トランザクション内で対象 `players` 行を `SELECT ... FOR UPDATE` で**行ロック**して読む（Repository のマッピング XML が発行する） |
 | ロック競合時 | 待機する（`lock_timeout` 5秒。DataSource の接続プロパティで設定）。超過時は `503` + `BATTLE_TICK_BUSY` |
 | ロック範囲 | `last_tick_at` の読み取り 〜 更新 〜 トランザクションコミットまで |
 

@@ -13,8 +13,8 @@
 | レイヤ | 責務 | 本プロジェクトの実体 |
 |--------|------|-------------------|
 | アプリケーション層 | クライアントとのデータ入出力の制御（リクエストハンドリング、入力データの妥当性チェック、ドメイン層の呼び出し）。**実装はできるだけ薄く保ち、ビジネスルールを含めない** | `afkgame-web` |
-| ドメイン層 | 業務ロジックと、その対象となる業務データ。トランザクション境界を宣言する | `afkgame-domain` の `.model` / `.service` |
-| インフラストラクチャ層 | 業務データの永続化と外部システム連携 | `afkgame-domain` の `.repository`（MyBatis3） |
+| ドメイン層 | 業務ロジックと、その対象となる業務データ。トランザクション境界を宣言する | `afkgame-domain` の `.model` / `.service` と `.repository` の Repository インタフェース |
+| インフラストラクチャ層 | 業務データの永続化と外部システム連携 | `afkgame-domain` の `.repository` のマッピング XML（MyBatis3） |
 
 - ドメイン層の変更でアプリケーション層が変わるのはよいが、**逆は起こしてはならない**
 - ドメイン層の実装は「Entity → データアクセス → Service」の順に作る（ガイドライン 3.2.1）。Entity の起点はテーブル定義書（[phases.md](../phases.md) §3.2.1）
@@ -29,32 +29,37 @@
 | Form | 入出力データの表現と入力チェックルールの宣言（Bean Validation） | `web.resource` の `<用途>Resource`（ガイドライン 2.4.1.1.3 Tip: REST では `Resource` が Form の役割を担い、変換は `HttpMessageConverter` が行う） |
 | Helper | Controller を補助する POJO。作成は任意で、Controller の一部として扱ってよい | **作らない**（ガイドライン 2.4.1.1.3・2.4.1.1.4 との差分）。Resource ↔ ドメイン型の変換は Resource の `static from(...)` に集約する（理由は [web.md](web.md) §3 #3） |
 | Domain Object | 業務データを表すモデル。Entity はこれに含まれる。**状態のみを持つ**（振る舞いは持たせない） | `domain.model` の Entity（[domain.md](domain.md) §2） |
-| Repository | Domain Object の CRUD を担うインタフェース（ドメイン層に定義のみを置く） | **作らない**（§3） |
+| Repository | Domain Object の CRUD を担うインタフェース（ドメイン層に定義のみを置く） | `domain.repository` の `<主体Entity>Repository`（§3・[domain.md](domain.md) §3） |
 | Service | 業務処理の提供とトランザクション境界の宣言。**Form・`HttpServletRequest` など Web の情報を扱わない** | `domain.service`（[domain_service.md](domain_service.md)） |
-| RepositoryImpl | Repository インタフェースの実装 | **なし**（§3） |
-| O/R Mapper | DB と Entity の相互マッピング。MyBatis3 では Mapper インタフェースと `SqlSession` が該当する | `domain.repository` の Mapper インタフェース + XML（[domain.md](domain.md) §3） |
+| RepositoryImpl | Repository インタフェースの実装 | **書かない**（§3）。MyBatis3 が Mapper インタフェースの仕組みで実装を生成するため不要（ガイドライン 3.3.1.1。差分ではない） |
+| O/R Mapper | DB と Entity の相互マッピング。MyBatis3 では Mapper インタフェースと `SqlSession` が該当する | MyBatis3 の `SqlSession` と、Repository と同名・同パッケージのマッピング XML（[domain.md](domain.md) §3） |
 | Integration System Connector | DB 以外のデータストア（KVS・Web サービス・外部システム）との連携 | **なし**（外部連携を持たない。持つことになったら本表へ追記してから作る） |
 
-## 3. Repository を作らない構成
+## 3. Repository でデータアクセスを抽象化する
 
-ガイドラインは Repository インタフェース（ドメイン層）+ RepositoryImpl（インフラストラクチャ層）を推奨するが（2.4.1.2.2）、**データアクセスの抽象化が必要ないなら Repository を作らず、Service から O/R Mapper を直接呼んでよい**とも明記している（2.4.2.2）。本プロジェクトは後者を採る（ガイドラインが認める構成のため差分ではない）。
+ガイドラインは Repository インタフェース（ドメイン層）+ RepositoryImpl（インフラストラクチャ層）でデータアクセスを抽象化する（2.4.1.2.2・3.2.4.2）。**本プロジェクトはこれに従い、Service は Repository インタフェースだけを見る**。Repository を作らず Service から O/R Mapper を直接呼ぶ構成（2.4.2.2）は採らない。
 
-| # | 理由 |
-|---|------|
-| 1 | 永続化技術を差し替える計画がない（PostgreSQL + MyBatis3 固定。[tech_selection.md](../../backlog/java_migration/tech_selection.md) §2） |
-| 2 | SQL は Mapper XML へ外出しされており、Mapper インタフェースが既に永続化の詳細を隠している。抽象化をもう一段重ねても隠れるものが増えない |
-| 3 | シングルプレイ専用の小規模構成で、ガイドラインが Repository の利点として挙げる「複数体制でのデータアクセス共通化」が発生しない |
+抽象化の目的は永続化技術の差し替えではなく、**業務データへのアクセス操作を Repository へ分離して、Service をビジネスルールの実装に専念させること**（ガイドライン 3.2.4.2 Warning）。SQL・永続先の都合は Repository 側へ寄せる。
 
-**コンポーネント間の呼び出し可否**（ガイドライン 2.4.2.2 の表を本プロジェクトの実体名にしたもの）。これが層の依存の正。
+MyBatis3 を使うため **RepositoryImpl は書かない**。Repository インタフェースを Mapper インタフェースの仕組みで作れば実装は自動生成されるので、作るのは次の2つだけ（ガイドライン 3.3.1.1）。
 
-| 呼ぶ側 \ 呼ばれる側 | `web.api`（Controller） | `domain.service`（Service） | `domain.repository`（Mapper） |
+| 作るもの | 実体 | 属する層 |
+|---------|------|---------|
+| Repository インタフェース（メソッド定義） | `domain.repository` の `<主体Entity>Repository` | ドメイン層 |
+| マッピングファイル（SQL と O/R マッピング） | 同名・同パッケージの `<主体Entity>Repository.xml` | インフラストラクチャ層 |
+
+Java のパッケージとしては両者をドメイン層に同居させる（ガイドライン 3.2.4.3 #2。§1 の「モジュールを分けない」と同じ扱い）。作成単位・命名・SQL の書き方は [domain.md](domain.md) §3・§5 が正。
+
+**コンポーネント間の呼び出し可否**（ガイドライン 2.4.2.1 の表を本プロジェクトの実体名にしたもの）。これが層の依存の正。
+
+| 呼ぶ側 \ 呼ばれる側 | `web.api`（Controller） | `domain.service`（Service） | `domain.repository`（Repository） |
 |---|---|---|---|
 | `web.api`（Controller） | × | ○ | **×** |
 | `domain.service`（Service） | × | **△** | ○ |
 
 - **○** 可 / **×** 禁止 / **△** 原則禁止（許す条件と書き方は [domain_service.md](domain_service.md) §2）
-- Controller から Mapper を直接呼ぶと**トランザクション境界が Web 層へ漏れる**。参照系でも Service を通す
-- Mapper から Service を呼ばない（逆流。[common.md](common.md) §2）
+- Controller から Repository を直接呼ぶと**トランザクション境界が Web 層へ漏れる**。参照系でも Service を通す
+- Repository から Service を呼ばない（逆流。[common.md](common.md) §2）
 
 ## 4. モジュール構成の対応
 

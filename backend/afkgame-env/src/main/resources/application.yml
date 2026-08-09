@@ -35,7 +35,7 @@ spring:
       add-mappings: false
 
 mybatis:
-  # Mapper XML は afkgame-domain の Mapper インタフェースと同じパッケージに置く
+  # マッピング XML は afkgame-domain の Repository インタフェースと同じパッケージに置く
   mapper-locations: classpath*:com/afkgame/domain/repository/*.xml
   configuration:
     # DB列の snake_case を Java の camelCase へ対応づける（tech_db.md §2）

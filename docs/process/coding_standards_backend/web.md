@@ -17,7 +17,7 @@
 
 - Web層は「受け取る・検証する・ドメインへ渡す・返す」だけを担う。業務判断は [domain_service.md](domain_service.md) §1 の Service が持つ
 - **View と Helper は持たない**（ガイドライン 2.4.1.1.2・2.4.1.1.3 との差分。[layering.md](layering.md) §2）。描画は SPA（Vue 3）、変換は Resource の `static from(...)`（§3 #3）
-- Controller から Mapper を直接呼ばない（[layering.md](layering.md) §3）。参照系でも Service を通す
+- Controller から Repository を直接呼ばない（[layering.md](layering.md) §3）。参照系でも Service を通す
 - API契約（パス・HTTPメソッド・ステータス・JSON構造）の正は [tech_api.md](../../tech/basic/tech_api.md)・[tech_api_common.md](../../tech/basic/tech_api_common.md)。本書で再掲しない
 
 ## 2. コントローラ（`api`）

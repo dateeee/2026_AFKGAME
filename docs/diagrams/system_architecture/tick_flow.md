@@ -15,7 +15,7 @@ flowchart LR
 
     Service -->|"敵・塔データ取得\nエンカウント抽選"| MasterData["afkgame-domain\nTowers, Enemies (YAMLロード)\n塔・敵マスター"]
 
-    Service -->|"DB読み書き"| Model["Entity + MyBatis3 Mapper\nPlayer, Character\nEquipment, BattleLog"]
+    Service -->|"DB読み書き"| Model["Entity + Repository (MyBatis3)\nPlayer, Character\nEquipment, BattleLog"]
 
     Model <-->|"SQL"| Database["PostgreSQL"]
 

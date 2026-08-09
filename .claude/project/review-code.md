@@ -46,7 +46,7 @@ python .claude/scripts/review_prep.py --dir docs/reviews/frontend-review \
 | 分類 | # | 観点 |
 |------|---|------|
 | コード品質 | 1 | **Spring MVC**: `@RestController`（マッピングアノテーション・パス設計）、コンストラクタ注入によるDI、HTTPステータス（200/201/400/401/404/422）、`@RestControllerAdvice` による例外ハンドリングの一貫性、パス・クエリパラメータの型・バリデーション |
-| コード品質 | 2 | **MyBatis3**: Mapper インタフェースと XML の対応、SQL のパラメータバインド、`@Transactional` によるトランザクション境界、**N+1問題**（Mapper でのJOIN取得・バッチ取得） |
+| コード品質 | 2 | **MyBatis3**: Repository インタフェースとマッピング XML の対応、主体 Entity 単位で作れているか、SQL のパラメータバインド、`@Transactional` によるトランザクション境界、**N+1問題**（Repository でのJOIN取得・バッチ取得） |
 | コード品質 | 3 | **Resource + Bean Validation**: `@NotNull` 等の制約アノテーションの活用、Create/Update/Response の分離、`@Valid` によるコントローラ側の検証 |
 | コード品質 | 4 | **Java一般**: 型の網羅性、命名規則（camelCase）、不要な `Object`、マジックナンバー |
 | セキュリティ | 5 | SQLインジェクション（生SQLのパラメータバインド） |

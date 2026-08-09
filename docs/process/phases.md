@@ -30,7 +30,7 @@ DBスキーマは**テキスト（テーブル定義書）を正、ER図を視�
 |-------|------|---------|
 | `docs/tech/basic/tech_db.md`（索引）+ `tech_db/` | 物理テーブル名・列の物理型・NULL/既定・主キー/外部キー/一意制約・インデックス・外部キー動作・命名規約・導入Phase | **正** |
 | [er_diagram.md](../diagrams/er_diagram.md) + `er_diagram/` | エンティティ・関連・カーディナリティの一望図（属性は視覚化としての再掲） | 視覚化 |
-| `afkgame-domain` の Entity/Mapper + `afkgame-initdb` の Flyway マイグレーション | 実装。製造（§3.5）で定義書どおりに作る | 実装 |
+| `afkgame-domain` の Entity/Repository + `afkgame-initdb` の Flyway マイグレーション | 実装。製造（§3.5）で定義書どおりに作る | 実装 |
 
 - **差し戻しルール**: 詳細設計以降で「定義書にないテーブル・列が要る」と判明したら、実装を先に書かず**基本設計へ戻して定義書とER図を更新**してから進む（§3.4 の分岐一覧と同じ扱い）
 - インデックスは**それを使う検索パターンとセット**で書く。パターンの無いインデックスは作らない
@@ -83,7 +83,7 @@ DBスキーマは**テキスト（テーブル定義書）を正、ER図を視�
 | 目的 | §3.4 のテストを満たす実装をTDDで作る |
 | 主な作業 | backend/（Terasoluna(Spring Boot)）は Red-Green-Refactor を1テストずつ回す。frontend/（Vue 3）は従来どおり実装 |
 | 成果物 | 実装コード一式（テーブルの追加・変更を伴う場合は Flyway マイグレーションを含む） |
-| 規約 | **バックエンドは [coding_standards_backend.md](coding_standards_backend.md) に従う**（層の責務・命名・例外・ログ・Javadoc）。フロントエンドは規約整備まで既存コードの流儀に倣う（§3.2.2）。Entity/Mapper は §3.2.1 のテーブル定義書どおりに作り、定義書に無い列を足さない |
+| 規約 | **バックエンドは [coding_standards_backend.md](coding_standards_backend.md) に従う**（層の責務・命名・例外・ログ・Javadoc）。フロントエンドは規約整備まで既存コードの流儀に倣う（§3.2.2）。Entity/Repository は §3.2.1 のテーブル定義書どおりに作り、定義書に無い列を足さない |
 | 完了基準 | §3.4 の全テストがPASS、`backend-review`・`frontend-review` の指摘対応完了（コーディング規約からの逸脱ゼロ）。テーブル変更がある場合は Flyway マイグレーションが存在し `flyway migrate` が通る |
 | レビュー | `backend-review` スキル、`frontend-review` スキル（仕様↔コードの統合整合は §3.7 の `full-review`） |
 

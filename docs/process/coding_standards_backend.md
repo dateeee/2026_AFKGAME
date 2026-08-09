@@ -13,9 +13,9 @@
 | 分冊 | 内容 | 読むとき |
 |------|------|---------|
 | [basis.md](coding_standards_backend/basis.md) | §1 適用範囲と準拠元 / §2 原則 / §3 適用と検証 | 規約に無い判断をするとき・規約を改訂するとき |
-| [layering.md](coding_standards_backend/layering.md) | §1 3レイヤの定義 / §2 コンポーネントの担当 / §3 Repository を作らない構成と呼び出し可否 / §4 モジュール構成の対応 | 新しいクラスの置き場・呼び出し方向に迷ったとき |
+| [layering.md](coding_standards_backend/layering.md) | §1 3レイヤの定義 / §2 コンポーネントの担当 / §3 Repository による抽象化と呼び出し可否 / §4 モジュール構成の対応 | 新しいクラスの置き場・呼び出し方向に迷ったとき |
 | [common.md](coding_standards_backend/common.md) | §2 モジュールとパッケージ / §3 命名 / §4 全層共通のルール / §5 Java 記述規約 / §6 例外 / §7 ログ / §8 Javadoc / §9 禁止事項 | **常に最初に読む** |
-| [domain.md](coding_standards_backend/domain.md) | `afkgame-domain`: §1 責務 / §2 Entity / §3 Mapper / §4 マスターデータ・乱数 / §5 命名 | Entity・Mapper を書くとき |
+| [domain.md](coding_standards_backend/domain.md) | `afkgame-domain`: §1 責務 / §2 Entity / §3 Repository / §4 マスターデータ・乱数 / §5 命名 | Entity・Repository を書くとき |
 | [domain_service.md](coding_standards_backend/domain_service.md) | `afkgame-domain`: §1 Service の役割 / §2 クラス構成 / §3 作り方 / §4 トランザクション / §5 作成単位 / §6 例外とメッセージ | Service を書くとき |
 | [web.md](coding_standards_backend/web.md) | `afkgame-web`: §1 責務 / §2 コントローラ / §3 Resource / §4 設定・フィルタ / §5 エラー応答 / §6 命名 / §7 セキュリティ | Web層を書くとき |
 | [test.md](coding_standards_backend/test.md) | §1 配置と分離 / §2 記述規約 / §3 再現性 / §4 分担 / §5 ガイドラインとの差分 | テストを書くとき |

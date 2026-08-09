@@ -16,7 +16,7 @@
 | `afkgame-domain` の Service | **厳格に適用**（すべての分岐にテストを先に書く） |
 | `afkgame-domain` のマスターデータ | **厳格に適用** |
 | `afkgame-web` の `@RestController` | MockMvc で先行作成 |
-| Entity/Mapper・Resource | 定義のみのため副次的 |
+| Entity/Repository・Resource | 定義のみのため副次的 |
 | `frontend/` | **対象外**（TDD非適用。`vue-tsc` と結合テストで検証する） |
 
 **適用時期**: TDDは**新規実装から**適用する。Phase 2 の残り（日替わりショップ）と Phase 3〜5 が対象。実装済み（Phase 1〜2）のテストは遡及整備で C1 100% に到達済みのため**書き直さない**。既存機能の修正・リファクタ時は、先にその変更を表すテストを追加してから実装に着手する。
@@ -48,14 +48,14 @@
 
 不足するユーティリティはテストクラス内にローカル定義する（共通ユーティリティは全テスト共通のものだけ）。
 
-### Mapper のテスト基盤（`afkgame-domain`）
+### Repository のテスト基盤（`afkgame-domain`）
 
-Mapper を追加するときは以下を使う（毎回の再調査を避けるための台帳）。
+Repository を追加するときは以下を使う（毎回の再調査を避けるための台帳）。テストクラスは Repository 1つに1つ（`<主体Entity>RepositoryTest`）で、従 Entity 分の観点は `@Nested` で分ける。
 
 | 部品 | パス / 内容 |
 |------|-----------|
-| 基底クラス | `src/test/java/com/afkgame/domain/repository/MapperTestSupport.java`（abstract。`@Tag("integration")` + `@SpringBootTest` + `@AutoConfigureEmbeddedDatabase(ZONKY)` + `@Transactional`。`jdbcTemplate`・時刻固定 `FIXED_NOW`・親レコード生成 `givenUser` / `givenPlayer` / `givenCharacter` / `givenEquipment`・`uuid(prefix)` を提供） |
-| 起動クラス | `src/test/java/com/afkgame/domain/MapperTestApplication.java`（`@SpringBootConfiguration` + `@EnableAutoConfiguration` + `@MapperScan("com.afkgame.domain.repository")`。`afkgame-domain` には本番の起動クラスが無いため、これが最小コンテキストになる） |
+| 基底クラス | `src/test/java/com/afkgame/domain/repository/RepositoryTestSupport.java`（abstract。`@Tag("integration")` + `@SpringBootTest` + `@AutoConfigureEmbeddedDatabase(ZONKY)` + `@Transactional`。`jdbcTemplate`・時刻固定 `FIXED_NOW`・親レコード生成 `givenUser` / `givenPlayer` / `givenCharacter` / `givenEquipment`・`uuid(prefix)` を提供） |
+| 起動クラス | `src/test/java/com/afkgame/domain/RepositoryTestApplication.java`（`@SpringBootConfiguration` + `@EnableAutoConfiguration` + `@MapperScan("com.afkgame.domain.repository")`。`afkgame-domain` には本番の起動クラスが無いため、これが最小コンテキストになる） |
 | pom のテスト依存 | `afkgame-domain/pom.xml` に `spring-boot-starter-test` と `io.zonky.test:embedded-database-spring-test` を追加済み（`afkgame-web` の設定を持ち込まない） |
 
 ## 5. 記述規約

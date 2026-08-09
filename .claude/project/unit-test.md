@@ -8,7 +8,7 @@
 | 項目 | 値 |
 |------|-----|
 | 対象 | `@Tag("unit")` を付けたテスト（`afkgame-env`・`afkgame-domain`・`afkgame-web`）。Service・Controller・フィルタ・マスターデータが主 |
-| 対象外 | `@Tag("integration")`（Mapper・`@SpringBootTest`）。**カバレッジの分母にも入らない**（下記「実行の分離」） |
+| 対象外 | `@Tag("integration")`（Repository・`@SpringBootTest`）。**カバレッジの分母にも入らない**（下記「実行の分離」） |
 | 配置 | 各モジュールの `src/test/java/.../<対象クラス>Test.java` |
 | 設定 | 各モジュールの `pom.xml`（`jacoco-maven-plugin`。branch カバレッジ・しきい値100%を設定） |
 | 実行の分離 | `backend/pom.xml` の surefire が `integration` タグを除外し、failsafe が `integration` タグだけを `integration-test` フェーズで回す。failsafe 側は `argLine` を上書きして JaCoCo agent を外しているため、**C1 は単体テストだけで測られる** |

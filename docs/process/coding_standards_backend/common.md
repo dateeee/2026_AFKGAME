@@ -2,7 +2,7 @@
 
 > [coding_standards_backend.md](../coding_standards_backend.md) の分冊。**どの層を書くときも本書を先に読む**。
 > ベースは TERASOLUNA 開発ガイドライン 5.11.0.RELEASE 日本語版（[basis.md](basis.md) §1）の `ArchitectureInDetail`。本書はそこからの差分だけを持つ。
-> レイヤの定義とコンポーネント間の呼び出し可否は [layering.md](layering.md)、層固有の規約は [domain.md](domain.md)（Entity・Mapper）・[domain_service.md](domain_service.md)（Service）・[web.md](web.md)（Web層）・[test.md](test.md)（テスト）。
+> レイヤの定義とコンポーネント間の呼び出し可否は [layering.md](layering.md)、層固有の規約は [domain.md](domain.md)（Entity・Repository）・[domain_service.md](domain_service.md)（Service）・[web.md](web.md)（Web層）・[test.md](test.md)（テスト）。
 
 ---
 
@@ -13,7 +13,7 @@
 | モジュール | パッケージ | 置くもの | 依存してよい先 |
 |-----------|-----------|---------|--------------|
 | `afkgame-env` | `com.afkgame.env.config` / `.logging` | `@ConfigurationProperties`、ログ基盤 | （なし） |
-| `afkgame-domain` | `com.afkgame.domain.model` / `.repository` / `.service` / `.masterdata` / `.rng` / `.exception` | Entity、Mapper、Service、マスターデータ、RNG、業務例外 | `afkgame-env` |
+| `afkgame-domain` | `com.afkgame.domain.model` / `.repository` / `.service` / `.masterdata` / `.rng` / `.exception` | Entity、Repository、Service、マスターデータ、RNG、業務例外 | `afkgame-env` |
 | `afkgame-web` | `com.afkgame.web.api` / `.resource` / `.config` / `.filter` | `@RestController`、Resource、Security・フィルタ | `afkgame-domain`、`afkgame-env` |
 | `afkgame-initdb` | （Java なし） | Flyway マイグレーション SQL | （なし） |
 
@@ -23,7 +23,7 @@
 
 ## 3. 命名
 
-層に依存する名前（コントローラ・Resource・Entity・Mapper・Service）は [domain.md](domain.md) §5・[web.md](web.md) §6 が正。
+層に依存する名前（コントローラ・Resource・Entity・Repository・Service）は [domain.md](domain.md) §5・[web.md](web.md) §6 が正。
 
 | 対象 | 規約 | 例 |
 |------|------|-----|
@@ -103,7 +103,7 @@
 |------|---------|
 | フィールド `@Autowired`・setter 注入 | コンストラクタ注入（`private final`） |
 | コントローラへの業務ロジック記述 | Service へ集約（[domain_service.md](domain_service.md) §1） |
-| コントローラから Mapper の直接呼び出し | Service を通す（[layering.md](layering.md) §3 の呼び出し可否） |
+| コントローラから Repository の直接呼び出し | Service を通す（[layering.md](layering.md) §3 の呼び出し可否） |
 | SQL の `${}` による文字列組み立て | `#{}` によるパラメータバインド |
 | ワイルドカード import | 個別 import |
 | ゲームバランス数値のハードコード | マスターデータ YAML・`application.yml` |

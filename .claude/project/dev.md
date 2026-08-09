@@ -10,7 +10,7 @@
 
 | 順 | 層 | パス | 規約 |
 |----|----|------|------|
-| 1 | モデル | `afkgame-domain` の Entity + MyBatis3 Mapper | インタフェース + XML |
+| 1 | モデル | `afkgame-domain` の Entity + Repository | インタフェース + マッピング XML（MyBatis3。RepositoryImpl は書かない） |
 | 2 | スキーマ | `afkgame-web` の Resource | Bean Validation（Jakarta）でフィールド制約 |
 | 3 | サービス | `afkgame-domain` の Service | ビジネスロジックを集約 |
 | 4 | コントローラ | `afkgame-web` の `@RestController` | Spring MVC（マッピング・バリデーション） |

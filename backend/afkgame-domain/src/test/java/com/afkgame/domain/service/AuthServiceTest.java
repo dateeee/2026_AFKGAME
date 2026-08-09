@@ -27,8 +27,8 @@ import org.springframework.dao.DuplicateKeyException;
 import com.afkgame.domain.exception.AppException;
 import com.afkgame.domain.model.RefreshToken;
 import com.afkgame.domain.model.User;
-import com.afkgame.domain.repository.RefreshTokenMapper;
-import com.afkgame.domain.repository.UserMapper;
+import com.afkgame.domain.repository.RefreshTokenRepository;
+import com.afkgame.domain.repository.UserRepository;
 import com.afkgame.env.config.AuthProperties;
 
 /**
@@ -57,10 +57,10 @@ class AuthServiceTest {
             Duration.ofDays(30));
 
     @Mock
-    private UserMapper userMapper;
+    private UserRepository userRepository;
 
     @Mock
-    private RefreshTokenMapper refreshTokenMapper;
+    private RefreshTokenRepository refreshTokenRepository;
 
     @Mock
     private PlayerInitializationService playerInitializationService;
@@ -75,7 +75,7 @@ class AuthServiceTest {
 
     private AuthService authService() {
         if (authService == null) {
-            authService = new AuthService(userMapper, refreshTokenMapper,
+            authService = new AuthService(userRepository, refreshTokenRepository,
                     new JwtService(AUTH_PROPERTIES, CLOCK), AUTH_PROPERTIES,
                     playerInitializationService, CLOCK);
         }
@@ -111,7 +111,7 @@ class AuthServiceTest {
             AuthResult result = authService().createGuest();
 
             ArgumentCaptor<User> saved = ArgumentCaptor.forClass(User.class);
-            verify(userMapper).insert(saved.capture());
+            verify(userRepository).save(saved.capture());
             // ID は guest_<UUID>（tech_auth.md §2）
             assertThat(saved.getValue().getId()).startsWith("guest_");
             assertThat(saved.getValue().isGuest()).isTrue();
@@ -136,13 +136,13 @@ class AuthServiceTest {
             AuthResult result = authService().createGuest();
 
             ArgumentCaptor<User> saved = ArgumentCaptor.forClass(User.class);
-            verify(userMapper).insert(saved.capture());
+            verify(userRepository).save(saved.capture());
 
             // 手順1（ユーザー）→ 手順2〜6（初期化）→ 手順7（トークン）の順で進む
-            InOrder inOrder = inOrder(userMapper, playerInitializationService, refreshTokenMapper);
-            inOrder.verify(userMapper).insert(any(User.class));
+            InOrder inOrder = inOrder(userRepository, playerInitializationService, refreshTokenRepository);
+            inOrder.verify(userRepository).save(any(User.class));
             inOrder.verify(playerInitializationService).initialize(saved.getValue().getId());
-            inOrder.verify(refreshTokenMapper).insert(any(RefreshToken.class));
+            inOrder.verify(refreshTokenRepository).save(any(RefreshToken.class));
 
             assertThat(result.accessToken()).isNotBlank();
             assertThat(result.refreshToken()).isNotBlank();
@@ -163,7 +163,7 @@ class AuthServiceTest {
             assertThatThrownBy(() -> authService().createGuest())
                     .isInstanceOf(DuplicateKeyException.class);
 
-            verify(refreshTokenMapper, never()).insert(any());
+            verify(refreshTokenRepository, never()).save(any());
         }
 
         @Test
@@ -171,7 +171,7 @@ class AuthServiceTest {
             AuthResult result = authService().createGuest();
 
             ArgumentCaptor<RefreshToken> saved = ArgumentCaptor.forClass(RefreshToken.class);
-            verify(refreshTokenMapper).insert(saved.capture());
+            verify(refreshTokenRepository).save(saved.capture());
             assertThat(saved.getValue().getTokenHash())
                     .isNotEqualTo(result.refreshToken())
                     .hasSize(64);
@@ -187,12 +187,12 @@ class AuthServiceTest {
     @DisplayName("リフレッシュ")
     class TestRefresh {
 
-        /** 生トークンを発行し、それに対応する保存済みレコードを mapper に仕込む。 */
+        /** 生トークンを発行し、それに対応する保存済みレコードを Repository に仕込む。 */
         private String issueAndStore() {
             AuthResult issued = authService().createGuest();
             ArgumentCaptor<RefreshToken> saved = ArgumentCaptor.forClass(RefreshToken.class);
-            verify(refreshTokenMapper).insert(saved.capture());
-            when(refreshTokenMapper.selectByTokenHash(saved.getValue().getTokenHash()))
+            verify(refreshTokenRepository).save(saved.capture());
+            when(refreshTokenRepository.findByTokenHash(saved.getValue().getTokenHash()))
                     .thenReturn(storedToken(saved.getValue().getTokenHash()));
             return issued.refreshToken();
         }
@@ -200,11 +200,11 @@ class AuthServiceTest {
         @Test
         void test_正常時は旧トークンを失効させ新しいペアを返す() {
             String rawToken = issueAndStore();
-            when(userMapper.selectById("guest_001")).thenReturn(storedUser());
+            when(userRepository.findById("guest_001")).thenReturn(storedUser());
 
             AuthResult result = authService().refresh(rawToken);
 
-            verify(refreshTokenMapper).revokeById(1);
+            verify(refreshTokenRepository).updateRevokedById(1);
             assertThat(result.refreshToken()).isNotEqualTo(rawToken);
             assertThat(result.accessToken()).isNotBlank();
             assertThat(result.user().getId()).isEqualTo("guest_001");
@@ -212,7 +212,7 @@ class AuthServiceTest {
 
         @Test
         void test_該当レコードが無ければAUTH_REFRESH_INVALIDになる() {
-            when(refreshTokenMapper.selectByTokenHash(any())).thenReturn(null);
+            when(refreshTokenRepository.findByTokenHash(any())).thenReturn(null);
 
             assertThatThrownBy(() -> authService().refresh("unknown-token"))
                     .isInstanceOf(AppException.class)
@@ -224,35 +224,35 @@ class AuthServiceTest {
         void test_revoked済みの再利用は全トークンを失効させる() {
             RefreshToken revoked = storedToken("dummy-hash");
             revoked.setRevoked(true);
-            when(refreshTokenMapper.selectByTokenHash(any())).thenReturn(revoked);
+            when(refreshTokenRepository.findByTokenHash(any())).thenReturn(revoked);
 
             assertThatThrownBy(() -> authService().refresh("reused-token"))
                     .isInstanceOf(AppException.class)
                     .extracting("code")
                     .isEqualTo("AUTH_REFRESH_INVALID");
 
-            verify(refreshTokenMapper).revokeAllByUserId("guest_001");
-            verify(refreshTokenMapper, never()).revokeById(any());
+            verify(refreshTokenRepository).updateRevokedByUserId("guest_001");
+            verify(refreshTokenRepository, never()).updateRevokedById(any());
         }
 
         @Test
         void test_期限切れはAUTH_REFRESH_INVALIDになる() {
             RefreshToken expired = storedToken("dummy-hash");
             expired.setExpiresAt(Instant.now().minus(Duration.ofSeconds(1)));
-            when(refreshTokenMapper.selectByTokenHash(any())).thenReturn(expired);
+            when(refreshTokenRepository.findByTokenHash(any())).thenReturn(expired);
 
             assertThatThrownBy(() -> authService().refresh("expired-token"))
                     .isInstanceOf(AppException.class)
                     .extracting("code")
                     .isEqualTo("AUTH_REFRESH_INVALID");
 
-            verify(refreshTokenMapper, never()).revokeAllByUserId(any());
+            verify(refreshTokenRepository, never()).updateRevokedByUserId(any());
         }
 
         @Test
         void test_トークンは正当でもユーザーが居なければAUTH_REFRESH_INVALIDになる() {
-            when(refreshTokenMapper.selectByTokenHash(any())).thenReturn(storedToken("dummy-hash"));
-            when(userMapper.selectById("guest_001")).thenReturn(null);
+            when(refreshTokenRepository.findByTokenHash(any())).thenReturn(storedToken("dummy-hash"));
+            when(userRepository.findById("guest_001")).thenReturn(null);
 
             assertThatThrownBy(() -> authService().refresh("orphan-token"))
                     .isInstanceOf(AppException.class)
@@ -267,14 +267,14 @@ class AuthServiceTest {
 
         @Test
         void test_存在すればユーザーを返す() {
-            when(userMapper.selectById("guest_001")).thenReturn(storedUser());
+            when(userRepository.findById("guest_001")).thenReturn(storedUser());
 
             assertThat(authService().findAuthenticatedUser("guest_001").getId()).isEqualTo("guest_001");
         }
 
         @Test
         void test_存在しなければAUTH_USER_NOT_FOUNDになる() {
-            when(userMapper.selectById("guest_404")).thenReturn(null);
+            when(userRepository.findById("guest_404")).thenReturn(null);
 
             assertThatThrownBy(() -> authService().findAuthenticatedUser("guest_404"))
                     .isInstanceOf(AppException.class)

@@ -34,7 +34,7 @@
 | モジュール | パッケージ | 内容 |
 |------|------|------|
 | `afkgame-domain` | `com.afkgame.domain.model` | Entity |
-| | `.repository` | MyBatis3 Mapper インタフェース + 同名の Mapper XML |
+| | `.repository` | Repository インタフェース + 同名のマッピング XML（MyBatis3） |
 | | `.service` | ビジネスロジック |
 | | `.masterdata` | マスターデータの `record` + YAML ローダ（YAML 本体は `src/main/resources/masterdata/`） |
 | | `.config.app` | `AfkgameDomainConfig`・`AfkgameInfraConfig`（`@MapperScan` + `SqlSessionFactoryBean`） |

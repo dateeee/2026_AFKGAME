@@ -28,7 +28,7 @@
 | 一意制約 | `uq_<テーブル名>_<列>_<列>` | `uq_tower_clear_records_player_tower` |
 | モデルクラス | テーブル名の単数形アッパーキャメル | `players` → `Player` |
 
-API・Resource層は camelCase（Jackson）で、DB列名の snake_case との変換は MyBatis3 Mapper（`mapUnderscoreToCamelCase`）が担う。DB列名に camelCase を持ち込まない。
+API・Resource層は camelCase（Jackson）で、DB列名の snake_case との変換は MyBatis3（`mapUnderscoreToCamelCase`）が担う。DB列名に camelCase を持ち込まない。
 
 ## 3. 型マッピング
 

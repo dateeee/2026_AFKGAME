@@ -19,8 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.afkgame.domain.exception.AppException;
 import com.afkgame.domain.model.RefreshToken;
 import com.afkgame.domain.model.User;
-import com.afkgame.domain.repository.RefreshTokenMapper;
-import com.afkgame.domain.repository.UserMapper;
+import com.afkgame.domain.repository.RefreshTokenRepository;
+import com.afkgame.domain.repository.UserRepository;
 import com.afkgame.env.config.AuthProperties;
 
 /**
@@ -47,18 +47,18 @@ public class AuthService {
     /** トークン生成用の暗号乱数。ゲーム乱数（{@code RandomFactory}）とは用途が異なり、共有してよい。 */
     private static final SecureRandom RANDOM = new SecureRandom();
 
-    private final UserMapper userMapper;
-    private final RefreshTokenMapper refreshTokenMapper;
+    private final UserRepository userRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final JwtService jwtService;
     private final Duration refreshTokenExpire;
     private final PlayerInitializationService playerInitializationService;
     private final Clock clock;
 
-    public AuthService(UserMapper userMapper, RefreshTokenMapper refreshTokenMapper,
+    public AuthService(UserRepository userRepository, RefreshTokenRepository refreshTokenRepository,
             JwtService jwtService, AuthProperties authProperties,
             PlayerInitializationService playerInitializationService, Clock clock) {
-        this.userMapper = userMapper;
-        this.refreshTokenMapper = refreshTokenMapper;
+        this.userRepository = userRepository;
+        this.refreshTokenRepository = refreshTokenRepository;
         this.jwtService = jwtService;
         this.refreshTokenExpire = authProperties.refreshTokenExpire();
         this.playerInitializationService = playerInitializationService;
@@ -85,7 +85,7 @@ public class AuthService {
         user.setEmailVerified(false);
         user.setCreatedAt(now);
         user.setLastLoginAt(now);
-        userMapper.insert(user);
+        userRepository.save(user);
 
         playerInitializationService.initialize(user.getId());
 
@@ -106,14 +106,14 @@ public class AuthService {
      */
     @Transactional(noRollbackFor = AppException.class)
     public AuthResult refresh(String rawRefreshToken) {
-        RefreshToken stored = refreshTokenMapper.selectByTokenHash(hashToken(rawRefreshToken));
+        RefreshToken stored = refreshTokenRepository.findByTokenHash(hashToken(rawRefreshToken));
         if (stored == null) {
             throw refreshInvalid("Invalid refresh token");
         }
 
         if (stored.isRevoked()) {
             logger.warn("不正リフレッシュトークン検知 user_id={}", stored.getUserId());
-            refreshTokenMapper.revokeAllByUserId(stored.getUserId());
+            refreshTokenRepository.updateRevokedByUserId(stored.getUserId());
             throw refreshInvalid("Refresh token reuse detected");
         }
 
@@ -121,9 +121,9 @@ public class AuthService {
             throw refreshInvalid("Refresh token expired");
         }
 
-        refreshTokenMapper.revokeById(stored.getId());
+        refreshTokenRepository.updateRevokedById(stored.getId());
 
-        User user = userMapper.selectById(stored.getUserId());
+        User user = userRepository.findById(stored.getUserId());
         if (user == null) {
             throw refreshInvalid("User not found");
         }
@@ -138,7 +138,7 @@ public class AuthService {
      * @throws AppException {@code AUTH_USER_NOT_FOUND}（トークンは正当だがユーザーが存在しない）
      */
     public User findAuthenticatedUser(String userId) {
-        User user = userMapper.selectById(userId);
+        User user = userRepository.findById(userId);
         if (user == null) {
             logger.warn("認証失敗 reason=user_not_found user_id={}", userId);
             throw new AppException("AUTH_USER_NOT_FOUND", "User not found", 401);
@@ -161,7 +161,7 @@ public class AuthService {
         record.setExpiresAt(now.plus(refreshTokenExpire));
         record.setRevoked(false);
         record.setCreatedAt(now);
-        refreshTokenMapper.insert(record);
+        refreshTokenRepository.save(record);
 
         return new AuthResult(user, jwtService.createAccessToken(user.getId(), user.isGuest()), rawRefreshToken);
     }

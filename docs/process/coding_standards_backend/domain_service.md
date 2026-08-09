@@ -1,6 +1,6 @@
 # バックエンドコーディング規約 — ドメイン層の Service（`afkgame-domain`）
 
-> [coding_standards_backend.md](../coding_standards_backend.md) の分冊。全層共通の規約は [common.md](common.md) が先、Entity・Mapper は [domain.md](domain.md)、層の位置づけは [layering.md](layering.md)。
+> [coding_standards_backend.md](../coding_standards_backend.md) の分冊。全層共通の規約は [common.md](common.md) が先、Entity・Repository は [domain.md](domain.md)、層の位置づけは [layering.md](layering.md)。
 > ベースはガイドライン `ImplementationAtEachLayer/DomainLayer`（3.2.5〜3.2.7）。本書はそこからの差分だけを持つ（準拠元は [basis.md](basis.md) §1）。
 
 ---
@@ -11,7 +11,7 @@ Service は次の2つを担う（ガイドライン 3.2.5.1）。
 
 | # | 役割 |
 |---|------|
-| 1 | **Controller に業務ロジックを提供する。** 業務データの参照・更新は Mapper へ委譲し、Service は**ビジネスルールに関わる処理に専念する** |
+| 1 | **Controller に業務ロジックを提供する。** 業務データの参照・更新は Repository へ委譲し、Service は**ビジネスルールに関わる処理に専念する** |
 | 2 | **トランザクション境界を宣言する。** 境界は原則 Service に置く（§4）。Web 層に境界があるのは業務ロジックの抽出漏れの兆候なので、見直す |
 
 **Controller と Service の責任分界点**（ガイドライン 3.2.5.1 の Note）。
@@ -56,9 +56,9 @@ Service は次の2つを担う（ガイドライン 3.2.5.1）。
 
 | # | 規約 |
 |---|------|
-| 1 | 境界は **Service の public メソッド**。Mapper・Controller・フィルタに `@Transactional` を付けない |
+| 1 | 境界は **Service の public メソッド**。Repository・Controller・フィルタに `@Transactional` を付けない |
 | 2 | **クラスではなくメソッドに付ける。** ガイドラインはクラス既定 + メソッド上書きを例示するが、本プロジェクトは境界を持つメソッドが限られるため、**付いているメソッドだけが境界**と読める形にする |
-| 3 | 複数 Mapper をまたぐ更新は1メソッドに閉じる |
+| 3 | 複数 Repository をまたぐ更新は1メソッドに閉じる |
 | 4 | 参照だけのメソッドに境界が要るときは `@Transactional(readOnly = true)`（ガイドライン 3.2.5.4.2） |
 | 5 | 呼び出し元の境界に必ず含めたい共有 Service のメソッドは `Propagation.MANDATORY`（境界が無ければ例外になり、付け忘れに気づける） |
 | 6 | 失敗時にロールバックさせたくない副作用（不正検知による失効など）は `@Transactional(noRollbackFor = ...)` を明示し、理由を Javadoc に書く |
