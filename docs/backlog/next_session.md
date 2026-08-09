@@ -3,11 +3,11 @@
 > **使い方**: 新セッションの最初のメッセージで `/next` と送る（または §1 のコードブロックを貼り付ける）。**着手前に §0 を読む**。
 > 本ファイルは**ポインタ専用**。Phase 進捗の正は [development_process.md](../process/development_process.md) §5、書式の正は [.claude/project/next.md](../../.claude/project/next.md)、worktree 運用の正は [worktree_guide.md](../process/worktree_guide.md)。
 
-最終更新: 2026-08-09 / main `a32b0b8`。`cf5417c` で **移行 STEP 2R-F（実行・デプロイの切替）を完了し、これで STEP 2R が完了**した。war を Tomcat 11.0.24 へ配備して実機で通っている — `GET /health` が 200（`db:ok`）、`POST /api/auth/guest` が 200 でトークンペアを返す。**コンテキストパスは ROOT に確定**（`webapps/ROOT.war`。`/health`・`/api/**` を仕様どおりの絶対パスで受けるため、Vite の `server.proxy` に `rewrite` は不要）。E2E ハーネス（`serve-backend.mjs`）は専用 `CATALINA_BASE` を組み立てて :8100 で war を起動する方式へ書き直した（`java -jar` は 2R-B で実行可能 jar が消えており動かない状態だった）。DB操作は `docker compose exec` ではなく `docker exec afkgame-postgres` を使う（compose のプロジェクト名が cwd 由来で、worktree からは起動中コンテナを引けないため）。`mvn clean verify` は exit 0（単体89件・統合45件が緑、JaCoCo branch は domain・web とも check 通過）。詳細は [changelog.md](../changelog.md) の 2026-08-09 先頭行。**Tomcat 11.0.24 は `%LOCALAPPDATA%\Programs\apache-tomcat-11.0.24`**（`CATALINA_HOME` はユーザー環境変数へ設定済みだが**既存シェルには未反映**）。**起動には `SPRING_PROFILES_ACTIVE`（`local` / `production`）が必須**（未設定なら落ちる）。
+最終更新: 2026-08-09 / main `0c3e1a8`。`cf5417c` で **移行 STEP 2R-F（実行・デプロイの切替）を完了し、これで STEP 2R が完了**した。war を Tomcat 11.0.24 へ配備して実機で通っている — `GET /health` が 200（`db:ok`）、`POST /api/auth/guest` が 200 でトークンペアを返す。**コンテキストパスは ROOT に確定**（`webapps/ROOT.war`。`/health`・`/api/**` を仕様どおりの絶対パスで受けるため、Vite の `server.proxy` に `rewrite` は不要）。E2E ハーネス（`serve-backend.mjs`）は専用 `CATALINA_BASE` を組み立てて :8100 で war を起動する方式へ書き直した（`java -jar` は 2R-B で実行可能 jar が消えており動かない状態だった）。DB操作は `docker compose exec` ではなく `docker exec afkgame-postgres` を使う（compose のプロジェクト名が cwd 由来で、worktree からは起動中コンテナを引けないため）。`mvn clean verify` は exit 0（単体89件・統合45件が緑、JaCoCo branch は domain・web とも check 通過）。詳細は [changelog.md](../changelog.md) の 2026-08-09 先頭行。**Tomcat 11.0.24 は `%LOCALAPPDATA%\Programs\apache-tomcat-11.0.24`**（`CATALINA_HOME` はユーザー環境変数へ設定済みだが**既存シェルには未反映**）。**起動には `SPRING_PROFILES_ACTIVE`（`local` / `production`）が必須**（未設定なら落ちる）。
 
 **STEP 2R が完了したので backend の Phase 機能へ着手してよい**（2R 完了までの着手禁止は解除）。以後の移行順序は **3-A-2（register / login / logout）→ 3-A-3 → 3-B（Phase 1: game / battle / tower）→ 4（Phase 2）→ 5（Phase 3）→ 6（切替と後始末）**。順序の正は [carryover_notes.md](carryover_notes.md) §1、手順・進捗の正は [java_migration.md](java_migration.md)（索引 + `java_migration/` 3分冊）。
 
-**auth の分岐一覧は「ゲスト作成」しか無い**（`tech_auth.md` §8.3 の12件は初期化の観点のみ）。register / login / logout そのものの分岐（メール重複・パスワード不一致・失効トークン等）は未作成で、**3-A-2 は `test-list` ではなく `detail-design` から始める**（tower も同じ欠落。`carryover_notes.md` §1）。
+**register / login / logout の分岐一覧は揃った**（`0c3e1a8`。[tech_auth_account.md](../tech/detail/tech_auth_account.md) §11・§13・§15 に38件）。3-A-2 は `test-list` から始められる。**tower は `tech_tower.md` が無く分岐一覧も未作成**なので、3-B は引き続き `detail-design` から始める（`carryover_notes.md` §1）。
 
 **Phase 1〜3 の機能はどの言語でも未実装の期間**に入っている（Python 削除を STEP 3〜5 より先に実施したため）。E2E はハーネスと `GET /health` まで疎通済みだが、テスト本体は STEP 5 完了まで赤が正常。
 
@@ -29,10 +29,10 @@ worktree を使う複数セッションが同時に走る前提。**着手状態
 ## 1. 次回（コピペ用）
 
 ```
-/detail-design 移行 STEP 3-A-2 の前工程: register / login / logout の処理フローと分岐一覧を作る
-完了条件: ①`docs/tech/detail/tech_auth_account.md`（新規）へ3操作の処理フローと分岐一覧を書く（**`tech_auth.md` へは追記しない** — 残り698字・§8 が既に H2 上限超過。`tech_forge.md` + `tech_forge_*.md` の分割に倣う）②分岐は最低でも「メール形式不正・メール重複・パスワード強度・BCrypt 検証失敗・存在しないメール・ゲストアカウントでのログイン試行・リフレッシュトークンの失効/不在/二重失効」を含める③`python scripts/check_branch_list.py` が exit 0（現状29件・違反なしなので、増分だけ見ればよい）④`tech_auth.md` §8 冒頭・[tech_spec.md](../tech/tech_spec.md)・[README.md](../../README.md) の索引から新ファイルへ到達できる（`check_docs.py` の索引到達性）⑤`check_doc_size.py`・`check_docs.py` とも違反0
-参照: 分岐一覧の書式と初期化の正は [tech_auth.md](../tech/detail/tech_auth.md) §8.2・§8.3（**register は手順2以降を再利用**＝§8 冒頭）、API契約とエラーコードは [tech_api.md](../tech/basic/tech_api.md) の auth 節、トークン仕様は同 §1・§4。`BCryptPasswordEncoder` strength 12 と `SecurityConfig` の認証不要パス追加は [carryover_notes.md](carryover_notes.md) §1、`uq_players_user_id` 違反の扱い（業務エラーコードを新設しない）は同 §1
-前提: main の最新 `a32b0b8`（STEP 2R 完了は `cf5417c`。war + Tomcat で `/health`・ゲスト認証とも 200）。**`docs/tech/**` を編集するので worktree を作る**: `python scripts/worktree.py add auth-3a2-detail` → `EnterWorktree` に `path` で移動（領域は docs/tech）。**外部ツール・ランタイムは不要**（仕様書のみ。JDK・Maven・Tomcat・Docker は使わない）。`docs/backlog/open_specs.md` は**不在＝未確定ゼロ**
+/test-list 移行 STEP 3-A-2: register / login / logout の分岐一覧38件を失敗するテスト（Red）へ展開する
+完了条件: ①`tech_auth_account.md` §11（登録13件）・§13（ログイン13件）・§15（ログアウト12件）の全38件にテストを対応づけ、`afkgame-domain` の `AuthServiceTest`（サービス層の分岐）と `afkgame-web` の `AuthApiTest`（HTTPステータス・エラーコード・バリデーション）へ振り分ける②各テストの Javadoc へ `分岐: tech_auth_account.md §11 #1` 形式のマーカーを書き、`python scripts/check_branch_list.py` が exit 0（マーカーと分岐一覧の対応照合が通る）③`cd backend && mvn test` が **Red で落ちること**を確認する（未実装メソッドの呼び出しのため。出力の受け取り方は [commands.md](../../.claude/project/commands.md) §2 — ファイルへ落として cp932 で読む）④**Red と Green は同じ単位で積む**（[test-list.md](../../.claude/project/test-list.md) §7）ため、本セッションでは製造へ進まない
+参照: 分岐一覧の正は [tech_auth_account.md](../tech/detail/tech_auth_account.md) §11・§13・§15、処理フローは同 §10・§12・§14、3操作に共通する規約（bcrypt strength 12・トークン生成・エラーコード）は同 §9。テストの配置・分離・記述規約は [coding_standards_backend/test.md](../process/coding_standards_backend/test.md) §1・§2。既存の書き方は `AuthServiceTest`（ゲスト作成・refresh）と `AuthApiTest` に倣う
+前提: main の最新 `0c3e1a8`（3-A-2 の詳細設計が完了。`check_branch_list.py` は32セクション・WARN 0）。**`backend/` を編集するので worktree を作る**: `python scripts/worktree.py add auth-3a2-testlist` → `EnterWorktree` に `path` で移動（領域は backend）。**外部ツールは新規シェルで実測済み（2026-08-09）**: Maven 3.9.11・JDK 17.0.20（Adoptium）・Docker 29.6.2 はいずれも PATH 反映済みでそのまま呼べる（`CATALINA_HOME` は新規シェルへ未反映だが、本タスクに Tomcat は不要）。`docs/backlog/open_specs.md` は**不在＝未確定ゼロ**
 ```
 
 ## 2. 候補キュー（最大5行・優先順）
@@ -41,9 +41,9 @@ worktree を使う複数セッションが同時に走る前提。**着手状態
 
 | 優先 | タスク | 前提 | wt 名 / 領域 | 工程スキル |
 |------|-------|------|------------|-----------|
-| 1 | **移行 STEP 3-A-2 のテストリスト作成**。§1 で作った register / login / logout の分岐一覧を JUnit の Red へ展開する。`afkgame-web` の `AuthApi` と `afkgame-domain` の `AuthService` が対象。**同一モジュールに Red が複数並ぶと片方だけでは Green を検証できない**（[test-list.md](../../.claude/project/test-list.md) §7）ので、Red と Green は同じ単位で積む | **§1 の分岐一覧が完成してから** | `auth-3a2-testlist`<br>backend | `test-list` |
+| 1 | **移行 STEP 3-A-2 の製造**。§1 で積んだ Red を Green にする。`afkgame-domain` の `AuthService` へ register / login / logout を実装し、`afkgame-web` の `AuthApi` へ3エンドポイントと Resource（Bean Validation）を足す。`BCryptPasswordEncoder`（strength 12）の Bean 定義と `SecurityConfig` の認証不要パス追加（register・login。**logout は認証必須**）も本セグメント | **§1 のテストリスト（Red）が積まれてから** | `auth-3a2-dev`<br>backend | `dev` |
 | 2 | **`afkgame-env` を JaCoCo の分岐100%ゲートへ載せる**。`AfkgameSettingsConfig` のプロファイル検査（4分岐）に単体テストが無く 100% を満たせないため、env だけゲート対象外にしてある。テストを足して `afkgame-env/pom.xml` へ jacoco プラグインを宣言する | なし（2R-F 完了で backend が空いた） | `env-jacoco`<br>backend | `unit-test` |
 | 3 | **`scripts/check_java_conventions.py` の常設化**。Java 規約10項目を機械判定できず `backend-review` で毎回使い捨てを書いている（項目と背景は [carryover_notes.md](carryover_notes.md) §3）。回帰テストを `scripts/tests/` へ追加し [commands.md](../../.claude/project/commands.md) §1 へ登録する | なし | `java-conventions`<br>scripts | `dev` |
 
-- **キューが空いたら戻す行**: 移行 STEP 3-A-2 の製造（`dev`。上記1の後）、3-A-3（link-account / verify-email / password-reset）。順序の正は [carryover_notes.md](carryover_notes.md) §1
+- **キューが空いたら戻す行**: 移行 STEP 3-A-3（link-account / verify-email / password-reset。**確認メールの送信手段（SMTP設定・本文・再送）はここで確定する** — 3-A-2 では送信失敗を登録の成否へ反映しない前提だけを置いた。`tech_auth_account.md` §10 手順9）。順序の正は [carryover_notes.md](carryover_notes.md) §1
 - **Phase 4 は Java 移行が終わるまで本キューから外している**（2026-08-09・ユーザー判断）。再開時に戻す3件 — ①**③限界突破の詳細設計**: `POST /api/character/limit-break` を `tech_limitbreak.md`（新規）へ。素材＝同一 `master_id` のキャラ1体で `limit_break` +1（上限5回）。起点は `master/character.md` §8・§8.1、可否は `tech_state.md` §4、`canLimitBreak` は `tech_scout.md` §6。`characters.master_id` は Phase 4 で追加する未実装列 ②**④ダンジョン3（塔6〜8）のマスターデータ**: `docs/data/towers/` へ3ファイル追加し `TOWERS_OVERVIEW.md`・`master_data.md` の索引を更新（書式は `009_黄昏の塔.md` に倣う） ③**テストリスト作成**: 拠点・施設・鍛冶屋（`tech_base.md` §7・§8 の36件 + `tech_forge_*` の74件）。**詳細設計は拠点・施設・①酒場スカウト・②鍛冶屋まで完了済み**
