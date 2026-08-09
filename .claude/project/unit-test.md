@@ -24,6 +24,7 @@
 | クラスを絞る | `mvn test -Dtest=<対象クラス>Test`（速い確認用。HTML レポートも C1 判定も行われない） |
 | 結合テストも含めて回す | `cd backend && mvn verify` |
 | 完了判定 | `cd backend && mvn verify`（JaCoCo の branch カバレッジしきい値100%で判定。exit 0 が条件） |
+| 未達分岐の特定 | `python scripts/report_java_tests.py --coverage --uncovered`（モジュール別のC1と、分岐が残る `<ソース>:<行>  通った数/全分岐数` の一覧。HTMLレポートを開かずに作業リストが得られる） |
 
 ## 3. 固有の分岐観点
 
