@@ -112,7 +112,7 @@ docs/data/towers/
 3. **節番号は維持**する（`§2.4` を子ファイル側でも `2.4` のまま使う）。既存のリンク・アンカー・レビュー指摘の参照が生き残る
 4. **変更履歴は親にも子にも置かない**（§5.1）。分割した旨は `changelog.md` へ1行記録する
 5. 子ファイルのヘッダに **親へのリンク**と担当節を明記する
-6. `README.md` のドキュメント索引と、`.claude/project/**` の対象ファイル一覧を更新する
+6. [docs/INDEX.md](../INDEX.md) と、`.claude/project/**` の対象ファイル一覧を更新する
 7. リンク切れがないことを確認する（相対パスは移動先を基準に張り直す）
 8. **`docs/tech/detail/` の子ファイル名は `tech_*.md` にする**。`check_branch_list.py` の走査が `TECH_DIR.rglob("tech_*.md")` のため、外れた子ファイルの分岐一覧は照合から黙って落ちる（`tech_forge.md` + `tech_forge_{enhance,craft,disassemble}.md` が実例）
 
@@ -141,7 +141,7 @@ python scripts/check_docs.py              # リンク・索引到達性・曖昧
 
 ## 8. 分割実績（2026-08-02 完了）
 
-制定時に上限を超えていた8ファイル（最大は `game_spec.md` 35,042字）は、すべて索引 + 個別ファイルへ分割済み。索引と子ディレクトリの対応は `README.md` のドキュメント索引が正、分割前後の内訳は `changelog.md` 2026-08-02 に記録。
+制定時に上限を超えていた8ファイル（最大は `game_spec.md` 35,042字）は、すべて索引 + 個別ファイルへ分割済み。索引と子ディレクトリの対応は [docs/INDEX.md](../INDEX.md) が正、分割前後の内訳は `changelog.md` 2026-08-02 に記録。
 
 - 全ファイルが上限内（`python scripts/check_doc_size.py` が exit 0）
 - 索引ファイル・子ファイルとも節番号を維持している（§6「分割時の必須事項」）

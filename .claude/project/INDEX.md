@@ -57,6 +57,7 @@
 |---------|-------|------|
 | [review-procedure.md](../references/review-procedure.md) | レビュー系5スキル | レビューの共通手順・コスト規律 |
 | [review-format.md](../references/review-format.md) | レビュー系5スキル | レビュー結果の出力形式 |
-| [coding-standards-backend.md](../references/coding-standards-backend.md) | `dev`、`backend-review`、`unit-test` | Java 実装のコーディング規約チェックリスト。**正は [docs/process/coding_standards_backend.md](../../docs/process/coding_standards_backend.md)**（本書はその派生） |
+| [coding-standards-backend.md](../references/coding-standards-backend.md) | `dev`、`backend-review`、`unit-test` | Java 実装の規約要約（§1〜§4）。**正は [docs/process/coding_standards_backend.md](../../docs/process/coding_standards_backend.md)**（本書はその派生） |
+| [coding-standards-backend/review-checklist.md](../references/coding-standards-backend/review-checklist.md) | `backend-review` | 上記 §5 のレビュー観点チェックリスト |
 
 改稿時は [docs/changelog.md](../../docs/changelog.md) の先頭へ追記する（各ファイルに変更履歴セクションを置かない）。

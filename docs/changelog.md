@@ -12,6 +12,13 @@
 
 | ファイル | 内容 |
 |---------|------|
+| `docs/INDEX.md` | **新設**。`README.md`「ドキュメント索引」（2,496字・H2超過）を移管し、`docs/**` 全ファイルの入口を集約した（2,656字）。README は入口リンクのみ 5,974字→3,606字。`/doc-size` 余裕づくり |
+| `.claude/references/coding-standards-backend.md` | §5「レビュー チェックリスト」を `coding-standards-backend/review-checklist.md` へ**分割**（`backend-review` 専用のため。`dev`・`unit-test` の読込も軽くなる）。前文・§1・§2 の重複記述を圧縮し 4,993字→4,189字。`/doc-size` 余裕づくり |
+| `CLAUDE.md` | 「ドキュメント規約」の索引表を `docs/INDEX.md` へ移管し 2,927字→2,588字。`/doc-size` 余裕づくり |
+| `.claude/project/profile.md` | §8 worktree 運用を `worktree_guide.md` §5 へのポインタに集約、§2 の `docs/` 5行を1行へ、§3 の配置記述を §2 へ寄せ、§6 規律4・§7 規約7 を圧縮し 4,957字→4,489字。`/doc-size` 余裕づくり |
+| `.claude/project/dev.md` | 前文の規約分冊リンク列挙を `coding_standards_backend.md` §2「読む順」への参照へ置き換え 4,851字→4,461字。`/doc-size` 余裕づくり |
+| `.claude/project/basic-design.md` | §1 設計図表のパス列を命名規則の記述へ集約し 4,848字→4,661字。完了基準の索引登録先を `docs/INDEX.md` へ更新。`/doc-size` 余裕づくり |
+| `.claude/project/{INDEX,doc-size,review-code}.md`、`docs/process/documentation_rules.md`、`docs/tech/basic/tech_structure.md` | 上記の分割・移管に伴う参照先の追随（索引の正が `README.md` → `docs/INDEX.md` へ移動） |
 | `docs/backlog/efficiency_memo.md` | `/retro` で10エントリすべてを消化して削除（8,570字→864字・上限超過を解消）。ヘッダの「反映」へ**削除は main で行う**旨を明記した |
 | `.claude/project/commands.md` | §4「使い捨て調査の作法」を新設（検算・`cwd` 明示・`language` 統一・`Grep` の否定glob不可・API実在確認の1バッチ化・Maven版の参照先・使い捨てJavaのクラスパス）。`/retro` 反映 |
 | `.claude/project/dev.md` | §4に観点8（退避前に import で依存分類）、§5に注意4（DIコンテナ起動確認をビルドと別に置く）を追加し、注意2の版調査を commands.md §4 へ寄せた。`/retro` 反映 |

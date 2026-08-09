@@ -77,8 +77,7 @@ H2セクションは2,000字、H3は1,000字（§4）。1ファイルのH2は7�
 
 | 対象 | 更新箇所 |
 |------|---------|
-| [README.md](../../README.md) | 「ドキュメント索引」の該当行 |
-| [CLAUDE.md](../../CLAUDE.md) | 「ドキュメント規約」の索引表（大きな仕様書を分割した場合のみ） |
+| [docs/INDEX.md](../../docs/INDEX.md) | ドキュメント索引の該当行（**索引の正**。README・CLAUDE.md は入口リンクのみ持つ） |
 | [docs/process/spec_ownership.md](../../docs/process/spec_ownership.md) | 正の所在が別ファイルへ移る場合 |
 | `.claude/project/review-*.md`、工程プロファイル | レビュー・工程スキルの対象ファイル一覧 |
 | [docs/changelog.md](../../docs/changelog.md) | 先頭へ1行（**各ファイルに変更履歴を書かない**。§5.1） |

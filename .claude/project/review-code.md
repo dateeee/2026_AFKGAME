@@ -40,7 +40,7 @@ python .claude/scripts/review_prep.py --dir docs/reviews/frontend-review \
 
 ## 2. `backend-review` の観点
 
-**コーディング規約への適合を先に見る**。チェックリストは [.claude/references/coding-standards-backend.md](../references/coding-standards-backend.md) §5（正: [docs/process/coding_standards_backend.md](../../docs/process/coding_standards_backend.md)）。
+**コーディング規約への適合を先に見る**。§5 チェックリスト [review-checklist.md](../references/coding-standards-backend/review-checklist.md)、§2〜§4 規約本体 [coding-standards-backend.md](../references/coding-standards-backend.md)（正: [coding_standards_backend.md](../../docs/process/coding_standards_backend.md)）。
 規約に書かれた項目の指摘は**規約の節番号を添える**。下表はそれに加えて見る、AFK GAME 固有の観点。
 
 | 分類 | # | 観点 |

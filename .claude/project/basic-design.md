@@ -22,16 +22,18 @@
 
 **執筆前の分量見積もり**: 表形式の定義書は1テーブル約550字。区分Cの8,000字を超える構成は、**書き上げてから測るのではなく執筆前に**系統単位へ分割する（`tech_db/` が認証系・プレイヤー系・装備系…と分かれているのはこのため）。
 
-### 設計図（6点・索引 + 同名ディレクトリ構成）
+### 設計図（6点）
 
-| 図 | パス | 検証対象 |
-|----|------|---------|
-| ER図 | `docs/diagrams/er_diagram.md` + `er_diagram/` | `tech_db.md`（正）・`afkgame-domain` の Entity + Repository（マッピング XML） |
-| クラス図 | `docs/diagrams/class_diagram.md` + `class_diagram/` | `afkgame-domain`・`afkgame-web`・`frontend/src/` の構造 |
-| 画面遷移図 | `docs/diagrams/screen_transition.md` + `screen_transition/` | `design/systems/ui*.md`・`frontend/src/router/` |
-| 戦闘フロー図 | `docs/diagrams/battle_flow.md` + `battle_flow/` | `tech_battle.md`・`afkgame-domain` の戦闘 Service |
-| システム構成図 | `docs/diagrams/system_architecture.md` + `system_architecture/` | `tech_architecture.md`・`tech_operations.md` §12 |
-| APIシーケンス図 | `docs/diagrams/api_sequence.md` + `api_sequence/` | `tech_api.md`・`afkgame-web` の `@RestController` |
+パスは一律 `docs/diagrams/<名前>.md`（索引）+ 同名ディレクトリ（子ファイル）。
+
+| 図 `<名前>` | 検証対象 |
+|------------|---------|
+| ER図 `er_diagram` | `tech_db.md`（正）・`afkgame-domain` の Entity + Repository（マッピング XML） |
+| クラス図 `class_diagram` | `afkgame-domain`・`afkgame-web`・`frontend/src/` の構造 |
+| 画面遷移図 `screen_transition` | `design/systems/ui*.md`・`frontend/src/router/` |
+| 戦闘フロー図 `battle_flow` | `tech_battle.md`・`afkgame-domain` の戦闘 Service |
+| システム構成図 `system_architecture` | `tech_architecture.md`・`tech_operations.md` §12 |
+| APIシーケンス図 `api_sequence` | `tech_api.md`・`afkgame-web` の `@RestController` |
 
 **索引で担当ファイルを特定し、必要な子ファイルのみ読む**（全図の一括読み込みは禁止）。
 
@@ -89,7 +91,7 @@
 - 仕様書・設計図間に矛盾がない（`diagrams-review` の指摘解消）
 - DB変更時は §4「DBスキーマ三者一致」が差分ゼロ。追加した列は `nullable` または `server_default` を持つ（前方互換）
 - 要件定義の非機能・運用要件がすべて、実現方式を定めたいずれかの成果物に対応づいている
-- 新規の仕様ファイルは索引（`README.md`）へ登録し、既存ファイルと記述が重なるトピックの正を [docs/process/spec_ownership.md](../../docs/process/spec_ownership.md) へ宣言している
+- 新規の仕様ファイルは索引 [docs/INDEX.md](../../docs/INDEX.md) へ登録し、記述が重なるトピックの正を [spec_ownership.md](../../docs/process/spec_ownership.md) へ宣言している
 - `python scripts/check_doc_size.py`・`python scripts/check_docs.py` が exit 0
 
 ## 6. 次工程

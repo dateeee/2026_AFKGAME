@@ -6,9 +6,9 @@
 
 ```
 2026_AFKGAME/
-├── README.md                      # プロジェクト概要・セットアップ・ドキュメント索引
+├── README.md                      # プロジェクト概要・セットアップ
 ├── CLAUDE.md                      # AIエージェント向け開発ルール
-├── docs/                          # 仕様書・設計図 ※構成は README.md を正とする
+├── docs/                          # 仕様書・設計図 ※一覧は docs/INDEX.md を正とする
 │   └── diagrams/                  # 設計図（Mermaid）
 ├── scripts/                       # 開発補助スクリプト
 ├── docker-compose.yml             # `local` 用 PostgreSQL（:5432）

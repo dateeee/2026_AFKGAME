@@ -1,7 +1,7 @@
 # AFK GAME — AI開発ルール
 
 放置系ファンタジーRPGのWebブラウザゲーム。
-**プロジェクト概要・セットアップ・ドキュメント索引は [README.md](README.md) を参照。**
+**プロジェクト概要・セットアップは [README.md](README.md)、ドキュメント索引は [docs/INDEX.md](docs/INDEX.md)。**
 
 ## ドキュメント規約（必読）
 
@@ -19,14 +19,7 @@ Markdownには文字数上限を設けている。詳細は [docs/process/docume
 - **変更履歴は各ファイルに書かない**。[docs/changelog.md](docs/changelog.md)（上限対象外）の先頭へ1行追記する
 - ドキュメントの作成・改稿後は `python scripts/check_doc_size.py` と `python scripts/check_docs.py` を実行する（超過の扱いは規約§7の台帳運用）
 
-大きな仕様書は **索引 + 個別ファイル**構成。索引で担当ファイルを特定し、必要なものだけ読むこと（節番号は分割後も維持）。個別ファイル名の一覧は [README.md](README.md) のドキュメント索引にある。
-
-| 索引 | 個別ファイル |
-|------|------------|
-| [docs/design/game_spec.md](docs/design/game_spec.md) | `design/systems/`（システム別8件） |
-| [docs/tech/tech_spec.md](docs/tech/tech_spec.md) | `tech/basic/`・`tech/nonfunctional/`・`tech/detail/` |
-| [docs/data/master_data.md](docs/data/master_data.md) | `data/master/` |
-| `docs/diagrams/*.md`（6図） | 同名ディレクトリ配下（`er_diagram/` 等） |
+大きな仕様書は **索引 + 個別ファイル**構成。索引で担当ファイルを特定し、必要なものだけ読むこと（節番号は分割後も維持）。索引・個別ファイルの一覧は [docs/INDEX.md](docs/INDEX.md)。
 
 ## アーキテクチャ不変条件
 
