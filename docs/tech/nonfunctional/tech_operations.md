@@ -60,6 +60,7 @@ SPRING_PROFILES_ACTIVE=local "$CATALINA_HOME/bin/catalina.sh" run   # :8080
 | `FRONTEND_BASE_URL` | メール内リンクの生成元 | `http://localhost:5173` | ○ |
 | `LOG_LEVEL` | ログレベル | `INFO` | — |
 | `LOG_FORMAT` | ログ形式（`text` / `json`） | `text` | ○ |
+| `LOG_DIR` | ログ3種別（通信 / アプリケーション / エラー）の出力先ディレクトリ | `${catalina.base:-.}/logs` | — |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Google OAuth | なし | Phase 2〜 ○ |
 | `SMTP_HOST` / `SMTP_PORT` / `SMTP_USER` / `SMTP_PASSWORD` | 確認メール・パスワードリセット送信 | なし | Phase 2〜 ○ |
 | `BATTLE_RNG_SEED` | 戦闘乱数のシード固定（[tech_rng.md §2](../detail/tech_rng.md) の調査用。本番では未設定） | なし | — |
