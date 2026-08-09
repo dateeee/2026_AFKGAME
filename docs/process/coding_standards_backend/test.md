@@ -13,6 +13,8 @@
 | 配置 | 各モジュールの `src/test/java/.../<対象クラス>Test.java`（対象クラスと同じパッケージ） |
 | 単体テスト | `@Tag("unit")`。Service・Controller・フィルタ・マスターデータが対象。依存は Mockito でモックする |
 | 統合テスト | `@Tag("integration")`。Repository・`@ExtendWith(SpringExtension)` + `@ContextConfiguration`（Web層は `@WebAppConfiguration` + MockMvc）。DB は `EmbeddedPostgres.builder().start()` で起動する埋め込み PostgreSQL |
+| 統合テストの DB とプロファイル | DB は `EmbeddedPostgresSupport`（`afkgame-env` の test-jar）が払い出し、**worktree ごとに独立**する。`SPRING_PROFILES_ACTIVE` は既定値を持たないため（[tech_operations.md](../../tech/nonfunctional/tech_operations.md) §12）、統合テストには `@ActiveProfiles("local")` が要る |
+| カバレッジのゲート | 親 POM に JaCoCo の branch しきい値100%が入っている。**追加した分岐はすべてテストで通す**（`mvn verify` の check で落ちる） |
 | 実行の分離 | surefire が `integration` を除外し、failsafe が `integration` だけを回す（**failsafe には `verify` ゴールを持たせる** — 無いと結合テストが失敗してもビルドが落ちない）。**C1（分岐カバレッジ）は単体テストだけで測る** |
 | パッケージ | 単体と統合をパッケージで分ける（[profile.md](../../../.claude/project/profile.md) §2） |
 
@@ -26,6 +28,7 @@
 | 4 | テストメソッド名は**日本語**で期待する振る舞いを書く（例: `test_目標階が上限と一致していれば追従する`） |
 | 5 | 境界値・等価クラスは `@ParameterizedTest` + `@CsvSource` / `@MethodSource` にまとめ、各ケースにコメントで意図を書く |
 | 6 | テストメソッドの Javadoc に対応マーカー「`分岐: tech_<対象>.md §<節> #<行番号>`」を書く（一覧が1つの文書は §省略可、`#3,4` と複数可）。`check_branch_list.py --tests` がこれで対応を照合する |
+| 7 | **従 Entity を含む Repository のテストは `@Nested` で観点を分ける**（`PlayerRepositoryTest`）。従 Entity 分だけをモックできないので、統合テストで一部だけ失敗させたいときは `@MockitoSpyBean` を使う（`GuestInitializationRollbackIntegrationTest` が実例） |
 
 ## 3. 再現性
 

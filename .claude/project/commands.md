@@ -18,6 +18,16 @@
 | DBスキーマ一致 | `python scripts/check_schema_triple.py`（定義書↔ER図↔models↔Flyway DDL。`--columns` `--tags` `--unique` `--nofk` `--nullable` `--naming` `--index` で個別実行） |
 | 常設スクリプトの回帰テスト | `python -m pytest scripts/tests .claude/scripts/tests .claude/hooks/tests -q`（規約は [_TEMPLATE.md](_TEMPLATE.md)） |
 | トークン使用量ログ | `logs/token_usage.csv`（Stop フックが自動更新。過去分は `python scripts/log_token_usage.py --all`） |
+| DB操作（起動中コンテナ） | `docker exec afkgame-postgres <cmd>`。**`docker compose exec` は使わない** — compose のプロジェクト名が cwd 由来で、worktree からは起動中コンテナを引けない（`container_name` は固定なので `docker exec` なら引ける） |
+| E2E ハーネスの疎通確認 | `docker compose up -d` → `cd backend && mvn -DskipTests package` → `node frontend/tests/e2e/support/serve-backend.mjs`（専用DB `afkgame_e2e` を作り直し :8100 で war を起動。`SPRING_PROFILES_ACTIVE` はハーネスが付与）。`GET /health` が `db:ok` を返せば疎通 |
+
+**外部ツールの所在**（新規シェルでの `mvn -version` / `CATALINA_HOME` 実測。2026-08-09）
+
+| ツール | 版・所在 | シェルへの反映 |
+|-------|---------|--------------|
+| JDK | Adoptium 17.0.20（`JAVA_HOME` = `C:\Program Files\Eclipse Adoptium\jdk-17.0.20.8-hotspot`） | **反映済み**。そのまま呼べる |
+| Maven | 3.9.11 | **反映済み**。`mvn` をそのまま呼べる |
+| Tomcat | 11.0.24（`%LOCALAPPDATA%\Programs\apache-tomcat-11.0.24`） | `CATALINA_HOME` はユーザー環境変数へ設定済みだが**既存シェルには未反映**。コマンド側で明示するかフルパスで呼ぶ |
 
 ## 2. 出力の受け取り方
 

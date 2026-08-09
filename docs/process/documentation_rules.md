@@ -114,6 +114,7 @@ docs/data/towers/
 5. 子ファイルのヘッダに **親へのリンク**と担当節を明記する
 6. `README.md` のドキュメント索引と、`.claude/project/**` の対象ファイル一覧を更新する
 7. リンク切れがないことを確認する（相対パスは移動先を基準に張り直す）
+8. **`docs/tech/detail/` の子ファイル名は `tech_*.md` にする**。`check_branch_list.py` の走査が `TECH_DIR.rglob("tech_*.md")` のため、外れた子ファイルの分岐一覧は照合から黙って落ちる（`tech_forge.md` + `tech_forge_{enhance,craft,disassemble}.md` が実例）
 
 ## 7. 判定と超過時の運用サイクル
 

@@ -11,9 +11,9 @@
 
 **Phase 1〜3 の機能はどの言語でも未実装の期間**に入っている（Python 削除を STEP 3〜5 より先に実施したため）。E2E はハーネスと `GET /health` まで疎通済みだが、テスト本体は STEP 5 完了まで赤が正常。
 
-**⚠ 未統合の worktree が1本ある**: `wt/docs-cleanup`（`6804046`。ドキュメント整理94ファイル＝リンク重複の解消と Java 移行で陳腐化した記述の削除）。**完了済みで main へ未統合**なので、着手前に `python scripts/worktree.py merge docs-cleanup` を実行してよいかユーザーへ確認する。`docs/**` 全域に触れるため、統合前に docs 系のタスクを始めると衝突する。あわせて **`efficiency_memo.md` が 8,570字で上限超過**（本ファイルの整理では解消しない。`/retro` で棚卸しする）。
+**⚠ `efficiency_memo.md` が 8,570字で上限超過**（区分C・570字オーバー）。`/retro` で棚卸しして解消する。
 
-**複数セッションにまたがる申し送りの正は [carryover_notes.md](carryover_notes.md)**（移行 STEP の順序 / Java 実装の流儀と落とし穴 / 確定済み仕様の波及 / 環境・ツール）。着手前にそちらも見る。
+**複数セッションにまたがる申し送りの正は [carryover_notes.md](carryover_notes.md)**（§1 Java 移行 / §2 仕様・マスターデータ / §3 環境・ツール）。着手前にそちらも見る。**恒久的な知見は同ファイルに残さず規約・コマンド表の正へ移す**方針にしたので、Java 実装の流儀は [coding_standards_backend.md](../process/coding_standards_backend.md) の分冊、環境・コマンドは [commands.md](../../.claude/project/commands.md) を見る。
 
 ## 0. 並行作業のルール（着手前に読む）
 
@@ -33,7 +33,7 @@ worktree を使う複数セッションが同時に走る前提。**着手状態
 ```
 /detail-design 移行 STEP 3-A-2 の前工程: register / login / logout の処理フローと分岐一覧を作る
 完了条件: ①`docs/tech/detail/tech_auth_account.md`（新規）へ3操作の処理フローと分岐一覧を書く（**`tech_auth.md` へは追記しない** — 残り698字・§8 が既に H2 上限超過。`tech_forge.md` + `tech_forge_*.md` の分割に倣う）②分岐は最低でも「メール形式不正・メール重複・パスワード強度・BCrypt 検証失敗・存在しないメール・ゲストアカウントでのログイン試行・リフレッシュトークンの失効/不在/二重失効」を含める③`python scripts/check_branch_list.py` が exit 0（現状29件・違反なしなので、増分だけ見ればよい）④`tech_auth.md` §8 冒頭・[tech_spec.md](../tech/tech_spec.md)・[README.md](../../README.md) の索引から新ファイルへ到達できる（`check_docs.py` の索引到達性）⑤`check_doc_size.py`・`check_docs.py` とも違反0
-参照: 分岐一覧の書式と初期化の正は [tech_auth.md](../tech/detail/tech_auth.md) §8.2・§8.3（**register は手順2以降を再利用**＝§8 冒頭）、API契約とエラーコードは [tech_api.md](../tech/basic/tech_api.md) の auth 節、トークン仕様は同 §1・§4。`BCryptPasswordEncoder` strength 12 と `SecurityConfig` の認証不要パス追加は [carryover_notes.md](carryover_notes.md) §1、`uq_players_user_id` 違反の扱い（業務エラーコードを新設しない）は同 §2
+参照: 分岐一覧の書式と初期化の正は [tech_auth.md](../tech/detail/tech_auth.md) §8.2・§8.3（**register は手順2以降を再利用**＝§8 冒頭）、API契約とエラーコードは [tech_api.md](../tech/basic/tech_api.md) の auth 節、トークン仕様は同 §1・§4。`BCryptPasswordEncoder` strength 12 と `SecurityConfig` の認証不要パス追加は [carryover_notes.md](carryover_notes.md) §1、`uq_players_user_id` 違反の扱い（業務エラーコードを新設しない）は同 §1
 前提: main の最新 `cf5417c`（STEP 2R 完了。war + Tomcat で `/health`・ゲスト認証とも 200）。**`docs/tech/**` を編集するので worktree を作る**: `python scripts/worktree.py add auth-3a2-detail` → `EnterWorktree` に `path` で移動（領域は docs/tech）。**外部ツール・ランタイムは不要**（仕様書のみ。JDK・Maven・Tomcat・Docker は使わない）。`docs/backlog/open_specs.md` は**不在＝未確定ゼロ**
 ```
 
@@ -43,10 +43,10 @@ worktree を使う複数セッションが同時に走る前提。**着手状態
 
 | 優先 | タスク | 前提 | wt 名 / 領域 | 工程スキル |
 |------|-------|------|------------|-----------|
-| 1 | **移行 STEP 3-A-2 のテストリスト作成**。§1 で作った register / login / logout の分岐一覧を JUnit の Red へ展開する。`afkgame-web` の `AuthApi` と `afkgame-domain` の `AuthService` が対象。**同一モジュールに Red が複数並ぶと片方だけでは Green を検証できない**（`carryover_notes.md` §1）ので、Red と Green は同じ単位で積む | **§1 の分岐一覧が完成してから** | `auth-3a2-testlist`<br>backend | `test-list` |
+| 1 | **移行 STEP 3-A-2 のテストリスト作成**。§1 で作った register / login / logout の分岐一覧を JUnit の Red へ展開する。`afkgame-web` の `AuthApi` と `afkgame-domain` の `AuthService` が対象。**同一モジュールに Red が複数並ぶと片方だけでは Green を検証できない**（[test-list.md](../../.claude/project/test-list.md) §7）ので、Red と Green は同じ単位で積む | **§1 の分岐一覧が完成してから** | `auth-3a2-testlist`<br>backend | `test-list` |
 | 2 | **`afkgame-env` を JaCoCo の分岐100%ゲートへ載せる**。`AfkgameSettingsConfig` のプロファイル検査（4分岐）に単体テストが無く 100% を満たせないため、env だけゲート対象外にしてある。テストを足して `afkgame-env/pom.xml` へ jacoco プラグインを宣言する | なし（2R-F 完了で backend が空いた） | `env-jacoco`<br>backend | `unit-test` |
-| 3 | **移行バックログの文字数是正**。[carryover_notes.md](carryover_notes.md)（**残り6字**）を分割する。H2 `## 2` が上限超過で圧縮では解消しない（残量WARN 24件の棚卸しも同時に） | なし。ただし**移行 STEP と同時に走らせない**（同じファイルを触る） | `docsize-migration`<br>docs/backlog | `doc-size` |
+| 3 | **効率メモの棚卸し**。[efficiency_memo.md](efficiency_memo.md) が 8,570字で**上限超過**。消化して原因を反映し、済んだエントリを削除する。**削除は main で**（union は削除を伝播しない） | なし | main で実施<br>docs/backlog | `retro` |
+| 4 | **`scripts/check_java_conventions.py` の常設化**。Java 規約10項目を機械判定できず `backend-review` で毎回使い捨てを書いている（項目と背景は [carryover_notes.md](carryover_notes.md) §3）。回帰テストを `scripts/tests/` へ追加し [commands.md](../../.claude/project/commands.md) §1 へ登録する | なし | `java-conventions`<br>scripts | `dev` |
 
 - **キューが空いたら戻す行**: 移行 STEP 3-A-2 の製造（`dev`。上記1の後）、3-A-3（link-account / verify-email / password-reset）。順序の正は [carryover_notes.md](carryover_notes.md) §1
 - **Phase 4 は Java 移行が終わるまで本キューから外している**（2026-08-09・ユーザー判断）。再開時に戻す3件 — ①**③限界突破の詳細設計**: `POST /api/character/limit-break` を `tech_limitbreak.md`（新規）へ。素材＝同一 `master_id` のキャラ1体で `limit_break` +1（上限5回）。起点は `master/character.md` §8・§8.1、可否は `tech_state.md` §4、`canLimitBreak` は `tech_scout.md` §6。`characters.master_id` は Phase 4 で追加する未実装列 ②**④ダンジョン3（塔6〜8）のマスターデータ**: `docs/data/towers/` へ3ファイル追加し `TOWERS_OVERVIEW.md`・`master_data.md` の索引を更新（書式は `009_黄昏の塔.md` に倣う） ③**テストリスト作成**: 拠点・施設・鍛冶屋（`tech_base.md` §7・§8 の36件 + `tech_forge_*` の74件）。**詳細設計は拠点・施設・①酒場スカウト・②鍛冶屋まで完了済み**
-- 上記に載らない**複数セッションにまたがる申し送り**は [carryover_notes.md](carryover_notes.md) が持つ。着手前にそちらも見る
