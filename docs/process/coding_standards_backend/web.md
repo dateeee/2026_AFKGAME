@@ -48,6 +48,8 @@
 | 2 | 個別機能の業務ロジックをフィルタ・インターセプタに置かない（横断処理だけ） |
 | 3 | `request_id` などの横断項目は MDC（`RequestLogFilter`）が載せる（`common.md` §7 #5） |
 
+**フィルタ・インターセプタの正は [filter.md](filter.md)（使い分け・作り方・登録順・例外）と [interceptor.md](interceptor.md)（フック・登録・拒否の書き方）**。本書では再掲しない。
+
 ## 5. エラー応答
 
 **正は [exception.md](exception.md) §4**（`ApiExceptionHandler` が受ける例外と応答の対応、内部情報を出さない規約、ガイドライン 5.1.4.6.1・4.3.3.1.3 との差分）。本書では再掲しない。
