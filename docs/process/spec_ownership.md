@@ -2,64 +2,76 @@
 
 > 「同じ数値・仕様を複数ファイルに書かない。正となるファイルを1つ決め、他はリンクする」
 > （[documentation_rules.md](documentation_rules.md) §5）を運用するための台帳。
-> トピックごとに**正となるファイル**を宣言し、`python scripts/check_docs.py`（--owner）が逸脱を機械検出する。
+> **境界だけを宣言する**。仕様の中身と確定経緯（ISSUE番号・確定日）は書かない（正ファイルと [changelog.md](../changelog.md) が持つ）。
 
 ---
 
-## 1. 使い方
+## 1. まず一般原則で判断する
 
-| 場面 | すること |
-|------|---------|
-| 仕様を書く・直すとき | 対象トピックが下表にあれば**正ファイルにだけ**書く。他ファイルからはリンクする |
-| 新しい仕様ファイルを追加したとき | 索引（`README.md`）へ登録し、既存ファイルと記述が重なるトピックは下表へ行を追加して境界を宣言する |
-| `doc-review` が重複記載を指摘したとき | `fix-specs` で正を決めて修正し、**下表へ行を追加**する（検出パターンを書けば再発を機械検出できる） |
-| 正を移すとき | 下表の正ファイル列を更新し、旧・正ファイル側の記載をリンクに置き換える |
-
-- **検出パターン**列は正規表現。`check_docs.py` が `docs/design/` `docs/tech/` `docs/data/` `CLAUDE.md` `.claude/**` を走査し、正・許可以外のファイルでパターンが一致したら ERROR にする
-- **許可**列は「現状すでに記載があり、参照として妥当な箇所」の凍結リスト。新たな転載を防ぐのが目的であり、許可は増やさず縮減していく
-- パターンが書けない（文章的な）トピックは検出パターンを `—` にする。境界の宣言だけでも `doc-review` の照合基準になる
-
-## 2. 対応表
-
-| トピック | 正ファイル | 許可（参照可） | 検出パターン | 備考 |
-|---------|-----------|--------------|-------------|------|
-| 経験値計算式（100×level^1.5） | `docs/data/master/character.md` | `docs/design/systems/character.md`, `docs/design/game_spec.md`, `docs/glossary.md` | `\^1\.5` | 数値テーブルの導出元。許可3件は縮減候補 |
-| ゲスト削除猶予（90日） | `docs/tech/detail/tech_auth.md` | `docs/design/requirements/non_functional_requirements.md`, `docs/tech/nonfunctional/tech_maintenance.md` | `90日` | 要求値は nfr、実現方式の正は auth |
-| ダメージ計算式 | `docs/tech/detail/tech_battle.md` | `docs/design/systems/battle.md` | — | 図（`battle_flow/`）は視覚化として再掲可、値の変更は正から |
-| ヘッダの構成要素 | `docs/design/systems/ui.md` | `docs/tech/detail/tech_design_system.md` | — | ISSUE-601 で確定（2026-08-02） |
-| モーダルの表示位置・閉じ方 | `docs/tech/detail/tech_design_system.md` | `docs/design/systems/ui.md` | — | ISSUE-502 で確定（2026-08-02） |
-| ナビゲーション項目と「その他」まとめ | `docs/design/systems/ui.md` | `docs/tech/detail/tech_design_system.md`, `docs/diagrams/screen_transition/main_nav.md` | — | ISSUE-603 で確定。「その他」対象タブは 2026-08-05、Phase 5 の導線（「探索」タブへ集約）は 2026-08-08 に確定 |
-| お知らせの既読管理（保持先） | `docs/design/requirements/operation_requirements.md` | `docs/tech/basic/tech_api.md`, `docs/design/systems/ui.md` | — | §3.1 が正。localStorage 保持で確定（2026-08-05） |
-| ログアウトの挙動（フロー・トークン失効） | `docs/tech/detail/tech_auth.md` | `docs/design/systems/ui.md`, `docs/tech/basic/tech_api.md` | — | エンドポイント定義そのものは `tech_api.md` が正（ISSUE-602） |
-| リフレッシュトークンの保管先 | `docs/tech/detail/tech_auth.md` | `docs/tech/basic/tech_architecture.md`, `docs/tech/nonfunctional/tech_security.md` | `httpOnly` | §7 が正。LocalStorage で確定（ISSUE-704）。XSSリスクの受容判断は `tech_security.md` §11.7 |
-| 未確定仕様・調整待ち数値の管理ルール | `docs/process/development_process.md` | `docs/backlog/open_specs.md`, `docs/backlog/balance_backlog.md`, `CLAUDE.md` | — | §6 が正。台帳は open_specs / balance_backlog、振り分けと解消フローの正はプロセス側（ISSUE-701〜703） |
-| コスト規律（サブエージェント運用・読み方・工程区切り） | `.claude/project/profile.md` | `CLAUDE.md`, `.claude/references/review-procedure.md` | `同時最大4体` | §6 が正。CLAUDE.md は常時読込のため要約 + リンクを残す。review-procedure.md は一般手順としての原則再掲のみ可（固有値は持たない）。ISSUE-901 で確定（2026-08-03） |
-| 確率・軽減率の上限（挑発率・状態異常付与率の合算80%） | `docs/design/systems/battle.md` | `docs/design/systems/character.md`, `docs/tech/detail/tech_battle.md`, `docs/data/skills/006_生存術系統.md` | — | 「確率・軽減率の上限（キャップ）」が正。合算80%・残り20%は必ずランダム。按分の実装式は `tech_battle.md` §3.1.3（ISSUE-1001・1002 で確定） |
-| Phaseごとの開発進捗（工程の完了状況） | `docs/process/development_process.md` | — | — | §5 が正。README.md は Phase の**内容**のみを持ち、状況列は持たない（ISSUE-1019 で確定） |
-| キャラクター成長式と LV 別ステータス | `docs/data/master/character.md` | `docs/design/systems/character.md`, `docs/data/towers/*.md` | — | §1.2 の `base + growth × (LV - 1)` が正。塔ファイル §4 の勇者参考値は導出値（ISSUE-1008 で確定） |
-| ログ3種別（通信・アプリケーション・エラー）の定義・出力先ファイル・ローテーション・出力主体・共通部品の使い方 | `docs/process/coding_standards_backend/logging.md`（索引 + §1 出力先 / §5 エラーログ / §6 禁止事項 / §7 テスト）+ `logging/communication.md`（§2 通信ログ）+ `logging/application.md`（§3 AOP 境界ログ / §4 業務ログ） | `docs/tech/basic/tech_logging.md`, `docs/tech/nonfunctional/tech_operations.md` | `communication\.log` | 形式・項目名・ロガー名体系・`reason` の正は `tech_logging.md` に残し、**エラーコード体系・統一エラーレスポンス形式の正は `docs/tech/basic/tech_error_handling.md`**（語彙 = 仕様 / 出力先と書き方 = 規約 で分けた。2026-08-09 確定）。**節番号は3分冊で通し**（§1〜§7）で、分割後も維持する |
-| 認証入力の長さ制限（メール254・パスワード8〜128） | `docs/tech/detail/tech_auth/account.md` | `docs/tech/nonfunctional/tech_security.md`, `docs/tech/detail/tech_auth/link.md`, `docs/tech/detail/tech_auth/password_reset.md` | `254文字` | §9「入力長」が正。要求値は `tech_security.md` §11.3。255 との食い違いを 254 へ寄せた（2026-08-09） |
-| メールアドレスの正規化 | `docs/tech/detail/tech_auth/account.md` | — | — | §9 が正。アプリ層で前後空白除去 + 小文字化し、DB へは正規化済みだけを渡す（`citext` は採らない。2026-08-09） |
-| メール送信の方式（時機・設定値・本文・再送） | `docs/tech/detail/tech_auth/mail.md` | `docs/tech/nonfunctional/tech_operations.md` | — | §16 が正（環境変数の正は `tech_operations.md` §12.2）。再送APIは Phase 2 では設けない。`tech_auth/` の3操作は §16 へのリンクだけを持つ（2026-08-09） |
-| 次セッションの開始タスク（引き継ぎ） | `docs/backlog/next_session.md` | `docs/backlog/carryover_notes.md` | — | ポインタ専用（§0 並行作業のルール +「次回」1件 + 候補キュー最大5行）。Phase 進捗の正は `development_process.md` §5、書式の正は `.claude/project/next.md`。**複数セッションにまたがる申し送り**は `carryover_notes.md` が持つ（引き継ぎ側へ転記しない） |
-| 回復量+%（回復の心得）の適用範囲 | `docs/tech/detail/tech_skill.md` | `docs/data/skills/003_回復系統.md` | — | §1 #5 が正。ATK係数の回復スキル（`heal_1`・`heal_2`）にのみ乗算し、maxHP基準の蘇生・リジェネとポーションには適用しない（ISSUE-1101 で確定） |
-| お知らせマスターの項目定義・掲示件数の上限 | `docs/data/master_data.md` | `docs/tech/basic/tech_api.md`, `docs/design/requirements/operation_requirements.md`, `docs/backlog/balance_backlog.md` | — | §17 が正。掲示件数20件・title 40字・body 400字は Phase 3 の仮置き（ISSUE-1104 で確定）。既読管理の保持先は別行（`operation_requirements.md` §3.1 が正） |
-| DBスキーマ（物理テーブル名・列・型・キー・インデックス・制約） | `docs/tech/basic/tech_db.md` + `tech_db/` | `docs/diagrams/er_diagram/*.md`（**視覚化として再掲可**・値の変更は正から）, `docs/tech/basic/tech_data.md`（API/マスターの JSON 構造のみ） | — | 図は正にならない（§3）。反映順は定義書 → ER図 → Flyway DDL（`afkgame-initdb`）→ Entity + Repository（`afkgame-domain`）。**スキーマの実装側の正は Flyway DDL**（Java の Entity は列メタデータを持たない POJO のため機械照合の対象外）。運用手順（適用・ロールバック）の正は `tech_maintenance.md` §12.4 |
-| 到達記録（`towersCleared`）のキー体系 | `docs/tech/basic/tech_data.md` | — | `\{towerId\}_\{difficulty\}` | §1.1 が正。キーは塔ID、イベントダンジョンのみ難易度を畳み込む。難易度パラメータの受け渡し（`/api/tower/select` の `difficulty`）の正は `tech_api.md`「イベントダンジョン」（2026-08-08 に確定） |
-| バックエンドのコーディング規約（層の責務・命名・記述・例外・ログ・Javadoc・テストコード） | `docs/process/coding_standards_backend.md`（索引）+ `coding_standards_backend/`（basis / layering / common / exception / logging + logging/communication + logging/application / domain / domain/service / web / filter / interceptor / test の13分冊。例外の3分類は `exception.md`、フィルタとインターセプタの使い分けは `filter.md` §1、ログは `logging.md`（索引）が正） | `.claude/references/coding-standards-backend.md`（**派生**・固有値を持たないチェックリスト）, `.claude/project/profile.md`（§3 技術スタック表のみ）, `.claude/project/review-code.md`（§2 レビュー観点のみ）, `.claude/project/test-list.md`（§5 はポインタのみ）, `docs/process/phases.md` | — | **ベースは TERASOLUNA 開発ガイドライン 5.11.0.RELEASE 日本語版**（URL は `basis.md` §1。ガイドラインとの差分は各分冊が正）。規約はそこからの差分だけを持つ。正 → 派生の順に同じ変更で改訂する（`phases.md` §3.2.2）。ロガー名体系は `docs/tech/basic/tech_logging.md`、エラーコードは `docs/tech/basic/tech_error_handling.md`、DB列名は `tech_db.md` が正 |
-| ゲーム設定の選択肢・範囲・刻み・既定値（設定画面の4項目） | `docs/design/systems/ui.md` | `docs/design/systems/battle.md`, `docs/tech/basic/tech_db/player.md`, `docs/tech/basic/tech_data.md`, `docs/tech/nonfunctional/tech_security.md` | `0\.1〜0\.5` | §設定画面「設定項目」表が正（ポーション閾値・戦闘ログ件数・トースト通知・自動売却レアリティ）。正は%表記・技術層は小数表記のため検出パターンは小数側のみ。列の型・NULL・既定値は「DBスキーマ」行（`tech_db/` が正）。ISSUE-1201・1203 で確定（2026-08-08） |
-
-## 3. 境界の一般原則
-
-個別の行が無いトピックは、ファイルの役割から正を判断する。
+個別の行を引く前に、ファイルの役割から正を決める。**ここで決まる境界は §3 へ登録しない**。
 
 | 内容 | 正の置き場 |
 |------|-----------|
 | 要求値（性能・容量・期限などの「満たすべき値」） | `docs/design/*_requirements.md` |
 | ゲーム仕様の意味・ルール（何がどうなるか） | `docs/design/systems/` |
+| 画面の構成・遷移・機能配置（ヘッダ項目・ナビ項目を含む） | `docs/design/systems/ui*.md` |
+| ビジュアル・部品規約（色・トーン、モーダル等の見た目と開閉挙動） | `docs/tech/detail/tech_design_system.md` |
 | 処理・計算式・分岐（どう計算するか） | `docs/tech/tech_*.md` |
 | 数値の具体値（マスターデータ） | `docs/data/` |
-| ビジュアル・コンポーネント規約（色・部品・トーン） | `docs/tech/detail/tech_design_system.md` |
-| 画面の構成・遷移・機能配置 | `docs/design/systems/ui*.md` |
+| 開発プロセス・工程・規約の運用ルール | `docs/process/` |
 
-図（`docs/diagrams/`）はテキスト仕様の視覚化であり正にならない。図とテキストが食い違ったらテキスト側の正を起点に揃える（`diagrams-review`）。
+- 同じ数値が複数ファイルに現れるときは**導出元が正、他は導出値**（LV別ステータス表は成長式から導出、など）
+- 図（`docs/diagrams/`）は視覚化であり正にならない。テキストと食い違ったらテキスト側を起点に揃える（`diagrams-review`）
+
+## 2. 登録と更新
+
+| 場面 | すること |
+|------|---------|
+| 仕様を書く・直すとき | §1 で正を決める。§3 に行があれば**正ファイルにだけ**書き、他はリンクする |
+| 仕様ファイルを追加したとき | 索引（[INDEX.md](../INDEX.md)）へ登録する。既存と記述が重なり、かつ下の登録基準を満たすときだけ §3 へ行を足す |
+| `doc-review` が重複を指摘したとき | `fix-specs` で正を決めて修正し、**検出パターンを書けるなら** §3 へ行を足す |
+| 正を移すとき | §3 の正ファイル列を更新し、旧・正ファイル側の記載をリンクへ置き換える |
+
+**登録基準**（いずれかを満たす行だけ登録する。満たさない境界は §1 に委ねる）
+
+1. 検出パターンが書ける（機械検出できる）
+2. §1 の一般原則から導けない、または原則と逆の置き方をしている
+3. 過去に実際の重複が起き、再発しやすい
+
+**書式**（`check_docs.py --owner` が読む）
+
+- 正ファイル・許可の列には**バッククォート囲みのパスだけ**をカンマ区切りで書く。§番号・注記・ワイルドカードを混ぜない（完全一致で比較するため、混ぜた行は許可が効かなくなる）
+- 補足は表の下の箇条書きへ書く。**備考列を作らない**（仕様の転載置き場になり台帳が肥大するため）
+- 許可列は「現状すでに記載があり、参照として妥当な箇所」の凍結リスト。増やさず縮減する
+- 走査対象は `docs/design/` `docs/tech/` `docs/data/` `.claude/**` `CLAUDE.md`。それ以外（`docs/process/` `docs/backlog/` `docs/diagrams/` `docs/glossary.md`）へ書いた許可は機械的には効かない
+- パターンを書けない行は `—`。宣言だけでも `doc-review` の照合基準になる
+
+## 3. 対応表
+
+| トピック | 正ファイル | 許可（参照可） | 検出パターン |
+|---------|-----------|--------------|-------------|
+| 経験値計算式（100×level^1.5） | `docs/data/master/character.md` | `docs/design/systems/character.md`, `docs/design/game_spec.md` | `\^ ?1\.5` |
+| ゲスト削除猶予（90日） | `docs/tech/detail/tech_auth.md` | `docs/design/requirements/non_functional_requirements.md`, `docs/tech/nonfunctional/tech_maintenance.md` | `90日` |
+| リフレッシュトークンの保管先 | `docs/tech/detail/tech_auth.md` | `docs/tech/basic/tech_architecture.md`, `docs/tech/nonfunctional/tech_security.md` | `httpOnly` |
+| 認証入力の長さ制限（メール254・パスワード8〜128） | `docs/tech/detail/tech_auth/account.md` | `docs/tech/nonfunctional/tech_security.md`, `docs/tech/detail/tech_auth/link.md`, `docs/tech/detail/tech_auth/password_reset.md` | `254文字` |
+| ログ3種別の定義・出力先・ローテーション・共通部品 | `docs/process/coding_standards_backend/logging.md` | `docs/tech/basic/tech_logging.md`, `docs/tech/nonfunctional/tech_operations.md` | `communication\.log` |
+| 到達記録（`towersCleared`）のキー体系 | `docs/tech/basic/tech_data.md` | — | `\{towerId\}_\{difficulty\}` |
+| ゲーム設定の選択肢・範囲・刻み・既定値 | `docs/design/systems/ui.md` | `docs/design/systems/battle.md`, `docs/tech/basic/tech_db/player.md`, `docs/tech/basic/tech_data.md`, `docs/tech/nonfunctional/tech_security.md` | `0\.1〜0\.5` |
+| コスト規律（サブエージェント運用・読み方・工程区切り） | `.claude/project/profile.md` | `CLAUDE.md`, `.claude/references/review-procedure.md` | `同時最大4体` |
+| お知らせの既読管理（保持先） | `docs/design/requirements/operation_requirements.md` | `docs/tech/basic/tech_api.md`, `docs/design/systems/ui.md` | — |
+| ログアウトの挙動（フロー・トークン失効） | `docs/tech/detail/tech_auth.md` | `docs/design/systems/ui.md`, `docs/tech/basic/tech_api.md` | — |
+| 未確定仕様・調整待ち数値の管理ルール | `docs/process/development_process.md` | `docs/backlog/open_specs.md`, `docs/backlog/balance_backlog.md`, `CLAUDE.md` | — |
+| 確率・軽減率の上限（挑発率・状態異常付与率） | `docs/design/systems/battle.md` | `docs/design/systems/character.md`, `docs/tech/detail/tech_battle.md`, `docs/data/skills/006_生存術系統.md` | — |
+| Phaseごとの開発進捗（工程の完了状況） | `docs/process/development_process.md` | — | — |
+| メール送信の方式（時機・設定値・本文・再送） | `docs/tech/detail/tech_auth/mail.md` | `docs/tech/nonfunctional/tech_operations.md` | — |
+| 次セッションの開始タスク（引き継ぎ） | `docs/backlog/next_session.md` | `docs/backlog/carryover_notes.md` | — |
+| DBスキーマ（物理テーブル名・列・型・キー・インデックス・制約） | `docs/tech/basic/tech_db.md` | `docs/tech/basic/tech_data.md` | — |
+| バックエンドのコーディング規約 | `docs/process/coding_standards_backend.md` | `.claude/references/coding-standards-backend.md`, `.claude/project/profile.md`, `.claude/project/review-code.md`, `.claude/project/test-list.md` | — |
+
+- **経験値計算式**: 正の表記は `100 * (level ^ 1.5)`。パターンは `^` の後の空白有無を吸収する
+- **ゲーム設定**: 正は%表記・技術層は小数表記のため、パターンは小数側だけを見る（正ファイル自身には一致しない）
+- **ログ3種別**: 出力先と書き方が `logging.md`（3分冊通しの §1〜§7）、形式・項目名・ロガー名体系は `tech_logging.md`、エラーコード体系と統一エラーレスポンス形式は `tech_error_handling.md` が正
+- **ログアウト**: エンドポイント定義そのものは `tech_api.md` が正
+- **DBスキーマ**: 実装側の正は Flyway DDL（`afkgame-initdb`）。`tech_data.md` が持つのは API/マスターの JSON 構造のみ。反映順は `phases.md` §3.2.1
+- **引き継ぎ**: `next_session.md` はポインタ専用。複数セッションにまたがる申し送りは `carryover_notes.md` が持ち、引き継ぎ側へ転記しない
+- **コーディング規約**: 正 → 派生（`.claude/**`）の順に同じ変更で改訂する（`phases.md` §3.2.2）
