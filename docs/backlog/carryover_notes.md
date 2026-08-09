@@ -35,9 +35,11 @@
 
 ## 4. 環境・ツール
 
-- **JDK / Maven**（2026-08-09 に新規シェルで `mvn -version` を実行して確認）: **PATH・`JAVA_HOME` とも新規シェルへ反映済みで、`mvn` をそのまま呼べる**（Maven 3.9.11 / Adoptium JDK 17.0.20。JDK は `C:\Program Files\Eclipse Adoptium\jdk-17.0.20.8-hotspot`、Maven は `C:\Users\tubas\AppData\Local\Programs\apache-maven-3.9.11\bin\`）。2026-08-08 時点の「フルパス + `JAVA_HOME` を毎回与える」は解消済み
-- 統合テストDBは zonky 埋め込み PostgreSQL（`@AutoConfigureEmbeddedDatabase(provider = ZONKY)`）で worktree ごとに独立。`@ConfigurationProperties` は `afkgame-env` の `com.afkgame.env.config` へ置く。親POMに JaCoCo branch しきい値100%が入っているため、追加した分岐はすべてテストで通す
-- **Java の規約チェックに常設スクリプトが無い**（2026-08-08。backend-review で判明）。Python 側は `check_schema_triple.py` 等がそろっているが、Java にはタブ・120字超・ワイルドカード/未使用 import・`System.out`/`printStackTrace`・`@Autowired` フィールド注入・マッピング XML の `${}`・ログの文字列連結・`Instant.now()` の直接取得・静的乱数・`java.util.Date` を機械判定する手段が無く、レビューで毎回使い捨てを書くことになる（今回の指摘 ISSUE-605・608 はこれで検出）。`scripts/check_java_conventions.py` として常設化し `.claude/project/commands.md` §1 の表へ足すと、`dev` 工程で潰せる
+- **JDK / Maven**（2026-08-09 に新規シェルで `mvn -version` を実行して確認）: **PATH・`JAVA_HOME` とも新規シェルへ反映済みで、`mvn` をそのまま呼べる**（Maven 3.9.11 / Adoptium JDK 17.0.20。`JAVA_HOME` は `C:\Program Files\Eclipse Adoptium\jdk-17.0.20.8-hotspot`）
+- **Tomcat 11.0.24**（2R-F で導入）: `%LOCALAPPDATA%\Programs\apache-tomcat-11.0.24`。`CATALINA_HOME` は設定済みだが**既存シェルには未反映**なので、コマンド側で明示するかフルパスで呼ぶ
+- **`docker compose` はプロジェクト名が cwd 由来**で worktree から起動中コンテナを引けない。DB操作は `docker exec afkgame-postgres`（`container_name` 固定）を使う
+- 統合テストDBは埋め込み PostgreSQL を `EmbeddedPostgresSupport`（`afkgame-env` の test-jar）が払い出し worktree ごとに独立。設定保持 Bean は `afkgame-env` の `com.afkgame.env.config` へ置く。親POMに JaCoCo branch しきい値100%が入っているため、追加した分岐はすべてテストで通す
+- **Java の規約チェックに常設スクリプトが無い**（2026-08-08。backend-review で判明）。タブ・120字超・ワイルドカード/未使用 import・`System.out`/`printStackTrace`・`@Autowired` フィールド注入・マッピング XML の `${}`・ログの文字列連結・`Instant.now()` 直取得・静的乱数・`java.util.Date` を機械判定できず、レビューで毎回使い捨てを書くことになる（ISSUE-605・608 はこれで検出）。`scripts/check_java_conventions.py` として常設化し `commands.md` §1 へ足すと `dev` 工程で潰せる
 - **`afkgame-initdb` は surefire を `<skip>true</skip>` にしてある**（2R-B で恒久対応済み）。SQL のみで `src/test` を持たないため、親POMで surefire に `groups`/`excludedGroups` を与えると `require TestNG, JUnit48+ or JUnit 5` でビルドが落ちる（増分ビルドのときだけ出る）。**2R-E で単体/結合を分ける際にこのガードを外さないこと**
-- **Docker / E2E ハーネスは 2026-08-09 に実行確認済み**。`docker compose up -d`（`afkgame-postgres` :5432）→ `mvn -DskipTests package` → `node frontend/tests/e2e/support/serve-backend.mjs` で専用DB `afkgame_e2e` が作り直され、`GET /health` が `db:ok` を返すところまで通る。**ただし E2E テスト本体は Phase 1〜3 の API が Java 側に無いため通らない**（STEP 5 完了までは赤が正常）
-- **起動には `SPRING_PROFILES_ACTIVE`（`local` / `production`）が必須**（2026-08-09。2R-C で `APP_ENV` から置換）。未設定・想定外の値は `AfkgameSettingsConfig` が起動時に落とす。統合テストは `@ActiveProfiles("local")`、E2E の `serve-backend.mjs` は環境変数の付与が要る（2R-E・2R-F）
+- **Docker / E2E ハーネスは 2026-08-09 に実行確認済み**（2R-F で war + Tomcat 化）。`docker compose up -d` → `mvn -DskipTests package` → `node frontend/tests/e2e/support/serve-backend.mjs` で専用DB `afkgame_e2e` が作り直され `GET /health` が `db:ok` を返す。**ただし E2E テスト本体は Phase 1〜3 の API が Java 側に無いため通らない**（STEP 5 完了までは赤が正常）
+- **起動には `SPRING_PROFILES_ACTIVE`（`local` / `production`）が必須**（2R-C で `APP_ENV` から置換）。未設定・想定外の値は `AfkgameSettingsConfig` が起動時に落とす。統合テストは `@ActiveProfiles("local")`、E2E は `serve-backend.mjs` が付与する

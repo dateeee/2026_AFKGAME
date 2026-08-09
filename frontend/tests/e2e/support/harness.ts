@@ -13,9 +13,9 @@ import { fileURLToPath } from 'node:url'
 
 import { expect, type Locator, type Page } from '@playwright/test'
 
-import { E2E_DB_NAME, E2E_DB_SERVICE, E2E_DB_USER, TICK_INTERVAL_SECONDS } from './config'
+import { E2E_DB_CONTAINER, E2E_DB_NAME, E2E_DB_USER, TICK_INTERVAL_SECONDS } from './config'
 
-// frontend/tests/e2e/support → リポジトリルート（docker compose の実行位置）
+// frontend/tests/e2e/support → リポジトリルート
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../../..')
 
 /**
@@ -24,12 +24,13 @@ const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../../..'
  * テストは直列実行でプレイヤーもテストごとに作られるため、対象を絞らず一括で更新する。
  * DB は docker compose の PostgreSQL にあるため、コンテナ内の psql から更新する
  * （E2E 実行中はバックエンドが同じDBを掴んでいるが、行ロックは短時間で解ける）。
+ * コンテナ名で引く理由は config.ts。
  */
 export function rewindLastTick(seconds: number): void {
   const result = spawnSync(
     'docker',
     [
-      'compose', 'exec', '-T', E2E_DB_SERVICE,
+      'exec', '-i', E2E_DB_CONTAINER,
       'psql', '-v', 'ON_ERROR_STOP=1', '-U', E2E_DB_USER, '-d', E2E_DB_NAME,
       '-c', `UPDATE players SET last_tick_at = now() - interval '${seconds} seconds'`,
     ],

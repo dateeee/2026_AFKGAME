@@ -81,7 +81,7 @@
 
 | # | 確認時の注意 |
 |---|------------|
-| 1 | テスト件数・失敗は `target/surefire-reports/*.xml`（`tests=` / `<failure`）で数える。`*.txt` は JUnit 5 の `@Nested` 配下を「Tests run: 0」と表示するため読み違える |
+| 1 | テスト件数は **`<testcase` の出現数**（`grep -c "<testcase" target/*-reports/TEST-*.xml`）か、`mvn` 出力のモジュール別 `Tests run:` 行で数える。**`*.txt` の「Tests run」も XML ルートの `tests=` 属性も、JUnit 5 の `@Nested` 配下を 0 と報告する**（2026-08-09 実測: `MasterDataLoaderTest` は `tests="0"` だが `<testcase` は11件。`tests=` で集計すると domain 60件が15件に見える）。失敗は `<failure` / `<error` で数える |
 | 2 | 外部依存の版は**推測で書かない**。Maven Central へ1回問い合わせてから POM へ入れる（誤った版はビルド1回ぶんの空振りになる） |
 | 3 | 既存 POM の版調査は properties と dependencyManagement を**まとめて1回**で出す（キーを推測した grep の空振りを繰り返さない） |
 

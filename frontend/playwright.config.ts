@@ -2,8 +2,8 @@ import { defineConfig, devices } from '@playwright/test'
 
 import {
   E2E_BACKEND_PORT,
+  E2E_DB_CONTAINER,
   E2E_DB_NAME,
-  E2E_DB_SERVICE,
   E2E_DB_USER,
   E2E_FRONTEND_PORT,
 } from './tests/e2e/support/config'
@@ -47,7 +47,7 @@ export default defineConfig({
       env: {
         E2E_BACKEND_PORT: String(E2E_BACKEND_PORT),
         E2E_DB_NAME,
-        E2E_DB_SERVICE,
+        E2E_DB_CONTAINER,
         E2E_DB_USER,
       },
       stdout: 'ignore',

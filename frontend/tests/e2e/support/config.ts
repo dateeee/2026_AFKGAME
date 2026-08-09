@@ -14,8 +14,14 @@ export const E2E_FRONTEND_PORT = 5174
  */
 export const E2E_DB_NAME = 'afkgame_e2e'
 
-/** PostgreSQL を動かしている docker compose のサービス名（docker-compose.yml） */
-export const E2E_DB_SERVICE = 'postgres'
+/**
+ * PostgreSQL のコンテナ名（docker-compose.yml の `container_name`）。
+ *
+ * compose のサービス名ではなくコンテナ名で引くのは、`docker compose` のプロジェクト名が
+ * カレントディレクトリ名から決まるため。worktree から実行すると別プロジェクト扱いになり、
+ * `docker compose exec` が起動中のコンテナを見つけられない。
+ */
+export const E2E_DB_CONTAINER = 'afkgame-postgres'
 
 /** DB ユーザー（docker-compose.yml の `POSTGRES_USER`） */
 export const E2E_DB_USER = 'afkgame'

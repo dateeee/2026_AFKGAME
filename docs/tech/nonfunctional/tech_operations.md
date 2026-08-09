@@ -32,6 +32,19 @@
 - フロントとバックエンドは**別オリジン**（CloudFront / EC2）になる。許可オリジンは §12.2 の `CORS_ORIGINS` が正
 - マネージドコンテナ（App Runner・ECS Fargate）は採用しない。ファイルシステムが揮発し、DBのデータディレクトリと OS cron を同一ノードで継続できないため
 
+### 配備とコンテキストパス
+
+war は **ROOT コンテキスト**へ配備する（`webapps/ROOT.war`）。`/health`・`/api/**` を仕様どおりの絶対パスで受けるためで、`local` と `production` でパスが一致し、本番の Nginx にパス書き換えを持たせずに済む。`local` の起動手順は次のとおり（Windows は `catalina.bat`）。
+
+```bash
+cd backend && mvn clean install
+cp afkgame-web/target/afkgame-web.war "$CATALINA_HOME/webapps/ROOT.war"
+SPRING_PROFILES_ACTIVE=local "$CATALINA_HOME/bin/catalina.sh" run   # :8080
+```
+
+- 起動確認は `curl localhost:8080/health`（§12.3）。`SPRING_PROFILES_ACTIVE` が未設定なら §12.2 の起動時バリデーションで落ちる
+- E2E は開発用 Tomcat と分けるため、専用の `CATALINA_BASE`（`frontend/tests/e2e/.tomcat`）を組み立てて :8100 で起動する（`frontend/tests/e2e/support/serve-backend.mjs`）
+
 ## 12.2 環境変数一覧
 
 設定値の参照は `afkgame-env` の設定保持 Bean に集約し、アプリケーションコードから環境変数を直接読まない（`@ConfigurationProperties` は Boot 機能のため使わない。受け取り方は [tech_structure_backend.md](../basic/tech_structure_backend.md) §4.2）。値は `META-INF/spring/*.properties` の既定値を環境変数で上書きする。

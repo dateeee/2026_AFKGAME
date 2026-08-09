@@ -16,6 +16,8 @@ export default defineConfig({
         // E2E では専用DBのバックエンド（既定 :8100）を指すため環境変数で差し替える
         target: process.env.VITE_API_PROXY_TARGET || 'http://localhost:8080',
         changeOrigin: true,
+        // war は ROOT コンテキストへ配備するため、Tomcat 側も /api/** をそのまま受ける。
+        // パスの書き換え（rewrite）は不要（tech_operations.md §12.1）
       },
     },
   },

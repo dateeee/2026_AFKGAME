@@ -10,7 +10,7 @@
 | レイヤー | 技術 |
 |---------|------|
 | フロントエンド | Vue.js 3 (SPA / Composition API / TypeScript) + Vite + Pinia + Tailwind CSS |
-| バックエンド | Java 17 / Terasoluna (Spring Boot 3) + MyBatis3 + Flyway |
+| バックエンド | Java 17 / Terasoluna 5.11（war + Tomcat 11）+ MyBatis3 + Flyway |
 | DB | PostgreSQL |
 | 描画方式 | テキストベース（Canvas不使用）。UIアイコンはSVG、アイテムは画像 |
 
@@ -19,35 +19,32 @@
 ### バックエンド
 
 ```bash
-docker compose up -d          # PostgreSQL :5432
-cd backend
-mvn clean install
-APP_ENV=local java -jar afkgame-web/target/afkgame-web-0.1.0.jar   # http://localhost:8080
+docker compose up -d   # PostgreSQL :5432
+cd backend && mvn clean install
+cp afkgame-web/target/afkgame-web.war "$CATALINA_HOME/webapps/ROOT.war"
+SPRING_PROFILES_ACTIVE=local "$CATALINA_HOME/bin/catalina.sh" run   # :8080
 ```
 
-疎通確認は `curl localhost:8080/health`。
+要 Tomcat 11.0（`CATALINA_HOME`）。Windows は `catalina.bat`。確認は `curl localhost:8080/health`。
 
 ### フロントエンド
 
 ```bash
-cd frontend
-npm install
-npm run dev        # http://localhost:5173（/api は :8080 へプロキシ）
+cd frontend && npm install
+npm run dev   # http://localhost:5173（/api は :8080 へプロキシ）
 ```
 
-VS Code は実行構成 **Full Stack** で同時起動できる（[.vscode/launch.json](.vscode/launch.json)）。
+VS Code は実行構成 **Full Stack** で同時起動できる（`.vscode/launch.json`）。
 
-### 環境変数（既定値は `application.yml`）
+### 環境変数
 
 | 変数 | 既定値 | 用途 |
 |------|-------|------|
-| `DATABASE_URL` / `_USER` / `_PASSWORD` | `jdbc:postgresql://localhost:5432/afkgame` / `afkgame` / `afkgame` | DB接続情報（本番では変更必須） |
-| `APP_ENV` | なし（必須） | 環境識別（`local` / `production`）。未設定なら起動失敗 |
-| `JWT_SECRET` | `local` のみ既定値あり | JWT署名鍵（本番は必須。未設定なら起動失敗） |
-| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | 空 | Google OAuth（空の場合は無効） |
-| `LOG_LEVEL` / `LOG_FORMAT` | `INFO` / `text` | ログ出力設定 |
+| `DATABASE_URL` / `_USER` / `_PASSWORD` | `…localhost:5432/afkgame` / `afkgame` / `afkgame` | DB接続情報（本番は変更必須） |
+| `SPRING_PROFILES_ACTIVE` | なし（必須） | 環境識別（`local` / `production`）。未設定なら起動失敗 |
+| `JWT_SECRET` | `local` のみ既定値あり | JWT署名鍵（本番必須。未設定なら起動失敗） |
 
-その他は `afkgame-env` の `application.yml` を参照。
+既定値は `META-INF/spring/*.properties`。Google OAuth・ログ設定を含む全一覧は `tech_operations.md` §12.2 が正。
 
 ### 主なコマンド
 
@@ -55,7 +52,7 @@ VS Code は実行構成 **Full Stack** で同時起動できる（[.vscode/launc
 |---------|------|
 | `npm run dev` / `npm run build` | フロント開発サーバー / 本番ビルド |
 | `npm run type-check` | 型チェック（vue-tsc + E2E） |
-| `npm run test:e2e` | E2Eテスト（Playwright。専用ポート/DBで自動起動）。要 `docker compose up -d` + jar ビルド済み |
+| `npm run test:e2e` | E2Eテスト（Playwright。専用ポート/DBで自動起動）。要 `docker compose up -d` + war ビルド済み |
 | `mvn verify` | バックエンドテスト（JUnit 5 + JaCoCo。branch 100%・`target/site/jacoco/`） |
 | `python scripts/check_doc_size.py` | ドキュメント文字数チェック |
 | `python scripts/check_docs.py` | ドキュメント機械検証（リンク・索引・曖昧語・正の逸脱ほか） |
@@ -79,7 +76,7 @@ VS Code は実行構成 **Full Stack** で同時起動できる（[.vscode/launc
 │   └── reviews/                 # 記録: レビュー結果（自動生成。スキル名/日時.md）
 ├── scripts/                     # 開発補助スクリプト
 ├── frontend/                    # Vue.js SPA。src/{views,components,stores,composables,api,types} + tests/e2e/
-└── backend/                     # Terasoluna (Spring Boot)。afkgame-{domain,web,env,initdb}
+└── backend/                     # Terasoluna（war + Tomcat）。afkgame-{domain,web,env,initdb}
 ```
 
 各ディレクトリの責務は [.claude/project/profile.md](.claude/project/profile.md) §2 が正。

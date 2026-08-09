@@ -38,7 +38,7 @@
 
 **この STEP の成果は 2R で作り直す**（下記）。上表の見送り項目は 2R 後の STEP 3 へそのまま引き継ぐ。
 
-### STEP 2R: ブランクプロジェクト構成への再構築（着手中）
+### STEP 2R: ブランクプロジェクト構成への再構築（完了）
 
 STEP 2 で作った骨格は Spring Boot アプリで、ガイドラインのブランクプロジェクトとは別物だった（`terasoluna-gfw-*` への依存も `org.terasoluna` の利用も無く、`terasoluna.version` は未参照のまま残っていた）。[tech_selection.md](tech_selection.md) §2 の改訂に合わせて土台を作り直す。**API契約・DBスキーマ・ゲーム仕様は変更しない**。
 
@@ -52,7 +52,7 @@ STEP 2 で作った骨格は Spring Boot アプリで、ガイドラインのブ
 | 2R-C | 設定の移植（`web.xml`・Java Config 6種・`*.properties`・`logback.xml`・DataSource・Flyway 起動） | **完了**（2026-08-09） |
 | 2R-D | 既存実装の移植（main 48件を戻し Boot 依存を除去） | **完了**（2026-08-09） |
 | 2R-E | テスト基盤の再構築（テスト25件を素の Spring 用へ。設定と方式は changelog） | **完了**（2026-08-09） |
-| 2R-F | 実行・デプロイの切替（Tomcat 起動、Vite プロキシ、`launch.json`、[tech_operations.md](../../tech/nonfunctional/tech_operations.md) §12 反映） | 未着手 |
+| 2R-F | 実行・デプロイの切替（Tomcat 起動、Vite プロキシ、`launch.json`、[tech_operations.md](../../tech/nonfunctional/tech_operations.md) §12 反映） | **完了**（2026-08-09） |
 
 完了条件は STEP 2 と同じ「`GET /health` が 200（`db:ok`）・ゲスト認証が通る」に加え、**移植済みの単体テストが branch 100% のまま通ること**。
 
@@ -111,9 +111,9 @@ OWASP Dependency-Check は親が管理しないため**版を自分で固定し�
 | 1 | Vite の `/api` プロキシ先・E2E の webServer を Java 側へ向ける | 完了 |
 | 2 | `tech_db/` 各テーブルの「実装:」行を Entity 参照へ切り替え、`check_schema_triple.py` の models 照合を削除（DDL 照合が引き継ぐ） | 完了 |
 | 3 | `backend/`（Python）と Python 依存の削除（旧コードはタグ `python-backend-final` から取り出せる） | 完了 |
-| 4 | `.vscode/launch.json`（gitignore 済み）の実行構成を Java 側へ向ける | 完了（2R で war + Tomcat になったら再度差し替える） |
-| 5 | デプロイ手順（war + Tomcat）の反映は 2R-F で済ませ、本 STEP では最終構成での再確認のみ | 2R 完了後 |
+| 4 | `.vscode/launch.json`（gitignore 済み）の実行構成を Java 側へ向ける | 完了（2R-F で war + Tomcat へ差し替え済み） |
+| 5 | デプロイ手順（war + Tomcat）の反映は 2R-F で済ませ、本 STEP では最終構成での再確認のみ | 完了（2R-F） |
 | 6 | E2E 全PASS の確認 | STEP 5 完了後 |
 | 7 | 本ファイル群（`java_migration.md` と `java_migration/`）を削除し、[changelog.md](../../changelog.md) へ完了を1行記録 | STEP 5 完了後 |
 
-**E2E は STEP 5 まで通らない**。`serve-backend.mjs` は Java 起動へ切り替え済みで `/health` までは通るが、Phase 1〜3 の API が無いためテスト本体は失敗する。**2R で war + Tomcat になったら起動方法（現状は `java -jar`）も追随させる**。
+**E2E は STEP 5 まで通らない**。`serve-backend.mjs` は 2R-F で war + Tomcat 起動（専用 `CATALINA_BASE` で :8100）へ切り替え済みで `/health` までは通るが、Phase 1〜3 の API が無いためテスト本体は失敗する。

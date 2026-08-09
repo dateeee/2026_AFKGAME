@@ -8,6 +8,7 @@
 | 目的 | コマンド |
 |------|---------|
 | バックエンド構文確認 | `cd backend && mvn -q compile` |
+| バックエンド起動（war + Tomcat） | `cd backend && mvn clean install` → war を `$CATALINA_HOME/webapps/ROOT.war` へコピー → `SPRING_PROFILES_ACTIVE=local` を与えて `catalina.bat run`（手順の正は [tech_operations.md](../../docs/tech/nonfunctional/tech_operations.md) §12.1。**要 `CATALINA_HOME`**。実行可能 jar は無い） |
 | 単体テスト（C1計測つき） | `cd backend && mvn test`（JaCoCoで計測。判定・絞り込み・レポートは [unit-test.md](unit-test.md) §2） |
 | フロント型チェック | `cd frontend && npm run type-check`（`vue-tsc --noEmit`） |
 | ドキュメント規約チェック | `python scripts/check_doc_size.py`（`--list`。上限90%超は残量WARN） |

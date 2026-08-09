@@ -43,6 +43,8 @@ frontend/test-results/
 frontend/playwright-report/
 frontend/blob-report/
 frontend/.playwright/
+# serve-backend.mjs が組み立てる E2E 専用の CATALINA_BASE
+frontend/tests/e2e/.tomcat/
 
 # Logs
 *.log
