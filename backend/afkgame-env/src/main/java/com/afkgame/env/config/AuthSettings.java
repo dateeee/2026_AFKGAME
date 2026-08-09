@@ -17,6 +17,9 @@ import java.time.Duration;
  * @param passwordMinLength パスワードの最小文字数
  * @param passwordMaxLength パスワードの最大文字数
  * @param guestExpire ゲストアカウントの有効期限（最終アクセスからの経過）
+ * @param verificationTokenExpire メール確認トークンの有効期間（tech_auth/mail.md §16.3）
+ * @param passwordResetTokenExpire パスワード再設定トークンの有効期間（同 §16.3。乗っ取り時に
+ *        書き換えられる窓を狭めるため確認トークンより短い）
  */
 public record AuthSettings(
         String secret,
@@ -25,5 +28,7 @@ public record AuthSettings(
         int bcryptStrength,
         int passwordMinLength,
         int passwordMaxLength,
-        Duration guestExpire) {
+        Duration guestExpire,
+        Duration verificationTokenExpire,
+        Duration passwordResetTokenExpire) {
 }

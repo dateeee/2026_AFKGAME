@@ -8,12 +8,10 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.terasoluna.gfw.security.web.logging.UserIdMDCPutFilter;
 
 import com.afkgame.domain.service.AuthService;
 import com.afkgame.domain.service.JwtService;
@@ -72,7 +70,6 @@ public class SpringSecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http, JwtService jwtService,
             AuthService authService, ApiAuthenticationEntryPoint authenticationEntryPoint,
             CorsConfigurationSource corsConfigurationSource) throws Exception {
-        http.addFilterAfter(userIdMDCPutFilter(), AnonymousAuthenticationFilter.class);
         http.csrf(csrf -> csrf.disable());
         http.cors(cors -> cors.configurationSource(corsConfigurationSource));
         http.sessionManagement(
@@ -109,14 +106,5 @@ public class SpringSecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
-    }
-
-    /**
-     * Configure {@link UserIdMDCPutFilter} bean.
-     * @return Bean of configured {@link UserIdMDCPutFilter}
-     */
-    @Bean("userIdMDCPutFilter")
-    public UserIdMDCPutFilter userIdMDCPutFilter() {
-        return new UserIdMDCPutFilter();
     }
 }

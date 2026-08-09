@@ -50,9 +50,6 @@ public class AuthServiceImpl implements AuthService {
     /** 確認トークンの用途（tech_db/auth.md §3）。用途をまたいだ流用を防ぐため発行時に固定する。 */
     private static final String VERIFY_EMAIL_PURPOSE = "verify_email";
 
-    /** 確認トークンの有効期間（tech_auth/account.md §10 手順6）。 */
-    private static final Duration VERIFICATION_TOKEN_EXPIRE = Duration.ofHours(24);
-
     /** トークン生成用の暗号乱数。ゲーム乱数（{@code RandomFactory}）とは用途が異なり、共有してよい。 */
     private static final SecureRandom RANDOM = new SecureRandom();
 
@@ -60,6 +57,7 @@ public class AuthServiceImpl implements AuthService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final JwtService jwtService;
     private final Duration refreshTokenExpire;
+    private final Duration verificationTokenExpire;
     private final PlayerInitializationService playerInitializationService;
     private final Clock clock;
     private final PasswordEncoder passwordEncoder;
@@ -76,6 +74,7 @@ public class AuthServiceImpl implements AuthService {
         this.refreshTokenRepository = refreshTokenRepository;
         this.jwtService = jwtService;
         this.refreshTokenExpire = authSettings.refreshTokenExpire();
+        this.verificationTokenExpire = authSettings.verificationTokenExpire();
         this.playerInitializationService = playerInitializationService;
         this.clock = clock;
         this.passwordEncoder = passwordEncoder;
@@ -118,6 +117,7 @@ public class AuthServiceImpl implements AuthService {
     public AuthResult refresh(String rawRefreshToken) {
         RefreshToken stored = refreshTokenRepository.findByTokenHash(hashToken(rawRefreshToken));
         if (stored == null) {
+            logger.warn("リフレッシュ失敗").reason(LogReason.REFRESH_NOT_FOUND).log();
             throw refreshInvalid("Invalid refresh token");
         }
 
@@ -126,6 +126,8 @@ public class AuthServiceImpl implements AuthService {
         }
 
         if (stored.getExpiresAt().isBefore(clock.instant())) {
+            logger.warn("リフレッシュ失敗").reason(LogReason.REFRESH_EXPIRED)
+                    .with(LogKey.USER_ID, stored.getUserId()).log();
             throw refreshInvalid("Refresh token expired");
         }
 
@@ -170,7 +172,8 @@ public class AuthServiceImpl implements AuthService {
     public AuthResult register(String email, String rawPassword) {
         String normalizedEmail = normalizeEmail(email);
         if (userRepository.findByEmail(normalizedEmail) != null) {
-            logger.warn("登録失敗").reason(LogReason.EMAIL_TAKEN).log();
+            logger.warn("登録失敗").reason(LogReason.EMAIL_TAKEN)
+                    .with(LogKey.EMAIL, normalizedEmail).log();
             throw emailTaken();
         }
 
@@ -193,7 +196,8 @@ public class AuthServiceImpl implements AuthService {
                 throw e;
             }
             // 手順2の通過後に同時登録で uq_users_email 違反が起きた場合も重複として扱う（§11 #9）
-            logger.warn("登録失敗").reason(LogReason.EMAIL_TAKEN_CONFLICT).log();
+            logger.warn("登録失敗").reason(LogReason.EMAIL_TAKEN_CONFLICT)
+                    .with(LogKey.EMAIL, normalizedEmail).log();
             throw emailTaken();
         }
 
@@ -204,7 +208,7 @@ public class AuthServiceImpl implements AuthService {
         verificationToken.setUserId(user.getId());
         verificationToken.setTokenHash(hashToken(rawVerificationToken));
         verificationToken.setPurpose(VERIFY_EMAIL_PURPOSE);
-        verificationToken.setExpiresAt(now.plus(VERIFICATION_TOKEN_EXPIRE));
+        verificationToken.setExpiresAt(now.plus(verificationTokenExpire));
         verificationToken.setUsed(false);
         verificationToken.setCreatedAt(now);
         emailVerificationTokenRepository.save(verificationToken);
@@ -223,9 +227,11 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public AuthResult login(String email, String rawPassword) {
-        User user = userRepository.findByEmail(normalizeEmail(email));
+        String normalizedEmail = normalizeEmail(email);
+        User user = userRepository.findByEmail(normalizedEmail);
         if (user == null) {
-            logger.warn("ログイン失敗").reason(LogReason.EMAIL_NOT_FOUND).log();
+            logger.warn("ログイン失敗").reason(LogReason.EMAIL_NOT_FOUND)
+                    .with(LogKey.EMAIL, normalizedEmail).log();
             throw invalidCredentials();
         }
 
@@ -257,11 +263,14 @@ public class AuthServiceImpl implements AuthService {
     public void logout(String userId, String rawRefreshToken) {
         RefreshToken stored = refreshTokenRepository.findByTokenHash(hashToken(rawRefreshToken));
         if (stored == null) {
+            logger.warn("ログアウト失敗").reason(LogReason.REFRESH_NOT_FOUND)
+                    .with(LogKey.USER_ID, userId).log();
             throw refreshInvalid("Refresh token not found");
         }
 
         if (!stored.getUserId().equals(userId)) {
-            logger.warn("他ユーザーのリフレッシュトークンでログアウト").with(LogKey.USER_ID, userId).log();
+            logger.warn("他ユーザーのリフレッシュトークンでログアウト")
+                    .reason(LogReason.REFRESH_OWNER_MISMATCH).with(LogKey.USER_ID, userId).log();
             throw refreshInvalid("Refresh token owner mismatch");
         }
 
@@ -305,7 +314,8 @@ public class AuthServiceImpl implements AuthService {
      * により、401 を返す経路でも全失効は確定する。
      */
     private AppException detectReuse(String userId) {
-        logger.warn("不正リフレッシュトークン検知").with(LogKey.USER_ID, userId).log();
+        logger.warn("不正リフレッシュトークン検知").reason(LogReason.REFRESH_REUSED)
+                .with(LogKey.USER_ID, userId).log();
         refreshTokenRepository.updateRevokedByUserId(userId);
         return refreshInvalid("Refresh token reuse detected");
     }
@@ -365,7 +375,7 @@ public class AuthServiceImpl implements AuthService {
      * メール重複の例外を作る。
      *
      * <p>相手がゲスト・Google連携のみのアカウントでも同じ扱いにする（§10 手順2）。
-     * メールアドレスは応答にもログにも載せない（§9）。
+     * メールアドレスは応答には載せない。ログへは {@link LogKey#EMAIL} がマスクした形でだけ残す（§9）。
      */
     private static AppException emailTaken() {
         return new AppException("AUTH_EMAIL_TAKEN", "Email already registered", 409);

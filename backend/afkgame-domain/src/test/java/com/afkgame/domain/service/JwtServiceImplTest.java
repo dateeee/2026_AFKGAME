@@ -40,7 +40,7 @@ class JwtServiceImplTest {
     // 発行時刻と JJWT の期限判定を同じ時間軸に置くため、実時間のクロックを渡す
     private final JwtService jwtService = new JwtServiceImpl(
             new AuthSettings(SECRET, Duration.ofMinutes(30), Duration.ofDays(30),
-                    12, 8, 128, Duration.ofDays(90)),
+                    12, 8, 128, Duration.ofDays(90), Duration.ofHours(24), Duration.ofHours(1)),
             Clock.systemUTC());
 
     private static Claims claimsOf(String token, String secret) {

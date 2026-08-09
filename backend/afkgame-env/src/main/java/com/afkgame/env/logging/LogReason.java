@@ -44,6 +44,18 @@ public enum LogReason {
     /** パスワードが一致しない。 */
     PASSWORD_MISMATCH("password_mismatch"),
 
+    /** リフレッシュトークンに該当する行が無い。 */
+    REFRESH_NOT_FOUND("refresh_not_found"),
+
+    /** リフレッシュトークンの有効期限切れ。 */
+    REFRESH_EXPIRED("refresh_expired"),
+
+    /** 失効済みのリフレッシュトークンが再利用された。 */
+    REFRESH_REUSED("refresh_reused"),
+
+    /** ログアウト時、リフレッシュトークンの持ち主が認証ユーザーと異なる。 */
+    REFRESH_OWNER_MISMATCH("refresh_owner_mismatch"),
+
     /** AOP境界ログのEND出力時、例外で抜けた（logging/application.md §3 規約3）。 */
     EXCEPTION("exception");
 

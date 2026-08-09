@@ -76,4 +76,5 @@ backend/                           # Terasoluna サーバー（war を Tomcat �
 
 - **受け取り方**: `@ConfigurationProperties` は Boot 機能のため使わない。`afkgame-env` の `@Configuration` が `@Value` で読んで設定保持 Bean を1か所で組み立て、他層はその Bean を注入する（`@Value` の直書きと環境変数の直接参照をしない。[coding_standards_backend/web.md](../../process/coding_standards_backend/web.md) §4）
 - **キーはドット区切りのみ**にする。環境変数での上書きは素の Spring の変換（`database.url` ↔ `DATABASE_URL`）に依存し、ハイフンは変換されないため（[tech_operations.md](../nonfunctional/tech_operations.md) §12.2）
-- 認証系の定数（トークン期限・bcrypt strength・パスワード要件・ゲスト期限）も同ファイルに置く（値の正は [tech_auth.md](../detail/tech_auth.md)。本書では列挙しない）
+- 認証系の定数（トークン期限・bcrypt strength・パスワード要件・ゲスト期限・確認/再設定トークンの有効期間）も同ファイルに置く（値の正は [tech_auth.md](../detail/tech_auth.md)、確認/再設定トークンは [tech_auth/mail.md](../detail/tech_auth/mail.md) §16.3。本書では列挙しない）
+- メール送信の設定（SMTP接続先・認証・タイムアウト・差出人・リンク生成元）も同ファイルに置く。キー名が `afkgame.` 始まりでないのは、キー・既定値の正が [tech_auth/mail.md](../detail/tech_auth/mail.md) §16.2 の表だからである（本書では列挙しない）

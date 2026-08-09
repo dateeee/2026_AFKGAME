@@ -12,6 +12,7 @@ import org.springframework.core.env.Environment;
 import com.afkgame.env.config.AuthSettings;
 import com.afkgame.env.config.CorsSettings;
 import com.afkgame.env.config.GameSettings;
+import com.afkgame.env.config.MailSettings;
 
 /**
  * 設定ファイルの値を読み、設定保持 Bean を組み立てる。
@@ -93,6 +94,8 @@ public class AfkgameSettingsConfig {
      * @param passwordMinLength パスワードの最小文字数
      * @param passwordMaxLength パスワードの最大文字数
      * @param guestExpireDays ゲストアカウントの有効期限（日）
+     * @param verificationTokenExpireHours メール確認トークンの有効期間（時間）
+     * @param passwordResetTokenExpireHours パスワード再設定トークンの有効期間（時間）
      * @return 組み立てた {@link AuthSettings}
      */
     @Bean
@@ -103,10 +106,42 @@ public class AfkgameSettingsConfig {
             @Value("${afkgame.auth.bcrypt.strength}") int bcryptStrength,
             @Value("${afkgame.auth.password.min.length}") int passwordMinLength,
             @Value("${afkgame.auth.password.max.length}") int passwordMaxLength,
-            @Value("${afkgame.auth.guest.expire.days}") int guestExpireDays) {
+            @Value("${afkgame.auth.guest.expire.days}") int guestExpireDays,
+            @Value("${afkgame.auth.verification.token.expire.hours}") int verificationTokenExpireHours,
+            @Value("${afkgame.auth.password.reset.token.expire.hours}") int passwordResetTokenExpireHours) {
         return new AuthSettings(secret, Duration.ofMinutes(accessTokenExpireMinutes),
                 Duration.ofDays(refreshTokenExpireDays), bcryptStrength, passwordMinLength,
-                passwordMaxLength, Duration.ofDays(guestExpireDays));
+                passwordMaxLength, Duration.ofDays(guestExpireDays),
+                Duration.ofHours(verificationTokenExpireHours),
+                Duration.ofHours(passwordResetTokenExpireHours));
+    }
+
+    /**
+     * メール送信の設定保持 Bean を組み立てる。
+     *
+     * <p>キーの正は docs/tech/detail/tech_auth/mail.md §16.2。{@code SMTP_HOST} 等は未設定を
+     * 許容する（送信せずログへ残す動作へ倒すため）ので、既定値を空文字にして起動は止めない。
+     *
+     * @param smtpHost SMTP の接続先ホスト
+     * @param smtpPort SMTP の接続先ポート
+     * @param smtpUser SMTP 認証のユーザー
+     * @param smtpPassword SMTP 認証のパスワード
+     * @param smtpTimeoutMillis SMTP の通信タイムアウト（ミリ秒）
+     * @param from 差出人アドレス
+     * @param frontendBaseUrl メール本文のリンク生成元
+     * @return 組み立てた {@link MailSettings}
+     */
+    @Bean
+    public MailSettings mailSettings(
+            @Value("${mail.smtp.host}") String smtpHost,
+            @Value("${mail.smtp.port}") int smtpPort,
+            @Value("${mail.smtp.user}") String smtpUser,
+            @Value("${mail.smtp.password}") String smtpPassword,
+            @Value("${mail.smtp.timeout}") long smtpTimeoutMillis,
+            @Value("${mail.from}") String from,
+            @Value("${frontend.base.url}") String frontendBaseUrl) {
+        return new MailSettings(smtpHost, smtpPort, smtpUser, smtpPassword,
+                Duration.ofMillis(smtpTimeoutMillis), from, frontendBaseUrl);
     }
 
     /**

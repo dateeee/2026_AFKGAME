@@ -91,7 +91,9 @@ class AuthServiceImplTest {
             Duration.ofMinutes(30),
             Duration.ofDays(30),
             12, 8, 128,
-            Duration.ofDays(90));
+            Duration.ofDays(90),
+            Duration.ofHours(24),
+            Duration.ofHours(1));
 
     @Mock
     private UserRepository userRepository;
