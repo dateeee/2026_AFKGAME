@@ -20,7 +20,7 @@
 - [docs/tech/tech_spec.md](tech/tech_spec.md) — 技術仕様の索引
   - [basic/](tech/basic/) 基本設計 — db（索引+[tech_db/](tech/basic/tech_db/) テーブル定義書）/ data / structure（§2〜§3）/ backend（§4）/ api（索引+[tech_api/](tech/basic/tech_api/) common: §5.0 共通仕様）/ architecture / logging / error_handling（§9 エラー形式・コード体系）
   - [nonfunctional/](tech/nonfunctional/) 非機能 — performance / security / operations（§12.1〜§12.3 環境・設定・監視）/ maintenance（§12.4〜§12.7 手順）
-  - [detail/](tech/detail/) 詳細設計 — battle / offline / skill / party / tick / polling / state / rng / numeric / shop / design_system / auth（索引+[tech_auth/](tech/detail/tech_auth/) account: 登録・ログイン・ログアウト）/ base / scout / forge（索引+[tech_forge/](tech/detail/tech_forge/) enhance・craft・disassemble）
+  - [detail/](tech/detail/) 詳細設計 — battle / offline / skill / party / tick / polling / state / rng / numeric / shop / design_system / auth（索引+[tech_auth/](tech/detail/tech_auth/) account: 登録・ログイン・ログアウト）/ base / scout / forge（索引+[tech_forge/](tech/detail/tech_forge/) enhance・craft・disassemble）/ tower（索引+[tech_tower/](tech/detail/tech_tower/) list・select・progress・control）
 - [docs/data/master_data.md](data/master_data.md) — マスターデータの索引 + 塔データ一覧
   - [master/](data/master/) — character / item / equipment / base / endgame
   - [TOWERS_OVERVIEW.md](data/towers/TOWERS_OVERVIEW.md) 塔一覧 / [SKILLS_OVERVIEW.md](data/skills/SKILLS_OVERVIEW.md) スキル概要

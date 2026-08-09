@@ -54,7 +54,7 @@
 | `BATTLE_` | 戦闘関連 | `BATTLE_NOT_IN_TOWER`, `BATTLE_ALREADY_WIPED`, `BATTLE_TICK_BUSY`(503) |
 | `GAME_` | ゲーム状態関連 | `GAME_STATE_NOT_FOUND` |
 | `SHOP_` | ショップ関連 | `SHOP_INSUFFICIENT_GOLD`, `SHOP_ITEM_SOLD_OUT`, `SHOP_INVENTORY_FULL` |
-| `TOWER_` | 塔関連 | `TOWER_NOT_UNLOCKED`, `TOWER_INVALID_FLOOR` |
+| `TOWER_` | 塔関連 | `TOWER_NOT_UNLOCKED`, `TOWER_INVALID_FLOOR`（一覧は [tech_tower.md §4](../detail/tech_tower.md)） |
 | `EQUIP_` | 装備関連 | `EQUIP_NOT_FOUND`, `EQUIP_SLOT_MISMATCH` |
 | `SKILL_` | スキル関連 | `SKILL_INSUFFICIENT_SP`, `SKILL_PREREQUISITE_NOT_MET`（一覧は [tech_party.md §7](../detail/tech_party.md)） |
 | `PARTY_` | パーティ関連 | `PARTY_LOCKED_IN_TOWER`, `PARTY_MEMBER_NOT_OWNED` |

@@ -39,8 +39,8 @@ stateDiagram-v2
     EXPLORING --> IN_BATTLE: エンカウント（tick内）
     IN_BATTLE --> EXPLORING: 敵撃破（tick内）
     IN_BATTLE --> IDLE: 全滅
-    EXPLORING --> IDLE: リタイア / HP閾値撤退 / 目標階クリア（stop_on_clear）
-    EXPLORING --> EXPLORING: 目標階クリア（auto_repeat）→ 1階から再開
+    EXPLORING --> IDLE: リタイア / HP閾値撤退・目標階クリア（stop_on_clear）
+    EXPLORING --> EXPLORING: 目標階クリア・HP閾値撤退（auto_repeat）→ 1階から再開
     IDLE --> BOSS_RUSH: boss-rush/start
     BOSS_RUSH --> IDLE: 全滅 / リタイア
 ```
@@ -49,12 +49,12 @@ stateDiagram-v2
 |------|------|-------|
 | 塔選択 | `POST /api/tower/select` | `currentFloor = 1`、敵情報をクリア、探索セッションを開始（§3） |
 | 全滅 | パーティ全員HP=0 | 塔・敵情報をクリア。ペナルティ適用（§3）→ `IDLE`。自動周回でも再スタートしない |
-| リタイア | `POST /api/tower/retire` | 現在の戦闘完了後に塔・敵情報をクリア。獲得済み報酬は保持 |
-| HP閾値撤退 | 階クリア後にHPが閾値以下 | リタイアと同じ後始末（battle.md §撤退条件） |
+| リタイア | `POST /api/tower/retire` | **即時に**塔・敵情報をクリア（戦闘中でも待たない。[tech_tower/control.md §11](tech_tower/control.md)）。獲得済み報酬は保持 |
+| HP閾値撤退 | 階クリア後にHPが閾値未満（判定式は [tech_tower/progress.md §9](tech_tower/progress.md)） | セッションを確定してリセット。`auto_repeat` は1階から再開（塔に留まる）、`stop_on_clear` は `IDLE` へ（battle.md §撤退条件） |
 | 目標階クリア（`stop_on_clear`） | `currentFloor > targetFloor` | 塔・敵情報をクリアし `IDLE` へ |
 | 目標階クリア（`auto_repeat`） | 同上 | `currentFloor = 1` に戻し探索継続。探索セッションは継続する |
 
-- リタイアは**現在の戦闘が完了した時点**で成立する。戦闘途中での即時中断は行わない（`battle.md` §戦闘の流れ）
+- リタイアは**即時**に成立する（戦闘途中でも塔・敵情報をクリアする。予約状態を持たない。根拠は `tech_tower/control.md` §11）
 
 ## 3. 探索セッション（run）
 
@@ -70,7 +70,7 @@ stateDiagram-v2
 |------|-------------------|
 | 塔選択（入塔） | 全フィールドを0／空でリセット |
 | 目標階クリア（`auto_repeat`） | **継続**（周回をまたいで累積する） |
-| リタイア・HP閾値撤退・目標階クリア（`stop_on_clear`） | 確定（没収なし）してリセット |
+| リタイア・HP閾値撤退・目標階クリア（`stop_on_clear`） | 確定（没収なし）してリセット。HP閾値撤退の `auto_repeat` は確定リセット後、1階から新しいセッションを開始する（塔に留まる。[tech_tower/progress.md §9](tech_tower/progress.md)） |
 | 全滅 | ペナルティを適用してリセット |
 
 **全滅ペナルティの適用順序**:
@@ -92,9 +92,9 @@ stateDiagram-v2
 
 | 操作 | `IDLE` | `EXPLORING` / `IN_BATTLE` | `BOSS_RUSH` |
 |------|:------:|:------------------------:|:-----------:|
-| `POST /api/tower/select` | ○ | ×（400 `TOWER_ALREADY_IN`） | × |
-| `POST /api/tower/retire` | ×（400） | ○ | × |
-| `PUT /api/tower/mode` | ×（400） | ○ | × |
+| `POST /api/tower/select` | ○ | ×（400 `TOWER_ALREADY_IN_TOWER`） | × |
+| `POST /api/tower/retire` | ×（400 `TOWER_NOT_IN_TOWER`） | ○ | × |
+| `PUT /api/tower/mode` | ×（400 `TOWER_NOT_IN_TOWER`） | ○ | × |
 | `PUT /api/tower/retreat-conditions` | ○ | ○ | × |
 | `POST /api/equipment/equip` | ○ | ○ | ○ |
 | `POST /api/equipment/sell` / `lock` | ○ | ○（ロック中・装備中は不可） | ○ |
@@ -108,23 +108,20 @@ stateDiagram-v2
 
 - **パーティ編成・限界突破・転生を探索中に禁止する根拠**: いずれも編成やステータスを不連続に変える操作で、探索セッション中に適用すると同一セッション内の期待被ダメージ計算（[tech_offline.md §4.1](tech_offline.md)）の前提が崩れるため
 - 装備変更・スキルセットは探索中も許可する（放置ゲームの操作性を優先。次tickから反映）
-- 塔選択の入塔前提: パーティに `hp > 0` のキャラが1体以上いること（全員HP0での入塔は `400`）
+- 塔選択の入塔前提: パーティに `hp > 0` のキャラが1体以上いること（全員HP0での入塔は `400 TOWER_PARTY_WIPED`。[tech_tower/select.md §7](tech_tower/select.md)）
 
 ## 5. 分岐一覧（単体テスト観点）
 
-| # | 分岐 | 期待結果 |
-|---|------|---------|
-| 1 | `IDLE` で `tower/retire` | `400` |
-| 2 | `EXPLORING` で `tower/select` | `400 TOWER_ALREADY_IN` |
-| 3 | 未解放の塔を選択 | `403 TOWER_NOT_UNLOCKED` |
-| 4 | `targetFloor` が上限 `min(塔別 highestFloor + 1, 総階数)` 超過 | `400 TOWER_INVALID_FLOOR` |
-| 5 | `EXPLORING` で `party/edit` | `400 PARTY_LOCKED_IN_TOWER` |
-| 6 | 全滅（`runGold=0` のとき） | ゴールド減算0・下限を割らない |
-| 7 | 全滅（装備中の装備をrun中に取得） | 装備解除のうえ削除 |
-| 8 | 全滅（EXP=0のキャラ） | EXP減算0 |
-| 9 | 全滅後のHP | 全員 maxHP |
-| 10 | `auto_repeat` で目標階クリア | `currentFloor=1`・探索セッション継続 |
-| 11 | `stop_on_clear` で目標階クリア | `IDLE`・探索セッション確定 |
-| 12 | 不変条件違反データ | `500 INTERNAL_UNEXPECTED_ERROR` + ERRORログ |
+塔操作（select・retire・mode）と階進行（目標階クリア・HP閾値撤退・上限追従）の分岐は [tech_tower.md §0](tech_tower.md) の各分冊が持つ。本表は状態機械そのもの（探索セッション・不変条件・操作ガード）の分岐のみ。
 
-- #4 は上限が `highestFloor + 1` 側で決まる場合（総階数以内だが未到達の階を指定）と `総階数` 側で決まる場合の**両方**を試験する
+| # | 分岐点 | 条件 | 期待する振る舞い |
+|---|-------|------|----------------|
+| 1 | 編成ロック | `EXPLORING` / `IN_BATTLE` で `party/edit` | `400 PARTY_LOCKED_IN_TOWER` |
+| 2 | 編成ロック | `IDLE` で `party/edit` | 変更できる（§4） |
+| 3 | 全滅ペナルティ | `runGold = 0` で全滅 | ゴールド減算0・下限を割らない |
+| 4 | 全滅ペナルティ | 装備中の装備をrun中に取得して全滅 | 装備解除のうえ削除 |
+| 5 | 全滅ペナルティ | EXP=0 のキャラで全滅 | EXP減算0 |
+| 6 | 全滅ペナルティ | 全滅後のHP | 全員 `maxHP` へ全回復 |
+| 7 | 不変条件 | 不変条件（§1.1）に違反するデータを読んだ | `500 INTERNAL_UNEXPECTED_ERROR` + ERRORログ（黙って補正しない） |
+
+> WARN許容 #7: 真偽の対を持たない例外経路（不変条件違反は §1.1 のとおり検出のみで、正常側は全分岐の前提として常に検証される）。#3〜#6 はペナルティの境界を1観点ずつ試験する行で、適用順そのものの網羅は §3 の6手順を通しで検証するテストが担う。
