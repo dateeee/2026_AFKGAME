@@ -16,8 +16,9 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.terasoluna.gfw.common.exception.BusinessException;
+import org.terasoluna.gfw.common.message.ResultMessages;
 
-import com.afkgame.domain.exception.AppException;
 import com.afkgame.domain.model.EmailVerificationToken;
 import com.afkgame.domain.model.RefreshToken;
 import com.afkgame.domain.model.User;
@@ -110,15 +111,15 @@ public class AuthServiceImpl implements AuthService {
      * {@inheritDoc}
      *
      * <p>不正検知による全トークン失効は 401 を返す場合でも確定させる必要があるため、
-     * {@link AppException} ではロールバックしない（tech_auth.md §4「不正検知」）。
+     * {@link BusinessException} ではロールバックしない（tech_auth.md §4「不正検知」）。
      */
     @Override
-    @Transactional(noRollbackFor = AppException.class)
+    @Transactional(noRollbackFor = BusinessException.class)
     public AuthResult refresh(String refreshToken) {
         RefreshToken stored = refreshTokenRepository.findByTokenHash(hashToken(refreshToken));
         if (stored == null) {
             logger.warn("リフレッシュ失敗").reason(LogReason.REFRESH_NOT_FOUND).log();
-            throw refreshInvalid("Invalid refresh token");
+            throw refreshInvalid();
         }
 
         if (stored.isRevoked()) {
@@ -128,7 +129,7 @@ public class AuthServiceImpl implements AuthService {
         if (stored.getExpiresAt().isBefore(clock.instant())) {
             logger.warn("リフレッシュ失敗").reason(LogReason.REFRESH_EXPIRED)
                     .with(LogKey.USER_ID, stored.getUserId()).log();
-            throw refreshInvalid("Refresh token expired");
+            throw refreshInvalid();
         }
 
         // 失効させられるのは未失効の1本だけ。0件なら同じトークンで並走した他のリクエストが
@@ -141,7 +142,7 @@ public class AuthServiceImpl implements AuthService {
         if (user == null) {
             logger.warn("リフレッシュ失敗").reason(LogReason.USER_NOT_FOUND)
                     .with(LogKey.USER_ID, stored.getUserId()).log();
-            throw refreshInvalid("User not found");
+            throw refreshInvalid();
         }
         return issueTokens(user);
     }
@@ -156,7 +157,7 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findById(userId);
         if (user == null) {
             logger.warn("認証失敗").reason(LogReason.USER_NOT_FOUND).with(LogKey.USER_ID, userId).log();
-            throw new AppException("AUTH_USER_NOT_FOUND", "User not found", 401);
+            throw authError("AUTH_USER_NOT_FOUND");
         }
         return user;
     }
@@ -267,13 +268,13 @@ public class AuthServiceImpl implements AuthService {
         if (stored == null) {
             logger.warn("ログアウト失敗").reason(LogReason.REFRESH_NOT_FOUND)
                     .with(LogKey.USER_ID, userId).log();
-            throw refreshInvalid("Refresh token not found");
+            throw refreshInvalid();
         }
 
         if (!stored.getUserId().equals(userId)) {
             logger.warn("他ユーザーのリフレッシュトークンでログアウト")
                     .reason(LogReason.REFRESH_OWNER_MISMATCH).with(LogKey.USER_ID, userId).log();
-            throw refreshInvalid("Refresh token owner mismatch");
+            throw refreshInvalid();
         }
 
         if (stored.isRevoked()) {
@@ -312,14 +313,14 @@ public class AuthServiceImpl implements AuthService {
      * 再利用を検知し、当該ユーザーのトークンを全失効させたうえで返す例外を作る。
      *
      * <p>失効済みの行を読んだ場合と、失効更新に負けた場合（同時実行）の両方から呼ぶ
-     * （tech_auth.md §4「不正検知」）。{@code @Transactional(noRollbackFor = AppException.class)}
+     * （tech_auth.md §4「不正検知」）。{@code @Transactional(noRollbackFor = BusinessException.class)}
      * により、401 を返す経路でも全失効は確定する。
      */
-    private AppException detectReuse(String userId) {
+    private BusinessException detectReuse(String userId) {
         logger.warn("不正リフレッシュトークン検知").reason(LogReason.REFRESH_REUSED)
                 .with(LogKey.USER_ID, userId).log();
         refreshTokenRepository.updateRevokedByUserId(userId);
-        return refreshInvalid("Refresh token reuse detected");
+        return refreshInvalid();
     }
 
     /** アクセストークンを発行し、リフレッシュトークンを新規保存する。 */
@@ -368,9 +369,10 @@ public class AuthServiceImpl implements AuthService {
      *
      * <p>失敗理由（不正・再利用・期限切れ）はクライアントへ出し分けない。
      * どれも「再ログインが必要」であり、区別はトークン探索の手がかりになるため。
+     * 内部の切り分けは送出元が出すログの {@code reason} が持つ。
      */
-    private static AppException refreshInvalid(String reason) {
-        return new AppException("AUTH_REFRESH_INVALID", reason, 401);
+    private static BusinessException refreshInvalid() {
+        return authError("AUTH_REFRESH_INVALID");
     }
 
     /**
@@ -379,8 +381,8 @@ public class AuthServiceImpl implements AuthService {
      * <p>相手がゲスト・Google連携のみのアカウントでも同じ扱いにする（§10 手順2）。
      * メールアドレスは応答には載せない。ログへは {@link LogKey#EMAIL} がマスクした形でだけ残す（§9）。
      */
-    private static AppException emailTaken() {
-        return new AppException("AUTH_EMAIL_TAKEN", "Email already registered", 409);
+    private static BusinessException emailTaken() {
+        return authError("AUTH_EMAIL_TAKEN");
     }
 
     /**
@@ -389,7 +391,17 @@ public class AuthServiceImpl implements AuthService {
      * <p>未登録・パスワード未設定・不一致のどれであるかを**クライアントには**区別させない
      * （§12 末尾）。内部の切り分けはログの {@code reason} が持つ。
      */
-    private static AppException invalidCredentials() {
-        return new AppException("AUTH_INVALID_CREDENTIALS", "Invalid email or password", 401);
+    private static BusinessException invalidCredentials() {
+        return authError("AUTH_INVALID_CREDENTIALS");
+    }
+
+    /**
+     * 認証系のビジネス例外を作る。
+     *
+     * <p>載せるのはコードだけで、文言もステータスも持たせない（規約 exception.md §3 #5・§4 #4）。
+     * 文言はフロントエンドがコードから組み立て、ステータスは Web 層の対応表が決める。
+     */
+    private static BusinessException authError(String code) {
+        return new BusinessException(ResultMessages.error().add(code));
     }
 }

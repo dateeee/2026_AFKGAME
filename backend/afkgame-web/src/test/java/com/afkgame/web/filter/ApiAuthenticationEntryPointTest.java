@@ -12,8 +12,9 @@ import org.slf4j.MDC;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
+import org.terasoluna.gfw.common.exception.BusinessException;
+import org.terasoluna.gfw.common.message.ResultMessages;
 
-import com.afkgame.domain.exception.AppException;
 import com.afkgame.env.logging.LogKey;
 
 import tools.jackson.databind.json.JsonMapper;
@@ -39,7 +40,7 @@ class ApiAuthenticationEntryPointTest {
         MDC.clear();
     }
 
-    private MockHttpServletResponse commence(AppException failure) throws Exception {
+    private MockHttpServletResponse commence(BusinessException failure) throws Exception {
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/game/state");
         if (failure != null) {
             request.setAttribute(JwtAuthenticationFilter.AUTH_FAILURE_ATTRIBUTE, failure);
@@ -49,17 +50,24 @@ class ApiAuthenticationEntryPointTest {
         return response;
     }
 
+    /**
+     * 記録された失敗理由のコードを返す。
+     *
+     * <p>ステータスと文言は例外ではなく {@link ErrorCatalog} が決める（規約 exception.md §4 #4）。
+     * 例外の {@code getMessage()}（{@code ResultMessages} の {@code toString()}）は応答へ出さない。
+     */
     @Test
     @DisplayName("記録された失敗理由のコードを返す")
     void test_記録された失敗理由を返す() throws Exception {
         MockHttpServletResponse response =
-                commence(new AppException("AUTH_TOKEN_EXPIRED", "Token expired", 401));
+                commence(new BusinessException(ResultMessages.error().add("AUTH_TOKEN_EXPIRED")));
 
         assertThat(response.getStatus()).isEqualTo(401);
         assertThat(response.getContentType()).startsWith("application/json");
         assertThat(response.getContentAsString(StandardCharsets.UTF_8))
                 .contains("\"code\":\"AUTH_TOKEN_EXPIRED\"")
-                .contains("\"message\":\"Token expired\"");
+                .contains("\"message\":\"アクセストークンの有効期限が切れています\"")
+                .doesNotContain("ResultMessage");
     }
 
     @Test

@@ -1,6 +1,7 @@
 package com.afkgame.domain.service;
 
-import com.afkgame.domain.exception.AppException;
+import org.terasoluna.gfw.common.exception.BusinessException;
+
 import com.afkgame.domain.model.User;
 
 /**
@@ -37,7 +38,7 @@ public interface AuthService {
      *
      * @param refreshToken クライアントが持つ生のリフレッシュトークン
      * @return 新しいトークンペア
-     * @throws AppException {@code AUTH_REFRESH_INVALID}（不正・再利用・期限切れ）
+     * @throws BusinessException {@code AUTH_REFRESH_INVALID}（不正・再利用・期限切れ）
      */
     AuthResult refresh(String refreshToken);
 
@@ -46,7 +47,7 @@ public interface AuthService {
      *
      * @param userId トークンの {@code sub}
      * @return 該当ユーザー
-     * @throws AppException {@code AUTH_USER_NOT_FOUND}（トークンは正当だがユーザーが存在しない）
+     * @throws BusinessException {@code AUTH_USER_NOT_FOUND}（トークンは正当だがユーザーが存在しない）
      */
     User findAuthenticatedUser(String userId);
 
@@ -63,7 +64,7 @@ public interface AuthService {
      * @param email 登録するメールアドレス
      * @param rawPassword 生のパスワード
      * @return 作成したユーザーとトークンペア
-     * @throws AppException {@code AUTH_EMAIL_TAKEN}（メールが使用済み）
+     * @throws BusinessException {@code AUTH_EMAIL_TAKEN}（メールが使用済み）
      */
     AuthResult register(String email, String rawPassword);
 
@@ -76,7 +77,7 @@ public interface AuthService {
      * @param email メールアドレス
      * @param rawPassword 生のパスワード
      * @return 認証したユーザーとトークンペア
-     * @throws AppException {@code AUTH_INVALID_CREDENTIALS}（未登録・パスワード未設定・不一致）
+     * @throws BusinessException {@code AUTH_INVALID_CREDENTIALS}（未登録・パスワード未設定・不一致）
      */
     AuthResult login(String email, String rawPassword);
 
@@ -89,7 +90,7 @@ public interface AuthService {
      *
      * @param userId 手順1で特定した認証ユーザーのID
      * @param refreshToken クライアントが持つ生のリフレッシュトークン
-     * @throws AppException {@code AUTH_REFRESH_INVALID}（該当なし・他人のトークン）
+     * @throws BusinessException {@code AUTH_REFRESH_INVALID}（該当なし・他人のトークン）
      */
     void logout(String userId, String refreshToken);
 }

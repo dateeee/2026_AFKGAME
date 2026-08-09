@@ -38,6 +38,9 @@ public enum LogKey {
     /** 失敗理由。値は {@link LogReason}。 */
     REASON("reason"),
 
+    /** システム例外のエラーコード。運用者が原因を特定するために残す（応答へは出さない）。 */
+    ERROR_CODE("error_code"),
+
     /** 処理対象のユーザーID。認証済みを表す {@link #PLAYER_ID} とは別項目。 */
     USER_ID("user_id"),
 

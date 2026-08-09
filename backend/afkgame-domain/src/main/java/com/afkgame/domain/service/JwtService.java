@@ -1,6 +1,7 @@
 package com.afkgame.domain.service;
 
-import com.afkgame.domain.exception.AppException;
+import org.terasoluna.gfw.common.exception.BusinessException;
+
 import com.afkgame.env.logging.MaskReturnValue;
 
 /**
@@ -41,7 +42,7 @@ public interface JwtService {
      *
      * @param token 検証するトークン
      * @return {@code sub} クレームのユーザーID
-     * @throws AppException 期限切れ（{@code AUTH_TOKEN_EXPIRED}）または不正（{@code AUTH_INVALID_TOKEN}）
+     * @throws BusinessException 期限切れ（{@code AUTH_TOKEN_EXPIRED}）または不正（{@code AUTH_INVALID_TOKEN}）
      */
     String parseUserId(String token);
 }

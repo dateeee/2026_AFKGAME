@@ -19,8 +19,9 @@ import org.springframework.mock.web.MockFilterChain;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.terasoluna.gfw.common.exception.BusinessException;
+import org.terasoluna.gfw.common.message.ResultMessages;
 
-import com.afkgame.domain.exception.AppException;
 import com.afkgame.domain.model.User;
 import com.afkgame.domain.service.AuthService;
 import com.afkgame.domain.service.JwtService;
@@ -72,10 +73,20 @@ class JwtAuthenticationFilterTest {
         return request;
     }
 
-    /** フィルタを通し、記録された認証失敗を返す（失敗が無ければ null）。 */
-    private AppException runFilter(MockHttpServletRequest request) throws Exception {
+    /** フィルタを通し、記録された認証失敗のコードを返す（失敗が無ければ null）。 */
+    private String runFilter(MockHttpServletRequest request) throws Exception {
         filter().doFilter(request, new MockHttpServletResponse(), new MockFilterChain());
-        return (AppException) request.getAttribute(JwtAuthenticationFilter.AUTH_FAILURE_ATTRIBUTE);
+        BusinessException failure = (BusinessException) request.getAttribute(
+                JwtAuthenticationFilter.AUTH_FAILURE_ATTRIBUTE);
+        if (failure == null) {
+            return null;
+        }
+        return ErrorCatalog.codeOf(failure);
+    }
+
+    /** サービス層が投げる業務例外（コードだけを載せる。規約 exception.md §3 #1）。 */
+    private static BusinessException authError(String code) {
+        return new BusinessException(ResultMessages.error().add(code));
     }
 
     @Nested
@@ -93,21 +104,17 @@ class JwtAuthenticationFilterTest {
 
         @Test
         void test_Bearer形式でなければAUTH_INVALID_FORMATを記録する() throws Exception {
-            AppException failure = runFilter(request("Basic dXNlcjpwYXNz"));
+            assertThat(runFilter(request("Basic dXNlcjpwYXNz"))).isEqualTo("AUTH_INVALID_FORMAT");
 
-            assertThat(failure.getCode()).isEqualTo("AUTH_INVALID_FORMAT");
-            assertThat(failure.getStatus()).isEqualTo(401);
             assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
         }
 
         @Test
         void test_トークンが不正なら検証時のコードを引き継ぐ() throws Exception {
-            when(jwtService.parseUserId("bad-token"))
-                    .thenThrow(new AppException("AUTH_INVALID_TOKEN", "Invalid token", 401));
+            when(jwtService.parseUserId("bad-token")).thenThrow(authError("AUTH_INVALID_TOKEN"));
 
-            AppException failure = runFilter(request("Bearer bad-token"));
+            assertThat(runFilter(request("Bearer bad-token"))).isEqualTo("AUTH_INVALID_TOKEN");
 
-            assertThat(failure.getCode()).isEqualTo("AUTH_INVALID_TOKEN");
             assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
         }
 
@@ -115,11 +122,10 @@ class JwtAuthenticationFilterTest {
         void test_ユーザーが存在しなければAUTH_USER_NOT_FOUNDを記録する() throws Exception {
             when(jwtService.parseUserId("orphan-token")).thenReturn("guest_404");
             when(authService.findAuthenticatedUser("guest_404"))
-                    .thenThrow(new AppException("AUTH_USER_NOT_FOUND", "User not found", 401));
+                    .thenThrow(authError("AUTH_USER_NOT_FOUND"));
 
-            AppException failure = runFilter(request("Bearer orphan-token"));
+            assertThat(runFilter(request("Bearer orphan-token"))).isEqualTo("AUTH_USER_NOT_FOUND");
 
-            assertThat(failure.getCode()).isEqualTo("AUTH_USER_NOT_FOUND");
             assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
         }
     }

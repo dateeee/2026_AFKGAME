@@ -41,7 +41,7 @@ import com.afkgame.web.filter.ApiExceptionHandler;
  * docs/tech/basic/tech_api/common.md §5.0（ボディのキーは camelCase）。
  *
  * <p>分岐観点: ゲスト作成 / リフレッシュ（いずれも同じ応答形式）。エラー系はサービス層が
- * {@code AppException} を投げ、{@code ApiExceptionHandler} が応答へ変換する。
+ * {@code BusinessException} を投げ、{@code ApiExceptionHandler} が応答へ変換する。
  * 骨格構築（java_migration.md STEP 2）の横断基盤であり詳細設計の分岐一覧を持たないため、
  * ゲスト作成とリフレッシュには分岐マーカーを付けない。
  *
