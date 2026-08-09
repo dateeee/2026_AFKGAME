@@ -72,9 +72,9 @@
 
 ## 7. ログ
 
-**正は [logging.md](logging.md)**（層を問わない。ログ3種別＝通信ログ・アプリケーションログ・エラーログの定義と出力先、AOP による境界ログ、業務ログの書き方、禁止事項）。本書では再掲しない。
+**正は [logging.md](logging.md)**（層を問わない。ログ3種別＝通信ログ・アプリケーションログ・エラーログの定義と出力先、エラーログ、禁止事項。種別ごとの書き方は [logging_communication.md](logging_communication.md)（§2 通信ログ）と [logging_application.md](logging_application.md)（§3 AOP 境界ログ・§4 業務ログ）が持つ）。本書では再掲しない。
 
-最低限おさえるのは次の3点で、詳細はすべて `logging.md` にある。
+最低限おさえるのは次の3点で、詳細はすべて `logging.md` とその分冊にある。
 
 | # | 規約 |
 |---|------|
