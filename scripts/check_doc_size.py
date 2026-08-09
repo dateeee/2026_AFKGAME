@@ -30,6 +30,13 @@ LIMITS = {
 # H2セクションの上限（documentation_rules.md §4）
 SECTION_LIMIT = 2000
 
+# ── 上限を緩和する例外（documentation_rules.md §3.1）──
+# 準拠元ガイドラインの章立てに沿って規約と差分を1テーマへ書き切る必要があり、
+# これ以上分割すると「どの規約がどの分冊か」の探索コストが上限の効果を上回るもの。
+# 増やすときは documentation_rules.md §3.1 の表と同時に更新する。
+RELAXED_PREFIXES = ("docs/process/coding_standards_backend",)
+RELAXED_FACTOR = 1.5
+
 EXCLUDE = (
     "node_modules/",
     ".git/",
@@ -50,11 +57,7 @@ HISTORY_HEADING = re.compile(r"^#{1,6}\s*(?:\d+(?:\.\d+)*\.?\s*)?(?:変更|更�
 # 区分A・Dは登録不可（毎ターン・スキル起動ごとに読み込まれ放置コストが複利のため、セッション内に移管優先で是正）。
 # Phase完了ゲートでは本台帳が空であること。
 # 例: "docs/tech/basic/tech_data.md": "分割（レイヤー分割: スキーマ/JSON構造）",
-KNOWN_OVERSIZED: dict[str, str] = {
-    "docs/backlog/efficiency_memo.md": (
-        "圧縮 — Stop フックの追記で超過。/retro で消化して反映済みエントリを削除する（削除で解消する運用）"
-    ),
-}
+KNOWN_OVERSIZED: dict[str, str] = {}
 
 # 台帳登録を許す区分（documentation_rules.md §7。区分A・Dはセッション内是正）
 DEFERRABLE_ZONES = frozenset({"B 索引", "C 仕様・設計"})
@@ -71,6 +74,22 @@ def zone_of(rel: str) -> str:
     return "C 仕様・設計"
 
 
+def is_relaxed(rel: str) -> bool:
+    """上限を1.5倍に緩和する例外（documentation_rules.md §3.1）か。"""
+    return any(rel == f"{p}.md" or rel.startswith(f"{p}/") for p in RELAXED_PREFIXES)
+
+
+def limit_of(rel: str) -> int:
+    """ファイルの文字数上限（区分の上限。緩和例外は RELAXED_FACTOR 倍）。"""
+    base = LIMITS[zone_of(rel)]
+    return int(base * RELAXED_FACTOR) if is_relaxed(rel) else base
+
+
+def section_limit_of(rel: str) -> int:
+    """H2 セクションの上限（緩和例外は RELAXED_FACTOR 倍）。"""
+    return int(SECTION_LIMIT * RELAXED_FACTOR) if is_relaxed(rel) else SECTION_LIMIT
+
+
 def collect() -> list[tuple[str, str, int, int]]:
     """(相対パス, 区分, 文字数, 上限) の一覧を返す。"""
     rows = []
@@ -79,8 +98,7 @@ def collect() -> list[tuple[str, str, int, int]]:
         if any(rel.startswith(x) or f"/{x}" in f"/{rel}" for x in EXCLUDE):
             continue
         text = path.read_text(encoding="utf-8")
-        zone = zone_of(rel)
-        rows.append((rel, zone, len(text), LIMITS[zone]))
+        rows.append((rel, zone_of(rel), len(text), limit_of(rel)))
     return rows
 
 
@@ -118,7 +136,7 @@ def sections_of(rel: str) -> list[tuple[str, int]]:
 
 def oversized_sections(rel: str) -> list[tuple[str, int]]:
     """上限を超えた H2 セクションの (見出し, 文字数) を返す。"""
-    return [(h, c) for h, c in sections_of(rel) if c > SECTION_LIMIT]
+    return [(h, c) for h, c in sections_of(rel) if c > section_limit_of(rel)]
 
 
 def resolve_rel(target: str) -> str | None:
@@ -151,12 +169,14 @@ def report_sections(targets: list[str]) -> int:
             continue
         total = len((ROOT / rel).read_text(encoding="utf-8"))
         zone = zone_of(rel)
-        limit = LIMITS[zone]
+        limit = limit_of(rel)
+        sec_limit = section_limit_of(rel)
         rest = f"残り {limit - total:,}字" if total <= limit else f"{total - limit:,}字 超過"
-        print(f"\n{rel}  {total:,}字 / 上限 {limit:,}字（区分{zone[0]}・{rest}）")
+        relaxed = f"・×{RELAXED_FACTOR} 緩和（§3.1）" if is_relaxed(rel) else ""
+        print(f"\n{rel}  {total:,}字 / 上限 {limit:,}字（区分{zone[0]}{relaxed}・{rest}）")
         sections = sections_of(rel)
         for heading, chars in sorted(sections, key=lambda s: -s[1]):
-            mark = "!" if chars > SECTION_LIMIT else " "
+            mark = "!" if chars > sec_limit else " "
             print(f"{chars:>7} {mark} {heading}")
         print(f"{total - sum(c for _, c in sections):>7}   （前文・H2見出し行）")
     return 0
@@ -216,7 +236,7 @@ def main() -> int:
     if "--sections" in args:
         for rel, _, _, _ in rows:
             for heading, chars in oversized_sections(rel):
-                print(f"WARN  {rel}: {heading} が {chars:,}字 > {SECTION_LIMIT:,}字")
+                print(f"WARN  {rel}: {heading} が {chars:,}字 > {section_limit_of(rel):,}字")
 
     ok = len(rows) - len(errors) - len(known)
     print(f"\n{len(rows)} files checked: {ok} OK, {len(known)} 台帳登録, {len(errors)} 違反, 残量WARN {len(nears)}", end="")

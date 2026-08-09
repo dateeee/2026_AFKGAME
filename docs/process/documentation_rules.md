@@ -31,8 +31,16 @@ AIエージェント（Claude Code）と人間が共同で開発するため、�
 | **A. 常時読込** | `CLAUDE.md` | 2,500 | **3,000** | 全セッション・全ターンで読み込まれるため最も厳格 |
 | **B. 索引** | `README.md`、`**/*_OVERVIEW.md` | 4,000 | **6,000** | 目次として全体を見渡す。詳細は持たない |
 | **C. 仕様・設計・データ** | `docs/**`（設計図 `docs/diagrams/**` を含む） | 6,000 | **8,000** | 1テーマを1回の読み込みで完結できる粒度 |
-| **D. エージェント定義** | `.claude/skills/**`、`.claude/references/**`、`.claude/project/**` | 4,000 | **5,000** | スキル起動時に読み込まれる |
+| **D. エージェント定義** | `.claude/**`（スクリプト・フックを含む全体） | 4,000 | **5,000** | スキル起動時に読み込まれる |
 | **除外** | `docs/reviews/**`、`docs/changelog.md`、`node_modules/**` | — | — | 追記型アーカイブ（§5.1・§9） |
+
+### 3.1 上限を緩和する例外
+
+| 対象 | 倍率 | 理由 |
+|------|------|------|
+| `docs/process/coding_standards_backend.md` と同名ディレクトリ配下 | **×1.5**（区分C 12,000字・H2 3,000字・H3 1,500字） | 準拠元（TERASOLUNA 開発ガイドライン）の章立てに沿って「規約 + ガイドラインとの差分」を1テーマへ書き切る必要がある。これ以上割ると「どの規約がどの分冊か」の探索コストが上限の効果を上回る |
+
+例外は `check_doc_size.py` の `RELAXED_PREFIXES` / `RELAXED_FACTOR` が持つ。**増やすときは本表と同時に更新する**。
 
 ### 上限8,000字の根拠
 
@@ -48,6 +56,7 @@ AIエージェント（Claude Code）と人間が共同で開発するため、�
 
 - 1ファイルの H2 は **7個以内**（多すぎる場合は複数テーマの混在を疑う）
 - 見出し階層は **H3まで**。H4が必要になったら子ファイルへ分割する
+- H2・H3の上限にも §3.1 の緩和倍率が効く（緩和対象は H2 3,000字・H3 1,500字）
 
 ## 5. 記述スタイル
 
@@ -131,20 +140,9 @@ python scripts/check_docs.py              # リンク・索引到達性・曖昧
 
 ## 8. 分割実績（2026-08-02 完了）
 
-制定時に上限を超えていた8ファイルは、すべて索引 + 個別ファイルへ分割済み。
+制定時に上限を超えていた8ファイル（最大は `game_spec.md` 35,042字）は、すべて索引 + 個別ファイルへ分割済み。索引と子ディレクトリの対応は [README.md](../../README.md) のドキュメント索引が正、分割前後の内訳は [changelog.md](../changelog.md) 2026-08-02 に記録。
 
-| 元ファイル | 分割前 | 分割後（索引） | 子ファイル |
-|-----------|-------|--------------|-----------|
-| `docs/design/game_spec.md` | 35,042 | 4,242 | `design/systems/` 7件（3,235〜6,902） |
-| `docs/tech/tech_spec.md` | 27,052 | 2,663 | `tech/tech_{data,structure,api,architecture,logging}.md` 5件（3,550〜6,774） |
-| `docs/diagrams/api_sequence.md` | 19,311 | 887 | `api_sequence/` 6件（2,101〜4,840） |
-| `docs/data/master_data.md` | 19,273 | 3,470 | `data/master/` 5件（1,673〜5,302） |
-| `docs/diagrams/class_diagram.md` | 15,301 | 980 | `class_diagram/` 3件（4,302〜5,932） |
-| `docs/diagrams/battle_flow.md` | 11,592 | 641 | `battle_flow/` 4件（1,663〜5,522） |
-| `docs/diagrams/er_diagram.md` | 10,978 | 859 | `er_diagram/` 3件（2,528〜5,279） |
-| `docs/tech/tech_battle_offline.md` | 8,445 | 5,529 | `tech_offline.md`（3,278）。オフライン計算を分離し `tech_battle.md` へ改名 |
-
-- 全81ファイルが上限内（`python scripts/check_doc_size.py` が exit 0）
+- 全ファイルが上限内（`python scripts/check_doc_size.py` が exit 0）
 - 索引ファイル・子ファイルとも節番号を維持している（§6「分割時の必須事項」）
 
 ### 残課題

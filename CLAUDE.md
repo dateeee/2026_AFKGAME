@@ -11,8 +11,8 @@ Markdownには文字数上限を設けている。詳細は [docs/process/docume
 |------|------|------|
 | A | `CLAUDE.md` | 3,000字 |
 | B | `README.md`、`*_OVERVIEW.md` | 6,000字 |
-| C | `docs/**`（設計図 `docs/diagrams/**` を含む） | 8,000字 |
-| D | `.claude/skills/**`、`.claude/references/**`、`.claude/project/**` | 5,000字 |
+| C | `docs/**`（設計図含む。規約 `coding_standards_backend**` は上限×1.5） | 8,000字 |
+| D | `.claude/**` | 5,000字 |
 
 - 原則: **1ファイル = 1テーマ = 1回の読み込みで完結**
 - H2セクションは2,000字以内。表を優先し、同じ仕様を複数ファイルに重複させない（正の宣言は [docs/process/spec_ownership.md](docs/process/spec_ownership.md)）

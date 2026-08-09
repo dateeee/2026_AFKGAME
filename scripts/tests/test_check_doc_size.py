@@ -55,6 +55,88 @@ def test_oversized_sections_returns_only_over_limit(root):
     assert [h for h, _ in mod.oversized_sections(rel)] == ["## 大"]
 
 
+# ── 上限の緩和例外（documentation_rules.md §3.1）────────────
+
+RELAXED_DIR = "docs/process/coding_standards_backend"
+
+
+@pytest.fixture
+def relaxed_root(root):
+    """緩和対象のディレクトリを用意した root。"""
+    (root / RELAXED_DIR).mkdir(parents=True)
+    return root
+
+
+@pytest.mark.parametrize(
+    "rel, relaxed",
+    [
+        (f"{RELAXED_DIR}.md", True),
+        (f"{RELAXED_DIR}/basis.md", True),
+        ("docs/process/coding_standards_backend_old.md", False),
+        ("docs/process/documentation_rules.md", False),
+    ],
+)
+def test_is_relaxed_matches_index_and_children_only(rel, relaxed):
+    assert mod.is_relaxed(rel) is relaxed
+
+
+def test_limit_of_scales_relaxed_file_and_leaves_others():
+    base = mod.LIMITS["C 仕様・設計"]
+    assert mod.limit_of(f"{RELAXED_DIR}/basis.md") == int(base * mod.RELAXED_FACTOR)
+    assert mod.limit_of("docs/a.md") == base
+
+
+def test_section_limit_of_scales_relaxed_file_and_leaves_others():
+    assert mod.section_limit_of(f"{RELAXED_DIR}/basis.md") == int(
+        mod.SECTION_LIMIT * mod.RELAXED_FACTOR
+    )
+    assert mod.section_limit_of("docs/a.md") == mod.SECTION_LIMIT
+
+
+def test_oversized_sections_allows_relaxed_h2_up_to_factor(relaxed_root):
+    """緩和対象では通常上限超えの H2 も、緩和後の上限までは違反にしない。"""
+    body = "あ" * (mod.SECTION_LIMIT + 1)
+    rel = write(relaxed_root, f"{RELAXED_DIR}/basis.md", f"## 一\n{body}\n")
+    assert mod.oversized_sections(rel) == []
+
+    over = "あ" * (mod.section_limit_of(rel) + 1)
+    rel2 = write(relaxed_root, f"{RELAXED_DIR}/web.md", f"## 一\n{over}\n")
+    assert [h for h, _ in mod.oversized_sections(rel2)] == ["## 一"]
+
+
+def test_collect_reports_relaxed_limit_for_exception_files(relaxed_root):
+    write(relaxed_root, f"{RELAXED_DIR}/basis.md", "x")
+    write(relaxed_root, "docs/a.md", "x")
+    limits = {rel: limit for rel, _, _, limit in mod.collect()}
+    assert limits[f"{RELAXED_DIR}/basis.md"] == int(
+        mod.LIMITS["C 仕様・設計"] * mod.RELAXED_FACTOR
+    )
+    assert limits["docs/a.md"] == mod.LIMITS["C 仕様・設計"]
+
+
+def test_main_accepts_relaxed_file_over_base_limit(relaxed_root, monkeypatch, capsys):
+    """区分Cの上限は超えるが緩和後の上限内なら違反にしない。"""
+    write(relaxed_root, f"{RELAXED_DIR}/basis.md", "あ" * (mod.LIMITS["C 仕様・設計"] + 100))
+    monkeypatch.setattr(mod.sys, "argv", ["check_doc_size.py"])
+    assert mod.main() == 0
+    assert "ERROR" not in capsys.readouterr().out
+
+
+def test_main_rejects_relaxed_file_over_relaxed_limit(relaxed_root, monkeypatch, capsys):
+    rel = f"{RELAXED_DIR}/basis.md"
+    write(relaxed_root, rel, "あ" * (mod.limit_of(rel) + 1))
+    monkeypatch.setattr(mod.sys, "argv", ["check_doc_size.py"])
+    assert mod.main() == 1
+    assert f"ERROR {rel}" in capsys.readouterr().out
+
+
+def test_report_sections_marks_relaxed_limit_in_header(relaxed_root, capsys):
+    rel = write(relaxed_root, f"{RELAXED_DIR}/basis.md", "## 一\nAAA\n")
+    mod.report_sections([rel])
+    out = capsys.readouterr().out
+    assert f"上限 {mod.limit_of(rel):,}字" in out and "緩和" in out
+
+
 # ── resolve_rel ──────────────────────────────────────────────
 
 def test_resolve_rel_accepts_root_relative_path(root, monkeypatch, tmp_path):
