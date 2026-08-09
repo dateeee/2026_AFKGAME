@@ -46,3 +46,8 @@
 - シグナル: long-turn(calls=43)
 - ターン概要: ツール43回・エラー1回・拒否0回。開始:「<command-message>next</command-message>」
 - 原因と改善案: **引き継ぎ確認 → 鮮度検証 → 仕様4件の該当節読み → 雛形設定10件の把握 → 計画提示まで到達した分量**で long-turn 自体は概ね誤検出。ただし**実在の非効率が2件**: ① 外部ライブラリの実在確認（Jackson 3/2 の同居・`JacksonJsonHttpMessageConverter` のコンストラクタ・`DispatcherServlet` の既定・logback `JsonEncoder`・Flyway 版）を `javap`/`unzip` で**5回の往復に分けて**投げた（前の答えが次の問いを生む形で芋づる式に増えた）→ [.claude/project/dev.md](../../.claude/project/dev.md) §5 の注意3（版調査はまとめて1回）へ「**API の実在確認（クラス名・コンストラクタ・既定値の有無）も同じ扱い**。着手前に確認項目を列挙し `javap`/`unzip` を1バッチで出す」を併記 ② `mvn dependency:tree` に `-q` を付けてツリー出力ごと消し、1回空振りした → 同§5へ「`dependency:tree` は `-q` を付けない（ツリーは INFO で出るため消える）」を追記。
+
+## 2026-08-09 11:38 | session 49abca2c | 自動検出
+- シグナル: long-turn(calls=70)
+- ターン概要: ツール70回・エラー0回・拒否0回。開始:「<ide_selection>The user selected the lines 44 to 45 from c:\」
+- 原因と改善案: **2R-C の実装18ファイル・ビルド・起動スモーク・文書反映・統合・引き継ぎ更新まで1ターンで完走した分量**で long-turn は概ね誤検出（エラー0）。ただし**実在の非効率が2件**: ① 既存ファイルを確認するつもりで `Write` を呼び、`AfkgameDomainConfig.java.probe` を作って消す往復をした（ツールの取り違え。既存ファイルの確認は `Read` か `ctx_execute` に限る） ② **残量250字の [steps.md](java_migration/steps.md) へ「圧縮 + 追記」を同時に行う際、置換前後の `len()` 差で net を見積もって書いたが、チェッカー実測は 51字 超過**で2回追加圧縮した（複数箇所の増減を積み上げると誤差が乗り、`len()` は見積もりにしかならない）→ [.claude/project/doc-size.md](../../.claude/project/doc-size.md) §3.1 の判断 #0 へ「**残量300字未満のファイルで圧縮と追記を同時に行うときは見積もりで確定させず、編集後に `--sections` を再実行して確認する**」を追記し、[profile.md](../../.claude/project/profile.md) §7 規約7（`len()` で実測）にも同じ但し書きを付ける。
