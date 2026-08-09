@@ -28,3 +28,9 @@
 - ターン概要: ツール104回・エラー4回・拒否0回。開始:「<command-message>next</command-message>」
 - 原因と改善案: 4件とも worktree 特有の制約で、**その回避策は `worktree_guide.md` §5.4 に既出**（複合コマンド・ループの拒否、`ctx_execute_file` がルート外で拒否）。`/next` から worktree へ入った後に §5.4 を読まず、main と同じ流儀で Bash の相対パス・`for` ループ・`ctx_execute_file` を使ったのが原因で、規約の不足ではない。
   → `worktree_guide.md` §5.2 の表（開始手順）へ「手順2の直後に §5.4 の注意を読む」を1行足し、`next` スキル §3 の worktree 移行手順からも §5.4 を指す（入った直後に必ず目に入る位置へ置く）。
+
+## 2026-08-09 21:24 | session 5d30ecd6 | 自動検出
+- シグナル: same-command('git status --short --untracked'×6, 'python scripts/worktree.py mer'×4) / errors×5
+- ターン概要: ツール81回・エラー5回・拒否0回。開始:「<ide_opened_file>The user opened the file c:\GIT\2026_AFKGAM」
+- 原因と改善案: main の working tree で**別セッションがログ規約作業を進行中**だったため、`worktree.py merge` の「未コミット変更あり」が解消せず `status` → コミット → `merge` 失敗を4周した。他人の作業中ファイルを「前セッションのステージ漏れ」と誤認して 5件コミットしてしまった（`3bed24b`〜`eb574c5`）。`worktree_guide.md` §5.3 手順3「main の未コミット変更はコミットする」は**単独セッション前提**で、§0 の並行作業ルールと噛み合っていない。
+  → §5.3 手順3を「未コミット変更が**自分の担当外**なら**コミットせずユーザーへ確認**する（`git log -1 --format=%cr` と mtime で進行中か判定。stat キャッシュが古いと差分が小出しに出るので `git update-index --really-refresh` を先に実行）」へ改め、`worktree.py merge` のエラーにも同案内を出す。
