@@ -51,3 +51,8 @@
 - シグナル: long-turn(calls=70)
 - ターン概要: ツール70回・エラー0回・拒否0回。開始:「<ide_selection>The user selected the lines 44 to 45 from c:\」
 - 原因と改善案: **2R-C の実装18ファイル・ビルド・起動スモーク・文書反映・統合・引き継ぎ更新まで1ターンで完走した分量**で long-turn は概ね誤検出（エラー0）。ただし**実在の非効率が2件**: ① 既存ファイルを確認するつもりで `Write` を呼び、`AfkgameDomainConfig.java.probe` を作って消す往復をした（ツールの取り違え。既存ファイルの確認は `Read` か `ctx_execute` に限る） ② **残量250字の [steps.md](java_migration/steps.md) へ「圧縮 + 追記」を同時に行う際、置換前後の `len()` 差で net を見積もって書いたが、チェッカー実測は 51字 超過**で2回追加圧縮した（複数箇所の増減を積み上げると誤差が乗り、`len()` は見積もりにしかならない）→ [.claude/project/doc-size.md](../../.claude/project/doc-size.md) §3.1 の判断 #0 へ「**残量300字未満のファイルで圧縮と追記を同時に行うときは見積もりで確定させず、編集後に `--sections` を再実行して確認する**」を追記し、[profile.md](../../.claude/project/profile.md) §7 規約7（`len()` で実測）にも同じ但し書きを付ける。
+
+## 2026-08-09 12:04 | session 2f94d0c2 | 自動検出
+- シグナル: long-turn(calls=149)
+- ターン概要: ツール149回・エラー0回・拒否0回。開始:「<command-message>next</command-message>」
+- 原因と改善案: **main 42ファイル（2,222行）の移植・6件の書き直し・POM3件・起動検証・文書反映・統合まで完走した分量**で long-turn 自体は概ね誤検出（エラー0）。ただし**実在の非効率が2件**: ① 使い捨ての Java 検証クラスを Maven のクラスパスで動かす際、Git Bash の `/c/...` を `javac -d` / `java -cp` がそのまま解釈できず `ClassNotFoundException` で1往復、Flyway スタブの URL で1往復と、**環境の作法で3回空振り**した → [.claude/project/commands.md](../../.claude/project/commands.md) へ「**使い捨て Java を Maven のクラスパスで動かすレシピ**（`dependency:build-classpath -Dmdep.includeScope=test` → `-cp`・`-d` に渡すパスは `cygpath -w` で Windows 形式へ。区切りは `;`）」を追記 ② `mvn clean install` は通るのに**コンテキスト起動で落ちる不具合**（`MybatisConfig` の型エイリアス衝突）が 2R-C から潜伏しており、検出用のスタブ Bean を今回その場で書き起こした → [.claude/project/dev.md](../../.claude/project/dev.md) §5 の動作確認表へ「**DI コンテナを起こす確認をビルドと別に置く**（Bean 生成時にしか出ない衝突・未解決プレースホルダはコンパイルでは出ない）。DB 無しで回すときは `dataSource` と `flyway` だけスタブへ差し替える」を追記する。
