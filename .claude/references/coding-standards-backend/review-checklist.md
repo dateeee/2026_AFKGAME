@@ -1,7 +1,7 @@
 # バックエンドコーディング規約 — レビュー チェックリスト
 
 > 親: [coding-standards-backend.md](../coding-standards-backend.md)。本書は同 **§5** を担当する。
-> 規約そのものは親の §2〜§4、正はプロジェクト側のコーディング規約ドキュメント。
+> 規約そのものは §2 [layering.md](layering.md)・§3 [writing.md](writing.md)・§4 [exception-logging.md](exception-logging.md)。正はプロジェクト側のコーディング規約ドキュメント。
 
 ## 5. レビュー チェックリスト
 

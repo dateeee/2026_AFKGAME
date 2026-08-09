@@ -57,7 +57,10 @@
 |---------|-------|------|
 | [review-procedure.md](../references/review-procedure.md) | レビュー系5スキル | レビューの共通手順・コスト規律 |
 | [review-format.md](../references/review-format.md) | レビュー系5スキル | レビュー結果の出力形式 |
-| [coding-standards-backend.md](../references/coding-standards-backend.md) | `dev`、`backend-review`、`unit-test` | Java 実装の規約要約（§1〜§4）。**正は [docs/process/coding_standards_backend.md](../../docs/process/coding_standards_backend.md)**（本書はその派生） |
-| [coding-standards-backend/review-checklist.md](../references/coding-standards-backend/review-checklist.md) | `backend-review` | 上記 §5 のレビュー観点チェックリスト |
+| [coding-standards-backend.md](../references/coding-standards-backend.md) | `dev`、`backend-review`、`unit-test` | Java 実装の規約要約の**索引**（§1 使い方 + 分冊表）。**正は [docs/process/coding_standards_backend.md](../../docs/process/coding_standards_backend.md)**（本書はその派生） |
+| [coding-standards-backend/layering.md](../references/coding-standards-backend/layering.md) | 同上 | §2 層の責務・呼び出し可否・横断処理 |
+| [coding-standards-backend/writing.md](../references/coding-standards-backend/writing.md) | 同上 | §3 記述（書式・型・定数・可視性） |
+| [coding-standards-backend/exception-logging.md](../references/coding-standards-backend/exception-logging.md) | 同上 | §4 例外・トランザクション・ログ・Javadoc |
+| [coding-standards-backend/review-checklist.md](../references/coding-standards-backend/review-checklist.md) | `backend-review` | §5 レビュー観点チェックリスト |
 
 改稿時は [docs/changelog.md](../../docs/changelog.md) の先頭へ追記する（各ファイルに変更履歴セクションを置かない）。
