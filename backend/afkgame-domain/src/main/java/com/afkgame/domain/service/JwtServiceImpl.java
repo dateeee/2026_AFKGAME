@@ -8,12 +8,13 @@ import java.util.Date; // 規約例外: JJWT の expiration(Date) / issuedAt(Dat
 
 import javax.crypto.SecretKey;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.afkgame.domain.exception.AppException;
 import com.afkgame.env.config.AuthSettings;
+import com.afkgame.env.logging.AppLogger;
+import com.afkgame.env.logging.LogReason;
+import com.afkgame.env.logging.LoggerName;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -29,7 +30,7 @@ import io.jsonwebtoken.security.Keys;
 @Service
 public class JwtServiceImpl implements JwtService {
 
-    private static final Logger logger = LoggerFactory.getLogger("afkgame.auth");
+    private static final AppLogger logger = AppLogger.of(LoggerName.AUTH);
 
     /** アクセストークンの用途クレーム。用途の違うトークンを取り違えないために検証する（tech_auth.md §4）。 */
     private static final String TOKEN_TYPE_ACCESS = "access";
@@ -75,21 +76,21 @@ public class JwtServiceImpl implements JwtService {
                     .parseSignedClaims(token)
                     .getPayload();
         } catch (ExpiredJwtException e) {
-            logger.warn("認証失敗 reason=token_expired");
+            logger.warn("認証失敗").reason(LogReason.TOKEN_EXPIRED).log();
             throw new AppException("AUTH_TOKEN_EXPIRED", "Token expired", 401);
         } catch (JwtException | IllegalArgumentException e) {
-            logger.warn("認証失敗 reason=invalid_token");
+            logger.warn("認証失敗").reason(LogReason.INVALID_TOKEN).log();
             throw new AppException("AUTH_INVALID_TOKEN", "Invalid token", 401);
         }
 
         if (!TOKEN_TYPE_ACCESS.equals(claims.get("type", String.class))) {
-            logger.warn("認証失敗 reason=invalid_token_type");
+            logger.warn("認証失敗").reason(LogReason.INVALID_TOKEN_TYPE).log();
             throw new AppException("AUTH_INVALID_TOKEN", "Invalid token type", 401);
         }
 
         String userId = claims.getSubject();
         if (userId == null) {
-            logger.warn("認証失敗 reason=invalid_token");
+            logger.warn("認証失敗").reason(LogReason.INVALID_TOKEN).log();
             throw new AppException("AUTH_INVALID_TOKEN", "Invalid token payload", 401);
         }
         return userId;

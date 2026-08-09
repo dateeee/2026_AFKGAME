@@ -11,8 +11,6 @@ import java.util.Base64;
 import java.util.HexFormat;
 import java.util.UUID;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -26,6 +24,10 @@ import com.afkgame.domain.repository.EmailVerificationTokenRepository;
 import com.afkgame.domain.repository.RefreshTokenRepository;
 import com.afkgame.domain.repository.UserRepository;
 import com.afkgame.env.config.AuthSettings;
+import com.afkgame.env.logging.AppLogger;
+import com.afkgame.env.logging.LogKey;
+import com.afkgame.env.logging.LogReason;
+import com.afkgame.env.logging.LoggerName;
 
 /**
  * {@link AuthService} の実装。
@@ -36,7 +38,7 @@ import com.afkgame.env.config.AuthSettings;
 @Service
 public class AuthServiceImpl implements AuthService {
 
-    private static final Logger logger = LoggerFactory.getLogger("afkgame.auth");
+    private static final AppLogger logger = AppLogger.of(LoggerName.AUTH);
 
     /** リフレッシュトークンの生値のバイト数（Base64URL で44文字になる）。 */
     private static final int REFRESH_TOKEN_BYTES = 48;
@@ -97,7 +99,7 @@ public class AuthServiceImpl implements AuthService {
 
         playerInitializationService.initialize(user.getId());
 
-        logger.info("ゲストアカウント作成 user_id={}", user.getId());
+        logger.info("ゲストアカウント作成").with(LogKey.USER_ID, user.getId()).log();
         return issueTokens(user);
     }
 
@@ -116,7 +118,7 @@ public class AuthServiceImpl implements AuthService {
         }
 
         if (stored.isRevoked()) {
-            logger.warn("不正リフレッシュトークン検知 user_id={}", stored.getUserId());
+            logger.warn("不正リフレッシュトークン検知").with(LogKey.USER_ID, stored.getUserId()).log();
             refreshTokenRepository.updateRevokedByUserId(stored.getUserId());
             throw refreshInvalid("Refresh token reuse detected");
         }
@@ -143,7 +145,7 @@ public class AuthServiceImpl implements AuthService {
     public User findAuthenticatedUser(String userId) {
         User user = userRepository.findById(userId);
         if (user == null) {
-            logger.warn("認証失敗 reason=user_not_found user_id={}", userId);
+            logger.warn("認証失敗").reason(LogReason.USER_NOT_FOUND).with(LogKey.USER_ID, userId).log();
             throw new AppException("AUTH_USER_NOT_FOUND", "User not found", 401);
         }
         return user;
@@ -160,7 +162,7 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public AuthResult register(String email, String rawPassword) {
         if (userRepository.findByEmail(email) != null) {
-            logger.warn("登録失敗 reason=email_taken");
+            logger.warn("登録失敗").reason(LogReason.EMAIL_TAKEN).log();
             throw emailTaken();
         }
 
@@ -178,7 +180,7 @@ public class AuthServiceImpl implements AuthService {
             userRepository.save(user);
         } catch (DuplicateKeyException e) {
             // 手順2の通過後に同時登録で uq_users_email 違反が起きた場合も重複として扱う（§11 #9）
-            logger.warn("登録失敗 reason=email_taken_conflict");
+            logger.warn("登録失敗").reason(LogReason.EMAIL_TAKEN_CONFLICT).log();
             throw emailTaken();
         }
 
@@ -195,7 +197,7 @@ public class AuthServiceImpl implements AuthService {
         emailVerificationTokenRepository.save(verificationToken);
 
         AuthResult result = issueTokens(user);
-        logger.info("アカウント登録 user_id={}", user.getId());
+        logger.info("アカウント登録").with(LogKey.USER_ID, user.getId()).log();
         sendVerificationMail(user, rawVerificationToken);
         return result;
     }
@@ -210,25 +212,25 @@ public class AuthServiceImpl implements AuthService {
     public AuthResult login(String email, String rawPassword) {
         User user = userRepository.findByEmail(email);
         if (user == null) {
-            logger.warn("ログイン失敗 reason=email_not_found");
+            logger.warn("ログイン失敗").reason(LogReason.EMAIL_NOT_FOUND).log();
             throw invalidCredentials();
         }
 
         // Google連携のみのアカウントは bcrypt 照合そのものを行わない（§12 手順3）
         if (user.getPasswordHash() == null) {
-            logger.warn("ログイン失敗 reason=password_not_set user_id={}", user.getId());
+            logger.warn("ログイン失敗").reason(LogReason.PASSWORD_NOT_SET).with(LogKey.USER_ID, user.getId()).log();
             throw invalidCredentials();
         }
 
         if (!passwordEncoder.matches(rawPassword, user.getPasswordHash())) {
-            logger.warn("ログイン失敗 reason=password_mismatch user_id={}", user.getId());
+            logger.warn("ログイン失敗").reason(LogReason.PASSWORD_MISMATCH).with(LogKey.USER_ID, user.getId()).log();
             throw invalidCredentials();
         }
 
         // email_verified の値でログインを止めない（§12 手順5）
         userRepository.updateLastLoginAt(user.getId(), clock.instant());
 
-        logger.info("ログイン user_id={}", user.getId());
+        logger.info("ログイン").with(LogKey.USER_ID, user.getId()).log();
         return issueTokens(user);
     }
 
@@ -246,7 +248,7 @@ public class AuthServiceImpl implements AuthService {
         }
 
         if (!stored.getUserId().equals(userId)) {
-            logger.warn("他ユーザーのリフレッシュトークンでログアウト user_id={}", userId);
+            logger.warn("他ユーザーのリフレッシュトークンでログアウト").with(LogKey.USER_ID, userId).log();
             throw refreshInvalid("Refresh token owner mismatch");
         }
 
@@ -256,7 +258,7 @@ public class AuthServiceImpl implements AuthService {
         }
 
         refreshTokenRepository.updateRevokedById(stored.getId());
-        logger.info("ログアウト user_id={}", userId);
+        logger.info("ログアウト").with(LogKey.USER_ID, userId).log();
     }
 
     /**
@@ -269,7 +271,7 @@ public class AuthServiceImpl implements AuthService {
         try {
             verificationMailSender.send(user, rawVerificationToken);
         } catch (RuntimeException e) {
-            logger.warn("確認メールの送信に失敗 user_id={}", user.getId(), e);
+            logger.warn("確認メールの送信に失敗").with(LogKey.USER_ID, user.getId()).cause(e).log();
         }
     }
 

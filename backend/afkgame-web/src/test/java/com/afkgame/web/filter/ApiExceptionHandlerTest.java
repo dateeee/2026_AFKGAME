@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.afkgame.domain.exception.AppException;
+import com.afkgame.env.logging.LogKey;
 import com.afkgame.web.resource.RefreshResource;
 
 import jakarta.validation.Valid;
@@ -81,7 +82,7 @@ class ApiExceptionHandlerTest {
         mockMvc = MockMvcBuilders.standaloneSetup(new StubApi())
                 .setControllerAdvice(new ApiExceptionHandler())
                 .build();
-        MDC.put(RequestLogFilter.MDC_REQUEST_ID, "test-request-id");
+        MDC.put(LogKey.REQUEST_ID.field(), "test-request-id");
     }
 
     @AfterEach

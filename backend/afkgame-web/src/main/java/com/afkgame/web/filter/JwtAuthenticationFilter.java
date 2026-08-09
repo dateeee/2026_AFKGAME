@@ -3,8 +3,6 @@ package com.afkgame.web.filter;
 import java.io.IOException;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -15,6 +13,10 @@ import com.afkgame.domain.exception.AppException;
 import com.afkgame.domain.model.User;
 import com.afkgame.domain.service.AuthService;
 import com.afkgame.domain.service.JwtService;
+import com.afkgame.env.logging.AppLogger;
+import com.afkgame.env.logging.LogKey;
+import com.afkgame.env.logging.LogReason;
+import com.afkgame.env.logging.LoggerName;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -43,7 +45,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static final String BEARER_PREFIX = "Bearer ";
 
-    private static final Logger logger = LoggerFactory.getLogger("afkgame.auth");
+    private static final AppLogger logger = AppLogger.of(LoggerName.AUTH);
 
     private final JwtService jwtService;
     private final AuthService authService;
@@ -68,7 +70,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         if (!authorization.startsWith(BEARER_PREFIX)) {
-            logger.warn("認証失敗 reason=invalid_format");
+            logger.warn("認証失敗").reason(LogReason.INVALID_FORMAT).log();
             request.setAttribute(AUTH_FAILURE_ATTRIBUTE,
                     new AppException("AUTH_INVALID_FORMAT", "Invalid authorization header", 401));
             return;
@@ -78,7 +80,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String userId = jwtService.parseUserId(authorization.substring(BEARER_PREFIX.length()));
             User user = authService.findAuthenticatedUser(userId);
 
-            MDC.put(RequestLogFilter.MDC_PLAYER_ID, user.getId());
+            MDC.put(LogKey.PLAYER_ID.field(), user.getId());
             SecurityContextHolder.getContext().setAuthentication(
                     new UsernamePasswordAuthenticationToken(user, null, List.of()));
         } catch (AppException e) {

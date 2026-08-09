@@ -1,10 +1,11 @@
 package com.afkgame.domain.service;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.afkgame.domain.model.User;
+import com.afkgame.env.logging.AppLogger;
+import com.afkgame.env.logging.LogKey;
+import com.afkgame.env.logging.LoggerName;
 
 /**
  * {@link VerificationMailSender} の実装。
@@ -17,11 +18,13 @@ import com.afkgame.domain.model.User;
 @Service
 public class VerificationMailSenderImpl implements VerificationMailSender {
 
-    private static final Logger logger = LoggerFactory.getLogger("afkgame.auth");
+    private static final AppLogger logger = AppLogger.of(LoggerName.AUTH);
 
     /** {@inheritDoc} */
     @Override
     public void send(User user, String rawToken) {
-        logger.warn("確認メールは未送信（送信手段は移行 STEP 3-A-3 で実装） user_id={}", user.getId());
+        logger.warn("確認メールは未送信（送信手段は移行 STEP 3-A-3 で実装）")
+                .with(LogKey.USER_ID, user.getId())
+                .log();
     }
 }

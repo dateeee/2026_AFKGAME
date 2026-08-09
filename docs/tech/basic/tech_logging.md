@@ -5,6 +5,28 @@
 ## ログライブラリ
 Logback を使用。設定は `afkgame-env` の `logback.xml`（Boot 拡張の `logback-spring.xml` と `<springProfile>` は使えない）。Tomcat のアクセスログは Tomcat 側（`AccessLogValve`）が出力し、アプリのログとは別系統とする。
 
+## ログの書き方（共通部品）
+
+各クラスで `LoggerFactory` を直接使わず、`afkgame-env` の `com.afkgame.env.logging` が提供する共通部品で書く（規約は [common.md §7](../../process/coding_standards_backend/common.md)）。
+
+| 部品 | 役割 |
+|------|------|
+| `AppLogger` | 入口。`AppLogger.of(LoggerName.AUTH)` で得る |
+| `LoggerName` | ロガー名（正は「ロガー名体系」） |
+| `LogKey` | ログ項目名（正は「ログ項目」）。マスク規則も本 enum が持つ |
+| `LogReason` | `reason` の値（正は「失敗理由（reason）の値」） |
+| `LogEntry` | 項目を積み、`log()` で出力する |
+
+```java
+private static final AppLogger logger = AppLogger.of(LoggerName.AUTH);
+
+logger.info("ログイン").with(LogKey.USER_ID, user.getId()).log();
+logger.warn("ログイン失敗").reason(LogReason.PASSWORD_MISMATCH).log();
+logger.error("未捕捉例外").cause(e).log();
+```
+
+**項目はメッセージへ埋め込まない**。`with()` で積んだ値は出力の間だけ MDC へ載り、text 形式では末尾の `key=value`、JSON 形式では独立フィールドとして出る。出力後は元の MDC へ戻すため、横断項目を壊さない。
+
 ## ログレベル方針
 
 | レベル | 用途 | 例 |
@@ -18,7 +40,7 @@ Logback を使用。設定は `afkgame-env` の `logback.xml`（Boot 拡張の `
 
 **開発時（テキスト形式）:**
 ```
-[2026-03-15 14:38:30] WARNING  auth: 認証失敗 reason=player_not_found token=abc1****wxyz request_id=550e8400-e29b
+[2026-03-15 14:38:30] WARNING  afkgame.auth: ログイン失敗 reason=password_mismatch user_id=user_001 request_id=550e8400-e29b
 ```
 
 **本番（構造化JSON）:**
@@ -26,13 +48,13 @@ Logback を使用。設定は `afkgame-env` の `logback.xml`（Boot 拡張の `
 {
   "timestamp": "2026-03-15T14:38:30.123Z",
   "level": "WARNING",
-  "logger": "auth",
-  "message": "認証失敗",
+  "logger": "afkgame.auth",
+  "message": "ログイン失敗",
   "request_id": "550e8400-e29b-41d4-a716-446655440000",
   "client_ip": "127.0.0.1",
-  "method": "GET",
-  "path": "/api/game/state",
-  "reason": "player_not_found"
+  "method": "POST",
+  "path": "/api/auth/login",
+  "reason": "password_mismatch"
 }
 ```
 
@@ -48,17 +70,43 @@ Logback を使用。設定は `afkgame-env` の `logback.xml`（Boot 拡張の `
 | `afkgame.shop` | ショップ購入 |
 | `afkgame.tower` | 塔選択・リタイア |
 | `afkgame.middleware` | リクエストログミドルウェア |
+| `afkgame.health` | ヘルスチェック（運用監視向け） |
 
-## 認証エラーの詳細ログ
+コード側の正は `LoggerName`。**実際に出力している領域だけ**を enum に持ち、新しい領域を書くときに追加する。
 
-401レスポンス時に、失敗理由をWARNINGレベルで出力する。
+## ログ項目
 
-| reason | 説明 | 出力例 |
-|--------|------|--------|
-| `header_missing` | Authorizationヘッダーなし | `WARNING auth: 認証失敗 reason=header_missing` |
-| `invalid_format` | Bearer形式でない | `WARNING auth: 認証失敗 reason=invalid_format` |
-| `player_not_found` | トークンに該当するプレイヤーなし | `WARNING auth: 認証失敗 reason=player_not_found token=abc1****wxyz` |
-| `token_expired` | JWT期限切れ（Phase 2〜） | `WARNING auth: 認証失敗 reason=token_expired` |
+項目名は snake_case（応答ボディの camelCase とは別体系）。コード側の正は `LogKey`。
+
+| 項目 | 内容 | 付与 |
+|------|------|------|
+| `request_id` | リクエストID | `RequestLogFilter`（横断） |
+| `player_id` | 認証済みユーザーID | `JwtAuthenticationFilter`（横断） |
+| `client_ip` / `method` / `path` | 接続元・メソッド・パス | `RequestLogFilter`（横断） |
+| `status_code` / `duration_ms` | ステータス・処理時間 | `RequestLogFilter`・例外ハンドラ |
+| `reason` | 失敗理由 | 各処理 |
+| `user_id` | 処理対象のユーザーID（認証済みを表す `player_id` とは別） | 各処理 |
+| `token` / `email` | トークン・メールアドレス（**自動マスク**） | 各処理 |
+
+横断項目はフィルタが MDC へ載せ、各所で詰め直さない（`common.md` §7 #5）。
+
+## 失敗理由（reason）の値
+
+想定内の失敗は WARNING で `reason` を残す。クライアントへは理由を出し分けない（[exception.md](../../process/coding_standards_backend/exception.md) §4 #2）ため、内部の切り分けは本表が担う。コード側の正は `LogReason`。
+
+| reason | メッセージ | 発生条件 |
+|--------|-----------|---------|
+| `header_missing` | 認証失敗 | `Authorization` ヘッダが無い |
+| `invalid_format` | 認証失敗 | `Bearer ` で始まらない |
+| `token_expired` | 認証失敗 | アクセストークンの有効期限切れ |
+| `invalid_token` | 認証失敗 | 署名不正・`sub` 欠落 |
+| `invalid_token_type` | 認証失敗 | 用途クレーム（`type`）が `access` でない |
+| `user_not_found` | 認証失敗 | トークンは正当だがユーザーが存在しない |
+| `email_taken` | 登録失敗 | 登録時にメールが使用済み |
+| `email_taken_conflict` | 登録失敗 | 重複確認の通過後に一意制約違反で判明した |
+| `email_not_found` | ログイン失敗 | 該当するメールのユーザーが存在しない |
+| `password_not_set` | ログイン失敗 | Google連携のみでパスワード未設定 |
+| `password_mismatch` | ログイン失敗 | パスワードが一致しない |
 
 ## リクエストログ用フィルタ
 
@@ -74,11 +122,13 @@ Logback を使用。設定は `afkgame-env` の `logback.xml`（Boot 拡張の `
 
 ## 機密情報のマスク規則
 
-| 対象 | マスク方法 |
-|------|-----------|
-| トークン値 | 先頭4文字 + `****` + 末尾4文字（例: `abc1****wxyz`） |
-| パスワード | 出力禁止（ログに含めない） |
-| メールアドレス | ローカル部の先頭2文字 + `***@` + ドメイン（例: `ab***@example.com`） |
+| 対象 | マスク方法 | 残せない長さの場合 |
+|------|-----------|------------------|
+| トークン値 | 先頭4文字 + `****` + 末尾4文字（例: `abc1****wxyz`） | 8文字以下は `****` のみ |
+| パスワード | 出力禁止（ログに含めない） | — |
+| メールアドレス | ローカル部の先頭2文字 + `***@` + ドメイン（例: `ab***@example.com`） | ローカル部が2文字以下は `***@<ドメイン>`、`@` が無ければ `****` |
+
+伏せ字は固定長にして、元の値の長さを推測させない。適用は `LogKey.TOKEN` / `LogKey.EMAIL` が自動で行うため、**呼び出し側でマスクを書かない**。
 
 ## バックエンドエラーハンドリング
 

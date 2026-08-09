@@ -24,6 +24,7 @@ import com.afkgame.domain.exception.AppException;
 import com.afkgame.domain.model.User;
 import com.afkgame.domain.service.AuthService;
 import com.afkgame.domain.service.JwtService;
+import com.afkgame.env.logging.LogKey;
 
 /**
  * {@link JwtAuthenticationFilter} の単体テスト。
@@ -141,7 +142,7 @@ class JwtAuthenticationFilterTest {
             assertThat(SecurityContextHolder.getContext().getAuthentication().getPrincipal())
                     .isSameAs(user);
             // ログ突合のため認証済みユーザーIDを MDC へ載せる（tech_logging.md「リクエストログ用フィルタ」）
-            assertThat(MDC.get(RequestLogFilter.MDC_PLAYER_ID)).isEqualTo("guest_001");
+            assertThat(MDC.get(LogKey.PLAYER_ID.field())).isEqualTo("guest_001");
         }
     }
 }

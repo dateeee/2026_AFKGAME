@@ -2,7 +2,7 @@ package com.afkgame.web.resource;
 
 import org.slf4j.MDC;
 
-import com.afkgame.web.filter.RequestLogFilter;
+import com.afkgame.env.logging.LogKey;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
@@ -36,6 +36,6 @@ public record ErrorResource(Body error) {
      * @return エラー応答
      */
     public static ErrorResource of(String code, String message) {
-        return new ErrorResource(new Body(code, message, MDC.get(RequestLogFilter.MDC_REQUEST_ID)));
+        return new ErrorResource(new Body(code, message, MDC.get(LogKey.REQUEST_ID.field())));
     }
 }

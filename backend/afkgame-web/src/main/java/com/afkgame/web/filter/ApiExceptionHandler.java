@@ -1,7 +1,5 @@
 package com.afkgame.web.filter;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -14,6 +12,9 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import com.afkgame.domain.exception.AppException;
+import com.afkgame.env.logging.AppLogger;
+import com.afkgame.env.logging.LogKey;
+import com.afkgame.env.logging.LoggerName;
 import com.afkgame.web.resource.ErrorResource;
 
 /**
@@ -32,7 +33,7 @@ import com.afkgame.web.resource.ErrorResource;
 @RestControllerAdvice
 public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 
-    private static final Logger middlewareLogger = LoggerFactory.getLogger("afkgame.middleware");
+    private static final AppLogger middlewareLogger = AppLogger.of(LoggerName.MIDDLEWARE);
 
     /** 型・範囲・必須の違反（tech_api_common.md「HTTPステータスコードの使い分け」の 422）。 */
     private static final String VALIDATION_ERROR = "VALIDATION_ERROR";
@@ -59,7 +60,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResource> handleUnexpected(Exception e) {
-        middlewareLogger.error("未捕捉例外", e);
+        middlewareLogger.error("未捕捉例外").cause(e).log();
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ErrorResource.of("INTERNAL_UNEXPECTED_ERROR", "サーバー内部エラーが発生しました"));
     }
@@ -90,7 +91,10 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleExceptionInternal(Exception ex, Object body,
             HttpHeaders headers, HttpStatusCode statusCode, WebRequest request) {
         if (statusCode.is5xxServerError()) {
-            middlewareLogger.error("フレームワーク内部エラー status={}", statusCode.value(), ex);
+            middlewareLogger.error("フレームワーク内部エラー")
+                    .with(LogKey.STATUS_CODE, statusCode.value())
+                    .cause(ex)
+                    .log();
             return new ResponseEntity<>(
                     ErrorResource.of("INTERNAL_UNEXPECTED_ERROR", "サーバー内部エラーが発生しました"),
                     headers, statusCode);
@@ -100,7 +104,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     private static ResponseEntity<Object> validationError() {
-        middlewareLogger.warn("バリデーションエラー");
+        middlewareLogger.warn("バリデーションエラー").log();
         return new ResponseEntity<>(
                 ErrorResource.of(VALIDATION_ERROR, VALIDATION_MESSAGE), HttpStatus.UNPROCESSABLE_ENTITY);
     }

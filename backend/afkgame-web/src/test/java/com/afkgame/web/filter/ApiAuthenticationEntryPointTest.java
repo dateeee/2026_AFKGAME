@@ -14,6 +14,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 
 import com.afkgame.domain.exception.AppException;
+import com.afkgame.env.logging.LogKey;
 
 import tools.jackson.databind.json.JsonMapper;
 
@@ -64,7 +65,7 @@ class ApiAuthenticationEntryPointTest {
     @Test
     @DisplayName("記録が無ければ AUTH_HEADER_MISSING を返す")
     void test_記録が無ければヘッダ不足として返す() throws Exception {
-        MDC.put(RequestLogFilter.MDC_REQUEST_ID, "test-request-id");
+        MDC.put(LogKey.REQUEST_ID.field(), "test-request-id");
 
         MockHttpServletResponse response = commence(null);
 

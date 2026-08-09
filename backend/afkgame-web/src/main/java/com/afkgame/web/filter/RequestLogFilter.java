@@ -3,11 +3,13 @@ package com.afkgame.web.filter;
 import java.io.IOException;
 import java.util.UUID;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+
+import com.afkgame.env.logging.AppLogger;
+import com.afkgame.env.logging.LogKey;
+import com.afkgame.env.logging.LoggerName;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -32,13 +34,7 @@ public class RequestLogFilter extends OncePerRequestFilter {
     /** リクエストIDのレスポンスヘッダ名（tech_api_common.md「共通ヘッダ」）。 */
     public static final String REQUEST_ID_HEADER = "X-Request-ID";
 
-    /** リクエストIDの MDC キー。ログ項目名としてそのまま出力される。 */
-    public static final String MDC_REQUEST_ID = "request_id";
-
-    /** 認証済みユーザーIDの MDC キー。付与は {@link JwtAuthenticationFilter}。 */
-    public static final String MDC_PLAYER_ID = "player_id";
-
-    private static final Logger logger = LoggerFactory.getLogger("afkgame.middleware");
+    private static final AppLogger logger = AppLogger.of(LoggerName.MIDDLEWARE);
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
@@ -46,20 +42,20 @@ public class RequestLogFilter extends OncePerRequestFilter {
         String requestId = UUID.randomUUID().toString();
         response.setHeader(REQUEST_ID_HEADER, requestId);
 
-        MDC.put(MDC_REQUEST_ID, requestId);
-        MDC.put("method", request.getMethod());
-        MDC.put("path", request.getRequestURI());
-        MDC.put("client_ip", request.getRemoteAddr());
+        MDC.put(LogKey.REQUEST_ID.field(), requestId);
+        MDC.put(LogKey.METHOD.field(), request.getMethod());
+        MDC.put(LogKey.PATH.field(), request.getRequestURI());
+        MDC.put(LogKey.CLIENT_IP.field(), request.getRemoteAddr());
 
         long startedAt = System.nanoTime();
         try {
             filterChain.doFilter(request, response);
         } finally {
             long durationMs = (System.nanoTime() - startedAt) / 1_000_000;
-            MDC.put("status_code", String.valueOf(response.getStatus()));
-            MDC.put("duration_ms", String.valueOf(durationMs));
+            MDC.put(LogKey.STATUS_CODE.field(), String.valueOf(response.getStatus()));
+            MDC.put(LogKey.DURATION_MS.field(), String.valueOf(durationMs));
             logger.info("{} {} {} {}ms",
-                    request.getMethod(), request.getRequestURI(), response.getStatus(), durationMs);
+                    request.getMethod(), request.getRequestURI(), response.getStatus(), durationMs).log();
             MDC.clear();
         }
     }

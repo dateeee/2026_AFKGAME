@@ -73,12 +73,14 @@
 
 | # | 規約 |
 |---|------|
-| 1 | SLF4J を使う。`private static final Logger logger = LoggerFactory.getLogger("afkgame.<領域>")` の形で、**ロガー名体系の名前**を指定する。名前の正は [tech_logging.md](../../tech/basic/tech_logging.md)「ロガー名体系」。ガイドラインの実装例はクラスオブジェクト（`getLogger(Xxx.class)`）を渡すが採らない — 出力先とレベルを機能単位で切り替えるため、ロガー名をクラスの配置から独立させる |
-| 2 | レベルの使い分け・出力フォーマット・マスク規則も同ファイルが正。本書では再掲しない |
-| 3 | メッセージはプレースホルダ `{}` で組む（文字列連結・`String.format` を使わない） |
-| 4 | パスワード・トークン生値・メールアドレスをそのまま出さない |
-| 5 | `request_id` などの横断項目は MDC（`RequestLogFilter`）が載せる。各所で詰め直さない |
-| 6 | `System.out.println`・`printStackTrace` を使わない |
+| 1 | **`AppLogger` を使う**（`afkgame-env` の `com.afkgame.env.logging`）。`private static final AppLogger logger = AppLogger.of(LoggerName.<領域>)` の形で持ち、`LoggerFactory` を直接呼ばない。ロガー名・項目名・`reason` の値を各クラスの文字列リテラルから追い出すための共通部品で、使い方の正は [tech_logging.md](../../tech/basic/tech_logging.md)「ログの書き方（共通部品）」 |
+| 2 | ロガー名は `LoggerName` の値を使い、クラスの配置から独立させる。ガイドラインの実装例はクラスオブジェクト（`getLogger(Xxx.class)`）を渡すが採らない — 出力先とレベルを機能単位で切り替えるため |
+| 3 | **ログ項目はメッセージへ埋め込まず `with()` / `reason()` で積む**（`reason=...` `user_id={}` を文字列に書かない）。JSON 形式で独立フィールドになる形をコード側の唯一の書き方にする |
+| 4 | レベルの使い分け・出力フォーマット・項目名・マスク規則の正は `tech_logging.md`。本書では再掲しない |
+| 5 | メッセージのプレースホルダは `{}` で組む（文字列連結・`String.format` を使わない） |
+| 6 | パスワード・トークン生値・メールアドレスをそのまま出さない。トークン・メールは `LogKey.TOKEN` / `LogKey.EMAIL` へ渡せば自動でマスクされる |
+| 7 | `request_id` などの横断項目は MDC（`RequestLogFilter`）が載せる。各所で詰め直さない |
+| 8 | `System.out.println`・`printStackTrace` を使わない |
 
 ## 8. Javadoc・コメント
 
@@ -103,7 +105,9 @@
 | SQL の `${}` による文字列組み立て | `#{}` によるパラメータバインド |
 | ワイルドカード import | 個別 import |
 | ゲームバランス数値のハードコード | マスターデータ YAML・`META-INF/spring/*.properties` |
-| `System.out` / `printStackTrace` | SLF4J のロガー |
+| `System.out` / `printStackTrace` | `AppLogger`（§7 #1） |
+| `LoggerFactory.getLogger(...)` の直接呼び出し | `AppLogger.of(LoggerName.…)`（§7 #1） |
+| ログ項目をメッセージへ埋め込む（`reason=...`） | `with()` / `reason()` で積む（§7 #3） |
 | 空の `catch`・例外の握りつぶし | 3分類のいずれかへ変換するか再スロー（`exception.md` §3） |
 | 静的な可変フィールド（共有状態） | DI か引数で受け渡す |
 | `java.util.Date` / `Calendar` | `java.time`（既定は `Instant`） |

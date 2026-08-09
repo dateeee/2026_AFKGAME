@@ -1,11 +1,11 @@
 package com.afkgame.domain.service;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 import com.afkgame.domain.repository.HealthRepository;
+import com.afkgame.env.logging.AppLogger;
+import com.afkgame.env.logging.LoggerName;
 
 /**
  * {@link HealthService} の実装。
@@ -15,7 +15,7 @@ import com.afkgame.domain.repository.HealthRepository;
 @Service
 public class HealthServiceImpl implements HealthService {
 
-    private static final Logger logger = LoggerFactory.getLogger(HealthServiceImpl.class);
+    private static final AppLogger logger = AppLogger.of(LoggerName.HEALTH);
 
     private final HealthRepository healthRepository;
 
@@ -35,7 +35,7 @@ public class HealthServiceImpl implements HealthService {
             healthRepository.findOne();
             return true;
         } catch (DataAccessException e) {
-            logger.error("ヘルスチェック: DB疎通に失敗", e);
+            logger.error("ヘルスチェック: DB疎通に失敗").cause(e).log();
             return false;
         }
     }

@@ -3,14 +3,15 @@ package com.afkgame.web.filter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 
 import com.afkgame.domain.exception.AppException;
+import com.afkgame.env.logging.AppLogger;
+import com.afkgame.env.logging.LogReason;
+import com.afkgame.env.logging.LoggerName;
 import com.afkgame.web.resource.ErrorResource;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,7 +32,7 @@ import tools.jackson.databind.json.JsonMapper;
 @Component
 public class ApiAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
-    private static final Logger logger = LoggerFactory.getLogger("afkgame.auth");
+    private static final AppLogger logger = AppLogger.of(LoggerName.AUTH);
 
     private final JsonMapper jsonMapper;
 
@@ -45,7 +46,7 @@ public class ApiAuthenticationEntryPoint implements AuthenticationEntryPoint {
         AppException failure = (AppException) request.getAttribute(
                 JwtAuthenticationFilter.AUTH_FAILURE_ATTRIBUTE);
         if (failure == null) {
-            logger.warn("認証失敗 reason=header_missing");
+            logger.warn("認証失敗").reason(LogReason.HEADER_MISSING).log();
             failure = new AppException("AUTH_HEADER_MISSING", "Authorization header missing", 401);
         }
 
