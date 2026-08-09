@@ -58,16 +58,19 @@ void 有限塔は総階数でクランプされる(int highest, int total, int e
 
 ## 例外・エラーレスポンス
 
-Service層が送出する例外は、ビジネス例外 `AppException`（`code` と `status` を持つ）とシステム例外 `SystemException`（`code` を持ち、応答は 500 + `INTERNAL_UNEXPECTED_ERROR` に丸まる）の2種類（3分類の正は [coding_standards_backend/exception.md](../../docs/process/coding_standards_backend/exception.md)）。
+Service層が送出する例外は `terasoluna-gfw` の2種類（3分類の正は [coding_standards_backend/exception.md](../../docs/process/coding_standards_backend/exception.md)）。ビジネス例外 `BusinessException`（404 は `ResourceNotFoundException`）は `ResultMessages` にコードだけを持ち、**HTTP ステータスは持たない**（Web層の対応表が決める）。システム例外 `SystemException` は `code` を持ち、応答は 500 + `INTERNAL_UNEXPECTED_ERROR` に丸まる。
+
+Service の検証は**コードだけ**を見る（ステータスは Web 層のテストで見る）。`getMessage()` は `ResultMessages#toString()` を返すので**アサートに使わない**。
 
 ```java
 @Test
 void gold不足なら購入できない() {
     player.setGold(0);
-    AppException ex = assertThrows(AppException.class,
+    BusinessException ex = assertThrows(BusinessException.class,
         () -> shopService.buyItem(player, "hp_potion", 1, db));
-    assertThat(ex.getCode()).isEqualTo("INSUFFICIENT_GOLD");
-    assertThat(ex.getStatus()).isEqualTo(400);
+    assertThat(ex.getResultMessages().getList())
+        .extracting(ResultMessage::getCode)
+        .containsExactly("SHOP_INSUFFICIENT_GOLD");
 }
 ```
 

@@ -18,7 +18,7 @@
 | `afkgame-initdb` | （Java なし） | Flyway マイグレーション SQL | （なし） |
 
 - **依存方向は `web → domain → env` の一方向**。逆流・循環を作らない
-- `afkgame-domain` に Web 層の型（Spring MVC・`jakarta.servlet`・`HttpStatus`）を持ち込まない。HTTP ステータスを扱う必要がある場合は `int` で保持する（`AppException` がその例）
+- `afkgame-domain` に Web 層の型（Spring MVC・`jakarta.servlet`・`HttpStatus`）を持ち込まない。**HTTP ステータスはドメイン層で扱わない**（業務例外はエラーコードだけを持ち、ステータスは Web 層が決める。[exception.md](exception.md) §4 #4）
 - 新しいパッケージを切るときは [tech_structure_backend.md](../../tech/basic/tech_structure_backend.md) §4.1 のツリーへ同時に追記する
 
 ## 3. 命名
@@ -29,7 +29,7 @@
 |------|------|-----|
 | クラス・インタフェース | UpperCamelCase | `AuthService` |
 | 設定バインド | `<領域>Properties` | `AuthProperties` |
-| 例外 | `<領域>Exception` | `AppException`・`MasterDataException` |
+| 例外 | `<領域>Exception` | `MasterDataException`（自作できるのは起動時例外だけ。[exception.md](exception.md) §2.1） |
 | メソッド・変数 | lowerCamelCase。`boolean` の getter は `is` | `isGuest()` |
 | 定数 | UPPER_SNAKE_CASE（`private static final`） | `REFRESH_TOKEN_BYTES` |
 | パッケージ | 全小文字・単語区切りなし | `masterdata` |
@@ -86,7 +86,7 @@
 |---|------|
 | 1 | `public` のクラス・メソッドに**日本語の Javadoc** を書く。1行目は「〜する。」の要約1文 |
 | 2 | クラス Javadoc に**仕様書の参照先**を `<p>仕様: docs/....md §N` の形で書く。実装の根拠を追える状態にする |
-| 3 | `@param`・`@return`・`@throws` を書く。`@throws AppException` にはエラーコードを添える |
+| 3 | `@param`・`@return`・`@throws` を書く。`@throws BusinessException` / `SystemException` にはエラーコードを添える |
 | 4 | 段落は `<p>` で区切る。コード片・識別子は `{@code ...}` |
 | 5 | 意図的な未実装・仮実装は Javadoc に**理由と解消時期**を書く（`TODO` だけを残さない） |
 | 6 | 行コメントは「何をしているか」ではなく「**なぜそうしたか**」を書く。コードを読めば分かることを繰り返さない |

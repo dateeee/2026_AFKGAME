@@ -13,7 +13,7 @@
 | 非対象 | `frontend/`（別書）、`scripts/`・`.claude/scripts/`（開発補助の Python） |
 | 準拠元 | [TERASOLUNA Server Framework for Spring 開発ガイドライン 5.11.0.RELEASE 日本語版](https://github.com/terasolunaorg/terasolunaorg.github.com/tree/master/guideline/5.11.0.RELEASE/ja)（以下「ガイドライン」。HTML は [terasolunaorg.github.io](https://terasolunaorg.github.io/guideline/current/ja/)） |
 
-**設計・実装はガイドラインをベースに作る**。各分冊はガイドラインとの**差分**（本プロジェクト固有の決定・上書き）だけを持ち、書かれていない事柄はガイドラインに従う。参照する版は **5.11.0.RELEASE**（実装ライブラリの `terasoluna-gfw` も 5.11.0.RELEASE へそろえる。[tech_selection.md](../../backlog/java_migration/tech_selection.md) §2。適用は移行 STEP 2R-A）。
+**設計・実装はガイドラインをベースに作る**。各分冊はガイドラインとの**差分**（本プロジェクト固有の決定・上書き）だけを持ち、書かれていない事柄はガイドラインに従う。参照する版は **5.11.0.RELEASE**（実装ライブラリの `terasoluna-gfw` も同版で**導入済み**。[tech_selection.md](../../backlog/java_migration/tech_selection.md) §2。移行 STEP 2R-A で適用）。gfw が提供するクラスは**既定でそれを使い、同等の自作クラスを作らない**（例外クラスの採否は [exception.md](exception.md) §2.1）。
 
 | 分冊 | ベースにするガイドラインの章 |
 |------|---------------------------|

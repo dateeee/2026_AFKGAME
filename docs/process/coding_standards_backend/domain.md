@@ -17,7 +17,7 @@
 | `.service` | ビジネスロジック | Service（`domain_service.md`） |
 | `.masterdata` | マスターデータの `record` と YAML ローダ | （対応なし） |
 | `.rng` | 乱数（`RandomFactory`） | （対応なし） |
-| `.exception` | ビジネス例外（`AppException`）・システム例外（`SystemException`） | ビジネス例外・システム例外（[exception.md](exception.md) §2） |
+| `.exception` | **作らない**。例外は `terasoluna-gfw` の `BusinessException` / `SystemException` を直接使う | ビジネス例外・システム例外（[exception.md](exception.md) §2.1） |
 
 - **Web 層の型を持ち込まない**（Spring MVC・`jakarta.servlet`・`HttpStatus`）。依存してよいのは `afkgame-env` だけ（`common.md` §2）
 - ドメイン層は HTTP・画面の都合を知らない。API の形に合わせた戻り値の整形は Web 層（[web.md](web.md) §3）で行う
