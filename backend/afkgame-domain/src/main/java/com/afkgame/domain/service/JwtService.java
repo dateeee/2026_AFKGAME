@@ -4,7 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Date;
+import java.util.Date; // 規約例外: JJWT の expiration(Date) / issuedAt(Date) が java.util.Date を要求する
 
 import javax.crypto.SecretKey;
 

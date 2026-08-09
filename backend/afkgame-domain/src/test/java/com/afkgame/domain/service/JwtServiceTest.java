@@ -7,7 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Date;
+import java.util.Date; // 規約例外: JJWT の expiration(Date) が java.util.Date を要求する
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
