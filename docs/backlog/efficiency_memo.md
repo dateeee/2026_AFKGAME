@@ -39,3 +39,9 @@
 - シグナル: correction(間違)
 - ターン概要: ツール11回・エラー0回・拒否0回。開始:「待って、間違えて直近の作業をとめてしまったかも」
 - 原因と改善案: 誤検出: 「間違えて」は**ユーザー自身が直近の作業を中断させたかも**という発話で、Claude の出力への訂正ではない。中断箇所の特定は `git worktree list` → worktree 側の `git status` → `check_docs.py` の3手で完了しており、`next_session.md` §0 ルール1（着手状態は git 側に持たせる）が意図どおり機能した例。
+
+## 2026-08-10 03:25 | session 1eef5f4f | 自動検出
+- シグナル: errors×3 / long-turn(calls=167)
+- ターン概要: ツール167回・エラー3回・拒否0回。開始:「着手して」
+- 原因と改善案: エラー3回はすべて **PowerShell ツールへの引数の渡し方**。①`mvn -q -Dsurefire.printSummary=false test` が `-D` 以降を別トークンとして解釈され「Unknown lifecycle phase」②`python -c @'...'@` の here-string で `"` が崩れて SyntaxError（結局スクラッチパッドへ `.py` を書いて回避）③`javap ... | Select-Object -First 3` がパイプ早期終了で exit 255。call=167 は25ファイル・単体+結合269件の規模ぶんが大半だが、機械的置換を1件ずつ `Edit` した分（AuthServiceImplTest の15か所等）は `replace_all` のグループ化でさらに減らせた。
+  → `commands/adhoc.md` §4（使い捨て調査の作法）へ「PowerShell ツールでは **`-D`/`-X` 付きの引数と複数行スクリプトを直接渡さない**（`-D...` は `"` で括る、`python -c` は使わずスクラッチパッドへ `.py` を書いて実行、native exe のパイプに `Select-Object -First` を付けない）」を追記する。あわせて `dev.md` §5 の動作確認表に **PowerShell 版のコマンド列**（`mvn -f backend/pom.xml ...`）を併記し、`cd backend && ...` の Bash 記法をそのまま貼って崩す往復をなくす。
