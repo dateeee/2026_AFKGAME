@@ -61,3 +61,8 @@
 - シグナル: long-turn(calls=136)
 - ターン概要: ツール136回・エラー2回・拒否0回。開始:「<command-message>next</command-message>」
 - 原因と改善案: **テスト25件の移植・POM4件・テスト基盤3クラス新設・`mvn clean install`／`verify`・文書反映・統合・引き継ぎ更新まで1ターンで完走した分量**で long-turn 自体は概ね誤検出。ただし**実在の非効率が2件**（エラー2回はこれ）: ① worktree 隔離セッションで `git mv` を `for` ループ + `$(find ...)` で1回にまとめて投げ、「隔離先に収まるか検証できない」と拒否されて素の1ファイル1コマンドへ書き直した → [worktree_guide.md](../process/worktree_guide.md) §5.4 の「Bash は1コマンド1目的」へ「**worktree 隔離セッションではループ・コマンド置換・リダイレクトを含む git 操作は拒否される。`git mv` は1ファイル1行で並べる**」を明記 ② ライブラリ版の確認に `search.maven.org` の solrsearch API を使い、5件目でタイムアウトして `repo1.maven.org/.../maven-metadata.xml` へ切り替えた → [.claude/project/dev.md](../../.claude/project/dev.md) §5 の版調査へ「**Maven Central の版は `https://repo1.maven.org/maven2/<groupId のスラッシュ表記>/<artifactId>/maven-metadata.xml` の `<release>` を見る**（solrsearch は遅く落ちやすい）」を追記する。
+
+## 2026-08-09 13:23 | session 2b5c3b32 | 自動検出
+- シグナル: same-command('cd "C:/GIT/2026_AFKGAME.worktr'×5, 'cd "C:/GIT/2026_AFKGAME.worktr'×5) / errors×4 / long-turn(calls=173)
+- ターン概要: ツール173回・エラー4回・拒否0回。開始:「<command-message>next</command-message>」
+- 原因と改善案: 実機検証と15ファイル改修の分量で long-turn は誤検出（エラー4件も軽微）。**実在の非効率2件**: ① 残量1字の `README.md`・23字の `carryover_notes.md` で編集→測定→圧縮を繰り返し `check_doc_size.py` を5回叩いた（§7 規約7「追記予定の字数も `len()` で実測」を守らず目分量で見積もった）→ [profile.md](../../.claude/project/profile.md) §7 へ「**残量が上限の1割を切るファイルは Edit 前に置換後テキストの `len()` を実測する**」を追記 ② `ctx_execute` の shell が `/tmp` へ落としたログを `language: "python"` から読めず失敗 → [commands.md](../../.claude/project/commands.md) §2 へ「**生成と読み取りは同じ `language` で完結させる**」を追記。
