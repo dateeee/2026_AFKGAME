@@ -18,7 +18,8 @@
 | 分冊 | ベースにするガイドラインの章 |
 |------|---------------------------|
 | [layering.md](layering.md) | `Overview/ApplicationLayering`（2.4） |
-| [common.md](common.md) | `ArchitectureInDetail`（4.3 例外ハンドリング・7.1 ロギングほかの横断機能） |
+| [common.md](common.md) | `ArchitectureInDetail`（7.1 ロギングほかの横断機能） |
+| [exception.md](exception.md) | `ArchitectureInDetail/WebApplicationDetail/ExceptionHandling`（4.3） |
 | [domain.md](domain.md) | `ImplementationAtEachLayer/DomainLayer`（3.2.1〜3.2.4）、`ImplementationAtEachLayer/InfrastructureLayer`（MyBatis3） |
 | [domain_service.md](domain_service.md) | `ImplementationAtEachLayer/DomainLayer`（3.2.5〜3.2.7） |
 | [web.md](web.md) | `ImplementationAtEachLayer/ApplicationLayer`（3.4）、`ArchitectureInDetail/WebServiceDetail/REST`（5.1）、`Security`（9） |

@@ -50,12 +50,7 @@
 
 ## 5. エラー応答
 
-| # | 規約 |
-|---|------|
-| 1 | 応答メッセージに内部情報（SQL・スタックトレース・テーブル構造・ライブラリ名）を載せない |
-| 2 | 認証・認可の失敗理由を出し分けない（探索の手がかりになるため）。詳細はログにだけ残す |
-| 3 | エラーコード体系の正は [tech_logging.md](../../tech/basic/tech_logging.md)、レスポンス形式の正は [tech_api_common.md](../../tech/basic/tech_api_common.md) |
-| 4 | 例外から応答への変換は `ApiExceptionHandler`（`@RestControllerAdvice`）へ集約し、`AppException` が持つコードと HTTP ステータスをそのまま `ErrorResource` へ写す。ガイドラインの `ApiError` + `ExceptionCodeResolver` + `ResponseEntityExceptionHandler` 継承（5.1.4.6.1）は**採らない**。コードの正は `tech_logging.md` にあり、例外側がコードとステータスを持てば例外クラス→コードの解決表を二重に持たずに済むため |
+**正は [exception.md](exception.md) §4**（`ApiExceptionHandler` が受ける例外と応答の対応、内部情報を出さない規約、ガイドライン 5.1.4.6.1・4.3.3.1.3 との差分）。本書では再掲しない。
 
 ## 6. 命名（Web層）
 
