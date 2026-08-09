@@ -44,7 +44,7 @@
 | `user_id` | `VARCHAR(50)` | 不可 | — | FK → `users.id` |
 | `token_hash` | `VARCHAR(255)` | 不可 | — | UNIQUE |
 | `purpose` | `VARCHAR(20)` | 不可 | `verify_email` | `verify_email` / `password_reset`。用途をまたいだ流用を防ぐため発行・検証の双方で一致を要求する |
-| `expires_at` | `DATETIME(tz)` | 不可 | — | 有効期間（発行から24時間）は `tech_auth.md` §3 が正 |
+| `expires_at` | `DATETIME(tz)` | 不可 | — | 有効期間は用途で異なる。`verify_email` は24時間（`tech_auth.md` §3 が正）、`password_reset` は1時間（[tech_auth/mail.md](../../detail/tech_auth/mail.md) §16.3 が正） |
 | `used` | `BOOLEAN` | 不可 | `false` | 使用済みトークンの再利用を防ぐ |
 | `created_at` | `DATETIME(tz)` | 不可 | 現在時刻 | — |
 
