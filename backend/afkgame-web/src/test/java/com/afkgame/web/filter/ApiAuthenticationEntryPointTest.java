@@ -21,7 +21,7 @@ import tools.jackson.databind.json.JsonMapper;
 /**
  * {@link ApiAuthenticationEntryPoint} の単体テスト。
  *
- * <p>仕様: docs/tech/basic/tech_logging.md「AUTH_ コード一覧」「統一エラーレスポンス形式」。
+ * <p>仕様: docs/tech/basic/tech_error_handling.md「AUTH_ コード一覧」「統一エラーレスポンス形式」。
  * 認証フィルタが記録した失敗理由を 401 の統一エラー応答へ変換する。
  *
  * <p>分岐観点: 失敗理由の記録あり（そのコードを返す）/ 記録なし（{@code AUTH_HEADER_MISSING}）。

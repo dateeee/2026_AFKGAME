@@ -6,7 +6,7 @@ import com.afkgame.domain.exception.AppException;
  * アクセストークン（JWT）の発行と検証。
  *
  * <p>仕様: docs/tech/detail/tech_auth.md §1（有効期限）・§4（ペイロード）。
- * 失敗はコードで区別する（docs/tech/basic/tech_logging.md「AUTH_ コード一覧」）。
+ * 失敗はコードで区別する（docs/tech/basic/tech_error_handling.md「AUTH_ コード一覧」）。
  * クライアントは {@code AUTH_TOKEN_EXPIRED} なら refresh を試し、
  * {@code AUTH_INVALID_TOKEN} なら再ログインへ倒すため、両者を混ぜない。
  *

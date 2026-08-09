@@ -2,7 +2,7 @@
 
 > [tech_auth.md](../tech_auth.md) の子ファイル（§9〜§15）。`POST /api/auth/register` / `/login` / `/logout` の処理を定める。
 > 認証方式とトークン有効期限（§1）・フロー概要（§3）・JWT構造と不正検知（§4）・応答例（§5）・プレイヤー初期化（§8）は索引側が正。
-> API一覧は [tech_api.md](../../basic/tech_api.md)、共通規約は [tech_api/common.md](../../basic/tech_api/common.md)、エラーコードは [tech_logging.md](../../basic/tech_logging.md)「AUTH_ コード一覧」、列定義は [tech_db/auth.md](../../basic/tech_db/auth.md)。
+> API一覧は [tech_api.md](../../basic/tech_api.md)、共通規約は [tech_api/common.md](../../basic/tech_api/common.md)、エラーコードは [tech_error_handling.md](../../basic/tech_error_handling.md)「AUTH_ コード一覧」、列定義は [tech_db/auth.md](../../basic/tech_db/auth.md)。
 
 ## 9. 3操作に共通する規約
 

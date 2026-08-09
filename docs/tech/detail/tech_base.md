@@ -104,7 +104,7 @@
 |------|------|
 | リクエスト | `{ "facilityId": "market" }`（必須。5種のいずれか） |
 | 成功 | `200`。`facilityId`・`level`・`gold`・`materials` を**更新後の値**で返す |
-| 失敗 | §6 のコード。形式は [tech_logging.md](../basic/tech_logging.md)「エラーレスポンス」 |
+| 失敗 | §6 のコード。形式は [tech_error_handling.md](../basic/tech_error_handling.md)「統一エラーレスポンス形式」 |
 
 ## 6. `BASE_` エラーコード一覧
 

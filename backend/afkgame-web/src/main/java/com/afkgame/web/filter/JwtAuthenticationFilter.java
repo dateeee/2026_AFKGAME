@@ -27,7 +27,8 @@ import jakarta.servlet.http.HttpServletResponse;
  * {@code Authorization: Bearer <access_token>} を検証して認証情報を組み立てる。
  *
  * <p>仕様: docs/tech/detail/tech_auth.md §7、
- * docs/tech/basic/tech_logging.md「認証エラーの詳細ログ」「AUTH_ コード一覧」。
+ * docs/tech/basic/tech_logging.md「失敗理由（reason）の値」、
+ * docs/tech/basic/tech_error_handling.md「AUTH_ コード一覧」。
  *
  * <p>本フィルタは認証の可否を判定するだけで、拒否の応答は返さない。認証不要な
  * エンドポイント（{@code com.afkgame.web.config.app.SpringSecurityConfig}）では失敗しても

@@ -219,7 +219,7 @@ class PlayerInitializationServiceImplTest {
          *
          * <p>公開APIからは到達しない（ゲスト作成・本登録はいずれも新規ユーザーを作ってから初期化するため）。
          * クライアントが起こせない状態にエラーコードを新設せず、
-         * 500 {@code INTERNAL_UNEXPECTED_ERROR} として扱う（tech_logging.md「AUTH_ コード一覧」に該当なし）。
+         * 500 {@code INTERNAL_UNEXPECTED_ERROR} として扱う（tech_error_handling.md「AUTH_ コード一覧」に該当なし）。
          *
          * <p>分岐: tech_auth.md #2
          */

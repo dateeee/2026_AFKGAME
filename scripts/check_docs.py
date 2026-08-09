@@ -34,7 +34,7 @@ EXCLUDE = (
     ".venv/",
     "venv/",
     "dist/",
-    "docs/reviews/",   # 追記型アーカイブ。過去レポートのリンク切れは修正しない（documentation_rules.md §8）
+    "docs/reviews/",   # 追記型アーカイブ。過去レポートのリンク切れは修正しない（documentation_rules/reviews.md §9）
     "docs/changelog.md",  # 追記型アーカイブ。過去行は当時のパスを保持する
 )
 

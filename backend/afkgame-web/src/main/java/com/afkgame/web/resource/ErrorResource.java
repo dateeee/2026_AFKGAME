@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 /**
  * 統一エラーレスポンス。
  *
- * <p>仕様: docs/tech/basic/tech_logging.md「統一エラーレスポンス形式」。
+ * <p>仕様: docs/tech/basic/tech_error_handling.md「統一エラーレスポンス形式」。
  * 全APIのエラー応答はコードによらずこの形式で返す
  * （{@code {"error": {"code", "message", "requestId"}}}）。
  * クライアントは**メッセージ文字列ではなくコードで**分岐する。
@@ -20,7 +20,7 @@ public record ErrorResource(Body error) {
     /**
      * エラー本体。
      *
-     * @param code      エラーコード（tech_logging.md「エラーコード体系」）
+     * @param code      エラーコード（tech_error_handling.md「エラーコード体系」）
      * @param message   利用者向けメッセージ
      * @param requestId リクエストID。ログとの突合に使う（採番前なら null で出力しない）
      */

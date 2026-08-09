@@ -52,7 +52,7 @@ class GuestInitializationRollbackIntegrationTest extends WebIntegrationTestSuppo
         doThrow(new DataIntegrityViolationException("初期アイテムの付与に失敗"))
                 .when(playerRepository).saveItem(any());
 
-        // 業務例外へ写さないため、統一エラー形式の 500 になる（tech_logging.md「グローバル例外ハンドラ」）
+        // 業務例外へ写さないため、統一エラー形式の 500 になる（tech_error_handling.md「グローバル例外ハンドラ」）
         mockMvc.perform(post("/api/auth/guest"))
                 .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.error.code").value("INTERNAL_UNEXPECTED_ERROR"));

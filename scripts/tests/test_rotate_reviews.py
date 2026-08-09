@@ -39,7 +39,7 @@ def make_reports(directory, count: int, body: str = "x") -> list[str]:
 # ── 定数（規約と同期していること）────────────────────────────
 
 def test_recent_matches_documentation_rule():
-    """直下に残す件数は documentation_rules.md §9 の 10 件。"""
+    """直下に残す件数は documentation_rules/reviews.md §9 の 10 件。"""
     assert mod.RECENT == 10
 
 

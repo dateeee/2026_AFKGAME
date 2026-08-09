@@ -95,7 +95,7 @@
 |------|------|
 | リクエスト | ボディなし |
 | 成功 | `200`。`character`（追加したキャラ）・`isDuplicate`・`canLimitBreak`・`gold`（更新後）を返す |
-| 失敗 | `400 BASE_NOT_BUILT` / `400 BASE_INSUFFICIENT_GOLD`（`tech_base.md` §6）。形式は [tech_logging.md](../basic/tech_logging.md)「エラーレスポンス」 |
+| 失敗 | `400 BASE_NOT_BUILT` / `400 BASE_INSUFFICIENT_GOLD`（`tech_base.md` §6）。形式は [tech_error_handling.md](../basic/tech_error_handling.md)「統一エラーレスポンス形式」 |
 
 - 新規と重複で**レスポンスの形を変えない**（`isDuplicate` で区別する）。フロントは1つの型で受け取り、表示だけを分ける
 - `canLimitBreak` は「重複であり、かつ既所持の同一キャラに突破回数が上限未満のものが1体以上ある」ときだけ `true`。限界突破そのものは `POST /api/character/limit-break`（別途）で行い、本APIでは実行しない

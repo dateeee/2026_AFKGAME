@@ -1,6 +1,7 @@
-# AFK GAME — ログ設計・エラーハンドリング
+# AFK GAME — ログ設計
 
 > [tech_spec.md](../tech_spec.md) §6「ログ設計」。アーキテクチャ方針は [tech_architecture.md](tech_architecture.md)。
+> **クライアントへ返すエラーの形式・コード体系・例外ハンドラは [tech_error_handling.md](tech_error_handling.md)**（§9）。本書はログ側の語彙のみを持つ。
 
 ## ログライブラリ
 Logback を使用。設定は `afkgame-env` の `logback.xml`（Boot 拡張の `logback-spring.xml` と `<springProfile>` は使えない）。Tomcat のアクセスログは Tomcat 側（`AccessLogValve`）が出力し、アプリのログとは別系統とする。
@@ -116,69 +117,6 @@ Logback を使用。設定は `afkgame-env` の `logback.xml`（Boot 拡張の `
 | メールアドレス | ローカル部の先頭2文字 + `***@` + ドメイン（例: `ab***@example.com`） | ローカル部が2文字以下は `***@<ドメイン>`、`@` が無ければ `****` |
 
 伏せ字は固定長にして、元の値の長さを推測させない。適用は `LogKey.TOKEN` / `LogKey.EMAIL` が自動で行うため、**呼び出し側でマスクを書かない**。
-
-## バックエンドエラーハンドリング
-
-### 統一エラーレスポンス形式
-
-全APIエラーレスポンスを以下の形式に統一する:
-
-```json
-{
-  "error": {
-    "code": "AUTH_PLAYER_NOT_FOUND",
-    "message": "指定されたプレイヤーが見つかりません",
-    "requestId": "550e8400-e29b-41d4-a716-446655440000"
-  }
-}
-```
-
-応答ボディのキーは camelCase（[tech_api/common.md](tech_api/common.md) §5.0）。**ログ項目は snake_case**（上記「ログフォーマット」の `request_id` 等）であり、APIボディとは別体系である。
-
-### エラーコード体系
-
-| プレフィックス | 対象 | 例 |
-|---------------|------|-----|
-| `AUTH_` | 認証関連 | 一覧は下記「AUTH_ コード一覧」 |
-| `BATTLE_` | 戦闘関連 | `BATTLE_NOT_IN_TOWER`, `BATTLE_ALREADY_WIPED`, `BATTLE_TICK_BUSY`(503) |
-| `GAME_` | ゲーム状態関連 | `GAME_STATE_NOT_FOUND` |
-| `SHOP_` | ショップ関連 | `SHOP_INSUFFICIENT_GOLD`, `SHOP_ITEM_SOLD_OUT`, `SHOP_INVENTORY_FULL` |
-| `TOWER_` | 塔関連 | `TOWER_NOT_UNLOCKED`, `TOWER_INVALID_FLOOR` |
-| `EQUIP_` | 装備関連 | `EQUIP_NOT_FOUND`, `EQUIP_SLOT_MISMATCH` |
-| `SKILL_` | スキル関連 | `SKILL_INSUFFICIENT_SP`, `SKILL_PREREQUISITE_NOT_MET`（一覧は [tech_party.md §7](../detail/tech_party.md)） |
-| `PARTY_` | パーティ関連 | `PARTY_LOCKED_IN_TOWER`, `PARTY_MEMBER_NOT_OWNED` |
-| `CHARACTER_` | キャラクター関連 | `CHARACTER_NOT_FOUND` |
-| `BASE_` | 施設関連 | `BASE_INSUFFICIENT_MATERIALS`, `BASE_MAX_LEVEL`（一覧は [tech_base.md §6](../detail/tech_base.md)） |
-| `FORGE_` | 鍛冶屋関連 | `FORGE_INSUFFICIENT_MATERIALS`, `FORGE_LEVEL_TOO_LOW` |
-| `RATE_LIMIT_` | レート制限 | `RATE_LIMIT_EXCEEDED`(429)。`Retry-After` ヘッダを併せて返す |
-| `INTERNAL_` | サーバー内部エラー | `INTERNAL_UNEXPECTED_ERROR` |
-| `HTTP_` | 業務コードを持たない Spring MVC 標準例外（**4xx のみ**。404・405・415 等） | `HTTP_405`。クライアントは個別分岐せず汎用エラー表示に倒す |
-
-### AUTH_ コード一覧
-
-クライアントは**メッセージ文字列ではなくコードで**分岐する（`AUTH_TOKEN_EXPIRED` は refresh、`AUTH_INVALID_TOKEN` は再ログインと、挙動が異なるため）。
-
-| コード | HTTP | 発生条件 |
-|--------|------|---------|
-| `AUTH_HEADER_MISSING` | 401 | `Authorization` ヘッダが無い |
-| `AUTH_INVALID_FORMAT` | 401 | `Bearer ` で始まらない |
-| `AUTH_TOKEN_EXPIRED` | 401 | アクセストークンの有効期限切れ（refresh 可能） |
-| `AUTH_INVALID_TOKEN` | 401 | 署名不正・`sub` 欠落（再ログインが必要） |
-| `AUTH_USER_NOT_FOUND` | 401 | トークンは正当だがユーザーが存在しない |
-| `AUTH_PLAYER_NOT_FOUND` | 404 | ユーザーに対応する Player が無い |
-| `AUTH_INVALID_CREDENTIALS` | 401 | ログインのメール／パスワード不一致（どちらが誤りかは返さない） |
-| `AUTH_REFRESH_INVALID` | 401 | リフレッシュトークンが不正・再利用検知 |
-| `AUTH_EMAIL_TAKEN` | 409 | 登録・アカウント移行でメールが使用済み |
-| `AUTH_ALREADY_REGISTERED` | 400 | 本登録済みアカウントへの移行要求 |
-| `AUTH_LINK_PAYLOAD_INVALID` | 400 | 移行要求に `email`+`password` も `googleAuthCode` も無い |
-| `AUTH_VERIFICATION_INVALID` | 400 | メール確認トークンが不正・期限切れ・用途違い |
-| `AUTH_RESET_TOKEN_INVALID` | 400 | パスワードリセットトークンが不正・期限切れ・用途違い |
-| `AUTH_GOOGLE_NOT_CONFIGURED` | 501 | `GOOGLE_CLIENT_ID` 未設定 |
-| `AUTH_GOOGLE_NOT_IMPLEMENTED` | 501 | Google OAuth 未実装 |
-
-### グローバル例外ハンドラ
-
-`@RestControllerAdvice` で未捕捉例外を捕捉し、ERRORレベルでスタックトレースをログ出力したうえで、クライアントには `500` + `INTERNAL_UNEXPECTED_ERROR` とリクエストIDだけを返す（スタックトレースは含めない）。リクエストIDでログと突合できる。
 
 ## 設定値
 

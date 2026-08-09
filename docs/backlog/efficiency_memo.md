@@ -1,6 +1,6 @@
 # 効率メモ（efficiency memo）
 
-非効率だったやり取りの記録。反映したら消す作業用の台帳（[documentation_rules.md](../process/documentation_rules.md) §10）。
+非効率だったやり取りの記録。反映したら消す作業用の台帳（[documentation_rules/directories.md](../process/documentation_rules/directories.md) §10）。
 運用の正は [.claude/project/retro.md](../../.claude/project/retro.md)。
 区分Cの文字数上限（8,000字）の対象。**超過したら `/retro` を回す合図**（溜め込まずに反映して消す）。
 

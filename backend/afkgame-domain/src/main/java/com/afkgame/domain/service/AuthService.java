@@ -8,7 +8,7 @@ import com.afkgame.domain.model.User;
  *
  * <p>仕様: docs/tech/detail/tech_auth.md §2「ゲストプレイ」・§3「認証フロー」・
  * §4「リフレッシュトークン」と docs/tech/detail/tech_auth/account.md §9〜§15
- * （登録・ログイン・ログアウト）、エラーコードは docs/tech/basic/tech_logging.md「AUTH_ コード一覧」。
+ * （登録・ログイン・ログアウト）、エラーコードは docs/tech/basic/tech_error_handling.md「AUTH_ コード一覧」。
  *
  * <p>ゲスト作成・リフレッシュ・登録・ログイン・ログアウトと、ユーザー作成時のプレイヤー初期化
  * （tech_auth.md §8.2。実体は {@link PlayerInitializationService}）を持つ。

@@ -68,7 +68,7 @@ VS Code は実行構成 **Full Stack** で同時起動できる（`.vscode/launc
 │   ├── skills/                  # 工程7件 + 支援10件（プロジェクト非依存）
 │   ├── references/              # スキル共通リファレンス（同上）
 │   └── project/                 # プロジェクト固有プロファイル（索引: INDEX.md）
-├── docs/                        # ドキュメント（分類軸は documentation_rules.md §10）
+├── docs/                        # ドキュメント（分類軸は documentation_rules/directories.md §10）
 │   ├── design/ tech/ data/      # 成果物: ゲーム仕様 / 技術仕様 / マスターデータ
 │   ├── diagrams/                # 成果物: 設計図（Mermaid）。索引 + 同名ディレクトリ
 │   ├── process/                 # 進め方: 工程定義・ドキュメント規約

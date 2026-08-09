@@ -2,7 +2,7 @@
  * APIエラー型
  *
  * バックエンドは全例外を `{"error": {"code", "message"}}` に統一している
- * （backend/app/exceptions.py、コード体系は docs/tech/basic/tech_logging.md）。
+ * （backend/app/exceptions.py、コード体系は docs/tech/basic/tech_error_handling.md）。
  * サーバーが用意した日本語メッセージとエラーコードを、そのまま画面へ届けるための型。
  */
 

@@ -25,7 +25,7 @@ import io.jsonwebtoken.security.Keys;
  * {@link JwtServiceImpl} の単体テスト。
  *
  * <p>仕様: docs/tech/detail/tech_auth.md §1（有効期限）・§4（JWT構造）、
- * docs/tech/basic/tech_logging.md「AUTH_ コード一覧」（期限切れと不正の区別）。
+ * docs/tech/basic/tech_error_handling.md「AUTH_ コード一覧」（期限切れと不正の区別）。
  *
  * <p>分岐観点: 検証成功 / 期限切れ（{@code AUTH_TOKEN_EXPIRED}）/ 署名不正・改竄
  * （{@code AUTH_INVALID_TOKEN}）/ {@code sub} 欠落（{@code AUTH_INVALID_TOKEN}）。

@@ -20,7 +20,7 @@ import tools.jackson.databind.json.JsonMapper;
  * 認証の横断基盤（Security フィルタ → コントローラ → MyBatis → DB）が連結して動くことの統合テスト。
  *
  * <p>仕様: docs/tech/detail/tech_auth.md §3「ゲストプレイ」・§4（ローテーションと不正検知）、
- * docs/tech/basic/tech_logging.md「AUTH_ コード一覧」「統一エラーレスポンス形式」、
+ * docs/tech/basic/tech_error_handling.md「AUTH_ コード一覧」「統一エラーレスポンス形式」、
  * docs/tech/nonfunctional/tech_security.md §11.2（CORS）。
  *
  * <p>コンテキストと DB の起こし方は {@link WebIntegrationTestSupport}。

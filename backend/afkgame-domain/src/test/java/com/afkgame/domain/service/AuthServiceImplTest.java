@@ -40,7 +40,7 @@ import com.afkgame.env.config.AuthSettings;
  *
  * <p>仕様: docs/tech/detail/tech_auth.md §1（期限・ローテーション）・§3「ゲストプレイ」・
  * §4「リフレッシュトークン」（再利用検知で全トークン失効）、
- * docs/tech/basic/tech_logging.md「AUTH_ コード一覧」。
+ * docs/tech/basic/tech_error_handling.md「AUTH_ コード一覧」。
  *
  * <p>分岐観点: リフレッシュの 正常 / 該当なし / revoked済み（再利用検知）/ 期限切れ /
  * ユーザー不在、および認証ユーザー取得の 存在する / しない。

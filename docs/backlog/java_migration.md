@@ -1,6 +1,6 @@
 # AFK GAME — Java/Terasoluna 移行計画
 
-> 状態ファイル（[documentation_rules.md](../process/documentation_rules.md) §10）。移行完了時に本ファイルと `java_migration/` をまとめて削除する。
+> 状態ファイル（[documentation_rules/directories.md](../process/documentation_rules/directories.md) §10）。移行完了時に本ファイルと `java_migration/` をまとめて削除する。
 > 移行後の構成の正は [tech_structure.md](../tech/basic/tech_structure.md) §2〜§3 と [tech_backend.md](../tech/basic/tech_backend.md) §4。本書群は**手順と進捗**のみを持ち、仕様は各成果物へ反映して重複させない。
 > 本ファイルは索引で、**進捗（§4 の STEP 一覧表）の正**を持つ。各節の本文は分冊にある。
 

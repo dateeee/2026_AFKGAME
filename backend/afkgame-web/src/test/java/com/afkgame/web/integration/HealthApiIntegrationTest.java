@@ -52,7 +52,7 @@ class HealthApiIntegrationTest extends WebIntegrationTestSupport {
     }
 
     @Test
-    @DisplayName("一意制約名が定義書の命名規約どおりに作られる（known_issues #17）")
+    @DisplayName("一意制約名が定義書の命名規約どおりに作られる（tech_db.md §2 命名規約）")
     void test_一意制約名が命名規約に従う() {
         List<String> actual = jdbcTemplate.queryForList(
                 "SELECT constraint_name FROM information_schema.table_constraints"

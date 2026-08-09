@@ -29,7 +29,8 @@ import com.afkgame.env.logging.LogKey;
 /**
  * {@link JwtAuthenticationFilter} の単体テスト。
  *
- * <p>仕様: docs/tech/basic/tech_logging.md「認証エラーの詳細ログ」「AUTH_ コード一覧」、
+ * <p>仕様: docs/tech/basic/tech_logging.md「失敗理由（reason）の値」、
+ * docs/tech/basic/tech_error_handling.md「AUTH_ コード一覧」、
  * docs/tech/detail/tech_auth.md §7（{@code Authorization: Bearer <token>}）。
  *
  * <p>分岐観点: ヘッダ無し（{@code AUTH_HEADER_MISSING} を既定に委ねる）/ Bearer でない

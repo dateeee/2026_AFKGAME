@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 /**
  * {@link ApiExceptionHandler} の単体テスト。
  *
- * <p>仕様: docs/tech/basic/tech_logging.md「統一エラーレスポンス形式」「グローバル例外ハンドラ」、
+ * <p>仕様: docs/tech/basic/tech_error_handling.md「統一エラーレスポンス形式」「グローバル例外ハンドラ」、
  * docs/tech/basic/tech_api/common.md「HTTPステータスコードの使い分け」。
  *
  * <p>分岐観点: {@code AppException}（コードとステータスをそのまま返す）/
@@ -161,7 +161,7 @@ class ApiExceptionHandlerTest {
             mockMvc.perform(post("/stub/unexpected"))
                     .andExpect(status().isInternalServerError())
                     .andExpect(jsonPath("$.error.code").value("INTERNAL_UNEXPECTED_ERROR"))
-                    // スタックトレースはクライアントへ返さない（tech_logging.md）
+                    // スタックトレースはクライアントへ返さない（tech_error_handling.md）
                     .andExpect(jsonPath("$.error.message").value("サーバー内部エラーが発生しました"));
         }
     }

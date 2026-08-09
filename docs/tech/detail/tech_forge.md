@@ -51,7 +51,7 @@
 | `enhance` | 要求 `{ "equipmentId": "..." }`。成功 `200` で `equipment`（更新後・実効ステータス込み）・`materials`・`gold` を返す |
 | `craft` | 要求 `{ "rank": 1-5 }` または `{ "recipeId": "..." }`（排他・どちらか必須）。成功 `200` で `equipment`（生成物）・`materials`・`gold` を返す |
 | `disassemble` | 要求 `{ "equipmentId": "..." }`。成功 `200` で `materials`（更新後）・`gained`（獲得素材と数量）を返す |
-| 失敗 | §8 のコード。形式は [tech_logging.md](../basic/tech_logging.md)「エラーレスポンス」 |
+| 失敗 | §8 のコード。形式は [tech_error_handling.md](../basic/tech_error_handling.md)「統一エラーレスポンス形式」 |
 
 - `materials` は3操作とも**更新後の全素材の所持数**を返す（フロントが差分計算をしないで済むようにする）
 
@@ -65,5 +65,5 @@
 | `FORGE_INVENTORY_FULL` | 400 | 製作で所持枠が上限に達している |
 | `FORGE_EQUIPMENT_LOCKED` | 400 | 分解対象が装備中またはロック中 |
 
-- 未建設は `BASE_NOT_BUILT`、ゴールド不足は `BASE_INSUFFICIENT_GOLD`（`tech_base.md` §6）、装備が見つからない場合は `EQUIP_NOT_FOUND`（`tech_logging.md`）を流用する
+- 未建設は `BASE_NOT_BUILT`、ゴールド不足は `BASE_INSUFFICIENT_GOLD`（`tech_base.md` §6）、装備が見つからない場合は `EQUIP_NOT_FOUND`（`tech_error_handling.md`）を流用する
 - `equipmentId` の欠落、`rank` の範囲外、未知の `recipeId`、`rank` と `recipeId` の排他違反は Bean Validation の `422` とし、`FORGE_` コードを使わない

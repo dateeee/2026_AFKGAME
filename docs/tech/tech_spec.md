@@ -17,7 +17,8 @@
 | 5. API設計 | 全エンドポイント一覧（認証・ゲーム状態・tick・操作系・Phase 3〜5） | [tech_api.md](basic/tech_api.md) |
 | 5.0 API共通仕様 | 規約（パス・ボディ・日時・認証）・共通ヘッダ・ステータスコードの使い分け | [tech_api/common.md](basic/tech_api/common.md) |
 | 6. アーキテクチャ方針<br>7. ゲームループ | サーバー権威・ゲスト永続化・エラーハンドリング・ハイブリッドtick制 | [tech_architecture.md](basic/tech_architecture.md) |
-| 6. ログ設計 | ログレベル・フォーマット・マスク規則・統一エラーレスポンス | [tech_logging.md](basic/tech_logging.md) |
+| 6. ログ設計 | ログレベル・フォーマット・ロガー名体系・ログ項目・マスク規則・失敗理由（`reason`） | [tech_logging.md](basic/tech_logging.md) |
+| 9. エラーハンドリング | 統一エラーレスポンス形式・エラーコード体系・`AUTH_` コード一覧・グローバル例外ハンドラ | [tech_error_handling.md](basic/tech_error_handling.md) |
 | 10. 性能・容量設計 | 負荷見積り・平滑化・容量見積り・劣化時の対処順序・検証方法 | [tech_performance.md](nonfunctional/tech_performance.md) |
 | 11. セキュリティ設計 | 通信／CORS・入力検証・認可・レート制限・秘密情報管理 | [tech_security.md](nonfunctional/tech_security.md) |
 | 12.1〜12.3 運用設計（環境） | 環境区分・環境変数・ヘルスチェック／監視 | [tech_operations.md](nonfunctional/tech_operations.md) |

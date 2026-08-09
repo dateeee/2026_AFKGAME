@@ -21,7 +21,7 @@ import tools.jackson.databind.json.JsonMapper;
 /**
  * 未認証リクエストの拒否応答を、統一エラー形式の 401 で返す。
  *
- * <p>仕様: docs/tech/basic/tech_logging.md「AUTH_ コード一覧」「統一エラーレスポンス形式」。
+ * <p>仕様: docs/tech/basic/tech_error_handling.md「AUTH_ コード一覧」「統一エラーレスポンス形式」。
  * {@link JwtAuthenticationFilter} が記録した失敗理由をそのまま使い、記録が無い場合
  * （＝{@code Authorization} ヘッダ自体が無い）は {@code AUTH_HEADER_MISSING} とする。
  *

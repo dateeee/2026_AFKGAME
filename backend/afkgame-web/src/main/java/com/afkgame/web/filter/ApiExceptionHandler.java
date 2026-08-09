@@ -20,7 +20,7 @@ import com.afkgame.web.resource.ErrorResource;
 /**
  * 全APIのエラー応答を統一形式へそろえるグローバル例外ハンドラ。
  *
- * <p>仕様: docs/tech/basic/tech_logging.md「統一エラーレスポンス形式」「グローバル例外ハンドラ」。
+ * <p>仕様: docs/tech/basic/tech_error_handling.md「統一エラーレスポンス形式」「グローバル例外ハンドラ」。
  * 未捕捉例外は ERROR ログにスタックトレースを残し、クライアントには 500 と
  * {@code INTERNAL_UNEXPECTED_ERROR} のみを返す（内部情報を漏らさない）。
  *
