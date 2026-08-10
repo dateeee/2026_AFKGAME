@@ -3,7 +3,7 @@
 > **使い方**: 新セッションの最初のメッセージで `/next` と送る（または §1 のコードブロックを貼り付ける）。**着手前に §0 を読む**。
 > 本ファイルは**ポインタ専用**。Phase 進捗の正は [development_process.md](../process/development_process.md) §5、書式の正は [.claude/project/next.md](../../.claude/project/next.md)、worktree 運用の正は [worktree_guide.md](../process/worktree_guide.md)。
 
-最終更新: 2026-08-10 / main `ed90595`（**`check_java_conventions.py` へ判定12「境界ログでマスクされない機密名」・判定13「未参照の設定値・enum 値」を追加**。116ファイル・**違反0 / WARN 20件**、`scripts/tests` は **403件 green**）。判定12 は**引き継ぎが「違反0」と書いていた前提を覆して4件を検出**し、うち `AuthService#verifyEmail(String rawToken)` は製造①（`7be6af7`・レビュー後）で新たに入った **ISSUE-801 と同型の生トークン漏洩**だった。ユーザー判断で引数を `rawToken` → `token` へ改名して解消し（衝突する局所変数は `verificationToken` へ）、`findByTokenHash(String tokenHash)` 2件は SHA-256 ハッシュで生値を復元できないため `// 規約例外:` で抑止した。判定13 は **WARN のみで exit code に算入しない**（先行投入を許容し件数の増減だけ見る）。内訳は [changelog.md](../changelog.md) の 2026-08-10 ブロックが正。1つ前は `known_issues.md` #22 の解消（`check_branch_list.py` の回帰テスト30件を現行シグネチャへ）、その前は 3-A-3 製造①（link-account / verify-email）で、`mvn verify` は**単体259件 + 結合62件 Green・C1 100%（170/170・未達0）**。
+最終更新: 2026-08-10 / main `b1b95e9`（**3-A-3 テストリスト作成②**。`password_reset.md` §23（16件）・§25（19件）と `mail.md` §17（8件）の**全43行を Red のテストへ展開**した。新規テストメソッド40件、`check_branch_list.py --tests` 違反0）。**いま `mvn test` はテストコンパイルで停止する＝それが正常な Red の状態**で、ユニークな javac エラー45件のうち42件が未実装シンボル、残り3件も申し送りどおりの表層変更で消える（想定外の型エラー0件）。**製造②が実装すべき表層は各テストのクラス Javadoc「製造工程への申し送り」が正**（`AuthServiceImplTest`・`AuthApiTest`・`VerificationMailSenderImplTest`）で、仕様書に無い判断もそこにある。内訳は [changelog.md](../changelog.md) の 2026-08-10 ブロックが正。1つ前は `check_java_conventions.py` への判定12・13 追加（116ファイル・**違反0 / WARN 20件**、`scripts/tests` **403件 green**）、その前は 3-A-3 製造①（link-account / verify-email）で `mvn verify` は**単体259件 + 結合62件 Green・C1 100%（170/170・未達0）**。
 
 **STEP 2R は完了済みで backend の Phase 機能へ着手してよい**。以後の移行順序は **3-A-2（完了）→ 3-A-3 → 3-B（Phase 1: game / battle / tower）→ 4（Phase 2）→ 5（Phase 3）→ 6（切替と後始末）**。順序の正は [carryover_notes.md](carryover_notes.md) §1、手順・進捗の正は [java_migration.md](java_migration.md)（索引 + `java_migration/` 3分冊）。**3-A-3・3-B とも詳細設計は完了済み**で、残るのはテストリスト作成 → 製造。
 
@@ -29,10 +29,10 @@ worktree を使う複数セッションが同時に走る前提。**着手状態
 ## 1. 次回（コピペ用）
 
 ```
-/test-list 3-A-3 テストリスト作成②（password-reset / メール送信）: §23・§25・§17 の分岐一覧43行を失敗するテストへ展開する
-完了条件: ①3節の全43行を Red のテストへ展開し `python scripts/check_branch_list.py --tests` が違反0（**§17 は #1・#2・#6 の3件だけ `VerificationMailSenderImplTest` に実装済み**なので残り5件を足し、8行すべてへマーカーを行き渡らせる）②Red は `mvn test` のテストコンパイル停止で確認し、落ちる理由が**未実装シンボルだけ**であることを確かめる（想定外の型エラー0件）③製造②が実装する表層（メソッドシグネチャ・Resource・設定キー）をテストの Javadoc へ明記する④コミットする
-参照: 分岐一覧の正は [password_reset.md](../tech/detail/tech_auth/password_reset.md) §23（16件）・§25（19件）と [mail.md](../tech/detail/tech_auth/mail.md) §17（8件）。**実在と件数はこのターンで確認済み**。層の分担（サービス層 / Web層 / 統合）と表層の書き方は [changelog.md](../changelog.md) 2026-08-10「3-A-3 テストリスト作成①」ブロックが持つ
-前提: main `ed90595`（`check_java_conventions.py` は 116ファイル・**違反0 / WARN 20件**、`scripts/tests` 403件 green、`check_branch_list.py --tests` は**分岐一覧41件・違反0**）。実行環境は**このターンで実行確認済み** — Maven 3.9.11 / JDK 17.0.20（Temurin）/ docker コンテナ `afkgame-postgres` 稼働中で `mvn verify` が**単体259件 + 結合62件 Green・C1 100%（170/170）**。**判定12 が効いているので、引数名は `rawResetToken` 系を作らず固定表（`password`・`rawPassword`・`newPassword`・`token`・`accessToken`・`refreshToken`・`secret`・`credential`）へ寄せる**（違反すると `check_java_conventions.py` が ERROR で止まる）。編集を伴うので `python scripts/worktree.py add auth-3a3-testlist-b` で worktree を作る（[worktree_guide.md](../process/worktree_guide.md) §5.2）。`docs/backlog/open_specs.md` は不在＝未確定ゼロ
+/dev 3-A-3 製造②（password-reset / メール送信）: テストリスト②の Red 43行分を Green にする
+完了条件: ①`mvn verify` が**単体・結合とも Green で C1 100%（未達0）** ②`python scripts/check_java_conventions.py` が**違反0**で、WARN は 20件から**減る**（製造②で `MailSettings` 6件と `passwordResetTokenExpire` に読み手ができるはずなので、**減っていなければ設定を読み落としている**）③`check_branch_list.py --tests`・`check_error_codes.py` が違反0 ④コミットする
+参照: 手順の正は [password_reset.md](../tech/detail/tech_auth/password_reset.md) §22・§24 と [mail.md](../tech/detail/tech_auth/mail.md) §16。**実装すべき表層（シグネチャ・Resource・設定キー・規約例外の置き場所）は Red のテストのクラス Javadoc「製造工程への申し送り」が正**で、仕様書に無い判断もそこに書いてある
+前提: main `b1b95e9`（**テストコンパイルが通らないのが正常＝ Red**）。実行環境は前セッションで実行確認済み — Maven 3.9.11 / JDK 17.0.20（Temurin）/ docker コンテナ `afkgame-postgres`。**メール送信の依存（Jakarta Mail・`spring-context-support` 等）はどの pom にも無い**ので追加から入る。テストは実送信を `transmit(to, subject, body)`（パッケージ内可視）で差し替える前提なので、**ライブラリ呼び出しはこのメソッドの中だけに閉じる**。`RefreshTokenRepository#updateRevokedByUserId` は戻り値を `void` → `int` へ変える（既存の呼び出し元・`verify` はそのまま通る）。`UserRepository#updatePasswordHash` は引数 `passwordHash` が判定12 の固定表に無いため `// 規約例外:` が要る。編集を伴うので `python scripts/worktree.py add auth-3a3-dev-b` で worktree を作る（[worktree_guide.md](../process/worktree_guide.md) §5.2）。`docs/backlog/open_specs.md` は不在＝未確定ゼロ
 ```
 
 ## 2. 候補キュー（最大5行・優先順）
@@ -41,11 +41,12 @@ worktree を使う複数セッションが同時に走る前提。**着手状態
 
 | 優先 | タスク | 前提 | wt 名 / 領域 | 工程スキル |
 |------|-------|------|------------|-----------|
-| 1 | **3-A-3 の製造②（password-reset / メール送信）** | §1 のテストリスト② | `auth-3a3-dev-b`<br>backend | `dev` |
-| 2 | **3-A-3 の製造完了ゲート**（`backend-review` 差分）。3-A-2 と同じく**製造①②をまとめて1回**見る（①だけで先に回すと②で同じ差分を二度読む） | キュー1の製造② | なし（読み取りのみ）<br>backend | `backend-review` |
+| 1 | **3-A-3 の製造完了ゲート**（`backend-review` 差分）。3-A-2 と同じく**製造①②をまとめて1回**見る（①だけで先に回すと②で同じ差分を二度読む） | §1 の製造② | なし（読み取りのみ）<br>backend | `backend-review` |
+| 2 | **3-B テストリスト作成①（Phase 1: game / battle）**。tick・戦闘サービスが先に要るため tower は後段 | キュー1のゲート | `3b-testlist-battle`<br>backend | `test-list` |
 
-- **3-A-2 の製造完了ゲートは閉じた**（指摘6件すべて解消。レポートの正は [2026-08-10_013313.md](../reviews/backend-review/2026-08-10_013313.md)）。「プロセスへの還元」4件のうち**③C1 では拾えない観点は見送り**、**④「DB例外の写像を実DBで通す」は ISSUE-806 で前提の固定までが入った**（`DuplicateKeyException` → 409 `AUTH_EMAIL_TAKEN` の写像そのものを API 経由で通すのは未実施）。残る①②が §1
+- **3-A-2 の製造完了ゲートは閉じた**（指摘6件すべて解消。レポートの正は [2026-08-10_013313.md](../reviews/backend-review/2026-08-10_013313.md)）。「プロセスへの還元」4件のうち**③C1 では拾えない観点は見送り**、**④「DB例外の写像を実DBで通す」は ISSUE-806 で前提の固定までが入った**（`DuplicateKeyException` → 409 `AUTH_EMAIL_TAKEN` の写像そのものを API 経由で通すのは未実施）。残る①②はキュー1で見る
 - **3-A-3 製造① で `WebIntegrationTestSupport#updateFixture` を新設した**。`dataSource` が `defaultAutoCommit = false` のため、素の `jdbcTemplate.update` は**更新件数が返るのに値が残らない**（DBCP が接続返却時にロールバックする）。統合テストでフィクスチャを直接書き換えるときは必ずこれを通す
-- **判定13（`--unused`）の現在値は WARN 20件**（`AuthSettings` 4・`GameSettings` 9・`MailSettings` 6・`LogKey.TOKEN`）。ゼロを強制せず**この件数からの増減だけ見る**。製造②で `MailSettings` 6件と `passwordResetTokenExpire` に読み手ができるはずなので、**減っていなければ設定を読み落としている**
-- **キューが空いたら戻す行**: 3-B のテストリスト作成 → 製造（Phase 1: game / battle → tower の順。tick・戦闘サービスが先に要るため tower のテストは後段。tower の分岐一覧は [tech_tower.md](../tech/detail/tech_tower.md) §0 の55件 + `tech_state.md` §5 の7件。順序の正は [carryover_notes.md](carryover_notes.md) §1）
+- **判定13（`--unused`）の現在値は WARN 20件**（`AuthSettings` 4・`GameSettings` 9・`MailSettings` 6・`LogKey.TOKEN`）。ゼロを強制せず**この件数からの増減だけ見る**
+- **`mail.md` §17 への差し戻し候補が1件ある**（未反映）。`VerificationMailSenderImplTest#test_トランザクション外なら即時に送る` は `send` の実装分岐（`isSynchronizationActive()` の偽側）だが §17 に対応する行が無い。呼び出し元のコミット / ロールバックのどちらでもなく既存テストでもあるため今回は行を足さず据え置いた。**C1 の分母には入る**ので、製造②で未達になるようなら `detail-design` で §17 へ9行目として足す
+- **キューが空いたら戻す行**: 3-B の製造（game / battle）→ tower のテストリスト作成 → 製造（tower の分岐一覧は [tech_tower.md](../tech/detail/tech_tower.md) §0 の55件 + `tech_state.md` §5 の7件。順序の正は [carryover_notes.md](carryover_notes.md) §1）
 - **Phase 4 は Java 移行が終わるまで本キューから外している**（2026-08-09・ユーザー判断）。再開時に戻す3件の内訳は [carryover_notes.md](carryover_notes.md) §2 が持つ
