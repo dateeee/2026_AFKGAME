@@ -14,7 +14,7 @@
 | API設計 | `docs/tech/basic/tech_api.md` | エンドポイント一覧 |
 | API共通仕様 | `docs/tech/basic/tech_api/common.md` | 規約・共通ヘッダ・ステータスコード |
 | アーキテクチャ | `docs/tech/basic/tech_architecture.md` | 層構成・依存方向 |
-| ログ設計 | `docs/tech/basic/tech_logging.md` | ログレベル・出力項目 |
+| ログ設計 | `docs/tech/basic/tech_logging.md` + `tech_logging/` | ログレベル・出力項目 |
 | エラーハンドリング | `docs/tech/basic/tech_error_handling.md` | エラー形式・コード体系 |
 | 認証方式 | `docs/tech/detail/tech_auth.md` | 認証フロー・トークン |
 | 性能・容量 | `docs/tech/nonfunctional/tech_performance.md` | 非機能要件の実現方式 |
