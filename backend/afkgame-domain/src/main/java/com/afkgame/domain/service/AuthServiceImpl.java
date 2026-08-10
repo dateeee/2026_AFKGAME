@@ -303,6 +303,10 @@ public class AuthServiceImpl implements AuthService {
      * <p>{@code users} は {@code uq_users_email} と {@code uq_users_google_id} の2本を持つため、
      * 制約名を見ずに重複と決めつけると、Google連携の重複が「メールが既に使われています」として
      * 返る（link-account で {@code google_id} を設定するようになった時点で顕在化する）。
+     *
+     * <p>メッセージに制約名が含まれる前提は
+     * {@code UserRepositoryTest#同じメールアドレスでは2人目を作れない} が実DBで固定する
+     * （本メソッドの単体テストはメッセージをモックで自作するため、そこでは退行を検出できない）。
      */
     private static boolean isEmailConstraintViolation(DuplicateKeyException e) {
         String message = String.valueOf(e.getMostSpecificCause().getMessage());

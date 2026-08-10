@@ -15,6 +15,7 @@
 - **`characters.rarity` は V1 スキーマに無い**（Phase 3 の列）。`Character` Entity にも持たせていないので、Phase 3 の移植（STEP 5）でスキーマ追加と同時に足す
 - **`uq_players_user_id` 違反に業務エラーコードは新設しない**（2026-08-09 決着）。AUTH_ 一覧に該当が無く公開APIからは到達しない経路のため、`DuplicateKeyException` をそのまま送出し 500 `INTERNAL_UNEXPECTED_ERROR` として扱う（3-A-2 の register でも同じ判断を使う）
 - **STEP 6 で `tech_db/` の「実装:」行を Entity 参照へ替えても `check_schema_triple.py` は止まらない**（DDL はテーブル名で対応づけるため）。Java 側でスキーマの正を持つのは Flyway の `V1__initial_schema.sql`（照合仕様の正はスクリプトの docstring）
+- **`MailSettings` の7フィールドは読み手が未実装**（2026-08-10・ISSUE-803。`known_issues.md` #6 と対）。STEP 3-A-3（メール送信）の完了条件へ「7フィールドすべてに読み手ができること」を入れる。3-A-3 を終えてなお未参照が残るフィールドは、その時点で削除する
 
 ## 2. 仕様・マスターデータ
 

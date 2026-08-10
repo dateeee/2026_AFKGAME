@@ -88,13 +88,21 @@ class UserRepositoryTest extends RepositoryTestSupport {
             assertThat(actual.getDisplayName()).isEqualTo("冒険者");
         }
 
+        /**
+         * {@code AuthServiceImpl#isEmailConstraintViolation} は例外メッセージに制約名が含まれる前提で
+         * メール重複と Google連携の重複を判別するため、**実DBが返す文字列に {@code uq_users_email} が
+         * 含まれること**まで固定する。単体テストはメッセージをモックで自作するため、ドライバ更新で
+         * 制約名が落ちてもそちらは赤くならない。
+         */
         @Test
         void 同じメールアドレスでは2人目を作れない() {
             String email = email();
             userRepository.save(メール登録済みユーザー(email));
 
             assertThatThrownBy(() -> userRepository.save(メール登録済みユーザー(email)))
-                    .isInstanceOf(DuplicateKeyException.class);
+                    .isInstanceOf(DuplicateKeyException.class)
+                    .extracting(e -> ((DuplicateKeyException) e).getMostSpecificCause().getMessage())
+                    .asString().contains("uq_users_email");
         }
 
         @Test
