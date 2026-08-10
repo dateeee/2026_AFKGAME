@@ -3,9 +3,33 @@
     "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.afkgame.domain.repository.EmailVerificationTokenRepository">
 
+  <resultMap id="emailVerificationTokenResultMap"
+             type="com.afkgame.domain.model.EmailVerificationToken">
+    <id     property="id"        column="id"/>
+    <result property="userId"    column="user_id"/>
+    <result property="tokenHash" column="token_hash"/>
+    <result property="purpose"   column="purpose"/>
+    <result property="expiresAt" column="expires_at"/>
+    <result property="used"      column="used"/>
+    <result property="createdAt" column="created_at"/>
+  </resultMap>
+
   <insert id="save">
     INSERT INTO email_verification_tokens (user_id, token_hash, purpose, expires_at, used, created_at)
     VALUES (#{userId}, #{tokenHash}, #{purpose}, #{expiresAt}, #{used}, #{createdAt})
   </insert>
+
+  <!-- 用途で絞らない（用途違いは §21 #6 が「該当なし」と別扱いにするため） -->
+  <select id="findByTokenHash" resultMap="emailVerificationTokenResultMap">
+    SELECT id, user_id, token_hash, purpose, expires_at, used, created_at
+      FROM email_verification_tokens
+     WHERE token_hash = #{tokenHash}
+  </select>
+
+  <update id="updateUsedById">
+    UPDATE email_verification_tokens
+       SET used = TRUE
+     WHERE id = #{id}
+  </update>
 
 </mapper>

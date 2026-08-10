@@ -486,7 +486,8 @@ class AuthApiIntegrationTest extends WebIntegrationTestSupport {
         String userId = register(email).at("/user/id").asText();
         String rawToken = "integration-verification-token";
         // 確認メールを送らないため生値を受け取れない。既知の生値のハッシュへ差し替える
-        jdbcTemplate.update("UPDATE email_verification_tokens SET token_hash = ? WHERE user_id = ?",
+        // （素の jdbcTemplate.update では値が残らない。理由は updateFixture の Javadoc）
+        updateFixture("UPDATE email_verification_tokens SET token_hash = ? WHERE user_id = ?",
                 sha256Hex(rawToken), userId);
 
         mockMvc.perform(get("/api/auth/verify-email").param("token", rawToken))

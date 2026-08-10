@@ -20,6 +20,9 @@ import java.time.Duration;
  * @param verificationTokenExpire メール確認トークンの有効期間（tech_auth/mail.md §16.3）
  * @param passwordResetTokenExpire パスワード再設定トークンの有効期間（同 §16.3。乗っ取り時に
  *        書き換えられる窓を狭めるため確認トークンより短い）
+ * @param googleClientId Google OAuth のクライアントID（{@code GOOGLE_CLIENT_ID}）。
+ *        未設定は null または空文字で、どちらも「未設定」として扱う
+ *        （docs/tech/detail/tech_auth/link.md §18 手順3）
  */
 public record AuthSettings(
         String secret,
@@ -30,5 +33,6 @@ public record AuthSettings(
         int passwordMaxLength,
         Duration guestExpire,
         Duration verificationTokenExpire,
-        Duration passwordResetTokenExpire) {
+        Duration passwordResetTokenExpire,
+        String googleClientId) {
 }

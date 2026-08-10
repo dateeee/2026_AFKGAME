@@ -10,8 +10,9 @@ import com.afkgame.domain.model.User;
  * {@code users} の Repository。
  *
  * <p>骨格構築（docs/backlog/java_migration.md STEP 2-B）と、登録・ログイン
- * （docs/tech/detail/tech_auth/account.md §10・§12。STEP 3-A-2）で必要な操作を持つ。
- * アカウント移行・Google連携で使う操作は STEP 3-A-3 以降で追加する。
+ * （docs/tech/detail/tech_auth/account.md §10・§12。STEP 3-A-2）、アカウント移行・メール確認
+ * （docs/tech/detail/tech_auth/link.md §18・docs/tech/detail/tech_auth/verify.md §20。STEP 3-A-3）で
+ * 必要な操作を持つ。Google連携で使う操作は Google OAuth 対応時に追加する。
  */
 public interface UserRepository {
 
@@ -48,4 +49,25 @@ public interface UserRepository {
      * @param lastLoginAt 更新後の最終ログイン時刻
      */
     void updateLastLoginAt(@Param("id") String id, @Param("lastLoginAt") Instant lastLoginAt);
+
+    /**
+     * ゲストを本登録化する（tech_auth/link.md §18 手順8）。
+     *
+     * <p>更新するのは {@code email}・{@code password_hash}・{@code is_guest}・
+     * {@code email_verified}・{@code last_login_at} の5列だけで、{@code id}・{@code display_name}・
+     * {@code created_at} は変えない（移行してもアカウントの同一性とゲームデータを保つため）。
+     *
+     * @param user 更新後の値を持つユーザー（{@code id} で特定する）
+     * @throws org.springframework.dao.DuplicateKeyException 同時移行で {@code uq_users_email} に
+     *         違反した場合
+     */
+    void updateLinkedAccount(User user);
+
+    /**
+     * メール確認状態を更新する（tech_auth/verify.md §20 手順7）。
+     *
+     * @param id ユーザーID
+     * @param emailVerified 更新後のメール確認状態
+     */
+    void updateEmailVerified(@Param("id") String id, @Param("emailVerified") boolean emailVerified);
 }

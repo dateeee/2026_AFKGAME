@@ -16,6 +16,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.terasoluna.gfw.common.exception.BusinessException;
 import org.terasoluna.gfw.common.message.ResultMessages;
 
@@ -64,6 +65,7 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final EmailVerificationTokenRepository emailVerificationTokenRepository;
     private final VerificationMailSender verificationMailSender;
+    private final boolean googleConfigured;
 
     public AuthServiceImpl(UserRepository userRepository, RefreshTokenRepository refreshTokenRepository,
             JwtService jwtService, AuthSettings authSettings,
@@ -81,6 +83,8 @@ public class AuthServiceImpl implements AuthService {
         this.passwordEncoder = passwordEncoder;
         this.emailVerificationTokenRepository = emailVerificationTokenRepository;
         this.verificationMailSender = verificationMailSender;
+        // 未設定は null と空文字の両方があるため（プロパティの既定値は空文字）、判定を1か所で済ませる
+        this.googleConfigured = StringUtils.hasText(authSettings.googleClientId());
     }
 
     /**
@@ -206,15 +210,7 @@ public class AuthServiceImpl implements AuthService {
 
         playerInitializationService.initialize(user.getId());
 
-        String rawVerificationToken = generateRawToken();
-        EmailVerificationToken verificationToken = new EmailVerificationToken();
-        verificationToken.setUserId(user.getId());
-        verificationToken.setTokenHash(hashToken(rawVerificationToken));
-        verificationToken.setPurpose(VERIFY_EMAIL_PURPOSE);
-        verificationToken.setExpiresAt(now.plus(verificationTokenExpire));
-        verificationToken.setUsed(false);
-        verificationToken.setCreatedAt(now);
-        emailVerificationTokenRepository.save(verificationToken);
+        String rawVerificationToken = saveVerificationToken(user.getId(), now);
 
         AuthResult result = issueTokens(user);
         logger.info("アカウント登録").with(LogKey.USER_ID, user.getId()).log();
@@ -284,6 +280,144 @@ public class AuthServiceImpl implements AuthService {
 
         refreshTokenRepository.updateRevokedById(stored.getId());
         logger.info("ログアウト").with(LogKey.USER_ID, userId).log();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>ユーザー更新からトークン発行までを本メソッドの境界で1つにまとめる
+     * （tech_auth/link.md §18 手順11）。確認メールの送信要求だけは境界の外へ出さず、
+     * {@link #register} と同じく送信側が「コミット後・トランザクションの外」を担保する（§16.1）。
+     */
+    @Override
+    @Transactional
+    public AuthResult linkAccount(User user, String email, String rawPassword, String googleAuthCode) {
+        boolean emailLink = email != null && rawPassword != null;
+        boolean googleLink = googleAuthCode != null;
+        // ちょうど一方でなければ連携先が決まらない（§18 手順2）。両方あるときも同じ扱いにする
+        if (emailLink == googleLink) {
+            logger.warn("移行失敗").reason(LogReason.LINK_PAYLOAD_INVALID)
+                    .with(LogKey.USER_ID, user.getId()).log();
+            throw authError("AUTH_LINK_PAYLOAD_INVALID");
+        }
+
+        if (googleLink) {
+            throw googleUnavailable(user.getId());
+        }
+
+        // ゲスト扱いの判定はトークンではなくユーザーの現在値を見る（§18 末尾・手順4）
+        if (!user.isGuest()) {
+            logger.warn("移行失敗").reason(LogReason.ALREADY_REGISTERED)
+                    .with(LogKey.USER_ID, user.getId()).log();
+            throw authError("AUTH_ALREADY_REGISTERED");
+        }
+
+        String normalizedEmail = normalizeEmail(email);
+        if (userRepository.findByEmail(normalizedEmail) != null) {
+            logger.warn("移行失敗").reason(LogReason.EMAIL_TAKEN)
+                    .with(LogKey.EMAIL, normalizedEmail).log();
+            throw emailTaken();
+        }
+
+        Instant now = clock.instant();
+
+        // id・display_name・created_at は触らない。更新する5列だけを差し替える（手順8）
+        user.setEmail(normalizedEmail);
+        user.setPasswordHash(passwordEncoder.encode(rawPassword));
+        user.setGuest(false);
+        user.setEmailVerified(false);
+        user.setLastLoginAt(now);
+        try {
+            userRepository.updateLinkedAccount(user);
+        } catch (DuplicateKeyException e) {
+            // 手順6の通過後に同時移行で uq_users_email 違反が起きた場合（§19 #19）。
+            // google_id は Phase 2 では設定しない（手順3 で 501）ため、制約名を見る必要が無い
+            logger.warn("移行失敗").reason(LogReason.EMAIL_TAKEN_CONFLICT)
+                    .with(LogKey.EMAIL, normalizedEmail).log();
+            throw emailTaken();
+        }
+
+        String rawVerificationToken = saveVerificationToken(user.getId(), now);
+
+        // 既存のリフレッシュトークンは失効させない（ユーザーIDも権限も変わらないため。手順10）
+        AuthResult result = issueTokens(user);
+        logger.info("アカウント移行").with(LogKey.USER_ID, user.getId()).log();
+        verificationMailSender.send(user, rawVerificationToken);
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>確認状態とトークンの使用済み更新を本メソッドの境界で1つにまとめる
+     * （tech_auth/verify.md §20 手順9）。
+     */
+    @Override
+    @Transactional
+    public void verifyEmail(String rawToken) {
+        EmailVerificationToken token = emailVerificationTokenRepository.findByTokenHash(hashToken(rawToken));
+        if (token == null) {
+            logger.warn("メール確認失敗").reason(LogReason.VERIFICATION_NOT_FOUND).log();
+            throw verificationInvalid();
+        }
+
+        // 再設定トークンの流用を防ぐ（§20 手順3）
+        if (!VERIFY_EMAIL_PURPOSE.equals(token.getPurpose())) {
+            logger.warn("メール確認失敗").reason(LogReason.VERIFICATION_PURPOSE_MISMATCH)
+                    .with(LogKey.USER_ID, token.getUserId()).log();
+            throw verificationInvalid();
+        }
+
+        if (token.isUsed()) {
+            // メール内リンクの再クリックは正常操作（§20 手順4。ログアウトの二重実行と同じ扱い）
+            return;
+        }
+
+        // 現在時刻ちょうども「以前」に含む（§21 #10）
+        if (!token.getExpiresAt().isAfter(clock.instant())) {
+            logger.warn("メール確認失敗").reason(LogReason.VERIFICATION_EXPIRED)
+                    .with(LogKey.USER_ID, token.getUserId()).log();
+            throw verificationInvalid();
+        }
+
+        User user = userRepository.findById(token.getUserId());
+        if (user == null) {
+            logger.warn("メール確認失敗").reason(LogReason.USER_NOT_FOUND)
+                    .with(LogKey.USER_ID, token.getUserId()).log();
+            throw verificationInvalid();
+        }
+
+        // 既に true でも同じ値を書くだけで変化しない（§20 手順7・§21 #14）
+        userRepository.updateEmailVerified(user.getId(), true);
+        // 同じユーザーの他の確認トークンは変更しない（手順8）
+        emailVerificationTokenRepository.updateUsedById(token.getId());
+
+        logger.info("メール確認").with(LogKey.USER_ID, user.getId()).log();
+    }
+
+    /**
+     * 確認トークンを1件作成して保存し、メール本文へ載せる生値を返す。
+     *
+     * <p>登録（account.md §10 手順6）と移行（link.md §18 手順9）で同じ形の行を作る。
+     * 生値は保存せず、SHA-256 だけを残す。
+     *
+     * @param userId 宛先ユーザーのID
+     * @param now 発行時刻（{@code created_at} と有効期限の起点。呼び出し側が1回だけ取った値）
+     * @return メールへ載せる生トークン
+     */
+    private String saveVerificationToken(String userId, Instant now) {
+        String rawToken = generateRawToken();
+
+        EmailVerificationToken verificationToken = new EmailVerificationToken();
+        verificationToken.setUserId(userId);
+        verificationToken.setTokenHash(hashToken(rawToken));
+        verificationToken.setPurpose(VERIFY_EMAIL_PURPOSE);
+        verificationToken.setExpiresAt(now.plus(verificationTokenExpire));
+        verificationToken.setUsed(false);
+        verificationToken.setCreatedAt(now);
+        emailVerificationTokenRepository.save(verificationToken);
+
+        return rawToken;
     }
 
     /**
@@ -397,6 +531,34 @@ public class AuthServiceImpl implements AuthService {
      */
     private static BusinessException invalidCredentials() {
         return authError("AUTH_INVALID_CREDENTIALS");
+    }
+
+    /**
+     * Google連携が成立しないことを表す例外を作る（link.md §18 手順3）。
+     *
+     * <p>設定の有無でコードを分ける（運用者が「設定漏れ」と「Phase 2 では未対応」を切り分けられるように）。
+     * クライアントへの文言は対応表がどちらも同じにしており、区別させない。
+     */
+    private BusinessException googleUnavailable(String userId) {
+        if (googleConfigured) {
+            logger.warn("移行失敗").reason(LogReason.GOOGLE_NOT_IMPLEMENTED)
+                    .with(LogKey.USER_ID, userId).log();
+            return authError("AUTH_GOOGLE_NOT_IMPLEMENTED");
+        }
+        logger.warn("移行失敗").reason(LogReason.GOOGLE_NOT_CONFIGURED)
+                .with(LogKey.USER_ID, userId).log();
+        return authError("AUTH_GOOGLE_NOT_CONFIGURED");
+    }
+
+    /**
+     * メール確認失敗の例外を作る。
+     *
+     * <p>該当なし・用途違い・期限切れ・退会済みのどれであるかを**クライアントには**区別させない
+     * （§20 手順2）。存在するトークンを総当たりで探る手がかりを与えないため。
+     * 内部の切り分けはログの {@code reason} が持つ。
+     */
+    private static BusinessException verificationInvalid() {
+        return authError("AUTH_VERIFICATION_INVALID");
     }
 
     /**

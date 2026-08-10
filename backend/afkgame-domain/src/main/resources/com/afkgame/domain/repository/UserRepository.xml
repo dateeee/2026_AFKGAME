@@ -44,4 +44,21 @@
      WHERE id = #{id}
   </update>
 
+  <!-- 本登録化（§18 手順8）。id・display_name・created_at は列に挙げず、変えないことを SQL で示す -->
+  <update id="updateLinkedAccount">
+    UPDATE users
+       SET email          = #{email},
+           password_hash  = #{passwordHash},
+           is_guest       = #{guest},
+           email_verified = #{emailVerified},
+           last_login_at  = #{lastLoginAt}
+     WHERE id = #{id}
+  </update>
+
+  <update id="updateEmailVerified">
+    UPDATE users
+       SET email_verified = #{emailVerified}
+     WHERE id = #{id}
+  </update>
+
 </mapper>

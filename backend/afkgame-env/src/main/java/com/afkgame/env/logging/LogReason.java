@@ -56,6 +56,27 @@ public enum LogReason {
     /** ログアウト時、リフレッシュトークンの持ち主が認証ユーザーと異なる。 */
     REFRESH_OWNER_MISMATCH("refresh_owner_mismatch"),
 
+    /** 移行のペイロードで連携方法が一意に決まらない（どちらも無い・両方ある）。 */
+    LINK_PAYLOAD_INVALID("link_payload_invalid"),
+
+    /** Google連携を要求されたが {@code GOOGLE_CLIENT_ID} が未設定。 */
+    GOOGLE_NOT_CONFIGURED("google_not_configured"),
+
+    /** Google連携を要求されたが Phase 2 では未対応。 */
+    GOOGLE_NOT_IMPLEMENTED("google_not_implemented"),
+
+    /** 移行対象が既に本登録済み。 */
+    ALREADY_REGISTERED("already_registered"),
+
+    /** 確認トークンに該当する行が無い。 */
+    VERIFICATION_NOT_FOUND("verification_not_found"),
+
+    /** 確認トークンの用途が {@code verify_email} でない（再設定トークンの流用）。 */
+    VERIFICATION_PURPOSE_MISMATCH("verification_purpose_mismatch"),
+
+    /** 確認トークンの有効期限切れ。 */
+    VERIFICATION_EXPIRED("verification_expired"),
+
     /** AOP境界ログのEND出力時、例外で抜けた（logging/application.md §3 規約3）。 */
     EXCEPTION("exception");
 

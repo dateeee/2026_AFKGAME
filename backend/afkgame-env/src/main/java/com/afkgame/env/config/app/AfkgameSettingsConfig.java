@@ -96,6 +96,7 @@ public class AfkgameSettingsConfig {
      * @param guestExpireDays ゲストアカウントの有効期限（日）
      * @param verificationTokenExpireHours メール確認トークンの有効期間（時間）
      * @param passwordResetTokenExpireHours パスワード再設定トークンの有効期間（時間）
+     * @param googleClientId Google OAuth のクライアントID（未設定なら空文字）
      * @return 組み立てた {@link AuthSettings}
      */
     @Bean
@@ -108,12 +109,13 @@ public class AfkgameSettingsConfig {
             @Value("${afkgame.auth.password.max.length}") int passwordMaxLength,
             @Value("${afkgame.auth.guest.expire.days}") int guestExpireDays,
             @Value("${afkgame.auth.verification.token.expire.hours}") int verificationTokenExpireHours,
-            @Value("${afkgame.auth.password.reset.token.expire.hours}") int passwordResetTokenExpireHours) {
+            @Value("${afkgame.auth.password.reset.token.expire.hours}") int passwordResetTokenExpireHours,
+            @Value("${afkgame.auth.google.client.id}") String googleClientId) {
         return new AuthSettings(secret, Duration.ofMinutes(accessTokenExpireMinutes),
                 Duration.ofDays(refreshTokenExpireDays), bcryptStrength, passwordMinLength,
                 passwordMaxLength, Duration.ofDays(guestExpireDays),
                 Duration.ofHours(verificationTokenExpireHours),
-                Duration.ofHours(passwordResetTokenExpireHours));
+                Duration.ofHours(passwordResetTokenExpireHours), googleClientId);
     }
 
     /**

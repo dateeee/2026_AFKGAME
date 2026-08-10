@@ -93,9 +93,9 @@ Logback を使用。設定は `afkgame-env` の `logback.xml`（Boot 拡張の `
 | `token_expired` | 認証失敗 | アクセストークンの有効期限切れ |
 | `invalid_token` | 認証失敗 | 署名不正・`sub` 欠落 |
 | `invalid_token_type` | 認証失敗 | 用途クレーム（`type`）が `access` でない |
-| `user_not_found` | 認証失敗 | トークンは正当だがユーザーが存在しない |
-| `email_taken` | 登録失敗 | 登録時にメールが使用済み |
-| `email_taken_conflict` | 登録失敗 | 重複確認の通過後に一意制約違反で判明した |
+| `user_not_found` | 認証失敗 / メール確認失敗 | トークンは正当だがユーザーが存在しない（確認では退会済み） |
+| `email_taken` | 登録失敗 / 移行失敗 | メールが使用済み |
+| `email_taken_conflict` | 登録失敗 / 移行失敗 | 重複確認の通過後に一意制約違反で判明した |
 | `email_not_found` | ログイン失敗 | 該当するメールのユーザーが存在しない |
 | `password_not_set` | ログイン失敗 | Google連携のみでパスワード未設定 |
 | `password_mismatch` | ログイン失敗 | パスワードが一致しない |
@@ -103,6 +103,13 @@ Logback を使用。設定は `afkgame-env` の `logback.xml`（Boot 拡張の `
 | `refresh_expired` | リフレッシュ失敗 | リフレッシュトークンの有効期限切れ |
 | `refresh_reused` | 不正リフレッシュトークン検知 | 失効済みのトークンが再利用された（当該ユーザーの全トークンを失効させる） |
 | `refresh_owner_mismatch` | 他ユーザーのリフレッシュトークンでログアウト | トークンの持ち主が認証ユーザーと異なる |
+| `link_payload_invalid` | 移行失敗 | 連携方法が一意に決まらない（どちらも無い・両方ある） |
+| `google_not_configured` | 移行失敗 | Google連携を要求されたが `GOOGLE_CLIENT_ID` が未設定 |
+| `google_not_implemented` | 移行失敗 | Google連携を要求されたが Phase 2 では未対応 |
+| `already_registered` | 移行失敗 | 移行対象が既に本登録済み |
+| `verification_not_found` | メール確認失敗 | 確認トークンに該当する行が無い |
+| `verification_purpose_mismatch` | メール確認失敗 | 用途が `verify_email` でない（再設定トークンの流用） |
+| `verification_expired` | メール確認失敗 | 確認トークンの有効期限切れ |
 | `exception` | — | AOP境界ログ（`afkgame.layer`）のEND出力時、例外で抜けた（`logging/application.md` §3 規約3。ERRORにはしない） |
 
 ## リクエストログ用フィルタ

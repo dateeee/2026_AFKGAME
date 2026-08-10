@@ -11,10 +11,10 @@ import com.afkgame.domain.model.User;
  * §4「リフレッシュトークン」と docs/tech/detail/tech_auth/account.md §9〜§15
  * （登録・ログイン・ログアウト）、エラーコードは docs/tech/basic/tech_error_handling.md「AUTH_ コード一覧」。
  *
- * <p>ゲスト作成・リフレッシュ・登録・ログイン・ログアウトと、ユーザー作成時のプレイヤー初期化
- * （tech_auth.md §8.2。実体は {@link PlayerInitializationService}）を持つ。
- * アカウント移行・確認メール・パスワード再設定は STEP 3-A-3 以降で追加する
- * （docs/backlog/java_migration.md）。
+ * <p>ゲスト作成・リフレッシュ・登録・ログイン・ログアウト・アカウント移行・メール確認と、
+ * ユーザー作成時のプレイヤー初期化（tech_auth.md §8.2。実体は
+ * {@link PlayerInitializationService}）を持つ。パスワード再設定は STEP 3-A-3 セグメント②で
+ * 追加する（docs/backlog/java_migration.md）。
  *
  * <p>実装は {@link AuthServiceImpl}。
  */
@@ -93,4 +93,43 @@ public interface AuthService {
      * @throws BusinessException {@code AUTH_REFRESH_INVALID}（該当なし・他人のトークン）
      */
     void logout(String userId, String refreshToken);
+
+    /**
+     * ゲストアカウントを本登録化し、新しいトークンペアを発行する。
+     *
+     * <p>tech_auth/link.md §18。手順7〜10（ハッシュ化・ユーザー更新・確認トークン・トークンペア）を
+     * 1つのトランザクション境界にまとめる（手順11）。**ゲームデータは作り直さず**（tech_auth.md §3）、
+     * 既存のリフレッシュトークンも失効させない（手順10）。
+     *
+     * <p>受け取るのは手順1で特定した認証ユーザー<b>そのもの</b>で、IDではない。手順4の判定が
+     * 「アクセストークンに載った {@code isGuest}」ではなく「ユーザーの現在値」を見るため（§18 末尾）。
+     *
+     * <p>{@code email}+{@code rawPassword} と {@code googleAuthCode} のちょうど一方を受ける。
+     * Google連携は Phase 2 では成立させない（手順3）。
+     *
+     * @param user 手順1で特定した認証ユーザー
+     * @param email 連携するメールアドレス（Google連携なら null）
+     * @param rawPassword 生のパスワード（Google連携なら null）
+     * @param googleAuthCode Google の認可コード（メール連携なら null）
+     * @return 本登録化したユーザーとトークンペア
+     * @throws BusinessException {@code AUTH_LINK_PAYLOAD_INVALID}（連携方法が一意に決まらない）・
+     *         {@code AUTH_GOOGLE_NOT_CONFIGURED} / {@code AUTH_GOOGLE_NOT_IMPLEMENTED}（Google連携）・
+     *         {@code AUTH_ALREADY_REGISTERED}（本登録済み）・{@code AUTH_EMAIL_TAKEN}（メール使用済み）
+     */
+    AuthResult linkAccount(User user, String email, String rawPassword, String googleAuthCode);
+
+    /**
+     * 確認トークンを検証し、対象ユーザーのメール確認を済ませる。
+     *
+     * <p>tech_auth/verify.md §20。手順7〜8（確認状態・使用済みの更新）を1つのトランザクション境界に
+     * まとめる（手順9）。認証を要求せず、トークンの提示だけで成立する。
+     *
+     * <p>使用済みのトークンは<b>何も更新せず正常終了する</b>（メール内リンクの再クリックは正常操作。
+     * 手順4）。成功時に返す値は持たず、応答 {@code {"status": "ok"}} は Web 層が組む。
+     *
+     * @param rawToken メール本文のリンクに載った生のトークン
+     * @throws BusinessException {@code AUTH_VERIFICATION_INVALID}（該当なし・用途違い・期限切れ・
+     *         対象ユーザーが退会済み）
+     */
+    void verifyEmail(String rawToken);
 }

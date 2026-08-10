@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
@@ -1073,11 +1074,22 @@ class AuthServiceImplTest {
         /**
          * 連携先が決まらないため 400 で止め、何も変更しない（手順2）。
          *
+         * <p>メール連携が成立するのは {@code email} と {@code password} が<b>揃っている</b>ときだけで、
+         * 片側だけの指定は「どちらも無い」と同じ扱いになる。{@code LinkAccountResource} はどちらも
+         * 必須にしない（Google連携のボディを 422 で落とさないため）ので、片側だけのボディは
+         * Bean Validation を通過してサービス層へ届く。
+         *
          * <p>分岐: tech_auth/link.md §19 #5
          */
-        @Test
-        void test_どちらの指定も無ければAUTH_LINK_PAYLOAD_INVALIDになる() {
-            assertThatThrownBy(() -> authService().linkAccount(guest(), null, null, null))
+        @ParameterizedTest(name = "email={0}, password={1}")
+        @CsvSource(nullValues = "NULL", value = {
+            "NULL, NULL",                     // どちらの指定も無い
+            "user@example.com, NULL",         // メール連携がパスワードを欠く
+            "NULL, securepass123"             // メール連携がメールを欠く
+        })
+        void test_メール連携が揃わずGoogleも無ければAUTH_LINK_PAYLOAD_INVALIDになる(
+                String email, String password) {
+            assertThatThrownBy(() -> authService().linkAccount(guest(), email, password, null))
                     .isInstanceOf(BusinessException.class)
                     .extracting(AuthServiceImplTest::codeOf)
                     .isEqualTo("AUTH_LINK_PAYLOAD_INVALID");

@@ -14,6 +14,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.afkgame.env.test.EmbeddedPostgresSupport;
@@ -64,6 +66,9 @@ abstract class WebIntegrationTestSupport {
     @Autowired
     protected JdbcTemplate jdbcTemplate;
 
+    @Autowired
+    private PlatformTransactionManager transactionManager;
+
     /** {@code web.xml} と同じフィルタ順で組んだ MockMvc。 */
     protected MockMvc mockMvc;
 
@@ -85,5 +90,22 @@ abstract class WebIntegrationTestSupport {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
                 .addFilters(requestLogFilter, springSecurityFilterChain)
                 .build();
+    }
+
+    /**
+     * テストデータを直接書き換えて<b>コミットする</b>。
+     *
+     * <p>{@code dataSource} は {@code defaultAutoCommit = false}（{@code AfkgameEnvConfig}）なので、
+     * トランザクションの外で {@link JdbcTemplate#update} を呼ぶと、DBCP が接続の返却時に
+     * ロールバックする。**更新件数は 1 が返るのに値は残らない**ため、素の {@code update} で
+     * 用意したフィクスチャは後続のリクエストから見えない。書き換えは必ず本メソッドを通す
+     * （読み取りは {@link #jdbcTemplate} を直接使ってよい）。
+     *
+     * @param sql 実行する SQL
+     * @param args バインドする値
+     */
+    protected void updateFixture(String sql, Object... args) {
+        new TransactionTemplate(transactionManager)
+                .executeWithoutResult(status -> jdbcTemplate.update(sql, args));
     }
 }
