@@ -57,3 +57,9 @@
 - ターン概要: ツール124回・エラー3回・拒否0回。開始:「<command-message>next</command-message>」
 - 原因と改善案: 3件とも**ツールの選び分けの誤り**で、内容の誤りではない。①`pom.xml` を Bash の `cat` で読んでから `Edit` して「File has not been read yet」で弾かれ、`Read` からやり直した（**編集する気のあるファイルを `cat`／`ctx` で読まない**）②`curl` で Maven Central の版を引いて context-mode フックにリダイレクトされた ③`mvn help:effective-pom` も同じくリダイレクトされた。②③は `profile.md` §6 規律6（大きな出力は context-mode）と `adhoc.md` §6（版は maven-metadata.xml を見る）を**両方守っていれば1回で済んだ**もので、規律は既にあるのに Bash を既定で選んだのが原因。
   → `adhoc.md` §4 へ「**外部問い合わせ（`curl`）とビルド（`mvn`）は最初から `ctx_execute` で叩く**（Bash はフックでリダイレクトされ1往復が無駄になる）」と「**`Edit` する予定のファイルは `Read` で読む**（`cat`／`ctx_execute_file` で読んでも Edit は通らない）」の2行を追記する。後者は `profile.md` §6 規律6 の「`Read` の全文読みは Edit 前提のときのみ」の裏返しで、規律側にも「逆に Edit 前提なら必ず `Read`」と補うと片側だけ守る事故が減る。
+
+## 2026-08-10 17:46 | session 5826646b | 自動検出
+- シグナル: errors×4
+- ターン概要: ツール129回・エラー4回・拒否0回。開始:「<command-message>next</command-message>」
+- 原因と改善案: 4件の内訳は**①ツール選び分け1件**（`docker --version; mvn -v; java -version` を Bash で叩いて context-mode フックにリダイレクト。前回メモの「外部問い合わせとビルドは最初から `ctx_execute`」がまだ `adhoc.md` へ未反映で同型を再発）**②worktree の既知トラップ1件**（`ctx_execute_file` にプロジェクトルート外のパスを渡して拒否。`worktree_guide.md` §5.4 に明記されているが、§5.2 開始手順だけを読んで入ったため踏んだ）**③`Edit` の `old_string` 特定ミス2件**（`AuthServiceImplTest` は `@Nested` ごとに**同名のテストメソッド**があり `void test_...() {` + 直後1行では2箇所一致。加えて Javadoc 行を字下げ5スペースと思い込んで書き、実際の1スペースと不一致）。
+  → `worktree_guide.md` §5.2 の手順4へ「**worktree 内のファイル解析は `ctx_execute` にパスを直書きする**（`ctx_execute_file` はルート外として拒否。§5.4）」を1行足し、開始手順だけで完結させる。`dev.md` §5「確認時の注意」へ「**`@Nested` を持つテストクラスの `Edit` は、直前の `分岐:` マーカー行かメソッド本体の一意な行まで含めて `old_string` にする**（ネストをまたいで同名メソッドが並ぶ）」と「**Javadoc・コメント行の `old_string` は Read 出力から字下げごとコピーする**（目分量で書かない）」を追記する。①は前回メモの `adhoc.md` §4 追記が未実施なだけなので、`retro` で両セッション分をまとめて反映する。
