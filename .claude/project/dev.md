@@ -77,7 +77,7 @@
 | 対象 | コマンド |
 |------|---------|
 | バックエンド構文 | `cd backend && mvn -q compile` |
-| バックエンド規約 | `python scripts/check_java_conventions.py`（タブ・行長・import・ログ・DI・SQL・日時・乱数の11判定。抑止は `// 規約例外: <理由>`） |
+| バックエンド規約 | `python scripts/check_java_conventions.py`（タブ・行長・import・ログ・DI・SQL・日時・乱数・マスク・未参照の13判定。未参照は WARN。抑止は `// 規約例外: <理由>`） |
 | バックエンドテスト | `cd backend && mvn test`（TDDの全テストがGreen） |
 | フロント型チェック | `cd frontend && npm run type-check` |
 

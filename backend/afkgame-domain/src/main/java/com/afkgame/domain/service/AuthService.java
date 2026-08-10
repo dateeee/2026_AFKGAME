@@ -127,9 +127,10 @@ public interface AuthService {
      * <p>使用済みのトークンは<b>何も更新せず正常終了する</b>（メール内リンクの再クリックは正常操作。
      * 手順4）。成功時に返す値は持たず、応答 {@code {"status": "ok"}} は Web 層が組む。
      *
-     * @param rawToken メール本文のリンクに載った生のトークン
+     * @param token メール本文のリンクに載った生のトークン。境界ログで伏せるため固定表の名前にする
+     *        （logging/application.md §3.1 規約1）
      * @throws BusinessException {@code AUTH_VERIFICATION_INVALID}（該当なし・用途違い・期限切れ・
      *         対象ユーザーが退会済み）
      */
-    void verifyEmail(String rawToken);
+    void verifyEmail(String token);
 }

@@ -310,6 +310,188 @@ def test_check_random_ignores_test_sources(root):
     assert mod.check_random(mod.java_files()) == []
 
 
+# ── 12. 機密名の突合（--mask） ────────────────────────────────
+
+def service(root, name: str, body: str, area: str = "main") -> None:
+    write(root, f"backend/afkgame-domain/src/{area}/java/com/afkgame/domain/service/{name}.java", body)
+
+
+def repository(root, name: str, body: str) -> None:
+    write(root, f"backend/afkgame-domain/src/main/java/com/afkgame/domain/repository/{name}.java", body)
+
+
+def test_check_mask_passes_names_in_the_fixed_table(root):
+    service(root, "AuthServiceImpl", "class AuthServiceImpl {\n    public void refresh(String refreshToken) {}\n}\n")
+    assert mod.check_mask(mod.java_files()) == []
+
+
+def test_check_mask_detects_name_outside_the_fixed_table(root):
+    service(root, "AuthServiceImpl", "class AuthServiceImpl {\n    public void verifyEmail(String rawToken) {}\n}\n")
+    assert "rawToken" in mod.check_mask(mod.java_files())[0]
+
+
+def test_check_mask_covers_interface_methods_without_the_public_modifier(root):
+    # インタフェースのメソッドは暗黙 public。JDK 動的プロキシが渡すのはこちらの名前
+    repository(root, "RefreshTokenRepository",
+               "interface RefreshTokenRepository {\n    RefreshToken findByTokenHash(String tokenHash);\n}\n")
+    assert "tokenHash" in mod.check_mask(mod.java_files())[0]
+
+
+def test_check_mask_ignores_non_string_parameters(root):
+    # Entity・Resource は規約1 #2（toString から機密フィールドを外す）の担当で、名前一致の対象外
+    repository(root, "EmailVerificationTokenRepository",
+               "interface EmailVerificationTokenRepository {\n"
+               "    void save(EmailVerificationToken emailVerificationToken);\n}\n")
+    assert mod.check_mask(mod.java_files()) == []
+
+
+def test_check_mask_does_not_match_words_that_merely_contain_a_secret_word(root):
+    # `drawCount` の `raw` を拾わないよう、camelCase を語へ割ってから突き合わせる
+    service(root, "GachaServiceImpl", "class GachaServiceImpl {\n    public void draw(String drawCount) {}\n}\n")
+    assert mod.check_mask(mod.java_files()) == []
+
+
+def test_check_mask_ignores_classes_outside_the_pointcut(root):
+    java(root, "AuthController", "class AuthController {\n    public void verify(String rawToken) {}\n}\n")
+    assert mod.check_mask(mod.java_files()) == []
+
+
+def test_check_mask_ignores_subpackages_of_the_pointcut(root):
+    # ポイントカットは `service.*` であり、サブパッケージ（`service.impl.*`）には一致しない
+    write(root, "backend/afkgame-domain/src/main/java/com/afkgame/domain/service/impl/X.java",
+          "class X {\n    public void m(String rawToken) {}\n}\n")
+    assert mod.check_mask(mod.java_files()) == []
+
+
+def test_check_mask_ignores_non_public_methods(root):
+    service(root, "AuthServiceImpl",
+            "class AuthServiceImpl {\n    private String hashToken(String rawToken) {\n        return rawToken;\n    }\n}\n")
+    assert mod.check_mask(mod.java_files()) == []
+
+
+def test_check_mask_ignores_static_methods(root):
+    # static はプロキシが張れないため境界ログに出ない
+    service(root, "AuthServiceImpl", "class AuthServiceImpl {\n    public static void m(String rawToken) {}\n}\n")
+    assert mod.check_mask(mod.java_files()) == []
+
+
+def test_check_mask_ignores_test_sources(root):
+    service(root, "AuthServiceImplTest",
+            "class AuthServiceImplTest {\n    public void m(String rawToken) {}\n}\n", area="test")
+    assert mod.check_mask(mod.java_files()) == []
+
+
+def test_check_mask_respects_suppression(root):
+    repository(root, "RefreshTokenRepository",
+               "interface RefreshTokenRepository {\n"
+               "    RefreshToken findByTokenHash(String tokenHash); // 規約例外: ハッシュ値であり生値ではない\n}\n")
+    assert mod.check_mask(mod.java_files()) == []
+
+
+# ── 13. 未参照の設定・enum 値（--unused） ─────────────────────
+
+def config(root, name: str, body: str) -> None:
+    write(root, f"backend/afkgame-env/src/main/java/com/afkgame/env/config/{name}.java", body)
+
+
+def logging_enum(root, name: str, body: str) -> None:
+    write(root, f"backend/afkgame-env/src/main/java/com/afkgame/env/logging/{name}.java", body)
+
+
+SETTINGS = """package com.afkgame.env.config;
+
+public record AuthSettings(
+        String secret,
+        Duration guestExpire) {
+}
+"""
+
+LOG_KEY = """package com.afkgame.env.logging;
+
+public enum LogKey {
+
+    /** リクエストID。 */
+    REQUEST_ID("request_id"),
+
+    /** トークン。 */
+    TOKEN("token");
+
+    private final String key;
+}
+"""
+
+
+def test_check_unused_passes_accessor_with_a_reader(root):
+    config(root, "AuthSettings", SETTINGS)
+    java(root, "JwtService",
+         "class JwtService {\n    void m() {\n        var s = settings.secret();\n"
+         "        var g = settings.guestExpire();\n    }\n}\n")
+    assert mod.check_unused(mod.java_files()) == []
+
+
+def test_check_unused_detects_accessor_without_a_reader(root):
+    config(root, "AuthSettings", SETTINGS)
+    java(root, "JwtService", "class JwtService {\n    void m() {\n        var s = settings.secret();\n    }\n}\n")
+    found = mod.check_unused(mod.java_files())
+    assert len(found) == 1 and "AuthSettings#guestExpire()" in found[0]
+
+
+def test_check_unused_does_not_count_the_config_package_as_a_reader(root):
+    # 生成しているだけの `AfkgameSettingsConfig` は読み手に数えない
+    config(root, "AuthSettings", SETTINGS)
+    write(root, "backend/afkgame-env/src/main/java/com/afkgame/env/config/app/AfkgameSettingsConfig.java",
+          "class AfkgameSettingsConfig {\n    void m(AuthSettings s) {\n        var a = s.secret();\n"
+          "        var b = s.guestExpire();\n    }\n}\n")
+    assert len(mod.check_unused(mod.java_files())) == 2
+
+
+def test_check_unused_counts_a_method_reference_as_a_reader(root):
+    config(root, "AuthSettings", SETTINGS)
+    java(root, "JwtService",
+         "class JwtService {\n    void m() {\n        f(AuthSettings::secret);\n"
+         "        f(AuthSettings::guestExpire);\n    }\n}\n")
+    assert mod.check_unused(mod.java_files()) == []
+
+
+def test_check_unused_passes_enum_constant_with_a_reader(root):
+    logging_enum(root, "LogKey", LOG_KEY)
+    java(root, "RequestLogFilter",
+         "class RequestLogFilter {\n    void m() {\n        entry.with(LogKey.REQUEST_ID, id);\n"
+         "        entry.with(LogKey.TOKEN, t);\n    }\n}\n")
+    assert mod.check_unused(mod.java_files()) == []
+
+
+def test_check_unused_detects_enum_constant_without_a_reader(root):
+    logging_enum(root, "LogKey", LOG_KEY)
+    java(root, "RequestLogFilter",
+         "class RequestLogFilter {\n    void m() {\n        entry.with(LogKey.REQUEST_ID, id);\n    }\n}\n")
+    found = mod.check_unused(mod.java_files())
+    assert len(found) == 1 and "LogKey.TOKEN" in found[0]
+
+
+def test_check_unused_does_not_count_members_after_the_constant_list(root):
+    logging_enum(root, "LogKey", LOG_KEY)
+    java(root, "RequestLogFilter",
+         "class RequestLogFilter {\n    void m() {\n        entry.with(LogKey.REQUEST_ID, id);\n"
+         "        entry.with(LogKey.TOKEN, t);\n    }\n}\n")
+    # `key` フィールドは定数リストの外なので対象に入らない（対象が2件だけであることを保証する）
+    assert mod.check_unused(mod.java_files()) == []
+
+
+def test_check_unused_does_not_count_test_sources_as_readers(root):
+    logging_enum(root, "LogKey", LOG_KEY)
+    java(root, "RequestLogFilter",
+         "class RequestLogFilter {\n    void m() {\n        entry.with(LogKey.REQUEST_ID, id);\n    }\n}\n")
+    java(root, "LogKeyTest", "class LogKeyTest {\n    void m() {\n        assertThat(LogKey.TOKEN);\n    }\n}\n",
+         area="test")
+    assert "LogKey.TOKEN" in mod.check_unused(mod.java_files())[0]
+
+
+def test_check_unused_reports_at_warn_level(root):
+    config(root, "AuthSettings", SETTINGS)
+    assert all(m.startswith("WARN ") for m in mod.check_unused(mod.java_files()))
+
+
 # ── main ─────────────────────────────────────────────────────
 
 def test_main_returns_zero_when_clean(root, capsys, monkeypatch):
@@ -332,3 +514,12 @@ def test_main_runs_only_the_selected_check(root, capsys, monkeypatch):
     assert mod.main() == 0
     out = capsys.readouterr().out
     assert "[DI]" in out and "[import]" not in out
+
+
+def test_main_does_not_fail_on_warnings_alone(root, capsys, monkeypatch):
+    # 判定13 は先行投入を許容する運用のため、WARN は exit code に算入しない
+    config(root, "AuthSettings", SETTINGS)
+    monkeypatch.setattr(mod.sys, "argv", ["check_java_conventions.py", "--unused"])
+    assert mod.main() == 0
+    out = capsys.readouterr().out
+    assert "WARN" in out and "違反なし" in out and "WARN 2 件" in out

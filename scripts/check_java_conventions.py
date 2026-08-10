@@ -17,12 +17,21 @@ backend-review で毎回使い捨てスクリプトを書いていた機械判�
     --time     9. 現在時刻の直取得禁止（common.md §4 #2）
               10. java.util.Date / Calendar 禁止（common.md §5 #8・§9）
     --random  11. 静的な共有乱数の禁止（common.md §4 #2・§9）
+    --mask    12. 境界ログでマスクされない機密名（logging/application.md §3.1 規約1）
+    --unused  13. 用意したが読み手のいない設定値・enum 値（WARN のみ）
 
 走査対象:
     7・9・11 は src/main のみ。テストは Spring から Bean を受け取り（test.md §1）、
     時刻・乱数を固定する側（test.md §3 #1）であり、同じ判定を当てられない。
     8 は `namespace` を持つ MyBatis マッピング XML のみ（logback.xml の `${}` は
     Logback の変数置換で正当）。
+    12 は src/main のうち afkgame.properties のポイントカット2本
+    （`com.afkgame.domain.{service,repository}.*` の public メソッド）に一致する範囲。
+    13 は src/main 全体を参照コーパスとし、生成しているだけの config パッケージを除く。
+
+WARN の扱い:
+    13 は「使う工程より先に投入した部品」を許容する運用（レビュー 2026-08-10 還元2）のため
+    WARN で出し、exit code に算入しない。件数の増減だけを見る。
 
 規約例外の抑止:
     ライブラリの API 制約などで避けられない箇所は、その行の行末か直前行へ
@@ -64,6 +73,43 @@ UTIL_DATE = re.compile(r"\bjava\.util\.(?:Date|Calendar)\b|\bnew\s+Date\s*\(|\bC
 # `SecureRandom` は左側の単語境界が立たないため、この式では拾わない（規約の明示例外）
 STATIC_RANDOM = re.compile(r"\bstatic\b[^;()=]*\bRandom\b")
 SHARED_RANDOM = re.compile(r"\bMath\.random\s*\(|\bThreadLocalRandom\b")
+
+# 境界ログの対象範囲。afkgame.properties の
+# `afkgame.logging.layer.pointcut.{service,repository}` と同じく「パッケージ直下の public」。
+# サブパッケージは `.*.` に一致しないため対象外
+POINTCUT_PKGS = ("com/afkgame/domain/service/", "com/afkgame/domain/repository/")
+
+# logging/application.md §3.1 規約1 の固定表（LayerLoggingInterceptor#MASKED_PARAM_NAMES の写し）。
+# `email` は LogKey.EMAIL と同じマスクが掛かるため、同じく伏せられる側として数える
+MASKED_PARAMS = frozenset({
+    "password", "rawPassword", "newPassword", "token", "accessToken",
+    "refreshToken", "secret", "credential", "email",
+})
+
+# 機密を示す語。camelCase を語へ割ってから突き合わせる（`drawCount` の `raw` を拾わないため）
+SECRET_WORDS = frozenset({"raw", "token", "password", "secret", "credential"})
+
+CAMEL_WORD = re.compile(r"[A-Z]+(?![a-z])|[A-Z][a-z]*|[a-z]+|\d+")
+
+# 型の位置に立ったら宣言ではない語（`return hashToken(raw);` を宣言と読み違えないため）
+NOT_A_TYPE = frozenset({
+    "return", "new", "throw", "throws", "else", "case", "assert", "yield",
+    "if", "while", "for", "switch", "catch", "do", "super", "this",
+})
+
+MODIFIER = r"public|protected|private|static|final|default|abstract|synchronized|native|strictfp"
+METHOD = re.compile(
+    rf"(?P<mods>(?:(?:{MODIFIER})\s+)*)"
+    r"(?P<type>[\w.$]+(?:\s*<[^;{}]*?>)?(?:\s*\[\s*\])*)\s+"
+    r"(?P<name>[a-z_]\w*)\s*\((?P<params>[^;{}]*?)\)\s*(?:\{|;|throws\b)"
+)
+PARAM_ANNOTATION = re.compile(r"@\w+(?:\s*\([^)]*\))?\s*")
+TYPE_HEAD = re.compile(r"[\w.$]+")
+
+# 判定13 の対象。config は record の全アクセサ、logging は enum の全定数
+CONFIG_PKG = "com/afkgame/env/config/"
+TRACKED_ENUMS = ("LogKey", "LogReason", "LoggerName")
+RECORD = re.compile(r"\bpublic\s+record\s+(?P<name>\w+)\s*\((?P<comps>[^)]*)\)")
 
 
 def java_files() -> list[Path]:
@@ -284,6 +330,167 @@ def check_random(files: list[Path]) -> list[str]:
     return errors
 
 
+def in_pointcut(rel: str) -> bool:
+    """ポイントカット `com.afkgame.domain.{service,repository}.*` の直下か。"""
+    for pkg in POINTCUT_PKGS:
+        if pkg in rel and "/" not in rel.split(pkg, 1)[1]:
+            return True
+    return False
+
+
+def split_params(params: str) -> list[str]:
+    """引数リストをカンマで割る。`<>`・`()` の入れ子は跨がない。"""
+    out: list[str] = []
+    buf: list[str] = []
+    depth = 0
+    for ch in params:
+        if ch in "<(":
+            depth += 1
+        elif ch in ">)":
+            depth -= 1
+        elif ch == "," and depth == 0:
+            out.append("".join(buf))
+            buf = []
+            continue
+        buf.append(ch)
+    if "".join(buf).strip():
+        out.append("".join(buf))
+    return out
+
+
+def public_methods(text: str, iface: bool):
+    """(宣言開始の行番号, [(型, 引数名)]) を返す。
+
+    `static` はプロキシが張れず境界ログに出ないため除く。インタフェースのメソッドは
+    修飾子が無くても暗黙 public で、JDK 動的プロキシが渡すのはこちら側の名前になる。
+    """
+    for m in METHOD.finditer(text):
+        mods = m.group("mods")
+        if "static" in mods or "private" in mods:
+            continue
+        if not iface and "public" not in mods:
+            continue
+        head = TYPE_HEAD.match(m.group("type"))
+        if not head or head.group(0) in NOT_A_TYPE:
+            continue
+        params = []
+        for part in split_params(m.group("params")):
+            tokens = re.sub(r"\bfinal\b", " ", PARAM_ANNOTATION.sub("", part)).split()
+            if len(tokens) >= 2:
+                params.append((" ".join(tokens[:-1]), tokens[-1]))
+        if params:
+            yield text[:m.start()].count("\n") + 1, params
+
+
+def is_secret_name(name: str) -> bool:
+    """camelCase を語へ割り、機密を示す語を含むか。"""
+    return any(w.lower() in SECRET_WORDS for w in CAMEL_WORD.findall(name))
+
+
+def check_mask(files: list[Path]) -> list[str]:
+    """境界ログでマスクされない機密名（logging/application.md §3.1 規約1）。
+
+    `String` 引数だけを見る。Entity・Resource は同 §3.1 規約1 #2（`toString()` から
+    機密フィールドを外す）の担当で、名前一致マスクの対象外。
+    """
+    errors = []
+    for path in files:
+        rel = path.relative_to(ROOT).as_posix()
+        if not is_main(path) or not in_pointcut(rel):
+            continue
+        _, raw, code = read(path)
+        text = "\n".join(code)
+        iface = re.search(rf"\binterface\s+{re.escape(path.stem)}\b", text) is not None
+        for no, params in public_methods(text, iface):
+            if suppressed(raw, no):
+                continue
+            for type_, name in params:
+                if type_.split()[-1] not in ("String", "String...", "java.lang.String"):
+                    continue
+                if name in MASKED_PARAMS or not is_secret_name(name):
+                    continue
+                errors.append(
+                    f"ERROR {rel}:{no}: 引数 `{name}` が固定表に無く境界ログへ生値が出る"
+                    f"（logging/application.md §3.1 規約1 の名前へ揃える）")
+    return errors
+
+
+def record_components(text: str):
+    """(行番号, レコード名, アクセサ名) を返す。"""
+    m = RECORD.search(text)
+    if not m:
+        return
+    at = m.start("comps")
+    for part in split_params(m.group("comps")):
+        tokens = part.split()
+        if len(tokens) >= 2:
+            pos = text.index(tokens[-1], at)
+            yield text[:pos].count("\n") + 1, m.group("name"), tokens[-1]
+        at += len(part) + 1
+
+
+def enum_constants(text: str, name: str):
+    """(行番号, 定数名) を返す。定数リスト（本体先頭から最初の `;` まで）だけを見る。"""
+    m = re.search(rf"\benum\s+{re.escape(name)}\b[^{{]*\{{", text)
+    if not m:
+        return
+    depth = 0
+    i = m.end()
+    while i < len(text):
+        ch = text[i]
+        if ch in "({":
+            depth += 1
+        elif ch in ")}":
+            if depth == 0:
+                break
+            depth -= 1
+        elif ch == ";" and depth == 0:
+            break
+        i += 1
+    for c in re.finditer(r"\b[A-Z][A-Z0-9_]*\b", text[m.end():i]):
+        # 定数の引数（`REQUEST_ID("request_id")`）や定数本体の中は数えない
+        if not nested(text, m.end(), m.end() + c.start()):
+            yield text[:m.end() + c.start()].count("\n") + 1, c.group(0)
+
+
+def nested(text: str, start: int, pos: int) -> bool:
+    """`start`〜`pos` の間で括弧が開いたままか。"""
+    depth = 0
+    for ch in text[start:pos]:
+        if ch in "({":
+            depth += 1
+        elif ch in ")}":
+            depth -= 1
+    return depth > 0
+
+
+def check_unused(files: list[Path]) -> list[str]:
+    """用意したが読み手のいない設定値・enum 値（レビュー 2026-08-10 還元2）。WARN のみ。"""
+    mains = [p for p in files if is_main(p)]
+    targets = []  # (rel, 行番号, ラベル, 参照の式)
+    bodies = []  # (rel, コメントを潰した本文)
+    for path in mains:
+        rel = path.relative_to(ROOT).as_posix()
+        text = "\n".join(read(path)[2])
+        if CONFIG_PKG in rel:
+            for no, rec, comp in record_components(text):
+                targets.append((rel, no, f"{rec}#{comp}()",
+                                re.compile(rf"\.{re.escape(comp)}\s*\(|::{re.escape(comp)}\b")))
+        else:
+            # 生成しているだけの config パッケージは読み手に数えない
+            bodies.append((rel, text))
+        if path.stem in TRACKED_ENUMS:
+            for no, const in enum_constants(text, path.stem):
+                targets.append((rel, no, f"{path.stem}.{const}", re.compile(rf"\b{re.escape(const)}\b")))
+
+    warns = []
+    for rel, no, label, pattern in targets:
+        if any(r != rel and pattern.search(body) for r, body in bodies):
+            continue
+        warns.append(f"WARN {rel}:{no}: {label} は src/main から参照されていない（先行投入なら件数の増減を見る）")
+    return warns
+
+
 def main() -> int:
     try:
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -300,19 +507,31 @@ def main() -> int:
         "--sql": ("SQL", lambda: check_sql(mapper_files())),
         "--time": ("日時", lambda: check_time(files)),
         "--random": ("乱数", lambda: check_random(files)),
+        "--mask": ("マスク", lambda: check_mask(files)),
+        "--unused": ("未参照", lambda: check_unused(files)),
     }
     selected = [k for k in checks if k in args] or list(checks)
 
     total = 0
+    warned = 0
     for key in selected:
         label, fn = checks[key]
-        errors = fn()
+        found = fn()
+        errors = [m for m in found if not m.startswith("WARN")]
+        warns = [m for m in found if m.startswith("WARN")]
         total += len(errors)
-        for e in errors:
-            print(e)
-        print(f"[{label}] {'OK' if not errors else f'{len(errors)} 件'}")
+        warned += len(warns)
+        for m in found:
+            print(m)
+        status = f"{len(errors)} 件" if errors else "OK"
+        if warns:
+            status += f"（WARN {len(warns)} 件）"
+        print(f"[{label}] {status}")
 
-    print(f"\n{len(files)} files checked: {'違反なし' if total == 0 else f'{total} 件の違反'}")
+    summary = "違反なし" if total == 0 else f"{total} 件の違反"
+    if warned:
+        summary += f" / WARN {warned} 件"
+    print(f"\n{len(files)} files checked: {summary}")
     return 1 if total else 0
 
 

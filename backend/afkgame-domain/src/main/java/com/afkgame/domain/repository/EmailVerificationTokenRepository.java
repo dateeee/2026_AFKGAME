@@ -30,6 +30,7 @@ public interface EmailVerificationTokenRepository {
      * @param tokenHash 生トークンの SHA-256（16進小文字）
      * @return 該当レコード。存在しなければ null
      */
+    // 規約例外: 受け取るのは SHA-256 ハッシュであり、境界ログに出ても生トークンは復元できない
     EmailVerificationToken findByTokenHash(String tokenHash);
 
     /**

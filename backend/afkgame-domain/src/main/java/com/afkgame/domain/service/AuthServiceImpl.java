@@ -354,43 +354,44 @@ public class AuthServiceImpl implements AuthService {
      */
     @Override
     @Transactional
-    public void verifyEmail(String rawToken) {
-        EmailVerificationToken token = emailVerificationTokenRepository.findByTokenHash(hashToken(rawToken));
-        if (token == null) {
+    public void verifyEmail(String token) {
+        EmailVerificationToken verificationToken =
+                emailVerificationTokenRepository.findByTokenHash(hashToken(token));
+        if (verificationToken == null) {
             logger.warn("メール確認失敗").reason(LogReason.VERIFICATION_NOT_FOUND).log();
             throw verificationInvalid();
         }
 
         // 再設定トークンの流用を防ぐ（§20 手順3）
-        if (!VERIFY_EMAIL_PURPOSE.equals(token.getPurpose())) {
+        if (!VERIFY_EMAIL_PURPOSE.equals(verificationToken.getPurpose())) {
             logger.warn("メール確認失敗").reason(LogReason.VERIFICATION_PURPOSE_MISMATCH)
-                    .with(LogKey.USER_ID, token.getUserId()).log();
+                    .with(LogKey.USER_ID, verificationToken.getUserId()).log();
             throw verificationInvalid();
         }
 
-        if (token.isUsed()) {
+        if (verificationToken.isUsed()) {
             // メール内リンクの再クリックは正常操作（§20 手順4。ログアウトの二重実行と同じ扱い）
             return;
         }
 
         // 現在時刻ちょうども「以前」に含む（§21 #10）
-        if (!token.getExpiresAt().isAfter(clock.instant())) {
+        if (!verificationToken.getExpiresAt().isAfter(clock.instant())) {
             logger.warn("メール確認失敗").reason(LogReason.VERIFICATION_EXPIRED)
-                    .with(LogKey.USER_ID, token.getUserId()).log();
+                    .with(LogKey.USER_ID, verificationToken.getUserId()).log();
             throw verificationInvalid();
         }
 
-        User user = userRepository.findById(token.getUserId());
+        User user = userRepository.findById(verificationToken.getUserId());
         if (user == null) {
             logger.warn("メール確認失敗").reason(LogReason.USER_NOT_FOUND)
-                    .with(LogKey.USER_ID, token.getUserId()).log();
+                    .with(LogKey.USER_ID, verificationToken.getUserId()).log();
             throw verificationInvalid();
         }
 
         // 既に true でも同じ値を書くだけで変化しない（§20 手順7・§21 #14）
         userRepository.updateEmailVerified(user.getId(), true);
         // 同じユーザーの他の確認トークンは変更しない（手順8）
-        emailVerificationTokenRepository.updateUsedById(token.getId());
+        emailVerificationTokenRepository.updateUsedById(verificationToken.getId());
 
         logger.info("メール確認").with(LogKey.USER_ID, user.getId()).log();
     }

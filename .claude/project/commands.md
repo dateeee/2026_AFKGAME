@@ -22,7 +22,7 @@
 | 特定ファイルの残量・H2内訳 | `python scripts/check_doc_size.py --sections <path>`（**`--sections` を付けずに path だけ渡すと無視されて全件チェックになる**） |
 | ドキュメント機械検証 | `python scripts/check_docs.py`（リンク・索引到達性・曖昧語・正の逸脱・決定先送り・台帳存否。`--links` 等で個別実行） |
 | 分岐一覧の検証 | `python scripts/check_branch_list.py`（構造検証。`--tests` でテストとの対応照合） |
-| Java 規約チェック | `python scripts/check_java_conventions.py`（タブ・行長・import・ログ・DI・SQL・日時・乱数の11判定。`--format` 等で個別実行。避けられない箇所は `// 規約例外: <理由>` で抑止） |
+| Java 規約チェック | `python scripts/check_java_conventions.py`（タブ・行長・import・ログ・DI・SQL・日時・乱数・マスク・未参照の13判定。`--format` 等で個別実行。避けられない箇所は `// 規約例外: <理由>` で抑止。未参照は WARN で exit code に算入しない） |
 | エラーコード一致 | `python scripts/check_error_codes.py`（`tech_error_handling.md` ↔ Web層の `ErrorCatalog`。欠落・余剰・ステータス不一致。`--summary` で件数のみ） |
 | DBスキーマ一致 | `python scripts/check_schema_triple.py`（定義書↔ER図↔models↔Flyway DDL。`--columns` `--tags` `--unique` `--nofk` `--nullable` `--naming` `--index` で個別実行） |
 | 常設スクリプトの回帰テスト | `python -m pytest scripts/tests .claude/scripts/tests .claude/hooks/tests -q`（規約は [_TEMPLATE.md](_TEMPLATE.md)） |
