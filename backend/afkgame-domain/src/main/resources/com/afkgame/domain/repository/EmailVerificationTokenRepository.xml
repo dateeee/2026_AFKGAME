@@ -26,10 +26,13 @@
      WHERE token_hash = #{tokenHash}
   </select>
 
+  <!-- 未使用の行だけを更新する。同時実行で使用済み化できるのは1本だけになり、
+       呼び出し側は更新件数0を「他のリクエストが先に使い切った」として扱える（§25 #21） -->
   <update id="updateUsedById">
     UPDATE email_verification_tokens
        SET used = TRUE
      WHERE id = #{id}
+       AND used = FALSE
   </update>
 
   <!-- 用途で絞って一括で無効化する（§22 手順4）。確認トークンを巻き込まないため purpose を条件に置く -->

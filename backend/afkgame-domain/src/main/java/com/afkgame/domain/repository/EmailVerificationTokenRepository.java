@@ -40,9 +40,14 @@ public interface EmailVerificationTokenRepository {
      *
      * <p>同じユーザーの他のトークンは変更しない（期限切れで自然に無効になる）。
      *
+     * <p>未使用の行だけを更新する。同じトークンで並走したリクエストのうち更新できるのは1本だけになり、
+     * 呼び出し側は更新件数0を「他のリクエストが先に使い切った」として扱える
+     * （docs/tech/detail/tech_auth/password_reset.md §24 手順7）。
+     *
      * @param id 対象レコードのID
+     * @return 更新件数（既に使用済みなら 0）
      */
-    void updateUsedById(Integer id);
+    int updateUsedById(Integer id);
 
     /**
      * 指定ユーザーの未使用トークンを用途で絞って一括で使用済みにする
@@ -51,10 +56,12 @@ public interface EmailVerificationTokenRepository {
      * <p>有効な再設定トークンを常に最新の1本だけに保つために、新しい1件を作る前に呼ぶ。
      * 用途で絞るため、確認トークン（{@code verify_email}）は巻き込まない。
      *
+     * <p>呼び出し元は件数で経路を分けない（0件でも新しい1件を作る）ため更新件数を返さない。
+     * 件数ごとの振る舞いは {@code EmailVerificationTokenRepositoryTest} が実DBで固定する。
+     *
      * @param userId ユーザーID
      * @param purpose 対象の用途（{@code password_reset}）
-     * @return 更新件数（未使用のトークンが無ければ 0）
      */
-    int updateUsedByUserIdAndPurpose(@Param("userId") String userId,
+    void updateUsedByUserIdAndPurpose(@Param("userId") String userId,
             @Param("purpose") String purpose);
 }

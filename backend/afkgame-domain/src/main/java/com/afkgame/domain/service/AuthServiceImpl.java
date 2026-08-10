@@ -333,10 +333,20 @@ public class AuthServiceImpl implements AuthService {
         user.setEmailVerified(false);
         user.setLastLoginAt(now);
         try {
-            userRepository.updateLinkedAccount(user);
+            // 本登録化できるのはゲストのままの1本だけ。0件なら同じゲストで並走した他のリクエストが
+            // 先に移行を済ませており、READ COMMITTED では上のゲスト判定を通り抜けている（§19 #25）
+            if (userRepository.updateLinkedAccount(user) == 0) {
+                logger.warn("移行失敗").reason(LogReason.ALREADY_REGISTERED)
+                        .with(LogKey.USER_ID, user.getId()).log();
+                throw authError("AUTH_ALREADY_REGISTERED");
+            }
         } catch (DuplicateKeyException e) {
-            // 手順6の通過後に同時移行で uq_users_email 違反が起きた場合（§19 #19）。
-            // google_id は Phase 2 では設定しない（手順3 で 501）ため、制約名を見る必要が無い
+            if (!isEmailConstraintViolation(e)) {
+                // §19 #19 が扱うのはメール重複だけ。ほかの一意制約違反を 409 へ写像すると
+                // 原因と表示が食い違うため、予期しないエラーとしてそのまま伝播させる
+                throw e;
+            }
+            // 手順6の通過後に同時移行で uq_users_email 違反が起きた場合（§19 #19）
             logger.warn("移行失敗").reason(LogReason.EMAIL_TAKEN_CONFLICT)
                     .with(LogKey.EMAIL, normalizedEmail).log();
             throw emailTaken();
@@ -395,7 +405,8 @@ public class AuthServiceImpl implements AuthService {
 
         // 既に true でも同じ値を書くだけで変化しない（§20 手順7・§21 #14）
         userRepository.updateEmailVerified(user.getId(), true);
-        // 同じユーザーの他の確認トークンは変更しない（手順8）
+        // 同じユーザーの他の確認トークンは変更しない（手順8）。使用済みなら手順4で早期 return するため
+        // 0件にはならず、同時実行で0件になっても冪等が正（§20 手順4）なので更新件数は見ない
         emailVerificationTokenRepository.updateUsedById(verificationToken.getId());
 
         logger.info("メール確認").with(LogKey.USER_ID, user.getId()).log();
@@ -485,8 +496,15 @@ public class AuthServiceImpl implements AuthService {
             throw resetTokenInvalid();
         }
 
+        // 使い切れるのは未使用の1本だけ。0件なら同じトークンで並走した他のリクエストが先に使い切って
+        // おり、READ COMMITTED では上の使用済み判定を通り抜けている（§25 #21）。パスワードの更新より
+        // 前に置くことで、弾く経路で bcrypt を回さない（§24 手順7）
+        if (emailVerificationTokenRepository.updateUsedById(resetToken.getId()) == 0) {
+            logger.warn("パスワード再設定失敗").reason(LogReason.RESET_USED)
+                    .with(LogKey.USER_ID, resetToken.getUserId()).log();
+            throw resetTokenInvalid();
+        }
         userRepository.updatePasswordHash(user.getId(), passwordEncoder.encode(newPassword));
-        emailVerificationTokenRepository.updateUsedById(resetToken.getId());
         // パスワード変更で全端末を切断する（乗っ取られた端末を締め出す。§24 手順9）。件数で経路を分けない
         refreshTokenRepository.updateRevokedByUserId(user.getId());
 
@@ -552,7 +570,8 @@ public class AuthServiceImpl implements AuthService {
      *
      * <p>{@code users} は {@code uq_users_email} と {@code uq_users_google_id} の2本を持つため、
      * 制約名を見ずに重複と決めつけると、Google連携の重複が「メールが既に使われています」として
-     * 返る（link-account で {@code google_id} を設定するようになった時点で顕在化する）。
+     * 返る（{@code register} と {@code linkAccount} が {@code google_id} を設定するようになった
+     * 時点で顕在化する）。
      *
      * <p>メッセージに制約名が含まれる前提は
      * {@code UserRepositoryTest#同じメールアドレスでは2人目を作れない} が実DBで固定する

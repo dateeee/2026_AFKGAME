@@ -44,7 +44,9 @@
      WHERE id = #{id}
   </update>
 
-  <!-- 本登録化（§18 手順8）。id・display_name・created_at は列に挙げず、変えないことを SQL で示す -->
+  <!-- 本登録化（§18 手順8）。id・display_name・created_at は列に挙げず、変えないことを SQL で示す。
+       ゲストのままの行だけを更新し、呼び出し側は更新件数0を「同時移行で先に本登録化された」
+       として扱える（§19 #25） -->
   <update id="updateLinkedAccount">
     UPDATE users
        SET email          = #{email},
@@ -53,6 +55,7 @@
            email_verified = #{emailVerified},
            last_login_at  = #{lastLoginAt}
      WHERE id = #{id}
+       AND is_guest = TRUE
   </update>
 
   <update id="updateEmailVerified">

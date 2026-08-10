@@ -172,4 +172,64 @@ class UserRepositoryTest extends RepositoryTestSupport {
                     .isEqualTo(FIXED_NOW);
         }
     }
+
+    /** ゲストの本登録化（{@code link.md} §18 手順8）。 */
+    @Nested
+    class Test本登録化 {
+
+        /** 更新後の値を持つユーザー（{@code id} と {@code created_at} は元のまま）。 */
+        private User 本登録化後(User guest, String email) {
+            User updated = new User();
+            updated.setId(guest.getId());
+            updated.setEmail(email);
+            updated.setPasswordHash("$2a$12$abcdefghijklmnopqrstuv");
+            updated.setGuest(false);
+            updated.setEmailVerified(false);
+            updated.setLastLoginAt(FIXED_NOW.plus(Duration.ofDays(3)));
+            return updated;
+        }
+
+        /**
+         * ゲストのままなら5列だけを更新し、更新件数1を返す。{@code id}・{@code display_name}・
+         * {@code created_at} は SET 句に無いため変わらない（手順8）。
+         *
+         * <p>分岐: tech_auth/link.md §19 #24
+         */
+        @Test
+        void ゲストなら5列を更新して更新件数1を返す() {
+            User guest = ゲスト();
+            guest.setDisplayName("冒険者");
+            userRepository.save(guest);
+            String email = email();
+
+            assertThat(userRepository.updateLinkedAccount(本登録化後(guest, email))).isEqualTo(1);
+
+            User actual = userRepository.findById(guest.getId());
+            assertThat(actual.getEmail()).isEqualTo(email);
+            assertThat(actual.isGuest()).isFalse();
+            assertThat(actual.isEmailVerified()).isFalse();
+            assertThat(actual.getLastLoginAt()).isEqualTo(FIXED_NOW.plus(Duration.ofDays(3)));
+            // 更新の対象外（SET 句に混ざっていないこと）
+            assertThat(actual.getDisplayName()).isEqualTo("冒険者");
+            assertThat(actual.getCreatedAt()).isEqualTo(FIXED_NOW);
+        }
+
+        /**
+         * {@code AND is_guest = TRUE} により、本登録済みの行は更新できない。呼び出し側はこの0件を
+         * 「同時移行で他のリクエストが先に本登録化した」として扱う（手順8）。
+         *
+         * <p>分岐: tech_auth/link.md §19 #25
+         */
+        @Test
+        void 本登録済みなら更新件数0を返し何も変えない() {
+            User registered = メール登録済みユーザー(email());
+            userRepository.save(registered);
+
+            assertThat(userRepository.updateLinkedAccount(本登録化後(registered, email()))).isZero();
+
+            User actual = userRepository.findById(registered.getId());
+            assertThat(actual.getEmail()).isEqualTo(registered.getEmail());
+            assertThat(actual.isEmailVerified()).isTrue();
+        }
+    }
 }

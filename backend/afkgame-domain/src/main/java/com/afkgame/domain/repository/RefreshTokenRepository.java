@@ -43,8 +43,10 @@ public interface RefreshTokenRepository {
      * <p>再利用検知時の全失効（tech_auth.md §4）と、パスワード変更時の全端末切断
      * （tech_auth/password_reset.md §24 手順9）の両方から呼ぶ。
      *
+     * <p>どちらの呼び出し元も件数で経路を分けないため更新件数を返さない。件数ごとの振る舞いは
+     * {@code RefreshTokenRepositoryTest} が実DBで固定する。
+     *
      * @param userId ユーザーID
-     * @return 更新件数（未失効のトークンが無ければ 0）
      */
-    int updateRevokedByUserId(String userId);
+    void updateRevokedByUserId(String userId);
 }

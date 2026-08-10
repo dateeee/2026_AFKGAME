@@ -58,11 +58,16 @@ public interface UserRepository {
      * {@code email_verified}・{@code last_login_at} の5列だけで、{@code id}・{@code display_name}・
      * {@code created_at} は変えない（移行してもアカウントの同一性とゲームデータを保つため）。
      *
+     * <p>{@code is_guest = true} の行だけを更新する。同じゲストで並走したリクエストのうち更新できるのは
+     * 1本だけになり、呼び出し側は更新件数0を「他のリクエストが先に本登録化した」として扱える
+     * （§18 手順8）。
+     *
      * @param user 更新後の値を持つユーザー（{@code id} で特定する）
+     * @return 更新件数（既に本登録済みなら 0）
      * @throws org.springframework.dao.DuplicateKeyException 同時移行で {@code uq_users_email} に
      *         違反した場合
      */
-    void updateLinkedAccount(User user);
+    int updateLinkedAccount(User user);
 
     /**
      * メール確認状態を更新する（tech_auth/verify.md §20 手順7）。
