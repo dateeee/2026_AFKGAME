@@ -100,6 +100,31 @@ import com.afkgame.web.filter.ApiExceptionHandler;
  *       {@code /api/auth/verify-email} を足す（認証不要・tech_api/common.md §5.0）。
  *       <b>link-account は足さない</b>（認証必須）</li>
  * </ul>
+ *
+ * <p><b>パスワード再設定（移行 STEP 3-A-3 セグメント②）</b>: 仕様は
+ * docs/tech/detail/tech_auth/password_reset.md §22・§24。本クラスは分岐一覧 §23・§25 のうち
+ * <b>Bean Validation・HTTP ステータス・引数の受け渡し</b>が決める分岐（§23 #1〜#4・§25 #1〜#4）を
+ * 持つ。対象の有無・トークンの検証・失効はサービス層が決めるため {@code AuthServiceImplTest}、
+ * 実DBへの反映は {@code AuthApiIntegrationTest} が持つ。
+ *
+ * <p><b>製造工程への申し送り（追加分）</b>:
+ * <ul>
+ *   <li>{@code AuthApi#requestPasswordReset(@Valid @RequestBody PasswordResetRequestResource)}
+ *       → {@code StatusResource}（{@code POST /api/auth/password-reset/request}）。
+ *       <b>対象の有無によらず 200</b> を返す（§22 出口条件。存否を推測させない）</li>
+ *   <li>{@code AuthApi#resetPassword(@Valid @RequestBody PasswordResetConfirmResource)}
+ *       → {@code StatusResource}（{@code POST /api/auth/password-reset/confirm}）。
+ *       <b>トークンペアを応答へ載せない</b>（§24 手順10。ログイン画面へ戻す）</li>
+ *   <li>{@code PasswordResetRequestResource(String email)}: {@code email} は
+ *       {@code @NotBlank @Email @Size(max = 254)}（§22 手順1・account.md §9「入力長」）</li>
+ *   <li>{@code PasswordResetConfirmResource(String token, String newPassword)}:
+ *       {@code token} は {@code @NotBlank}、{@code newPassword} は
+ *       {@code @NotBlank @Size(min = 8, max = 128)}（§24 手順1）。フィールド名は API の
+ *       camelCase をそのまま使う（tech_api/common.md §5.0。Jackson の変換は不要）</li>
+ *   <li>{@code SpringSecurityConfig} の {@code PUBLIC_ENDPOINTS} へ
+ *       {@code /api/auth/password-reset/request} と {@code /api/auth/password-reset/confirm} を
+ *       足す（どちらも認証不要・§22・§24 入口条件）</li>
+ * </ul>
  */
 @Tag("unit")
 @ExtendWith(MockitoExtension.class)
@@ -741,6 +766,171 @@ class AuthApiTest {
                     .andExpect(jsonPath("$.error.code").value("VALIDATION_ERROR"));
 
             verify(authService, never()).verifyEmail(any());
+        }
+    }
+
+    @Nested
+    @DisplayName("POST /api/auth/password-reset/request")
+    class TestRequestPasswordReset {
+
+        private static final String PATH = "/api/auth/password-reset/request";
+
+        private static String requestBody(String email) {
+            return "{\"email\":\"" + email + "\"}";
+        }
+
+        /**
+         * 妥当な形式なら検証を通り、そのままサービスへ渡る（§22 手順2へ進む）。認証は要求しない。
+         * 応答は対象の有無によらず 200 {@code {"status": "ok"}}（§22 出口条件）。
+         *
+         * <p>分岐: tech_auth/password_reset.md §23 #1
+         */
+        @Test
+        void test_妥当な形式のメールはサービスへ渡る() throws Exception {
+            mockMvc.perform(post(PATH)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(requestBody("user@example.com")))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.status").value("ok"));
+
+            verify(authService).requestPasswordReset("user@example.com");
+        }
+
+        /**
+         * 形式違反は 422 で止め、サービスを呼ばない（§22 手順1）。必須違反（空文字）も同じ分岐。
+         *
+         * <p>分岐: tech_auth/password_reset.md §23 #2
+         */
+        @ParameterizedTest(name = "email={0}")
+        @ValueSource(strings = {
+            "user.example.com",  // @ を欠く
+            "@example.com",      // ローカル部が無い
+            "user@",             // ドメイン部が無い
+            ""                   // 空文字（必須違反）
+        })
+        void test_メール形式が不正なら422を返す(String email) throws Exception {
+            mockMvc.perform(post(PATH)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(requestBody(email)))
+                    .andExpect(status().isUnprocessableEntity())
+                    .andExpect(jsonPath("$.error.code").value("VALIDATION_ERROR"));
+
+            verify(authService, never()).requestPasswordReset(any());
+        }
+
+        /**
+         * 上限ちょうど（254文字）は受け付ける。上限の正は account.md §9「入力長」（RFC 5321）。
+         *
+         * <p>分岐: tech_auth/password_reset.md §23 #3
+         */
+        @Test
+        void test_254文字ちょうどのメールは受け付ける() throws Exception {
+            mockMvc.perform(post(PATH)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(requestBody(emailOfLength(254))))
+                    .andExpect(status().isOk());
+        }
+
+        /**
+         * 上限超過（255文字）は 422。
+         *
+         * <p>分岐: tech_auth/password_reset.md §23 #4
+         */
+        @Test
+        void test_255文字のメールは422を返す() throws Exception {
+            mockMvc.perform(post(PATH)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(requestBody(emailOfLength(255))))
+                    .andExpect(status().isUnprocessableEntity())
+                    .andExpect(jsonPath("$.error.code").value("VALIDATION_ERROR"));
+
+            verify(authService, never()).requestPasswordReset(any());
+        }
+    }
+
+    @Nested
+    @DisplayName("POST /api/auth/password-reset/confirm")
+    class TestResetPassword {
+
+        private static final String PATH = "/api/auth/password-reset/confirm";
+
+        private static final String RAW_TOKEN = "raw-password-reset-token";
+
+        private static final String NEW_PASSWORD = "newsecurepass456";
+
+        private static String confirmBody(String token, String newPassword) {
+            return "{\"token\":\"" + token + "\",\"newPassword\":\"" + newPassword + "\"}";
+        }
+
+        /**
+         * メール本文のリンクに載った生値をそのままサービスへ渡し（§24 手順2へ進む）、成功なら
+         * {@code {"status": "ok"}} を 200 で返す（§24 出口条件）。認証は要求しない。
+         *
+         * <p>分岐: tech_auth/password_reset.md §25 #1
+         */
+        @Test
+        void test_tokenが指定されていればサービスへ渡る() throws Exception {
+            mockMvc.perform(post(PATH)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(confirmBody(RAW_TOKEN, NEW_PASSWORD)))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.status").value("ok"));
+
+            verify(authService).resetPassword(RAW_TOKEN, NEW_PASSWORD);
+        }
+
+        /**
+         * 必須違反は 422 で止め、サービスを呼ばない（§24 手順1）。未指定と空文字は同じ分岐。
+         *
+         * <p>分岐: tech_auth/password_reset.md §25 #2
+         */
+        @ParameterizedTest(name = "body={0}")
+        @ValueSource(strings = {
+            "{\"newPassword\":\"newsecurepass456\"}",                  // 未指定
+            "{\"token\":\"\",\"newPassword\":\"newsecurepass456\"}"    // 空文字
+        })
+        void test_tokenが未指定または空文字なら422を返す(String body) throws Exception {
+            mockMvc.perform(post(PATH).contentType(MediaType.APPLICATION_JSON).content(body))
+                    .andExpect(status().isUnprocessableEntity())
+                    .andExpect(jsonPath("$.error.code").value("VALIDATION_ERROR"));
+
+            verify(authService, never()).resetPassword(any(), any());
+        }
+
+        /**
+         * 許容範囲の両端（8文字・128文字ちょうど）は受け付ける（tech_auth.md §1「パスワード要件」、
+         * 長さの正は account.md §9「入力長」）。
+         *
+         * <p>分岐: tech_auth/password_reset.md §25 #3
+         */
+        @ParameterizedTest(name = "length={0}")
+        @ValueSource(ints = {8, 128})
+        void test_8文字以上128文字以下の新パスワードは受け付ける(int length) throws Exception {
+            mockMvc.perform(post(PATH)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(confirmBody(RAW_TOKEN, "a".repeat(length))))
+                    .andExpect(status().isOk());
+        }
+
+        /**
+         * 範囲外は 422。空文字（必須違反）と上限超過（129文字）を同じ分岐に含む。
+         *
+         * <p>分岐: tech_auth/password_reset.md §25 #4
+         */
+        @ParameterizedTest(name = "length={0}")
+        @ValueSource(ints = {
+            0,    // 空文字（必須違反）
+            7,    // 下限の1つ手前
+            129   // 上限の1つ外側
+        })
+        void test_7文字以下または129文字以上の新パスワードは422を返す(int length) throws Exception {
+            mockMvc.perform(post(PATH)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(confirmBody(RAW_TOKEN, "a".repeat(length))))
+                    .andExpect(status().isUnprocessableEntity())
+                    .andExpect(jsonPath("$.error.code").value("VALIDATION_ERROR"));
+
+            verify(authService, never()).resetPassword(any(), any());
         }
     }
 }

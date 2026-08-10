@@ -72,6 +72,29 @@ class AuthApiIntegrationTest extends WebIntegrationTestSupport {
                 "SELECT last_login_at FROM users WHERE id = ?", Timestamp.class, userId);
     }
 
+    /** {@code users.password_hash} の現在値。再設定で置き換わったことの照合に使う。 */
+    private String passwordHash(String userId) {
+        return jdbcTemplate.queryForObject(
+                "SELECT password_hash FROM users WHERE id = ?", String.class, userId);
+    }
+
+    /** 用途で絞った {@code email_verification_tokens} の件数（{@code condition} は追加の絞り込み）。 */
+    private int tokenCount(String userId, String purpose, String condition) {
+        return jdbcTemplate.queryForObject(
+                "SELECT count(*) FROM email_verification_tokens "
+                        + "WHERE user_id = ? AND purpose = ? AND " + condition,
+                Integer.class, userId, purpose);
+    }
+
+    /** パスワード再設定を要求する（応答は対象の有無によらず 200 {@code {"status": "ok"}}）。 */
+    private void requestPasswordReset(String email) throws Exception {
+        mockMvc.perform(post("/api/auth/password-reset/request")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"email\":\"" + email + "\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("ok"));
+    }
+
     /**
      * 生トークンの SHA-256（16進小文字）。
      *
@@ -499,6 +522,70 @@ class AuthApiIntegrationTest extends WebIntegrationTestSupport {
         assertThat(jdbcTemplate.queryForObject(
                 "SELECT used FROM email_verification_tokens WHERE user_id = ?",
                 Boolean.class, userId)).isTrue();
+    }
+
+    /**
+     * 分岐: tech_auth/password_reset.md §23 #13
+     */
+    @Test
+    @DisplayName("POST /api/auth/password-reset/request は再設定トークンをコミットし、既存の未使用分を無効化する")
+    void test_パスワード再設定の要求が実DBへ反映される() throws Exception {
+        String email = "reset-request@example.com";
+        String userId = register(email).at("/user/id").asText();
+
+        requestPasswordReset(email);
+
+        // 用途 password_reset の未使用トークンがちょうど1本コミットされている（§22 手順5・6）
+        assertThat(tokenCount(userId, "password_reset", "used = false")).isEqualTo(1);
+
+        requestPasswordReset(email);
+
+        // 2回目でも有効なのは最新の1本だけ。前の1本は使用済みになる（§22 手順4）
+        assertThat(tokenCount(userId, "password_reset", "used = false")).isEqualTo(1);
+        assertThat(tokenCount(userId, "password_reset", "used = true")).isEqualTo(1);
+        // 用途が違う確認トークン（register が作る）は巻き込まない
+        assertThat(tokenCount(userId, "verify_email", "used = false")).isEqualTo(1);
+    }
+
+    /**
+     * 分岐: tech_auth/password_reset.md §25 #18
+     */
+    @Test
+    @DisplayName("POST /api/auth/password-reset/confirm はパスワード・使用済み・全トークン失効を確定する")
+    void test_パスワード再設定の実行が実DBへ反映される() throws Exception {
+        String email = "reset-confirm@example.com";
+        String userId = register(email).at("/user/id").asText();
+        String oldHash = passwordHash(userId);
+
+        requestPasswordReset(email);
+        String rawToken = "integration-password-reset-token";
+        // 再設定メールを送らないため生値を受け取れない。既知の生値のハッシュへ差し替える
+        // （素の jdbcTemplate.update では値が残らない。理由は updateFixture の Javadoc）
+        updateFixture("UPDATE email_verification_tokens SET token_hash = ? "
+                + "WHERE user_id = ? AND purpose = 'password_reset'", sha256Hex(rawToken), userId);
+
+        String newPassword = "brandnewpass789";
+        mockMvc.perform(post("/api/auth/password-reset/confirm")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"token\":\"" + rawToken + "\",\"newPassword\":\""
+                                + newPassword + "\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("ok"))
+                // 新しいトークンペアは発行しない（§24 手順10）
+                .andExpect(jsonPath("$.accessToken").doesNotExist());
+
+        assertThat(passwordHash(userId)).isNotEqualTo(oldHash).isNotEqualTo(newPassword);
+        assertThat(tokenCount(userId, "password_reset", "used = true")).isEqualTo(1);
+        // register が発行したリフレッシュトークンは全端末ぶん失効する（§24 手順9）
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT count(*) FROM refresh_tokens WHERE user_id = ? AND revoked = false",
+                Integer.class, userId)).isZero();
+
+        // 新しいパスワードでログインできる（＝ bcrypt ハッシュとして正しく保存されている）
+        mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(credentialBody(email, newPassword)))
+                .andExpect(status().isOk());
     }
 
     @Test

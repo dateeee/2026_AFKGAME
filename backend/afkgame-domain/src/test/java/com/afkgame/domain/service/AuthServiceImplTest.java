@@ -126,6 +126,44 @@ import com.afkgame.env.config.AuthSettings;
  *
  * <p>移行は<b>ゲームデータを作り直さない</b>（tech_auth.md §3）。{@link PlayerInitializationService}
  * を呼ばないことを §19 #20 のテストで固定する。
+ *
+ * <p><b>パスワード再設定（移行 STEP 3-A-3 セグメント②）</b>: 仕様は
+ * docs/tech/detail/tech_auth/password_reset.md §22（要求）・§24（実行）。本クラスは分岐一覧
+ * §23・§25 のうちサービス層が決める分岐（対象の有無・パスワード設定の有無・既存トークンの無効化・
+ * トークンの用途 / 使用状態 / 期限・リフレッシュトークンの失効・トランザクション）を持つ。
+ * Bean Validation と HTTP ステータス（§23 #1〜#4・§25 #1〜#4）は {@code AuthApiTest}、実DBへの
+ * 反映（§23 #13・§25 #18）は {@code AuthApiIntegrationTest}、メール送信そのもの（§23 #16 と
+ * mail.md §17 の全行）は {@code VerificationMailSenderImplTest} が持つ。
+ *
+ * <p><b>製造工程への申し送り（追加分）</b>:
+ * <ul>
+ *   <li>{@code AuthService#requestPasswordReset(String email)} → {@code void}
+ *       （{@code @Transactional}。手順4〜5 を1つの境界にまとめ、送信要求はコミット後・
+ *       境界の外。§22 手順6・7）。<b>対象がいない・パスワードを持たない場合も例外を投げない</b>
+ *       — 応答差でアカウントの存否を推測させないため（§22 末尾）</li>
+ *   <li>{@code AuthService#resetPassword(String token, String newPassword)} → {@code void}
+ *       （{@code @Transactional}。手順7〜9 を1つの境界にまとめる。§24 手順10）。
+ *       <b>新しいトークンペアは発行しない</b>。引数名は {@code token} / {@code newPassword} 固定
+ *       （logging/application.md §3.1 規約1 の固定表。{@code rawResetToken} 等にすると
+ *       {@code check_java_conventions.py} の判定12 が ERROR で止まる）</li>
+ *   <li>{@code EmailVerificationTokenRepository#updateUsedByUserIdAndPurpose(String userId,
+ *       String purpose)} → {@code int}（更新件数）を追加（§22 手順4）。用途で絞って一括で
+ *       使用済みにし、有効な再設定トークンを常に最新の1本だけに保つ</li>
+ *   <li>{@code UserRepository#updatePasswordHash(String id, String passwordHash)} を追加
+ *       （§24 手順7）。<b>{@code passwordHash} は固定表に無いため判定12 に掛かる</b> — 既存の
+ *       {@code findByTokenHash} と同じく、直前へ {@code // 規約例外: 受け取るのは bcrypt ハッシュ
+ *       であり、境界ログに出ても生パスワードは復元できない} を置いて抑止する</li>
+ *   <li>{@code RefreshTokenRepository#updateRevokedByUserId(String userId)} の戻り値を
+ *       {@code void} → {@code int}（更新件数）へ変える（§24 手順9）。同インタフェースの
+ *       {@code updateRevokedById} と揃い、既存の呼び出し元（{@code detectReuse}）とテストの
+ *       {@code verify} はそのまま通る</li>
+ *   <li>{@code VerificationMailSender#sendPasswordReset(User user, String token)} を追加
+ *       （§22 手順7）。詳細は {@code VerificationMailSenderImplTest} の申し送り</li>
+ *   <li>再設定トークンの {@code purpose} は {@code password_reset}、{@code expires_at} は
+ *       現在時刻 + {@code AuthSettings#passwordResetTokenExpire}（1時間。mail.md §16.3）。
+ *       生成方式（48バイト → Base64URL・SHA-256 16進小文字）は確認トークンと共通で、
+ *       既存の {@code saveVerificationToken} を用途で切り替えられる形へ広げる</li>
+ * </ul>
  */
 @Tag("unit")
 @ExtendWith(MockitoExtension.class)
@@ -1663,6 +1701,530 @@ class AuthServiceImplTest {
                     .isInstanceOf(DataAccessResourceFailureException.class);
 
             verify(emailVerificationTokenRepository, never()).updateUsedById(any());
+        }
+    }
+
+    @Nested
+    @DisplayName("パスワード再設定の要求")
+    class TestRequestPasswordReset {
+
+        /**
+         * 期限の起点。{@code expires_at} が「現在時刻 + 1時間」（§22 手順5・mail.md §16.3）で
+         * あることを固定するため、この節は固定クロックでサービスを組む。
+         */
+        private static final Instant NOW = Instant.parse("2026-08-10T12:00:00Z");
+
+        /** 再設定トークンの用途（tech_db/auth.md §3）。確認トークンと同じ表を用途で分ける。 */
+        private static final String PURPOSE = "password_reset";
+
+        private static final String USER_ID = "user_001";
+
+        private AuthService requestService() {
+            return authService(AUTH_SETTINGS, Clock.fixed(NOW, ZoneOffset.UTC));
+        }
+
+        /** パスワードを持つ本登録ユーザー（再設定できる側）。 */
+        private User registered() {
+            User user = new User();
+            user.setId(USER_ID);
+            user.setEmail(EMAIL);
+            user.setPasswordHash(HASHED);
+            user.setGuest(false);
+            user.setEmailVerified(true);
+            return user;
+        }
+
+        /** 保存された再設定トークンを取り出す。 */
+        private EmailVerificationToken savedToken() {
+            ArgumentCaptor<EmailVerificationToken> saved =
+                    ArgumentCaptor.forClass(EmailVerificationToken.class);
+            verify(emailVerificationTokenRepository).save(saved.capture());
+            return saved.getValue();
+        }
+
+        /**
+         * 正規化後の値に一致するユーザーがいれば、パスワード設定の確認（手順3）へ進む。
+         *
+         * <p>分岐: tech_auth/password_reset.md §23 #5
+         */
+        @Test
+        void test_一致するユーザーがいればパスワード設定の確認へ進む() {
+            when(userRepository.findByEmail(EMAIL)).thenReturn(registered());
+
+            requestService().requestPasswordReset(EMAIL);
+
+            // 手順3を通過した先でだけ再設定トークンが作られる
+            verify(emailVerificationTokenRepository).save(any(EmailVerificationToken.class));
+        }
+
+        /**
+         * 未登録・ゲストは<b>トークンを作らずメールも送らず</b>正常終了する（手順2）。応答は
+         * 対象がいる場合と同じ 200 で、メールアドレスの列挙を許さない（§22 末尾）。
+         *
+         * <p>分岐: tech_auth/password_reset.md §23 #6
+         */
+        @Test
+        void test_一致するユーザーがいなければ何も作らず送らない() {
+            when(userRepository.findByEmail(EMAIL)).thenReturn(null);
+
+            assertThatCode(() -> requestService().requestPasswordReset(EMAIL))
+                    .doesNotThrowAnyException();
+
+            verifyNoInteractions(emailVerificationTokenRepository, verificationMailSender);
+        }
+
+        /**
+         * 登録時と大小が異なる表記でも、正規化（前後空白除去 + 小文字化。§9）後に一致するため
+         * 同じユーザーのトークンを作る。検索は<b>正規化後の値</b>で行う。
+         *
+         * <p>分岐: tech_auth/password_reset.md §23 #7
+         */
+        @Test
+        void test_大小が異なる表記でも正規化後に一致してトークンを作る() {
+            when(userRepository.findByEmail(EMAIL)).thenReturn(registered());
+
+            requestService().requestPasswordReset("  USER@Example.COM  ");
+
+            verify(userRepository).findByEmail(EMAIL);
+            assertThat(savedToken().getUserId()).isEqualTo(USER_ID);
+        }
+
+        /**
+         * {@code password_hash} を持つなら既存トークンの無効化（手順4）へ進む。
+         *
+         * <p>分岐: tech_auth/password_reset.md §23 #8
+         */
+        @Test
+        void test_password_hashを持つなら既存トークンの無効化へ進む() {
+            when(userRepository.findByEmail(EMAIL)).thenReturn(registered());
+
+            requestService().requestPasswordReset(EMAIL);
+
+            verify(emailVerificationTokenRepository).updateUsedByUserIdAndPurpose(USER_ID, PURPOSE);
+        }
+
+        /**
+         * Google連携のみのアカウント（{@code password_hash} が NULL）は何も作らず正常終了する
+         * （手順3）。メールでのパスワード設定を、パスワードを持たないアカウントへの後付け手段に
+         * しないため。
+         *
+         * <p>分岐: tech_auth/password_reset.md §23 #9
+         */
+        @Test
+        void test_password_hashがNULLなら何も作らず送らない() {
+            User googleOnly = registered();
+            googleOnly.setPasswordHash(null);
+            when(userRepository.findByEmail(EMAIL)).thenReturn(googleOnly);
+
+            assertThatCode(() -> requestService().requestPasswordReset(EMAIL))
+                    .doesNotThrowAnyException();
+
+            verifyNoInteractions(emailVerificationTokenRepository, verificationMailSender);
+        }
+
+        /**
+         * 未使用の再設定トークンは<b>件数によらず</b>すべて使用済みにしてから新しい1件を作る
+         * （手順4・5）。有効な再設定トークンを常に最新の1本だけに保つため、無効化は件数を
+         * 分岐条件にしない（0件でも同じ経路を通り、新しい1件は必ず作られる）。
+         *
+         * <p>作る1件は用途 {@code password_reset}・未使用・期限は現在時刻 + 1時間（§16.3）で、
+         * 生値は保存せず SHA-256（16進小文字）だけを持つ（§9）。
+         *
+         * <p>分岐: tech_auth/password_reset.md §23 #10,11,12
+         */
+        @ParameterizedTest(name = "無効化した既存トークン={0}件")
+        @ValueSource(ints = {
+            0,   // 未使用のトークンが無い（#10）
+            1,   // 1件ある（#11）
+            2    // 2件以上ある（#12）
+        })
+        void test_未使用トークンを無効化してから新しい1件を作る(int invalidated) {
+            when(userRepository.findByEmail(EMAIL)).thenReturn(registered());
+            when(emailVerificationTokenRepository.updateUsedByUserIdAndPurpose(USER_ID, PURPOSE))
+                    .thenReturn(invalidated);
+
+            requestService().requestPasswordReset(EMAIL);
+
+            EmailVerificationToken token = savedToken();
+            assertThat(token.getUserId()).isEqualTo(USER_ID);
+            assertThat(token.getPurpose()).isEqualTo(PURPOSE);
+            assertThat(token.isUsed()).isFalse();
+            assertThat(token.getExpiresAt()).isEqualTo(NOW.plus(Duration.ofHours(1)));
+            assertThat(token.getTokenHash()).matches("[0-9a-f]{64}");
+        }
+
+        /**
+         * 手順4〜5 が成功したら、その後（コミット後）に送信を要求する（手順6・7）。コミット自体は
+         * {@code @Transactional} が行うため、ここでは<b>永続化をすべて終えてから送信要求を出す</b>
+         * 順序を固定する。
+         *
+         * <p>分岐: tech_auth/password_reset.md §23 #13
+         */
+        @Test
+        void test_無効化と作成を終えてから送信を要求する() {
+            when(userRepository.findByEmail(EMAIL)).thenReturn(registered());
+
+            requestService().requestPasswordReset(EMAIL);
+
+            InOrder inOrder = inOrder(emailVerificationTokenRepository, verificationMailSender);
+            inOrder.verify(emailVerificationTokenRepository)
+                    .updateUsedByUserIdAndPurpose(USER_ID, PURPOSE);
+            inOrder.verify(emailVerificationTokenRepository).save(any(EmailVerificationToken.class));
+            inOrder.verify(verificationMailSender)
+                    .sendPasswordReset(any(User.class), any(String.class));
+        }
+
+        /**
+         * 途中で失敗したらトークンを残さずメールも送らない（手順6）。ロールバックは
+         * {@code @Transactional} が行うため、ここでは例外を握りつぶさず伝播すること（＝
+         * ロールバックが起きる）と、送信要求を出さないことを見る。
+         *
+         * <p>分岐: tech_auth/password_reset.md §23 #14
+         */
+        @Test
+        void test_途中で失敗したら例外を伝播しメールを送らない() {
+            when(userRepository.findByEmail(EMAIL)).thenReturn(registered());
+            doThrow(new DataAccessResourceFailureException("DB error"))
+                    .when(emailVerificationTokenRepository).save(any(EmailVerificationToken.class));
+
+            assertThatThrownBy(() -> requestService().requestPasswordReset(EMAIL))
+                    .isInstanceOf(DataAccessResourceFailureException.class);
+
+            verifyNoInteractions(verificationMailSender);
+        }
+
+        /**
+         * 送信の成否は応答へ反映しない（手順7・8）。成功時は正常終了し、Web層が 200
+         * {@code {"status": "ok"}} を組む。
+         *
+         * <p>メールへ載せるのは<b>生値</b>で、DBへ入るのはその SHA-256 だけ（手順5・§9）。
+         * 取り違えるとリンクからは再設定できず、DBに生値が残る。
+         *
+         * <p>分岐: tech_auth/password_reset.md §23 #15
+         */
+        @Test
+        void test_再設定メールの送信を要求して正常終了する() {
+            when(userRepository.findByEmail(EMAIL)).thenReturn(registered());
+
+            assertThatCode(() -> requestService().requestPasswordReset(EMAIL))
+                    .doesNotThrowAnyException();
+
+            ArgumentCaptor<User> to = ArgumentCaptor.forClass(User.class);
+            ArgumentCaptor<String> sent = ArgumentCaptor.forClass(String.class);
+            verify(verificationMailSender).sendPasswordReset(to.capture(), sent.capture());
+            assertThat(to.getValue().getId()).isEqualTo(USER_ID);
+            assertThat(sent.getValue())
+                    .isNotBlank()
+                    .isNotEqualTo(savedToken().getTokenHash());
+        }
+    }
+
+    @Nested
+    @DisplayName("パスワード再設定の実行")
+    class TestResetPassword {
+
+        /**
+         * 期限判定の基準時刻。{@code expires_at} が現在時刻ちょうどの経路（§25 #12）は
+         * 実時間のクロックでは作れないため、この節だけ固定クロックでサービスを組む。
+         */
+        private static final Instant NOW = Instant.parse("2026-08-10T12:00:00Z");
+
+        /** メール本文のリンクに載る生値。DBにはこの SHA-256 だけが入る。 */
+        private static final String RAW_TOKEN = "raw-password-reset-token";
+
+        private static final String USER_ID = "user_001";
+
+        /** 新しいパスワード（8文字以上128文字以下）。 */
+        private static final String NEW_PASSWORD = "newsecurepass456";
+
+        /** {@code newPassword} を bcrypt でハッシュ化した結果（手順7）。 */
+        private static final String NEW_HASHED = "$2a$12$newdummyhashvalueforunittestonly";
+
+        private AuthService resetService() {
+            return authService(AUTH_SETTINGS, Clock.fixed(NOW, ZoneOffset.UTC));
+        }
+
+        /** 有効な再設定トークンの行（用途 password_reset・未使用・期限内）。 */
+        private EmailVerificationToken token() {
+            EmailVerificationToken token = new EmailVerificationToken();
+            token.setId(1);
+            token.setUserId(USER_ID);
+            token.setTokenHash("0".repeat(64));
+            token.setPurpose("password_reset");
+            token.setExpiresAt(NOW.plus(Duration.ofMinutes(30)));
+            token.setUsed(false);
+            token.setCreatedAt(NOW.minus(Duration.ofMinutes(30)));
+            return token;
+        }
+
+        /** 再設定の対象ユーザー。 */
+        private User target() {
+            User user = new User();
+            user.setId(USER_ID);
+            user.setEmail(EMAIL);
+            user.setPasswordHash(HASHED);
+            user.setGuest(false);
+            return user;
+        }
+
+        /** 手順7まで到達する経路の共通の下ごしらえ。 */
+        private void givenValidToken() {
+            when(emailVerificationTokenRepository.findByTokenHash(any())).thenReturn(token());
+            when(userRepository.findById(USER_ID)).thenReturn(target());
+            when(passwordEncoder.encode(NEW_PASSWORD)).thenReturn(NEW_HASHED);
+        }
+
+        /**
+         * 生値ではなく SHA-256（16進小文字）で検索し、行があれば用途の確認（手順3）へ進む（§9）。
+         *
+         * <p>分岐: tech_auth/password_reset.md §25 #5
+         */
+        @Test
+        void test_ハッシュが一致する行があれば用途の確認へ進む() {
+            givenValidToken();
+
+            resetService().resetPassword(RAW_TOKEN, NEW_PASSWORD);
+
+            ArgumentCaptor<String> hash = ArgumentCaptor.forClass(String.class);
+            verify(emailVerificationTokenRepository).findByTokenHash(hash.capture());
+            assertThat(hash.getValue()).isNotEqualTo(RAW_TOKEN).matches("[0-9a-f]{64}");
+        }
+
+        /**
+         * 存在しないトークンは 400。手順2〜6 はいずれも同じコードを返し、「無い」のか
+         * 「期限切れ」なのかを区別させない（§24 末尾）。
+         *
+         * <p>分岐: tech_auth/password_reset.md §25 #6
+         */
+        @Test
+        void test_一致する行が無ければAUTH_RESET_TOKEN_INVALIDになる() {
+            when(emailVerificationTokenRepository.findByTokenHash(any())).thenReturn(null);
+
+            assertThatThrownBy(() -> resetService().resetPassword(RAW_TOKEN, NEW_PASSWORD))
+                    .isInstanceOf(BusinessException.class)
+                    .extracting(AuthServiceImplTest::codeOf)
+                    .isEqualTo("AUTH_RESET_TOKEN_INVALID");
+
+            verifyNoInteractions(userRepository);
+        }
+
+        /**
+         * 用途が再設定トークンなら使用状態の確認（手順4）へ進む。
+         *
+         * <p>分岐: tech_auth/password_reset.md §25 #7
+         */
+        @Test
+        void test_用途がpassword_resetなら使用状態の確認へ進む() {
+            givenValidToken();
+
+            resetService().resetPassword(RAW_TOKEN, NEW_PASSWORD);
+
+            verify(emailVerificationTokenRepository).updateUsedById(1);
+        }
+
+        /**
+         * 確認トークンの流用を防ぐ（手順3）。パスワードを変えない。
+         *
+         * <p>分岐: tech_auth/password_reset.md §25 #8
+         */
+        @Test
+        void test_用途がverify_emailならAUTH_RESET_TOKEN_INVALIDになる() {
+            EmailVerificationToken verification = token();
+            verification.setPurpose("verify_email");
+            when(emailVerificationTokenRepository.findByTokenHash(any())).thenReturn(verification);
+
+            assertThatThrownBy(() -> resetService().resetPassword(RAW_TOKEN, NEW_PASSWORD))
+                    .isInstanceOf(BusinessException.class)
+                    .extracting(AuthServiceImplTest::codeOf)
+                    .isEqualTo("AUTH_RESET_TOKEN_INVALID");
+
+            verifyNoInteractions(userRepository);
+            verify(emailVerificationTokenRepository, never()).updateUsedById(any());
+        }
+
+        /**
+         * 未使用なら有効期限の確認（手順5）へ進み、再設定が成立する。
+         *
+         * <p>分岐: tech_auth/password_reset.md §25 #9
+         */
+        @Test
+        void test_未使用のトークンは有効期限の確認へ進む() {
+            givenValidToken();
+
+            resetService().resetPassword(RAW_TOKEN, NEW_PASSWORD);
+
+            verify(userRepository).updatePasswordHash(USER_ID, NEW_HASHED);
+        }
+
+        /**
+         * 使い切ったトークンでの再実行は 400。<b>メール確認（verify.md §20 手順4）と違い
+         * 冪等にしない</b> — 再設定はそのつどパスワードを書き換えるため、認めると漏れたメールから
+         * 何度でも書き換えられる（手順4）。
+         *
+         * <p>分岐: tech_auth/password_reset.md §25 #10
+         */
+        @Test
+        void test_使用済みのトークンはAUTH_RESET_TOKEN_INVALIDになる() {
+            EmailVerificationToken used = token();
+            used.setUsed(true);
+            when(emailVerificationTokenRepository.findByTokenHash(any())).thenReturn(used);
+
+            assertThatThrownBy(() -> resetService().resetPassword(RAW_TOKEN, NEW_PASSWORD))
+                    .isInstanceOf(BusinessException.class)
+                    .extracting(AuthServiceImplTest::codeOf)
+                    .isEqualTo("AUTH_RESET_TOKEN_INVALID");
+
+            verifyNoInteractions(userRepository);
+            verify(emailVerificationTokenRepository, never()).updateUsedById(any());
+        }
+
+        /**
+         * 期限内なら対象ユーザーの検索（手順6）へ進む。
+         *
+         * <p>分岐: tech_auth/password_reset.md §25 #11
+         */
+        @Test
+        void test_有効期限が現在時刻より後ならユーザーの検索へ進む() {
+            EmailVerificationToken valid = token();
+            // 境界の1つ内側（現在時刻の1秒後）
+            valid.setExpiresAt(NOW.plusSeconds(1));
+            when(emailVerificationTokenRepository.findByTokenHash(any())).thenReturn(valid);
+            when(userRepository.findById(USER_ID)).thenReturn(target());
+            when(passwordEncoder.encode(NEW_PASSWORD)).thenReturn(NEW_HASHED);
+
+            resetService().resetPassword(RAW_TOKEN, NEW_PASSWORD);
+
+            verify(userRepository).findById(USER_ID);
+        }
+
+        /**
+         * 期限切れは 400（手順5）。<b>現在時刻ちょうども「以前」に含む</b>
+         * （{@code <=} であることを境界で固定する）。
+         *
+         * <p>分岐: tech_auth/password_reset.md §25 #12
+         */
+        @ParameterizedTest(name = "expiresAt = 現在時刻{0}秒")
+        @ValueSource(longs = {
+            0,   // 境界ちょうど（現在時刻と等しい）
+            -1   // 境界の1つ外側
+        })
+        void test_有効期限が現在時刻以前ならAUTH_RESET_TOKEN_INVALIDになる(long offsetSeconds) {
+            EmailVerificationToken expired = token();
+            expired.setExpiresAt(NOW.plusSeconds(offsetSeconds));
+            when(emailVerificationTokenRepository.findByTokenHash(any())).thenReturn(expired);
+
+            assertThatThrownBy(() -> resetService().resetPassword(RAW_TOKEN, NEW_PASSWORD))
+                    .isInstanceOf(BusinessException.class)
+                    .extracting(AuthServiceImplTest::codeOf)
+                    .isEqualTo("AUTH_RESET_TOKEN_INVALID");
+
+            verifyNoInteractions(userRepository);
+            verify(emailVerificationTokenRepository, never()).updateUsedById(any());
+        }
+
+        /**
+         * ユーザーが居ればパスワードの更新（手順7）へ進む。保存するのは bcrypt ハッシュだけで、
+         * 生の {@code newPassword} をDBへ渡さない（§9）。
+         *
+         * <p>分岐: tech_auth/password_reset.md §25 #13
+         */
+        @Test
+        void test_対象ユーザーが存在すればパスワードを更新する() {
+            givenValidToken();
+
+            resetService().resetPassword(RAW_TOKEN, NEW_PASSWORD);
+
+            verify(passwordEncoder).encode(NEW_PASSWORD);
+            verify(userRepository).updatePasswordHash(USER_ID, NEW_HASHED);
+        }
+
+        /**
+         * 退会済みのユーザーへ宛てたトークンは無効として扱う（手順6）。
+         *
+         * <p>分岐: tech_auth/password_reset.md §25 #14
+         */
+        @Test
+        void test_対象ユーザーが存在しなければAUTH_RESET_TOKEN_INVALIDになる() {
+            when(emailVerificationTokenRepository.findByTokenHash(any())).thenReturn(token());
+            when(userRepository.findById(USER_ID)).thenReturn(null);
+
+            assertThatThrownBy(() -> resetService().resetPassword(RAW_TOKEN, NEW_PASSWORD))
+                    .isInstanceOf(BusinessException.class)
+                    .extracting(AuthServiceImplTest::codeOf)
+                    .isEqualTo("AUTH_RESET_TOKEN_INVALID");
+
+            verify(userRepository, never()).updatePasswordHash(any(), any());
+            verify(emailVerificationTokenRepository, never()).updateUsedById(any());
+            verify(refreshTokenRepository, never()).updateRevokedByUserId(any());
+        }
+
+        /**
+         * 未失効のリフレッシュトークンは<b>件数によらず</b>一括で失効させ、再設定は成功する
+         * （手順9）。パスワード変更で全端末を切断するのが目的なので、0件でも成功させ、件数で
+         * 経路を分けない。
+         *
+         * <p>分岐: tech_auth/password_reset.md §25 #15,16,17
+         */
+        @ParameterizedTest(name = "失効させたリフレッシュトークン={0}件")
+        @ValueSource(ints = {
+            0,   // 未失効のトークンが無い（#15）
+            1,   // 1件ある（#16）
+            2    // 2件以上ある（#17）
+        })
+        void test_リフレッシュトークンを件数によらず一括失効させる(int revoked) {
+            givenValidToken();
+            when(refreshTokenRepository.updateRevokedByUserId(USER_ID)).thenReturn(revoked);
+
+            assertThatCode(() -> resetService().resetPassword(RAW_TOKEN, NEW_PASSWORD))
+                    .doesNotThrowAnyException();
+
+            verify(refreshTokenRepository).updateRevokedByUserId(USER_ID);
+            verify(userRepository).updatePasswordHash(USER_ID, NEW_HASHED);
+        }
+
+        /**
+         * 手順7〜9 がすべて成功する経路。コミットは {@code @Transactional} が行うため、ここでは
+         * 3つの更新が順に呼ばれることだけを見る。DBへ反映されることの検証は統合テストが持つ。
+         *
+         * <p><b>新しいトークンペアは発行しない</b>（手順10）。フロントはログイン画面へ戻す。
+         *
+         * <p>分岐: tech_auth/password_reset.md §25 #18
+         */
+        @Test
+        void test_パスワードとトークンと失効の更新を順に実行して成功する() {
+            givenValidToken();
+
+            assertThatCode(() -> resetService().resetPassword(RAW_TOKEN, NEW_PASSWORD))
+                    .doesNotThrowAnyException();
+
+            InOrder inOrder = inOrder(userRepository, emailVerificationTokenRepository,
+                    refreshTokenRepository);
+            inOrder.verify(userRepository).updatePasswordHash(USER_ID, NEW_HASHED);
+            inOrder.verify(emailVerificationTokenRepository).updateUsedById(1);
+            inOrder.verify(refreshTokenRepository).updateRevokedByUserId(USER_ID);
+
+            // 新しいトークンペアを発行しない（手順10）
+            verify(refreshTokenRepository, never()).save(any(RefreshToken.class));
+        }
+
+        /**
+         * 手順7〜9 の途中で失敗する経路。ロールバックは {@code @Transactional} が行うため、
+         * ここでは例外を握りつぶさず伝播すること（＝ロールバックが起きる）と、後続の更新を
+         * 実行しないことを見る。
+         *
+         * <p>分岐: tech_auth/password_reset.md §25 #19
+         */
+        @Test
+        void test_途中で失敗したら例外を伝播し後続の更新を行わない() {
+            givenValidToken();
+            doThrow(new DataAccessResourceFailureException("DB error"))
+                    .when(userRepository).updatePasswordHash(any(), any());
+
+            assertThatThrownBy(() -> resetService().resetPassword(RAW_TOKEN, NEW_PASSWORD))
+                    .isInstanceOf(DataAccessResourceFailureException.class);
+
+            verify(emailVerificationTokenRepository, never()).updateUsedById(any());
+            verify(refreshTokenRepository, never()).updateRevokedByUserId(any());
         }
     }
 }
