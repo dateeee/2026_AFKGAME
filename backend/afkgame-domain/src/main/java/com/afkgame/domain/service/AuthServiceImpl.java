@@ -52,6 +52,9 @@ public class AuthServiceImpl implements AuthService {
     /** 確認トークンの用途（tech_db/auth.md §3）。用途をまたいだ流用を防ぐため発行時に固定する。 */
     private static final String VERIFY_EMAIL_PURPOSE = "verify_email";
 
+    /** 再設定トークンの用途（tech_db/auth.md §3）。確認トークンと同じ表を用途で分ける。 */
+    private static final String PASSWORD_RESET_PURPOSE = "password_reset";
+
     /** トークン生成用の暗号乱数。ゲーム乱数（{@code RandomFactory}）とは用途が異なり、共有してよい。 */
     private static final SecureRandom RANDOM = new SecureRandom();
 
@@ -60,6 +63,7 @@ public class AuthServiceImpl implements AuthService {
     private final JwtService jwtService;
     private final Duration refreshTokenExpire;
     private final Duration verificationTokenExpire;
+    private final Duration passwordResetTokenExpire;
     private final PlayerInitializationService playerInitializationService;
     private final Clock clock;
     private final PasswordEncoder passwordEncoder;
@@ -78,6 +82,7 @@ public class AuthServiceImpl implements AuthService {
         this.jwtService = jwtService;
         this.refreshTokenExpire = authSettings.refreshTokenExpire();
         this.verificationTokenExpire = authSettings.verificationTokenExpire();
+        this.passwordResetTokenExpire = authSettings.passwordResetTokenExpire();
         this.playerInitializationService = playerInitializationService;
         this.clock = clock;
         this.passwordEncoder = passwordEncoder;
@@ -397,6 +402,98 @@ public class AuthServiceImpl implements AuthService {
     }
 
     /**
+     * {@inheritDoc}
+     *
+     * <p>既存トークンの無効化と新しい1件の作成を本メソッドの境界で1つにまとめる
+     * （tech_auth/password_reset.md §22 手順6）。送信要求だけは境界の外で、
+     * 送信側（{@link VerificationMailSender}）が「コミット後・トランザクションの外」を担保する。
+     *
+     * <p>対象がいない・パスワードを持たない場合は<b>何も作らずに正常終了する</b>（手順2・3）。
+     * 内部の切り分けは WARN ログの {@code reason} だけが持ち、応答には出さない。
+     */
+    @Override
+    @Transactional
+    public void requestPasswordReset(String email) {
+        String normalizedEmail = normalizeEmail(email);
+        User user = userRepository.findByEmail(normalizedEmail);
+        if (user == null) {
+            logger.warn("再設定要求を無視").reason(LogReason.EMAIL_NOT_FOUND)
+                    .with(LogKey.EMAIL, normalizedEmail).log();
+            return;
+        }
+
+        // メールでのパスワード設定を、パスワードを持たないアカウントへの後付け手段にしない（手順3）
+        if (user.getPasswordHash() == null) {
+            logger.warn("再設定要求を無視").reason(LogReason.PASSWORD_NOT_SET)
+                    .with(LogKey.USER_ID, user.getId()).log();
+            return;
+        }
+
+        Instant now = clock.instant();
+
+        // 有効な再設定トークンを常に最新の1本だけに保つ（手順4）。件数で経路を分けない
+        emailVerificationTokenRepository.updateUsedByUserIdAndPurpose(user.getId(), PASSWORD_RESET_PURPOSE);
+        String rawResetToken =
+                saveEmailVerificationToken(user.getId(), now, PASSWORD_RESET_PURPOSE, passwordResetTokenExpire);
+
+        logger.info("パスワード再設定要求").with(LogKey.USER_ID, user.getId()).log();
+        verificationMailSender.sendPasswordReset(user, rawResetToken);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>パスワード更新・トークンの使用済み化・全リフレッシュトークンの失効を本メソッドの境界で
+     * 1つにまとめる（tech_auth/password_reset.md §24 手順10）。
+     */
+    @Override
+    @Transactional
+    public void resetPassword(String token, String newPassword) {
+        EmailVerificationToken resetToken =
+                emailVerificationTokenRepository.findByTokenHash(hashToken(token));
+        if (resetToken == null) {
+            logger.warn("パスワード再設定失敗").reason(LogReason.RESET_NOT_FOUND).log();
+            throw resetTokenInvalid();
+        }
+
+        // 確認トークンの流用を防ぐ（§24 手順3）
+        if (!PASSWORD_RESET_PURPOSE.equals(resetToken.getPurpose())) {
+            logger.warn("パスワード再設定失敗").reason(LogReason.RESET_PURPOSE_MISMATCH)
+                    .with(LogKey.USER_ID, resetToken.getUserId()).log();
+            throw resetTokenInvalid();
+        }
+
+        // メール確認（verify.md §20 手順4）と違い冪等にしない。使い切ったトークンでの再実行を
+        // 認めると、漏れたメールから何度でもパスワードを書き換えられる（§24 手順4）
+        if (resetToken.isUsed()) {
+            logger.warn("パスワード再設定失敗").reason(LogReason.RESET_USED)
+                    .with(LogKey.USER_ID, resetToken.getUserId()).log();
+            throw resetTokenInvalid();
+        }
+
+        // 現在時刻ちょうども「以前」に含む（§25 #12）
+        if (!resetToken.getExpiresAt().isAfter(clock.instant())) {
+            logger.warn("パスワード再設定失敗").reason(LogReason.RESET_EXPIRED)
+                    .with(LogKey.USER_ID, resetToken.getUserId()).log();
+            throw resetTokenInvalid();
+        }
+
+        User user = userRepository.findById(resetToken.getUserId());
+        if (user == null) {
+            logger.warn("パスワード再設定失敗").reason(LogReason.USER_NOT_FOUND)
+                    .with(LogKey.USER_ID, resetToken.getUserId()).log();
+            throw resetTokenInvalid();
+        }
+
+        userRepository.updatePasswordHash(user.getId(), passwordEncoder.encode(newPassword));
+        emailVerificationTokenRepository.updateUsedById(resetToken.getId());
+        // パスワード変更で全端末を切断する（乗っ取られた端末を締め出す。§24 手順9）。件数で経路を分けない
+        refreshTokenRepository.updateRevokedByUserId(user.getId());
+
+        logger.info("パスワード再設定").with(LogKey.USER_ID, user.getId()).log();
+    }
+
+    /**
      * 確認トークンを1件作成して保存し、メール本文へ載せる生値を返す。
      *
      * <p>登録（account.md §10 手順6）と移行（link.md §18 手順9）で同じ形の行を作る。
@@ -407,13 +504,31 @@ public class AuthServiceImpl implements AuthService {
      * @return メールへ載せる生トークン
      */
     private String saveVerificationToken(String userId, Instant now) {
+        return saveEmailVerificationToken(userId, now, VERIFY_EMAIL_PURPOSE, verificationTokenExpire);
+    }
+
+    /**
+     * 用途を指定してトークンを1件作成して保存し、メール本文へ載せる生値を返す。
+     *
+     * <p>確認トークン（account.md §10 手順6・link.md §18 手順9）と再設定トークン
+     * （password_reset.md §22 手順5）は同じ表に同じ形で入り、変わるのは用途と有効期限だけ。
+     * 生成方式（48バイト → Base64URL・SHA-256 16進小文字）も共通で、生値は保存せず
+     * SHA-256 だけを残す（account.md §9）。
+     *
+     * @param userId 宛先ユーザーのID
+     * @param now 発行時刻（{@code created_at} と有効期限の起点。呼び出し側が1回だけ取った値）
+     * @param purpose 用途（{@code verify_email} / {@code password_reset}）
+     * @param expire 有効期間
+     * @return メールへ載せる生トークン
+     */
+    private String saveEmailVerificationToken(String userId, Instant now, String purpose, Duration expire) {
         String rawToken = generateRawToken();
 
         EmailVerificationToken verificationToken = new EmailVerificationToken();
         verificationToken.setUserId(userId);
         verificationToken.setTokenHash(hashToken(rawToken));
-        verificationToken.setPurpose(VERIFY_EMAIL_PURPOSE);
-        verificationToken.setExpiresAt(now.plus(verificationTokenExpire));
+        verificationToken.setPurpose(purpose);
+        verificationToken.setExpiresAt(now.plus(expire));
         verificationToken.setUsed(false);
         verificationToken.setCreatedAt(now);
         emailVerificationTokenRepository.save(verificationToken);
@@ -560,6 +675,17 @@ public class AuthServiceImpl implements AuthService {
      */
     private static BusinessException verificationInvalid() {
         return authError("AUTH_VERIFICATION_INVALID");
+    }
+
+    /**
+     * パスワード再設定失敗の例外を作る。
+     *
+     * <p>該当なし・用途違い・使用済み・期限切れ・退会済みのどれであるかを**クライアントには**
+     * 区別させない（§24 末尾）。存在するトークンを総当たりで探る手がかりを与えないため。
+     * 内部の切り分けはログの {@code reason} が持つ。
+     */
+    private static BusinessException resetTokenInvalid() {
+        return authError("AUTH_RESET_TOKEN_INVALID");
     }
 
     /**

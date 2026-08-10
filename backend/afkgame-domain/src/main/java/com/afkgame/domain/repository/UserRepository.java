@@ -11,7 +11,8 @@ import com.afkgame.domain.model.User;
  *
  * <p>骨格構築（docs/backlog/java_migration.md STEP 2-B）と、登録・ログイン
  * （docs/tech/detail/tech_auth/account.md §10・§12。STEP 3-A-2）、アカウント移行・メール確認
- * （docs/tech/detail/tech_auth/link.md §18・docs/tech/detail/tech_auth/verify.md §20。STEP 3-A-3）で
+ * （docs/tech/detail/tech_auth/link.md §18・docs/tech/detail/tech_auth/verify.md §20。STEP 3-A-3）、
+ * パスワード再設定（docs/tech/detail/tech_auth/password_reset.md §24 手順7）で
  * 必要な操作を持つ。Google連携で使う操作は Google OAuth 対応時に追加する。
  */
 public interface UserRepository {
@@ -70,4 +71,13 @@ public interface UserRepository {
      * @param emailVerified 更新後のメール確認状態
      */
     void updateEmailVerified(@Param("id") String id, @Param("emailVerified") boolean emailVerified);
+
+    /**
+     * パスワードを更新する（tech_auth/password_reset.md §24 手順7）。
+     *
+     * @param id ユーザーID
+     * @param passwordHash 更新後の bcrypt ハッシュ
+     */
+    // 規約例外: 受け取るのは bcrypt ハッシュであり、境界ログに出ても生パスワードは復元できない
+    void updatePasswordHash(@Param("id") String id, @Param("passwordHash") String passwordHash);
 }

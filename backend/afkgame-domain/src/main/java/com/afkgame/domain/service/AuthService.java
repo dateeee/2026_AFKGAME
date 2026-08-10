@@ -11,10 +11,10 @@ import com.afkgame.domain.model.User;
  * §4「リフレッシュトークン」と docs/tech/detail/tech_auth/account.md §9〜§15
  * （登録・ログイン・ログアウト）、エラーコードは docs/tech/basic/tech_error_handling.md「AUTH_ コード一覧」。
  *
- * <p>ゲスト作成・リフレッシュ・登録・ログイン・ログアウト・アカウント移行・メール確認と、
+ * <p>ゲスト作成・リフレッシュ・登録・ログイン・ログアウト・アカウント移行・メール確認・
+ * パスワード再設定（docs/tech/detail/tech_auth/password_reset.md §22・§24）と、
  * ユーザー作成時のプレイヤー初期化（tech_auth.md §8.2。実体は
- * {@link PlayerInitializationService}）を持つ。パスワード再設定は STEP 3-A-3 セグメント②で
- * 追加する（docs/backlog/java_migration.md）。
+ * {@link PlayerInitializationService}）を持つ。
  *
  * <p>実装は {@link AuthServiceImpl}。
  */
@@ -133,4 +133,36 @@ public interface AuthService {
      *         対象ユーザーが退会済み）
      */
     void verifyEmail(String token);
+
+    /**
+     * パスワード再設定を要求し、再設定トークンを作って再設定メールの送信を要求する。
+     *
+     * <p>tech_auth/password_reset.md §22。手順4〜5（既存トークンの無効化・新しい1件の作成）を
+     * 1つのトランザクション境界にまとめ（手順6）、送信要求はコミット後・境界の外で出す（手順7）。
+     *
+     * <p><b>対象がいない場合もパスワードを持たない場合も例外を投げない</b>（手順2・3）。
+     * 応答差でアカウントの存否・種別を推測させないため（§22 末尾）。成功時に返す値は持たず、
+     * 応答 {@code {"status": "ok"}} は Web 層が組む。
+     *
+     * @param email 再設定するアカウントのメールアドレス（正規化してから検索する）
+     */
+    void requestPasswordReset(String email);
+
+    /**
+     * 再設定トークンを検証し、パスワードを更新して全リフレッシュトークンを失効させる。
+     *
+     * <p>tech_auth/password_reset.md §24。手順7〜9（パスワード更新・トークンの使用済み化・
+     * 全端末の切断）を1つのトランザクション境界にまとめる（手順10）。
+     * <b>新しいトークンペアは発行しない</b> — フロントはログイン画面へ戻す。
+     *
+     * <p>使用済みのトークンでの再実行は<b>冪等にしない</b>（メール確認と違い 400 を返す。手順4）。
+     * 認めると漏れたメールから何度でもパスワードを書き換えられるため。
+     *
+     * @param token メール本文のリンクに載った生のトークン。境界ログで伏せるため固定表の名前にする
+     *        （logging/application.md §3.1 規約1）
+     * @param newPassword 新しい生のパスワード
+     * @throws BusinessException {@code AUTH_RESET_TOKEN_INVALID}（該当なし・用途違い・使用済み・
+     *         期限切れ・対象ユーザーが退会済み）
+     */
+    void resetPassword(String token, String newPassword);
 }

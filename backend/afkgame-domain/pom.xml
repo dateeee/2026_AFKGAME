@@ -84,6 +84,15 @@
             <artifactId>jjwt-jackson</artifactId>
         </dependency>
 
+        <!-- メール送信（tech_auth/mail.md §16）。Jakarta Mail の実装として angus-mail を使い、
+             ライブラリの型は VerificationMailSenderImpl#transmit の中だけに閉じる。
+             Spring の JavaMailSender（spring-context-support）は採らない — 親が管理する版が
+             Spring Framework 7 系で、本体（6 系）と食い違うため。版は親が管理する -->
+        <dependency>
+            <groupId>org.eclipse.angus</groupId>
+            <artifactId>angus-mail</artifactId>
+        </dependency>
+
         <!-- 外部API呼び出し（tech_backend.md §4.3）。RestClient の ClientHttpRequestFactory に
              HttpComponentsClientHttpRequestFactory を使うため入れる（Terasoluna ガイドラインの推奨。
              classpath 検出の自動選択に任せず Bean で明示構成する）。利用は Phase 2〜 の Google OAuth で、

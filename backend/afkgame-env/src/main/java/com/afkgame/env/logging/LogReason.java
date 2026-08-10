@@ -77,6 +77,18 @@ public enum LogReason {
     /** 確認トークンの有効期限切れ。 */
     VERIFICATION_EXPIRED("verification_expired"),
 
+    /** 再設定トークンに該当する行が無い。 */
+    RESET_NOT_FOUND("reset_not_found"),
+
+    /** 再設定トークンの用途が {@code password_reset} でない（確認トークンの流用）。 */
+    RESET_PURPOSE_MISMATCH("reset_purpose_mismatch"),
+
+    /** 再設定トークンが使用済み（メール確認と違い冪等にしない）。 */
+    RESET_USED("reset_used"),
+
+    /** 再設定トークンの有効期限切れ。 */
+    RESET_EXPIRED("reset_expired"),
+
     /** AOP境界ログのEND出力時、例外で抜けた（logging/application.md §3 規約3）。 */
     EXCEPTION("exception");
 

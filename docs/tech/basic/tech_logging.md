@@ -93,11 +93,11 @@ Logback を使用。設定は `afkgame-env` の `logback.xml`（Boot 拡張の `
 | `token_expired` | 認証失敗 | アクセストークンの有効期限切れ |
 | `invalid_token` | 認証失敗 | 署名不正・`sub` 欠落 |
 | `invalid_token_type` | 認証失敗 | 用途クレーム（`type`）が `access` でない |
-| `user_not_found` | 認証失敗 / メール確認失敗 | トークンは正当だがユーザーが存在しない（確認では退会済み） |
+| `user_not_found` | 認証失敗 / メール確認失敗 / パスワード再設定失敗 | トークンは正当だがユーザーが存在しない（確認・再設定では退会済み） |
 | `email_taken` | 登録失敗 / 移行失敗 | メールが使用済み |
 | `email_taken_conflict` | 登録失敗 / 移行失敗 | 重複確認の通過後に一意制約違反で判明した |
-| `email_not_found` | ログイン失敗 | 該当するメールのユーザーが存在しない |
-| `password_not_set` | ログイン失敗 | Google連携のみでパスワード未設定 |
+| `email_not_found` | ログイン失敗 / 再設定要求を無視 | 該当するメールのユーザーが存在しない |
+| `password_not_set` | ログイン失敗 / 再設定要求を無視 | Google連携のみでパスワード未設定 |
 | `password_mismatch` | ログイン失敗 | パスワードが一致しない |
 | `refresh_not_found` | リフレッシュ失敗 / ログアウト失敗 | リフレッシュトークンに該当する行が無い |
 | `refresh_expired` | リフレッシュ失敗 | リフレッシュトークンの有効期限切れ |
@@ -110,6 +110,10 @@ Logback を使用。設定は `afkgame-env` の `logback.xml`（Boot 拡張の `
 | `verification_not_found` | メール確認失敗 | 確認トークンに該当する行が無い |
 | `verification_purpose_mismatch` | メール確認失敗 | 用途が `verify_email` でない（再設定トークンの流用） |
 | `verification_expired` | メール確認失敗 | 確認トークンの有効期限切れ |
+| `reset_not_found` | パスワード再設定失敗 | 再設定トークンに該当する行が無い |
+| `reset_purpose_mismatch` | パスワード再設定失敗 | 用途が `password_reset` でない（確認トークンの流用） |
+| `reset_used` | パスワード再設定失敗 | 再設定トークンが使用済み（確認と違い冪等にしない） |
+| `reset_expired` | パスワード再設定失敗 | 再設定トークンの有効期限切れ |
 | `exception` | — | AOP境界ログ（`afkgame.layer`）のEND出力時、例外で抜けた（`logging/application.md` §3 規約3。ERRORにはしない） |
 
 ## リクエストログ用フィルタ

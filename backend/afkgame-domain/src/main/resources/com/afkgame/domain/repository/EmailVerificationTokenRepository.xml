@@ -32,4 +32,13 @@
      WHERE id = #{id}
   </update>
 
+  <!-- 用途で絞って一括で無効化する（§22 手順4）。確認トークンを巻き込まないため purpose を条件に置く -->
+  <update id="updateUsedByUserIdAndPurpose">
+    UPDATE email_verification_tokens
+       SET used = TRUE
+     WHERE user_id = #{userId}
+       AND purpose = #{purpose}
+       AND used = FALSE
+  </update>
+
 </mapper>

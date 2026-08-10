@@ -38,9 +38,13 @@ public interface RefreshTokenRepository {
     int updateRevokedById(Integer id);
 
     /**
-     * 指定ユーザーの有効なトークンをすべて無効化する（再利用検知時の全失効）。
+     * 指定ユーザーの有効なトークンをすべて無効化する。
+     *
+     * <p>再利用検知時の全失効（tech_auth.md §4）と、パスワード変更時の全端末切断
+     * （tech_auth/password_reset.md §24 手順9）の両方から呼ぶ。
      *
      * @param userId ユーザーID
+     * @return 更新件数（未失効のトークンが無ければ 0）
      */
-    void updateRevokedByUserId(String userId);
+    int updateRevokedByUserId(String userId);
 }

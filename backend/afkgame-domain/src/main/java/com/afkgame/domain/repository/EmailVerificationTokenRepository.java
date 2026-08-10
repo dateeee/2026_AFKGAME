@@ -1,5 +1,7 @@
 package com.afkgame.domain.repository;
 
+import org.apache.ibatis.annotations.Param;
+
 import com.afkgame.domain.model.EmailVerificationToken;
 
 /**
@@ -8,9 +10,9 @@ import com.afkgame.domain.model.EmailVerificationToken;
  * <p>確認・再設定トークンはトークンハッシュで独立して検索されるため、{@code users} の従ではなく
  * 主体として扱う（{@code refresh_tokens} と同じ扱い。docs/process/coding_standards_backend/domain.md §3）。
  *
- * <p>登録（docs/tech/detail/tech_auth/account.md §10 手順6）とメール確認
- * （docs/tech/detail/tech_auth/verify.md §20 手順2・8）で必要な操作を持つ。
- * パスワード再設定で使う操作は STEP 3-A-3 セグメント②で追加する。
+ * <p>登録（docs/tech/detail/tech_auth/account.md §10 手順6）・メール確認
+ * （docs/tech/detail/tech_auth/verify.md §20 手順2・8）・パスワード再設定
+ * （docs/tech/detail/tech_auth/password_reset.md §22 手順4・§24 手順2・8）で必要な操作を持つ。
  */
 public interface EmailVerificationTokenRepository {
 
@@ -41,4 +43,18 @@ public interface EmailVerificationTokenRepository {
      * @param id 対象レコードのID
      */
     void updateUsedById(Integer id);
+
+    /**
+     * 指定ユーザーの未使用トークンを用途で絞って一括で使用済みにする
+     * （tech_auth/password_reset.md §22 手順4）。
+     *
+     * <p>有効な再設定トークンを常に最新の1本だけに保つために、新しい1件を作る前に呼ぶ。
+     * 用途で絞るため、確認トークン（{@code verify_email}）は巻き込まない。
+     *
+     * @param userId ユーザーID
+     * @param purpose 対象の用途（{@code password_reset}）
+     * @return 更新件数（未使用のトークンが無ければ 0）
+     */
+    int updateUsedByUserIdAndPurpose(@Param("userId") String userId,
+            @Param("purpose") String purpose);
 }

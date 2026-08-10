@@ -45,19 +45,20 @@ public class SpringSecurityConfig {
      * 認証不要なエンドポイント。
      * <p>
      * 一覧の正は tech_api/common.md §5.0「認証不要な例外」。ここには**実装済みのものだけ**を
-     * 並べる（未実装のパスを先に開けない）。google・password-reset は移植時
-     * （java_migration.md STEP 3-A-3 セグメント②・4）に追加する。
+     * 並べる（未実装のパスを先に開けない）。google は Google OAuth 対応時に追加する。
      * </p>
      * <p>
      * **logout と link-account は載せない**。どちらも認証必須であり（tech_auth/account.md §9・
      * §14 手順1、tech_auth/link.md §18 入口条件）、ここへ足すと無効なアクセストークンでも
-     * 他人のリフレッシュトークン・アカウントを指せてしまう。verify-email は逆に認証を要求しない
-     * （メールクライアントから別ブラウザで開くため。verify.md §20 入口条件）。
+     * 他人のリフレッシュトークン・アカウントを指せてしまう。verify-email と password-reset は
+     * 逆に認証を要求しない（メールクライアントから別ブラウザで開くため。verify.md §20・
+     * password_reset.md §22・§24 の入口条件）。
      * </p>
      */
     private static final String[] PUBLIC_ENDPOINTS = {"/health", "/api/auth/guest",
             "/api/auth/refresh", "/api/auth/register", "/api/auth/login",
-            "/api/auth/verify-email"};
+            "/api/auth/verify-email", "/api/auth/password-reset/request",
+            "/api/auth/password-reset/confirm"};
 
     /**
      * Configure {@link SecurityFilterChain} bean.
