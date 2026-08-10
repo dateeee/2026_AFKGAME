@@ -8,7 +8,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
+import java.util.HexFormat;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -66,6 +70,18 @@ class AuthApiIntegrationTest extends WebIntegrationTestSupport {
     private Timestamp lastLoginAt(String userId) {
         return jdbcTemplate.queryForObject(
                 "SELECT last_login_at FROM users WHERE id = ?", Timestamp.class, userId);
+    }
+
+    /**
+     * 生トークンの SHA-256（16進小文字）。
+     *
+     * <p>確認メールは送らないため生値を受け取れない。DBの {@code token_hash} を既知の生値の
+     * ハッシュへ差し替えて確認APIを叩くために使う。<b>ハッシュ方式（tech_auth/account.md §9）が
+     * 実装と食い違えば照合が外れて赤くなる</b>ので、方式の固定も兼ねる。
+     */
+    private static String sha256Hex(String rawToken) throws NoSuchAlgorithmException {
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        return HexFormat.of().formatHex(digest.digest(rawToken.getBytes(StandardCharsets.UTF_8)));
     }
 
     @Test
@@ -355,6 +371,133 @@ class AuthApiIntegrationTest extends WebIntegrationTestSupport {
         assertThat(jdbcTemplate.queryForObject(
                 "SELECT count(*) FROM refresh_tokens WHERE user_id = ? AND revoked = FALSE",
                 Integer.class, userId)).isZero();
+    }
+
+    /**
+     * アカウント移行は認証必須（link.md §18 入口条件）。アクセストークンが無効なら AUTH_ コードで
+     * 401 を返し、ユーザーを本登録化しない。Security フィルタは DispatcherServlet より前に拒否する
+     * ため、**エンドポイントが未実装でも 401 は返る**。空振りを防ぐため、末尾に「認証を通せば同じ
+     * リクエストが成功する」対照実験を置く。
+     *
+     * <p>分岐: tech_auth/link.md §19 #2
+     */
+    @Test
+    @DisplayName("アクセストークンが無効な移行は 401 になり、ユーザーを本登録化しない")
+    void test_無効なアクセストークンの移行はユーザーを変更しない() throws Exception {
+        String email = "link-unauthorized@example.com";
+        JsonNode guest = createGuest();
+        String userId = guest.at("/user/id").asText();
+        String body = credentialBody(email, PASSWORD);
+
+        mockMvc.perform(post("/api/auth/link-account")
+                        .contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error.code").value("AUTH_HEADER_MISSING"));
+
+        mockMvc.perform(post("/api/auth/link-account").header("Authorization", "Token abc")
+                        .contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error.code").value("AUTH_INVALID_FORMAT"));
+
+        mockMvc.perform(post("/api/auth/link-account")
+                        .header("Authorization", "Bearer broken.token.value")
+                        .contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error.code").value("AUTH_INVALID_TOKEN"));
+
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT is_guest FROM users WHERE id = ?", Boolean.class, userId)).isTrue();
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT count(*) FROM users WHERE email = ?", Integer.class, email)).isZero();
+
+        mockMvc.perform(post("/api/auth/link-account")
+                        .header("Authorization", "Bearer " + guest.at("/accessToken").asText())
+                        .contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isOk());
+
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT is_guest FROM users WHERE id = ?", Boolean.class, userId)).isFalse();
+    }
+
+    /**
+     * 移行が「ユーザーの本登録化 + 確認トークン」を1つのトランザクションで確定し、**ゲームデータを
+     * 作り直さない**ことを実DBの行で確認する（tech_auth.md §3）。手順ごとの分岐は
+     * {@code AuthServiceImplTest} が持ち、ここでは連結と永続化を見る。
+     *
+     * <p>分岐: tech_auth/link.md §19 #20
+     */
+    @Test
+    @DisplayName("POST /api/auth/link-account はゲストを本登録化し、プレイヤーを作り直さない")
+    void test_アカウント移行が実DBへ反映される() throws Exception {
+        String email = "link@example.com";
+        JsonNode guest = createGuest();
+        String userId = guest.at("/user/id").asText();
+        String playerId = jdbcTemplate.queryForObject(
+                "SELECT id FROM players WHERE user_id = ?", String.class, userId);
+
+        String responseBody = mockMvc.perform(post("/api/auth/link-account")
+                        .header("Authorization", "Bearer " + guest.at("/accessToken").asText())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(credentialBody(email, PASSWORD)))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        JsonNode linked = jsonMapper.readTree(responseBody);
+
+        // ID は変えずに本登録化する（§18 手順8）
+        assertThat(linked.at("/user/id").asText()).isEqualTo(userId);
+        assertThat(linked.at("/user/isGuest").asBoolean()).isFalse();
+
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT count(*) FROM users WHERE id = ? AND is_guest = FALSE"
+                        + " AND email = ? AND email_verified = FALSE",
+                Integer.class, userId, email)).isEqualTo(1);
+        // 保存するのは bcrypt（strength 12）のハッシュだけで、生パスワードは残さない（§9）
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT password_hash FROM users WHERE id = ?", String.class, userId))
+                .startsWith("$2a$12$").isNotEqualTo(PASSWORD);
+
+        // 確認メール用のトークンが未使用で1件残る（§18 手順9）
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT count(*) FROM email_verification_tokens"
+                        + " WHERE user_id = ? AND purpose = 'verify_email' AND used = FALSE",
+                Integer.class, userId)).isEqualTo(1);
+
+        // ゲームデータは作り直さない（同じ player 行がそのまま残る）
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT id FROM players WHERE user_id = ?", String.class, userId))
+                .isEqualTo(playerId);
+
+        // 既存のリフレッシュトークンは失効させない（§18 手順10）。ゲスト作成時の1本＋移行の1本
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT count(*) FROM refresh_tokens WHERE user_id = ? AND revoked = FALSE",
+                Integer.class, userId)).isEqualTo(2);
+    }
+
+    /**
+     * メール確認が {@code email_verified} と {@code used} を1つのトランザクションで確定することを
+     * 実DBの行で確認する。**認証不要**で、ログイン状態を持たないブラウザからも通る（§20 入口条件）。
+     *
+     * <p>分岐: tech_auth/verify.md §21 #15
+     */
+    @Test
+    @DisplayName("GET /api/auth/verify-email は認証不要で email_verified と used を確定する")
+    void test_メール確認が実DBへ反映される() throws Exception {
+        String email = "verify@example.com";
+        String userId = register(email).at("/user/id").asText();
+        String rawToken = "integration-verification-token";
+        // 確認メールを送らないため生値を受け取れない。既知の生値のハッシュへ差し替える
+        jdbcTemplate.update("UPDATE email_verification_tokens SET token_hash = ? WHERE user_id = ?",
+                sha256Hex(rawToken), userId);
+
+        mockMvc.perform(get("/api/auth/verify-email").param("token", rawToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("ok"));
+
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT email_verified FROM users WHERE id = ?", Boolean.class, userId)).isTrue();
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT used FROM email_verification_tokens WHERE user_id = ?",
+                Boolean.class, userId)).isTrue();
     }
 
     @Test

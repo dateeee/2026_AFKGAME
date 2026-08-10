@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -70,6 +71,35 @@ import com.afkgame.web.filter.ApiExceptionHandler;
  *   <li>{@code LogoutResource(String refreshToken)}: {@code @NotBlank}</li>
  *   <li>{@code StatusResource(String status)}</li>
  * </ul>
+ *
+ * <p><b>アカウント移行・メール確認（移行 STEP 3-A-3）</b>: 仕様は
+ * docs/tech/detail/tech_auth/link.md §18・docs/tech/detail/tech_auth/verify.md §20。本クラスは
+ * 分岐一覧 link.md §19・verify.md §21 のうち **Bean Validation・HTTP ステータス・引数の受け渡し**が
+ * 決める分岐を持つ。ペイロードの形（どちらか一方）・種別・重複・トークンの検証はサービス層が
+ * 決めるため {@code AuthServiceImplTest}、認証必須の拒否（§19 #2）と実DBへの反映は
+ * {@code AuthApiIntegrationTest} が持つ。
+ *
+ * <p><b>製造工程への申し送り（追加分）</b>:
+ * <ul>
+ *   <li>{@code AuthApi#linkAccount(@AuthenticationPrincipal User, @Valid @RequestBody
+ *       LinkAccountResource)} → {@code AuthResource}。認証ユーザーは <b>ID ではなくユーザー自身</b>を
+ *       サービスへ渡す（§18 手順4 が {@code is_guest} の現在値を見るため）</li>
+ *   <li>{@code LinkAccountResource(String email, String password, String googleAuthCode)}:
+ *       3つとも<b>必須にしない</b>（メール連携と Google連携のちょうど一方を受けるため。
+ *       {@code @NotBlank} を付けると Google連携のボディが 422 で落ちる）。
+ *       {@code email} は {@code @Email @Size(max = 254)}、{@code password} は
+ *       {@code @Size(min = 8, max = 128)}（null は素通り。§18 手順5・§9「入力長」）。
+ *       どちらも無い・両方あるの判定は 400 {@code AUTH_LINK_PAYLOAD_INVALID} なので**サービス層**
+ *       が持つ（422 ではないため Bean Validation では表せない）</li>
+ *   <li>{@code AuthApi#verifyEmail(String token)} → {@code StatusResource}
+ *       （{@code GET /api/auth/verify-email?token=xxx}）。クエリ {@code token} は必須で、
+ *       <b>未指定・空文字は 422 {@code VALIDATION_ERROR}</b>（§21 #2）。素の
+ *       {@code @RequestParam} では未指定が 400 {@code HTTP_400} になるため、Resource へ束ねるか
+ *       {@link ApiExceptionHandler} へハンドラを足すかは製造で決める</li>
+ *   <li>{@code SpringSecurityConfig} の {@code PUBLIC_ENDPOINTS} へ
+ *       {@code /api/auth/verify-email} を足す（認証不要・tech_api/common.md §5.0）。
+ *       <b>link-account は足さない</b>（認証必須）</li>
+ * </ul>
  */
 @Tag("unit")
 @ExtendWith(MockitoExtension.class)
@@ -114,6 +144,20 @@ class AuthApiTest {
 
     private static String credentialBody(String email, String password) {
         return "{\"email\":\"" + email + "\",\"password\":\"" + password + "\"}";
+    }
+
+    /**
+     * アカウント移行後の認証結果。**ID は変わらない**ため {@code guest_} 接頭辞のまま
+     * {@code isGuest} だけが false になる（link.md §18 手順8）。
+     */
+    private static AuthResult linkedResult() {
+        User user = new User();
+        user.setId("guest_550e8400");
+        user.setDisplayName("冒険者");
+        user.setEmail("user@example.com");
+        user.setGuest(false);
+        user.setEmailVerified(false);
+        return new AuthResult(user, "access-token", "refresh-token");
     }
 
     /** ローカル部の上限（RFC 5321）。{@code @Email} が長さも検査するため境界内に収める。 */
@@ -476,6 +520,227 @@ class AuthApiTest {
                     .andExpect(jsonPath("$.error.code").value("VALIDATION_ERROR"));
 
             verify(authService, never()).logout(any(), any());
+        }
+    }
+
+    @Nested
+    @DisplayName("POST /api/auth/link-account")
+    class TestLinkAccount {
+
+        private static final String PASSWORD = "securepass123";
+
+        private static final String EMAIL = "user@example.com";
+
+        /** アクセストークン検証後に {@code JwtAuthenticationFilter} が置く principal を再現する。 */
+        private User authenticated(String userId) {
+            User user = new User();
+            user.setId(userId);
+            user.setGuest(true);
+            SecurityContextHolder.getContext().setAuthentication(
+                    new UsernamePasswordAuthenticationToken(user, null, List.of()));
+            return user;
+        }
+
+        /**
+         * 手順1で特定した認証ユーザー<b>自身</b>をサービスへ渡す（IDだけを渡さない。手順4が
+         * {@code is_guest} の現在値を見るため）。無効なアクセストークンを拒む側（#2）は
+         * Security フィルタチェーンが要るため {@code AuthApiIntegrationTest} が持つ。
+         *
+         * <p>分岐: tech_auth/link.md §19 #1
+         */
+        @Test
+        void test_有効なアクセストークンなら認証ユーザー自身をサービスへ渡す() throws Exception {
+            User user = authenticated("guest_550e8400");
+            when(authService.linkAccount(any(), any(), any(), any())).thenReturn(linkedResult());
+
+            mockMvc.perform(post("/api/auth/link-account")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(credentialBody(EMAIL, PASSWORD)))
+                    .andExpect(status().isOk());
+
+            verify(authService).linkAccount(user, EMAIL, PASSWORD, null);
+        }
+
+        /**
+         * 妥当な形式なら検証を通り、そのままサービスへ渡る（手順6へ進む）。
+         *
+         * <p>分岐: tech_auth/link.md §19 #11
+         */
+        @Test
+        void test_妥当な形式のメールはサービスへ渡る() throws Exception {
+            authenticated("guest_550e8400");
+            when(authService.linkAccount(any(), any(), any(), any())).thenReturn(linkedResult());
+
+            mockMvc.perform(post("/api/auth/link-account")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(credentialBody("Link.User@Example.com", PASSWORD)))
+                    .andExpect(status().isOk());
+
+            // 正規化はサービス層の責務（§9）。Web層は受け取った表記のまま渡す
+            verify(authService).linkAccount(any(), any(), any(), any());
+        }
+
+        /**
+         * 形式違反は 422 で止め、ユーザーを変更しない（手順5）。
+         *
+         * <p>分岐: tech_auth/link.md §19 #12
+         */
+        @ParameterizedTest(name = "email={0}")
+        @ValueSource(strings = {
+            "user.example.com",  // @ を欠く
+            "@example.com",      // ローカル部が無い
+            "user@"              // ドメイン部が無い
+        })
+        void test_メール形式が不正なら422を返す(String email) throws Exception {
+            authenticated("guest_550e8400");
+
+            mockMvc.perform(post("/api/auth/link-account")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(credentialBody(email, PASSWORD)))
+                    .andExpect(status().isUnprocessableEntity())
+                    .andExpect(jsonPath("$.error.code").value("VALIDATION_ERROR"));
+
+            verify(authService, never()).linkAccount(any(), any(), any(), any());
+        }
+
+        /**
+         * 上限ちょうど（254文字）は受け付ける（RFC 5321。長さの正は §9「入力長」）。
+         *
+         * <p>分岐: tech_auth/link.md §19 #13
+         */
+        @Test
+        void test_254文字ちょうどのメールは受け付ける() throws Exception {
+            authenticated("guest_550e8400");
+            when(authService.linkAccount(any(), any(), any(), any())).thenReturn(linkedResult());
+
+            mockMvc.perform(post("/api/auth/link-account")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(credentialBody(emailOfLength(254), PASSWORD)))
+                    .andExpect(status().isOk());
+        }
+
+        /**
+         * 上限超過（255文字）は 422。
+         *
+         * <p>分岐: tech_auth/link.md §19 #14
+         */
+        @Test
+        void test_255文字のメールは422を返す() throws Exception {
+            authenticated("guest_550e8400");
+
+            mockMvc.perform(post("/api/auth/link-account")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(credentialBody(emailOfLength(255), PASSWORD)))
+                    .andExpect(status().isUnprocessableEntity())
+                    .andExpect(jsonPath("$.error.code").value("VALIDATION_ERROR"));
+
+            verify(authService, never()).linkAccount(any(), any(), any(), any());
+        }
+
+        /**
+         * 許容範囲の両端（8文字・128文字ちょうど）は受け付ける（tech_auth.md §1「パスワード要件」）。
+         *
+         * <p>分岐: tech_auth/link.md §19 #15
+         */
+        @ParameterizedTest(name = "length={0}")
+        @ValueSource(ints = {8, 128})
+        void test_8文字以上128文字以下のパスワードは受け付ける(int length) throws Exception {
+            authenticated("guest_550e8400");
+            when(authService.linkAccount(any(), any(), any(), any())).thenReturn(linkedResult());
+
+            mockMvc.perform(post("/api/auth/link-account")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(credentialBody(EMAIL, "a".repeat(length))))
+                    .andExpect(status().isOk());
+        }
+
+        /**
+         * 範囲外は 422。空文字（下限側）も上限超過も同じ分岐に含む（§19 #16）。
+         *
+         * <p>分岐: tech_auth/link.md §19 #16
+         */
+        @ParameterizedTest(name = "length={0}")
+        @ValueSource(ints = {
+            0,    // 空文字
+            7,    // 下限の1つ手前
+            129   // 上限の1つ先
+        })
+        void test_7文字以下または129文字以上のパスワードは422を返す(int length) throws Exception {
+            authenticated("guest_550e8400");
+
+            mockMvc.perform(post("/api/auth/link-account")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(credentialBody(EMAIL, "a".repeat(length))))
+                    .andExpect(status().isUnprocessableEntity())
+                    .andExpect(jsonPath("$.error.code").value("VALIDATION_ERROR"));
+
+            verify(authService, never()).linkAccount(any(), any(), any(), any());
+        }
+
+        /**
+         * 成功時の応答（§5）。トランザクションのコミットは {@code AuthServiceImplTest} と
+         * {@code AuthApiIntegrationTest} が持ち、ここでは 200 と本文の形だけを見る。
+         *
+         * <p>分岐: tech_auth/link.md §19 #20
+         */
+        @Test
+        void test_移行が成功すれば200でトークンペアとユーザー情報を返す() throws Exception {
+            authenticated("guest_550e8400");
+            when(authService.linkAccount(any(), any(), any(), any())).thenReturn(linkedResult());
+
+            mockMvc.perform(post("/api/auth/link-account")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(credentialBody(EMAIL, PASSWORD)))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.accessToken").value("access-token"))
+                    .andExpect(jsonPath("$.refreshToken").value("refresh-token"))
+                    // ID は移行しても変わらない（§18 手順8）
+                    .andExpect(jsonPath("$.user.id").value("guest_550e8400"))
+                    .andExpect(jsonPath("$.user.email").value(EMAIL))
+                    .andExpect(jsonPath("$.user.isGuest").value(false))
+                    .andExpect(jsonPath("$.user.emailVerified").value(false));
+        }
+    }
+
+    @Nested
+    @DisplayName("GET /api/auth/verify-email")
+    class TestVerifyEmail {
+
+        private static final String RAW_TOKEN = "raw-verification-token";
+
+        /**
+         * クエリの生値をそのままサービスへ渡し（手順2へ進む）、成功なら
+         * {@code {"status": "ok"}} を 200 で返す（§20 出口条件）。認証は要求しない。
+         *
+         * <p>分岐: tech_auth/verify.md §21 #1
+         */
+        @Test
+        void test_tokenが指定されていればサービスへ渡る() throws Exception {
+            mockMvc.perform(get("/api/auth/verify-email").param("token", RAW_TOKEN))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.status").value("ok"));
+
+            verify(authService).verifyEmail(RAW_TOKEN);
+        }
+
+        /**
+         * 必須違反は 422 で止め、サービスを呼ばない（手順1）。未指定と空文字は同じ分岐。
+         *
+         * <p>分岐: tech_auth/verify.md §21 #2
+         */
+        @Test
+        void test_tokenが未指定または空文字なら422を返す() throws Exception {
+            // 未指定
+            mockMvc.perform(get("/api/auth/verify-email"))
+                    .andExpect(status().isUnprocessableEntity())
+                    .andExpect(jsonPath("$.error.code").value("VALIDATION_ERROR"));
+
+            // 空文字
+            mockMvc.perform(get("/api/auth/verify-email").param("token", ""))
+                    .andExpect(status().isUnprocessableEntity())
+                    .andExpect(jsonPath("$.error.code").value("VALIDATION_ERROR"));
+
+            verify(authService, never()).verifyEmail(any());
         }
     }
 }

@@ -1,28 +1,36 @@
 package com.afkgame.domain.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.ZoneOffset;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.terasoluna.gfw.common.exception.BusinessException;
@@ -81,6 +89,42 @@ import com.afkgame.env.config.AuthSettings;
  *
  * <p>登録・ログインが受け取るメールは §9「メールの正規化」に従って前後の空白除去と小文字化を
  * 経てから検索・保存される。正規化そのものの分岐は §11 #15・#16 と §13 #14・#15 が持つ。
+ *
+ * <p><b>アカウント移行・メール確認（移行 STEP 3-A-3）</b>: 仕様は
+ * docs/tech/detail/tech_auth/link.md §18・docs/tech/detail/tech_auth/verify.md §20。
+ * 分岐一覧 link.md §19（移行）・verify.md §21（確認）のうち、サービス層が決める分岐を本クラスが持つ。
+ * Bean Validation と HTTP ステータスは {@code AuthApiTest}、認証必須の拒否（§19 #2）と実DBへの
+ * 反映（§19 #20・§21 #15）は {@code AuthApiIntegrationTest} が持つ。
+ *
+ * <p>分岐観点（追加分）: 移行の ペイロードの形（メール連携 / Google連携 / 欠落 / 両方）/
+ * Google設定の有無 / アカウント種別 / メール重複（事前確認・更新時の制約違反）/ 全手順成功 /
+ * 途中失敗 / 確認メール送信、メール確認の トークンの存在 / 用途 / 使用状態 / 有効期限 /
+ * 対象ユーザーの有無 / 確認状態 / 全手順成功 / 途中失敗。
+ *
+ * <p><b>製造工程への申し送り（本セッションでは未実装。テストが要求する表層）</b>:
+ * <ul>
+ *   <li>{@code AuthService#linkAccount(User user, String email, String rawPassword,
+ *       String googleAuthCode)} → {@link AuthResult}。手順1で特定済みの認証ユーザー
+ *       <b>そのもの</b>を受け取る（{@code is_guest} はトークンではなくユーザーの現在値を見る・§18 末尾。
+ *       {@code userId} だけを受けて引き直すと、テストの無い「ユーザー不在」分岐が増える）</li>
+ *   <li>{@code AuthService#verifyEmail(String rawToken)} → {@code void}（成功は例外を投げないこと。
+ *       応答 {@code {"status": "ok"}} は Web 層が組む）</li>
+ *   <li>{@code UserRepository#updateLinkedAccount(User user)}: {@code email}・
+ *       {@code password_hash}・{@code is_guest}・{@code email_verified}・{@code last_login_at} を
+ *       更新する（{@code id}・{@code display_name}・{@code created_at} は変えない・§18 手順8）</li>
+ *   <li>{@code UserRepository#updateEmailVerified(String id, boolean emailVerified)}（§20 手順7）</li>
+ *   <li>{@code EmailVerificationTokenRepository#findByTokenHash(String tokenHash)} →
+ *       {@link EmailVerificationToken}（不在は null）、
+ *       {@code EmailVerificationTokenRepository#updateUsedById(Integer id)}（§20 手順2・8）</li>
+ *   <li>{@link AuthSettings} へ {@code String googleClientId} を追加（末尾のコンポーネント。
+ *       未設定は null または空文字）。プロパティキーは {@code afkgame.auth.google.client.id}、
+ *       環境変数は {@code GOOGLE_CLIENT_ID}（tech_operations.md §12.2）。
+ *       {@code AfkgameSettingsConfig}・{@code afkgame.properties}・{@code JwtServiceImplTest} の
+ *       組み立ても同時に直す</li>
+ * </ul>
+ *
+ * <p>移行は<b>ゲームデータを作り直さない</b>（tech_auth.md §3）。{@link PlayerInitializationService}
+ * を呼ばないことを §19 #20 のテストで固定する。
  */
 @Tag("unit")
 @ExtendWith(MockitoExtension.class)
@@ -93,7 +137,19 @@ class AuthServiceImplTest {
             12, 8, 128,
             Duration.ofDays(90),
             Duration.ofHours(24),
-            Duration.ofHours(1));
+            Duration.ofHours(1),
+            null);
+
+    /** {@code GOOGLE_CLIENT_ID} が設定済みの構成（link.md §19 #8）。ほかの値は既定と同じ。 */
+    private static final AuthSettings AUTH_SETTINGS_WITH_GOOGLE = new AuthSettings(
+            "afkgame-test-secret-value-32bytes-or-longer",
+            Duration.ofMinutes(30),
+            Duration.ofDays(30),
+            12, 8, 128,
+            Duration.ofDays(90),
+            Duration.ofHours(24),
+            Duration.ofHours(1),
+            "afkgame.apps.googleusercontent.com");
 
     @Mock
     private UserRepository userRepository;
@@ -123,12 +179,22 @@ class AuthServiceImplTest {
 
     private AuthService authService() {
         if (authService == null) {
-            authService = new AuthServiceImpl(userRepository, refreshTokenRepository,
-                    new JwtServiceImpl(AUTH_SETTINGS, CLOCK), AUTH_SETTINGS,
-                    playerInitializationService, CLOCK, passwordEncoder,
-                    emailVerificationTokenRepository, verificationMailSender);
+            authService = authService(AUTH_SETTINGS, CLOCK);
         }
         return authService;
+    }
+
+    /**
+     * 設定・時刻を指定してサービスを組み立てる。
+     *
+     * <p>Google設定の有無（link.md §19 #7・#8）と、期限の境界（verify.md §21 #9・#10。
+     * {@code expires_at} が現在時刻ちょうどの経路は実時間のクロックでは作れない）で使う。
+     */
+    private AuthService authService(AuthSettings settings, Clock clock) {
+        return new AuthServiceImpl(userRepository, refreshTokenRepository,
+                new JwtServiceImpl(settings, clock), settings,
+                playerInitializationService, clock, passwordEncoder,
+                emailVerificationTokenRepository, verificationMailSender);
     }
 
     /**
@@ -940,6 +1006,651 @@ class AuthServiceImplTest {
             authService().logout(USER_ID, RAW_TOKEN);
 
             verify(refreshTokenRepository).updateRevokedById(7);
+        }
+    }
+
+    /** Google連携で受け取る認可コード（Phase 2 では未対応。link.md §18 手順3）。 */
+    private static final String GOOGLE_AUTH_CODE = "4/0AWtgzh-google-auth-code";
+
+    @Nested
+    @DisplayName("アカウント移行")
+    class TestLinkAccount {
+
+        /** 移行前の作成時刻。{@code created_at} を変えないことの照合に使う。 */
+        private static final Instant CREATED_AT = Instant.parse("2026-01-01T00:00:00Z");
+
+        /** 手順1で特定済みの認証ユーザー（ゲスト）。principal がそのままサービスへ渡る。 */
+        private User guest() {
+            User user = new User();
+            user.setId("guest_001");
+            user.setDisplayName("冒険者");
+            user.setGuest(true);
+            user.setEmailVerified(false);
+            user.setCreatedAt(CREATED_AT);
+            return user;
+        }
+
+        /** 既に同じメールを持つ行（相手が本登録済みでもゲストでも扱いは同じ）。 */
+        private User existing() {
+            User user = new User();
+            user.setId("user_existing");
+            user.setEmail(EMAIL);
+            return user;
+        }
+
+        /**
+         * {@code email} と {@code password} だけがあればメール連携として扱い、Google連携の 501 では
+         * なくアカウント種別の判定（手順4）へ進む。
+         *
+         * <p>分岐: tech_auth/link.md §19 #3
+         */
+        @Test
+        void test_メールとパスワードだけならメール連携として続行する() {
+            when(userRepository.findByEmail(EMAIL)).thenReturn(null);
+
+            AuthResult result = authService().linkAccount(guest(), EMAIL, PASSWORD, null);
+
+            // 正規化後の値で重複を確認する経路（手順6）まで到達している
+            verify(userRepository).findByEmail(EMAIL);
+            assertThat(result.accessToken()).isNotBlank();
+        }
+
+        /**
+         * {@code googleAuthCode} だけがあれば Google連携として扱い、メール連携の経路
+         * （重複確認・更新）へは入らない。設定の有無による出し分けは #7・#8 が持つ。
+         *
+         * <p>分岐: tech_auth/link.md §19 #4
+         */
+        @Test
+        void test_googleAuthCodeだけならメール連携の経路へ入らない() {
+            assertThatThrownBy(() -> authService().linkAccount(guest(), null, null, GOOGLE_AUTH_CODE))
+                    .isInstanceOf(BusinessException.class);
+
+            verify(userRepository, never()).findByEmail(any());
+            verify(userRepository, never()).updateLinkedAccount(any());
+        }
+
+        /**
+         * 連携先が決まらないため 400 で止め、何も変更しない（手順2）。
+         *
+         * <p>分岐: tech_auth/link.md §19 #5
+         */
+        @Test
+        void test_どちらの指定も無ければAUTH_LINK_PAYLOAD_INVALIDになる() {
+            assertThatThrownBy(() -> authService().linkAccount(guest(), null, null, null))
+                    .isInstanceOf(BusinessException.class)
+                    .extracting(AuthServiceImplTest::codeOf)
+                    .isEqualTo("AUTH_LINK_PAYLOAD_INVALID");
+
+            verify(userRepository, never()).updateLinkedAccount(any());
+            verify(emailVerificationTokenRepository, never()).save(any());
+        }
+
+        /**
+         * 両方あるときも連携先が一意に決まらないため同じ扱いにする（手順2）。
+         *
+         * <p>分岐: tech_auth/link.md §19 #6
+         */
+        @Test
+        void test_両方の指定があればAUTH_LINK_PAYLOAD_INVALIDになる() {
+            assertThatThrownBy(
+                    () -> authService().linkAccount(guest(), EMAIL, PASSWORD, GOOGLE_AUTH_CODE))
+                    .isInstanceOf(BusinessException.class)
+                    .extracting(AuthServiceImplTest::codeOf)
+                    .isEqualTo("AUTH_LINK_PAYLOAD_INVALID");
+
+            verify(userRepository, never()).updateLinkedAccount(any());
+            verify(emailVerificationTokenRepository, never()).save(any());
+        }
+
+        /**
+         * {@code GOOGLE_CLIENT_ID} が未設定なら「設定が無い」ことを示すコードで 501 を返す（手順3）。
+         *
+         * <p>分岐: tech_auth/link.md §19 #7
+         */
+        @Test
+        void test_GOOGLE_CLIENT_IDが未設定ならAUTH_GOOGLE_NOT_CONFIGUREDになる() {
+            assertThatThrownBy(() -> authService().linkAccount(guest(), null, null, GOOGLE_AUTH_CODE))
+                    .isInstanceOf(BusinessException.class)
+                    .extracting(AuthServiceImplTest::codeOf)
+                    .isEqualTo("AUTH_GOOGLE_NOT_CONFIGURED");
+        }
+
+        /**
+         * 設定済みでも Phase 2 では実装しない（手順3）。クライアントへは 501 の文言を
+         * {@code AUTH_GOOGLE_NOT_CONFIGURED} とそろえるが、コードは区別する。
+         *
+         * <p>分岐: tech_auth/link.md §19 #8
+         */
+        @Test
+        void test_GOOGLE_CLIENT_IDが設定済みならAUTH_GOOGLE_NOT_IMPLEMENTEDになる() {
+            AuthService service = authService(AUTH_SETTINGS_WITH_GOOGLE, CLOCK);
+
+            assertThatThrownBy(() -> service.linkAccount(guest(), null, null, GOOGLE_AUTH_CODE))
+                    .isInstanceOf(BusinessException.class)
+                    .extracting(AuthServiceImplTest::codeOf)
+                    .isEqualTo("AUTH_GOOGLE_NOT_IMPLEMENTED");
+        }
+
+        /**
+         * ゲストなら入力検証（手順5）へ進み、本登録化まで到達する。
+         *
+         * <p>分岐: tech_auth/link.md §19 #9
+         */
+        @Test
+        void test_ゲストユーザーなら移行を続行する() {
+            when(userRepository.findByEmail(EMAIL)).thenReturn(null);
+
+            authService().linkAccount(guest(), EMAIL, PASSWORD, null);
+
+            ArgumentCaptor<User> updated = ArgumentCaptor.forClass(User.class);
+            verify(userRepository).updateLinkedAccount(updated.capture());
+            assertThat(updated.getValue().isGuest()).isFalse();
+        }
+
+        /**
+         * 本登録済みのユーザーは二重に移行できない（手順4）。行を1つも変えない。
+         *
+         * <p>分岐: tech_auth/link.md §19 #10
+         */
+        @Test
+        void test_本登録済みならAUTH_ALREADY_REGISTEREDで何も変更しない() {
+            User registered = guest();
+            registered.setGuest(false);
+
+            assertThatThrownBy(() -> authService().linkAccount(registered, EMAIL, PASSWORD, null))
+                    .isInstanceOf(BusinessException.class)
+                    .extracting(AuthServiceImplTest::codeOf)
+                    .isEqualTo("AUTH_ALREADY_REGISTERED");
+
+            verify(userRepository, never()).findByEmail(any());
+            verify(userRepository, never()).updateLinkedAccount(any());
+            verify(emailVerificationTokenRepository, never()).save(any());
+            verify(refreshTokenRepository, never()).save(any());
+        }
+
+        /**
+         * 正規化後の値に一致する行が無ければ移行を続行する（手順6）。
+         *
+         * <p>分岐: tech_auth/link.md §19 #17
+         */
+        @Test
+        void test_同じメールのユーザーが無ければ本登録化する() {
+            when(userRepository.findByEmail(EMAIL)).thenReturn(null);
+
+            AuthResult result = authService().linkAccount(guest(), EMAIL, PASSWORD, null);
+
+            verify(userRepository).updateLinkedAccount(any(User.class));
+            assertThat(result.user().getEmail()).isEqualTo(EMAIL);
+        }
+
+        /**
+         * 相手が誰であっても同じ扱いで、移行そのものを行わない（手順6）。
+         *
+         * <p>分岐: tech_auth/link.md §19 #18
+         */
+        @Test
+        void test_メールが登録済みならAUTH_EMAIL_TAKENで何も変更しない() {
+            when(userRepository.findByEmail(EMAIL)).thenReturn(existing());
+
+            assertThatThrownBy(() -> authService().linkAccount(guest(), EMAIL, PASSWORD, null))
+                    .isInstanceOf(BusinessException.class)
+                    .extracting(AuthServiceImplTest::codeOf)
+                    .isEqualTo("AUTH_EMAIL_TAKEN");
+
+            verify(userRepository, never()).updateLinkedAccount(any());
+            verify(emailVerificationTokenRepository, never()).save(any());
+            verify(refreshTokenRepository, never()).save(any());
+        }
+
+        /**
+         * 手順6を通過した後に同時移行で {@code uq_users_email} 違反が起きる経路。ロールバック自体は
+         * {@code @Transactional} が行うため、ここでは 409 への変換と、後続を行わないことを見る。
+         *
+         * <p>分岐: tech_auth/link.md §19 #19
+         */
+        @Test
+        void test_更新時のメール重複違反もAUTH_EMAIL_TAKENになる() {
+            when(userRepository.findByEmail(EMAIL)).thenReturn(null);
+            doThrow(new DuplicateKeyException("uq_users_email"))
+                    .when(userRepository).updateLinkedAccount(any());
+
+            assertThatThrownBy(() -> authService().linkAccount(guest(), EMAIL, PASSWORD, null))
+                    .isInstanceOf(BusinessException.class)
+                    .extracting(AuthServiceImplTest::codeOf)
+                    .isEqualTo("AUTH_EMAIL_TAKEN");
+
+            verify(emailVerificationTokenRepository, never()).save(any());
+            verify(refreshTokenRepository, never()).save(any());
+        }
+
+        /**
+         * 手順7〜10がすべて成功する経路。**ゲームデータは作り直さず**（tech_auth.md §3）、
+         * {@code id}・{@code display_name}・{@code created_at} も変えない（手順8）。
+         * 既存のリフレッシュトークンも失効させない（手順10）。
+         *
+         * <p>分岐: tech_auth/link.md §19 #20
+         */
+        @Test
+        void test_手順7から10を順に実行しトークンペアを返す() {
+            when(userRepository.findByEmail(EMAIL)).thenReturn(null);
+            when(passwordEncoder.encode(PASSWORD)).thenReturn(HASHED);
+
+            AuthResult result = authService().linkAccount(guest(), EMAIL, PASSWORD, null);
+
+            ArgumentCaptor<User> updated = ArgumentCaptor.forClass(User.class);
+            verify(userRepository).updateLinkedAccount(updated.capture());
+            assertThat(updated.getValue().getId()).isEqualTo("guest_001");
+            assertThat(updated.getValue().getDisplayName()).isEqualTo("冒険者");
+            assertThat(updated.getValue().getCreatedAt()).isEqualTo(CREATED_AT);
+            assertThat(updated.getValue().getEmail()).isEqualTo(EMAIL);
+            assertThat(updated.getValue().getPasswordHash()).isEqualTo(HASHED);
+            assertThat(updated.getValue().isGuest()).isFalse();
+            assertThat(updated.getValue().isEmailVerified()).isFalse();
+            assertThat(updated.getValue().getLastLoginAt()).isNotNull();
+
+            // 移行はゲームデータを作り直さない
+            verify(playerInitializationService, never()).initialize(any());
+            // 既存のリフレッシュトークンは失効させない（ユーザーIDも権限も変わらないため）
+            verify(refreshTokenRepository, never()).updateRevokedByUserId(any());
+
+            InOrder inOrder = inOrder(userRepository, emailVerificationTokenRepository,
+                    refreshTokenRepository);
+            inOrder.verify(userRepository).updateLinkedAccount(any(User.class));
+            inOrder.verify(emailVerificationTokenRepository).save(any(EmailVerificationToken.class));
+            inOrder.verify(refreshTokenRepository).save(any(RefreshToken.class));
+
+            assertThat(result.user().getId()).isEqualTo("guest_001");
+            assertThat(result.accessToken()).isNotBlank();
+            assertThat(result.refreshToken()).isNotBlank();
+        }
+
+        /**
+         * 同じ成功経路が残す値。手順7（bcrypt）と手順9（確認トークン）はいずれも生値を保存しない。
+         *
+         * <p>分岐: tech_auth/link.md §19 #20
+         */
+        @Test
+        void test_パスワードと確認トークンはハッシュだけを保存する() {
+            when(userRepository.findByEmail(EMAIL)).thenReturn(null);
+            when(passwordEncoder.encode(PASSWORD)).thenReturn(HASHED);
+
+            authService().linkAccount(guest(), EMAIL, PASSWORD, null);
+
+            ArgumentCaptor<EmailVerificationToken> token =
+                    ArgumentCaptor.forClass(EmailVerificationToken.class);
+            verify(emailVerificationTokenRepository).save(token.capture());
+            assertThat(token.getValue().getUserId()).isEqualTo("guest_001");
+            assertThat(token.getValue().getPurpose()).isEqualTo("verify_email");
+            assertThat(token.getValue().isUsed()).isFalse();
+            // SHA-256（16進小文字）だけを保存する（§9）
+            assertThat(token.getValue().getTokenHash()).hasSize(64);
+            // 有効期限は現在時刻 + 24時間（手順9）。時刻を2回取ると誤差が乗るため差で見る
+            assertThat(Duration.between(token.getValue().getCreatedAt(),
+                    token.getValue().getExpiresAt())).isEqualTo(Duration.ofHours(24));
+        }
+
+        /**
+         * 手順7〜10の途中で失敗する経路。ロールバックは {@code @Transactional} が行うため、ここでは
+         * 例外を握りつぶさず伝播すること（＝ロールバックが起きる）と、リフレッシュトークンを
+         * 発行せず確認メールも要求しないことを見る。DBへ何も残らないことの検証は統合テストが持つ。
+         *
+         * <p>分岐: tech_auth/link.md §19 #21
+         */
+        @Test
+        void test_途中で失敗したら例外を伝播しトークンを発行しない() {
+            when(userRepository.findByEmail(EMAIL)).thenReturn(null);
+            doThrow(new DataAccessResourceFailureException("DB error"))
+                    .when(emailVerificationTokenRepository).save(any());
+
+            assertThatThrownBy(() -> authService().linkAccount(guest(), EMAIL, PASSWORD, null))
+                    .isInstanceOf(DataAccessResourceFailureException.class);
+
+            verify(refreshTokenRepository, never()).save(any());
+            verify(verificationMailSender, never()).send(any(), any());
+        }
+
+        /**
+         * 送信の成否は応答へ反映しない（手順12）。成功時は移行結果をそのまま返す。
+         *
+         * <p>分岐: tech_auth/link.md §19 #22
+         */
+        @Test
+        void test_確認メールの送信に成功しても応答は変わらない() {
+            when(userRepository.findByEmail(EMAIL)).thenReturn(null);
+
+            AuthResult result = authService().linkAccount(guest(), EMAIL, PASSWORD, null);
+
+            verify(verificationMailSender).send(any(User.class), any(String.class));
+            assertThat(result.accessToken()).isNotBlank();
+            assertThat(result.refreshToken()).isNotBlank();
+        }
+
+        /**
+         * 送信に失敗しても移行は成功として扱い、確認トークンの行を消さない。
+         *
+         * <p>失敗そのものを握るのは送信側の責務で（{@link VerificationMailSender} は例外を投げない
+         * 契約。実行はコミット後）、その分岐は {@code VerificationMailSenderImplTest} が持つ。
+         * 呼び出し元である本メソッドに求められるのは、<b>送信要求を永続化のすべてより後に置き、
+         * 送信後の後始末（確認トークンの取り消し）を持たない</b>ことなので、そこを固定する。
+         *
+         * <p>分岐: tech_auth/link.md §19 #23
+         */
+        @Test
+        void test_確認メールの送信要求は永続化を終えてから出し取り消さない() {
+            when(userRepository.findByEmail(EMAIL)).thenReturn(null);
+
+            authService().linkAccount(guest(), EMAIL, PASSWORD, null);
+
+            InOrder inOrder = inOrder(emailVerificationTokenRepository, refreshTokenRepository,
+                    verificationMailSender);
+            inOrder.verify(emailVerificationTokenRepository).save(any(EmailVerificationToken.class));
+            inOrder.verify(refreshTokenRepository).save(any(RefreshToken.class));
+            inOrder.verify(verificationMailSender).send(any(User.class), any(String.class));
+
+            // 確認トークンへの操作は save 1回だけ（送信後に消す・使用済みにする後始末を持たない）
+            verifyNoMoreInteractions(emailVerificationTokenRepository);
+        }
+    }
+
+    @Nested
+    @DisplayName("メール確認")
+    class TestVerifyEmail {
+
+        /**
+         * 期限判定の基準時刻。{@code expires_at} が現在時刻ちょうどの経路（§21 #10）は
+         * 実時間のクロックでは作れないため、この節だけ固定クロックでサービスを組む。
+         */
+        private static final Instant NOW = Instant.parse("2026-08-10T12:00:00Z");
+
+        /** メール本文のリンクに載る生値。DBにはこの SHA-256 だけが入る。 */
+        private static final String RAW_TOKEN = "raw-verification-token";
+
+        /** 対象ユーザーのID。確認トークンの {@code user_id} と対応する。 */
+        private static final String USER_ID = "user_001";
+
+        private AuthService verifyService() {
+            return authService(AUTH_SETTINGS, Clock.fixed(NOW, ZoneOffset.UTC));
+        }
+
+        /** 有効な確認トークンの行（用途 verify_email・未使用・期限内）。 */
+        private EmailVerificationToken token() {
+            EmailVerificationToken token = new EmailVerificationToken();
+            token.setId(1);
+            token.setUserId(USER_ID);
+            token.setTokenHash("0".repeat(64));
+            token.setPurpose("verify_email");
+            token.setExpiresAt(NOW.plus(Duration.ofHours(1)));
+            token.setUsed(false);
+            token.setCreatedAt(NOW.minus(Duration.ofHours(23)));
+            return token;
+        }
+
+        /** 確認前のユーザー。 */
+        private User unverified() {
+            User user = new User();
+            user.setId(USER_ID);
+            user.setEmail(EMAIL);
+            user.setGuest(false);
+            user.setEmailVerified(false);
+            return user;
+        }
+
+        /**
+         * 生値ではなく SHA-256（16進小文字）で検索し、行があれば用途の確認（手順3）へ進む（§9）。
+         *
+         * <p>分岐: tech_auth/verify.md §21 #3
+         */
+        @Test
+        void test_ハッシュが一致する行があれば用途の確認へ進む() {
+            when(emailVerificationTokenRepository.findByTokenHash(any())).thenReturn(token());
+            when(userRepository.findById(USER_ID)).thenReturn(unverified());
+
+            verifyService().verifyEmail(RAW_TOKEN);
+
+            ArgumentCaptor<String> hash = ArgumentCaptor.forClass(String.class);
+            verify(emailVerificationTokenRepository).findByTokenHash(hash.capture());
+            assertThat(hash.getValue()).isNotEqualTo(RAW_TOKEN).matches("[0-9a-f]{64}");
+        }
+
+        /**
+         * 存在しないトークンは 400。理由（不正・期限切れ・退会済み）を出し分けない（§20 手順2）。
+         *
+         * <p>分岐: tech_auth/verify.md §21 #4
+         */
+        @Test
+        void test_一致する行が無ければAUTH_VERIFICATION_INVALIDになる() {
+            when(emailVerificationTokenRepository.findByTokenHash(any())).thenReturn(null);
+
+            assertThatThrownBy(() -> verifyService().verifyEmail(RAW_TOKEN))
+                    .isInstanceOf(BusinessException.class)
+                    .extracting(AuthServiceImplTest::codeOf)
+                    .isEqualTo("AUTH_VERIFICATION_INVALID");
+
+            verifyNoInteractions(userRepository);
+        }
+
+        /**
+         * 用途が確認メールなら使用状態の確認（手順4）へ進む。
+         *
+         * <p>分岐: tech_auth/verify.md §21 #5
+         */
+        @Test
+        void test_用途がverify_emailなら使用状態の確認へ進む() {
+            when(emailVerificationTokenRepository.findByTokenHash(any())).thenReturn(token());
+            when(userRepository.findById(USER_ID)).thenReturn(unverified());
+
+            verifyService().verifyEmail(RAW_TOKEN);
+
+            verify(emailVerificationTokenRepository).updateUsedById(1);
+        }
+
+        /**
+         * 再設定トークンの流用を防ぐ（§20 手順3）。{@code email_verified} を変えない。
+         *
+         * <p>分岐: tech_auth/verify.md §21 #6
+         */
+        @Test
+        void test_用途がpassword_resetならAUTH_VERIFICATION_INVALIDになる() {
+            EmailVerificationToken reset = token();
+            reset.setPurpose("password_reset");
+            when(emailVerificationTokenRepository.findByTokenHash(any())).thenReturn(reset);
+
+            assertThatThrownBy(() -> verifyService().verifyEmail(RAW_TOKEN))
+                    .isInstanceOf(BusinessException.class)
+                    .extracting(AuthServiceImplTest::codeOf)
+                    .isEqualTo("AUTH_VERIFICATION_INVALID");
+
+            verifyNoInteractions(userRepository);
+            verify(emailVerificationTokenRepository, never()).updateUsedById(any());
+        }
+
+        /**
+         * 未使用なら有効期限の確認（手順5）へ進む。
+         *
+         * <p>分岐: tech_auth/verify.md §21 #7
+         */
+        @Test
+        void test_未使用のトークンは有効期限の確認へ進む() {
+            EmailVerificationToken expired = token();
+            expired.setUsed(false);
+            expired.setExpiresAt(NOW.minus(Duration.ofSeconds(1)));
+            when(emailVerificationTokenRepository.findByTokenHash(any())).thenReturn(expired);
+
+            // 使用済みなら 200 で素通りする（#8）ため、期限判定へ進んだことが 400 で分かる
+            assertThatThrownBy(() -> verifyService().verifyEmail(RAW_TOKEN))
+                    .isInstanceOf(BusinessException.class)
+                    .extracting(AuthServiceImplTest::codeOf)
+                    .isEqualTo("AUTH_VERIFICATION_INVALID");
+        }
+
+        /**
+         * メール内リンクの再クリックは正常操作なので、何も更新せず成功させる
+         * （ログアウトの二重実行と同じ扱い。§20 手順4）。
+         *
+         * <p>分岐: tech_auth/verify.md §21 #8
+         */
+        @Test
+        void test_使用済みのトークンは何も更新せず成功する() {
+            EmailVerificationToken used = token();
+            used.setUsed(true);
+            when(emailVerificationTokenRepository.findByTokenHash(any())).thenReturn(used);
+
+            assertThatCode(() -> verifyService().verifyEmail(RAW_TOKEN)).doesNotThrowAnyException();
+
+            verifyNoInteractions(userRepository);
+            verify(emailVerificationTokenRepository, never()).updateUsedById(any());
+        }
+
+        /**
+         * 期限内なら対象ユーザーの検索（手順6）へ進む。
+         *
+         * <p>分岐: tech_auth/verify.md §21 #9
+         */
+        @Test
+        void test_有効期限が現在時刻より後ならユーザーの検索へ進む() {
+            EmailVerificationToken valid = token();
+            // 境界の1つ内側（現在時刻の1秒後）
+            valid.setExpiresAt(NOW.plus(Duration.ofSeconds(1)));
+            when(emailVerificationTokenRepository.findByTokenHash(any())).thenReturn(valid);
+            when(userRepository.findById(USER_ID)).thenReturn(unverified());
+
+            verifyService().verifyEmail(RAW_TOKEN);
+
+            verify(userRepository).findById(USER_ID);
+        }
+
+        /**
+         * 期限切れは 400。再送APIを設けないため、未確認のまま据え置く（§20 手順5）。
+         * <b>現在時刻ちょうども「以前」に含む</b>（{@code <=} であることを境界で固定する）。
+         *
+         * <p>分岐: tech_auth/verify.md §21 #10
+         */
+        @ParameterizedTest(name = "expiresAt = 現在時刻{0}秒")
+        @ValueSource(longs = {
+            0,   // 境界ちょうど（現在時刻と等しい）
+            -1   // 境界の1つ外側
+        })
+        void test_有効期限が現在時刻以前ならAUTH_VERIFICATION_INVALIDになる(long offsetSeconds) {
+            EmailVerificationToken expired = token();
+            expired.setExpiresAt(NOW.plusSeconds(offsetSeconds));
+            when(emailVerificationTokenRepository.findByTokenHash(any())).thenReturn(expired);
+
+            assertThatThrownBy(() -> verifyService().verifyEmail(RAW_TOKEN))
+                    .isInstanceOf(BusinessException.class)
+                    .extracting(AuthServiceImplTest::codeOf)
+                    .isEqualTo("AUTH_VERIFICATION_INVALID");
+
+            verifyNoInteractions(userRepository);
+            verify(emailVerificationTokenRepository, never()).updateUsedById(any());
+        }
+
+        /**
+         * ユーザーが居れば確認状態の更新（手順7）へ進む。
+         *
+         * <p>分岐: tech_auth/verify.md §21 #11
+         */
+        @Test
+        void test_対象ユーザーが存在すれば確認状態の更新へ進む() {
+            when(emailVerificationTokenRepository.findByTokenHash(any())).thenReturn(token());
+            when(userRepository.findById(USER_ID)).thenReturn(unverified());
+
+            verifyService().verifyEmail(RAW_TOKEN);
+
+            verify(userRepository).updateEmailVerified(USER_ID, true);
+        }
+
+        /**
+         * 退会済みのユーザーへ宛てたトークンは無効として扱う（§20 手順6）。
+         *
+         * <p>分岐: tech_auth/verify.md §21 #12
+         */
+        @Test
+        void test_対象ユーザーが存在しなければAUTH_VERIFICATION_INVALIDになる() {
+            when(emailVerificationTokenRepository.findByTokenHash(any())).thenReturn(token());
+            when(userRepository.findById(USER_ID)).thenReturn(null);
+
+            assertThatThrownBy(() -> verifyService().verifyEmail(RAW_TOKEN))
+                    .isInstanceOf(BusinessException.class)
+                    .extracting(AuthServiceImplTest::codeOf)
+                    .isEqualTo("AUTH_VERIFICATION_INVALID");
+
+            verify(userRepository, never()).updateEmailVerified(any(), anyBoolean());
+            verify(emailVerificationTokenRepository, never()).updateUsedById(any());
+        }
+
+        /**
+         * 未確認なら {@code email_verified} を true にし、使ったトークンを使用済みにする（手順7・8）。
+         *
+         * <p>分岐: tech_auth/verify.md §21 #13
+         */
+        @Test
+        void test_未確認ならemail_verifiedをtrueにしトークンを使用済みにする() {
+            when(emailVerificationTokenRepository.findByTokenHash(any())).thenReturn(token());
+            when(userRepository.findById(USER_ID)).thenReturn(unverified());
+
+            verifyService().verifyEmail(RAW_TOKEN);
+
+            verify(userRepository).updateEmailVerified(USER_ID, true);
+            verify(emailVerificationTokenRepository).updateUsedById(1);
+        }
+
+        /**
+         * 別トークンで確認済みなら値は true のままで、使ったトークンだけ使用済みにする（手順7・8）。
+         * 同じユーザーの他の確認トークンは変更しない。
+         *
+         * <p>分岐: tech_auth/verify.md §21 #14
+         */
+        @Test
+        void test_確認済みならトークンだけを使用済みにする() {
+            User verified = unverified();
+            verified.setEmailVerified(true);
+            when(emailVerificationTokenRepository.findByTokenHash(any())).thenReturn(token());
+            when(userRepository.findById(USER_ID)).thenReturn(verified);
+
+            verifyService().verifyEmail(RAW_TOKEN);
+
+            assertThat(verified.isEmailVerified()).isTrue();
+            verify(userRepository, never()).updateEmailVerified(USER_ID, false);
+            verify(emailVerificationTokenRepository).updateUsedById(1);
+        }
+
+        /**
+         * 手順7・8がともに成功する経路。コミットは {@code @Transactional} が行うため、ここでは
+         * 2つの更新が順に呼ばれることだけを見る。DBへ反映されることの検証は統合テストが持つ。
+         *
+         * <p>分岐: tech_auth/verify.md §21 #15
+         */
+        @Test
+        void test_確認状態とトークンの更新を順に実行して成功する() {
+            when(emailVerificationTokenRepository.findByTokenHash(any())).thenReturn(token());
+            when(userRepository.findById(USER_ID)).thenReturn(unverified());
+
+            assertThatCode(() -> verifyService().verifyEmail(RAW_TOKEN)).doesNotThrowAnyException();
+
+            InOrder inOrder = inOrder(userRepository, emailVerificationTokenRepository);
+            inOrder.verify(userRepository).updateEmailVerified(USER_ID, true);
+            inOrder.verify(emailVerificationTokenRepository).updateUsedById(1);
+        }
+
+        /**
+         * 手順7・8の途中で失敗する経路。ロールバックは {@code @Transactional} が行うため、ここでは
+         * 例外を握りつぶさず伝播すること（＝ロールバックが起きる）と、トークンを使用済みに
+         * しないことを見る。
+         *
+         * <p>分岐: tech_auth/verify.md §21 #16
+         */
+        @Test
+        void test_途中で失敗したら例外を伝播しトークンを使用済みにしない() {
+            when(emailVerificationTokenRepository.findByTokenHash(any())).thenReturn(token());
+            when(userRepository.findById(USER_ID)).thenReturn(unverified());
+            doThrow(new DataAccessResourceFailureException("DB error"))
+                    .when(userRepository).updateEmailVerified(any(), anyBoolean());
+
+            assertThatThrownBy(() -> verifyService().verifyEmail(RAW_TOKEN))
+                    .isInstanceOf(DataAccessResourceFailureException.class);
+
+            verify(emailVerificationTokenRepository, never()).updateUsedById(any());
         }
     }
 }
