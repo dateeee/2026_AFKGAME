@@ -68,19 +68,20 @@ flowchart TB
     subgraph Server["Terasoluna(Spring MVC) バックエンド (Java)"]
         direction TB
 
-        subgraph Routers["Controllers (APIエンドポイント)"]
-            authRouter["AuthController.java\nPOST /api/auth/guest\nPOST /api/auth/login\nPOST /api/auth/register\nPOST /api/auth/google\nPOST /api/auth/refresh\n他5エンドポイント"]
-            gameRouter["GameController.java\nGET /api/game/state\nPUT /api/game/settings"]
-            battleRouter["BattleController.java\nPOST /api/battle/tick"]
-            towerRouter["TowerController.java\nPOST /api/tower/select\nPOST /api/tower/retire\nPUT /api/tower/mode\nPUT /api/tower/retreat-conditions"]
-            shopRouter["ShopController.java\nGET /api/shop/lineup\nPOST /api/shop/buy"]
-            equipRouter["EquipmentController.java\nGET /api/equipment/list\nPOST /api/equipment/equip\nPOST /api/equipment/sell\nPOST /api/equipment/lock"]
-            partyRouter["PartyController.java Phase3~\nPUT /api/party/edit\nPOST /api/skill/learn\nPUT /api/skill/set-active\nPOST /api/skill/reset\nPOST /api/character/limit-break"]
-            baseRouter["BaseController.java Phase4~\nPOST /api/base/build\nPOST /api/base/upgrade\nPOST /api/base/scout"]
-            forgeRouter["ForgeController.java Phase4~\nPOST /api/forge/enhance\nPOST /api/forge/craft\nPOST /api/forge/disassemble"]
-            bossRushRouter["BossRushController.java Phase5~\nPOST /api/boss-rush/start\nPOST /api/boss-rush/retire\nGET /api/boss-rush/ranking"]
-            abyssRouter["AbyssController.java Phase5~\nGET /api/abyss/ranking"]
-            prestigeRouter["PrestigeController.java Phase5~\nPOST /api/prestige\nPUT /api/prestige/invest\nPOST /api/prestige/reset"]
+        subgraph Routers["Controllers (@RestController・パスの正は tech_api.md)"]
+            authRouter["AuthApi.java\n認証・アカウント連携"]
+            gameRouter["GameApi.java\nゲーム状態取得・設定更新"]
+            battleRouter["BattleApi.java\ntick処理"]
+            towerRouter["TowerApi.java\n塔の一覧・選択・進行・撤退"]
+            shopRouter["ShopApi.java\n品揃え取得・購入"]
+            equipRouter["EquipmentApi.java\n装備一覧・装着・売却・ロック"]
+            noticeRouter["NoticeApi.java Phase3~\nお知らせ一覧"]
+            partyRouter["PartyApi.java Phase3~\nパーティ編成・スキル・限界突破"]
+            baseRouter["BaseApi.java Phase4~\n施設建設・LVアップ・スカウト"]
+            forgeRouter["ForgeApi.java Phase4~\n装備強化・製作・分解"]
+            bossRushRouter["BossRushApi.java Phase5~\n開始・リタイア・ランキング"]
+            abyssRouter["AbyssApi.java Phase5~\n深淵ランキング"]
+            prestigeRouter["PrestigeApi.java Phase5~\n転生・投資・リセット"]
         end
 
         subgraph Services["Services (ビジネスロジック)"]
@@ -102,16 +103,13 @@ flowchart TB
             userModel["Entity + UserRepository / RefreshTokenRepository Phase2~\nUser, RefreshToken\nEmailVerificationToken"]
         end
 
-        subgraph Schemas["Resources (Bean Validation)"]
-            playerSchema["PlayerResource.java\nPlayerResponse\nCharacterResponse\nGameStateResponse\nSettingsUpdate / SettingsResponse"]
-            battleSchema["BattleResource.java\nTickResponse\nOfflineSummary"]
-            towerSchema["TowerResource.java\nTowerSelectRequest\nTowerInfo"]
-            equipSchema["EquipmentResource.java Phase2~\nEquipmentResponse\nEquipRequest"]
-            shopSchema["ShopResource.java\nShopLineupResponse\nShopDailyItemResponse"]
-            authSchema["AuthResource.java Phase2~\nLoginRequest\nAuthResponse"]
+        subgraph Schemas["Resources (Bean Validation・I/O定義の正は tech_api.md)"]
+            authSchema["認証系 (実装済み)\nAuth/Login/Register/Refresh\nLogout/User Resource"]
+            commonSchema["共通 (実装済み)\nHealth/Status/Error Resource"]
+            gameSchema["ゲーム系 (Phase 1~ 実装予定)\nPlayer/Battle/Tower/Shop/\nEquipment Resource"]
         end
 
-        Config["AppProperties.java (@ConfigurationProperties)\nTICK_INTERVAL_SECONDS = 60\nTURNS_PER_TICK = 3\nFAST_CALC_THRESHOLD = 100\nMAX_OFFLINE_HOURS = 24\nMAX_BATTLE_LOG_RECORDS = 100\nMAX_LOG_PER_RESPONSE = 50\nMAX_PLAYER_LEVEL = 9999"]
+        Config["afkgame.properties (afkgame-env)\n@Value で読む設定保持Bean\ntick間隔・ターン数・各種上限\n(キーと既定値は tech_backend.md §4.2)"]
         DB_Module["afkgame-env\nDataSource設定\nセッション管理"]
         Flyway["flyway/\nDBマイグレーション\nスキーマ管理"]
 
@@ -138,4 +136,5 @@ flowchart TB
 
 - DBMS（`local`・`production` とも PostgreSQL）とデプロイ構成は [tech_operations.md](../../tech/nonfunctional/tech_operations.md) §12 が正。デプロイ構成の図は [deployment.md](deployment.md)
 - Components の3層構成（トークン / UIプリミティブ / アプリシェル）と各層の責務は [tech_design_system.md](../../tech/detail/tech_design_system.md) が正。UIプリミティブはトークンだけを参照し、ストアには触れない
-- Resources は `afkgame-web` の `resource/` に実装済みのクラスのみを描く。Phase 3〜5 で追加する Resource（`PartyEditResource` 等）は Controllers の Phase 注記と `tech_backend.md` §4.1 を参照
+- 本図は**層とモジュールの依存方向**を描く。各層のメンバー（エンドポイントのパス・設定キーと既定値・Resource のフィールド）は再掲しない。正は API が [tech_api.md](../../tech/basic/tech_api.md)、設定値が [tech_backend.md](../../tech/basic/tech_backend.md) §4.2、クラス構成が同 §4.1
+- Controllers のクラス名は `<リソース>Api`（`Controller` 接尾辞は使わない。[coding_standards_backend/web.md](../../process/coding_standards_backend/web.md) §6）。Phase 注記のないものが Phase 1〜2
