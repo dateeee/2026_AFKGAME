@@ -45,3 +45,9 @@
 - ターン概要: ツール167回・エラー3回・拒否0回。開始:「着手して」
 - 原因と改善案: エラー3回はすべて **PowerShell ツールへの引数の渡し方**。①`mvn -q -Dsurefire.printSummary=false test` が `-D` 以降を別トークンとして解釈され「Unknown lifecycle phase」②`python -c @'...'@` の here-string で `"` が崩れて SyntaxError（結局スクラッチパッドへ `.py` を書いて回避）③`javap ... | Select-Object -First 3` がパイプ早期終了で exit 255。call=167 は25ファイル・単体+結合269件の規模ぶんが大半だが、機械的置換を1件ずつ `Edit` した分（AuthServiceImplTest の15か所等）は `replace_all` のグループ化でさらに減らせた。
   → `commands/adhoc.md` §4（使い捨て調査の作法）へ「PowerShell ツールでは **`-D`/`-X` 付きの引数と複数行スクリプトを直接渡さない**（`-D...` は `"` で括る、`python -c` は使わずスクラッチパッドへ `.py` を書いて実行、native exe のパイプに `Select-Object -First` を付けない）」を追記する。あわせて `dev.md` §5 の動作確認表に **PowerShell 版のコマンド列**（`mvn -f backend/pom.xml ...`）を併記し、`cd backend && ...` の Bash 記法をそのまま貼って崩す往復をなくす。
+
+## 2026-08-10 13:38 | session 66b774d9 | 自動検出
+- シグナル: same-command('git status --short'×3)
+- ターン概要: ツール65回・エラー0回・拒否0回。開始:「<command-message>next</command-message>」
+- 原因と改善案: 3回のうち2回は**別々の工程ゲートが個別に要求**したもの（`dev/SKILL.md` §6.1 差分の範囲 / `worktree_guide.md` §5.3 手順3 main 側の未コミット確認 ＝ 実質誤検出）。無駄だったのは1回で、**変異テストの裏取り**（`check_branch_list.py` を一時的に壊して新設テストが赤くなることを確認 → `git checkout --` で復元）のあとに復元確認として単独で叩いた分。直後に全382件の再実行とコミット前の差分確認が控えており、そこで同じことが分かった。
+  → `dev.md` §5「確認時の注意」へ「**変異による裏取りは復元後に単独の `git status` を挟まず、§6.1 のコミット前チェックで一括確認する**（`git checkout -- <path>` は失敗すれば非0で返るため、復元それ自体の確認は不要）」を1行追記する。
