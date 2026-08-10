@@ -51,3 +51,9 @@
 - ターン概要: ツール65回・エラー0回・拒否0回。開始:「<command-message>next</command-message>」
 - 原因と改善案: 3回のうち2回は**別々の工程ゲートが個別に要求**したもの（`dev/SKILL.md` §6.1 差分の範囲 / `worktree_guide.md` §5.3 手順3 main 側の未コミット確認 ＝ 実質誤検出）。無駄だったのは1回で、**変異テストの裏取り**（`check_branch_list.py` を一時的に壊して新設テストが赤くなることを確認 → `git checkout --` で復元）のあとに復元確認として単独で叩いた分。直後に全382件の再実行とコミット前の差分確認が控えており、そこで同じことが分かった。
   → `dev.md` §5「確認時の注意」へ「**変異による裏取りは復元後に単独の `git status` を挟まず、§6.1 のコミット前チェックで一括確認する**（`git checkout -- <path>` は失敗すれば非0で返るため、復元それ自体の確認は不要）」を1行追記する。
+
+## 2026-08-10 15:13 | session 96b02c43 | 自動検出
+- シグナル: errors×3
+- ターン概要: ツール124回・エラー3回・拒否0回。開始:「<command-message>next</command-message>」
+- 原因と改善案: 3件とも**ツールの選び分けの誤り**で、内容の誤りではない。①`pom.xml` を Bash の `cat` で読んでから `Edit` して「File has not been read yet」で弾かれ、`Read` からやり直した（**編集する気のあるファイルを `cat`／`ctx` で読まない**）②`curl` で Maven Central の版を引いて context-mode フックにリダイレクトされた ③`mvn help:effective-pom` も同じくリダイレクトされた。②③は `profile.md` §6 規律6（大きな出力は context-mode）と `adhoc.md` §6（版は maven-metadata.xml を見る）を**両方守っていれば1回で済んだ**もので、規律は既にあるのに Bash を既定で選んだのが原因。
+  → `adhoc.md` §4 へ「**外部問い合わせ（`curl`）とビルド（`mvn`）は最初から `ctx_execute` で叩く**（Bash はフックでリダイレクトされ1往復が無駄になる）」と「**`Edit` する予定のファイルは `Read` で読む**（`cat`／`ctx_execute_file` で読んでも Edit は通らない）」の2行を追記する。後者は `profile.md` §6 規律6 の「`Read` の全文読みは Edit 前提のときのみ」の裏返しで、規律側にも「逆に Edit 前提なら必ず `Read`」と補うと片側だけ守る事故が減る。
