@@ -32,7 +32,7 @@ worktree を使う複数セッションが同時に走る前提。**着手状態
 /test-list 3-A-3 テストリスト作成①（link-account / verify-email）: §19（23件）・§21（16件）を失敗するテストへ展開する
 完了条件: ①link.md §19 の23件と verify.md §21 の16件を、各テストの Javadoc へ「分岐: tech_auth/link.md §19 #<行番号>」形式のマーカー付きで展開する②`python scripts/check_branch_list.py --tests` が違反0（全行にテストが対応する）③**実装が無いので Red で止まるのが正**。赤の理由が「未実装」であることを確認し、期待値を実装側へ寄せない④コミットする
 参照: 分岐一覧の正は [link.md](../tech/detail/tech_auth/link.md) §19（行27〜・23件）・[verify.md](../tech/detail/tech_auth/verify.md) §21（行24〜・16件）が起点、テストの書き方の正は [test.md](../process/coding_standards_backend/test.md) §1「配置と分離」・§2「記述規約」
-前提: main `9fbe365`（3-A-2 のゲートが閉じた直後）。3-A-3 の詳細設計は main `122ba2b` で完了済みで、以後この領域へ変更は入っていない。編集を伴うので `python scripts/worktree.py add auth-3a3-testlist-a` で worktree を作る（[worktree_guide.md](../process/worktree_guide.md) §5.2）。JDK 17.0.20（Temurin）・Maven 3.9.11・docker 29.6.2 は新規シェルで実行確認済み。**Docker Desktop は OS 起動時に自動起動しない** — `docker info` が npipe エラーを返したら `$LOCALAPPDATA\Programs\DockerDesktop\Docker Desktop.exe` を起動する（`afkgame-postgres` は追随して healthy になる。起動待ちは約5秒）。`docs/backlog/open_specs.md` は不在＝未確定ゼロ
+前提: main `9ab1a1a`（3-A-2 のゲートは `9fbe365` で閉じた。以後の2件は本引き継ぎの更新 `006c639` と、無関係な全体アーキテクチャ図の是正 `9ab1a1a` で、いずれも auth 領域に触れていない）。3-A-3 の詳細設計は main `122ba2b` で完了済みで、以後この領域へ変更は入っていない。編集を伴うので `python scripts/worktree.py add auth-3a3-testlist-a` で worktree を作る（[worktree_guide.md](../process/worktree_guide.md) §5.2）。JDK 17.0.20（Temurin）・Maven 3.9.11・docker 29.6.2 は新規シェルで実行確認済み。**Docker Desktop は OS 起動時に自動起動しない** — `docker info` が npipe エラーを返したら `$LOCALAPPDATA\Programs\DockerDesktop\Docker Desktop.exe` を起動する（`afkgame-postgres` は追随して healthy になる。起動待ちは約5秒）。`docs/backlog/open_specs.md` は不在＝未確定ゼロ
 ```
 
 ## 2. 候補キュー（最大5行・優先順）
