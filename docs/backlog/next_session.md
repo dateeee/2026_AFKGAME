@@ -45,10 +45,11 @@ worktree を使う複数セッションが同時に走る前提。**着手状態
 
 | 優先 | タスク | 前提 | wt 名 / 領域 | 工程スキル |
 |------|-------|------|------------|-----------|
-| 1 | **3-B テストリスト作成①（Phase 1: game / battle）**。tick・戦闘サービスが先に要るため tower は後段 | §1（ゲートを閉じてから） | `3b-testlist-battle`<br>backend | `test-list` |
-| 2 | **3-B 製造①（Phase 1: game / battle）** | キュー1 | `3b-dev-battle`<br>backend | `dev` |
-| 3 | **3-B テストリスト作成②（Phase 1: tower）**。分岐一覧は [tech_tower.md](../tech/detail/tech_tower.md) §0 の55件 + `tech_state.md` §5 の7件 | キュー2 | `3b-testlist-tower`<br>backend | `test-list` |
-| 4 | **3-B 製造②（Phase 1: tower）** | キュー3 | `3b-dev-tower`<br>backend | `dev` |
+| 1 | **Phase 5 仕様確定ゲートの反映**。[2026-08-11_123351.md](../reviews/doc-review/2026-08-11_123351.md) の11件（高2・中7・低2）を適用 | なし（**Java 移行と独立**・並行可） | `p5-fix-specs`<br>docs | `fix-specs` |
+| 2 | **3-B テストリスト作成①（Phase 1: game / battle）**。tick・戦闘サービスが先に要るため tower は後段 | §1（ゲートを閉じてから） | `3b-testlist-battle`<br>backend | `test-list` |
+| 3 | **3-B 製造①（Phase 1: game / battle）** | キュー2 | `3b-dev-battle`<br>backend | `dev` |
+| 4 | **3-B テストリスト作成②（Phase 1: tower）**。分岐一覧は [tech_tower.md](../tech/detail/tech_tower.md) §0 の55件 + `tech_state.md` §5 の7件 | キュー3 | `3b-testlist-tower`<br>backend | `test-list` |
+| 5 | **3-B 製造②（Phase 1: tower）** | キュー4 | `3b-dev-tower`<br>backend | `dev` |
 
 - **3-A-3 の製造完了ゲートは開いたまま**（指摘9件のうち4件を反映済み。残る5件を §1 で閉じる）。前回ゲート（3-A-2）の「プロセスへの還元」①②は**判定12・13 として実装済みで効いている**（違反0・WARN 13件で横ばい）が、**網の外に同型の穴が3件**出た（ISSUE-903 語表の穴 / 905 pom の依存 / 907 Repository の戻り値）。次の還元候補は [2026-08-10_155729.md](../reviews/backend-review/2026-08-10_155729.md)「プロセスへの還元」1〜3 が正
 - **更新系 SQL の条件は実DBテストでしか検証されない**（①の学び）。`AND used = FALSE` のような条件を足したら、サービスの単体テスト（Repository をモックする）では素通りするため、対応するリポジトリ統合テストを同じコミットで足す。`RepositoryTestSupport` を継承すれば埋め込み PostgreSQL で回る
