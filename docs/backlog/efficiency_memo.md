@@ -22,3 +22,8 @@
     - 原因と改善案: <原因 + どのスキル/プロファイル/成果物をどう直すか（1〜2行）>
 
 ---
+
+## 2026-08-11 16:25 | session 4a974fcf | 自動検出
+- シグナル: same-command('python scripts/check_doc_size.'×6, 'python scripts/check_docs.py'×3)
+- ターン概要: ツール91回・エラー0回・拒否0回。開始:「<command-message>next</command-message>」
+- 原因と改善案: `check_doc_size.py` 6回のうち4回は `next_session.md` §2 が H2 2,000字を 23字超えた後の**目分量トリムの往復**（2023→2009→2012→2001→1981。1回は削ったつもりが増えた）。事前の残量測定4件と `check_docs.py` 3回（着手前の鮮度確認・worktree での修正後・main での引き継ぎ更新後）はゲートとして正当。改善: [doc-size.md](../../.claude/project/doc-size.md) §3.1 と [profile.md](../../.claude/project/profile.md) §7 ルール7 の「`len()` で実測」を**超過分の削減にも適用する**と明記する（必要削減字数を先に出し、候補文の `len()` 差分の合計がそれを上回る組み合わせを**1回の編集で**当てる。1箇所ずつ削って測り直さない）
