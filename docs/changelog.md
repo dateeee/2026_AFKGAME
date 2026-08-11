@@ -16,6 +16,12 @@
 - `docs/diagrams/api_sequence/character.md` §8・`api_sequence.md`: 限界突破フローを Phase 4 表記へ改め、検証順・トランザクション境界・レスポンス項目を処理仕様に合わせた
 - `docs/reviews/doc-review/2026-08-11_123351.md`: 新規。Phase 5 仕様確定ゲートの `doc-review` 結果（差分・11件＝高2/中7/低2）。`towersCleared` のキー体系は矛盾なし、「探索」タブ集約は転生の導線のみ欠落
 - `docs/backlog/next_session.md`: §2 候補キューへ「Phase 5 仕様確定ゲートの反映」を優先1で追加した（Java 移行と独立・並行可）
+- `docs/process/worktree_guide.md`: §5.3 手順3 を「main の未コミットは担当外ならコミットせず確認」へ改め、§5.1・§5.2 手順4 に main で読むと `Edit` が弾かれる実害と復旧策を明記、§5.2 手順2 へ §5.4 通読の導線を追加した（`/retro` 反映。§5.4 の重複は同時に圧縮）
+- `.claude/project/commands/adhoc.md`: §4 へ作法7〜9（`curl`・`mvn` は `ctx_execute` 既定 / `Edit` 前提は `Read` / PowerShell への `-D` 引数・複数行スクリプトの渡し方）を追加した
+- `.claude/project/dev.md`: §5 確認時の注意へ `@Nested` の `old_string` 特定・Javadoc の字下げコピーを追加し、注意2・3 を統合して圧縮した
+- `.claude/project/profile.md`: §6 規律4 へ「Edit 前提なら必ず `Read`」を追記した
+- `.claude/skills/next/SKILL.md`: §3 手順1 へ「worktree 手順に付随する制約・注意の節まで読む」を追記した
+- `docs/backlog/carryover_notes.md`: §3 へ `worktree_guide.md` §5 の H2 超過（分割は `doc-size` へ）を追加した
 
 ## 2026-08-10
 
