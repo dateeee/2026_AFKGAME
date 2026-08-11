@@ -67,9 +67,10 @@ import com.afkgame.env.config.GameSettings;
  *       {@code hp_potion} の数量を起点にし、周回ごとに減算する（§4.1「ポーション消費モデル」）</li>
  * </ul>
  *
- * <p><b>詳細設計への差し戻し</b>: §4.1 の期待値計算式そのもの（base_hit・crit_factor・skill_factor・
- * E_taken・撃破ターン数・消費数/周回）は §5 の分岐一覧に行が無く、本工程で展開できない。
- * {@code LapAnalyzer} の実装前に行を追加する必要がある（完了報告に記載）。
+ * <p>§4.1 の期待値計算式そのもの（base_hit・crit_factor・E_taken・撃破ターン数・消費数）は
+ * tech_offline.md §6 へ行を足し、{@link LapAnalyzerImplTest} が持つ。スキル・パッシブ・挑発に
+ * 依存する分岐（skill_factor・範囲攻撃・軽減の上限・挑発の按分・回復の差し引き）は §7 で、
+ * Phase 1 の編成では到達しないためマーカーを付けていない（Phase 3 の製造で展開する）。
  */
 @Tag("unit")
 @ExtendWith(MockitoExtension.class)

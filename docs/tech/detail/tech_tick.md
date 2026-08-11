@@ -75,20 +75,26 @@
 
 C1網羅の対象分岐。[phases.md §3.4](../../process/phases.md) のテストリストと §3.6 の基準に対応する。
 
-| # | 分岐 | 期待結果 |
-|---|------|---------|
-| 1 | `elapsed < 60秒` | `pending_ticks=0`、状態のみ返却、`last_tick_at` 不変 |
-| 2 | `elapsed = 60秒ちょうど` | `pending_ticks=1` |
-| 3 | `elapsed = 119秒` | `pending_ticks=1`、59秒を繰り越す |
-| 4 | `pending_ticks = 100`（閾値ちょうど） | 正規シミュレーション |
-| 5 | `pending_ticks = 101` | 簡略計算 |
-| 6 | `elapsed = 24時間ちょうど` | `pending_ticks=1440`、`capped=false` |
-| 7 | `elapsed > 24時間` | `pending_ticks=1440`、`capped=true`、`last_tick_at ← now` |
-| 8 | `last_tick_at > now` | `pending_ticks=0`、WARNINGログ |
-| 9 | 塔外待機中（`IDLE`） | 戦闘なし。HP自然回復のみ（`tech_offline.md` §4） |
-| 10 | パーティが空 | 戦闘なし・状態のみ返却 |
-| 11 | ロック競合（`busy_timeout` 超過） | `503 BATTLE_TICK_BUSY` |
-| 12 | tick処理中の例外 | 全ロールバック・`last_tick_at` 不変 |
+| # | 分岐点 | 条件 | 期待する振る舞い |
+|---|-------|------|----------------|
+| 1 | tick成立判定 | `elapsed < 60秒` | `pending_ticks=0`。状態のみ返却し `last_tick_at` は不変 |
+| 2 | tick成立判定 | `elapsed = 60秒ちょうど` | `pending_ticks=1` |
+| 3 | tick成立判定 | `elapsed = 119秒` | `pending_ticks=1`。59秒を繰り越す |
+| 4 | 処理方式の選択 | `pending_ticks = 100`（閾値ちょうど） | 正規シミュレーションで処理する |
+| 5 | 処理方式の選択 | `pending_ticks = 101` | 簡略計算で処理する |
+| 6 | 24時間クランプ | `elapsed = 24時間ちょうど` | `pending_ticks=1440`、`capped=false` |
+| 7 | 24時間クランプ | `elapsed > 24時間` | `pending_ticks=1440`、`capped=true`、`last_tick_at ← now` |
+| 8 | 異常な時刻 | `last_tick_at > now` | `pending_ticks=0`。WARNINGログを残す |
+| 9 | 戦闘の成立 | 塔外待機中（`IDLE`） | 戦闘なし。HP自然回復のみ（`tech_offline.md` §4）。消化した分だけ `last_tick_at` を進める |
+| 10 | 戦闘の成立 | パーティが空 | 戦闘なし・状態のみ返却。`last_tick_at` は §1 のとおり進める |
+| 11 | 排他制御 | ロック競合（`busy_timeout` 超過） | `503 BATTLE_TICK_BUSY` |
+| 12 | 例外処理 | tick処理中の例外 | 全ロールバック・`last_tick_at` 不変 |
+
+> WARN許容 #8・#11・#12: 例外経路（異常な時刻・ロック競合・処理中の例外）。対になる正常系は #1〜#7・#9・#10 が持つ
+
+**#10 の `last_tick_at`**: 消化する戦闘が無くても §1 の繰り越し規則どおり
+`last_tick_at ← last_tick_at + pending_ticks × 60秒` とする。据え置くと未処理tickが際限なく積み上がり、
+編成を戻した瞬間に §2 のクランプ（#7）が働いて `capped=true`（切り詰めた）を返すため。
 
 ## 6. Java 実装時に満たすこと（未実装）
 

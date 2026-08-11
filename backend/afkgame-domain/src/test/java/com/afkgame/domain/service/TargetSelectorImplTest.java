@@ -1,7 +1,11 @@
 package com.afkgame.domain.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Random;
@@ -22,7 +26,8 @@ import com.afkgame.domain.model.Character;
  * <p>仕様: docs/tech/detail/tech_rng.md §5（分岐一覧）・§1 #3、選択規則は
  * docs/tech/detail/tech_battle.md §3.3。
  *
- * <p>分岐観点: 生存者が0体のときの呼び出し（呼び出し側の打ち切り漏れ）。
+ * <p>分岐観点: 生存者が1体以上のときの抽選（正常系）と、生存者が0体のときの呼び出し
+ * （呼び出し側の打ち切り漏れ）。
  * 打ち切りそのもの（味方全滅・敵撃破で以降の行動を行わない）は
  * {@link BattleSimulatorImplTest} が tech_battle.md §5 #4・#5 で持つ。
  *
@@ -56,6 +61,31 @@ class TargetSelectorImplTest {
         character.setHp(hp);
         character.setMaxHp(100);
         return character;
+    }
+
+    @Nested
+    @DisplayName("生存者ありの抽選")
+    class TestSurvivorSelected {
+
+        /**
+         * 候補に戦闘不能者が混ざっていても、生存者だけを詰め直してから
+         * {@code nextInt(生存者数)} を1回だけ消費する（tech_rng.md §1 #3・§3「消費順序の固定」）。
+         * 候補全体の件数で抽選すると戦闘不能者が当たり、そのターンが空振りする。
+         *
+         * <p>分岐: tech_rng.md §5 #9
+         */
+        @Test
+        void test_生存者から1体を選び乱数は1回だけ消費する() {
+            List<Character> candidates = List.of(
+                    character("char_001", 100), character("char_002", 0), character("char_003", 50));
+            when(random.nextInt(2)).thenReturn(1);
+
+            Character selected = selector().selectRandom(candidates, random);
+
+            assertThat(selected.getId()).isEqualTo("char_003");
+            verify(random).nextInt(2);
+            verifyNoMoreInteractions(random);
+        }
     }
 
     @Nested

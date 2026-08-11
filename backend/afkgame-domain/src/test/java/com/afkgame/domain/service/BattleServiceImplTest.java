@@ -411,14 +411,16 @@ class BattleServiceImplTest {
         /**
          * パーティが1体もいなければ戦闘は成立しない。状態だけを返す。
          *
-         * <p>{@code lastTickAt} を進めるかは §5 #10 が定めていないため<b>アサートしない</b>
-         * （詳細設計への差し戻し対象。テストリスト作成の完了報告に記載）。
+         * <p>戦闘も回復も起こらないが、{@code lastTickAt} は §1 の繰り越し規則どおり進める（§5 #10）。
+         * 据え置くと未処理tickが際限なく積み上がり、編成を戻した瞬間に §2 のクランプが働いて
+         * {@code capped=true}（切り詰めた）を返してしまう。
          *
          * <p>分岐: tech_tick.md §5 #10
          */
         @Test
         void test_パーティが空なら戦闘せず状態だけを返す() {
-            givenPlayerLastTickedAt(NOW.minusSeconds(5 * 60));
+            Instant base = NOW.minusSeconds(5 * 60);
+            Player player = givenPlayerLastTickedAt(base);
             when(characterRepository.findAllByPlayerId(PLAYER_ID)).thenReturn(List.of());
 
             TickResult result = service().tick(PLAYER_ID);
@@ -428,6 +430,7 @@ class BattleServiceImplTest {
             assertThat(result.offlineSummary()).isNull();
             verify(battleSimulator, never()).simulate(any(), anyList(), anyInt());
             verify(offlineCalculator, never()).calculate(any(), anyList(), anyInt());
+            assertThat(player.getLastTickAt()).isEqualTo(base.plusSeconds(300));
         }
     }
 
