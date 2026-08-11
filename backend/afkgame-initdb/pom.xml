@@ -32,7 +32,8 @@
         <plugins>
             <!-- 本モジュールは SQL だけで src/test を持たないため、親で surefire / failsafe に
                  groups/excludedGroups を与えると「JUnit48+ or JUnit 5 が要る」で
-                 ビルドが落ちる。テスト実行自体をスキップして回避する（2R-E で failsafe も同様に塞いだ） -->
+                 ビルドが落ちる。テスト実行自体をスキップして回避する（2R-E で failsafe も同様に塞いだ）。
+                 増分ビルドのときだけ再現するため、このガードは外さないこと -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>

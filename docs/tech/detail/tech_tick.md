@@ -10,7 +10,7 @@
 | 項目 | 仕様 |
 |------|------|
 | 時刻の権威 | サーバーのUTC時刻のみ。クライアント送信の時刻は一切信用しない |
-| 基準時刻 | `player.last_tick_at`（`timestamptz` にUTCで保存。読み出しは `OffsetDateTime` で受ける） |
+| 基準時刻 | `player.last_tick_at`（`timestamptz` にUTCで保存。読み出しは `Instant` で受ける） |
 | tick間隔 | 60秒固定（`TICK_INTERVAL_SECONDS`） |
 | 未処理tick数 | `pending_ticks = floor((now − last_tick_at) / 60)` |
 | **端数の扱い** | **繰り越す**。`last_tick_at ← last_tick_at + pending_ticks × 60秒`（`now` を代入しない） |

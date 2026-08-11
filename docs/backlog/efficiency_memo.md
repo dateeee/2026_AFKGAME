@@ -33,3 +33,8 @@
 - ターン概要: ツール99回・エラー1回・拒否0回。開始:「<command-message>next</command-message>」
 - 原因と改善案: `check_doc_size.py` 5回のうち3回は `next_session.md` §2 が H2 2,000字を超えた後の**目分量トリムの往復**（2,198→2,131→2,016→1,994）で、**16:25 のエントリと同一原因の再発**。前回の改善案（`len()` 実測を削減にも適用）は `doc-size.md` §3.1・`profile.md` §7 ルール7 に書いたが、`next`→工程スキルの経路ではどちらも読まないため届いていない。改善案: **[next.md](../../.claude/project/next.md) §4（引き継ぎ更新時のチェック）へ「書き換え前後の差分字数を `len()` で実測し、超過分の削減を同じ編集にまとめる」を1行追加する**（同§は既に `--sections` の事前実行を求めているので、その直後が置き場所）。`check_branch_list.py` 3回は worktree での追加後・マーカー重複解消後・統合後の確認で、うち統合後の1回は ff マージで内容が変わらないため省ける。
 
+
+## 2026-08-11 20:01 | session e707fe00 | 自動検出
+- シグナル: same-command('python scripts/check_branch_li'×5, 'python scripts/check_docs.py'×4)
+- ターン概要: ツール147回・エラー1回・拒否0回。開始:「<command-message>next</command-message>」
+- 原因と改善案: （未記入 — Claude が1〜2行で追記する）

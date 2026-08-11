@@ -41,7 +41,7 @@ DBMS は `local`・`production` とも **PostgreSQL** に統一する（[tech_op
 | `BIGINT` | `Long` | `bigint` | ゴールド・EXP（32bit桁溢れ回避） |
 | `FLOAT` | `Double` | `double precision` | 閾値・倍率 |
 | `BOOLEAN` | `Boolean` | `boolean` | フラグ |
-| `DATETIME(tz)` | `OffsetDateTime` | `timestamptz` | 時刻。**保存・比較は常に UTC** |
+| `DATETIME(tz)` | `Instant` | `timestamptz` | 時刻。**保存・比較は常に UTC**（瞬時点のみ扱い、オフセットは持たない） |
 | `JSON` | `String`（MyBatis TypeHandler で変換） | `json` | 要素数が可変で、DB側で検索しない構造（戦闘ログの `entries`） |
 
 `JSON` 列は**アプリ側でのみ解釈する**。DBMS の JSON 関数・JSON インデックスを使う設計にしない（DB側にスキーマ知識を持たせないため）。列単位の検索が必要になった時点で、正規化したテーブルへ切り出す。
