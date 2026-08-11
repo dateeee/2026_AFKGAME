@@ -14,13 +14,26 @@
 | モジュール | パッケージ | 置くもの | 依存してよい先 |
 |-----------|-----------|---------|--------------|
 | `afkgame-env` | `com.afkgame.env.config` / `.logging` | 設定保持 Bean・DataSource・Flyway 起動、ログ基盤 | （なし） |
-| `afkgame-domain` | `com.afkgame.domain.model` / `.repository` / `.service` / `.masterdata` / `.rng` | Entity、Repository、Service、マスターデータ、RNG | `afkgame-env` |
-| `afkgame-web` | `com.afkgame.web.api` / `.resource` / `.config` / `.filter` | `@RestController`、Resource、Security・フィルタ | `afkgame-domain`、`afkgame-env` |
+| `afkgame-domain` | `com.afkgame.domain.model` / `.repository` / `.service.<領域>` / `.masterdata` / `.rng` | Entity、Repository、Service、マスターデータ、RNG | `afkgame-env` |
+| `afkgame-web` | `com.afkgame.web.api` / `.resource.<領域>` / `.config` / `.filter` | `@RestController`、Resource、Security・フィルタ | `afkgame-domain`、`afkgame-env` |
 | `afkgame-initdb` | （Java なし） | Flyway マイグレーション SQL | （なし） |
 
 - **依存方向は `web → domain → env` の一方向**。逆流・循環を作らない
 - `afkgame-domain` に Web 層の型（Spring MVC・`jakarta.servlet`・`HttpStatus`）を持ち込まない。**HTTP ステータスはドメイン層で扱わない**（業務例外はエラーコードだけを持ち、ステータスは Web 層が決める。[exception.md](exception.md) §4 #4）
 - 新しいパッケージを切るときは [tech_backend.md](../../tech/basic/tech_backend.md) §4.1 のツリーへ同時に追記する
+
+### 2.1 サブパッケージ（領域で分ける範囲）
+
+**`.service` と `.resource` だけ**を業務領域で分ける（`auth`・`player`・`health`・`battle`・`tower` …）。ほかは平置きのまま。
+
+| パッケージ | 扱い | 理由 |
+|-----------|------|------|
+| `domain.service.<領域>`・`web.resource.<領域>` | **領域で分ける** | Phase ごとに領域そのものが増え、平置きだと40〜55ファイルへ達する。ガイドライン 5.1.6.7 の REST 実装例も `domain.service.member` の形を採る |
+| `domain.model`・`domain.repository`・`domain.masterdata`・`web.api`・`web.filter`・`env.*` | 平置き | Entity・マスタ種別・API リソースと1対1で増え、クラス名から置き場が引ける。**1パッケージ20ファイルを超えたら本表を見直す** |
+
+- 領域名は**機能の区分に一致させる**（ツリーの正は `tech_backend.md` §4.1）。`impl`・`dto` のような**技術種別で切らない** — インタフェース・実装・戻り値の `record` は同じサブパッケージに同居させる（`domain/service.md` §3 #1）
+- `domain.repository` を分けないのは**ガイドラインとの差分**。マッピング XML を `src/main/resources` の同一パスへ追随させる手間と `namespace` の書き換えが、Entity と1対1でしか増えないパッケージを分ける益を上回るため
+- **サブパッケージを作ったら AOP 境界ログのポイントカットを確認する**。`afkgame.properties` の式は `..` で配下を含める（`.*.` は直下しか一致せず、境界ログが**黙って消える**。[logging/application.md](logging/application.md) §3）
 
 ## 3. 命名
 

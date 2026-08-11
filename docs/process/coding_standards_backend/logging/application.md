@@ -14,8 +14,8 @@
 
 | # | 境界 | 対象 |
 |---|------|------|
-| 1 | **Web ↔ Domain** | `com.afkgame.domain.service` の Service（`ServiceImpl`）の public メソッド |
-| 2 | **Domain ↔ Repository** | `com.afkgame.domain.repository` の Repository の public メソッド |
+| 1 | **Web ↔ Domain** | `com.afkgame.domain.service` **配下**（領域サブパッケージを含む）の Service（`ServiceImpl`）の public メソッド |
+| 2 | **Domain ↔ Repository** | `com.afkgame.domain.repository` **配下**の Repository の public メソッド |
 
 コントローラそのものは対象にしない（受信の START / END は [communication.md](communication.md) §2 の通信ログが持つ。二重に出さない）。
 

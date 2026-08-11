@@ -75,6 +75,7 @@ Service は次の2つを担う（ガイドライン 3.2.5.1）。
 |---|------|
 | 1 | 原則**主体となる Entity（業務データ）ごとに1 Service**。ユースケース単位の Service は、複数 Entity をまたぐ初期化・集約処理に限って作ってよい（例: `PlayerInitializationService`） |
 | 2 | 名前はインタフェースが `<領域>Service`、実装が `<領域>ServiceImpl`（`domain.md` §5）。Phase をまたいで機能が増えるときは Service を分けて足す（既存 Service を肥大させない） |
+| 3 | 置き場は**業務領域ごとのサブパッケージ** `com.afkgame.domain.service.<領域>`（`common.md` §2.1）。インタフェース・`Impl`・戻り値の `record` は**同じサブパッケージへ同居**させる（`impl` で切らない。ガイドライン 5.1.6.7 の `domain.service.member` と同じ形）。領域をまたいで呼ぶときは §2 #1 の共有 Service として宣言する |
 
 ## 6. 例外とメッセージ
 

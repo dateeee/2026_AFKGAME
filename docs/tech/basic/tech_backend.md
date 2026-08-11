@@ -34,10 +34,10 @@ backend/                           # Terasoluna サーバー（war を Tomcat �
 │   │   ├── Player, Character, Item / Equipment, ShopDailyState, ShopDailySlot（Phase 2〜）
 │   │   └── User, RefreshToken, EmailVerificationToken（Phase 2〜）/ Party, PartyMember, CharacterSkill（Phase 3〜）
 │   ├── repository/                # Repository インタフェース + 同名のマッピング XML（MyBatis3）
-│   ├── service/                   # ビジネスロジック（インタフェース `〜Service` + 実装 `〜ServiceImpl`）
-│   │   ├── BattleService（戦闘計算・エンカウント。オフライン報酬含む）, GameStateBuilder（状態レスポンス構築）
-│   │   ├── EquipmentService / ShopDailyService / AuthService（Phase 2〜）
-│   │   └── PartyService / SkillService（Phase 3〜）, BaseService / ForgeService（Phase 4〜）
+│   ├── service/<領域>/            # ビジネスロジック（`〜Service` + `〜ServiceImpl`。**領域で分ける**。common.md §2.1）
+│   │   ├── auth/（AuthService, JwtService, VerificationMailSender）, player/（PlayerInitializationService, GameStateBuilder）, health/
+│   │   ├── battle/（BattleService＝戦闘計算・エンカウント・tick・オフライン報酬, BattleSimulator, DamageCalculator ほか）, tower/
+│   │   └── equipment/ / shop/（Phase 2〜）, party/ / skill/（Phase 3〜）, base/ / forge/（Phase 4〜）
 │   ├── masterdata/                # マスターデータの record + YAML ローダ
 │   │   └── Enemies, Towers, Items, Equipments, Characters, Notices（Phase 3〜）
 │   ├── (src/main/resources/masterdata/)  # マスターデータ本体（YAML。数値の正は docs/data/）
@@ -47,7 +47,7 @@ backend/                           # Terasoluna サーバー（war を Tomcat �
 │   ├── api/                       # @RestController
 │   │   ├── AuthApi, GameApi, BattleApi, TowerApi, ShopApi / EquipmentApi（Phase 2〜）
 │   │   └── PartyApi, NoticeApi（Phase 3〜）/ BaseApi, ForgeApi（Phase 4〜）/ BossRushApi ほか（Phase 5〜）
-│   ├── resource/                  # Resource(DTO) + Bean Validation（API I/O）
+│   ├── resource/<領域>/           # Resource(DTO) + Bean Validation（API I/O。**領域で分ける**。auth/ common/ health/ …）
 │   ├── config/{app,web}/          # ApplicationContextConfig・SpringSecurityConfig・SpringMvcConfig
 │   ├── filter/                    # リクエストIDログ・共通例外ハンドラ
 │   ├── (src/main/webapp/WEB-INF/web.xml)  # サーブレット定義

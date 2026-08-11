@@ -374,11 +374,11 @@ def test_check_mask_ignores_classes_outside_the_pointcut(root):
     assert mod.check_mask(mod.java_files()) == []
 
 
-def test_check_mask_ignores_subpackages_of_the_pointcut(root):
-    # ポイントカットは `service.*` であり、サブパッケージ（`service.impl.*`）には一致しない
-    write(root, "backend/afkgame-domain/src/main/java/com/afkgame/domain/service/impl/X.java",
+def test_check_mask_covers_subpackages_of_the_pointcut(root):
+    # ポイントカットは `service..*` であり、領域サブパッケージ（`service.auth.*`）にも一致する
+    write(root, "backend/afkgame-domain/src/main/java/com/afkgame/domain/service/auth/X.java",
           "class X {\n    public void m(String rawToken) {}\n}\n")
-    assert mod.check_mask(mod.java_files()) == []
+    assert "rawToken" in mod.check_mask(mod.java_files())[0]
 
 
 def test_check_mask_ignores_non_public_methods(root):

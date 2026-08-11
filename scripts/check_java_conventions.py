@@ -26,7 +26,8 @@ backend-review で毎回使い捨てスクリプトを書いていた機械判�
     8 は `namespace` を持つ MyBatis マッピング XML のみ（logback.xml の `${}` は
     Logback の変数置換で正当）。
     12 は src/main のうち afkgame.properties のポイントカット2本
-    （`com.afkgame.domain.{service,repository}.*` の public メソッド）に一致する範囲。
+    （`com.afkgame.domain.{service,repository}..*` ＝サブパッケージを含む配下の
+    public メソッド）に一致する範囲。
     13 は src/main 全体を参照コーパスとし、生成しているだけの config パッケージを除く。
 
 WARN の扱い:
@@ -75,8 +76,8 @@ STATIC_RANDOM = re.compile(r"\bstatic\b[^;()=]*\bRandom\b")
 SHARED_RANDOM = re.compile(r"\bMath\.random\s*\(|\bThreadLocalRandom\b")
 
 # 境界ログの対象範囲。afkgame.properties の
-# `afkgame.logging.layer.pointcut.{service,repository}` と同じく「パッケージ直下の public」。
-# サブパッケージは `.*.` に一致しないため対象外
+# `afkgame.logging.layer.pointcut.{service,repository}` と同じく「パッケージ配下の public」。
+# 式は `..` なので領域サブパッケージ（`service.auth` 等）も対象に含む
 POINTCUT_PKGS = ("com/afkgame/domain/service/", "com/afkgame/domain/repository/")
 
 # logging/application.md §3.1 規約1 の固定表（LayerLoggingInterceptor#MASKED_PARAM_NAMES の写し）。
@@ -335,11 +336,8 @@ def check_random(files: list[Path]) -> list[str]:
 
 
 def in_pointcut(rel: str) -> bool:
-    """ポイントカット `com.afkgame.domain.{service,repository}.*` の直下か。"""
-    for pkg in POINTCUT_PKGS:
-        if pkg in rel and "/" not in rel.split(pkg, 1)[1]:
-            return True
-    return False
+    """ポイントカット `com.afkgame.domain.{service,repository}..*` の配下か。"""
+    return any(pkg in rel for pkg in POINTCUT_PKGS)
 
 
 def split_params(params: str) -> list[str]:
