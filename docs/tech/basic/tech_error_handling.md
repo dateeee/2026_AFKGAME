@@ -58,7 +58,7 @@
 | `EQUIP_` | 装備関連 | `EQUIP_NOT_FOUND`, `EQUIP_SLOT_MISMATCH` |
 | `SKILL_` | スキル関連 | `SKILL_INSUFFICIENT_SP`, `SKILL_PREREQUISITE_NOT_MET`（一覧は [tech_party.md §7](../detail/tech_party.md)） |
 | `PARTY_` | パーティ関連 | `PARTY_LOCKED_IN_TOWER`, `PARTY_MEMBER_NOT_OWNED` |
-| `CHARACTER_` | キャラクター関連 | `CHARACTER_NOT_FOUND` |
+| `CHARACTER_` | キャラクター関連 | `CHARACTER_NOT_FOUND`（限界突破の一覧は [tech_limitbreak.md §7](../detail/tech_limitbreak.md)） |
 | `BASE_` | 施設関連 | `BASE_INSUFFICIENT_MATERIALS`, `BASE_MAX_LEVEL`（一覧は [tech_base.md §6](../detail/tech_base.md)） |
 | `FORGE_` | 鍛冶屋関連 | `FORGE_INSUFFICIENT_MATERIALS`, `FORGE_LEVEL_TOO_LOW` |
 | `RATE_LIMIT_` | レート制限 | `RATE_LIMIT_EXCEEDED`(429)。`Retry-After` ヘッダを併せて返す |

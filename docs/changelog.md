@@ -8,6 +8,13 @@
 
 ---
 
+## 2026-08-11
+
+- `docs/tech/detail/tech_limitbreak.md`: 新規。限界突破（`POST /api/character/limit-break`）の処理フロー・素材の同一性判定・素材消費の波及・分岐一覧30件を確定した（Phase 4 詳細設計）
+- `docs/tech/detail/tech_state.md`: §4 の限界突破行に `CHARACTER_LOCKED_IN_TOWER` を明記した
+- `docs/tech/basic/tech_api.md`・`tech_error_handling.md`・`tech_spec.md`・`docs/INDEX.md`・`docs/data/master/character.md` §8: `tech_limitbreak.md` への参照を追加した
+- `docs/diagrams/api_sequence/character.md` §8・`api_sequence.md`: 限界突破フローを Phase 4 表記へ改め、検証順・トランザクション境界・レスポンス項目を処理仕様に合わせた
+
 ## 2026-08-10
 
 | ファイル | 内容 |

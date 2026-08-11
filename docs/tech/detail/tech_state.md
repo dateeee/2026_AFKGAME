@@ -100,7 +100,7 @@ stateDiagram-v2
 | `POST /api/equipment/sell` / `lock` | ○ | ○（ロック中・装備中は不可） | ○ |
 | `PUT /api/party/edit` | ○ | ×（400 `PARTY_LOCKED_IN_TOWER`） | × |
 | `POST /api/skill/learn` / `set-active` | ○ | ○ | ○ |
-| `POST /api/character/limit-break` | ○ | ×（400） | × |
+| `POST /api/character/limit-break` | ○ | ×（400 `CHARACTER_LOCKED_IN_TOWER`） | × |
 | `POST /api/prestige` | ○ | ×（400） | × |
 | `POST /api/shop/buy` / `item/sell` | ○ | ○ | ○ |
 | `POST /api/base/*` / `forge/*` | ○ | ○ | ○ |

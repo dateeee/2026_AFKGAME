@@ -1,4 +1,4 @@
-# APIシーケンス図 — パーティ・スキル・限界突破（Phase 3）
+# APIシーケンス図 — パーティ・スキル・限界突破（Phase 3〜4）
 
 > 親: [api_sequence.md](../api_sequence.md)。API定義は [tech_api.md](../../tech/basic/tech_api.md)。
 
@@ -65,7 +65,9 @@ sequenceDiagram
     API-->>B: {<br/>  status: "ok",<br/>  gold: 400,<br/>  returnedSP: 9<br/>}
 ```
 
-## 8. 限界突破フロー（Phase 3）
+## 8. 限界突破フロー（Phase 4〜）
+
+処理・分岐の正は [tech_limitbreak.md](../../tech/detail/tech_limitbreak.md)、ボーナス率の正は [master/character.md §8.1](../../data/master/character.md)。
 
 ```mermaid
 %%{init: {'theme': 'default', 'sequence': {'actorFontSize': 18, 'messageFontSize': 16, 'noteFontSize': 14}} }%%
@@ -74,16 +76,17 @@ sequenceDiagram
     participant API as Terasoluna(Spring MVC)
     participant DB as Database
 
-    B->>API: POST /api/character/limit-break<br/>{<br/>  characterId: "hero_001",<br/>  materialCharacterId: "hero_002"<br/>}
+    B->>API: POST /api/character/limit-break<br/>{<br/>  characterId: "chr-a",<br/>  materialCharacterId: "chr-b"<br/>}
 
-    API->>API: バリデーション:<br/>同一キャラ名? ✓<br/>limitBreak < 5? (現在2) ✓<br/>素材キャラがパーティ外? ✓
+    API->>API: 検証(すべて更新前):<br/>塔外(IDLE)? ✓<br/>両者を所持? ✓<br/>別の行? ✓<br/>masterId が一致? ✓<br/>突破回数 < 上限? (現在2) ✓<br/>素材がパーティ外? ✓
 
-    API->>DB: hero_001.limitBreak = 3<br/>(+5%→+10%→+15%)
-    API->>DB: hero_002を削除<br/>(素材として消費)
+    API->>DB: chr-a.limitBreak = 3
+    API->>DB: chr-b の子行を削除<br/>(習得スキル・セット枠・装備スロット)
+    API->>DB: chr-b を削除<br/>(素材として消費。equipment 行は残す)
 
-    Note over API: ステータスボーナス:<br/>突破0: +0%<br/>突破1: +5%<br/>突破2: +10%<br/>突破3: +15% ← Now<br/>突破4: +20%<br/>突破5: +30%
+    Note over API,DB: 手順はすべて1トランザクション。<br/>失敗時は突破回数も含めて全件ロールバック
 
-    API-->>B: {<br/>  status: "ok",<br/>  limitBreak: 3,<br/>  bonusPercent: 15,<br/>  updatedStats: {...}<br/>}
+    API-->>B: {<br/>  character: { ...limitBreak: 3, effectiveAtk: ... },<br/>  bonusPercent: 15,<br/>  removedCharacterId: "chr-b"<br/>}
 
-    B->>B: キャラステータス更新表示
+    B->>B: 基点のステータスを更新し<br/>素材の行を一覧から除く
 ```
