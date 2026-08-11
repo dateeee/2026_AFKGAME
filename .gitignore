@@ -51,6 +51,7 @@ frontend/tests/e2e/.tomcat/
 # logback のローテート済みファイル（*.log に一致しないため backend/**/logs/ が ?? で残る）
 *.log.gz
 logs/token_usage.csv
+logs/token_usage_deltas.csv
 
 # Coverage / Test
 .pytest_cache/
