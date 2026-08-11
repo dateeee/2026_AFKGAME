@@ -42,7 +42,7 @@
 |------|------|----------------|
 | コンパイル | 構文・型 | `cd backend && mvn -q compile` |
 | テスト・カバレッジ | 振る舞い・C1 100% | `cd backend && mvn verify`（JaCoCo） |
-| レビュー | 規約への適合（命名・層の責務・セキュリティ・一貫性） | `backend-review` スキル（観点の正は [.claude/project/review-code.md](../../../.claude/project/review-code.md) §2） |
+| レビュー | 規約への適合（命名・層の責務・セキュリティ・一貫性） | `backend-review` スキル（観点の正は [.claude/project/review/backend.md](../../../.claude/project/review/backend.md) §2） |
 
 - 新規・改修したコードは規約に従う。**既存コードの一括是正はしない**（見つけた逸脱は `known_issues.md` へ記録し、その箇所を触るときに直す）
 - 改訂は基本設計工程で行う（[phases.md](../phases.md) §3.2.2）。改訂したら `.claude/references/coding-standards-backend.md` を**同じ変更で**追随させる

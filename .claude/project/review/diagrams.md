@@ -1,18 +1,17 @@
 # 設計図レビュー — プロジェクト固有プロファイル
 
-> 一般手順は [.claude/references/review-procedure.md](../references/review-procedure.md)、出力形式は [review-format.md](../references/review-format.md)。本書は `diagrams-review` 固有の値のみを持つ。
-> 仕様書横断（`doc-review`）・修正適用（`fix-specs`）の固有値は [review-docs.md](review-docs.md)。
+> 共通パラメータ・重要度の共通軸は [review.md](../review.md)。一般手順は [review-procedure.md](../../references/review-procedure.md)、出力形式は [review-format.md](../../references/review-format.md)。
+> 対象スキル: `diagrams-review`。仕様書横断（`doc-review`）・修正適用（`fix-specs`）は [docs.md](docs.md)。
 
 ## 0. レビューパラメータ
 
 | 項目 | 値 |
 |------|-----|
-| 保存先ディレクトリ | `docs/reviews/diagrams-review/`（ファイル名は `YYYY-MM-DD_HHMMSS.md`） |
-| ローテーション | `python scripts/rotate_reviews.py --apply`（直下を最新10件に保ち、超過分は `archive/` へ移動） |
+| 保存先ディレクトリ | `docs/reviews/diagrams-review/` |
 | レポートタイトル | 設計図レビュー結果 |
 | カテゴリ | 仕様書との整合性 / コードとの整合性 / 設計図間の整合性 / Mermaid構文 / 網羅性 |
 
-準備コマンド（モード判定・差分特定・ISSUE採番。全量時は `--full` を追加）。図だけでなく照合先の変更も差分に含める:
+図だけでなく照合先の変更も差分に含める:
 
 ```bash
 python .claude/scripts/review_prep.py --dir docs/reviews/diagrams-review \
@@ -27,13 +26,13 @@ python .claude/scripts/review_prep.py --dir docs/reviews/diagrams-review \
 |------|---------|----------|
 | データ構造 | `er_diagram`、`class_diagram` | `tech_db.md`（DBスキーマの正）、`tech_data.md`、`design/systems/`、`afkgame-domain` の Entity/Repository・Service、`frontend/src/stores/` |
 | 画面・API | `screen_transition`、`api_sequence` | `design/systems/ui*.md`、`tech_api.md`、`tech_architecture.md`、`afkgame-web` の `@RestController`、`frontend/src/router/`・`api/` |
-| 処理・構成 | `battle_flow`、`system_architecture` | `tech_battle.md`、`tech_offline.md`、`tech_architecture.md`、[profile.md](profile.md) §5 |
+| 処理・構成 | `battle_flow`、`system_architecture` | `tech_battle.md`、`tech_offline.md`、`tech_architecture.md`、[profile.md](../profile.md) §5 |
 
 差分モードは分担しない（`review-procedure.md` §1 規律2）。
 
 ## 1. 観点
 
-対象6図と照合先は [basic-design.md](basic-design.md) §1 の表。
+対象6図と照合先は [basic-design.md](../basic-design.md) §1 の表。
 
 | 分類 | 観点 |
 |------|------|
@@ -46,10 +45,10 @@ python .claude/scripts/review_prep.py --dir docs/reviews/diagrams-review \
 
 ## 2. 重要度の基準
 
+[review.md](../review.md) §2 の具体化。
+
 | 重要度 | 基準 |
 |-------|------|
 | **高** | 設計図とコード/仕様書の重大な乖離（テーブル定義の不一致、画面遷移の欠落） |
 | **中** | 設計図間の不整合、属性の過不足、フローの軽微な差異 |
 | **低** | 命名の不統一、構文上の改善点、可読性 |
-
-担当範囲の切り分けは `review-procedure.md` §7 を参照。

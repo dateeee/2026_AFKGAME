@@ -14,7 +14,8 @@ argument-hint: "[full | 追加観点]"
 |----|---------|------|
 | 1 | `.claude/references/review-procedure.md` | 準備スクリプト・モード判定・機械的検証・指摘の書き方・出力 |
 | 2 | `.claude/project/profile.md` | ディレクトリ（§2）・不変条件（§5）・コスト規律（§6） |
-| 3 | `.claude/project/review-docs.md` | パラメータ・照合先・分担・観点・重要度基準 |
+| 3 | `.claude/project/review.md` | 共通パラメータ（§1）・重要度の共通軸（§2） |
+| 4 | `.claude/project/review/docs.md` | パラメータ・照合先・分担・観点・重要度の基準 |
 
 ## 1. 引数
 
@@ -30,10 +31,10 @@ review-procedure.md を §2 準備（`review_prep.py` 実行）→ §3 差分モ
 
 | 項目 | 参照先 |
 |------|-------|
-| 差分モードの照合先 | review-docs.md §1 |
-| 全量モードの分担 | review-docs.md §2（最大4体・`sonnet`） |
-| 適用する観点 | review-docs.md §3（整合性 / 網羅性 / 規約） |
-| 重要度の基準 | review-docs.md §5 |
+| 差分モードの照合先 | review/docs.md §1 差分モードの照合先 |
+| 全量モードの分担 | review/docs.md §2 全量モードの分担（最大4体・`sonnet`） |
+| 適用する観点 | review/docs.md §3 観点（整合性 / 網羅性 / 規約） |
+| 重要度の基準 | review/docs.md §4 重要度の基準 |
 
 ## 3. 注意事項
 

@@ -13,6 +13,7 @@
 | ファイル | 内容 |
 |---------|------|
 | [profile.md](profile.md) | 技術スタック・ディレクトリ・常用コマンド・アーキテクチャ不変条件。**全スキルが最初に読む** |
+| [review.md](review.md) | レビュー系5スキル + `fix-specs` の共通パラメータ・重要度の共通軸・分冊表。**レビュー時に最初に読む** |
 | [_TEMPLATE.md](_TEMPLATE.md) | 再利用テンプレート。新プロジェクト立ち上げ時の記述スキーマ |
 
 ## 工程 ↔ スキル ↔ プロファイル 対応表
@@ -31,14 +32,16 @@
 
 ## 支援スキルのプロファイル
 
+レビュー系は **[review.md](review.md)（共通）+ 分冊1件**を読む（分冊どうしは読み合わない）。
+
 | スキル | プロファイル | 用途 |
 |-------|------------|------|
-| `doc-review` | [review-docs.md](review-docs.md) | 仕様書の横断レビュー |
-| `diagrams-review` | [review-diagrams.md](review-diagrams.md) | 設計図と仕様書・コードの整合レビュー |
-| `fix-specs` | [review-docs.md](review-docs.md) | レビュー結果の仕様書への反映 |
-| `backend-review` | [review-code.md](review-code.md) | バックエンドのコードレビュー |
-| `frontend-review` | [review-code.md](review-code.md) | フロントエンドのコードレビュー |
-| `full-review` | [review-fullstack.md](review-fullstack.md) | 仕様↔コード・フロント↔バックの統合レビュー |
+| `doc-review` | [review.md](review.md) + [review/docs.md](review/docs.md) | 仕様書の横断レビュー |
+| `diagrams-review` | [review.md](review.md) + [review/diagrams.md](review/diagrams.md) | 設計図と仕様書・コードの整合レビュー |
+| `fix-specs` | [review.md](review.md) + [review/docs.md](review/docs.md) §5 | レビュー結果の仕様書への反映 |
+| `backend-review` | [review.md](review.md) + [review/backend.md](review/backend.md) | バックエンドのコードレビュー |
+| `frontend-review` | [review.md](review.md) + [review/frontend.md](review/frontend.md) | フロントエンドのコードレビュー |
+| `full-review` | [review.md](review.md) + [review/fullstack.md](review/fullstack.md) | 仕様↔コード・フロント↔バックの統合レビュー |
 | `resolve-specs` | [requirements.md](requirements.md) | 未確定仕様の確定（要件定義工程の一部） |
 | `next` | [next.md](next.md) | 新セッション冒頭で引き継ぎファイルから次タスクを特定し工程スキルへ委譲 |
 | `retro` | [retro.md](retro.md) | 効率メモ（Stop フックが自動追記）の振り返りとスキル・成果物への反映 |

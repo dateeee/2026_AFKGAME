@@ -1,19 +1,16 @@
 # 統合整合レビュー — プロジェクト固有プロファイル
 
-> 一般手順は [.claude/references/review-procedure.md](../references/review-procedure.md)、出力形式は [review-format.md](../references/review-format.md)。本書は AFK GAME 固有の値のみを持つ。
-> 対象スキル: `full-review`（仕様↔コード・フロント↔バックの整合）。片側のコード品質は [review-code.md](review-code.md)。
-> 不変条件は [profile.md](profile.md) §5。
+> 共通パラメータ・重要度の共通軸は [review.md](../review.md)。一般手順は [review-procedure.md](../../references/review-procedure.md)、出力形式は [review-format.md](../../references/review-format.md)。
+> 対象スキル: `full-review`（仕様↔コード・フロント↔バックの整合）。片側のコード品質は [backend.md](backend.md)・[frontend.md](frontend.md)。
+> 不変条件は [profile.md](../profile.md) §5。
 
 ## 0. レビューパラメータ
 
 | 項目 | 値 |
 |------|-----|
-| 保存先ディレクトリ | `docs/reviews/full-review/`（ファイル名は `YYYY-MM-DD_HHMMSS.md`） |
-| ローテーション | `python scripts/rotate_reviews.py --apply`（直下を最新10件に保ち、超過分は `archive/` へ移動） |
+| 保存先ディレクトリ | `docs/reviews/full-review/` |
 | レポートタイトル | フルスタック統合レビュー結果 |
 | カテゴリ | 仕様書-コード整合性 / フロント・バック統合整合性 / アーキテクチャ方針適合 |
-
-準備コマンド（モード判定・差分特定・ISSUE採番。全量時は `--full` を追加）:
 
 ```bash
 python .claude/scripts/review_prep.py --dir docs/reviews/full-review \
@@ -32,7 +29,7 @@ python .claude/scripts/review_prep.py --dir docs/reviews/full-review \
 | 仕様書 | `design/game_spec.md` → `systems/`、`tech/tech_spec.md` → `tech_data` / `tech_structure{,_backend}` / `tech_api` / `tech_architecture` / `tech_logging` / `tech_error_handling`、`tech_battle.md`・`tech_offline.md`・`tech_auth.md`、`data/master_data.md` → `data/master/` |
 
 索引 + 個別ファイル構成のため、**照合に必要な個別ファイルのみ**読む。
-**設計図（`docs/diagrams/`）は対象外**。図が絡む照合は `diagrams-review` の担当（`review-procedure.md` §7）。
+**設計図（`docs/diagrams/`）は対象外**。図が絡む照合は `diagrams-review` の担当（[review-procedure.md](../../references/review-procedure.md) §7）。
 
 ### 1.1 全量モードの分担（最大3体・`sonnet`）
 
@@ -40,7 +37,7 @@ python .claude/scripts/review_prep.py --dir docs/reviews/full-review \
 |------|------------|
 | API・型整合 | `afkgame-web` の `@RestController`・Resource、`frontend/src/api/`、`frontend/src/types/`、`tech_api.md` |
 | ロジック・マスターデータ | `afkgame-domain` の Service・Entity/Repository・マスターデータ、`design/systems/`、`tech_battle.md`、`tech_offline.md`、`tech_data.md`、`data/master/` |
-| 画面・アーキテクチャ | `frontend/src/views/`・`components/`・`stores/`・`router/`、`design/systems/ui*.md`、`tech_architecture.md`、`profile.md` §5 |
+| 画面・アーキテクチャ | `frontend/src/views/`・`components/`・`stores/`・`router/`、`design/systems/ui*.md`、`tech_architecture.md`、[profile.md](../profile.md) §5 |
 
 差分モードは分担しない（`review-procedure.md` §1 規律2）。
 
@@ -71,7 +68,7 @@ python .claude/scripts/review_prep.py --dir docs/reviews/full-review \
 | 統合整合性 | 8 | **エンドポイント整合**: `frontend/src/api/` の URL・HTTPメソッド・ボディ・レスポンス期待値が `afkgame-web` の `api/` と一致するか |
 | 統合整合性 | 9 | **認証フロー**: トークン管理、ヘッダー名・形式（Bearer 等）、認証エラー時のフロント側ハンドリング（リダイレクト等） |
 | 統合整合性 | 10 | **データフロー**: ポーリング間隔がフロント・バック・仕様書で一致するか。オフライン復帰の取得フローが整合するか |
-| アーキテクチャ | 11 | `profile.md` §5 の不変条件（ハイブリッドtick制・サーバー権威・開発時フォールバック）に沿っているか |
+| アーキテクチャ | 11 | [profile.md](../profile.md) §5 の不変条件（ハイブリッドtick制・サーバー権威・開発時フォールバック）に沿っているか |
 | アーキテクチャ | 12 | フロントがビジネスロジック（ダメージ計算等）を持っていないか。**例外は `useBattleLocal.ts` のみ** |
 | アーキテクチャ | 13 | `tech_architecture.md` の構成（層の分離・依存の向き）と実装が一致するか |
 
@@ -88,10 +85,10 @@ python .claude/scripts/review_prep.py --dir docs/reviews/full-review \
 
 ## 5. 重要度の基準
 
+[review.md](../review.md) §2 の具体化。
+
 | 重要度 | 基準 |
 |-------|------|
 | **高** | フロント・バック間の通信が実際に失敗する問題、仕様との重大な乖離、データ不整合 |
 | **中** | 型の不一致（動作はするが型安全性が損なわれる）、仕様との軽微な不一致 |
 | **低** | 命名の不統一、改善が望ましいが動作に影響しない問題 |
-
-担当範囲の切り分けは `review-procedure.md` §7 を参照。

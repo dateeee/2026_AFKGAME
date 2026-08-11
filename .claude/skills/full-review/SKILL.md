@@ -15,7 +15,8 @@ argument-hint: "[full | 追加観点]"
 |----|---------|------|
 | 1 | `.claude/references/review-procedure.md` | 準備スクリプト・モード判定・機械的検証・指摘の書き方・出力 |
 | 2 | `.claude/project/profile.md` | ディレクトリ・技術規約（§3）・**不変条件（§5）**・コスト規律 |
-| 3 | `.claude/project/review-fullstack.md` | パラメータ・対象・照合先・観点・機械的検証・重要度基準 |
+| 3 | `.claude/project/review.md` | 共通パラメータ（§1）・重要度の共通軸（§2） |
+| 4 | `.claude/project/review/fullstack.md` | パラメータ・対象・照合先・観点・機械的検証・重要度の基準 |
 
 索引 + 個別ファイル構成のため、**照合に必要な個別ファイルのみ**読む。
 
@@ -33,10 +34,10 @@ review-procedure.md を §2 準備（`review_prep.py` 実行）→ §3 差分モ
 
 | 項目 | 参照先 |
 |------|-------|
-| 差分モードの照合先 | review-fullstack.md §2 |
-| 適用する観点 | review-fullstack.md §3（仕様書-コード / 統合整合性 / アーキテクチャ） |
-| 機械的検証 | review-fullstack.md §4（型・エンドポイント・数値・ルート定義の突き合わせ） |
-| 重要度の基準 | review-fullstack.md §5 |
+| 差分モードの照合先 | review/fullstack.md §2 差分モードの照合先 |
+| 適用する観点 | review/fullstack.md §3 観点（仕様書-コード / 統合整合性 / アーキテクチャ） |
+| 機械的検証 | review/fullstack.md §4 機械的検証（型・エンドポイント・数値・ルート定義の突き合わせ） |
+| 重要度の基準 | review/fullstack.md §5 重要度の基準 |
 
 型・エンドポイント・ルート定義の突き合わせは**目視しない**。スクラッチパッドの使い捨てスクリプトで抽出・差分を取り、その出力だけを取り込む。
 

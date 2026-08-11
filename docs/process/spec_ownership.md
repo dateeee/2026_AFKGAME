@@ -66,7 +66,7 @@
 | メール送信の方式（時機・設定値・本文・再送） | `docs/tech/detail/tech_auth/mail.md` | `docs/tech/nonfunctional/tech_operations.md` | — |
 | 次セッションの開始タスク（引き継ぎ） | `docs/backlog/next_session.md` | `docs/backlog/carryover_notes.md` | — |
 | DBスキーマ（物理テーブル名・列・型・キー・インデックス・制約） | `docs/tech/basic/tech_db.md` | `docs/tech/basic/tech_data.md` | — |
-| バックエンドのコーディング規約 | `docs/process/coding_standards_backend.md` | `.claude/references/coding-standards-backend.md`, `.claude/project/profile.md`, `.claude/project/review-code.md`, `.claude/project/test-list.md` | — |
+| バックエンドのコーディング規約 | `docs/process/coding_standards_backend.md` | `.claude/references/coding-standards-backend.md`, `.claude/project/profile.md`, `.claude/project/review/backend.md`, `.claude/project/test-list.md` | — |
 | エンドコンテンツの数値（ボスラッシュのウェーブ／累積報酬・転生ボーナス・深淵の塔の基準値／スケーリング） | `docs/data/master/endgame.md` | `docs/design/systems/endgame.md` | — |
 | イベントダンジョンの敵・報酬数値 | `docs/data/master/event_dungeon.md` | `docs/design/systems/endgame.md` | — |
 

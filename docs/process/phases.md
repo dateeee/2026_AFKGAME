@@ -48,7 +48,7 @@ DBスキーマは**テキスト（テーブル定義書）を正、ER図を視�
 | `coding_standards_frontend.md` | `frontend/` の Vue 3 / TypeScript | **未整備**。フロントエンドの製造再開前に作成する |
 
 - **正は `docs/process/` 側**。エージェントが実装・レビュー時に読む要約を [.claude/references/coding-standards-backend.md](../../.claude/references/coding-standards-backend.md) へ派生させる。改訂は**正 → 派生の順に同じ変更で**行う（派生側に固有値を書かない）
-- 規約の**境界**: テストコードの記述規約は [coding_standards_backend/test.md](coding_standards_backend/test.md)、レビュー観点は [.claude/project/review-code.md](../../.claude/project/review-code.md) §2、技術スタックの一覧は [.claude/project/profile.md](../../.claude/project/profile.md) §3 が正。規約側で再掲しない（`spec_ownership.md`）
+- 規約の**境界**: テストコードの記述規約は [coding_standards_backend/test.md](coding_standards_backend/test.md)、レビュー観点は [.claude/project/review/backend.md](../../.claude/project/review/backend.md) §2、技術スタックの一覧は [.claude/project/profile.md](../../.claude/project/profile.md) §3 が正。規約側で再掲しない（`spec_ownership.md`）
 - **改訂の起点**: ①技術スタック・レイヤ構成の変更 ②`backend-review` / `frontend-review` で同じ指摘が繰り返された（規約へ昇格させる）③実装で新しい流儀が必要になった（先に規約を直してから実装する）
 - 既存コードの一括是正は行わない。逸脱は [known_issues.md](../backlog/known_issues.md) へ記録し、その箇所を触るときに直す
 
