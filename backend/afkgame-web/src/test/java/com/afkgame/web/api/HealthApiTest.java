@@ -16,7 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import com.afkgame.domain.service.HealthService;
+import com.afkgame.domain.service.health.HealthService;
 
 /**
  * {@link HealthApi} の単体テスト。

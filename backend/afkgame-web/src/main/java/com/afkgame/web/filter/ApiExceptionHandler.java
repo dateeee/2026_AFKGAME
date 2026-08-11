@@ -19,7 +19,7 @@ import org.terasoluna.gfw.common.exception.SystemException;
 import com.afkgame.env.logging.AppLogger;
 import com.afkgame.env.logging.LogKey;
 import com.afkgame.env.logging.LoggerName;
-import com.afkgame.web.resource.ErrorResource;
+import com.afkgame.web.resource.common.ErrorResource;
 
 import tools.jackson.core.exc.StreamReadException;
 

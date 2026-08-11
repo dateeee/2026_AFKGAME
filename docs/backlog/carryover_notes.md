@@ -20,6 +20,9 @@
 - **製造①で決める3点**（①-b の申し送り）: **乱数源の生成点は `BattleSimulatorImpl#simulate` の入口**（`RandomFactory#create()` を1回 → 以降は引数で配る）、**`FloorProgression`・`FloorCatalog` の中身はセグメント②**（テストは継ぎ目だけを置いてモックする）、**クリティカル率の供給元は未定**（`tech_rng.md` §6 の節削除とあわせて決める。テストは `StatCalculator#effectiveCritRate` の実効値だけを使うので供給元に依存しない）
 - **`tech_polling.md` §5 の10件は JUnit へ展開しない**（①-a で判断）。フロントは TDD 非適用（`test-list.md` §2）で、同 §5 自身が「単体レベルの検証はE2E（Playwright）に統合する」と定めている。**`integration-test` スキルの担当**。マーカー0件のままなら `check_branch_list.py --tests` の照合対象外で exit 0 は維持される
 - **`httpclient5` は STEP 4（Phase 2 の Google OAuth）で `afkgame-domain/pom.xml` へ戻す**（ISSUE-905 で先行投入を削除した。技術選定は有効で、正は [tech_selection.md](java_migration/tech_selection.md) §2・[tech_backend.md](../tech/basic/tech_backend.md) §4.3）。`RestClient` の `ClientHttpRequestFactory` を Bean 構成する回に、同じコミットで依存を足す
+- **新しい Service・Resource は業務領域のサブパッケージへ置く**（`domain.service.<領域>`・`web.resource.<領域>`。判断表は [common.md](../process/coding_standards_backend/common.md) §2.1）。**3-B 製造①の表層は `service/battle/` へ置く**（Red 10クラスを移してあるので、同じパッケージに実装を作れば import は要らない）。`FloorCatalog`・`FloorProgression` だけは `battle/` と `tower/` のどちらへ置くかを製造②のセグメント分割に合わせて決める
+- **サブパッケージを新設したら AOP 境界ログのポイントカットを確認する**。`afkgame.properties` の式は `..`（配下）で書いてあるので現状は追随不要だが、`.*.`（直下のみ）へ戻すと境界ログが**テストに検出されないまま消える**
+- **backend-review 2026-08-10 の還元候補のうち `MailSettings.java` の `{@link}` 提案は旧パッケージを指している**（レビュー本文は記録として書き換えていない）。適用時は `com.afkgame.domain.service.auth.VerificationMailSenderImpl` へ読み替える
 
 ## 2. 仕様・マスターデータ
 

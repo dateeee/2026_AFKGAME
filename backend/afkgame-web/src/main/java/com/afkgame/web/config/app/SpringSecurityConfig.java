@@ -13,8 +13,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import com.afkgame.domain.service.AuthService;
-import com.afkgame.domain.service.JwtService;
+import com.afkgame.domain.service.auth.AuthService;
+import com.afkgame.domain.service.auth.JwtService;
 import com.afkgame.env.config.CorsSettings;
 import com.afkgame.web.filter.ApiAuthenticationEntryPoint;
 import com.afkgame.web.filter.JwtAuthenticationFilter;

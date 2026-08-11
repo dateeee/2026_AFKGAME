@@ -12,7 +12,7 @@ import org.terasoluna.gfw.common.exception.BusinessException;
 import com.afkgame.env.logging.AppLogger;
 import com.afkgame.env.logging.LogReason;
 import com.afkgame.env.logging.LoggerName;
-import com.afkgame.web.resource.ErrorResource;
+import com.afkgame.web.resource.common.ErrorResource;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

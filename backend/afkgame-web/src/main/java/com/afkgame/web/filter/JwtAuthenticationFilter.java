@@ -12,8 +12,8 @@ import org.terasoluna.gfw.common.exception.BusinessException;
 import org.terasoluna.gfw.common.message.ResultMessages;
 
 import com.afkgame.domain.model.User;
-import com.afkgame.domain.service.AuthService;
-import com.afkgame.domain.service.JwtService;
+import com.afkgame.domain.service.auth.AuthService;
+import com.afkgame.domain.service.auth.JwtService;
 import com.afkgame.env.logging.AppLogger;
 import com.afkgame.env.logging.LogKey;
 import com.afkgame.env.logging.LogReason;

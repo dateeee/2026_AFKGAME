@@ -9,17 +9,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.afkgame.domain.model.User;
-import com.afkgame.domain.service.AuthService;
-import com.afkgame.web.resource.AuthResource;
-import com.afkgame.web.resource.LinkAccountResource;
-import com.afkgame.web.resource.LoginResource;
-import com.afkgame.web.resource.LogoutResource;
-import com.afkgame.web.resource.PasswordResetConfirmResource;
-import com.afkgame.web.resource.PasswordResetRequestResource;
-import com.afkgame.web.resource.RefreshResource;
-import com.afkgame.web.resource.RegisterResource;
-import com.afkgame.web.resource.StatusResource;
-import com.afkgame.web.resource.VerifyEmailResource;
+import com.afkgame.domain.service.auth.AuthService;
+import com.afkgame.web.resource.auth.AuthResource;
+import com.afkgame.web.resource.auth.LinkAccountResource;
+import com.afkgame.web.resource.auth.LoginResource;
+import com.afkgame.web.resource.auth.LogoutResource;
+import com.afkgame.web.resource.auth.PasswordResetConfirmResource;
+import com.afkgame.web.resource.auth.PasswordResetRequestResource;
+import com.afkgame.web.resource.auth.RefreshResource;
+import com.afkgame.web.resource.auth.RegisterResource;
+import com.afkgame.web.resource.common.StatusResource;
+import com.afkgame.web.resource.auth.VerifyEmailResource;
 
 import jakarta.validation.Valid;
 

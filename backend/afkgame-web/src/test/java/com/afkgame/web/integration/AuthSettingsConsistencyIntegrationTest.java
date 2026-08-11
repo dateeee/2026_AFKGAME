@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.afkgame.env.config.AuthSettings;
-import com.afkgame.web.resource.RegisterResource;
+import com.afkgame.web.resource.auth.RegisterResource;
 
 import jakarta.validation.constraints.Size;
 

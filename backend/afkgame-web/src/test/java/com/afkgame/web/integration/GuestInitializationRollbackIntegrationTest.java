@@ -16,7 +16,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.transaction.IllegalTransactionStateException;
 
 import com.afkgame.domain.repository.PlayerRepository;
-import com.afkgame.domain.service.PlayerInitializationService;
+import com.afkgame.domain.service.player.PlayerInitializationService;
 
 /**
  * ゲスト作成の初期化が途中で失敗したとき、単一トランザクションが全体をロールバックすることの統合テスト。

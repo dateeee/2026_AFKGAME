@@ -6,8 +6,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.afkgame.domain.service.HealthService;
-import com.afkgame.web.resource.HealthResource;
+import com.afkgame.domain.service.health.HealthService;
+import com.afkgame.web.resource.health.HealthResource;
 
 /**
  * 死活監視エンドポイント。

@@ -28,8 +28,8 @@ import org.terasoluna.gfw.common.exception.SystemException;
 import org.terasoluna.gfw.common.message.ResultMessages;
 
 import com.afkgame.env.logging.LogKey;
-import com.afkgame.web.resource.RefreshResource;
-import com.afkgame.web.resource.RegisterResource;
+import com.afkgame.web.resource.auth.RefreshResource;
+import com.afkgame.web.resource.auth.RegisterResource;
 
 import jakarta.validation.Valid;
 

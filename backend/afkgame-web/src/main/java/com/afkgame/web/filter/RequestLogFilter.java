@@ -21,7 +21,7 @@ import jakarta.servlet.http.HttpServletResponse;
  *
  * <p>仕様: docs/tech/basic/tech_logging.md「リクエストログ用フィルタ」。
  * リクエストIDは MDC で引き回し、レスポンスヘッダ {@code X-Request-ID} とエラー応答
- * （{@link com.afkgame.web.resource.ErrorResource}）へ載せてログとの突合を可能にする。
+ * （{@link com.afkgame.web.resource.common.ErrorResource}）へ載せてログとの突合を可能にする。
  * START / END の出力項目・対の規約は
  * {@code coding_standards_backend/logging/communication.md} §2 が正。
  *

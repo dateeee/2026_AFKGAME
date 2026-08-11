@@ -30,8 +30,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.afkgame.domain.model.User;
-import com.afkgame.domain.service.AuthResult;
-import com.afkgame.domain.service.AuthService;
+import com.afkgame.domain.service.auth.AuthResult;
+import com.afkgame.domain.service.auth.AuthService;
 import com.afkgame.web.filter.ApiExceptionHandler;
 
 /**
