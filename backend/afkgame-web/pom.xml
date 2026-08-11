@@ -37,10 +37,35 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
             </plugin>
-            <!-- 単体テストの C1（分岐）100% を mvn verify で判定する（設定は親の pluginManagement） -->
+            <!-- 単体テストの C1（分岐）100% を mvn verify で判定する（設定は親の pluginManagement）。
+                 加えて全モジュールを1つにまとめた HTML を backend/target/site/jacoco-aggregate へ出す
+                 （モジュール別の target/site/jacoco は check の判定単位＝BUNDLE に対応するため残す）。
+
+                 report-aggregate を web に置くのは、**依存をたどって全モジュールへ届く唯一のモジュール**
+                 だから（集約対象は「自分が依存するモジュール」＝ domain・env。自分自身は
+                 includeCurrentProject で含める）。reactor は env → domain → web の順に
+                 ライフサイクルを回すので、web の集約時点で各モジュールの jacoco.exec は揃っている。
+
+                 フェーズを verify ではなく post-integration-test にするのは、**check より先に出す**ため。
+                 C1 が 100% に届かず check が落ちる場面こそ HTML を開きたいが、同じ verify に置くと
+                 プラグイン間の実行順が保証されず、集約前に build が落ちうる -->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>report-aggregate</id>
+                        <phase>post-integration-test</phase>
+                        <goals>
+                            <goal>report-aggregate</goal>
+                        </goals>
+                        <configuration>
+                            <includeCurrentProject>true</includeCurrentProject>
+                            <outputDirectory>${project.basedir}/../target/site/jacoco-aggregate</outputDirectory>
+                            <title>AFK GAME backend (afkgame-env + afkgame-domain + afkgame-web)</title>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
