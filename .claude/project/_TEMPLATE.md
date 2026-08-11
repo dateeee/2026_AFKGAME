@@ -115,23 +115,7 @@
 
 **一般層に残す固有前提の範囲**: テスト系スキル（`test-list` `unit-test`）の一般例は **JUnit 5 / JaCoCo 前提**で書かれている（`@Tag`・`@ParameterizedTest`・分岐カバレッジの読み方など）。他のスタックへ持ち出す場合は、スキル本体ではなく `skills/<スキル名>/references/` の資料を差し替える。
 
-## 規約: スクリプトの配置
-
-判定・採番・雛形生成・一括置換など**決定的に決まる手順は LLM の手作業にせず**スクリプトへ寄せる。
-
-| 置き場所 | 用途 | 回帰テスト |
-|---------|------|----------|
-| `.claude/scripts/` | 複数スキルが共有するもの（例: `review_prep.py` — レビュー系5スキルのモード判定・差分特定・採番・雛形生成） | `.claude/scripts/tests/` |
-| `.claude/skills/<スキル名>/scripts/` | そのスキル専用のもの | 同ディレクトリの `tests/` |
-| `.claude/hooks/` | フック本体（stdin の JSON を受けて判定するもの） | `.claude/hooks/tests/` |
-| `<リポジトリ>/scripts/` | プロジェクト固有の検証（`.claude/` の外。パス・対象を内蔵してよい） | `<リポジトリ>/scripts/tests/` |
-
-- 判定ロジックを持つスクリプトには `<配置先>/tests/` へ pytest を置き、`python -m pytest <配置先>/tests -q` で回す。プロダクト側のテスト設定（カバレッジ閾値等）と混ざらないよう**別ルートで回す**
-- テストは**緑パス + 変異テスト**（検出対象を1項目ずつ壊して検出されることを確認）をセットにする。緑パスだけでは「何も検出しない実装」が通ってしまう
-- `tests/conftest.py` で `sys.path` へ親ディレクトリを足し、通常の import 経路で読む（`importlib` の直読みは `sys.modules` 未登録で dataclass の型解決が落ちる）
-- `.claude/` 配下のスクリプトは**プロジェクト非依存**にする。保存先・対象パス・タイトル等の固有値は**すべて引数で受け取り**、呼び出し側（スキル + プロファイル）が渡す
-- 出力は `KEY  値` 形式など**そのまま取り込める形**にする。LLM に再計算させない
-- 許可プロンプトを省くには `.claude/settings.json` の `permissions.allow` へ `Bash(python .claude/scripts/*)` を追加する（SKILL.md の `allowed-tools` は「そのスキルが使えるツールの制限」であり、書くと列挙外のツールが使えなくなる。許可の追加用途には使わない）
+スクリプト（`.claude/scripts/` `skills/<名>/scripts/` `hooks/`）の置き場所・回帰テスト・引数化の規約は [.claude/references/script-conventions.md](../references/script-conventions.md)（コピー対象側が持つ。本書は書き直す側のスキーマのみ）。
 
 ---
 

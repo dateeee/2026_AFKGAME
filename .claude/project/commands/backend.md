@@ -7,6 +7,7 @@
 | 対象 | 方法 |
 |------|------|
 | `mvn` の出力解析（Red確認・失敗原因の特定） | **まず `python scripts/report_java_tests.py --run`**（要約のみ出力。生ログは `backend/target/mvn.log` に残り、javac エラーは字下げ行ごと抽出済み）。生ログを読むときは `ctx_execute` の python で **`cp932` デコード**する。**Bash のパイプ + `grep` は使わない**（日本語が文字化けし、`[ERROR]` に続く字下げ行＝`シンボル: クラス X` が grep から落ちる。読み直しで重い `mvn` を2回走らせることになる） |
+| テスト件数・失敗件数 | 同スクリプトの集計値を使う。**自前で数えるなら `<testcase` の出現数**で数え、`*.txt` の「Tests run」も XML ルートの `tests=` 属性も**使わない**（JUnit 5 の `@Nested` 配下を 0 と報告する。実測: `MasterDataLoaderTest` は `tests="0"` だが `<testcase` は11件）。失敗は `<failure` / `<error` |
 | 使い捨てスクリプト | **Write ツールでスクラッチパッドへ作成** → `python <path> <リポジトリルート>` で実行する（Bash のヒアドキュメント + リダイレクトでの作成は worktree セッションで拒否される。`python -c` へ日本語を直接書くと CP932 で壊れて SyntaxError になる） |
 
 ## 3. バックエンド: モジュールを絞ってテストする

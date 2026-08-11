@@ -55,6 +55,8 @@
 | [commands.md](commands.md) | 全スキル（[profile.md](profile.md) §4 経由） | 全工程共通の常用コマンド表（索引・§1） |
 | [commands/backend.md](commands/backend.md) | `dev`、`unit-test`、`integration-test` | §2 出力の受け取り方 / §3 モジュールを絞ったテスト / §5 外部ツールの所在 / §6 起動と疎通確認 |
 | [commands/adhoc.md](commands/adhoc.md) | 使い捨て調査を行うスキル | §4 使い捨て調査の作法 |
+| [dev/verification.md](dev/verification.md) | `dev` | §5.1 動作確認時の Gotchas（外部依存の版調査・DIコンテナ起動確認・`Edit` の `old_string` 特定）。**該当状況でのみ読む** |
+| [integration-test/conventions.md](integration-test/conventions.md) | `integration-test` | §1.1 L1（MockMvc）/ §1.2 L2（Playwright）の記述規約。**テストを書くときのみ読む** |
 
 ## 共有リファレンス（`.claude/references/`）
 
@@ -62,10 +64,7 @@
 |---------|-------|------|
 | [review-procedure.md](../references/review-procedure.md) | レビュー系5スキル | レビューの共通手順・コスト規律 |
 | [review-format.md](../references/review-format.md) | レビュー系5スキル | レビュー結果の出力形式 |
-| [coding-standards-backend.md](../references/coding-standards-backend.md) | `dev`、`backend-review`、`unit-test` | Java 実装の規約要約の**索引**（§1 使い方 + 分冊表）。**正は [docs/process/coding_standards_backend.md](../../docs/process/coding_standards_backend.md)**（本書はその派生） |
-| [coding-standards-backend/layering.md](../references/coding-standards-backend/layering.md) | 同上 | §2 層の責務・呼び出し可否・横断処理 |
-| [coding-standards-backend/writing.md](../references/coding-standards-backend/writing.md) | 同上 | §3 記述（書式・型・定数・可視性） |
-| [coding-standards-backend/exception-logging.md](../references/coding-standards-backend/exception-logging.md) | 同上 | §4 例外・トランザクション・ログ・Javadoc |
-| [coding-standards-backend/review-checklist.md](../references/coding-standards-backend/review-checklist.md) | `backend-review` | §5 レビュー観点チェックリスト |
+| [script-conventions.md](../references/script-conventions.md) | スクリプトを新設・改修する全スキル | `.claude/` 配下のスクリプトの置き場所・回帰テスト（緑パス + 変異テスト）・固有値の引数化 |
+| [coding-standards-backend.md](../references/coding-standards-backend.md) | `dev`、`backend-review`、`unit-test` | Java 実装の規約要約の**索引**。§2〜§5 の分冊（`coding-standards-backend/`）は同書の分冊表から開く（§5 チェックリストは `backend-review` のみ）。**正は [docs/process/coding_standards_backend.md](../../docs/process/coding_standards_backend.md)**（本書はその派生） |
 
 改稿時は [docs/changelog.md](../../docs/changelog.md) の先頭へ追記する（各ファイルに変更履歴セクションを置かない）。

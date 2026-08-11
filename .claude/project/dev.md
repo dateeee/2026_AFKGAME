@@ -34,7 +34,7 @@
 | 順 | 参照先 | 内容 |
 |----|--------|------|
 | 1 | `docs/design/game_spec.md` → `design/systems/` | ゲームシステム・バランス仕様 |
-| 2 | `docs/tech/tech_spec.md` → `tech_api.md` / `tech_data.md` / `tech_structure{,_backend}.md` | API設計・データ構造・実装配置 |
+| 2 | `docs/tech/tech_spec.md` → `tech_api.md` / `tech_data.md` / `tech_structure.md`（§2〜§3）/ `tech_backend.md`（§4） | API設計・データ構造・実装配置 |
 | 3 | `docs/tech/detail/tech_<機能>.md` | 対象機能の処理フローと**分岐一覧の正**（機能名は索引 `tech_spec.md` で特定する） |
 | 4 | `docs/tech/basic/tech_db/<領域>.md` | 列・NULL・一意制約の正（**モデルを新設・変更する場合**。`check_schema_triple.py` の照合元） |
 | 5 | `docs/tech/detail/tech_battle.md`・`tech_offline.md`・`tech_auth.md` | 戦闘処理・オフライン計算・認証（該当する場合の補助） |
@@ -74,20 +74,9 @@
 
 ## 5. 動作確認
 
-| 対象 | コマンド |
-|------|---------|
-| バックエンド構文 | `cd backend && mvn -q compile` |
-| バックエンド規約 | `python scripts/check_java_conventions.py`（タブ・行長・import・ログ・DI・SQL・日時・乱数・マスク・未参照の13判定。未参照は WARN。抑止は `// 規約例外: <理由>`） |
-| バックエンドテスト | `cd backend && mvn test`（TDDの全テストがGreen） |
-| フロント型チェック | `cd frontend && npm run type-check` |
-
-| # | 確認時の注意 |
-|---|------------|
-| 1 | テスト件数は **`<testcase` の出現数**（`grep -c "<testcase" target/*-reports/TEST-*.xml`）か、`mvn` 出力のモジュール別 `Tests run:` 行で数える。**`*.txt` の「Tests run」も XML ルートの `tests=` 属性も、JUnit 5 の `@Nested` 配下を 0 と報告する**（実測: `MasterDataLoaderTest` は `tests="0"` だが `<testcase` は11件）。失敗は `<failure` / `<error` で数える |
-| 2 | 外部依存の版・API の実在確認は**推測で書かず、着手前に項目を列挙して1バッチで問い合わせる**（既存 POM なら properties と dependencyManagement をまとめて1回。問い合わせ先と落とし穴は [commands/adhoc.md](commands/adhoc.md) §4） |
-| 3 | **DI コンテナを起こす確認をビルドと別に置く**（Bean 生成時にしか出ない型エイリアス衝突・未解決プレースホルダはコンパイルでは出ない）。DB 無しで回すときは `dataSource` と `flyway` だけスタブへ差し替える |
-| 4 | **`@Nested` を持つテストクラスの `Edit` は `old_string` に一意な行まで含める**（ネストをまたいで同名のテストメソッドが並ぶため `void test_...() {` + 直後1行では複数一致する）。直前の `分岐:` マーカー行かメソッド本体の特徴的な行を足す |
-| 5 | **Javadoc・コメント行の `old_string` は Read 出力から字下げごとコピーする**（目分量で書くと字下げ幅が合わず不一致になる） |
+コマンドは [commands.md](commands.md) §1 が**正**（本書に再掲しない）。**バックエンド構文確認 → Java 規約チェック → `mvn test`（TDDの全テストがGreen）→ フロント型チェック**の順に通す。
+出力の読み方・モジュールを絞ったテストは [commands/backend.md](commands/backend.md) §2・§3。
+状況別の失敗パターン（外部依存の版調査・DIコンテナ起動確認・`@Nested`／Javadoc の `Edit`）は [dev/verification.md](dev/verification.md) §5.1。
 
 ## 6. 完了基準
 

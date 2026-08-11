@@ -5,21 +5,12 @@
 
 ## 1. 成果物
 
-| 成果物 | パス | 役割 |
-|-------|------|------|
-| 技術仕様（索引） | `docs/tech/tech_spec.md` | 個別ファイルへの索引 |
-| DB設計 | `docs/tech/basic/tech_db.md` + `tech_db/` | 物理テーブル名・列の型・キー・一意制約・インデックス・命名規約。**DBスキーマの正** |
-| データ構造 | `docs/tech/basic/tech_data.md` | API レスポンス／マスターデータの JSON 構造（永続化スキーマは持たない） |
-| 実装配置 | `docs/tech/basic/tech_structure.md`（§2〜§3）+ 同 `_backend.md`（§4） | ディレクトリ構成・モジュール責務 |
-| API設計 | `docs/tech/basic/tech_api.md` | エンドポイント一覧 |
-| API共通仕様 | `docs/tech/basic/tech_api/common.md` | 規約・共通ヘッダ・ステータスコード |
-| アーキテクチャ | `docs/tech/basic/tech_architecture.md` | 層構成・依存方向 |
-| ログ設計 | `docs/tech/basic/tech_logging.md` + `tech_logging/` | ログレベル・出力項目 |
-| エラーハンドリング | `docs/tech/basic/tech_error_handling.md` | エラー形式・コード体系 |
-| 認証方式 | `docs/tech/detail/tech_auth.md` | 認証フロー・トークン |
-| 性能・容量 | `docs/tech/nonfunctional/tech_performance.md` | 非機能要件の実現方式 |
-| セキュリティ | `docs/tech/nonfunctional/tech_security.md` | 非機能要件の実現方式 |
-| 運用 | `tech_operations.md`（§12.1〜3 環境）+ 同 `_procedure.md`（§12.4〜7 手順） | 運用要件の実現方式 |
+本工程の成果物は **`docs/tech/` 配下の技術仕様一式**。ファイル名・章割り当て・各ファイルの役割は索引 [tech_spec.md](../../docs/tech/tech_spec.md) §1 章構成が**正**（本書に再掲しない。§0 DB設計 〜 §12 運用設計の全章 + 索引 `tech_spec.md` 自身）。認証方式 [tech_auth.md](../../docs/tech/detail/tech_auth.md) は `detail/` に置くが本工程の範囲。
+
+| 押さえる点 | 内容 |
+|-----------|------|
+| DBスキーマの正 | `basic/tech_db.md` + `tech_db/`（物理テーブル名・列の型・キー・一意制約・インデックス・命名規約）。ER図・Entity はこれに従う |
+| 非機能・運用 | §10〜§12 は**実現方式**のみ。目標値は要件定義工程の成果物が正（`tech_spec.md` §1 の注記） |
 
 **執筆前の分量見積もり**: 表形式の定義書は1テーブル約550字。区分Cの8,000字を超える構成は、**書き上げてから測るのではなく執筆前に**系統単位へ分割する（`tech_db/` が認証系・プレイヤー系・装備系…と分かれているのはこのため）。
 
@@ -67,7 +58,7 @@
 
 | 検証項目 | 方法 |
 |---------|------|
-| DBスキーマ一致 | `python scripts/check_schema_triple.py`。`tech_db/`（正）↔ `er_diagram/` ↔ Python models ↔ Flyway DDL を、列名・並び順・PK/FK/UK タグ・一意制約・FKなし宣言・nullable・制約の命名規約・ER索引の7観点で照合する |
+| DBスキーマ一致 | `python scripts/check_schema_triple.py`。`tech_db/`（正）↔ `er_diagram/` ↔ `afkgame-domain` の Entity ↔ Flyway DDL を、列名・並び順・PK/FK/UK タグ・一意制約・FKなし宣言・nullable・制約の命名規約・ER索引の7観点で照合する |
 | 相対リンク切れ・索引到達性 | `python scripts/check_docs.py --links --reach` |
 | 文字数上限 | `python scripts/check_doc_size.py` |
 | コードフェンスの閉じ漏れ | ` ```mermaid ` と ` ``` ` の対応を数える（使い捨て） |
