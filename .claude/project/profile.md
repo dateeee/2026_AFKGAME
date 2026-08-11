@@ -22,7 +22,7 @@
 
 ## 3. 技術スタック
 
-記述規約の正は [coding_standards_backend.md](../../docs/process/coding_standards_backend.md)（索引 + 分冊。**ベースは TERASOLUNA 開発ガイドライン 5.11.0**）、要約は [coding-standards-backend.md](../references/coding-standards-backend.md)。本表は**採用技術の一覧**に限り、配置は §2。
+記述規約の正は [coding_standards_backend.md](../../docs/process/coding_standards_backend.md)（**ベースは TERASOLUNA 開発ガイドライン 5.11.0**）と [coding_standards_frontend.md](../../docs/process/coding_standards_frontend.md)（**ベースは Vue 公式ガイド・スタイルガイド**。いずれも索引 + 分冊）、要約は [coding-standards-backend.md](../references/coding-standards-backend.md)・[coding-standards-frontend.md](../references/coding-standards-frontend.md)。本表は**採用技術の一覧**に限り、配置は §2。
 
 | 層 | 技術 | 規約 |
 |----|------|------|

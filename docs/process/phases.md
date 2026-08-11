@@ -45,12 +45,12 @@ DBスキーマは**テキスト（テーブル定義書）を正、ER図を視�
 | 規約 | 対象 | 状態 |
 |------|------|------|
 | `coding_standards_backend.md`（索引 + [coding_standards_backend/](coding_standards_backend/) の13分冊: basis / layering / common / exception / logging（+ `logging/` 2件）/ domain（+ `domain/service.md`）/ web / filter / interceptor / test） | `backend/` の Java（Terasoluna / MyBatis3）。**TERASOLUNA 開発ガイドライン 5.11.0.RELEASE 日本語版をベースとし、規約はその差分だけを持つ**（準拠元URLは [basis.md](coding_standards_backend/basis.md) §1、個々の差分は各分冊が正） | 整備済み |
-| `coding_standards_frontend.md` | `frontend/` の Vue 3 / TypeScript | **未整備**。フロントエンドの製造再開前に作成する |
+| [coding_standards_frontend.md](coding_standards_frontend.md)（索引 + [coding_standards_frontend/](coding_standards_frontend/) の9分冊: basis / layering / common / component / composition / store / api / styling / test） | `frontend/` の Vue 3 / TypeScript。**Vue 公式ガイド・スタイルガイドをベースとし、規約はその差分だけを持つ**（準拠元とスタイルガイド優先度別の採否は [basis.md](coding_standards_frontend/basis.md) §1、個々の差分は各分冊が正） | 整備済み |
 
-- **正は `docs/process/` 側**。エージェントが実装・レビュー時に読む要約を [.claude/references/coding-standards-backend.md](../../.claude/references/coding-standards-backend.md) へ派生させる。改訂は**正 → 派生の順に同じ変更で**行う（派生側に固有値を書かない）
+- **正は `docs/process/` 側**。エージェントが実装・レビュー時に読む要約を [.claude/references/coding-standards-backend.md](../../.claude/references/coding-standards-backend.md)・[.claude/references/coding-standards-frontend.md](../../.claude/references/coding-standards-frontend.md) へ派生させる。改訂は**正 → 派生の順に同じ変更で**行う（派生側に固有値を書かない）
 - 規約の**境界**: テストコードの記述規約は [coding_standards_backend/test.md](coding_standards_backend/test.md)、レビュー観点は [.claude/project/review/backend.md](../../.claude/project/review/backend.md) §2、技術スタックの一覧は [.claude/project/profile.md](../../.claude/project/profile.md) §3 が正。規約側で再掲しない（`spec_ownership.md`）
 - **改訂の起点**: ①技術スタック・レイヤ構成の変更 ②`backend-review` / `frontend-review` で同じ指摘が繰り返された（規約へ昇格させる）③実装で新しい流儀が必要になった（先に規約を直してから実装する）
-- 既存コードの一括是正は行わない。逸脱は [known_issues.md](../backlog/known_issues.md) へ記録し、その箇所を触るときに直す
+- 既存コードの逸脱は [known_issues.md](../backlog/known_issues.md) へ記録する。是正のタイミングは各規約の basis が定める（バックエンドはその箇所を触るとき＝一括是正しない、フロントエンドは修正対象として解消する。[coding_standards_frontend/basis.md](coding_standards_frontend/basis.md) §2 #6）
 
 ## 3.3 詳細設計（ローレベル設計）
 
@@ -83,7 +83,7 @@ DBスキーマは**テキスト（テーブル定義書）を正、ER図を視�
 | 目的 | §3.4 のテストを満たす実装をTDDで作る |
 | 主な作業 | backend/（Terasoluna）は Red-Green-Refactor を1テストずつ回す。frontend/（Vue 3）は従来どおり実装 |
 | 成果物 | 実装コード一式（テーブルの追加・変更を伴う場合は Flyway マイグレーションを含む） |
-| 規約 | **バックエンドは `coding_standards_backend.md` に従う**（層の責務・命名・例外・ログ・Javadoc）。フロントエンドは規約整備まで既存コードの流儀に倣う（§3.2.2）。Entity/Repository は §3.2.1 のテーブル定義書どおりに作り、定義書に無い列を足さない |
+| 規約 | **バックエンドは `coding_standards_backend.md`、フロントエンドは [coding_standards_frontend.md](coding_standards_frontend.md) に従う**（層の責務・命名・例外・ログ・Javadoc / SFC・ストア・エラー処理）。Entity/Repository は §3.2.1 のテーブル定義書どおりに作り、定義書に無い列を足さない |
 | 完了基準 | §3.4 の全テストがPASS、`backend-review`・`frontend-review` の指摘対応完了（コーディング規約からの逸脱ゼロ）。テーブル変更がある場合は Flyway マイグレーションが存在し `flyway migrate` が通る |
 | レビュー | `backend-review` スキル、`frontend-review` スキル（仕様↔コードの統合整合は §3.7 の `full-review`） |
 

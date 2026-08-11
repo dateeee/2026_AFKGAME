@@ -3,7 +3,7 @@
 > `backend/` の Java 実装が従う規約の**正**。本書は**索引だけ**を持ち、規約の本体はすべて `coding_standards_backend/` の分冊にある。
 > 分冊がさらに子を持つものは**同名ディレクトリ**へ入れる（`logging.md` + `logging/`、`domain.md` + `domain/`。[documentation_rules.md](documentation_rules.md) §6.1）。`└` の行がその子。
 > ベースは [TERASOLUNA Server Framework for Spring 開発ガイドライン 5.11.0.RELEASE 日本語版](https://terasolunaorg.github.io/guideline/current/ja/)。**規約はそこからの差分だけを持つ**（適用範囲・準拠元・原則・検証手段は [basis.md](coding_standards_backend/basis.md) が正。個々の差分は各分冊が正）。
-> フロントエンド（Vue 3 / TypeScript）は別書 `coding_standards_frontend.md`（未整備）。
+> フロントエンド（Vue 3 / TypeScript）は別書 [coding_standards_frontend.md](coding_standards_frontend.md)。
 > 位置づけ・改訂手順は [phases.md](phases.md) §3.2.2、遵守の判定は [development_process.md](development_process.md) §4「製造完了ゲート」。
 > 技術スタック一覧は [profile.md](../../.claude/project/profile.md) §3、エージェント向けの要約は [.claude/references/coding-standards-backend.md](../../.claude/references/coding-standards-backend.md)（本書からの派生）。
 

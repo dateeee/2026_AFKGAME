@@ -2,7 +2,7 @@
 
 > 共通パラメータ・重要度の共通軸は [review.md](../review.md)。一般手順は [review-procedure.md](../../references/review-procedure.md)、出力形式は [review-format.md](../../references/review-format.md)。
 > 対象スキル: `frontend-review`。バックエンドは [backend.md](backend.md)、フロント↔バックの統合整合は [fullstack.md](fullstack.md)。
-> 技術規約は [profile.md](../profile.md) §3、不変条件は §5。
+> 記述規約の正は [coding_standards_frontend.md](../../../docs/process/coding_standards_frontend.md)（索引 + 分冊9冊。逸脱は修正対象 = basis.md §2 #6）。技術スタックは [profile.md](../profile.md) §3、不変条件は §5。
 
 ## 0. レビューパラメータ
 

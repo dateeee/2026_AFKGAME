@@ -9,7 +9,7 @@
 
 | 分類 | ファイル |
 |------|---------|
-| 進め方 `docs/process/` | [development_process](process/development_process.md) 7工程・ゲート・進捗 / [phases](process/phases.md) 工程別の定義 / [documentation_rules](process/documentation_rules.md) 文書規約（索引 + 分冊2件） / [coding_standards_backend](process/coding_standards_backend.md) バックエンド規約（索引+分冊） / [spec_ownership](process/spec_ownership.md) 正の所在マップ / [worktree_guide](process/worktree_guide.md) 編集時の worktree 運用 |
+| 進め方 `docs/process/` | [development_process](process/development_process.md) 7工程・ゲート・進捗 / [phases](process/phases.md) 工程別の定義 / [documentation_rules](process/documentation_rules.md) 文書規約（索引 + 分冊2件） / [coding_standards_backend](process/coding_standards_backend.md) バックエンド規約（索引+分冊） / [coding_standards_frontend](process/coding_standards_frontend.md) フロントエンド規約（索引+分冊） / [spec_ownership](process/spec_ownership.md) 正の所在マップ / [worktree_guide](process/worktree_guide.md) 編集時の worktree 運用 |
 | 状態 `docs/backlog/` | [balance_backlog](backlog/balance_backlog.md) 見直す数値 / [known_issues](backlog/known_issues.md) 実装の疑義 / [next_session](backlog/next_session.md) 引き継ぎ / [carryover_notes](backlog/carryover_notes.md) 後工程への申し送り / [efficiency_memo](backlog/efficiency_memo.md) 効率メモ / [java_migration](backlog/java_migration.md) Java移行計画（索引 + 分冊3件） |
 | 横断 | [glossary](glossary.md) 用語集 / [changelog](changelog.md) 変更履歴 / [INDEX](../.claude/project/INDEX.md) 工程↔スキル対応表 |
 
