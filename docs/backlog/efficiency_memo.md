@@ -55,3 +55,9 @@
 - シグナル: same-command('python scripts/check_docs.py'×3)
 - ターン概要: ツール62回・エラー1回・拒否0回。開始:「<task-notification>」
 - 原因と改善案: `check_docs.py` 3回のうち2回は Plan B・Plan C 完了時のゲートで、[SKILL.md](../../.claude/skills/doc-size/SKILL.md) §4「1ファイルごとに検証まで通す」が求めるもの＝**正当**。余分な1回は Plan A 完了後で、**参照の張り替え先だった `.claude/project/detail-design.md`（区分D）へ残量を測らずに約50字足して 4,459→4,507字と90%線を越えさせ**、トリム＋再検証の往復を招いた（`profile.md` §7 ルール7「書く前に残量を測る」を、編集の主対象でない**張り替え先**には適用していなかった）。改善案: **[doc-size.md](../../.claude/project/doc-size.md) §5 の表へ「参照の張り替えで区分A・Dのファイルへ字数を足すときは、張り替え前に残量を測る。同義でより短い表記（`` `tech_api.md` ``→`` `tech_api/` ``）を優先して増分を0以下に抑える」を1行追加する**（現行 §5 は「どのファイルを更新するか」だけで、更新が字数を増やす副作用に触れていない）。
+
+## 2026-08-11 21:04 | session 4a64306f | 自動検出
+- シグナル: same-command('python scripts/check_java_conv'×3, 'git add -A'×3)
+- ターン概要: ツール94回・エラー0回・拒否0回。開始:「<ide_opened_file>The user opened the file c:\GIT\2026_AFKGAM」
+- 原因と改善案: 誤検出: `git add -A`×3 は**3コミットに割った**ぶん（規約と機構＝挙動不変 → ファイル移動 → 引き継ぎ）で、1コミットにつき1回＝正当。`check_java_conventions.py`×3 も**別々のツリー状態**（worktree のフェーズA後・移動後・main へ ff 統合後）に対する検証で、CLAUDE.md「製造完了ゲート」が求めるもの。強いて挙げれば3回目（統合後）は取り込んだ main 側の2コミットが `docs/backlog/**` だけで Java を含まなかったため省けたが、**統合が Java を巻き込んだか確かめずに省く方が危険**なので現行のままでよい。
+- 付随して観測: 最初の `git commit` で PowerShell の here-string `@'...'@` を **Bash ツール**へ渡し、`@` がメッセージ本文へ混入して amend が要った（Stop フックの指示文が両ツールの書式を併記しており、worktree 内の「1コマンド1目的」制約でリダイレクトを避けようとした結果、取り違えた）。`git commit -m "..."`（複数行可・バッククォートは `\`` でエスケープ）は Bash で問題なく通ったので、**[commands.md](../../.claude/project/commands.md) へ「Bash ツールで複数行コミットメッセージを書くときは `-F -` のヒアドキュメントか `-m "..."`。`@'...'@` は PowerShell ツール専用」を1行足す**と防げる。
