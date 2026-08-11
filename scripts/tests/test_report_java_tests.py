@@ -9,6 +9,8 @@
 実データで踏んだものとして個別に固定している。
 """
 
+import os
+
 import pytest
 
 import report_java_tests as mod
@@ -67,6 +69,24 @@ def passing(count, cls=CLS):
     return "\n".join(f'<testcase name="t{i}" classname="{cls}" time="0.01"/>' for i in range(count))
 
 
+def source(root, module, cls=CLS):
+    """`src/test/java` へテストクラスの実体を置く（陳腐化と判定させないため）。"""
+    path = root / "backend" / module / "src" / "test" / "java" / f"{cls.replace('.', '/')}.java"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(f"class {cls.rsplit('.', 1)[-1]} {{}}\n", encoding="utf-8")
+    return path
+
+
+def parse(kind=mod.SUREFIRE, sources=frozenset()):
+    """`parse_tests` の呼び出し。既定は空の `sources` ＝ 陳腐化判定なし。
+
+    判定そのものは `sources` を渡すテストで個別に確かめる。ここを既定で有効に
+    すると、集計側のテストがすべて「ソースを置き忘れると 0 件」になって
+    何を確かめているか分からなくなる。
+    """
+    return mod.parse_tests(kind, sources)
+
+
 SKIPPED = f'<testcase name="wip" classname="{CLS}" time="0.0"><skipped/></testcase>'
 
 FAILING = f"""<testcase name="ダメージが下限でクランプされる" classname="{CLS}" time="0.5">
@@ -111,35 +131,35 @@ def test_clip_marks_truncation():
 def test_parse_tests_aggregates_modules(root):
     suite(root, "afkgame-env", "com.afkgame.env.TokenTest", cases=passing(4), time="1.25")
     suite(root, "afkgame-domain", cases=passing(5) + "\n" + SKIPPED, time="2.75")
-    suites, failures, reruns, newest = mod.parse_tests(mod.SUREFIRE)
+    tests = parse()
 
-    assert sorted(suites) == ["afkgame-domain", "afkgame-env"]
-    assert suites["afkgame-domain"].tests == 6
-    assert suites["afkgame-domain"].skipped == 1
-    assert suites["afkgame-domain"].time == pytest.approx(2.75)
-    assert (failures, reruns) == ([], [])
-    assert newest is not None
+    assert sorted(tests.suites) == ["afkgame-domain", "afkgame-env"]
+    assert tests.suites["afkgame-domain"].tests == 6
+    assert tests.suites["afkgame-domain"].skipped == 1
+    assert tests.suites["afkgame-domain"].time == pytest.approx(2.75)
+    assert (tests.failures, tests.reruns, tests.stale) == ([], [], [])
+    assert tests.newest is not None
 
 
 def test_parse_tests_counts_testcases_not_suite_attributes(root):
     """`@Nested` を持つクラスは surefire が `tests="0"` を書く（実データで確認済み）。"""
     suite(root, "afkgame-env", "com.afkgame.env.logging.LogMaskerTest", cases=NESTED, tests=0)
-    assert mod.parse_tests(mod.SUREFIRE)[0]["afkgame-env"].tests == 2
+    assert parse().suites["afkgame-env"].tests == 2
 
 
 def test_parse_tests_sums_multiple_files_of_same_module(root):
     suite(root, "afkgame-web", "com.afkgame.web.ATest", cases=passing(3))
     suite(root, "afkgame-web", "com.afkgame.web.BTest", cases=passing(5))
-    assert mod.parse_tests(mod.SUREFIRE)[0]["afkgame-web"].tests == 8
+    assert parse().suites["afkgame-web"].tests == 8
 
 
 def test_parse_tests_detects_failure_with_type_message_and_frame(root):
     suite(root, "afkgame-domain", cases=FAILING)
-    suites, failures, _, _ = mod.parse_tests(mod.SUREFIRE)
+    tests = parse()
 
-    assert suites["afkgame-domain"].failures == 1
-    assert len(failures) == 1
-    case = failures[0]
+    assert tests.suites["afkgame-domain"].failures == 1
+    assert len(tests.failures) == 1
+    case = tests.failures[0]
     assert case.kind == "FAIL"
     assert case.module == "afkgame-domain"
     assert case.label == f"{CLS}#ダメージが下限でクランプされる"
@@ -154,55 +174,99 @@ def test_parse_tests_labels_nested_display_name_with_owning_class(root):
         'classname="トークン" time="0.001"/>',
         'classname="トークン" time="0.001"><failure message="ng" type="X">boom</failure></testcase>')
     suite(root, "afkgame-env", "com.afkgame.env.logging.LogMaskerTest", cases=nested_failure)
-    case = mod.parse_tests(mod.SUREFIRE)[1][0]
+    case = parse().failures[0]
     assert case.label == "com.afkgame.env.logging.LogMaskerTest > トークン#test_空文字も全体を伏せる"
 
 
 def test_parse_tests_detects_error_element(root):
     suite(root, "afkgame-domain", cases=ERRORING)
-    suites, failures, _, _ = mod.parse_tests(mod.SUREFIRE)
-    assert suites["afkgame-domain"].errors == 1
-    assert [(c.kind, c.type) for c in failures] == [("ERROR", "java.lang.NullPointerException")]
+    tests = parse()
+    assert tests.suites["afkgame-domain"].errors == 1
+    assert [(c.kind, c.type) for c in tests.failures] == [("ERROR", "java.lang.NullPointerException")]
 
 
 def test_parse_tests_separates_rerun_from_failure(root):
     suite(root, "afkgame-domain", cases=FLAKY)
-    suites, failures, reruns, _ = mod.parse_tests(mod.SUREFIRE)
-    assert suites["afkgame-domain"].failures == 0
-    assert failures == []
-    assert [c.kind for c in reruns] == ["FLAKY"]
+    tests = parse()
+    assert tests.suites["afkgame-domain"].failures == 0
+    assert tests.failures == []
+    assert [c.kind for c in tests.reruns] == ["FLAKY"]
 
 
 def test_parse_tests_reports_broken_xml_as_error(root):
     """壊れたレポートを 0 件と読んで OK 判定にしない。"""
     path = suite(root, "afkgame-domain", cases=passing(1))
     path.write_text("<testsuite tests=", encoding="utf-8")
-    suites, failures, _, _ = mod.parse_tests(mod.SUREFIRE)
-    assert suites["afkgame-domain"].errors == 1
-    assert failures[0].type == "ParseError"
+    tests = parse()
+    assert tests.suites["afkgame-domain"].errors == 1
+    assert tests.failures[0].type == "ParseError"
 
 
 def test_parse_tests_drops_module_without_any_report(root):
     (root / "backend" / "afkgame-initdb" / "target" / "surefire-reports").mkdir(parents=True)
-    assert mod.parse_tests(mod.SUREFIRE)[0] == {}
+    assert parse().suites == {}
 
 
 def test_parse_tests_reads_failsafe_separately(root):
     suite(root, "afkgame-web", "com.afkgame.web.AuthIntegrationTest",
           cases=passing(2), kind="failsafe-reports")
-    assert mod.parse_tests(mod.SUREFIRE)[0] == {}
-    assert mod.parse_tests(mod.FAILSAFE)[0]["afkgame-web"].tests == 2
+    assert parse().suites == {}
+    assert parse(mod.FAILSAFE).suites["afkgame-web"].tests == 2
+
+
+# ── 陳腐化レポートの除外 ──────────────────────────────────────
+
+def test_test_class_names_collects_fqn_across_modules(root):
+    source(root, "afkgame-domain", "com.afkgame.domain.service.auth.AuthServiceImplTest")
+    source(root, "afkgame-web", "com.afkgame.web.api.AuthApiTest")
+    assert mod.test_class_names() == {
+        "com.afkgame.domain.service.auth.AuthServiceImplTest",
+        "com.afkgame.web.api.AuthApiTest",
+    }
+
+
+def test_parse_tests_excludes_report_without_matching_source(root):
+    """パッケージを移したテストの旧レポートを二重計上しない（実データで踏んだ退行）。"""
+    moved = "com.afkgame.domain.service.auth.AuthServiceImplTest"
+    stale = "com.afkgame.domain.service.AuthServiceImplTest"
+    suite(root, "afkgame-domain", moved, cases=passing(10))
+    suite(root, "afkgame-domain", stale, cases=passing(40))
+    source(root, "afkgame-domain", moved)
+
+    tests = parse(sources=mod.test_class_names())
+    assert tests.suites["afkgame-domain"].tests == 10
+    assert tests.stale == [("afkgame-domain", stale)]
+
+
+def test_parse_tests_keeps_everything_when_source_scan_is_empty(root):
+    """ソース走査に失敗しても全件除外しない（テスト0件と誤報告しないため）。"""
+    suite(root, "afkgame-domain", cases=passing(3))
+    tests = parse(sources=mod.test_class_names())
+    assert tests.suites["afkgame-domain"].tests == 3
+    assert tests.stale == []
+
+
+def test_parse_tests_excludes_stale_report_from_timestamps(root):
+    """除外したレポートの時刻は鮮度比較に混ぜない。"""
+    fresh = suite(root, "afkgame-domain", cases=passing(1))
+    stale = suite(root, "afkgame-domain", "com.afkgame.domain.GoneTest", cases=passing(1))
+    source(root, "afkgame-domain")
+    stale.touch()  # 除外対象を最新にしても newest は fresh 側のまま
+
+    tests = parse(sources=mod.test_class_names())
+    assert tests.newest == pytest.approx(fresh.stat().st_mtime)
 
 
 # ── JaCoCo ────────────────────────────────────────────────────
 
 def test_parse_coverage_reads_report_level_counters(root):
     jacoco(root, "afkgame-domain", bm=0, bc=42, lm=0, lc=100)
-    coverages, newest = mod.parse_coverage()
+    coverages = mod.parse_coverage()
     assert [c.module for c in coverages] == ["afkgame-domain"]
     assert (coverages[0].branch_covered, coverages[0].branch_missed) == (42, 0)
     assert coverages[0].uncovered == []
-    assert newest is not None
+    assert coverages[0].mtime > 0
+    assert coverages[0].stale is False
 
 
 def test_parse_coverage_lists_uncovered_branch_lines(root):
@@ -210,7 +274,7 @@ def test_parse_coverage_lists_uncovered_branch_lines(root):
              '      <line nr="12" mi="0" ci="3" mb="0" cb="2"/>\n'
              '      <line nr="90" mi="4" ci="0" mb="2" cb="0"/>')
     jacoco(root, "afkgame-domain", bm=3, bc=39, lines=lines)
-    coverage = mod.parse_coverage()[0][0]
+    coverage = mod.parse_coverage()[0]
 
     assert coverage.branch_missed == 3
     # 分岐が残る行だけを行番号順で挙げる（mb=0 の 12 行目は出さない）
@@ -223,7 +287,34 @@ def test_parse_coverage_lists_uncovered_branch_lines(root):
 def test_parse_coverage_ignores_broken_report(root):
     path = jacoco(root, "afkgame-domain")
     path.write_text("<report", encoding="utf-8")
-    assert mod.parse_coverage()[0] == []
+    assert mod.parse_coverage() == []
+
+
+def test_mark_stale_coverage_flags_report_older_than_tests():
+    """JaCoCo は test フェーズ直後に書かれる。surefire より古ければ前回の残骸。"""
+    coverage = mod.Coverage("afkgame-domain", mtime=1000.0)
+    suites = {"afkgame-domain": mod.Suite("afkgame-domain", mtime=1000.0 + mod.STALE_GRACE + 1)}
+    mod.mark_stale_coverage([coverage], suites)
+    assert coverage.stale is True
+
+
+def test_mark_stale_coverage_allows_grace_and_newer_reports():
+    """同一実行内の秒単位の揺れ・JaCoCo のほうが新しい正常な並びは STALE にしない。"""
+    within = mod.Coverage("afkgame-domain", mtime=1000.0)
+    newer = mod.Coverage("afkgame-web", mtime=9999.0)
+    suites = {
+        "afkgame-domain": mod.Suite("afkgame-domain", mtime=1000.0 + mod.STALE_GRACE - 1),
+        "afkgame-web": mod.Suite("afkgame-web", mtime=1000.0),
+    }
+    mod.mark_stale_coverage([within, newer], suites)
+    assert (within.stale, newer.stale) == (False, False)
+
+
+def test_mark_stale_coverage_ignores_module_without_unit_tests():
+    """単体テストが無いモジュール（結合のみ）を鮮度不明で STALE にしない。"""
+    coverage = mod.Coverage("afkgame-initdb", mtime=1.0)
+    mod.mark_stale_coverage([coverage], {})
+    assert coverage.stale is False
 
 
 def test_pct_handles_zero_denominator():
@@ -290,14 +381,28 @@ def parse_args(*argv):
 
 
 @pytest.mark.parametrize("argv, expected", [
-    (["--run"], ["verify", "-DskipITs"]),
-    (["--run", "--it"], ["verify"]),
-    (["--run", "--test", "BattleServiceTest"],
-     ["test", "-Dtest=BattleServiceTest", "-Dsurefire.failIfNoSpecifiedTests=false"]),
-    (["--run", "--module", "afkgame-domain"], ["verify", "-DskipITs", "-pl", "afkgame-domain", "-am"]),
+    # clean が既定。surefire はレポートディレクトリを掃除しないため、これを外すと
+    # 移動・改名したテストの旧レポートが残って二重計上になる
+    (["--run"], ["clean", "verify", "-DskipITs"]),
+    (["--run", "--it"], ["clean", "verify"]),
+    (["--run", "--test", "BattleServiceImplTest"],
+     ["clean", "test", "-Dtest=BattleServiceImplTest", "-Dsurefire.failIfNoSpecifiedTests=false"]),
+    (["--run", "--module", "afkgame-domain"],
+     ["clean", "verify", "-DskipITs", "-pl", "afkgame-domain", "-am"]),
+    # --no-clean は速度優先の明示的な降格
+    (["--run", "--no-clean"], ["verify", "-DskipITs"]),
+    (["--run", "--no-clean", "--it"], ["verify"]),
+    (["--run", "--no-clean", "--module", "afkgame-domain"],
+     ["verify", "-DskipITs", "-pl", "afkgame-domain", "-am"]),
 ])
 def test_maven_command(argv, expected):
     assert mod.maven_command(parse_args(*argv)) == expected
+
+
+def test_maven_command_puts_clean_before_the_goal():
+    """`clean` はゴールより前に置く（後ろだと生成物を消してから集計することになる）。"""
+    command = mod.maven_command(parse_args("--run", "--it"))
+    assert command.index("clean") < command.index("verify")
 
 
 def test_run_maven_prepends_parent_install_for_single_module(root, monkeypatch):
@@ -352,6 +457,46 @@ def test_report_fails_on_missed_branch(root):
     assert result == "COVERAGE_NG"
     assert "com/afkgame/domain/service/BattleService.java:88" in text
     assert "== 未達分岐 (1) ==" in text
+
+
+def test_report_flags_stale_coverage_over_passing_reports(root):
+    """テストより古い JaCoCo の 100% を OK と答えない（実データで踏んだ退行）。"""
+    reports = suite(root, "afkgame-domain", cases=passing(6))
+    covered = jacoco(root, "afkgame-domain", bm=0, bc=42)
+    old = covered.stat().st_mtime - mod.STALE_GRACE - 60
+    os.utime(covered, (old, old))
+    os.utime(reports, None)
+
+    text, result = mod.report(parse_args())
+    assert result == "COVERAGE_STALE"
+    assert "STALE" in text
+    assert "MISSED_BRANCHES  0" in text  # 未達0でも STALE が優先される
+
+
+def test_report_counts_stale_reports_and_excludes_them(root):
+    """旧パッケージのレポートを除外し、除外件数を判定へ出す。"""
+    moved = "com.afkgame.domain.service.auth.AuthServiceImplTest"
+    gone = "com.afkgame.domain.service.AuthServiceImplTest"
+    suite(root, "afkgame-domain", moved, cases=passing(6))
+    suite(root, "afkgame-domain", gone, cases=passing(40))
+    source(root, "afkgame-domain", moved)
+
+    text, result = mod.report(parse_args())
+    assert result == "OK"
+    assert "UNIT_TESTS       6" in text  # 46 にならない
+    assert "STALE_REPORTS    1" in text
+    assert gone in text  # 何を捨てたかを黙らない
+
+
+def test_report_time_shows_range_when_runs_are_mixed(root):
+    """別々の実行のレポートが混ざっていることを REPORT_TIME で見せる。"""
+    fresh = suite(root, "afkgame-domain", cases=passing(1))
+    old = suite(root, "afkgame-web", "com.afkgame.web.ATest", cases=passing(1))
+    stamp = fresh.stat().st_mtime - mod.MIXED_RUN_GAP - 60
+    os.utime(old, (stamp, stamp))
+
+    text, _ = mod.report(parse_args())
+    assert "別々の実行が混在" in text
 
 
 def test_report_flags_integration_failure(root):

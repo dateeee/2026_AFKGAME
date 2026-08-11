@@ -12,7 +12,7 @@
 
 ## 3. バックエンド: モジュールを絞ってテストする
 
-全体 `mvn test` が重いときの絞り込み。**下の4点はセットで使う**（1つ欠けると空振りするか、誤った実測値を読む）。
+全体 `mvn test` が重いときの絞り込み。**下の5点はセットで使う**（1つ欠けると空振りするか、誤った実測値を読む）。
 
 | # | 指定 | 欠けたときに起きること |
 |---|------|--------------------|
@@ -20,11 +20,14 @@
 | 2 | 単一モジュールを回す前に親 POM を `mvn -N install` | 依存解決に失敗する |
 | 3 | `-Dtest=<クラス>` には `-Dsurefire.failIfNoSpecifiedTests=false` | 対象クラスを持たないモジュールで surefire が落ちる |
 | 4 | pom へプラグインを新規追加した**直後の初回だけ** `-o`（オフライン）を外す | 未取得のプラグインを解決できず失敗する |
+| 5 | ゴールの先頭に `clean` | surefire はレポートディレクトリを掃除しないため、**移動・改名したテストの旧レポートが残って二重計上**される。JaCoCo も前回の実行のまま残り、現行コードを測っていない 100% を実測値として読む |
 
 例: `cd backend && mvn -N install -q` の後に
-`mvn -pl afkgame-domain -am test -Dtest=BattleServiceTest -Dsurefire.failIfNoSpecifiedTests=false`。
+`mvn -pl afkgame-domain -am clean test -Dtest=BattleServiceImplTest -Dsurefire.failIfNoSpecifiedTests=false`。
 出力の読み方（CP932・ファイル経由）は §2。
-`python scripts/report_java_tests.py --run --module <名前> [--test <クラス>]` は上の4点を自動で付ける。
+`python scripts/report_java_tests.py --run --module <名前> [--test <クラス>]` は上の5点を自動で付ける
+（clean を省いて速くしたいときだけ `--no-clean`。集計側は残骸を検出して除外し、判定へ
+`STALE_REPORTS` / `COVERAGE_STALE` を出す）。
 
 ## 5. 外部ツールの所在
 
