@@ -78,13 +78,16 @@
 | 8 | 並行リクエストでの乱数干渉 | 2インスタンスを別シードで同時実行し結果が独立すること |
 | 9 | 生存者ありのターゲット抽選（#7 の正常系） | 候補に生存者と戦闘不能者を混ぜ、`nextInt(生存者数)` を1回だけ消費して生存者から1体を返すこと |
 
-## 6. Java 実装時に満たすこと（未実装）
+## 6. クリティカル率の供給元
 
-本仕様のうち Java 実装が未達の項目。移行 STEP 3 の実装で本仕様どおり満たす
-（[java_migration.md](../../backlog/java_migration.md)）。
+**プレイヤー・敵で共通の定数にしない。** Phase 1 の基礎5%（[systems/battle.md](../../design/systems/battle.md)「確率・軽減率の上限」）は供給元を左右で分ける（バランス値はマスターデータへ置く。`coding_standards_backend/common.md` §5 #10）。
 
-| 項目 | 満たすべき仕様 |
-|------|--------------|
-| クリティカル率 | プレイヤー・敵で共通の定数にしない。**Phase 1 の基礎5%（[systems/battle.md](../../design/systems/battle.md)「確率・軽減率の上限」）は供給元を左右で分ける** — 味方はキャラタイプ別マスター（`character_types.yml`）の列、敵は `EnemyData` の列から読む（バランス値はマスターデータへ置く。`coding_standards_backend/common.md` §5 #10）。**列の追加は読み手（`BattleSimulator`）を作る製造①-iii で行う**（読み手のいない列を先行させない）。Phase 3〜 はキャラクターごとの `crit_rate`（装備・スキルの合算）を参照する |
+| 側 | 供給元（値の正） | 読み手 |
+|----|----------------|-------|
+| 味方 | キャラタイプ別マスター `character_types.yml` の `critRate` 列（[master/character.md](../../data/master/character.md) §1.2） | `BattleSimulatorImpl#critRateOf` が `CharacterTypes` 経由で読む |
+| 敵 | `EnemyData` の `critRate` 列（[towers/000_テンプレート.md](../../data/towers/000_テンプレート.md) §2） | 同クラスが `Enemies` 経由で読む |
+
+- Phase 3〜 はキャラクターごとの `crit_rate`（装備・スキルの合算）を参照し、合算値の上限100%は `StatCalculator#effectiveCritRate` が受け持つ
+- 敵側の YAML（`enemies.yml`）は塔マスターデータを載せるセグメント②で追加する（列と読み手は実装済み）
 
 §2 のインスタンス注入は Java 側で実装済み（`com.afkgame.domain.rng.RandomFactory`）。1リクエストにつき1つ生成し、戦闘・エンカウント・ドロップ・装備生成へ引き渡す。

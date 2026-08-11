@@ -55,4 +55,14 @@ public class CharacterTypes {
     public boolean contains(String typeId) {
         return characterTypes.containsKey(typeId);
     }
+
+    /**
+     * タイプIDに対応する定義を引く（{@link Enemies#get(String)} と同じレジストリの形）。
+     *
+     * @param typeId タイプID
+     * @return 対応する定義。未定義なら {@code null}
+     */
+    public CharacterTypeData get(String typeId) {
+        return characterTypes.get(typeId);
+    }
 }

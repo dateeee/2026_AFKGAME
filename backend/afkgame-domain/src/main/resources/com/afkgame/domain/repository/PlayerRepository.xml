@@ -54,6 +54,36 @@
      WHERE user_id = #{userId}
   </select>
 
+  <!--
+    tick処理の行ロック（tech_tick.md §3.1）。同一プレイヤーの並行tickが同じ last_tick_at を
+    読んで二重付与するのを防ぐため、トランザクション内で対象行をロックして読む。
+  -->
+  <select id="findByIdForUpdate" resultMap="playerResultMap">
+    SELECT <include refid="playerColumns"/>
+      FROM players
+     WHERE id = #{id}
+       FOR UPDATE
+  </select>
+
+  <!--
+    tick処理の結果を一括反映する（tech_tick.md §4「tick単位のDB書き込みは行わず最後に一括反映」）。
+    hp_threshold は tick で変化しない設定値なので含めない。
+  -->
+  <update id="updateTickState">
+    UPDATE players
+       SET gold             = #{gold},
+           current_tower_id = #{currentTowerId},
+           current_floor    = #{currentFloor},
+           target_floor     = #{targetFloor},
+           tower_mode       = #{towerMode},
+           current_enemy_id = #{currentEnemyId},
+           current_enemy_hp = #{currentEnemyHp},
+           run_gold         = #{runGold},
+           highest_floor    = #{highestFloor},
+           last_tick_at     = #{lastTickAt}
+     WHERE id = #{id}
+  </update>
+
   <insert id="save">
     INSERT INTO players (id, user_id, gold, current_tower_id, current_floor, target_floor,
                          tower_mode, hp_threshold, current_enemy_id, current_enemy_hp,

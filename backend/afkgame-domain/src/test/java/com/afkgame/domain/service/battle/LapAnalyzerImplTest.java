@@ -144,7 +144,7 @@ class LapAnalyzerImplTest {
      * {@code def} で {@code base_hit} が動く。
      */
     private void givenFloorEnemy(int hp, int atk, int def) {
-        EnemyData enemy = new EnemyData("goblin", "ゴブリン", 1, hp, atk, def, 10, 12L, 8L);
+        EnemyData enemy = new EnemyData("goblin", "ゴブリン", 1, hp, atk, def, 10, 12L, 8L, 0.05);
         when(floorCatalog.enemiesOf(TOWER_ID, 1)).thenReturn(List.of(enemy));
     }
 

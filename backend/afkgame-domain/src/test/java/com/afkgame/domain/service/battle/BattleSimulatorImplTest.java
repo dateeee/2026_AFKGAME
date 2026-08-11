@@ -28,6 +28,8 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.afkgame.domain.masterdata.CharacterTypeData;
+import com.afkgame.domain.masterdata.CharacterTypes;
 import com.afkgame.domain.masterdata.Enemies;
 import com.afkgame.domain.masterdata.EnemyData;
 import com.afkgame.domain.model.Character;
@@ -55,8 +57,8 @@ import com.afkgame.env.config.GameSettings;
  *       は ①-a（{@link BattleServiceImplTest}）が定義済み。<b>別名の表層を新設しない</b></li>
  *   <li>コンストラクタ注入:
  *       {@code BattleSimulatorImpl(TargetSelector, DamageCalculator, FloorProgression, Enemies,
- *       RandomFactory, GameSettings)}。1tickあたりのターン数は {@link GameSettings#turnsPerTick()}
- *       から読む（profile.md §5 不変条件6「データ駆動」）</li>
+ *       CharacterTypes, RandomFactory, GameSettings)}。1tickあたりのターン数は
+ *       {@link GameSettings#turnsPerTick()} から読む（profile.md §5 不変条件6「データ駆動」）</li>
  *   <li><b>乱数源</b>: {@code simulate} の入口で {@link RandomFactory#create()} を1回だけ呼び、
  *       得た {@link Random} を協調オブジェクトへ<b>メソッド引数で</b>引き渡す（tech_rng.md §2）。
  *       ①-a が定義した {@code BattleServiceImpl} のコンストラクタに {@code RandomFactory} が無いため、
@@ -85,10 +87,10 @@ import com.afkgame.env.config.GameSettings;
  *       {@code CharacterGrowth#addExp}（{@link CharacterGrowthImplTest}）へ委譲する。
  *       ①-a の {@code BattleServiceImpl} は {@link BattleOutcome} を素通しするだけで
  *       加算を行わないため、加算点は本クラスになる</li>
- *   <li><b>クリティカル率の供給元が未定</b>: Phase 1 の基礎値5%（docs/design/systems/battle.md
- *       「戦闘ルール」）は {@link GameSettings} にも master data にも鍵が無い。
- *       tech_rng.md §6 が「プレイヤー・敵で共通の定数にしない」を求めているため、
- *       製造では外から与える形（マスターデータまたは設定値）にする。
+ *   <li><b>クリティカル率の供給元</b>（製造①-iii で確定。正は tech_rng.md §6）:
+ *       味方は {@link CharacterTypes} が持つキャラタイプ別マスターの {@code critRate} 列、
+ *       敵は {@link EnemyData#critRate()}。左右で供給元を分けるのは
+ *       「プレイヤー・敵で共通の定数にしない」を満たすため。
  *       本クラスは供給元を検証しないので {@code anyDouble()} で受ける</li>
  * </ul>
  */
@@ -117,7 +119,13 @@ class BattleSimulatorImplTest {
 
     /** 敵マスター。SPD10 を基準に、味方SPDを 10（同速）/ 9（敵が速い）で振り分ける。 */
     private static final EnemyData GOBLIN =
-            new EnemyData(ENEMY_ID, "ゴブリン", 1, 60, 30, 5, 10, 12L, 8L);
+            new EnemyData(ENEMY_ID, "ゴブリン", 1, 60, 30, 5, 10, 12L, 8L, 0.05);
+
+    /** 味方のキャラタイプ。クリティカル率の供給元を引くためだけに使う（値は検証しない）。 */
+    private static final String HERO_TYPE = "melee";
+
+    private static final CharacterTypeData HERO_TYPE_DATA =
+            new CharacterTypeData(HERO_TYPE, 100, 10, 5, 5, 0.05);
 
     private static final int HERO_ATK = 20;
 
@@ -138,6 +146,9 @@ class BattleSimulatorImplTest {
     private Enemies enemies;
 
     @Mock
+    private CharacterTypes characterTypes;
+
+    @Mock
     private RandomFactory randomFactory;
 
     /** 乱数そのものは協調オブジェクト側で固定するため、ここでは同一性の確認にだけ使う。 */
@@ -150,7 +161,7 @@ class BattleSimulatorImplTest {
 
     private BattleSimulator simulatorWith(GameSettings settings) {
         return new BattleSimulatorImpl(targetSelector, damageCalculator, floorProgression, enemies,
-                randomFactory, settings);
+                characterTypes, randomFactory, settings);
     }
 
     /** 交戦中のプレイヤー（塔内・敵と対峙中）。 */
@@ -170,6 +181,7 @@ class BattleSimulatorImplTest {
         Character hero = new Character();
         hero.setId("char_001");
         hero.setPlayerId(PLAYER_ID);
+        hero.setType(HERO_TYPE);
         hero.setLevel(1);
         hero.setHp(HERO_MAX_HP);
         hero.setMaxHp(HERO_MAX_HP);
@@ -184,8 +196,9 @@ class BattleSimulatorImplTest {
         when(randomFactory.create()).thenReturn(rng);
     }
 
-    /** 味方 → 敵の一撃。 */
+    /** 味方 → 敵の一撃。クリティカル率の供給元（キャラタイプ別マスター）もここで固定する。 */
     private void givenAllyHits(long damage) {
+        when(characterTypes.get(HERO_TYPE)).thenReturn(HERO_TYPE_DATA);
         when(damageCalculator.calculate(eq(HERO_ATK), eq(GOBLIN.def()), anyDouble(),
                 eq(DamageDirection.ALLY_TO_ENEMY), same(rng))).thenReturn(damage);
     }
@@ -407,6 +420,7 @@ class BattleSimulatorImplTest {
             Random second = new Random(2);
             when(randomFactory.create()).thenReturn(first, second);
             when(enemies.get(ENEMY_ID)).thenReturn(GOBLIN);
+            when(characterTypes.get(HERO_TYPE)).thenReturn(HERO_TYPE_DATA);
             when(damageCalculator.calculate(eq(HERO_ATK), eq(GOBLIN.def()), anyDouble(),
                     eq(DamageDirection.ALLY_TO_ENEMY), any())).thenReturn((long) GOBLIN.hp());
 

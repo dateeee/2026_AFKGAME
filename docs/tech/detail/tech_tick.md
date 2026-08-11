@@ -103,8 +103,7 @@ C1網羅の対象分岐。[phases.md §3.4](../../process/phases.md) のテス�
 
 | 項目 | 満たすべき仕様 |
 |------|--------------|
-| 24時間超のクランプ | 無言で切り詰めない。§2 の `capped` をサマリーに含める |
-| tick の排他 | 行ロックを取り、二重tickを成立させない（§3） |
 | 簡略計算 | 10tickサンプルの平均 × 残り ではなく、`tech_offline.md` §4 の期待値計算を使う |
 
-§1 の端数繰り越しは仕様どおり実装する（旧実装でも満たしていた）。
+§1 の端数繰り越し・§2 のクランプ（`capped`）・§3 の行ロック（`SELECT ... FOR UPDATE` と `BATTLE_TICK_BUSY`）は
+`BattleServiceImpl` で実装済み（3-B 製造①-iii）。残りは `OfflineCalculator` を実装する回で満たす。

@@ -121,6 +121,64 @@ class PlayerRepositoryTest extends RepositoryTestSupport {
         void プレイヤーを持たないユーザーIDで引くとnullを返す() {
             assertThat(playerRepository.findByUserId(givenUser())).isNull();
         }
+
+        /**
+         * tick処理の行ロック読み（{@code SELECT ... FOR UPDATE}。tech_tick.md §3.1）。
+         * ロックの競合そのものは別トランザクションが要るためここでは見ず、
+         * <b>発行される SQL が通り全列が往復すること</b>を確かめる。
+         */
+        @Test
+        void ロック付きで読んでも全列が往復する() {
+            Player expected = 塔内のプレイヤー(givenUser());
+            playerRepository.save(expected);
+
+            assertThat(playerRepository.findByIdForUpdate(expected.getId()))
+                    .usingRecursiveComparison().isEqualTo(expected);
+        }
+
+        /**
+         * tick処理の結果を一括反映する（tech_tick.md §4）。更新対象の列名は実DBでしか
+         * 検証されないため、tick で動く列をすべて変えて往復させる。
+         */
+        @Test
+        void tick状態の更新で基準時刻と探索状態が反映される() {
+            Player player = 塔内のプレイヤー(givenUser());
+            playerRepository.save(player);
+
+            player.setGold(4321L);
+            player.setCurrentTowerId("tower_002");
+            player.setCurrentFloor(13);
+            player.setTargetFloor(30);
+            player.setTowerMode("auto_repeat");
+            player.setCurrentEnemyId("goblin_002");
+            player.setCurrentEnemyHp(8);
+            player.setRunGold(999L);
+            player.setHighestFloor(16);
+            player.setLastTickAt(FIXED_NOW.plusSeconds(60));
+
+            playerRepository.updateTickState(player);
+
+            assertThat(playerRepository.findById(player.getId()))
+                    .usingRecursiveComparison().isEqualTo(player);
+        }
+
+        /** 敵を倒して場から敵が消えた状態（NULL 許容列を NULL へ戻す経路）。 */
+        @Test
+        void tick状態の更新で敵の列をNULLへ戻せる() {
+            Player player = 塔内のプレイヤー(givenUser());
+            playerRepository.save(player);
+
+            player.setCurrentEnemyId(null);
+            player.setCurrentEnemyHp(null);
+            player.setLastTickAt(FIXED_NOW.plusSeconds(120));
+
+            playerRepository.updateTickState(player);
+
+            Player actual = playerRepository.findById(player.getId());
+            assertThat(actual.getCurrentEnemyId()).isNull();
+            assertThat(actual.getCurrentEnemyHp()).isNull();
+            assertThat(actual.getLastTickAt()).isEqualTo(FIXED_NOW.plusSeconds(120));
+        }
     }
 
     /** 従 Entity: {@code player_settings}（players と 1:1）。 */

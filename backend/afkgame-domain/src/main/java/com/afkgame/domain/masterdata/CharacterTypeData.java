@@ -2,6 +2,7 @@ package com.afkgame.domain.masterdata;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 
 /**
  * キャラクタータイプ別の LV1 基礎ステータスのマスターデータ。
@@ -14,16 +15,18 @@ import jakarta.validation.constraints.Positive;
  * <p><strong>成長率は持たない</strong>。レベルアップ機能を移植するまで参照側が無いため、
  * 成長率のキーは同機能の移植時に追加する（tech_auth/init.md §8.1）。
  *
- * @param id  タイプID（YAML 内で一意。例: {@code melee}）
- * @param hp  LV1 の最大HP
- * @param atk LV1 の攻撃力
- * @param def LV1 の防御力
- * @param spd LV1 の素早さ
+ * @param id       タイプID（YAML 内で一意。例: {@code melee}）
+ * @param hp       LV1 の最大HP
+ * @param atk      LV1 の攻撃力
+ * @param def      LV1 の防御力
+ * @param spd      LV1 の素早さ
+ * @param critRate クリティカル率（0.0〜1.0。Phase 1 は基礎値のみ）
  */
 public record CharacterTypeData(
         @NotBlank String id,
         @Positive int hp,
         @Positive int atk,
         @Positive int def,
-        @Positive int spd) {
+        @Positive int spd,
+        @PositiveOrZero double critRate) {
 }

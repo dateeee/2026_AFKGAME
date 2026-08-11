@@ -55,6 +55,7 @@ public final class ErrorCatalog {
             Map.entry("AUTH_RESET_TOKEN_INVALID", new Entry(400, "再設定用リンクが無効か期限切れです")),
             Map.entry("AUTH_GOOGLE_NOT_CONFIGURED", new Entry(501, GOOGLE_UNAVAILABLE)),
             Map.entry("AUTH_GOOGLE_NOT_IMPLEMENTED", new Entry(501, GOOGLE_UNAVAILABLE)),
+            Map.entry("BATTLE_TICK_BUSY", new Entry(503, "処理が混み合っています。しばらくしてからお試しください")),
             Map.entry(INTERNAL_ERROR, new Entry(500, "サーバー内部エラーが発生しました")));
 
     private ErrorCatalog() {
