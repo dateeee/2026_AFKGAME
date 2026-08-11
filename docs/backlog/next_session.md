@@ -3,7 +3,7 @@
 > **使い方**: 新セッションの最初のメッセージで `/next` と送る（または §1 のコードブロックを貼り付ける）。**着手前に §0 を読む**。
 > 本ファイルは**ポインタ専用**。Phase 進捗の正は [development_process.md](../process/development_process.md) §5、書式の正は [.claude/project/next.md](../../.claude/project/next.md)、worktree 運用の正は [worktree_guide.md](../process/worktree_guide.md)。
 
-最終更新: 2026-08-11 / main `45261b8`（**Phase 5 仕様確定ゲートの反映**＝ [2026-08-11_123351.md](../reviews/doc-review/2026-08-11_123351.md) の ISSUE-1301〜1310 を適用。ISSUE-1311 は構造変更のため `doc-size` 送り。`check_doc_size.py` 203 OK・0 違反 / `check_docs.py` 違反なし。**Java 移行とは独立の docs タスク**なので §1 の 3-A-3 反映②はそのまま残っている）。1つ前は 2026-08-10 / main `185a87b`（**3-A-3 レビュー指摘の反映①**＝ ISSUE-901・902・907・908 の4件を適用。`mvn verify` **単体306件 + 結合85件 Green・C1 100%（194/194・未達0）**、`check_java_conventions.py` **違反0・WARN 13件（増減なし）**、`check_branch_list.py --tests`・`check_error_codes.py`・`check_docs.py`・`check_doc_size.py` 違反0、`pytest scripts/tests` 403件 passed）。**残るは §1 の5件でゲートが閉じる**。レビューレポート [2026-08-10_155729.md](../reviews/backend-review/2026-08-10_155729.md) が正で、**各指摘に修正案と既存テストへの影響まで書いてある**。1つ前は製造完了ゲート＝ backend-review（指摘9件・高0/中5/低4）、その前は製造②。**`VerificationMailSenderImpl#transmit` には分岐を書かない**（単体テストが override して通るため、`if` を置くと C1 が落ちる）。内訳は [changelog.md](../changelog.md) の 2026-08-10 ブロックが正。
+最終更新: 2026-08-11 / main `11c5ade`（**Phase 5 設計整合ゲート**＝ `diagrams-review` を実行し [2026-08-11_133822.md](../reviews/diagrams-review/2026-08-11_133822.md) に9件（高2 / 中6 / 低1）。**うち5件は doc-review の ISSUE-1301・1303・1308 を仕様書にだけ適用し、図へ波及させなかったもの**＝ 701・702（記録時点）・703・705（リタイア即時）・706（転生の導線）。709 は `check_schema_triple.py` が赤で返した1行（`tech_db/auth.md` の「実装予定:」）。`check_docs.py`・`check_doc_size.py` は違反0。**Java 移行とは独立の docs タスク**なので §1 の 3-A-3 反映②はそのまま残っている）。1つ前は 2026-08-11 / main `45261b8`（**Phase 5 仕様確定ゲートの反映**＝ ISSUE-1301〜1310 を適用。1311 は `doc-size` で消化済み）。その前は 2026-08-10 / main `185a87b`（**3-A-3 レビュー指摘の反映①**＝ ISSUE-901・902・907・908 の4件。`mvn verify` **単体306件 + 結合85件 Green・C1 100%（194/194・未達0）**、`check_java_conventions.py` **違反0・WARN 13件**）。**残るは §1 の5件でゲートが閉じる**。レビューレポート [2026-08-10_155729.md](../reviews/backend-review/2026-08-10_155729.md) が正で、**各指摘に修正案と既存テストへの影響まで書いてある**。**`VerificationMailSenderImpl#transmit` には分岐を書かない**（単体テストが override して通るため、`if` を置くと C1 が落ちる）。内訳は [changelog.md](../changelog.md) の 2026-08-10 ブロックが正。
 
 **レビュー指摘の「既存テストへの影響」は鵜呑みにしない**（①で実証）。ISSUE-907 は「テストは戻り値をスタブしていない」としていたが、実際は `AuthServiceImplTest` のパラメータ化テスト2件が `thenReturn(0/1/2)` で使っており、そのまま `void` 化すると分岐一覧6行（`password_reset.md §23 #10〜#12`・`§25 #15〜#17`）が代替なしで落ちる。**着手前に対象メソッドを `grep` して読み手を数える**。①では「`void` 化＋リポジトリ統合テスト新設」をユーザー判断で採り、`RefreshTokenRepositoryTest`・`EmailVerificationTokenRepositoryTest` を新設して件数の振る舞いを実DBへ移した。
 
@@ -45,12 +45,13 @@ worktree を使う複数セッションが同時に走る前提。**着手状態
 
 | 優先 | タスク | 前提 | wt 名 / 領域 | 工程スキル |
 |------|-------|------|------------|-----------|
-| 1 | **Phase 5 設計図の整合確認**。ISSUE-1301（記録時点）・1303（リタイア即時）・1304（`towersCleared`）・1308（転生の導線）の**図側への波及**を見る。対象は `screen_transition/endgame.md`・`api_sequence/endgame.md`・`battle_flow/bossrush.md`・`er_diagram/battle.md` | なし（**Java 移行と独立**・並行可） | `p5-diagrams`<br>docs | `diagrams-review` |
+| 1 | **Phase 5 設計図の指摘反映**（ISSUE-701〜709）。**701・702 は同じ記録時点を扱うので必ず同じ修正パスで直す**（片方だけだと図どうしが食い違う）。706・707 は `screen_transition/endgame.md` 67行目を共有するのでマージする | なし（**Java 移行と独立**・並行可） | `p5-diagrams-fix`<br>docs | `fix-specs` |
 | 2 | **3-B テストリスト作成①（Phase 1: game / battle）**。tick・戦闘サービスが先に要るため tower は後段 | §1（ゲートを閉じてから） | `3b-testlist-battle`<br>backend | `test-list` |
 | 3 | **3-B 製造①（Phase 1: game / battle）** | キュー2 | `3b-dev-battle`<br>backend | `dev` |
 | 4 | **3-B テストリスト作成②（Phase 1: tower）**。分岐一覧は [tech_tower.md](../tech/detail/tech_tower.md) §0 の55件 + `tech_state.md` §5 の7件 | キュー3 | `3b-testlist-tower`<br>backend | `test-list` |
 | 5 | **3-B 製造②（Phase 1: tower）** | キュー4 | `3b-dev-tower`<br>backend | `dev` |
 
+- **仕様書の指摘を直したら、それを検証対象に持つ図まで同じパスで直す**（今回の学び。仕様書だけ直した結果、ISSUE-1301・1303・1308 が図の指摘5件に化けた）。対応表は [basic-design.md](../../.claude/project/basic-design.md) §1。還元案（`fix-specs` への組み込み・Mermaid チェッカーの常設化）はレビュー末尾が正
 - **3-A-3 の製造完了ゲートは開いたまま**（指摘9件のうち4件を反映済み。残る5件を §1 で閉じる）。前回ゲート（3-A-2）の「プロセスへの還元」①②は**判定12・13 として実装済みで効いている**（違反0・WARN 13件で横ばい）が、**網の外に同型の穴が3件**出た（ISSUE-903 語表の穴 / 905 pom の依存 / 907 Repository の戻り値）。次の還元候補は [2026-08-10_155729.md](../reviews/backend-review/2026-08-10_155729.md)「プロセスへの還元」1〜3 が正
 - **更新系 SQL の条件は実DBテストでしか検証されない**（①の学び）。`AND used = FALSE` のような条件を足したら、サービスの単体テスト（Repository をモックする）では素通りするため、対応するリポジトリ統合テストを同じコミットで足す。`RepositoryTestSupport` を継承すれば埋め込み PostgreSQL で回る
 - **分岐一覧に行を足すときは末尾へ追加する**（①の判断）。途中へ挿すと後続番号が動き、テストの `分岐:` マーカーを全部書き替えることになる。番号は流れ順ではなく安定した識別子として扱う
