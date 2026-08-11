@@ -50,3 +50,8 @@
 - ターン概要: ツール50回・エラー0回・拒否0回。開始:「<ide_opened_file>The user opened the file c:\GIT\2026_AFKGAM」
 - 原因と改善案: 圧縮対象の `carryover_notes.md` が `merge=union` のホットスポットで、**着手時に全文を読んでから書き換えるまでの間に別セッションが main へ ①-b の申し送りを追記した**（7,359→7,964字）。`Write` は現在のバイト列を持っていないと書けないため読み直しは必須で、避けられたのは読む**順序**のほう（先に洗い出し・個別修正を済ませ、`Write` の直前に1回だけ読めば1回で足りた）。改善案: **[doc-size.md](../../.claude/project/doc-size.md) §1 へ「[worktree_guide.md](../process/worktree_guide.md) §3 のホットスポット（`changelog`・`efficiency_memo`・`carryover_notes`）を全面書き換えする場合は、調査・個別修正を先に終えてから対象を読む。読了後に長い作業を挟んだら `git log -1 -- <path>` で更新の有無を確かめる」を1行追加する**（現行 §1 は「本文はまだ読まない」までで、読んだ後に他セッションが動く前提が無い）。
 - 付随して観測: 序盤の4ファイル編集を main で始めてしまい（`worktree_guide.md` §5.1 違反）、ユーザーの指摘で patch 退避 → 差し戻し → worktree 作成 → `git apply` の往復が発生した。§5.1 は「依頼が仕様・規約・コードの**変更**なら調査前に worktree を作る」と書いてあるが、**今回のように「`docs/backlog/**` の整理」で始まり調査の結果として `docs/`・`backend/` の修正へ広がる依頼**は入口が §5.1 の case 2（main 可）に見える。同 §5.1 へ「main 可の判定は着手時点のファイルではなく**着手後に広がりうる範囲**で行う」旨の1行を足すと防げる。
+
+## 2026-08-11 20:50 | session 14a39462 | 自動検出
+- シグナル: same-command('python scripts/check_docs.py'×3)
+- ターン概要: ツール62回・エラー1回・拒否0回。開始:「<task-notification>」
+- 原因と改善案: `check_docs.py` 3回のうち2回は Plan B・Plan C 完了時のゲートで、[SKILL.md](../../.claude/skills/doc-size/SKILL.md) §4「1ファイルごとに検証まで通す」が求めるもの＝**正当**。余分な1回は Plan A 完了後で、**参照の張り替え先だった `.claude/project/detail-design.md`（区分D）へ残量を測らずに約50字足して 4,459→4,507字と90%線を越えさせ**、トリム＋再検証の往復を招いた（`profile.md` §7 ルール7「書く前に残量を測る」を、編集の主対象でない**張り替え先**には適用していなかった）。改善案: **[doc-size.md](../../.claude/project/doc-size.md) §5 の表へ「参照の張り替えで区分A・Dのファイルへ字数を足すときは、張り替え前に残量を測る。同義でより短い表記（`` `tech_api.md` ``→`` `tech_api/` ``）を優先して増分を0以下に抑える」を1行追加する**（現行 §5 は「どのファイルを更新するか」だけで、更新が字数を増やす副作用に触れていない）。
