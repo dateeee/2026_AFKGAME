@@ -22,6 +22,9 @@
 - **バランス調整バックログ B-9 の波及**: 酒場・鍛冶屋のしきい値方式を廃止し5施設とも全10LV定義にした結果、**`tech_base.md` §8 の分岐一覧が16→15件**になっている。Phase 4 のテストリストは新番号を起点にする
 - **未確定仕様はゼロ**（2026-08-08。`open_specs.md` は削除済み・不在＝未確定ゼロ）。Phase 5 の基本設計前に仕様確定ゲート（`doc-review` → `fix-specs`）を一度通す。主な照合対象は `towersCleared` のキー体系（正は `tech_data.md` §1.1）と Phase 5「探索」タブへの導線集約（正は `systems/ui.md`）
 - **Phase 4 の再開時に戻す1件**（2026-08-09・Java 移行を優先するユーザー判断で `next_session.md` のキューから外した）: **テストリスト作成** — 拠点・施設・鍛冶屋（`tech_base.md` §7・§8 の36件 + `tech_forge/` の74件）+ **限界突破**（`tech_limitbreak.md` §6 の30件）。詳細設計は拠点・施設・①酒場スカウト・②鍛冶屋・③限界突破まで完了済み（③は 2026-08-11 に `tech_limitbreak.md` で確定。④ダンジョン3＝塔6〜8のマスターデータは既に `docs/data/towers/` と索引に登録済みで、この行は誤って残っていたもの）
+- **Phase 5 の詳細設計は3点が未作成**（2026-08-11・仕様確定ゲートの ISSUE-1302／1306）: ①ボスラッシュ `tech_bossrush.md`、②転生 `tech_prestige.md`（いずれも処理フロー + 分岐一覧。索引は `tech_spec.md` §1 に予定行だけ置いてある）、③イベントダンジョンのマスターデータ `docs/data/master/event_dungeon.md` §19（`master_data.md` の索引に節番号だけ採番済み）。**実ファイル作成と索引のリンク張り替えは同じ変更にまとめる**（先にリンクを張ると `check_docs.py --links` が落ちる）。深淵の塔・イベントダンジョンの塔側処理は `tech_tower.md` + `tech_tower/` へ統合済みで追加不要
+- **深淵の塔の基準値を改定した**（2026-08-11・ISSUE-1309。`master/endgame.md` §18.1 の通常敵を `arch_dragon` LV152 の実データへ揃え、§18.3 早見表を再計算）。**461F の「素の melee LV9999 で安定周回できる想定上限」は旧基準値（HP 4,500）時点の試算のまま**なので、Phase 5 の詳細設計で再試算する。`balance_backlog.md` B-5 の「約115日」も同じ前提に立つ
+- **`tech_data.md` §1.1 は 3,990字**（H2 の 2,000字 WARN・ISSUE-1311）。Phase 5 で `bossRush`・`prestige` が実体化するとさらに増えるため、**Phase 5 着手前に分割する**（`tech_db/` と同じ索引+子ファイル構成に倣い、JSON 例を `tech_data/game_state.md` へ移して §1.1 本体はキー一覧と `towersCleared` のキー体系を残す。節番号 §1.1 は維持）。`doc-size` スキルの担当
 - 獣の塔（`docs/data/towers/003_獣の塔.md`）をマスターデータへ追加する際、`FLOOR_CHARACTERS` へ `scout_001` ハヤテ（獣の塔10Fクリア。`master/character.md` §7.1 の3体目）を足す。製造①では塔IDが未宣言で ID を発明しないため見送った（塔6〜8 のマスターデータ追加または移行 STEP 5 へ合流させる）
 
 ## 3. 環境・ツール

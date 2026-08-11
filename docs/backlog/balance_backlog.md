@@ -23,7 +23,7 @@
 
 | # | 項目 | 現在の仮置き値 | 定義箇所 | 調整の目安 |
 |---|------|--------------|---------|-----------|
-| B-1 | ボスラッシュ累積報酬率 | 通常塔の **50%** 相当 | [systems/endgame.md §2.11](../design/systems/endgame.md) | 通常塔周回とボスラッシュのGold/EXP効率が拮抗するか。ボスラッシュが常に不利ならプレイヤーが挑戦しない |
+| B-1 | ボスラッシュ累積報酬率 | そのウェーブの敵の Gold/EXP 合計 × **50%** | [master/endgame.md §15.3](../data/master/endgame.md) | 通常塔周回とボスラッシュのGold/EXP効率が拮抗するか。ボスラッシュが常に不利ならプレイヤーが挑戦しない |
 | B-2 | スキル数値（倍率・CD・効果量・状態異常の付与率/持続） | 全スキルの数値 | [master/character.md §9](../data/master/character.md)・[SKILLS_OVERVIEW.md §3](../data/skills/SKILLS_OVERVIEW.md) | スキル系統間の強弱差。特定系統一強・死に系統が出ていないか |
 | B-3 | 転生ポイント獲得量 | **10pt** / 転生1回 | [master/endgame.md §16.1](../data/master/endgame.md) | 全ボーナス上限（累計260pt = 26回転生）までの周回数が現実的か |
 | B-4 | 転生ボーナスリセットコスト | `転生回数 × 1,000G` | `master/endgame.md` §16.2 | 高転生回数帯でコストが無視できる額にならないか |
