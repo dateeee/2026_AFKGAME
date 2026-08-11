@@ -128,6 +128,7 @@ public class AfkgameSettingsConfig {
      * @param smtpPort SMTP の接続先ポート
      * @param smtpUser SMTP 認証のユーザー
      * @param smtpPassword SMTP 認証のパスワード
+     * @param smtpStarttlsRequired STARTTLS を必須にするか
      * @param smtpTimeoutMillis SMTP の通信タイムアウト（ミリ秒）
      * @param from 差出人アドレス
      * @param frontendBaseUrl メール本文のリンク生成元
@@ -139,10 +140,11 @@ public class AfkgameSettingsConfig {
             @Value("${mail.smtp.port}") int smtpPort,
             @Value("${mail.smtp.user}") String smtpUser,
             @Value("${mail.smtp.password}") String smtpPassword,
+            @Value("${mail.smtp.starttls.required}") boolean smtpStarttlsRequired,
             @Value("${mail.smtp.timeout}") long smtpTimeoutMillis,
             @Value("${mail.from}") String from,
             @Value("${frontend.base.url}") String frontendBaseUrl) {
-        return new MailSettings(smtpHost, smtpPort, smtpUser, smtpPassword,
+        return new MailSettings(smtpHost, smtpPort, smtpUser, smtpPassword, smtpStarttlsRequired,
                 Duration.ofMillis(smtpTimeoutMillis), from, frontendBaseUrl);
     }
 

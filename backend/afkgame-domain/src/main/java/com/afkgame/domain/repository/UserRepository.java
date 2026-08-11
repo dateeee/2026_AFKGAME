@@ -83,6 +83,5 @@ public interface UserRepository {
      * @param id ユーザーID
      * @param passwordHash 更新後の bcrypt ハッシュ
      */
-    // 規約例外: 受け取るのは bcrypt ハッシュであり、境界ログに出ても生パスワードは復元できない
     void updatePasswordHash(@Param("id") String id, @Param("passwordHash") String passwordHash);
 }

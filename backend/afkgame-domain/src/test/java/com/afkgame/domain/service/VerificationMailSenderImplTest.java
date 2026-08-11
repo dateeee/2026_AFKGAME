@@ -76,12 +76,12 @@ class VerificationMailSenderImplTest {
 
     /** SMTP接続先が設定された状態（§17 #3）。 */
     private static final MailSettings SMTP_CONFIGURED = new MailSettings(
-            "smtp.example.com", 587, "smtp-user", "smtp-pass", Duration.ofSeconds(5),
+            "smtp.example.com", 587, "smtp-user", "smtp-pass", true, Duration.ofSeconds(5),
             "noreply@afkgame.example", FRONTEND_BASE_URL);
 
     /** SMTP接続先が未設定の状態（§17 #4）。既定値は空文字で、null にはならない。 */
     private static final MailSettings SMTP_ABSENT = new MailSettings(
-            "", 587, "", "", Duration.ofSeconds(5),
+            "", 587, "", "", true, Duration.ofSeconds(5),
             "noreply@afkgame.example", FRONTEND_BASE_URL);
 
     /**

@@ -152,9 +152,9 @@ import com.afkgame.env.config.AuthSettings;
  *       更新件数は返さず、件数ごとの振る舞いは {@code EmailVerificationTokenRepositoryTest}
  *       が実DBで持つ</li>
  *   <li>{@code UserRepository#updatePasswordHash(String id, String passwordHash)} を追加
- *       （§24 手順7）。<b>{@code passwordHash} は固定表に無いため判定12 に掛かる</b> — 既存の
- *       {@code findByTokenHash} と同じく、直前へ {@code // 規約例外: 受け取るのは bcrypt ハッシュ
- *       であり、境界ログに出ても生パスワードは復元できない} を置いて抑止する</li>
+ *       （§24 手順7）。<b>{@code passwordHash} は固定表（application.md §3.1 規約1）に入れて
+ *       境界ログで伏せる</b> — bcrypt ハッシュは辞書攻撃の入力になるため、{@code findByTokenHash}
+ *       の {@code // 規約例外:}（48バイト乱数の SHA-256）と同じ扱いにはしない</li>
  *   <li>{@code RefreshTokenRepository#updateRevokedByUserId(String userId)} は {@code void} の
  *       まま据え置く（§24 手順9）。件数で経路を分ける {@code updateRevokedById} と違い、再利用検知の
  *       全失効もパスワード変更の全端末切断も件数を見ないため、件数ごとの振る舞いは

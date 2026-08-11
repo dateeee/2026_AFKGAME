@@ -345,6 +345,24 @@ def test_check_mask_ignores_non_string_parameters(root):
     assert mod.check_mask(mod.java_files()) == []
 
 
+def test_check_mask_detects_an_authorization_code_by_the_word_pair(root):
+    # `auth` + `code` の並びは認可コード（アクセストークンと交換できる）。語単独では拾えない
+    service(root, "AuthServiceImpl", "class AuthServiceImpl {\n    public void link(String authCode) {}\n}\n")
+    assert "authCode" in mod.check_mask(mod.java_files())[0]
+
+
+def test_check_mask_passes_an_authorization_code_name_in_the_fixed_table(root):
+    service(root, "AuthServiceImpl",
+            "class AuthServiceImpl {\n    public void link(String googleAuthCode) {}\n}\n")
+    assert mod.check_mask(mod.java_files()) == []
+
+
+def test_check_mask_does_not_treat_a_trailing_code_word_as_secret(root):
+    # `code` 単独を機密語にすると `errorCode`・`statusCode` を巻き込む
+    service(root, "BattleServiceImpl", "class BattleServiceImpl {\n    public void fail(String errorCode) {}\n}\n")
+    assert mod.check_mask(mod.java_files()) == []
+
+
 def test_check_mask_does_not_match_words_that_merely_contain_a_secret_word(root):
     # `drawCount` の `raw` を拾わないよう、camelCase を語へ割ってから突き合わせる
     service(root, "GachaServiceImpl", "class GachaServiceImpl {\n    public void draw(String drawCount) {}\n}\n")

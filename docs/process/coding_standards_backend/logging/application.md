@@ -42,12 +42,14 @@
 
 | # | 規約 |
 |---|------|
-| 1 | **パラメータ名が機密名に一致したら値を伏せる**。機密名は共通部品が持つ固定表（`password`・`rawPassword`・`newPassword`・`token`・`accessToken`・`refreshToken`・`secret`・`credential` → `****`／`email` → `LogKey.EMAIL` と同じマスク） |
+| 1 | **パラメータ名が機密名に一致したら値を伏せる**。機密名は共通部品が持つ固定表（`password`・`rawPassword`・`newPassword`・`passwordHash`・`token`・`accessToken`・`refreshToken`・`googleAuthCode`・`secret`・`credential` → `****`／`email` → `LogKey.EMAIL` と同じマスク） |
 | 2 | 名前で判定できないもの（戻り値・Entity・Resource のフィールド）は、**機密フィールドを `toString()` から外す**ことで担保する。Lombok は `@ToString.Exclude`、手書きは対象フィールドを含めない。**機密項目を持つクラスを新設・改修したら同時に対応する**（レビュー観点。[logging.md](../logging.md) §6） |
 | 3 | 生のトークン・パスワードを返すメソッドは、**戻り値を出力対象から外す注釈**を付けて `****` にする（例: `JwtService#createAccessToken`） |
 | 4 | **コレクション・配列・`Map` は要素を展開せず件数だけ**出す（`List(size=12)`）。ログ量とマスク漏れの両方を同時に抑える |
 | 5 | 1値あたり **200文字で打ち切り**、末尾に `...` を付ける |
 | 6 | `null` は `null`、`Optional` は中身へ #1〜#5 を適用する。`void` の戻り値は `result` を出さない |
+
+ハッシュ値でも `passwordHash`（bcrypt）は辞書攻撃の入力になるため固定表に入れる。`tokenHash`（48バイト乱数の SHA-256）は総当たりが成立しないので `// 規約例外:` の抑止でよい。
 
 ## 4. アプリケーションログ②：業務ログ（AppLogger）
 

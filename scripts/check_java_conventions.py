@@ -82,12 +82,16 @@ POINTCUT_PKGS = ("com/afkgame/domain/service/", "com/afkgame/domain/repository/"
 # logging/application.md §3.1 規約1 の固定表（LayerLoggingInterceptor#MASKED_PARAM_NAMES の写し）。
 # `email` は LogKey.EMAIL と同じマスクが掛かるため、同じく伏せられる側として数える
 MASKED_PARAMS = frozenset({
-    "password", "rawPassword", "newPassword", "token", "accessToken",
-    "refreshToken", "secret", "credential", "email",
+    "password", "rawPassword", "newPassword", "passwordHash", "token", "accessToken",
+    "refreshToken", "googleAuthCode", "secret", "credential", "email",
 })
 
 # 機密を示す語。camelCase を語へ割ってから突き合わせる（`drawCount` の `raw` を拾わないため）
 SECRET_WORDS = frozenset({"raw", "token", "password", "secret", "credential"})
+
+# 単語では機密と判定できないが、並びで機密になる組（`authCode` は認可コード）。
+# `code` 単独を SECRET_WORDS へ入れると `errorCode`・`statusCode` を巻き込むため並びで見る
+SECRET_WORD_PAIRS = frozenset({("auth", "code")})
 
 CAMEL_WORD = re.compile(r"[A-Z]+(?![a-z])|[A-Z][a-z]*|[a-z]+|\d+")
 
@@ -383,8 +387,11 @@ def public_methods(text: str, iface: bool):
 
 
 def is_secret_name(name: str) -> bool:
-    """camelCase を語へ割り、機密を示す語を含むか。"""
-    return any(w.lower() in SECRET_WORDS for w in CAMEL_WORD.findall(name))
+    """camelCase を語へ割り、機密を示す語（単独 or 並び）を含むか。"""
+    words = [w.lower() for w in CAMEL_WORD.findall(name)]
+    if any(w in SECRET_WORDS for w in words):
+        return True
+    return any(pair in SECRET_WORD_PAIRS for pair in zip(words, words[1:]))
 
 
 def check_mask(files: list[Path]) -> list[str]:

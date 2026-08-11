@@ -177,8 +177,9 @@ public class VerificationMailSenderImpl implements VerificationMailSender {
      * 差し替えて通るため、ここに分岐を書くと C1 の未達になる。
      *
      * <p>接続先を設定するなら認証情報も設定する前提とし（§16.2 は SMTP認証を接続先と対で挙げる）、
-     * 認証は常に有効にする。STARTTLS は要求ではなく有効化にとどめるため、対応しないサーバーでも
-     * 平文で送信できる。
+     * 認証は常に有効にする。STARTTLS を要求するかは設定から流し込む（§16.2
+     * {@code mail.smtp.starttls.required}。既定の {@code true} では STARTTLS を広告しない
+     * サーバーへの送信が失敗し、平文へ落ちない）。
      *
      * @param to 宛先アドレス
      * @param subject 件名
@@ -193,6 +194,8 @@ public class VerificationMailSenderImpl implements VerificationMailSender {
         props.put("mail.smtp.port", String.valueOf(mailSettings.smtpPort()));
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.smtp.starttls.required",
+                String.valueOf(mailSettings.smtpStarttlsRequired()));
         props.put("mail.smtp.connectiontimeout", timeoutMillis);
         props.put("mail.smtp.timeout", timeoutMillis);
         props.put("mail.smtp.writetimeout", timeoutMillis);

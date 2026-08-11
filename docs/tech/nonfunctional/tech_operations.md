@@ -63,6 +63,7 @@ SPRING_PROFILES_ACTIVE=local "$CATALINA_HOME/bin/catalina.sh" run   # :8080
 | `LOG_DIR` | ログ3種別（通信 / アプリケーション / エラー）の出力先ディレクトリ | `${catalina.base:-.}/logs` | — |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Google OAuth | なし | Phase 2〜 ○ |
 | `SMTP_HOST` / `SMTP_PORT` / `SMTP_USER` / `SMTP_PASSWORD` | 確認メール・パスワードリセット送信 | なし | Phase 2〜 ○ |
+| `SMTP_STARTTLS_REQUIRED` | SMTP の STARTTLS を必須にする（`false` で平文送信を許す） | `true` | — |
 | `BATTLE_RNG_SEED` | 戦闘乱数のシード固定（[tech_rng.md §2](../detail/tech_rng.md) の調査用。本番では未設定） | なし | — |
 
 - **上書きの仕組み**: 素の Spring は `database.url` の解決時に `DATABASE_URL` を探す（`.` → `_` と大文字化のみ）。**プロパティキーはドット区切りのみで組む** — ハイフンは変換されず、上書きが黙って効かなくなる

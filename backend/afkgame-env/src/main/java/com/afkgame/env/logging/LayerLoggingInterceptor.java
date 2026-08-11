@@ -30,8 +30,8 @@ public class LayerLoggingInterceptor implements MethodInterceptor {
 
     /** 名前一致で伏せるパラメータ名（application.md §3.1 規約1の固定表）。 */
     private static final Set<String> MASKED_PARAM_NAMES = Set.of(
-            "password", "rawPassword", "newPassword", "token", "accessToken", "refreshToken",
-            "secret", "credential");
+            "password", "rawPassword", "newPassword", "passwordHash", "token", "accessToken",
+            "refreshToken", "googleAuthCode", "secret", "credential");
 
     private static final String EMAIL_PARAM_NAME = "email";
 

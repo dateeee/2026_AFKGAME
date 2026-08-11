@@ -16,6 +16,7 @@
 - **`uq_players_user_id` 違反に業務エラーコードは新設しない**（2026-08-09 決着）。AUTH_ 一覧に該当が無く公開APIからは到達しない経路のため、`DuplicateKeyException` をそのまま送出し 500 `INTERNAL_UNEXPECTED_ERROR` として扱う（3-A-2 の register でも同じ判断を使う）
 - **STEP 6 で `tech_db/` の「実装:」行を Entity 参照へ替えても `check_schema_triple.py` は止まらない**（DDL はテーブル名で対応づけるため）。Java 側でスキーマの正を持つのは Flyway の `V1__initial_schema.sql`（照合仕様の正はスクリプトの docstring）
 - **`MailSettings` の7フィールドは読み手が未実装**（2026-08-10・ISSUE-803。`known_issues.md` #6 と対）。STEP 3-A-3（メール送信）の完了条件へ「7フィールドすべてに読み手ができること」を入れる。3-A-3 を終えてなお未参照が残るフィールドは、その時点で削除する
+- **`httpclient5` は STEP 4（Phase 2 の Google OAuth）で `afkgame-domain/pom.xml` へ戻す**（2026-08-11・ISSUE-905 で先行投入を削除した）。技術選定そのものは有効で、正は [tech_selection.md](java_migration/tech_selection.md) §2・[tech_backend.md](../tech/basic/tech_backend.md) §4.3。`RestClient` の `ClientHttpRequestFactory` を Bean 構成する回に、同じコミットで依存を足す
 
 ## 2. 仕様・マスターデータ
 
