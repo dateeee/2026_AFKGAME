@@ -15,6 +15,9 @@
 - **`characters.rarity` は V1 スキーマに無い**（Phase 3 の列）。`Character` Entity にも持たせていないので、Phase 3 の移植（STEP 5）でスキーマ追加と同時に足す
 - **`uq_players_user_id` 違反に業務エラーコードは新設しない**（2026-08-09 決着）。AUTH_ 一覧に該当が無く公開APIからは到達しない経路のため、`DuplicateKeyException` をそのまま送出し 500 `INTERNAL_UNEXPECTED_ERROR` として扱う（3-A-2 の register でも同じ判断を使う）
 - **STEP 6 で `tech_db/` の「実装:」行を Entity 参照へ替えても `check_schema_triple.py` は止まらない**（DDL はテーブル名で対応づけるため）。Java 側でスキーマの正を持つのは Flyway の `V1__initial_schema.sql`（照合仕様の正はスクリプトの docstring）
+- **3-B ①-a 以降、`afkgame-domain` のテストモジュールは製造①まで test-compile が通らない**（2026-08-11）。未実装型（`BattleService`・`BattleSimulator`・`OfflineCalculator`・`BattleOutcome`・`OfflineSummary`・`LapAnalyzer`・`LapAnalysis`・`CharacterGrowth`）を参照する Red が入っているため、**既存の単体306件も同モジュールでは走らない**。これは `test-list.md` §7 の想定どおりで、Green は製造①（キュー2）でまとめて取る。`afkgame-web`・`afkgame-env` は影響を受けない
+- **3-B ①-a が定義した表層は各テストクラスの Javadoc「製造工程への申し送り」が正**（`BattleServiceImplTest`・`OfflineCalculatorImplTest`）。①-b（battle / rng / numeric）と製造①はこの署名に合わせる。特に `BattleSimulator#simulate(Player, List<Character>, int ticks)` は ①-b の `tech_battle.md` 側と重なるため、**①-b で別名の表層を新設しない**。あわせて `LoggerName.BATTLE("afkgame.battle")`・`LogReason.CLOCK_SKEW("clock_skew")`・`PlayerRepository#findByIdForUpdate` / `#updateTickState`・`ErrorCatalog` への `BATTLE_TICK_BUSY`(503) 登録が製造①の追加対象
+- **`tech_polling.md` §5 の10件は JUnit へ展開しない**（2026-08-11・①-a で判断）。`usePolling.ts` / `useGameLoop.ts` の分岐でフロントは TDD 非適用（`test-list.md` §2）、同 §5 自身が「単体レベルの検証はE2E（Playwright）に統合する」と定めている。**`integration-test` スキルの担当**として E2E 側で消化する。マーカー0件のままなら `check_branch_list.py --tests` の照合対象外で、exit 0 は維持される
 - **`httpclient5` は STEP 4（Phase 2 の Google OAuth）で `afkgame-domain/pom.xml` へ戻す**（2026-08-11・ISSUE-905 で先行投入を削除した）。技術選定そのものは有効で、正は [tech_selection.md](java_migration/tech_selection.md) §2・[tech_backend.md](../tech/basic/tech_backend.md) §4.3。`RestClient` の `ClientHttpRequestFactory` を Bean 構成する回に、同じコミットで依存を足す
 
 ## 2. 仕様・マスターデータ
@@ -25,6 +28,9 @@
 - **Phase 5 の詳細設計は3点が未作成**（2026-08-11・仕様確定ゲートの ISSUE-1302／1306）: ①ボスラッシュ `tech_bossrush.md`、②転生 `tech_prestige.md`（いずれも処理フロー + 分岐一覧。索引は `tech_spec.md` §1 に予定行だけ置いてある）、③イベントダンジョンのマスターデータ `docs/data/master/event_dungeon.md` §19（`master_data.md` の索引に節番号だけ採番済み）。**実ファイル作成と索引のリンク張り替えは同じ変更にまとめる**（先にリンクを張ると `check_docs.py --links` が落ちる）。深淵の塔・イベントダンジョンの塔側処理は `tech_tower.md` + `tech_tower/` へ統合済みで追加不要
 - **深淵の塔の基準値を改定した**（2026-08-11・ISSUE-1309。`master/endgame.md` §18.1 の通常敵を `arch_dragon` LV152 の実データへ揃え、§18.3 早見表を再計算）。**461F の「素の melee LV9999 で安定周回できる想定上限」は旧基準値（HP 4,500）時点の試算のまま**なので、Phase 5 の詳細設計で再試算する。`balance_backlog.md` B-5 の「約115日」も同じ前提に立つ
 - **`tech_data.md` §1.1 の分割は完了**（2026-08-11・ISSUE-1311 消化）。JSON 例は `tech_data/game_state.md` の §1.1.1 プレイヤー状態 / §1.1.2 キャラクター / §1.1.3 装備と予約キーが持ち、**親 §1.1 はトップレベルキー一覧表と `towersCleared` のキー体系（正）**。Phase 5 で `bossRush`・`prestige` を実体化するときは、**親のキー表の行と子 §1.1.3 の予約コメントの両方**を更新する
+- **`tech_offline.md` §4.1 の期待値計算式に分岐一覧の行が無い**（2026-08-11・①-a で検出）。`base_hit`・`crit_factor`・`skill_factor`・`E_taken`・撃破ターン数・消費数/周回 は §5 の15件がどれも押さえておらず、①-a は周回ループ側だけをテスト化して計算式は `LapAnalyzer` の内側へ寄せた。**`LapAnalyzer` の製造前に `detail-design` で §5 へ行を追加する**（末尾へ追加＝既存番号を動かさない）。範囲攻撃 `×0.7×敵数`・攻撃スキル2枠は倍率の高い方のみ・被ダメ軽減の上限80%・挑発の按分が未カバー
+- **`tech_tick.md` §5 #10（パーティが空）は `last_tick_at` を進めるかを定めていない**（2026-08-11・①-a で検出）。#1 は「不変」と明記があるが #10 は「戦闘なし・状態のみ返却」までで、①-a のテストは基準時刻をアサートしていない。製造①の前に `detail-design` で確定する（進めない場合は空パーティのまま放置した時間が復帰後に一括計算される）
+- **`tech_tick.md` §1 は `last_tick_at` の読み出しを `OffsetDateTime` と書いているが、`Player` Entity の実装は `Instant`**（2026-08-11・①-a で検出）。UTC 固定の瞬時点としては等価で実害は無いが記述が実装とずれている。次に `tech_tick.md` を触る回に実装側へ寄せる（`fix-specs` 相当の1行修正）
 - 獣の塔（`docs/data/towers/003_獣の塔.md`）をマスターデータへ追加する際、`FLOOR_CHARACTERS` へ `scout_001` ハヤテ（獣の塔10Fクリア。`characters/CHARACTERS_OVERVIEW.md` §3 の3体目）を足す。製造①では塔IDが未宣言で ID を発明しないため見送った（塔6〜8 のマスターデータ追加または移行 STEP 5 へ合流させる）
 
 ## 3. 環境・ツール
