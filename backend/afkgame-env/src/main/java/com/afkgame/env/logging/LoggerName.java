@@ -21,6 +21,9 @@ public enum LoggerName {
     /** ヘルスチェック（運用監視向け）。 */
     HEALTH("afkgame.health"),
 
+    /** 戦闘tick処理・オフライン計算。 */
+    BATTLE("afkgame.battle"),
+
     /** 通信の START / END（受信・送信）。通信ログファイルへ出る唯一のロガー。 */
     COMM("afkgame.comm"),
 

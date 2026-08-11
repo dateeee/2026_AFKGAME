@@ -55,6 +55,12 @@
 | `reset_used` | パスワード再設定失敗 | 再設定トークンが使用済み（確認と違い冪等にしない） |
 | `reset_expired` | パスワード再設定失敗 | 再設定トークンの有効期限切れ |
 
+## 戦闘tick
+
+| reason | メッセージ | 発生条件 |
+|--------|-----------|---------|
+| `clock_skew` | tick処理をスキップ | `last_tick_at` が現在時刻より未来（サーバー時刻の巻き戻し・データ不整合）。`pending_ticks = 0` として扱い `last_tick_at` を更新しない（[tech_tick.md](../../detail/tech_tick.md) §1.1） |
+
 ## 横断（AOP境界ログ）
 
 | reason | メッセージ | 発生条件 |

@@ -89,6 +89,9 @@ public enum LogReason {
     /** 再設定トークンの有効期限切れ。 */
     RESET_EXPIRED("reset_expired"),
 
+    /** {@code last_tick_at} が現在時刻より未来（サーバー時刻の巻き戻し・データ不整合）。 */
+    CLOCK_SKEW("clock_skew"),
+
     /** AOP境界ログのEND出力時、例外で抜けた（logging/application.md §3 規約3）。 */
     EXCEPTION("exception");
 

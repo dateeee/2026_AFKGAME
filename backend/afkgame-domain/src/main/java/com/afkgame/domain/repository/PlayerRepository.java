@@ -35,6 +35,27 @@ public interface PlayerRepository {
     Player findByUserId(String userId);
 
     /**
+     * IDでプレイヤーを取得し、その行を占有ロックする。
+     *
+     * <p>tick 処理の多重実行を防ぐため、マッピング XML が {@code SELECT ... FOR UPDATE} を
+     * 発行する（docs/tech/detail/tech_tick.md §3.1）。トランザクション内から呼ぶこと。
+     *
+     * @param id プレイヤーID
+     * @return 該当プレイヤー。存在しなければ null
+     */
+    Player findByIdForUpdate(String id);
+
+    /**
+     * tick 処理の結果として進んだ状態を反映する。
+     *
+     * <p>{@code last_tick_at} と探索状態（現在階・交戦中の敵・周回ゴールドなど）をまとめて更新する
+     * （docs/tech/detail/tech_tick.md §4）。
+     *
+     * @param player 更新するプレイヤー
+     */
+    void updateTickState(Player player);
+
+    /**
      * プレイヤーを登録する。
      *
      * @param player 登録するプレイヤー

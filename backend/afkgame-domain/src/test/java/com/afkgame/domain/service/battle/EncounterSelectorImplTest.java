@@ -19,7 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.terasoluna.gfw.common.exception.SystemException;
 
-import com.afkgame.domain.service.EncounterSelector.EncounterEntry;
+import com.afkgame.domain.service.battle.EncounterSelector.EncounterEntry;
 
 /**
  * {@link EncounterSelectorImpl} の単体テスト（エンカウントの重み付き抽選）。
