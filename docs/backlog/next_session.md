@@ -15,7 +15,8 @@
 | 4 | **クリティカル率は配線済み**（味方 `character_types.yml`・敵 `EnemyData` の `critRate` 列。値は基礎5%）。[tech_rng.md](../tech/detail/tech_rng.md) §6 は「満たすこと」から**供給元を宣言する恒久の節へ書き換え済み**。敵の `enemies.yml` はセグメント②で載せる |
 | 5 | **`check_java_conventions.py` は 違反0 / WARN 7 が現在の正常値**（13 → −6 は `CLOCK_SKEW` と `GameSettings` の5アクセサに読み手が付いたため）。ゼロを強制せず増減だけ見る |
 | 6 | 表層の正は各テストクラスの Javadoc「製造工程への申し送り」。**そこに無い名前を新設しない** |
-| 7 | **main に別セッションの未コミット変更が1件ある**: `scripts/report_java_tests.py`（+142/−38・本タスクとは無関係）。①-iii の統合時に既に在り、`worktree.py merge` がこれで止まったため**手動で `git merge --ff-only` して統合した**。**触らず、正体をユーザーへ確認してから扱う** |
+| 7 | **main にユーザー作業中の未コミット変更が4件ある**（別件）: `report_java_tests.py`・同テスト・`commands/backend.md`・`changelog.md`。①-iii の統合時に既に在り `worktree.py merge` が止まったため**手動で `git merge --ff-only` した**。**コミットも `git restore` もしない**（`scripts/**` 回帰は448件 green） |
+| 8 | **`report_java_tests.py --run` は Red があると `BUILD_FAILURE`**（reactor が止まり `afkgame-web` が SKIPPED → 古いレポートが混ざり件数が狂う）。①-iv までは `mvn verify -Dmaven.test.failure.ignore=true` で見る。同スクリプトの「`clean` 後にログ書き出しが落ちる」不具合は修正済み（未コミット・上記に含む） |
 
 **Java 移行の残りは 3-B（Phase 1: game / battle / tower）→ 4（Phase 2）→ 5（Phase 3）→ 6（切替と後始末）**（順序の正は [carryover_notes.md](carryover_notes.md) §1、手順・進捗の正は [java_migration.md](java_migration.md)、STEP の定義は [steps.md](java_migration/steps.md)「STEP 3〜5」）。**3-B は詳細設計・テストリスト作成①（game / battle）・製造①-i〜①-iii まで完了**で、残るのは製造①-iv → テストリスト作成②（tower）→ 製造②。**Phase 1〜3 の機能はどの言語でも未実装の期間**（E2E はハーネスと `GET /health` まで疎通済みで、テスト本体は STEP 5 完了まで赤が正常）。
 
