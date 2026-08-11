@@ -85,6 +85,6 @@
 
 | 項目 | 満たすべき仕様 |
 |------|--------------|
-| クリティカル率 | プレイヤー・敵で共通の定数にしない。Phase 3〜 はキャラクターごとの `crit_rate`（装備・スキルの合算）を参照する |
+| クリティカル率 | プレイヤー・敵で共通の定数にしない。**Phase 1 の基礎5%（[systems/battle.md](../../design/systems/battle.md)「確率・軽減率の上限」）は供給元を左右で分ける** — 味方はキャラタイプ別マスター（`character_types.yml`）の列、敵は `EnemyData` の列から読む（バランス値はマスターデータへ置く。`coding_standards_backend/common.md` §5 #10）。**列の追加は読み手（`BattleSimulator`）を作る製造①-iii で行う**（読み手のいない列を先行させない）。Phase 3〜 はキャラクターごとの `crit_rate`（装備・スキルの合算）を参照する |
 
 §2 のインスタンス注入は Java 側で実装済み（`com.afkgame.domain.rng.RandomFactory`）。1リクエストにつき1つ生成し、戦闘・エンカウント・ドロップ・装備生成へ引き渡す。

@@ -8,6 +8,12 @@
 
 ---
 
+## 2026-08-12
+
+| ファイル | 内容 |
+|---------|------|
+| `backend/afkgame-domain/**/service/battle/`（`DamageCalculatorImpl`・`TargetSelectorImpl`・`StatCalculatorImpl`・`HealingCalculatorImpl`・`EncounterSelectorImpl`・`CharacterGrowthImpl`）・`docs/tech/basic/tech_error_handling.md`・`docs/tech/detail/tech_rng.md` | **3-B 製造①-ii（戦闘計算の Green）**。製造①-i が置いた6クラスの `UnsupportedOperationException` を実装へ置き換え、**対象29件を Green**（`@Service` も同じ回で付与。協調先が揃っているのはこの6つだけ）。**ダメージ計算**は分散 → クリティカルの順に `nextDouble()` を**分岐に依らず2回**消費し（クリティカル判定は分岐ではなく毎ターン行うため消費数が一定。tech_rng.md §3）、`ATK×(1+variance) − DEF×0.5` → ×1.5 → `floor` → 向き別下限（味方→敵は1・敵→味方は0）の順で途中の丸めを挟まない（tech_numeric.md §4）。**エンカウント抽選**は末尾の要素が残りの重みを受け持つ形（ループは `size-1` まで）にして「どの要素にも当たらない」到達不能な経路を作らず、C1 の未達分岐を生まないようにした。重み合計0以下は `SystemException INTERNAL_MASTER_DATA_INVALID`。**`tech_error_handling.md`** はコード体系の `INTERNAL_` 行へ同コードを追加し、「個別コードは応答へ出さず（500 + `INTERNAL_UNEXPECTED_ERROR` にそろえる）ログの `error_code` にだけ残す ＝ **`ErrorCatalog` へは登録しない**」「起動時（Bean 生成中）の検知は `MasterDataException`」の2点を明文化した — `ApiExceptionHandler` は `SystemException` を `ErrorCatalog` を引かずに 500 へ固定するため、登録しても引かれない死んだ行になる（既存の `INTERNAL_MASTER_DATA_MISSING` も未登録で揃っている）。**`tech_rng.md` §6 でクリティカル率の供給元を確定**: Phase 1 の基礎5%は左右で分けて持ち、味方は `character_types.yml` のタイプ別列・敵は `EnemyData` の列から読む（バランス値はマスターデータ ＝ `common.md` §5 #10。tech_rng.md §6 の「共通の定数にしない」を満たす）。**列の追加は読み手（`BattleSimulator`）を作る製造①-iii で行う**（読み手のいない列を先行させない）。**①-iii へ送ったもの**: `CharacterGrowth#applyLevelUp` と `addExp` のしきい値到達→LVアップ経路は実装せず Javadoc へ理由と解消時期を残した — 到達側の行が分岐一覧に無く（`tech_numeric.md` §5 は #11・#12 の上限判定のみ、周回中のLVアップは `tech_offline.md` §5 #7・#8 が `OfflineCalculator` 側で持つ）、ステータス再計算に要る成長率も `character_types.yml` が未搭載のため（実装すれば未到達分岐を作り込む）。検証は**単体378件中 Green 335 / Red 43**（`BattleService`・`BattleSimulator`・`OfflineCalculator`・`LapAnalyzer` の4クラスのみ＝72→43。surefire XML の実測）、**結合85件 green**（`mvn verify -Dmaven.test.failure.ignore=true`）、**C1 100%（210/210・未達0）**、`check_java_conventions.py` 違反0・**WARN 14→13**（`GameSettings#maxPlayerLevel()` を `CharacterGrowthImpl` が参照したため減）、`check_error_codes.py`／`check_docs.py`／`check_doc_size.py`／`check_branch_list.py --tests`（45件・WARN 0）すべて green |
+
 ## 2026-08-11
 
 | ファイル | 内容 |

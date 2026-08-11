@@ -62,9 +62,12 @@
 | `BASE_` | 施設関連 | `BASE_INSUFFICIENT_MATERIALS`, `BASE_MAX_LEVEL`（一覧は [tech_base.md §6](../detail/tech_base.md)） |
 | `FORGE_` | 鍛冶屋関連 | `FORGE_INSUFFICIENT_MATERIALS`, `FORGE_LEVEL_TOO_LOW` |
 | `RATE_LIMIT_` | レート制限 | `RATE_LIMIT_EXCEEDED`(429)。`Retry-After` ヘッダを併せて返す |
-| `INTERNAL_` | サーバー内部エラー | `INTERNAL_UNEXPECTED_ERROR` |
+| `INTERNAL_` | サーバー内部エラー | `INTERNAL_UNEXPECTED_ERROR`・`INTERNAL_MASTER_DATA_INVALID` |
 | `VALIDATION_` | 入力チェック違反（422） | `VALIDATION_ERROR`。違反項目は `details`（上記） |
 | `HTTP_` | 業務コードを持たない Spring MVC 標準例外（**4xx のみ**。400・404・405・415 等） | `HTTP_400`（JSON の構文破損）・`HTTP_405`。クライアントは個別分岐せず汎用エラー表示に倒す |
+
+- **`INTERNAL_` の個別コードは応答へ出さない**。システム例外（分類2）の応答は 500 + `INTERNAL_UNEXPECTED_ERROR` にそろえ、原因を特定するコードはログの `error_code` にだけ残す（[exception.md](../../process/coding_standards_backend/exception.md) §1・§4）。したがって `ErrorCatalog`（コード→ステータス対応表）へは登録しない
+- `INTERNAL_MASTER_DATA_INVALID` は**リクエスト中に検知した**マスターデータ不正（例: エンカウント抽選プールの重み合計が0以下）。起動時（Bean 生成中）の検知は `MasterDataException` で起動を止めるため本体系に含めない（exception.md §3 #2・#3）
 
 ## AUTH_ コード一覧
 
