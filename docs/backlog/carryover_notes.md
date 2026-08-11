@@ -18,6 +18,7 @@
 - **3-B ①-a 以降、`afkgame-domain` のテストモジュールは製造①まで test-compile が通らない**（2026-08-11）。未実装型（`BattleService`・`BattleSimulator`・`OfflineCalculator`・`BattleOutcome`・`OfflineSummary`・`LapAnalyzer`・`LapAnalysis`・`CharacterGrowth`）を参照する Red が入っているため、**既存の単体306件も同モジュールでは走らない**。これは `test-list.md` §7 の想定どおりで、Green は製造①（キュー2）でまとめて取る。`afkgame-web`・`afkgame-env` は影響を受けない
 - **3-B ①-a が定義した表層は各テストクラスの Javadoc「製造工程への申し送り」が正**（`BattleServiceImplTest`・`OfflineCalculatorImplTest`）。①-b（battle / rng / numeric）と製造①はこの署名に合わせる。特に `BattleSimulator#simulate(Player, List<Character>, int ticks)` は ①-b の `tech_battle.md` 側と重なるため、**①-b で別名の表層を新設しない**。あわせて `LoggerName.BATTLE("afkgame.battle")`・`LogReason.CLOCK_SKEW("clock_skew")`・`PlayerRepository#findByIdForUpdate` / `#updateTickState`・`ErrorCatalog` への `BATTLE_TICK_BUSY`(503) 登録が製造①の追加対象
 - **`tech_polling.md` §5 の10件は JUnit へ展開しない**（2026-08-11・①-a で判断）。`usePolling.ts` / `useGameLoop.ts` の分岐でフロントは TDD 非適用（`test-list.md` §2）、同 §5 自身が「単体レベルの検証はE2E（Playwright）に統合する」と定めている。**`integration-test` スキルの担当**として E2E 側で消化する。マーカー0件のままなら `check_branch_list.py --tests` の照合対象外で、exit 0 は維持される
+- **3-B ①-b の表層も各テストの Javadoc「製造工程への申し送り」が正**（2026-08-11。`BattleSimulatorImplTest` ほか7件。追加型の一覧は changelog の同日ブロック）。**乱数源の生成点は `BattleSimulatorImpl#simulate` の入口**（`RandomFactory#create()` を1回 → 以降はメソッド引数で配る）、**`FloorProgression` の中身はセグメント②**（①-b は継ぎ目だけ）、**クリティカル率の供給元は未定**（`tech_rng.md` §6 の節削除とあわせて製造①で決める）、`INTERNAL_MASTER_DATA_INVALID` は `tech_error_handling.md` へ登録する
 - **`httpclient5` は STEP 4（Phase 2 の Google OAuth）で `afkgame-domain/pom.xml` へ戻す**（2026-08-11・ISSUE-905 で先行投入を削除した）。技術選定そのものは有効で、正は [tech_selection.md](java_migration/tech_selection.md) §2・[tech_backend.md](../tech/basic/tech_backend.md) §4.3。`RestClient` の `ClientHttpRequestFactory` を Bean 構成する回に、同じコミットで依存を足す
 
 ## 2. 仕様・マスターデータ
@@ -31,6 +32,7 @@
 - **`tech_offline.md` §4.1 の期待値計算式に分岐一覧の行が無い**（2026-08-11・①-a で検出）。`base_hit`・`crit_factor`・`skill_factor`・`E_taken`・撃破ターン数・消費数/周回 は §5 の15件がどれも押さえておらず、①-a は周回ループ側だけをテスト化して計算式は `LapAnalyzer` の内側へ寄せた。**`LapAnalyzer` の製造前に `detail-design` で §5 へ行を追加する**（末尾へ追加＝既存番号を動かさない）。範囲攻撃 `×0.7×敵数`・攻撃スキル2枠は倍率の高い方のみ・被ダメ軽減の上限80%・挑発の按分が未カバー
 - **`tech_tick.md` §5 #10（パーティが空）は `last_tick_at` を進めるかを定めていない**（2026-08-11・①-a で検出）。#1 は「不変」と明記があるが #10 は「戦闘なし・状態のみ返却」までで、①-a のテストは基準時刻をアサートしていない。製造①の前に `detail-design` で確定する（進めない場合は空パーティのまま放置した時間が復帰後に一括計算される）
 - **`tech_tick.md` §1 は `last_tick_at` の読み出しを `OffsetDateTime` と書いているが、`Player` Entity の実装は `Instant`**（2026-08-11・①-a で検出）。UTC 固定の瞬時点としては等価で実害は無いが記述が実装とずれている。次に `tech_tick.md` を触る回に実装側へ寄せる（`fix-specs` 相当の1行修正）
+- **`tech_numeric.md` §5 を再構成した**（2026-08-11・①-b）: §5「丸め・クランプ・飽和」12件 + §6「入力値の検証」2件（**§6 は `PUT /api/game/settings` の Resource を作る回に消化**）。**回復量の下限1 と ターゲット抽選の正常系（`tech_rng.md` §5 #7 は0体側のみ）には分岐一覧の行が無い**ので、製造前に `detail-design` で末尾へ足す
 - 獣の塔（`docs/data/towers/003_獣の塔.md`）をマスターデータへ追加する際、`FLOOR_CHARACTERS` へ `scout_001` ハヤテ（獣の塔10Fクリア。`characters/CHARACTERS_OVERVIEW.md` §3 の3体目）を足す。製造①では塔IDが未宣言で ID を発明しないため見送った（塔6〜8 のマスターデータ追加または移行 STEP 5 へ合流させる）
 
 ## 3. 環境・ツール
