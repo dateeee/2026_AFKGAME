@@ -98,7 +98,7 @@ OWASP Dependency-Check は親が管理しないため**版を自分で固定し�
 
 移植時にあわせて処理するもの:
 
-- 詳細設計の [tech_tick.md](../../tech/detail/tech_tick.md) §6「Java 実装時に満たすこと」を満たす。満たしたら節ごと削除する（[tech_rng.md](../../tech/detail/tech_rng.md) §6 は 3-B 製造①-iii で解消し、クリティカル率の供給元を宣言する恒久の節へ書き換えた）
+- 詳細設計の「Java 実装時に満たすこと」節は**解消済み**（`tech_tick.md` §6 は 3-B 製造①-iv で満たして節ごと削除、[tech_rng.md](../../tech/detail/tech_rng.md) §6 は 3-B 製造①-iii で解消しクリティカル率の供給元を宣言する恒久の節へ書き換えた）
 - [known_issues.md](../known_issues.md) §2 の未対応項目のうち、移植対象の機能に紐づくものを1件ずつ再確認して解消する
 - 対応する Entity を作ったら `tech_db/` の「実装予定:」を「実装:」へ変える（`check_schema_triple.py` が実在を照合する）
 

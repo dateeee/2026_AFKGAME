@@ -95,15 +95,3 @@ C1網羅の対象分岐。[phases.md §3.4](../../process/phases.md) のテス�
 **#10 の `last_tick_at`**: 消化する戦闘が無くても §1 の繰り越し規則どおり
 `last_tick_at ← last_tick_at + pending_ticks × 60秒` とする。据え置くと未処理tickが際限なく積み上がり、
 編成を戻した瞬間に §2 のクランプ（#7）が働いて `capped=true`（切り詰めた）を返すため。
-
-## 6. Java 実装時に満たすこと（未実装）
-
-本仕様のうち Java 実装が未達の項目。移行 STEP 3 の実装で本仕様どおり満たす
-（[java_migration.md](../../backlog/java_migration.md)）。
-
-| 項目 | 満たすべき仕様 |
-|------|--------------|
-| 簡略計算 | 10tickサンプルの平均 × 残り ではなく、`tech_offline.md` §4 の期待値計算を使う |
-
-§1 の端数繰り越し・§2 のクランプ（`capped`）・§3 の行ロック（`SELECT ... FOR UPDATE` と `BATTLE_TICK_BUSY`）は
-`BattleServiceImpl` で実装済み（3-B 製造①-iii）。残りは `OfflineCalculator` を実装する回で満たす。
