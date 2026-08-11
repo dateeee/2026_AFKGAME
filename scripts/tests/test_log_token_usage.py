@@ -19,9 +19,10 @@ import log_token_usage as mod
 
 @pytest.fixture
 def log_path(tmp_path, monkeypatch):
-    """`LOG_PATH` を差し替えた（まだ存在しない）CSV パスを返す。"""
+    """`LOG_PATH`/`DELTA_PATH` を差し替えた（まだ存在しない）CSV パスを返す。"""
     path = tmp_path / "logs" / "token_usage.csv"
     monkeypatch.setattr(mod, "LOG_PATH", path)
+    monkeypatch.setattr(mod, "DELTA_PATH", tmp_path / "logs" / "token_usage_deltas.csv")
     return path
 
 
@@ -295,6 +296,7 @@ def projects(tmp_path, monkeypatch):
     work.mkdir()
     monkeypatch.chdir(work)
     monkeypatch.setattr(mod.Path, "home", classmethod(lambda cls: home))
+    monkeypatch.setattr(mod, "worktree_roots", lambda: [])  # git 起動を避ける
     slug = re.sub(r"[^0-9A-Za-z-]", "-", str(work))
     directory = home / ".claude" / "projects" / slug
     directory.mkdir(parents=True)
@@ -330,6 +332,7 @@ def test_backfill_skips_non_uuid_filenames(log_path, projects, capsys):
 def test_backfill_reports_missing_project_directory(log_path, tmp_path, monkeypatch, capsys):
     monkeypatch.chdir(tmp_path)
     monkeypatch.setattr(mod.Path, "home", classmethod(lambda cls: tmp_path / "none"))
+    monkeypatch.setattr(mod, "worktree_roots", lambda: [])
     mod.backfill()
     assert "トランスクリプトが見つかりません" in capsys.readouterr().err
 
@@ -373,3 +376,232 @@ def test_main_keeps_explicit_reason(log_path, tmp_path, monkeypatch):
     monkeypatch.setattr(mod.sys, "stdin", io.StringIO(payload))
     mod.main()
     assert read_rows(log_path)[0]["reason"] == "clear"
+
+
+# ── cost_usd（削減計画⑤-2）──────────────────────────────────
+
+def test_cost_usd_applies_input_output_prices():
+    assert mod.cost_usd("claude-opus-5", 1_000_000, 0, 0, 0) == 5.0
+    assert mod.cost_usd("claude-opus-5", 0, 1_000_000, 0, 0) == 25.0
+
+
+def test_cost_usd_applies_cache_rates():
+    """cache_read=入力単価×0.1、cache_creation=×2.0（1時間TTL運用）。"""
+    assert mod.cost_usd("claude-opus-5", 0, 0, 1_000_000, 0) == 0.5
+    assert mod.cost_usd("claude-opus-5", 0, 0, 0, 1_000_000) == 10.0
+
+
+def test_cost_usd_matches_model_by_prefix():
+    assert mod.cost_usd("claude-haiku-4-5-20251001", 1_000_000, 0, 0, 0) == 1.0
+
+
+def test_cost_usd_falls_back_to_opus_price_for_unknown_model():
+    assert mod.cost_usd("unknown", 1_000_000, 0, 0, 0) == 5.0
+
+
+def test_log_session_writes_cost_usd_column(log_path, tmp_path):
+    path = tmp_path / "s1.jsonl"
+    write_transcript(path, [assistant(output_tokens=1_000_000)])
+    mod.log_session(str(path), "s1", "stop")
+    assert read_rows(log_path)[0]["cost_usd"] == "25.0"
+
+
+def test_upsert_rows_fills_cost_usd_for_legacy_rows(log_path):
+    """旧形式（cost_usd 列なし）の既存行は書き直し時に再計算して埋める。"""
+    legacy_cols = [c for c in mod.COLUMNS if c != "cost_usd"]
+    log_path.parent.mkdir(parents=True)
+    with open(log_path, "w", encoding="utf-8-sig", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=legacy_cols, restval="")
+        writer.writeheader()
+        writer.writerow({"session_id": "old", "model": "claude-opus-5",
+                         "input_tokens": "0", "output_tokens": "1000000",
+                         "cache_read_tokens": "0", "cache_creation_tokens": "0"})
+    mod.upsert_rows([{"session_id": "s2", "model": "claude-opus-5"}], "s2")
+    rows = {r["session_id"]: r for r in read_rows(log_path)}
+    assert rows["old"]["cost_usd"] == "25.0"
+
+
+# ── last_prompt_label（削減計画⑤-1）─────────────────────────
+
+def test_last_prompt_label_uses_last_prompt():
+    entries = [user("最初の依頼"), assistant(), user("直近の依頼")]
+    assert mod.last_prompt_label(entries) == "直近の依頼"
+
+
+def test_last_prompt_label_uses_command_name():
+    entries = [user("依頼文"), user("<command-name>/doc-review</command-name>")]
+    assert mod.last_prompt_label(entries) == "/doc-review"
+
+
+def test_last_prompt_label_skips_builtin_command_and_boilerplate():
+    entries = [user("実際の依頼"),
+               user("Stop hook feedback:\n[bash ...] コミットしてください"),
+               user("<command-name>/clear</command-name>")]
+    assert mod.last_prompt_label(entries) == "実際の依頼"
+
+
+def test_last_prompt_label_returns_unknown_when_nothing_found():
+    assert mod.last_prompt_label([user("<system-reminder>x")]) == "(不明)"
+
+
+def test_last_prompt_label_truncates_to_60_chars():
+    assert mod.last_prompt_label([user("あ" * 100)]) == "あ" * 60
+
+
+# ── append_deltas / deltas 統合（削減計画⑤-1）───────────────
+
+def read_deltas():
+    with open(mod.DELTA_PATH, encoding="utf-8-sig", newline="") as f:
+        return list(csv.DictReader(f))
+
+
+def test_deltas_first_stop_records_full_cumulative(log_path, tmp_path):
+    path = tmp_path / "s1.jsonl"
+    write_transcript(path, [user("依頼A"), assistant(msg_id="a", output_tokens=5)])
+    mod.log_session(str(path), "s1", "stop")
+    rows = read_deltas()
+    assert len(rows) == 1
+    assert rows[0]["output_d"] == "5" and rows[0]["calls_d"] == "1"
+    assert rows[0]["prompt"] == "依頼A"
+
+
+def test_deltas_second_stop_records_difference(log_path, tmp_path):
+    path = tmp_path / "s1.jsonl"
+    write_transcript(path, [user("依頼A"), assistant(msg_id="a", output_tokens=5)])
+    mod.log_session(str(path), "s1", "stop")
+    write_transcript(path, [user("依頼A"), assistant(msg_id="a", output_tokens=5),
+                            user("依頼B"), assistant(msg_id="b", input_tokens=3)])
+    mod.log_session(str(path), "s1", "stop")
+    rows = read_deltas()
+    assert len(rows) == 2
+    assert rows[1]["input_d"] == "3" and rows[1]["output_d"] == "0"
+    assert rows[1]["calls_d"] == "1" and rows[1]["prompt"] == "依頼B"
+
+
+def test_deltas_negative_difference_records_current_cumulative(log_path, tmp_path):
+    """resume 引き継ぎ等で累計が巻き戻ったら今回累計をそのまま記録する。"""
+    path = tmp_path / "s1.jsonl"
+    write_transcript(path, [assistant(msg_id="a", output_tokens=5)])
+    mod.log_session(str(path), "s1", "stop")
+    write_transcript(path, [assistant(msg_id="c", output_tokens=2)])
+    mod.log_session(str(path), "s1", "stop")
+    assert read_deltas()[1]["output_d"] == "2"
+
+
+def test_deltas_skips_unchanged_models(log_path, tmp_path):
+    path = tmp_path / "s1.jsonl"
+    write_transcript(path, [assistant(msg_id="a", output_tokens=5)])
+    mod.log_session(str(path), "s1", "stop")
+    mod.log_session(str(path), "s1", "stop")  # 変化なし
+    assert len(read_deltas()) == 1
+
+
+def test_deltas_not_written_for_backfill(log_path, tmp_path):
+    path = tmp_path / "s1.jsonl"
+    write_transcript(path, [assistant(output_tokens=5)])
+    mod.log_session(str(path), "s1", "backfill")
+    assert not mod.DELTA_PATH.exists()
+
+
+def test_deltas_cost_uses_delta_tokens(log_path, tmp_path):
+    path = tmp_path / "s1.jsonl"
+    write_transcript(path, [assistant(msg_id="a", output_tokens=1_000_000)])
+    mod.log_session(str(path), "s1", "stop")
+    assert read_deltas()[0]["cost_usd"] == "25.0"
+
+
+# ── context_warning（削減計画①-2）───────────────────────────
+
+def test_context_warning_below_thresholds_is_empty():
+    entries = [assistant(input_tokens=1_000)]
+    assert mod.context_warning(entries, mod.collect_usage(entries)) == ""
+
+
+def test_context_warning_level1_by_context():
+    entries = [assistant(cache_read_input_tokens=130_000)]
+    msg = mod.context_warning(entries, mod.collect_usage(entries))
+    assert "検討" in msg and "13.0万" in msg
+
+
+def test_context_warning_level1_by_calls():
+    entries = [assistant(msg_id=f"m{i}", output_tokens=1) for i in range(100)]
+    msg = mod.context_warning(entries, mod.collect_usage(entries))
+    assert "検討" in msg and "100回" in msg
+
+
+def test_context_warning_level2_strongly_recommends_clear():
+    entries = [assistant(cache_read_input_tokens=185_000)]
+    msg = mod.context_warning(entries, mod.collect_usage(entries))
+    assert "強く推奨" in msg
+
+
+def test_context_warning_uses_last_assistant_usage():
+    """現在コンテキストは「最後の」応答の usage から取る（累計ではない）。"""
+    entries = [assistant(msg_id="a", cache_read_input_tokens=190_000),
+               assistant(msg_id="b", cache_read_input_tokens=1_000)]
+    assert mod.context_warning(entries, mod.collect_usage(entries)) == ""
+
+
+def test_log_session_emits_system_message_on_large_context(log_path, tmp_path, capsys):
+    path = tmp_path / "s1.jsonl"
+    write_transcript(path, [assistant(cache_read_input_tokens=200_000)])
+    mod.log_session(str(path), "s1", "stop")
+    out = capsys.readouterr().out
+    assert '"systemMessage"' in out and "/clear" in out
+
+
+def test_log_session_backfill_emits_no_warning(log_path, tmp_path, capsys):
+    path = tmp_path / "s1.jsonl"
+    write_transcript(path, [assistant(cache_read_input_tokens=200_000)])
+    mod.log_session(str(path), "s1", "backfill")
+    assert capsys.readouterr().out == ""
+
+
+# ── repo_root（worktree からの起動）──────────────────────────
+
+def test_repo_root_resolves_worktree_to_main(tmp_path, monkeypatch):
+    main = tmp_path / "main"
+    (main / ".git" / "worktrees" / "x").mkdir(parents=True)
+    wt = tmp_path / "wt"
+    (wt / "scripts").mkdir(parents=True)
+    (wt / ".git").write_text(f"gitdir: {main / '.git' / 'worktrees' / 'x'}\n",
+                             encoding="utf-8")
+    monkeypatch.setattr(mod, "__file__", str(wt / "scripts" / "log_token_usage.py"))
+    assert mod.repo_root() == main
+
+
+def test_repo_root_returns_own_root_for_normal_repo(tmp_path, monkeypatch):
+    repo = tmp_path / "repo"
+    (repo / "scripts").mkdir(parents=True)
+    (repo / ".git").mkdir()
+    monkeypatch.setattr(mod, "__file__", str(repo / "scripts" / "log_token_usage.py"))
+    assert mod.repo_root() == repo
+
+
+def test_backfill_fills_missing_cost_usd_without_new_sessions(log_path, projects, capsys):
+    """新規セッションが無くても --all は旧形式行の cost_usd を埋める。"""
+    legacy_cols = [c for c in mod.COLUMNS if c != "cost_usd"]
+    log_path.parent.mkdir(parents=True)
+    with open(log_path, "w", encoding="utf-8-sig", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=legacy_cols, restval="")
+        writer.writeheader()
+        writer.writerow({"session_id": "old", "model": "claude-opus-5",
+                         "input_tokens": "0", "output_tokens": "1000000",
+                         "cache_read_tokens": "0", "cache_creation_tokens": "0"})
+    mod.backfill()
+    assert read_rows(log_path)[0]["cost_usd"] == "25.0"
+
+
+# ── backfill の worktree 走査 ─────────────────────────────────
+
+def test_backfill_scans_worktree_slugs(log_path, projects, tmp_path, monkeypatch):
+    wt_root = tmp_path / "wtroot"
+    wt_root.mkdir()
+    monkeypatch.setattr(mod, "worktree_roots", lambda: [wt_root])
+    slug = re.sub(r"[^0-9A-Za-z-]", "-", str(wt_root))
+    wt_dir = tmp_path / "home" / ".claude" / "projects" / slug
+    wt_dir.mkdir(parents=True)
+    write_transcript(projects / f"{UUID}.jsonl", [assistant(output_tokens=5)])
+    write_transcript(wt_dir / f"{UUID2}.jsonl", [assistant(msg_id="b", output_tokens=7)])
+    mod.backfill()
+    assert {r["session_id"] for r in read_rows(log_path)} == {UUID, UUID2}
