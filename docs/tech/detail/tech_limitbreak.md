@@ -74,7 +74,7 @@
 
 | レスポンス項目 | 内容 |
 |--------------|------|
-| `character` | 更新後の基点。[tech_data.md §1.1](../basic/tech_data.md) のキャラクターオブジェクトと**同形**（`limitBreak`・`effectiveMaxHp`・`effectiveAtk`・`effectiveDef`・`effectiveSpd` を含む） |
+| `character` | 更新後の基点。[tech_data/game_state.md §1.1.2](../basic/tech_data/game_state.md) のキャラクターオブジェクトと**同形**（`limitBreak`・`effectiveMaxHp`・`effectiveAtk`・`effectiveDef`・`effectiveSpd` を含む） |
 | `bonusPercent` | 適用後の累計ボーナス率をパーセントの整数で返す（3回目なら `15`）。フロントが表を引かずに表示するための導出値 |
 | `removedCharacterId` | 消費した素材のID。フロントはこの1行だけをストアから除く |
 

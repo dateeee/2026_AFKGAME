@@ -86,7 +86,7 @@
 | `base_atk`・`base_def`・`base_spd`・`max_hp` | `master/character.md` §1.2 の**タイプ別 LV1 基礎値をそのまま**入れる |
 | `hp` | `max_hp` と同値 |
 
-- 基礎値へ**レアリティ倍率を掛けない**。倍率と限界突破ボーナスは読み取り時に実効値（[tech_data.md](../basic/tech_data.md) の `effectiveAtk` 等）として算出する。保存値に含めると二重適用になる
+- 基礎値へ**レアリティ倍率を掛けない**。倍率と限界突破ボーナスは読み取り時に実効値（[tech_data/game_state.md §1.1.2](../basic/tech_data/game_state.md) の `effectiveAtk` 等）として算出する。保存値に含めると二重適用になる
 - 加入時LVが1である点は `characters/CHARACTERS_OVERVIEW.md` §3 の確定入手キャラと同じ（**仮置き**。調整は [balance_backlog.md](../../backlog/balance_backlog.md) B-8）
 
 ## 6. API
