@@ -63,3 +63,9 @@
 - ターン概要: ツール129回・エラー4回・拒否0回。開始:「<command-message>next</command-message>」
 - 原因と改善案: 4件の内訳は**①ツール選び分け1件**（`docker --version; mvn -v; java -version` を Bash で叩いて context-mode フックにリダイレクト。前回メモの「外部問い合わせとビルドは最初から `ctx_execute`」がまだ `adhoc.md` へ未反映で同型を再発）**②worktree の既知トラップ1件**（`ctx_execute_file` にプロジェクトルート外のパスを渡して拒否。`worktree_guide.md` §5.4 に明記されているが、§5.2 開始手順だけを読んで入ったため踏んだ）**③`Edit` の `old_string` 特定ミス2件**（`AuthServiceImplTest` は `@Nested` ごとに**同名のテストメソッド**があり `void test_...() {` + 直後1行では2箇所一致。加えて Javadoc 行を字下げ5スペースと思い込んで書き、実際の1スペースと不一致）。
   → `worktree_guide.md` §5.2 の手順4へ「**worktree 内のファイル解析は `ctx_execute` にパスを直書きする**（`ctx_execute_file` はルート外として拒否。§5.4）」を1行足し、開始手順だけで完結させる。`dev.md` §5「確認時の注意」へ「**`@Nested` を持つテストクラスの `Edit` は、直前の `分岐:` マーカー行かメソッド本体の一意な行まで含めて `old_string` にする**（ネストをまたいで同名メソッドが並ぶ）」と「**Javadoc・コメント行の `old_string` は Read 出力から字下げごとコピーする**（目分量で書かない）」を追記する。①は前回メモの `adhoc.md` §4 追記が未実施なだけなので、`retro` で両セッション分をまとめて反映する。
+
+## 2026-08-11 12:41 | session 9ae813f8 | 自動検出
+- シグナル: errors×5
+- ターン概要: ツール56回・エラー5回・拒否0回。開始:「<ide_opened_file>The user opened the file c:\Git\2026_AFKGAM」
+- 原因と改善案: 5件とも**同一原因の `Edit` 失敗**（「File has not been read yet」）。調査のための `Read` を **main のパス**（`c:\Git6_AFKGAME\docs\...`）で済ませたあとに worktree を作り、編集を **worktree のパス**（`C:\Git6_AFKGAME.worktrees\p4-limitbreak\docs\...`）へ出したため、ツール側の既読判定が別ファイル扱いになって5ファイル分まとめて弾かれた。回避には使い捨ての置換スクリプト（`python - <<'PY'` で文字列 replace + 出現数アサート）へ切り替えて1往復で済ませた。
+  → `worktree_guide.md` §5.2 の開始手順へ「**worktree は調査 Read より先に作る**。作成後は Read も Edit も worktree 側の絶対パスで統一する（main で読んだファイルは worktree では未読扱いになり `Edit` が弾かれる）」と「**main で読んでしまった場合は再 Read せず、使い捨ての置換スクリプトで一括適用する**（出現数を assert して誤爆を防ぐ）」の2行を追記する。前者は `profile.md` §6 規律4「同一セッション内で同じファイルを再 Read しない」と衝突しない運用（worktree 切替は例外として既に許容されている）。
