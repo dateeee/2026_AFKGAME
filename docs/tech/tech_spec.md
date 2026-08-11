@@ -46,6 +46,8 @@
 | フロントエンドのtick制御（ポーリング・多重タブ・ストア反映） | [tech_polling.md](detail/tech_polling.md) |
 | 認証システム（JWT・ゲスト・Google OAuth） | [tech_auth.md](detail/tech_auth.md) → [登録・ログイン・ログアウト](detail/tech_auth/account.md) |
 | デザインシステム（トークン・UIプリミティブ・アプリシェル） | [tech_design_system.md](detail/tech_design_system.md) |
+| ボスラッシュ（ウェーブ進行・HP回復・マイルストーン付与・全滅判定・ランキング更新） | `tech_bossrush.md`（Phase 5 で新設予定・**未作成**） |
+| 転生（LV9999判定・リセット範囲の適用・ポイント投資の上限検証） | `tech_prestige.md`（Phase 5 で新設予定・**未作成**） |
 
 ---
 

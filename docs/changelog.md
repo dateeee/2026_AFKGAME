@@ -10,6 +10,14 @@
 
 ## 2026-08-11
 
+| ファイル | 内容 |
+|---------|------|
+| `docs/design/systems/endgame.md` | **Phase 5 仕様確定ゲートのレビュー反映**（[2026-08-11_123351.md](reviews/doc-review/2026-08-11_123351.md) ISSUE-1301・1303・1305〜1308・1310）。①ボスラッシュの記録時点を「ウェーブ突破時」と明記しタイブレークを `best_wave_hp` 基準へ揃えた ②終了手段に「リタイア（即時成立）」を追加した ③累積報酬の具体値を外し `master/endgame.md` §15.3 を正とした ④転生の UI 導線（キャラ詳細内セクション）を追記した ⑤索引ファイル名で節を指していた3箇所（`master_data.md` §16 / §10.2 / 定義先未定）を実在の子ファイルへ張り替えた ⑥冒頭の親リンクへ §2.14 を補った |
+| `docs/data/master/endgame.md` | §15.3「累積報酬（毎ウェーブ）」を新設し算出式（そのウェーブの敵 Gold/EXP 合計 × 0.5・Wave 11〜は強化倍率適用後を基準）を定義（ISSUE-1307）。§18.1 の深淵の塔の基準値を宣言どおり天空の塔終盤の実データ（`arch_dragon` LV152）へ揃え、§18.3 早見表の通常敵HP・EXP列を全行再計算した（ISSUE-1309・ユーザー判断で「実データへ揃える」を採用。461F の想定上限は旧基準値時点の試算のため要再試算） |
+| `docs/tech/basic/tech_db/battle.md`・`tech_api.md`・`docs/tech/detail/tech_state.md`・`tech_data.md` | `best_wave_hp` の更新タイミングを「`best_wave` を更新したウェーブの突破直後」と一意化（ISSUE-1301）。`POST /api/boss-rush/retire` を「現在の戦闘完了後」→**即時**へ改め、塔リタイアと同じ扱い・予約状態の列を持たないことを状態機械側にも明記（ISSUE-1303）。`towersCleared` のコメントから無条件の `min()` 式を外して正（`tech_api.md`「操作系」）への参照に替え、深淵の塔の例外を `abyss_tower` 行へ移した（ISSUE-1304） |
+| `docs/process/development_process.md`・`docs/tech/tech_spec.md`・`docs/data/master_data.md`・`docs/design/systems/ui.md` | §5 の「Phase 4〜5」行を分割し Phase 5 を**部分完了**（ボスラッシュ・転生の処理フローと分岐一覧が未作成）へ改めた（ISSUE-1302）。`tech_spec.md` へ `tech_bossrush.md`・`tech_prestige.md`、`master_data.md` 索引へ §19 イベントダンジョンデータ（`master/event_dungeon.md`）を**未作成の予定行**として採番（リンクは実ファイル作成時に張る。ISSUE-1302・1306）。`ui.md` のタブ表へ転生の導線（キャラ詳細内セクション）を追加した（ISSUE-1308） |
+| `docs/process/spec_ownership.md`・`docs/backlog/balance_backlog.md`・`carryover_notes.md` | エンドコンテンツの数値（正 = `master/endgame.md`）とイベントダンジョンの数値（正 = `master/event_dungeon.md`）の境界を §3 へ登録。B-1 の仮置き値と定義箇所を §15.3 へ差し替え。Phase 5 の未作成成果物3点・461F の再試算・`tech_data.md` §1.1 の分割（ISSUE-1311・`doc-size` 送り）を申し送りへ追加 |
+
 - `docs/tech/detail/tech_limitbreak.md`: 新規。限界突破（`POST /api/character/limit-break`）の処理フロー・素材の同一性判定・素材消費の波及・分岐一覧30件を確定した（Phase 4 詳細設計）
 - `docs/tech/detail/tech_state.md`: §4 の限界突破行に `CHARACTER_LOCKED_IN_TOWER` を明記した
 - `docs/tech/basic/tech_api.md`・`tech_error_handling.md`・`tech_spec.md`・`docs/INDEX.md`・`docs/data/master/character.md` §8: `tech_limitbreak.md` への参照を追加した

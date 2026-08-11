@@ -53,10 +53,10 @@
   "potions": {
     "hp_potion": 10
   },
-  "towersCleared": {                   // 到達記録。キーは塔ID。目標階の上限 = min(highestFloor + 1, totalFloors)
+  "towersCleared": {                   // 到達記録。キーは塔ID。目標階の上限は tech_api.md「操作系」が正
     "goblin_tower": { "cleared": true, "highestFloor": 20 },
     "forest_tower": { "cleared": false, "highestFloor": 15 },
-    "abyss_tower": { "cleared": false, "highestFloor": 87 },  // 深淵の塔（無限塔）。cleared は常に false
+    "abyss_tower": { "cleared": false, "highestFloor": 87 },  // 深淵の塔（無限塔）。totalFloors を持たず上限は highestFloor + 1 のみ。cleared は常に false
     "trial_maze_beginner": { "cleared": true, "highestFloor": 10 }   // Phase 5〜: イベントダンジョンのみ難易度を畳み込む
   },
   "currentEnemy": {                    // null = 現在戦闘中でない

@@ -54,7 +54,7 @@ stateDiagram-v2
 | 目標階クリア（`stop_on_clear`） | `currentFloor > targetFloor` | 塔・敵情報をクリアし `IDLE` へ |
 | 目標階クリア（`auto_repeat`） | 同上 | `currentFloor = 1` に戻し探索継続。探索セッションは継続する |
 
-- リタイアは**即時**に成立する（戦闘途中でも塔・敵情報をクリアする。予約状態を持たない。根拠は `tech_tower/control.md` §11）
+- リタイアは**即時**に成立する（戦闘途中でも塔・敵情報をクリアする。予約状態を持たない。根拠は `tech_tower/control.md` §11）。**ボスラッシュのリタイア（`POST /api/boss-rush/retire`）も同じ**で、`boss_rush_states` に予約状態を表す列を持たない
 
 ## 3. 探索セッション（run）
 
