@@ -44,3 +44,9 @@
 - 原因と改善案: `check_docs.py` 4回のうち1往復は**正の逸脱の踏み抜き**（`tech_numeric.md` に新設した §6 へ `0.1〜0.5` を再掲 → `--owner` で ERROR → 書き直して再実行）。書く前に [spec_ownership.md](../process/spec_ownership.md) の**検出パターン列**を引いていれば0往復だった。改善案: **[detail-design.md](../../.claude/project/detail-design.md) §4 の記載ルールへ「数値・範囲・選択肢を仕様書へ書く前に `spec_ownership.md` の検出パターン列を grep し、正でなければリンクに替える」を1行追加する**（`profile.md` §7 #4 は「正は1ファイル」までで、機械照合の正規表現が存在することに触れていない）。`check_branch_list.py` 5回（着手前の基準・battle/rng 追加後・§5 再構成後・numeric 追加後・統合後）は状態が変わるたびのゲートで正当だが、**統合後の1回は ff マージで内容が変わらないため省ける**（18:12 と同じ再発）。
 - 付随して観測: **別セッションが main の作業ツリーを restore し、他セッションの未コミット（本エントリの自動追記）まで巻き込んだ**。`worktree_guide.md` §5.1 の「main のまま進めてよい作業」に沿わない編集が main に出ていたのが発端で、[worktree_guide.md](../process/worktree_guide.md) §2 ルール7 の「main の進行を確認する」を**復旧操作（`restore`・`checkout --`）の側にも**書くと再発を防げる。
 
+
+## 2026-08-11 20:07 | session 5d3bb6a1 | 自動検出
+- シグナル: same-read(carryover_notes.md×2)
+- ターン概要: ツール50回・エラー0回・拒否0回。開始:「<ide_opened_file>The user opened the file c:\GIT\2026_AFKGAM」
+- 原因と改善案: 圧縮対象の `carryover_notes.md` が `merge=union` のホットスポットで、**着手時に全文を読んでから書き換えるまでの間に別セッションが main へ ①-b の申し送りを追記した**（7,359→7,964字）。`Write` は現在のバイト列を持っていないと書けないため読み直しは必須で、避けられたのは読む**順序**のほう（先に洗い出し・個別修正を済ませ、`Write` の直前に1回だけ読めば1回で足りた）。改善案: **[doc-size.md](../../.claude/project/doc-size.md) §1 へ「[worktree_guide.md](../process/worktree_guide.md) §3 のホットスポット（`changelog`・`efficiency_memo`・`carryover_notes`）を全面書き換えする場合は、調査・個別修正を先に終えてから対象を読む。読了後に長い作業を挟んだら `git log -1 -- <path>` で更新の有無を確かめる」を1行追加する**（現行 §1 は「本文はまだ読まない」までで、読んだ後に他セッションが動く前提が無い）。
+- 付随して観測: 序盤の4ファイル編集を main で始めてしまい（`worktree_guide.md` §5.1 違反）、ユーザーの指摘で patch 退避 → 差し戻し → worktree 作成 → `git apply` の往復が発生した。§5.1 は「依頼が仕様・規約・コードの**変更**なら調査前に worktree を作る」と書いてあるが、**今回のように「`docs/backlog/**` の整理」で始まり調査の結果として `docs/`・`backend/` の修正へ広がる依頼**は入口が §5.1 の case 2（main 可）に見える。同 §5.1 へ「main 可の判定は着手時点のファイルではなく**着手後に広がりうる範囲**で行う」旨の1行を足すと防げる。
