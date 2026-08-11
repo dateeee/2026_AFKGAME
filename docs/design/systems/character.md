@@ -38,7 +38,7 @@
 - 計算: `実効ステータス = 基本ステータス × レアリティ倍率`
 - 塔クリア報酬で入手するキャラは全員「レア」固定
 - 酒場ガチャではコモン〜レジェンダリーまで排出される
-- **レアリティ別の倍率は [master/character.md §7.2](../../data/master/character.md) が正**（本書では定義しない）
+- **レアリティ別の倍率は [CHARACTERS_OVERVIEW.md §2](../../data/characters/CHARACTERS_OVERVIEW.md) が正**（本書では定義しない）
 
 ### キャラクター獲得（Phase 3〜）
 
@@ -49,7 +49,7 @@
 
 - Phase 3 では新たに3体を塔クリア報酬で確定入手（アカネ・シロナ・ハヤテ）。初期キャラの勇者と合わせて全4タイプが揃う
 - Phase 4 以降は酒場ガチャでキャラを無限に追加獲得可能
-- 具体的な入手キャラ一覧・ガチャプール・排出率は `master_data.md` §7 を参照
+- 具体的な入手キャラ一覧・ガチャプール・排出率は [CHARACTERS_OVERVIEW.md](../../data/characters/CHARACTERS_OVERVIEW.md) を参照
 
 ### 限界突破（Phase 4〜）
 

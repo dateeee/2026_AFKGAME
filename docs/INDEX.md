@@ -22,7 +22,8 @@
   - [nonfunctional/](tech/nonfunctional/) 非機能 — performance / security / operations（§12.1〜§12.3 環境・設定・監視）/ maintenance（§12.4〜§12.7 手順）
   - [detail/](tech/detail/) 詳細設計 — battle / offline / skill / party / tick / polling / state / rng / numeric / shop / design_system / auth（索引+[tech_auth/](tech/detail/tech_auth/) account: 登録・ログイン・ログアウト）/ base / scout / forge（索引+[tech_forge/](tech/detail/tech_forge/) enhance・craft・disassemble）/ limitbreak / tower（索引+[tech_tower/](tech/detail/tech_tower/) list・select・progress・control）
 - [docs/data/master_data.md](data/master_data.md) — マスターデータの索引 + 塔データ一覧
-  - [master/](data/master/) — character / item / equipment / base / endgame
+  - [master/](data/master/) — character（§1 基礎ステータス / §8 限界突破 / §9 スキル）/ item / equipment / base / endgame
+  - [CHARACTERS_OVERVIEW.md](data/characters/CHARACTERS_OVERVIEW.md) キャラクター一覧（§7）+ [characters/](data/characters/) タイプ別4件
   - [TOWERS_OVERVIEW.md](data/towers/TOWERS_OVERVIEW.md) 塔一覧 / [SKILLS_OVERVIEW.md](data/skills/SKILLS_OVERVIEW.md) スキル概要
 
 ## 設計図

@@ -23,7 +23,7 @@ python .claude/scripts/review_prep.py --dir docs/reviews/doc-review \
 | 変更ファイル | 照合先 |
 |------------|--------|
 | `design/game_spec.md`、`design/systems/*.md` | `data/master/`、`tech/`、`TOWERS_OVERVIEW.md`、`SKILLS_OVERVIEW.md` |
-| `data/master_data.md`、`data/master/*.md` | `design/systems/`、`tech/`、各塔ファイル（数値が変わった場合のみ） |
+| `data/master_data.md`、`data/master/*.md`、`data/characters/*.md` | `design/systems/`、`tech/`、各塔ファイル（数値が変わった場合のみ） |
 | `tech/*.md` | `design/systems/`、`data/master/`、相互 |
 | `towers/NNN_*.md` | `TOWERS_OVERVIEW.md`、`master_data.md`、`game_spec.md`（塔・ドロップ関連） |
 | `skills/NNN_*.md` | `SKILLS_OVERVIEW.md`、`game_spec.md`（スキル関連） |

@@ -24,7 +24,7 @@
 1. 施設LVが1以上なら、その施設の表から**施設LVと一致する行**の値を採用する
 2. 施設LVが0（未建設）の場合は §2.2 に従う
 
-- 5施設のいずれも**レベルアップで必ず効果が向上する**（据え置きのLVを作らない）。酒場は「スカウト可能レアリティ」が同じLVでも排出率が上がり（[master/character.md §7.3](../../data/master/character.md)）、鍛冶屋は「強化上限 = 施設LV」なので毎LV +1 される
+- 5施設のいずれも**レベルアップで必ず効果が向上する**（据え置きのLVを作らない）。酒場は「スカウト可能レアリティ」が同じLVでも排出率が上がり（[CHARACTERS_OVERVIEW.md §4.1](../../data/characters/CHARACTERS_OVERVIEW.md)）、鍛冶屋は「強化上限 = 施設LV」なので毎LV +1 される
 - 表の値をコードへ展開せず、マスターデータとして読む（[profile.md](../../../.claude/project/profile.md) §5 不変条件「データ駆動」）
 
 ### 2.2 LV0（未建設）の効果値
@@ -46,7 +46,7 @@
 | 市場 | ゴールドボーナス率 `m` | 敵撃破時のゴールド報酬を `floor(base × (1 + m + e))` とする。`e` は環境効果の `bonus`（`tech_data.md` §1.5）。**加算で合算**し、乗算後に1回だけ `floor`（[tech_numeric.md §2](tech_numeric.md)）。換金アイテムの売却価格には適用しない |
 | 訓練場 | EXP獲得率 `t` | tick でパーティがEXPを得た時、**パーティ外の全キャラ**へ `floor(gainedExp × t)`（下限0）を加算する。パーティ内キャラには二重付与しない |
 | 倉庫 | 所持枠上限 | 装備・素材・換金アイテムの**合計**枠。ポーションは対象外。**装備1件＝1枠、素材・換金アイテムは1種類＝1枠**（数量はスタック上限まで1枠に収まる。数量0の行は数えない）。判定箇所は [tech_shop.md §4](tech_shop.md) 手順5・戦闘ドロップ・鍛冶屋の製作／分解（[tech_forge/disassemble.md §6](tech_forge/disassemble.md)） |
-| 酒場 | スカウト可能レアリティ・費用 | `POST /api/base/scout`（処理は `tech_scout.md`、排出率は `master/character.md` §7.3） |
+| 酒場 | スカウト可能レアリティ・費用 | `POST /api/base/scout`（処理は `tech_scout.md`、排出率は `characters/CHARACTERS_OVERVIEW.md` §4.1） |
 | 鍛冶屋 | 強化上限・製作可能レアリティ・強化コスト倍率 | `/api/forge/*`（処理は `tech_forge.md`、コストは [master/equipment.md §12〜§14](../../data/master/equipment.md)） |
 
 - 市場・訓練場の効果値は economy.md の表で `LV × 5%` と一致するが、**参照は表**とする。式に置き換えない（不変条件「データ駆動」）

@@ -1,7 +1,7 @@
 # AFK GAME — 酒場スカウト処理
 
 > Phase 4。`POST /api/base/scout` の排出設定の解決・抽選・重複判定・キャラ生成を定める。
-> **数値の正**: 排出率とガチャプールは [master/character.md §7.3](../../data/master/character.md)、スカウト費用と酒場のしきい値は [economy.md §2.9](../../design/systems/economy.md)。本書は**処理**のみを持つ。
+> **数値の正**: 排出率は [CHARACTERS_OVERVIEW.md §4.1](../../data/characters/CHARACTERS_OVERVIEW.md)、ガチャプールのキャラ定義は [characters/](../../data/characters/) のタイプ別ファイル §3、スカウト費用と酒場のしきい値は [economy.md §2.9](../../design/systems/economy.md)。本書は**処理**のみを持つ。
 > 建設・レベルアップと施設効果の解決規則は [tech_base.md](tech_base.md)。
 
 ## 1. 適用範囲と方針
@@ -26,7 +26,7 @@
 
 | 引くもの | 正となるファイル |
 |---------|----------------|
-| レアリティ別排出率 | `master/character.md` §7.3 の該当LV列 |
+| レアリティ別排出率 | `characters/CHARACTERS_OVERVIEW.md` §4.1 の該当LV列 |
 | スカウト費用（ゴールド） | `economy.md` §2.9 酒場表の該当行 |
 
 - スカウト可能レアリティが同じLVでも排出率は必ず向上する（据え置きのLVを作らない。`tech_base.md` §2.1）
@@ -48,7 +48,7 @@
 
 ### 3.2 キャラクター抽選（離散一様）
 
-1. §7.3 のプール20体から、3.1 で決めたレアリティの候補を抽出する（各レアリティ4体・タイプ均等）
+1. プール20体（`characters/` のタイプ別ファイル §3）から、3.1 で決めたレアリティの候補を抽出する（各レアリティ4体・タイプ均等）
 2. 候補を**マスターIDの昇順**に並べ、`[0, 候補数)` の離散一様乱数で1体を採る
 3. 候補が0体ならマスターデータ不正として例外を送出する
 
@@ -73,7 +73,7 @@
 出口条件: ゴールド減算とキャラ1行追加が**ともに成立**しているか、**いずれも起きていない**かのどちらか。
 
 - 検証（手順3・5）は**すべて抽選と消費の前**に行う。抽選後に失敗する経路を持たない（乱数を消費したのに獲得できない状態を作らない）
-- 重複でもキャラ行を作るのは、限界突破が「同一キャラ1体」を素材に取るため（`master/character.md` §8）。[tech_party.md §2](tech_party.md) の「既所持なら付与しない」は**塔クリア報酬のみ**の規則であり、スカウトには適用しない
+- 重複でもキャラ行を作るのは、限界突破が「同一キャラ1体」を素材に取るため（`master/character.md` §8。スカウトの重複規則は `characters/CHARACTERS_OVERVIEW.md` §4）。[tech_party.md §2](tech_party.md) の「既所持なら付与しない」は**塔クリア報酬のみ**の規則であり、スカウトには適用しない
 - 追加したキャラをパーティへ自動編入しない（控えとして加入。`tech_party.md` §2 手順3 と同じ）
 - キャラクターの所持数に上限は設けない（倉庫の所持枠はアイテムのみが対象。`tech_base.md` §2.3）
 
@@ -81,13 +81,13 @@
 
 | 列 | 設定する値 |
 |----|-----------|
-| `master_id`・`name`・`type`・`rarity` | プール（`master/character.md` §7.3）の定義値をそのまま入れる |
+| `master_id`・`name`・`type`・`rarity` | プール（`characters/` のタイプ別ファイル §3）の定義値をそのまま入れる |
 | `level`・`exp`・`skill_points`・`limit_break` | LV1・0・0・0（習得スキルなし・装備なし） |
 | `base_atk`・`base_def`・`base_spd`・`max_hp` | `master/character.md` §1.2 の**タイプ別 LV1 基礎値をそのまま**入れる |
 | `hp` | `max_hp` と同値 |
 
 - 基礎値へ**レアリティ倍率を掛けない**。倍率と限界突破ボーナスは読み取り時に実効値（[tech_data.md](../basic/tech_data.md) の `effectiveAtk` 等）として算出する。保存値に含めると二重適用になる
-- 加入時LVが1である点は §7.1 の確定入手キャラと同じ（**仮置き**。調整は [balance_backlog.md](../../backlog/balance_backlog.md) B-8）
+- 加入時LVが1である点は `characters/CHARACTERS_OVERVIEW.md` §3 の確定入手キャラと同じ（**仮置き**。調整は [balance_backlog.md](../../backlog/balance_backlog.md) B-8）
 
 ## 6. API
 

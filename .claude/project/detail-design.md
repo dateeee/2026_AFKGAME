@@ -34,7 +34,7 @@
 | 成果物 | パス |
 |-------|------|
 | 索引 | `docs/data/master_data.md` |
-| 個別 | `docs/data/master/` — character / item / equipment / base / endgame |
+| 個別 | `docs/data/master/` — character / item / equipment / base / endgame、`docs/data/characters/` — タイプ別 |
 | 塔別 | `docs/data/towers/`（`TOWERS_OVERVIEW.md` + `NNN_*.md`） |
 | スキル別 | `docs/data/skills/`（`SKILLS_OVERVIEW.md` + `NNN_*.md`） |
 
