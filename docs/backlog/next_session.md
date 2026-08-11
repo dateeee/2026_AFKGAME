@@ -56,4 +56,4 @@ worktree を使う複数セッションが同時に走る前提。**着手状態
 - **3-A-3 製造① で `WebIntegrationTestSupport#updateFixture` を新設した**。`dataSource` が `defaultAutoCommit = false` のため、素の `jdbcTemplate.update` は**更新件数が返るのに値が残らない**（DBCP が接続返却時にロールバックする）。統合テストでフィクスチャを直接書き換えるときは必ずこれを通す
 - **判定13（`--unused`）の現在値は WARN 13件**（`AuthSettings` 3・`GameSettings` 9・`LogKey.TOKEN`）。ゼロを強制せず**この件数からの増減だけ見る**
 - **`mail.md` §17 への差し戻しは不要と確定した**。`VerificationMailSenderImplTest#test_トランザクション外なら即時に送る`（§17 に行を持たない `send` の実装分岐）は製造②で **C1 100%・未達0** を満たしたため、§17 へ9行目を足さずに据え置く
-- **Phase 4 は Java 移行が終わるまで本キューから外している**（2026-08-09・ユーザー判断）。再開時に戻す3件の内訳は [carryover_notes.md](carryover_notes.md) §2 が持つ。移行の残りは **3-B の後に 4（Phase 2）→ 5（Phase 3）→ 6（切替と後始末）**（順序の正は [carryover_notes.md](carryover_notes.md) §1）
+- **Phase 4 は Java 移行が終わるまで本キューから外している**（2026-08-09・ユーザー判断）。再開時に戻すのは**テストリスト作成1件のみ**（詳細設計は 2026-08-11 の限界突破＝[tech_limitbreak.md](../tech/detail/tech_limitbreak.md) で完了。内訳は [carryover_notes.md](carryover_notes.md) §2）。移行の残りは **3-B の後に 4（Phase 2）→ 5（Phase 3）→ 6（切替と後始末）**（順序の正は [carryover_notes.md](carryover_notes.md) §1）
