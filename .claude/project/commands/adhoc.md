@@ -14,4 +14,7 @@
 | 4 | **`Grep` の `glob` に否定（`!...`）は使えない**。除外を伴う横断調査は `ctx_execute` 内でフィルタする |
 | 5 | **API の実在確認（クラス名・コンストラクタ・既定値の有無）は着手前に項目を列挙し、`javap` / `unzip` を1バッチで出す**。前の答えが次の問いを生む形で投げると往復が芋づる式に増える |
 | 6 | **Maven Central の版は `https://repo1.maven.org/maven2/<groupId のスラッシュ表記>/<artifactId>/maven-metadata.xml` の `<release>`** を見る（`search.maven.org` の solrsearch API は遅く落ちやすい）。`mvn dependency:tree` に **`-q` を付けない**（ツリーは INFO 出力なので消える） |
-| 7 | **使い捨て Java を Maven のクラスパスで動かす**: `mvn -q dependency:build-classpath -Dmdep.includeScope=test -Dmdep.outputFile=cp.txt` → `-cp` / `-d` に渡すパスは `cygpath -w` で Windows 形式へ直す（Git Bash の `/c/...` を `javac` / `java` は解釈できない）。クラスパスの区切りは `;` |
+| 7 | **外部問い合わせ（`curl`）とビルド（`mvn`・`docker --version` 等の版確認）は最初から `ctx_execute` で叩く**。Bash で出すとフックが context-mode へリダイレクトし、1往復まるごと無駄になる（3セッション連続で踏んだ） |
+| 8 | **`Edit` する予定のファイルは必ず `Read` で読む**。`cat`・`ctx_execute_file` で読んでも Edit は「File has not been read yet」で通らない（`profile.md` §6 規律4「Read の全文読みは Edit 前提のときのみ」の裏返し） |
+| 9 | **PowerShell ツールへは `-D` 付き引数と複数行スクリプトを直接渡さない**。`-Dxxx=yyy` は `"` で括る（括らないと別トークンとして解釈され `Unknown lifecycle phase`）、`python -c` は使わずスクラッチパッドへ `.py` を書いて実行する（here-string で `"` が崩れる）、native exe のパイプに `Select-Object -First` を付けない（早期終了で exit 255） |
+| 10 | **使い捨て Java を Maven のクラスパスで動かす**: `mvn -q dependency:build-classpath -Dmdep.includeScope=test -Dmdep.outputFile=cp.txt` → `-cp` / `-d` に渡すパスは `cygpath -w` で Windows 形式へ直す（Git Bash の `/c/...` を `javac` / `java` は解釈できない）。クラスパスの区切りは `;` |

@@ -83,10 +83,11 @@
 
 | # | 確認時の注意 |
 |---|------------|
-| 1 | テスト件数は **`<testcase` の出現数**（`grep -c "<testcase" target/*-reports/TEST-*.xml`）か、`mvn` 出力のモジュール別 `Tests run:` 行で数える。**`*.txt` の「Tests run」も XML ルートの `tests=` 属性も、JUnit 5 の `@Nested` 配下を 0 と報告する**（2026-08-09 実測: `MasterDataLoaderTest` は `tests="0"` だが `<testcase` は11件。`tests=` で集計すると domain 60件が15件に見える）。失敗は `<failure` / `<error` で数える |
-| 2 | 外部依存の版・API の実在確認は**推測で書かず、着手前に項目を列挙して1バッチで問い合わせる**（問い合わせ先と落とし穴は [commands/adhoc.md](commands/adhoc.md) §4） |
-| 3 | 既存 POM の版調査は properties と dependencyManagement を**まとめて1回**で出す（キーを推測した grep の空振りを繰り返さない） |
-| 4 | **DI コンテナを起こす確認をビルドと別に置く**（Bean 生成時にしか出ない型エイリアス衝突・未解決プレースホルダはコンパイルでは出ない）。DB 無しで回すときは `dataSource` と `flyway` だけスタブへ差し替える |
+| 1 | テスト件数は **`<testcase` の出現数**（`grep -c "<testcase" target/*-reports/TEST-*.xml`）か、`mvn` 出力のモジュール別 `Tests run:` 行で数える。**`*.txt` の「Tests run」も XML ルートの `tests=` 属性も、JUnit 5 の `@Nested` 配下を 0 と報告する**（実測: `MasterDataLoaderTest` は `tests="0"` だが `<testcase` は11件）。失敗は `<failure` / `<error` で数える |
+| 2 | 外部依存の版・API の実在確認は**推測で書かず、着手前に項目を列挙して1バッチで問い合わせる**（既存 POM なら properties と dependencyManagement をまとめて1回。問い合わせ先と落とし穴は [commands/adhoc.md](commands/adhoc.md) §4） |
+| 3 | **DI コンテナを起こす確認をビルドと別に置く**（Bean 生成時にしか出ない型エイリアス衝突・未解決プレースホルダはコンパイルでは出ない）。DB 無しで回すときは `dataSource` と `flyway` だけスタブへ差し替える |
+| 4 | **`@Nested` を持つテストクラスの `Edit` は `old_string` に一意な行まで含める**（ネストをまたいで同名のテストメソッドが並ぶため `void test_...() {` + 直後1行では複数一致する）。直前の `分岐:` マーカー行かメソッド本体の特徴的な行を足す |
+| 5 | **Javadoc・コメント行の `old_string` は Read 出力から字下げごとコピーする**（目分量で書くと字下げ幅が合わず不一致になる） |
 
 ## 6. 完了基準
 
