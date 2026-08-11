@@ -36,7 +36,7 @@
 
 ## 3. `email_verification_tokens`（Phase 2）
 
-実装予定: `com.afkgame.domain.model.EmailVerificationToken`
+実装: `com.afkgame.domain.model.EmailVerificationToken`
 
 | 列 | 型 | NULL | 既定 | 制約・備考 |
 |----|----|------|------|-----------|

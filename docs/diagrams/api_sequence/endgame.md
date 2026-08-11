@@ -14,9 +14,9 @@ sequenceDiagram
     B->>API: POST /api/boss-rush/start
 
     API->>API: 通常塔探索を停止<br/>(同時進行不可)
-    API->>DB: BossRushState作成<br/>(isActive=true, wave=1)
+    API->>DB: BossRushState作成<br/>(active=true, wave=1)
     API->>DB: Player.currentTower = null
-    API-->>B: { status: "ok", bossRush: {isActive: true, wave: 1} }
+    API-->>B: { status: "ok", bossRush: {active: true, wave: 1} }
 
     Note over B,API: 以降は通常の tick ポーリングで進行<br/>各tickでウェーブ戦闘を処理
 
@@ -24,19 +24,20 @@ sequenceDiagram
         B->>API: POST /api/battle/tick
         API->>API: ボスラッシュモードで戦闘処理<br/>Wave開始: CD/バフ/状態異常リセット<br/>5Waveごと: HP10%回復
         API->>DB: accumulatedGold/Exp更新
+        API->>DB: ウェーブ突破時: bestWave/bestWaveHp 更新判定
         API-->>B: battleLogs + bossRushState
     end
 
     alt リタイア
+        Note over B,API: リタイアは即時成立（進行中の戦闘の完了を待たない）。<br/>塔リタイアと同じ扱い（tech_state.md §2）
         B->>API: POST /api/boss-rush/retire
         API->>DB: 累積報酬をPlayerに反映
-        API->>DB: isActive = false
+        API->>DB: active = false（予約状態を持たない）
         API-->>B: { rewards: {gold, exp}, bestWave }
     else 全滅
-        Note over API: tick処理内で全滅検知
+        Note over API: tick処理内で全滅検知<br/>(全滅したウェーブは未突破のため記録対象外)
         API->>DB: 累積報酬をPlayerに反映 (没収なし)
-        API->>DB: ベスト記録更新判定
-        API->>DB: isActive = false
+        API->>DB: active = false
         API-->>B: { wipe: true, rewards: {...}, newBest: true/false }
     end
 
@@ -68,9 +69,9 @@ sequenceDiagram
 
     B->>API: GET /api/abyss/ranking
     API->>DB: 上位100件取得<br/>ORDER BY highest_floor DESC,<br/>highest_floor_at ASC
-    API-->>B: { ranking: [{rank, name, floor}, ...],<br/>  myRank: 87 }
+    API-->>B: { ranking: [{rank, name, floor, reachedAt}, ...],<br/>  myRank: 87 }
 
-    Note over API: 同階なら先に到達したプレイヤーが上位。<br/>登録は認証ユーザーのみ（ゲストは閲覧のみ）
+    Note over API: 同階なら先に到達したプレイヤーが上位。<br/>`reachedAt` は `highest_floor_at`（タイブレーク根拠として表示する）。<br/>登録は認証ユーザーのみ（ゲストは閲覧のみ）
 ```
 
 ## 12. 転生フロー（Phase 5）
