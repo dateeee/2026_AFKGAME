@@ -64,7 +64,7 @@
 |----|----|------|------|-----------|
 | `id` | `VARCHAR(36)` | 不可 | UUID4 | PK |
 | `player_id` | `VARCHAR(36)` | 不可 | — | FK → `players.id`、UNIQUE。同時リクエストで重複した状態が作られると以後どちらが読まれるか不定になるためDB側で防ぐ |
-| `reset_at` | `DATETIME(tz)` | 不可 | — | 次回リセット時刻。確定規則は `tech_shop.md` §2.1 が正 |
+| `reset_at` | `DATETIME(tz)` | 不可 | — | 次回リセット時刻。確定規則は `tech_shop/lineup.md` §2.1 が正 |
 
 ## 5. `shop_daily_slots`（Phase 2）
 
@@ -77,13 +77,13 @@
 | `slot_index` | `INTEGER` | 不可 | — | 枠番号（0〜4） |
 | `category` | `VARCHAR(20)` | 不可 | — | `weapon` / `armor` / `accessory` |
 | `base_id` | `VARCHAR(50)` | 不可 | — | 装備マスターの ID。FKなし（親 §4-6） |
-| `rarity` | `VARCHAR(20)` | 不可 | — | 抽選結果。取りうる値は `tech_shop.md` §2.3 が正 |
-| `level` | `INTEGER` | 不可 | — | 装備レベル。算出規則は `tech_shop.md` §3.1 が正 |
+| `rarity` | `VARCHAR(20)` | 不可 | — | 抽選結果。取りうる値は `tech_shop/lineup.md` §2.3 が正 |
+| `level` | `INTEGER` | 不可 | — | 装備レベル。算出規則は `tech_shop/lineup.md` §3.1 が正 |
 | `stat_atk` | `INTEGER` | 可 | — | 未付与は NULL |
 | `stat_def` | `INTEGER` | 可 | — | 未付与は NULL |
 | `stat_hp` | `INTEGER` | 可 | — | 未付与は NULL |
 | `stat_spd` | `INTEGER` | 可 | — | 未付与は NULL |
-| `price` | `INTEGER` | 不可 | — | 購入価格。算出規則は `tech_shop.md` §3.2 が正 |
+| `price` | `INTEGER` | 不可 | — | 購入価格。算出規則は `tech_shop/lineup.md` §3.2 が正 |
 | `sold` | `BOOLEAN` | 不可 | `false` | 購入済みの枠は行を消さずフラグで表す（リセットまで枠を残すため） |
 
 一意制約: `uq_shop_daily_slots_state_slot` = (`shop_daily_state_id`, `slot_index`)

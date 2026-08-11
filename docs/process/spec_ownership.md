@@ -58,8 +58,8 @@
 | 到達記録（`towersCleared`）のキー体系 | `docs/tech/basic/tech_data.md` | — | `\{towerId\}_\{difficulty\}` |
 | ゲーム設定の選択肢・範囲・刻み・既定値 | `docs/design/systems/ui.md` | `docs/design/systems/battle.md`, `docs/tech/basic/tech_db/player.md`, `docs/tech/basic/tech_data.md`, `docs/tech/nonfunctional/tech_security.md` | `0\.1〜0\.5` |
 | コスト規律（サブエージェント運用・読み方・工程区切り） | `.claude/project/profile.md` | `CLAUDE.md`, `.claude/references/review-procedure.md` | `同時最大4体` |
-| お知らせの既読管理（保持先） | `docs/design/requirements/operation_requirements.md` | `docs/tech/basic/tech_api.md`, `docs/design/systems/ui.md` | — |
-| ログアウトの挙動（フロー・トークン失効） | `docs/tech/detail/tech_auth.md` | `docs/design/systems/ui.md`, `docs/tech/basic/tech_api.md` | — |
+| お知らせの既読管理（保持先） | `docs/design/requirements/operation_requirements.md` | `docs/tech/basic/tech_api/core.md`, `docs/design/systems/ui.md` | — |
+| ログアウトの挙動（フロー・トークン失効） | `docs/tech/detail/tech_auth.md` | `docs/design/systems/ui.md`, `docs/tech/basic/tech_api/auth.md` | — |
 | 未確定仕様・調整待ち数値の管理ルール | `docs/process/development_process.md` | `docs/backlog/open_specs.md`, `docs/backlog/balance_backlog.md`, `CLAUDE.md` | — |
 | 確率・軽減率の上限（挑発率・状態異常付与率） | `docs/design/systems/battle.md` | `docs/design/systems/character.md`, `docs/tech/detail/tech_battle.md`, `docs/data/skills/006_生存術系統.md` | — |
 | Phaseごとの開発進捗（工程の完了状況） | `docs/process/development_process.md` | — | — |
@@ -73,7 +73,7 @@
 - **経験値計算式**: 正の表記は `100 * (level ^ 1.5)`。パターンは `^` の後の空白有無を吸収する
 - **ゲーム設定**: 正は%表記・技術層は小数表記のため、パターンは小数側だけを見る（正ファイル自身には一致しない）
 - **ログ3種別**: 出力先と書き方が `logging.md`（3分冊通しの §1〜§7）、形式・項目名・ロガー名体系・`reason` は `tech_logging.md`（索引 + 分冊3件。見出しと分冊の対応は索引の表）、エラーコード体系と統一エラーレスポンス形式は `tech_error_handling.md` が正
-- **ログアウト**: エンドポイント定義そのものは `tech_api.md` が正
+- **ログアウト**: エンドポイント定義そのものは `tech_api/auth.md` が正
 - **DBスキーマ**: 実装側の正は Flyway DDL（`afkgame-initdb`）。`tech_data.md` が持つのは API/マスターの JSON 構造のみ。反映順は `phases.md` §3.2.1
 - **引き継ぎ**: `next_session.md` はポインタ専用。複数セッションにまたがる申し送りは `carryover_notes.md` が持ち、引き継ぎ側へ転記しない
 - **コーディング規約**: 正 → 派生（`.claude/**`）の順に同じ変更で改訂する（`phases.md` §3.2.2）

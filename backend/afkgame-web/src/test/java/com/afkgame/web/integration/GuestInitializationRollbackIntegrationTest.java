@@ -21,7 +21,7 @@ import com.afkgame.domain.service.PlayerInitializationService;
 /**
  * ゲスト作成の初期化が途中で失敗したとき、単一トランザクションが全体をロールバックすることの統合テスト。
  *
- * <p>仕様: docs/tech/detail/tech_auth.md §8.2 手順8（手順1〜7を単一トランザクションでコミット）。
+ * <p>仕様: docs/tech/detail/tech_auth/init.md §8.2 手順8（手順1〜7を単一トランザクションでコミット）。
  *
  * <p>失敗を DB 制約で作れない（公開APIからは一意制約違反へ到達できない）ため、
  * 手順6（初期所持アイテムの付与）だけが失敗するよう {@link PlayerRepository} を spy にして
@@ -44,7 +44,7 @@ class GuestInitializationRollbackIntegrationTest extends WebIntegrationTestSuppo
     }
 
     /**
-     * 分岐: tech_auth.md #13
+     * 分岐: tech_auth/init.md §8.3 #13
      */
     @Test
     @DisplayName("初期化の途中で失敗したら、ユーザーを含めて何も残らない")

@@ -18,9 +18,9 @@
   - [requirements/](design/requirements/) 要件 — product / non_functional / operation
   - [systems/](design/systems/) — character / battle / equipment / economy / dungeon / endgame / ui（索引+[ui/](design/systems/ui/) onboarding: 認証画面・チュートリアル）
 - [docs/tech/tech_spec.md](tech/tech_spec.md) — 技術仕様の索引
-  - [basic/](tech/basic/) 基本設計 — db（索引+[tech_db/](tech/basic/tech_db/) テーブル定義書）/ data（索引+[tech_data/](tech/basic/tech_data/) game_state: §1.1 の JSON 例）/ structure（§2〜§3）/ backend（§4）/ api（索引+[tech_api/](tech/basic/tech_api/) common: §5.0 共通仕様）/ architecture / logging（索引+[tech_logging/](tech/basic/tech_logging/) format・fields・reason）/ error_handling（§9 エラー形式・コード体系）
+  - [basic/](tech/basic/) 基本設計 — db（索引+[tech_db/](tech/basic/tech_db/) テーブル定義書）/ data（索引+[tech_data/](tech/basic/tech_data/) game_state: §1.1 の JSON 例）/ structure（§2〜§3）/ backend（§4）/ api（索引+[tech_api/](tech/basic/tech_api/) common: §5.0 共通仕様 / core・auth・gameplay・character・base・endgame）/ architecture / logging（索引+[tech_logging/](tech/basic/tech_logging/) format・fields・reason）/ error_handling（§9 エラー形式・コード体系）
   - [nonfunctional/](tech/nonfunctional/) 非機能 — performance / security / operations（§12.1〜§12.3 環境・設定・監視）/ maintenance（§12.4〜§12.7 手順）
-  - [detail/](tech/detail/) 詳細設計 — battle / offline / skill / party / tick / polling / state / rng / numeric / shop / design_system / auth（索引+[tech_auth/](tech/detail/tech_auth/) account: 登録・ログイン・ログアウト）/ base / scout / forge（索引+[tech_forge/](tech/detail/tech_forge/) enhance・craft・disassemble）/ limitbreak / tower（索引+[tech_tower/](tech/detail/tech_tower/) list・select・progress・control）
+  - [detail/](tech/detail/) 詳細設計 — battle / offline / skill / party / tick / polling / state / rng / numeric / shop（索引+[tech_shop/](tech/detail/tech_shop/) lineup・buy）/ design_system / auth（索引+[tech_auth/](tech/detail/tech_auth/) init: ゲスト作成の初期化 / account: 登録・ログイン・ログアウト）/ base / scout / forge（索引+[tech_forge/](tech/detail/tech_forge/) enhance・craft・disassemble）/ limitbreak / tower（索引+[tech_tower/](tech/detail/tech_tower/) list・select・progress・control）
 - [docs/data/master_data.md](data/master_data.md) — マスターデータの索引 + 塔データ一覧
   - [master/](data/master/) — character（§1 基礎ステータス / §8 限界突破 / §9 スキル）/ item / equipment / base / endgame
   - [CHARACTERS_OVERVIEW.md](data/characters/CHARACTERS_OVERVIEW.md) キャラクター一覧（§7）+ [characters/](data/characters/) タイプ別4件

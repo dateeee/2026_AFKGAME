@@ -17,7 +17,7 @@ import jakarta.validation.Validator;
  *
  * <p>スロットの正は docs/design/systems/equipment.md §2.4「装備スロット（9スロット）」、
  * スロットIDの正は docs/tech/basic/tech_db/item.md §1 の {@code equipment.slot}。
- * 参照関係は docs/tech/detail/tech_auth.md §8.1。
+ * 参照関係は docs/tech/detail/tech_auth/init.md §8.1。
  * 件数は9種固定で、そろわなければ<strong>起動時に</strong>中止する（§8.3 #6）。
  *
  * <p><strong>製造工程への申し送り（本テストが要求する表層）</strong>:
@@ -49,7 +49,7 @@ class EquipmentSlotsTest {
      * 作成される行そのもの（{@code equipment_id = NULL} の9行）は #5 の担当で、
      * 移行 STEP 3-A-1c のプレイヤー初期化サービスで押さえる。
      *
-     * <p>分岐: tech_auth.md §8.3 #6
+     * <p>分岐: tech_auth/init.md §8.3 #6
      */
     @Test
     @DisplayName("9種そろっていれば YAML の記載順どおりに公開する")
@@ -65,9 +65,9 @@ class EquipmentSlotsTest {
      * 9種でなければ起動を中止する（分岐 #6 の真側）。
      *
      * <p>不足・過剰の両方を弾く。件数が固定のため 0周・1周の行は置かない
-     * （tech_auth.md §8.3 の「WARN許容 #5・#6」）。
+     * （tech_auth/init.md §8.3 の「WARN許容 #5・#6」）。
      *
-     * <p>分岐: tech_auth.md §8.3 #6
+     * <p>分岐: tech_auth/init.md §8.3 #6
      */
     @ParameterizedTest(name = "{1}種なら例外")
     @CsvSource({

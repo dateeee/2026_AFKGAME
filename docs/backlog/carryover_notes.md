@@ -11,7 +11,7 @@
 
 - **残りの STEP 順序**（各 STEP の内容は [steps.md](java_migration/steps.md) §4、進捗は [java_migration.md](java_migration.md) §4 が正）: **3-B**（Phase 1: game / battle / tower）→ **4**（Phase 2: equipment / shop・日替わり）→ **5**（Phase 3: party / skill）→ **6**（切替と後始末）。3-A（auth）は 3-A-3 の製造完了ゲートまで消化済み
 - **tower（3-B セグメント②）の分岐一覧は `tech_tower.md`**（索引 + `tech_tower/` 4分冊）。テストリストは tick・戦闘サービスの実装後に着手する（階進行が tick 処理内のため）
-- **STEP 4 は着手前に `tech_shop.md` §7・§8 の分岐一覧が使える粒度かを確認する**。STEP 5 は製造①（パーティ・スキル操作）の移植に続けて製造②（スキル戦闘処理: skill / environment。`SkillData` へダメージ倍率・対象・状態異常のフィールドを追加）・製造③（オフライン期待値計算＝ISSUE-106）を Java で実装する
+- **STEP 4 は着手前に `tech_shop/lineup.md` §7・`tech_shop/buy.md` §8 の分岐一覧が使える粒度かを確認する**。STEP 5 は製造①（パーティ・スキル操作）の移植に続けて製造②（スキル戦闘処理: skill / environment。`SkillData` へダメージ倍率・対象・状態異常のフィールドを追加）・製造③（オフライン期待値計算＝ISSUE-106）を Java で実装する
 - **STEP 4・5 の移植量（2026-08-08 実測）**: 装備1,512行 / ショップ1,233行 / スキル1,100行 / パーティ461行（`routers`+`services`+`models`+`schemas`+`master_data`+テストの合計）。**領域ごとに1セグメント**へ割るとキュー1行の規模に収まる。各領域ともテストが半分以上を占めるため `test-list` → `dev` の2セッションを見込む
 - **`characters.rarity` は V1 スキーマに無い**（Phase 3 の列）。`Character` Entity にも持たせていないので、STEP 5 でスキーマ追加と同時に足す
 - **`uq_players_user_id` 違反に業務エラーコードは新設しない**（2026-08-09 決着）。AUTH_ 一覧に該当が無く公開APIからは到達しない経路のため、`DuplicateKeyException` をそのまま送出し 500 `INTERNAL_UNEXPECTED_ERROR` として扱う

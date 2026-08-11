@@ -35,7 +35,7 @@ python .claude/scripts/review_prep.py --dir docs/reviews/full-review \
 
 | 担当 | 対象ファイル |
 |------|------------|
-| API・型整合 | `afkgame-web` の `@RestController`・Resource、`frontend/src/api/`、`frontend/src/types/`、`tech_api.md` |
+| API・型整合 | `afkgame-web` の `@RestController`・Resource、`frontend/src/api/`、`frontend/src/types/`、`tech_api/` |
 | ロジック・マスターデータ | `afkgame-domain` の Service・Entity/Repository・マスターデータ、`design/systems/`、`tech_battle.md`、`tech_offline.md`、`tech_data.md`、`data/master/` |
 | 画面・アーキテクチャ | `frontend/src/views/`・`components/`・`stores/`・`router/`、`design/systems/ui*.md`、`tech_architecture.md`、[profile.md](../profile.md) §5 |
 
@@ -45,9 +45,9 @@ python .claude/scripts/review_prep.py --dir docs/reviews/full-review \
 
 | 変更ファイル | 照合先 |
 |------------|--------|
-| `afkgame-web` の `@RestController` | `tech_api.md`、`frontend/src/api/` |
+| `afkgame-web` の `@RestController` | `tech_api/`、`frontend/src/api/` |
 | `afkgame-domain` の Entity/Repository | `tech_data.md` |
-| `afkgame-web` の Resource | `frontend/src/types/`、`tech_api.md` |
+| `afkgame-web` の Resource | `frontend/src/types/`、`tech_api/` |
 | `afkgame-domain` の Service | `design/systems/`、`tech_battle.md`・`tech_offline.md` |
 | `afkgame-domain` のマスターデータ | `docs/data/master/`、`docs/data/towers/`、`docs/data/skills/` |
 | `frontend/src/router/index.ts` | `design/systems/ui*.md` |
@@ -58,7 +58,7 @@ python .claude/scripts/review_prep.py --dir docs/reviews/full-review \
 
 | 分類 | # | 観点 |
 |------|---|------|
-| 仕様書-コード | 1 | **API完全性**: `tech_api.md` の全エンドポイントが `afkgame-web` の `api/` に実装され、メソッド・パス・リクエスト/レスポンス形式が一致するか |
+| 仕様書-コード | 1 | **API完全性**: `tech_api/` の全エンドポイントが `afkgame-web` の `api/` に実装され、メソッド・パス・リクエスト/レスポンス形式が一致するか |
 | 仕様書-コード | 2 | **データモデル**: `afkgame-domain` の `model/` が `tech_data.md` のテーブル定義と一致するか（テーブル名・カラム名・型・リレーション、必須カラムの欠落、不要カラム） |
 | 仕様書-コード | 3 | **ビジネスロジック**: `afkgame-domain` の `service/` が `design/systems/` を正しく実装しているか（ダメージ計算・経験値/レベルアップ・ドロップ率・オフライン報酬・ショップ価格） |
 | 仕様書-コード | 4 | **マスターデータ**: `afkgame-domain` のマスターデータが `docs/data/` と一致するか。**Service に数値がハードコードされていないか** |

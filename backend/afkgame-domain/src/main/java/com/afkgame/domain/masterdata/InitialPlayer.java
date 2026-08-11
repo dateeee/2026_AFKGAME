@@ -11,14 +11,14 @@ import org.springframework.stereotype.Component;
  * プレイヤー初期化に使うマスターデータを保持するレジストリ。
  *
  * <p>値の正は docs/data/master/character.md §1.1 と docs/data/master/item.md §3.5、
- * 参照関係の正は docs/tech/detail/tech_auth.md §8.1。起動時に一度だけ YAML を読み込み、
+ * 参照関係の正は docs/tech/detail/tech_auth/init.md §8.1。起動時に一度だけ YAML を読み込み、
  * 以降は不変の値として公開する（docs/tech/basic/tech_structure.md §2「masterdata/」）。
  *
  * <p>他ファイルへの参照（タイプ・アイテムID）が解決できるか、および初期所持アイテムのIDが
- * 重複していないかは<strong>構築時に</strong>検証し、実行時には再検証しない（tech_auth.md §8.2 末尾）。
+ * 重複していないかは<strong>構築時に</strong>検証し、実行時には再検証しない（tech_auth/init.md §8.2 末尾）。
  * そのため §8.3 の #4・#10・#11 は初期化サービスではなく本レジストリの構築時に落ちる。
  *
- * <p>ゲストの表示名（{@code 冒険者}）は tech_auth.md §8.2 手順1 が正で、
+ * <p>ゲストの表示名（{@code 冒険者}）は tech_auth/init.md §8.2 手順1 が正で、
  * マスターデータには持たない。
  */
 @Component
@@ -60,7 +60,7 @@ public class InitialPlayer {
                 throw new MasterDataException(
                         resourcePath + ": 初期所持アイテムのIDがアイテム定義に無い (" + item.id() + ")");
             }
-            // 同じIDを2行書くと inventory_items の一意制約違反になる（tech_auth.md §8.3 #11）
+            // 同じIDを2行書くと inventory_items の一意制約違反になる（tech_auth/init.md §8.3 #11）
             if (!seen.add(item.id())) {
                 throw new MasterDataException(
                         resourcePath + ": 初期所持アイテムのIDが重複している (" + item.id() + ")");

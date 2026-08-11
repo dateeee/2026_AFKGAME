@@ -1,6 +1,6 @@
 # 塔一覧の組み立て（GET /api/tower/list）
 
-> [tech_tower.md](../tech_tower.md) の子ファイル（§5・§6）。Phase 2〜（Phase 1 のフロントは塔1固定で select を呼ぶため未使用。[tech_api.md](../../basic/tech_api.md)「操作系」）。
+> [tech_tower.md](../tech_tower.md) の子ファイル（§5・§6）。Phase 2〜（Phase 1 のフロントは塔1固定で select を呼ぶため未使用。[tech_api/gameplay.md](../../basic/tech_api/gameplay.md)「操作系」）。
 > 解放判定・`cap` の解決規則は tech_tower.md §2 が正。本書は一覧APIへの当てはめと分岐一覧を持つ。
 
 ## 5. 一覧の組み立て
@@ -18,7 +18,7 @@
 |------|------|
 | 応答 | `TowerInfo` の配列（フィールドは tech_tower.md §3） |
 | 深淵の塔（Phase 5〜） | `totalFloors = null`（階数無限）・`targetFloorCap = highestFloor + 1` |
-| イベントダンジョン（Phase 5〜） | 難易度ごとの**独立エントリ3件**へ展開。`totalFloors` は10固定。記録は難易度を畳み込んだキーで引く（キー体系の正は [tech_data.md §1.1](../../basic/tech_data.md)、一覧の仕様は [tech_api.md](../../basic/tech_api.md)「イベントダンジョン」） |
+| イベントダンジョン（Phase 5〜） | 難易度ごとの**独立エントリ3件**へ展開。`totalFloors` は10固定。記録は難易度を畳み込んだキーで引く（キー体系の正は [tech_data.md §1.1](../../basic/tech_data.md)、一覧の仕様は [tech_api/endgame.md](../../basic/tech_api/endgame.md)「イベントダンジョン」） |
 
 ## 6. 分岐一覧（一覧・解放判定）
 

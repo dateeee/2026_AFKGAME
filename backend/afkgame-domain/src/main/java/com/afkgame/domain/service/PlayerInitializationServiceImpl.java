@@ -25,7 +25,7 @@ import com.afkgame.domain.repository.PlayerRepository;
 /**
  * {@link PlayerInitializationService} の実装。
  *
- * <p>仕様・契約はインタフェース側が持つ。本クラスは手順2〜6（tech_auth.md §8.2）の既定値と
+ * <p>仕様・契約はインタフェース側が持つ。本クラスは手順2〜6（tech_auth/init.md §8.2）の既定値と
  * 採番方式を担う。
  *
  * <p>マスターデータの妥当性（初期キャラのタイプが実在する・初期所持アイテムのIDがアイテム定義にある・

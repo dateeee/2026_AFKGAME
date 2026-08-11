@@ -60,7 +60,7 @@
 
 ## 17. お知らせ（Phase 3〜）
 
-告知の要件は [operation_requirements.md §3.1](../design/requirements/operation_requirements.md)、配信APIは [tech_api.md](../tech/basic/tech_api.md)「お知らせ」が正。本節は**マスターの項目定義と上限値**を持つ。本文はマスターデータとして配信し、DBテーブルは設けない（更新はデプロイ）。
+告知の要件は [operation_requirements.md §3.1](../design/requirements/operation_requirements.md)、配信APIは [tech_api/core.md](../tech/basic/tech_api/core.md)「お知らせ」が正。本節は**マスターの項目定義と上限値**を持つ。本文はマスターデータとして配信し、DBテーブルは設けない（更新はデプロイ）。
 
 ### 17.1 項目定義
 

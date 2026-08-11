@@ -12,7 +12,7 @@
    - b. `clearedFloor > players.highestFloor`（全塔通算の表示用）なら同様に更新
    - c. `clearedFloor = totalFloors`（最上階ボス討伐）なら `cleared = true`（次の塔の解放条件になる。深淵の塔は総階数が無いため対象外＝常に `false`）
 2. **環境効果 `recovery` の適用**（Phase 3〜）: 塔に `recovery` modifier があれば、生存者（`hp > 0`）へ `heal = floor(maxHP × value)` を適用。上限 `effectiveMaxHp`（[tech_data.md §1.5](../../basic/tech_data.md)）
-3. **上限追従**: 次の3条件が**すべて**成立したら `targetFloor = 新cap`（実質 +1。[tech_api.md](../../basic/tech_api.md)「操作系」の上限追従）
+3. **上限追従**: 次の3条件が**すべて**成立したら `targetFloor = 新cap`（実質 +1。[tech_api/gameplay.md](../../basic/tech_api/gameplay.md)「操作系」の上限追従）
    - `clearedFloor > 旧highestFloor`（新しい階のクリアである）
    - `targetFloor = 旧cap`（目標階が上限に一致していた）
    - `新cap > 旧cap`（総階数で頭打ちでない）。`cap = min(highestFloor + 1, totalFloors)`（tech_tower.md §2）

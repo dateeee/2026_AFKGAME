@@ -9,7 +9,7 @@ import com.afkgame.domain.model.PlayerSettings;
 /**
  * {@code players} の Repository。
  *
- * <p>プレイヤー初期化（docs/tech/detail/tech_auth.md §8.2 手順2・3・6）で必要な操作のみを持つ。
+ * <p>プレイヤー初期化（docs/tech/detail/tech_auth/init.md §8.2 手順2・3・6）で必要な操作のみを持つ。
  * 探索状態・所持金の更新、設定変更、所持品の増減は、該当機能を移植する際に追加する。
  *
  * <p>{@code player_settings}・{@code inventory_items} は {@code players} の従 Entity のため、

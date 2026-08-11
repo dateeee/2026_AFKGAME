@@ -1,5 +1,5 @@
 # 異常系フィクスチャ: 初期キャラのタイプが character_types.yml に無い
-# 分岐: tech_auth.md §8.3 #4（起動時のローダ検証で起動を中止する）
+# 分岐: tech_auth/init.md §8.3 #4（起動時のローダ検証で起動を中止する）
 # items 側は正常にして、タイプだけを未定義にする。
 
 character:

@@ -15,11 +15,11 @@ import jakarta.validation.Validator;
  * プレイヤー初期化に使うマスターデータ（{@code InitialPlayer}）の単体テスト。
  *
  * <p>初期キャラの正は docs/data/master/character.md §1.1、初期所持アイテムの正は
- * docs/data/master/item.md §3.5、参照関係の正は docs/tech/detail/tech_auth.md §8.1。
- * ゲストの表示名（{@code 冒険者}）は tech_auth.md §8.2 手順1 が正でマスターデータには持たない。
+ * docs/data/master/item.md §3.5、参照関係の正は docs/tech/detail/tech_auth/init.md §8.1。
+ * ゲストの表示名（{@code 冒険者}）は tech_auth/init.md §8.2 手順1 が正でマスターデータには持たない。
  *
  * <p>他ファイルへの参照（タイプ・アイテムID）が解決できるかは<strong>起動時に</strong>検証し、
- * 実行時には再検証しない（tech_auth.md §8.2 末尾）。そのため #4・#10 は
+ * 実行時には再検証しない（tech_auth/init.md §8.2 末尾）。そのため #4・#10 は
  * サービスではなく本レジストリの構築時に落ちる。
  *
  * <p><strong>製造工程への申し送り（本テストが要求する表層）</strong>:
@@ -68,10 +68,10 @@ class InitialPlayerTest {
         /**
          * タイプがタイプ別マスターに実在すれば、その LV1 基礎値まで引ける。
          *
-         * <p>ここで引ける値が、初期化のキャラ作成（tech_auth.md §8.2 手順4）で
+         * <p>ここで引ける値が、初期化のキャラ作成（tech_auth/init.md §8.2 手順4）で
          * {@code hp = max_hp} として書き写される基礎値になる。
          *
-         * <p>分岐: tech_auth.md §8.3 #3
+         * <p>分岐: tech_auth/init.md §8.3 #3
          */
         @Test
         @DisplayName("タイプがマスターに実在すれば、その LV1 基礎値を引ける")
@@ -94,7 +94,7 @@ class InitialPlayerTest {
         /**
          * タイプがマスターに無ければ、構築時に落として起動を中止する。
          *
-         * <p>分岐: tech_auth.md §8.3 #4
+         * <p>分岐: tech_auth/init.md §8.3 #4
          */
         @Test
         @DisplayName("タイプがマスターに無ければ例外（起動を中止する）")
@@ -116,7 +116,7 @@ class InitialPlayerTest {
          * <p>付与そのもの（種類ごとに1行）は #7〜#9 の担当で、
          * 移行 STEP 3-A-1c のプレイヤー初期化サービスで押さえる。
          *
-         * <p>分岐: tech_auth.md §8.3 #10
+         * <p>分岐: tech_auth/init.md §8.3 #10
          */
         @Test
         @DisplayName("アイテムIDがアイテム定義にあれば、IDと個数を公開する")
@@ -131,7 +131,7 @@ class InitialPlayerTest {
         /**
          * アイテムIDがアイテム定義に無ければ、構築時に落として起動を中止する。
          *
-         * <p>分岐: tech_auth.md §8.3 #10
+         * <p>分岐: tech_auth/init.md §8.3 #10
          */
         @Test
         @DisplayName("アイテムIDがアイテム定義に無ければ例外（起動を中止する）")
@@ -148,7 +148,7 @@ class InitialPlayerTest {
          * <p>実在検査だけでは通ってしまい、ゲスト作成のたびに
          * {@code uq_inventory_items_player_item} 違反で 500 になる（新規ユーザーを1人も作れない）。
          *
-         * <p>分岐: tech_auth.md §8.3 #11
+         * <p>分岐: tech_auth/init.md §8.3 #11
          */
         @Test
         @DisplayName("アイテムIDが重複していれば例外（起動を中止する）")

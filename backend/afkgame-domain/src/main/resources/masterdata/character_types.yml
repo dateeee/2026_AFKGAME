@@ -2,7 +2,7 @@
 #
 # 数値の正は docs/data/master/character.md §1.2。スキーマの正は
 # com.afkgame.domain.masterdata.CharacterTypeData（制約違反は起動時に検出して起動を中止する）。
-# 成長率は持たない（レベルアップ機能の移植時に追加する。tech_auth.md §8.1）。
+# 成長率は持たない（レベルアップ機能の移植時に追加する。tech_auth/init.md §8.1）。
 # 未知のキーは起動時に弾かれるため、先回りしてキーを足さないこと。
 
 - id: melee

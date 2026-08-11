@@ -8,7 +8,7 @@ import com.afkgame.domain.model.CharacterEquipSlot;
 /**
  * {@code characters} の Repository。
  *
- * <p>プレイヤー初期化（docs/tech/detail/tech_auth.md §8.2 手順4・5）で必要な操作のみを持つ。
+ * <p>プレイヤー初期化（docs/tech/detail/tech_auth/init.md §8.2 手順4・5）で必要な操作のみを持つ。
  * 経験値・レベルの更新、装備の着脱は、該当機能を移植する際に追加する。
  *
  * <p>{@code character_equip_slots} は {@code characters} の従 Entity のため、

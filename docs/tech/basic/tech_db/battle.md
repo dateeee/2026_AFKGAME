@@ -55,7 +55,7 @@
 
 一意制約: `uq_boss_rush_milestones_state_wave` = (`boss_rush_state_id`, `wave`)（報酬は初回到達時のみのため、同一ウェーブは1行）
 
-受取エンドポイントは設けず（[tech_api.md](../tech_api.md)「ボスラッシュ」）、到達したtick処理の中でサーバーが付与する。行の存在が「到達済み」、`claimed` が「付与完了」を表し、付与の途中でtickが中断しても再開できるよう2段階に分ける。
+受取エンドポイントは設けず（[tech_api/endgame.md](../tech_api/endgame.md)「ボスラッシュ」）、到達したtick処理の中でサーバーが付与する。行の存在が「到達済み」、`claimed` が「付与完了」を表し、付与の途中でtickが中断しても再開できるよう2段階に分ける。
 
 ## 4. インデックスと検索パターン
 

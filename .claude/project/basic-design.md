@@ -25,7 +25,7 @@
 | 画面遷移図 `screen_transition` | `design/systems/ui*.md`・`frontend/src/router/` |
 | 戦闘フロー図 `battle_flow` | `tech_battle.md`・`afkgame-domain` の戦闘 Service |
 | システム構成図 `system_architecture` | `tech_architecture.md`・`tech_operations.md` §12 |
-| APIシーケンス図 `api_sequence` | `tech_api.md`・`afkgame-web` の `@RestController` |
+| APIシーケンス図 `api_sequence` | `tech_api/`・`afkgame-web` の `@RestController` |
 
 **索引で担当ファイルを特定し、必要な子ファイルのみ読む**（全図の一括読み込みは禁止）。
 
@@ -44,7 +44,7 @@
 |---|------|---------|
 | 1 | サーバー権威 | 戦闘計算・報酬決定のAPIがすべてバックエンド側にあるか。フロントに計算を持たせていないか |
 | 2 | tick制の一貫性 | 60秒固定間隔の前提が `tech_tick.md`・`tech_polling.md`・API設計で揃っているか |
-| 3 | API網羅性 | `game_spec.md` の各機能に対応するエンドポイントが `tech_api.md` に存在するか |
+| 3 | API網羅性 | `game_spec.md` の各機能に対応するエンドポイントが `tech_api/` に存在するか |
 | 4 | データ構造の表現力 | `tech_db.md` のテーブル・列が `game_spec.md` の仕様を表現できているか |
 | 5 | 図とテキストの一致 | ER図のPK/FK・APIシーケンスのエンドポイント名が `tech_*.md` と一致しているか |
 | 8 | DBスキーマ三者一致 | テーブル定義書 ↔ ER図 ↔ `afkgame-domain` の Entity + Repository のマッピング XML（テーブル名・列・キーの対応）が一致しているか（正は定義書） |

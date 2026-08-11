@@ -56,7 +56,7 @@ import com.afkgame.env.config.AuthSettings;
  * これらは骨格構築（java_migration.md STEP 2）の横断基盤であり詳細設計の分岐一覧を持たないため、
  * 分岐マーカーは付けない。
  *
- * <p>ゲスト作成は tech_auth.md §8.2「処理フロー」のトランザクション境界（手順1・7・8）を担うため、
+ * <p>ゲスト作成は tech_auth/init.md §8.2「処理フロー」のトランザクション境界（手順1・7・8）を担うため、
  * §8.3 の #11・#12 に対応するテストだけマーカーを持つ。手順2〜6（#1・#2・#5・#7〜#9）は
  * {@link PlayerInitializationService} 側の責務で、{@code PlayerInitializationServiceImplTest} が持つ。
  *
@@ -296,7 +296,7 @@ class AuthServiceImplTest {
          * 手順1〜7がすべて成功する経路。手順2〜6の中身は
          * {@code PlayerInitializationServiceImplTest} が持ち、ここでは順序と委譲だけを見る。
          *
-         * <p>分岐: tech_auth.md #11
+         * <p>分岐: tech_auth/init.md §8.3 #11
          */
         @Test
         void test_ユーザー作成後にプレイヤー初期化を行いトークンペアを返す() {
@@ -320,7 +320,7 @@ class AuthServiceImplTest {
          * ここでは「例外を握りつぶさずに伝播させる（＝ロールバックが起きる）」ことと、
          * トークンを発行しないことを見る。DBへ何も残らないことの検証は統合テストが持つ。
          *
-         * <p>分岐: tech_auth.md #12
+         * <p>分岐: tech_auth/init.md §8.3 #12
          */
         @Test
         void test_初期化に失敗したらトークンを発行せず例外を伝播する() {

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
  * キャラクタータイプ別 LV1 基礎ステータスのマスターデータを保持するレジストリ。
  *
  * <p>数値の正は docs/data/master/character.md §1.2、参照関係の正は
- * docs/tech/detail/tech_auth.md §8.1。起動時に一度だけ YAML を読み込み、以降は不変 Map として
+ * docs/tech/detail/tech_auth/init.md §8.1。起動時に一度だけ YAML を読み込み、以降は不変 Map として
  * 公開する（docs/tech/basic/tech_structure.md §2「masterdata/」）。
  * 読み込みに失敗した場合は Bean 生成が失敗し、アプリケーションは起動しない。
  */

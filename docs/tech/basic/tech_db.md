@@ -10,7 +10,8 @@
 | 系統 | ファイル | 収録テーブル |
 |------|---------|------------|
 | 認証・アカウント | [tech_db/auth.md](tech_db/auth.md) | `users` `refresh_tokens` `email_verification_tokens` |
-| プレイヤー・キャラクター | [tech_db/player.md](tech_db/player.md) | `players` `player_settings` `tower_clear_records` `characters` + 未実装4件（`party_members` `learned_skills` `active_skill_slots` `prestige_bonuses`） |
+| プレイヤー・キャラクター | [tech_db/player.md](tech_db/player.md) | `players` `player_settings` `tower_clear_records` `characters` |
+| 育成・編成（パーティ・スキル・転生） | [tech_db/progression.md](tech_db/progression.md) | `party_members` `learned_skills` `active_skill_slots` + 未実装1件（`prestige_bonuses`） |
 | 装備・アイテム・ショップ・施設 | [tech_db/item.md](tech_db/item.md) | `equipment` `character_equip_slots` `inventory_items` `shop_daily_states` `shop_daily_slots` + 未実装1件（`facilities`） |
 | 戦闘・ボスラッシュ | [tech_db/battle.md](tech_db/battle.md) | `battle_logs` + 未実装2件（`boss_rush_states` `boss_rush_milestones`） |
 

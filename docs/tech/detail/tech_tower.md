@@ -1,7 +1,7 @@
 # AFK GAME — 塔操作・階進行（索引）
 
 > Phase 1〜（イベントダンジョン・深淵の塔への適用は Phase 5〜）。`/api/tower/*` の5APIと、tick内の階クリア後処理（階進行）の詳細設計。本書は**共通部分**（適用範囲・データ解決・API・エラーコード）を持ち、処理フローと分岐一覧は子ファイルにある。
-> **数値の正**: 各塔の階数・エンカウントプール・解放条件は [TOWERS_OVERVIEW.md](../../data/towers/TOWERS_OVERVIEW.md) と各塔ファイル。状態遷移・操作可否の正は [tech_state.md](tech_state.md)、戦闘処理とエンカウント抽選は [tech_battle.md](tech_battle.md) §3、目標階上限の式は [tech_api.md](../basic/tech_api.md)「操作系」。
+> **数値の正**: 各塔の階数・エンカウントプール・解放条件は [TOWERS_OVERVIEW.md](../../data/towers/TOWERS_OVERVIEW.md) と各塔ファイル。状態遷移・操作可否の正は [tech_state.md](tech_state.md)、戦闘処理とエンカウント抽選は [tech_battle.md](tech_battle.md) §3、目標階上限の式は [tech_api/gameplay.md](../basic/tech_api/gameplay.md)「操作系」。
 
 ## 0. 子ファイル索引
 
@@ -25,7 +25,7 @@
 | 乱数 | 本書群の処理は乱数を消費しない（エンカウント抽選は tech_battle §3.2 = [tech_rng.md §1](tech_rng.md) #7・#8） |
 | 永続化 | `players` の塔フィールドと `tower_clear_records`（[tech_db/player.md](../basic/tech_db/player.md) §1・§3）。1リクエスト=1トランザクション |
 | 共通検証 | 未認証は共通の `401`、型・必須・値域違反は Bean Validation の `422`（[tech_api/common.md](../basic/tech_api/common.md)）。分岐一覧では `401` を扱わない |
-| Phase | 塔の実装Phase対応は [game_spec.md §1](../../design/game_spec.md) が正。イベントダンジョン・深淵の塔の固有仕様は [systems/endgame.md](../../design/systems/endgame.md) §2.13・§2.14 と tech_api.md「イベントダンジョン」 |
+| Phase | 塔の実装Phase対応は [game_spec.md §1](../../design/game_spec.md) が正。イベントダンジョン・深淵の塔の固有仕様は [systems/endgame.md](../../design/systems/endgame.md) §2.13・§2.14 と tech_api/endgame.md「イベントダンジョン」 |
 
 ## 2. データの解決
 
@@ -35,13 +35,13 @@
 |------|---------|
 | 解放判定 | 解放条件（`unlockTowerId`）が無い塔は常に解放。有る塔は、その塔の `TowerClearRecord.cleared = true`（最上階ボス討伐済み）なら解放 |
 | 到達済み最高階 | その塔の `TowerClearRecord.highestFloor`。行が無ければ `0`（未挑戦） |
-| 目標階上限 `cap` | `min(highestFloor + 1, totalFloors)`。式の正は tech_api.md「操作系」。深淵の塔（Phase 5〜）は総階数を持たず `highestFloor + 1` のみ |
+| 目標階上限 `cap` | `min(highestFloor + 1, totalFloors)`。式の正は tech_api/gameplay.md「操作系」。深淵の塔（Phase 5〜）は総階数を持たず `highestFloor + 1` のみ |
 | クリア記録の作成 | `tower_clear_records` の行は**階クリア時**に無ければ作成する（§9）。入塔時・一覧時には作らない |
 | イベントダンジョン（Phase 5〜） | 到達記録は難易度を畳み込んだキーで難易度別に引く（キー体系の正は [tech_data.md §1.1](../basic/tech_data.md)。組み立てはサーバーが行う） |
 
 ## 3. API要求・応答
 
-要求・応答とも camelCase（[tech_api/common.md](../basic/tech_api/common.md)）。エンドポイント一覧の正は tech_api.md「操作系」。
+要求・応答とも camelCase（[tech_api/common.md](../basic/tech_api/common.md)）。エンドポイント一覧の正は tech_api/gameplay.md「操作系」。
 
 | API | 要求 | 成功応答（200） |
 |-----|------|----------------|

@@ -161,5 +161,5 @@ stateDiagram-v2
 - 塔タブ・ダンジョン選択はPhase 2時点ではホーム画面内セクションとして実装中（タブ分離は製造残。構成自体は仕様準拠のため変更なし）
 - お知らせはタブではなくヘッダ導線（`systems/ui.md`「お知らせ（Phase 3〜）」）
 - 退会確認で削除を実行した後、およびログアウト実行後は、メインナビの外にある認証フロー（[auth.md](auth.md)）のログイン画面へ戻る。ログアウトは `POST /api/auth/logout`、退会は再認証のうえ `POST /api/auth/delete-account` を呼ぶ（いずれも [api_sequence/auth.md](../api_sequence/auth.md) §14）
-- 深淵の塔・ボスラッシュ・イベントダンジョンはタブを追加せず「探索」タブ配下のセクション（正は `systems/ui.md` ナビゲーション構造。モバイルの直接タブ/「その他」の割り当ても同節が正）。深淵の塔の入塔・進行は通常の塔画面を再利用する（[tech_api.md](../../tech/basic/tech_api.md)「深淵の塔（Phase 5〜）」）
+- 深淵の塔・ボスラッシュ・イベントダンジョンはタブを追加せず「探索」タブ配下のセクション（正は `systems/ui.md` ナビゲーション構造。モバイルの直接タブ/「その他」の割り当ても同節が正）。深淵の塔の入塔・進行は通常の塔画面を再利用する（[tech_api/endgame.md](../../tech/basic/tech_api/endgame.md)「深淵の塔（Phase 5〜）」）
 - 転生はタブでもキャラ画面直下でもなく、**キャラ画面 > ステータス詳細 内のセクション**として入る（Phase 5〜。正は `systems/ui.md` ナビゲーション構造、図は [endgame.md](endgame.md)）

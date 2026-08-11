@@ -53,7 +53,7 @@ sequenceDiagram
 > イベントダンジョン（試練の迷宮 `trial_maze` / 宝物庫 `treasure_vault` / 修練場 `training_hall`）は通常の塔と同じデータ構造で管理される。
 > 難易度（初級/中級/上級）は `Modifier`（bonus型: 報酬倍率 ×1/2/4）で実装し、
 > **専用エンドポイントは設けず `/api/tower/*` を再利用する**。
-> 難易度は `POST /api/tower/select` の `difficulty`（`beginner` / `intermediate` / `advanced`）で渡す（正は `tech_api.md`「イベントダンジョン」）。
+> 難易度は `POST /api/tower/select` の `difficulty`（`beginner` / `intermediate` / `advanced`）で渡す（正は `tech_api/endgame.md`「イベントダンジョン」）。
 > 到達記録は難易度別に `towersCleared` へ保持する（キー体系の正は [tech_data.md](../../tech/basic/tech_data.md) §1.1）。
 
 ## 11.7. 深淵の塔ランキング（Phase 5）

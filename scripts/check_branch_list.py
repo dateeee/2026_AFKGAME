@@ -18,7 +18,7 @@ WARN の抑止（`WARN許容`）:
 テスト対応照合（--tests）:
     テストの docstring / Javadoc / コメントにあるマーカーを集計し、分岐一覧の行と突き合わせる。
     対象は backend/*/src/test/java/**/*Test.java（JUnit 5）。
-    マーカー形式: 「分岐: tech_shop.md §7 #3」（節番号は §8.3 のような枝番も可。
+    マーカー形式: 「分岐: tech_battle.md §5 #3」（節番号は §8.3 のような枝番も可。
     一覧が1つだけの文書は §番号 を省略可。#3,4 と複数可）
     索引の子ファイルは親ディレクトリ名を付ける（「分岐: tech_forge/craft.md §10 #1」）。
     マーカーが1件も参照していない文書・セクションは照合対象外（レガシーテストに影響しない）。
@@ -47,7 +47,7 @@ LAP_COUNT = re.compile(r"\d+\s*周")
 def doc_key(path: Path) -> str:
     """マーカーが指す文書名。層ディレクトリ（basic / detail / nonfunctional）だけ落とす。
 
-    `detail/tech_shop.md` → `tech_shop.md`、`detail/tech_forge/craft.md` → `tech_forge/craft.md`。
+    `detail/tech_battle.md` → `tech_battle.md`、`detail/tech_forge/craft.md` → `tech_forge/craft.md`。
     索引の子は親ディレクトリ名を残すため、基底名だけでは失われる文脈（どの索引の子か）が
     マーカー側にも残り、別の索引に同名の子ができても一意になる。
     """

@@ -22,7 +22,7 @@
 |----|--------|---------|
 | 1 | `docs/diagrams/screen_transition.md` | 対象Phaseの画面遷移のみ |
 | 2 | `docs/diagrams/api_sequence.md` → `api_sequence/` | 対象シーケンスの子ファイルのみ |
-| 3 | `docs/tech/basic/tech_api.md` | 対象エンドポイントの行のみ |
+| 3 | `docs/tech/basic/tech_api/` | 対象エンドポイントの行のみ |
 | 4 | `docs/design/systems/ui*.md` | 対象画面のセクションのみ |
 
 **単体テストの分岐一覧からシナリオを作らない**。結合テストが検証するのは**基本設計**（API設計・画面遷移・データ構造）であって、詳細設計の分岐ではない。
@@ -33,7 +33,7 @@
 
 | 対象 | 設計側の抽出元 | テスト側の突き合わせ先 |
 |------|-------------|------------------|
-| エンドポイント | `afkgame-web` の `@RestController` のマッピングアノテーション（`@GetMapping` 等）。仕様との差は `docs/tech/basic/tech_api.md` のエンドポイント表で確認する | 統合テスト内のリクエストパス |
+| エンドポイント | `afkgame-web` の `@RestController` のマッピングアノテーション（`@GetMapping` 等）。仕様との差は `docs/tech/basic/tech_api/` のエンドポイント表で確認する | 統合テスト内のリクエストパス |
 | 画面 | `frontend/src/router/index.ts` の `path` | `frontend/tests/e2e/` 内の遷移先パス（`goto` ・リンク操作後のURL） |
 
 差分に出た経路は §3.1「意図的に扱わない経路」に宣言があるか確認し、無ければ**不足として報告**する。

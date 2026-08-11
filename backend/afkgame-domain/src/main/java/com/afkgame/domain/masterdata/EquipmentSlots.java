@@ -9,11 +9,11 @@ import org.springframework.stereotype.Component;
  * 装備スロット定義のマスターデータを保持するレジストリ。
  *
  * <p>スロットの正は docs/design/systems/equipment.md §2.4、参照関係の正は
- * docs/tech/detail/tech_auth.md §8.1。起動時に一度だけ YAML を読み込み、以降は不変 Map として
+ * docs/tech/detail/tech_auth/init.md §8.1。起動時に一度だけ YAML を読み込み、以降は不変 Map として
  * 公開する（docs/tech/basic/tech_structure.md §2「masterdata/」）。
  * 公開する並び順は装備画面の表示順にそのまま使うため、YAML の記載順を保つ。
  *
- * <p>件数は9種固定で、そろわなければ起動を中止する（tech_auth.md §8.3 #6）。
+ * <p>件数は9種固定で、そろわなければ起動を中止する（tech_auth/init.md §8.3 #6）。
  */
 @Component
 public class EquipmentSlots {

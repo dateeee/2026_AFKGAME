@@ -24,7 +24,7 @@
 | 塔の対 | `currentTowerId` / `currentFloor` / `targetFloor` は同時にnull、または同時に非null |
 | 敵の対 | `currentEnemyId` と `currentEnemyHp` は同時にnull、または同時に非null |
 | 敵の従属 | `currentEnemyId ≠ null` ならば `currentTowerId ≠ null` |
-| 階の範囲 | `1 ≤ currentFloor` かつ `targetFloor ≤ min(塔別 highestFloor + 1, 塔の総階数)`（`tech_api.md`「操作系」が正。深淵の塔は総階数を持たないため `highestFloor + 1` のみ） |
+| 階の範囲 | `1 ≤ currentFloor` かつ `targetFloor ≤ min(塔別 highestFloor + 1, 塔の総階数)`（`tech_api/gameplay.md`「操作系」が正。深淵の塔は総階数を持たないため `highestFloor + 1` のみ） |
 | 排他 | `bossRush.active = true` ならば `currentTowerId = null` |
 | HP | 全キャラの `hp` は `0 ≤ hp ≤ effectiveMaxHp` |
 

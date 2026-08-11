@@ -1,6 +1,6 @@
 # AFK GAME — パーティ・スキル操作の処理仕様（Phase 3〜）
 
-> エンドポイント定義の正は [tech_api.md](../basic/tech_api.md)「パーティ・スキル」、状態×操作可否の正は [tech_state.md §4](tech_state.md)、データ構造は [tech_data.md](../basic/tech_data.md) と [er_diagram/player.md](../../diagrams/er_diagram/player.md)、数値の正は [master/character.md](../../data/master/character.md)・[CHARACTERS_OVERVIEW.md](../../data/characters/CHARACTERS_OVERVIEW.md)・[skills/](../../data/skills/SKILLS_OVERVIEW.md)。
+> エンドポイント定義の正は [tech_api/character.md](../basic/tech_api/character.md)「パーティ・スキル」、状態×操作可否の正は [tech_state.md §4](tech_state.md)、データ構造は [tech_data.md](../basic/tech_data.md) と [er_diagram/player.md](../../diagrams/er_diagram/player.md)、数値の正は [master/character.md](../../data/master/character.md)・[CHARACTERS_OVERVIEW.md](../../data/characters/CHARACTERS_OVERVIEW.md)・[skills/](../../data/skills/SKILLS_OVERVIEW.md)。
 > エラーコードの体系は [tech_error_handling.md](../basic/tech_error_handling.md)。本書の各表に個別コードを定義する。
 
 ## 1. パーティ編成変更（PUT /api/party/edit）

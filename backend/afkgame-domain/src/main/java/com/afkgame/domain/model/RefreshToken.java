@@ -5,8 +5,8 @@ import java.time.Instant;
 /**
  * {@code refresh_tokens} テーブルの Entity。
  *
- * <p>スキーマ定義の正は docs/tech/basic/tech_db.md、認証仕様は
- * docs/tech/detail/tech_auth.md §6。生のトークンは保存せず、SHA-256 ハッシュのみを持つ。
+ * <p>スキーマ定義の正は docs/tech/basic/tech_db/auth.md §2、ローテーション仕様は
+ * docs/tech/detail/tech_auth.md §4。生のトークンは保存せず、SHA-256 ハッシュのみを持つ。
  */
 public class RefreshToken {
 

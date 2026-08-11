@@ -95,7 +95,7 @@ public class AuthServiceImpl implements AuthService {
     /**
      * {@inheritDoc}
      *
-     * <p>ユーザー作成・初期化・トークン発行を本メソッドの境界で1つにまとめる（tech_auth.md §8.2 手順8）。
+     * <p>ユーザー作成・初期化・トークン発行を本メソッドの境界で1つにまとめる（tech_auth/init.md §8.2 手順8）。
      */
     @Override
     @Transactional

@@ -1,7 +1,7 @@
 # AFK GAME — ゲーム状態JSON
 
 > 親: [tech_data.md](../tech_data.md) §1.1。**トップレベルキーの一覧と `towersCleared` のキー体系は親が正**であり、本書は `GET /api/game/state` のレスポンス（`GameStateResponse`）の JSON 例を持つ。
-> エンドポイント定義の正は [tech_api.md](../tech_api.md)「ゲーム状態」、永続化スキーマは [tech_db.md](../tech_db.md)。
+> エンドポイント定義の正は [tech_api/core.md](../tech_api/core.md)「ゲーム状態」、永続化スキーマは [tech_db.md](../tech_db.md)。
 
 > **注意**: 以下はトップレベルキーごとに分けて示した実際のJSON構造で、**3節を連結すると1つのレスポンスになる**。フロント・バック間で camelCase を使用。Phase 3以降のフィールドはコメントで記載。
 
@@ -31,7 +31,7 @@
   "potions": {
     "hp_potion": 10
   },
-  "towersCleared": {                   // 到達記録。キーは塔ID。目標階の上限は tech_api.md「操作系」が正
+  "towersCleared": {                   // 到達記録。キーは塔ID。目標階の上限は tech_api/gameplay.md「操作系」が正
     "goblin_tower": { "cleared": true, "highestFloor": 20 },
     "forest_tower": { "cleared": false, "highestFloor": 15 },
     "abyss_tower": { "cleared": false, "highestFloor": 87 },  // 深淵の塔（無限塔）。totalFloors を持たず上限は highestFloor + 1 のみ。cleared は常に false

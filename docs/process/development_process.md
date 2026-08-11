@@ -89,7 +89,7 @@ graph LR
 |-------|---------|------|-----------|-----------|
 | Phase 1 (MVP) | 完了 | 完了 | **完了（C1 100%）** | **完了（L1・L2）** |
 | Phase 2 | 完了 | **完了**（日替わりショップ含む全機能。製造完了ゲートの初回レビュー指摘 backend 18件・frontend 12件を反映済み） | **完了（C1 100%）** | **完了（L1・L2）** |
-| Phase 3 | **完了**（分岐一覧まで整備。数値は仮置き。お知らせはAPI定義済み → [tech_api.md](../tech/basic/tech_api.md)「お知らせ」、マスター項目定義は [master_data.md §17](../data/master_data.md)。分岐一覧の追補（例外経路の注記・ループ行）のみ残 → テストリスト作成時に解消する） | 未着手 | — | — |
+| Phase 3 | **完了**（分岐一覧まで整備。数値は仮置き。お知らせはAPI定義済み → [tech_api/core.md](../tech/basic/tech_api/core.md)「お知らせ」、マスター項目定義は [master_data.md §17](../data/master_data.md)。分岐一覧の追補（例外経路の注記・ループ行）のみ残 → テストリスト作成時に解消する） | 未着手 | — | — |
 | Phase 4 | 完了（数値は仮置き。分岐一覧はPhase着手時に整備） | 未着手 | — | — |
 | Phase 5 | **部分完了**（深淵の塔・イベントダンジョンは [tech_tower.md](../tech/detail/tech_tower.md) + `tech_tower/` へ統合済み。**ボスラッシュ・転生の処理フローと分岐一覧は未作成** — Phase 5 着手時に `tech_bossrush.md`・`tech_prestige.md` を新設する） | 未着手 | — | — |
 

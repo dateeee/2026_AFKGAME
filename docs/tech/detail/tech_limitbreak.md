@@ -1,6 +1,6 @@
 # AFK GAME — 限界突破の処理仕様（Phase 4〜）
 
-> エンドポイント定義の正は [tech_api.md](../basic/tech_api.md)「キャラクター」、状態×操作可否の正は [tech_state.md §4](tech_state.md)、データ構造は [tech_data.md](../basic/tech_data.md) と [tech_db/player.md §4](../basic/tech_db/player.md)。
+> エンドポイント定義の正は [tech_api/character.md](../basic/tech_api/character.md)「パーティ・スキル」、状態×操作可否の正は [tech_state.md §4](tech_state.md)、データ構造は [tech_data.md](../basic/tech_data.md) と [tech_db/player.md §4](../basic/tech_db/player.md)。
 > **ボーナス量の正は [master/character.md §8.1](../../data/master/character.md)**（本書では値を再掲しない）。実効ステータスへの適用位置は [tech_battle.md §3.1.1](tech_battle.md)、丸めは [tech_numeric.md](tech_numeric.md)。
 > ゲーム仕様は [systems/character.md](../../design/systems/character.md)「限界突破」。エラーコードの体系は [tech_error_handling.md](../basic/tech_error_handling.md)。
 

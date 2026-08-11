@@ -7,7 +7,7 @@ import java.time.Instant;
  *
  * <p>列・NULL 可否の正は docs/tech/basic/tech_db/player.md §4。
  * ステータスの基礎値はタイプ別マスター（{@code character_types.yml}）から書き写す
- * （docs/tech/detail/tech_auth.md §8.2 手順4）。
+ * （docs/tech/detail/tech_auth/init.md §8.2 手順4）。
  *
  * <p>{@code rarity} は Phase 3 の列で V1 スキーマに存在しないため、本 Entity にも持たない。
  * 追加は同列をスキーマへ入れる Phase の製造で行う。

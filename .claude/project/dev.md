@@ -34,7 +34,7 @@
 | 順 | 参照先 | 内容 |
 |----|--------|------|
 | 1 | `docs/design/game_spec.md` → `design/systems/` | ゲームシステム・バランス仕様 |
-| 2 | `docs/tech/tech_spec.md` → `tech_api.md` / `tech_data.md` / `tech_structure.md`（§2〜§3）/ `tech_backend.md`（§4） | API設計・データ構造・実装配置 |
+| 2 | `docs/tech/tech_spec.md` → `tech_api/` / `tech_data.md` / `tech_structure.md`（§2〜§3）/ `tech_backend.md`（§4） | API設計・データ構造・実装配置 |
 | 3 | `docs/tech/detail/tech_<機能>.md` | 対象機能の処理フローと**分岐一覧の正**（機能名は索引 `tech_spec.md` で特定する） |
 | 4 | `docs/tech/basic/tech_db/<領域>.md` | 列・NULL・一意制約の正（**モデルを新設・変更する場合**。`check_schema_triple.py` の照合元） |
 | 5 | `docs/tech/detail/tech_battle.md`・`tech_offline.md`・`tech_auth.md` | 戦闘処理・オフライン計算・認証（該当する場合の補助） |

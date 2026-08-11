@@ -15,7 +15,7 @@
 | オフライン計算 | `docs/tech/detail/tech_offline.md` | 復帰時の一括計算 |
 | tick進行制御 | `docs/tech/detail/tech_tick.md` | 60秒tickの進行判定 |
 | フロントtick制御 | `docs/tech/detail/tech_polling.md` | ポーリング間隔・停止条件 |
-| ショップ処理 | `docs/tech/detail/tech_shop.md` | 日替わりショップの品揃え抽選・購入 |
+| ショップ処理 | `docs/tech/detail/tech_shop.md`（索引）+ `tech_shop/` | 日替わりショップの品揃え抽選・購入 |
 | 拠点・施設 | `docs/tech/detail/tech_base.md` | 建設・レベルアップ・施設効果の解決 |
 | 酒場スカウト | `docs/tech/detail/tech_scout.md` | 排出設定の解決・ガチャ抽選・重複判定 |
 | 鍛冶屋 | `docs/tech/detail/tech_forge.md`（索引）+ `tech_forge/{enhance,craft,disassemble}.md` | 強化コスト・製作の生成規則・分解・所持枠 |
@@ -43,7 +43,7 @@
 | 順 | 参照先 | 読む範囲 |
 |----|--------|---------|
 | 1 | `docs/design/systems/<対象>.md` | 対象機能のセクションのみ |
-| 2 | `docs/tech/basic/tech_api.md`・`tech_data.md` | 対象エンドポイント・テーブルの行のみ |
+| 2 | `docs/tech/basic/tech_api/`・`tech_data.md` | 対象エンドポイント・テーブルの行のみ |
 | 3 | `docs/tech/detail/tech_rng.md`・`tech_numeric.md`・`tech_state.md` | 乱数・丸め・状態を扱う場合のみ |
 | 4 | `docs/data/master/` | 対象の数値定義のみ |
 | 5 | `docs/diagrams/battle_flow/`・`api_sequence/` | 対象処理の図のみ |
@@ -92,7 +92,7 @@
 | 2 | 同一条件の真・偽の行には**同じ分岐点名**を使う（`check_branch_list.py` が対として検証する） |
 | 3 | 記載後に `python scripts/check_branch_list.py` を実行し ERROR を解消する。WARN は残さない（下記の確認と注記で0件にする） |
 | 4 | 「1行のみ」「ループに0周・1周・2周がない」の WARN は、片側欠落でないことを確認したうえで表の直後に注記を置いて抑止する。書式: `> WARN許容 #21・#22: <理由>`（`#` 番号はコロンの前に列挙する。理由は必須） |
-| 5 | **見出しは1段のみ**。`## N. 分岐一覧（対象）` に表を直付けし、その下へ `###` を重ねない（重ねると `check_branch_list.py` が「見出しはあるが表がない」で ERROR にする。既存例: `tech_shop.md` §7・§8） |
+| 5 | **見出しは1段のみ**。`## N. 分岐一覧（対象）` に表を直付けし、その下へ `###` を重ねない（重ねると `check_branch_list.py` が「見出しはあるが表がない」で ERROR にする。既存例: `tech_shop/lineup.md` §7） |
 | 6 | **処理フローの括弧内・注記に書いた条件も分岐一覧の対象**（例: 手順2「`facilities` に行が無ければ LV0」）。表を書き始める前に本文の条件を拾い切る（後から気づくと番号の振り直しになる） |
 
 本プロジェクトでの当てはめ:

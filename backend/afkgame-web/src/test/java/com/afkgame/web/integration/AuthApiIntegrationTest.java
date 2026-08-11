@@ -130,7 +130,7 @@ class AuthApiIntegrationTest extends WebIntegrationTestSupport {
      * ゲスト作成が「プレイ可能な初期状態」まで作ることを、実DBの行で確認する。
      * 手順ごとの分岐は PlayerInitializationServiceImplTest が持ち、ここでは連結と永続化（コミット）を見る。
      *
-     * <p>分岐: tech_auth.md #12
+     * <p>分岐: tech_auth/init.md §8.3 #12
      */
     @Test
     @DisplayName("POST /api/auth/guest は Player・設定・初期キャラ・9スロット・初期アイテムまで作る")
@@ -140,7 +140,7 @@ class AuthApiIntegrationTest extends WebIntegrationTestSupport {
         String playerId = jdbcTemplate.queryForObject(
                 "SELECT id FROM players WHERE user_id = ?", String.class, userId);
         assertThat(playerId).isNotBlank();
-        // 塔外で作られる（tech_auth.md §8.2 手順2）
+        // 塔外で作られる（tech_auth/init.md §8.2 手順2）
         assertThat(jdbcTemplate.queryForObject(
                 "SELECT count(*) FROM players WHERE id = ? AND gold = 0 AND current_tower_id IS NULL"
                         + " AND current_floor IS NULL AND target_floor IS NULL",
@@ -152,7 +152,7 @@ class AuthApiIntegrationTest extends WebIntegrationTestSupport {
 
         String characterId = jdbcTemplate.queryForObject(
                 "SELECT id FROM characters WHERE player_id = ?", String.class, playerId);
-        // 作成直後は全快（tech_auth.md §8.2 手順4）
+        // 作成直後は全快（tech_auth/init.md §8.2 手順4）
         assertThat(jdbcTemplate.queryForObject(
                 "SELECT count(*) FROM characters WHERE id = ? AND hp = max_hp AND level = 1",
                 Integer.class, characterId)).isEqualTo(1);

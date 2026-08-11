@@ -47,7 +47,7 @@ import com.afkgame.domain.repository.PlayerRepository;
 /**
  * {@link PlayerInitializationServiceImpl} の単体テスト。
  *
- * <p>仕様: docs/tech/detail/tech_auth.md §8.2「処理フロー」手順2〜6・§8.3「分岐一覧」。
+ * <p>仕様: docs/tech/detail/tech_auth/init.md §8.2「処理フロー」手順2〜6・§8.3「分岐一覧」。
  * 既定値の正は docs/tech/basic/tech_db/player.md §1（players）・§2（player_settings）・§4（characters）。
  *
  * <p>分岐観点: プレイヤー重複の 未作成 / 既存（#1・#2）、装備スロット9種の作成（#5）、
@@ -144,7 +144,7 @@ class PlayerInitializationServiceImplTest {
         /**
          * 手順2・3を検証する（手順4はキャラ、手順5・6はスロット・アイテムの各テストが持つ）。
          *
-         * <p>分岐: tech_auth.md #1
+         * <p>分岐: tech_auth/init.md §8.3 #1
          */
         @Test
         @DisplayName("未作成なら Player と PlayerSettings を既定値で作成する")
@@ -164,7 +164,7 @@ class PlayerInitializationServiceImplTest {
             assertThat(player.getHighestFloor()).isZero();
             assertThat(player.getLastTickAt()).isEqualTo(FIXED_NOW);
             assertThat(player.getCreatedAt()).isEqualTo(FIXED_NOW);
-            // 塔外のため塔関連と交戦中の敵は NULL（tech_auth.md §8.2 手順2）
+            // 塔外のため塔関連と交戦中の敵は NULL（tech_auth/init.md §8.2 手順2）
             assertThat(player.getCurrentTowerId()).isNull();
             assertThat(player.getCurrentFloor()).isNull();
             assertThat(player.getTargetFloor()).isNull();
@@ -186,7 +186,7 @@ class PlayerInitializationServiceImplTest {
         /**
          * 手順4を検証する。ステータスはタイプ別 LV1 基礎値をそのまま写す。
          *
-         * <p>分岐: tech_auth.md #1
+         * <p>分岐: tech_auth/init.md §8.3 #1
          */
         @Test
         @DisplayName("未作成なら初期キャラを1体、タイプ別 LV1 基礎値で作成する")
@@ -207,7 +207,7 @@ class PlayerInitializationServiceImplTest {
             assertThat(character.getBaseAtk()).isEqualTo(10);
             assertThat(character.getBaseDef()).isEqualTo(5);
             assertThat(character.getBaseSpd()).isEqualTo(5);
-            // 作成直後は全快（tech_auth.md §8.2 手順4）
+            // 作成直後は全快（tech_auth/init.md §8.2 手順4）
             assertThat(character.getHp()).isEqualTo(character.getMaxHp());
             assertThat(character.getLimitBreak()).isZero();
             assertThat(character.getSkillPoints()).isZero();
@@ -221,7 +221,7 @@ class PlayerInitializationServiceImplTest {
          * クライアントが起こせない状態にエラーコードを新設せず、
          * 500 {@code INTERNAL_UNEXPECTED_ERROR} として扱う（tech_error_handling.md「AUTH_ コード一覧」に該当なし）。
          *
-         * <p>分岐: tech_auth.md #2
+         * <p>分岐: tech_auth/init.md §8.3 #2
          */
         @Test
         @DisplayName("既にプレイヤーがあれば一意制約違反で中止し、以降の手順を実行しない")
@@ -252,7 +252,7 @@ class PlayerInitializationServiceImplTest {
         /**
          * 手順5を検証する。9種でない場合（#6）は起動時のローダ検証が弾くため、ここでは扱わない。
          *
-         * <p>分岐: tech_auth.md #5
+         * <p>分岐: tech_auth/init.md §8.3 #5
          */
         @Test
         @DisplayName("9種そろっていれば9行を未装備（equipment_id = NULL）で作成する")
@@ -283,7 +283,7 @@ class PlayerInitializationServiceImplTest {
         /**
          * 定義が空でも手順7（トークン発行）へ進めるよう、例外なく完了すること。
          *
-         * <p>分岐: tech_auth.md #7
+         * <p>分岐: tech_auth/init.md §8.3 #7
          */
         @Test
         @DisplayName("定義が空ならアイテムを付与せず、初期化は完了する")
@@ -299,7 +299,7 @@ class PlayerInitializationServiceImplTest {
         }
 
         /**
-         * 分岐: tech_auth.md #8
+         * 分岐: tech_auth/init.md §8.3 #8
          */
         @Test
         @DisplayName("定義が1種類ならその1種類を定義された個数で付与する")
@@ -320,7 +320,7 @@ class PlayerInitializationServiceImplTest {
         /**
          * アイテムIDの実在性はローダ検証（#10）が持つため、ここでは任意のIDでよい。
          *
-         * <p>分岐: tech_auth.md #9
+         * <p>分岐: tech_auth/init.md §8.3 #9
          */
         @Test
         @DisplayName("定義が2種類以上なら種類ごとに1行ずつ付与する")

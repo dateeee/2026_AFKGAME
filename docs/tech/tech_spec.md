@@ -14,7 +14,7 @@
 | 1. データ設計 | ゲーム状態JSON・敵／塔／環境効果・戦闘ログ・施設／装備強化のデータ構造 | [tech_data.md](basic/tech_data.md)（索引兼本文） → [tech_data/game_state.md](basic/tech_data/game_state.md)（§1.1 の JSON 例） |
 | 2. ディレクトリ構成<br>3. フロントエンド構成 | リポジトリ構成と Vue 3 SPA の内部構成・レスポンシブ設計 | [tech_structure.md](basic/tech_structure.md) |
 | 4. バックエンド構成 | Terasoluna の技術スタック・モジュール構成・設定値 | [tech_backend.md](basic/tech_backend.md) |
-| 5. API設計 | 全エンドポイント一覧（認証・ゲーム状態・tick・操作系・Phase 3〜5） | [tech_api.md](basic/tech_api.md) |
+| 5. API設計 | 全エンドポイントの索引（core / auth / gameplay / character / base / endgame の6分冊。`api_sequence/` と1:1） | [tech_api.md](basic/tech_api.md) |
 | 5.0 API共通仕様 | 規約（パス・ボディ・日時・認証）・共通ヘッダ・ステータスコードの使い分け | [tech_api/common.md](basic/tech_api/common.md) |
 | 6. アーキテクチャ方針<br>7. ゲームループ | サーバー権威・ゲスト永続化・エラーハンドリング・ハイブリッドtick制 | [tech_architecture.md](basic/tech_architecture.md) |
 | 6. ログ設計 | ログレベル・フォーマット・ロガー名体系・ログ項目・マスク規則・失敗理由（`reason`） | [tech_logging.md](basic/tech_logging.md) |
@@ -44,7 +44,7 @@
 | 数値・丸め規約（丸め方向・キャップ・適用順序） | [tech_numeric.md](detail/tech_numeric.md) |
 | 進行状態と操作可否（状態機械・不変条件・探索セッション） | [tech_state.md](detail/tech_state.md) |
 | フロントエンドのtick制御（ポーリング・多重タブ・ストア反映） | [tech_polling.md](detail/tech_polling.md) |
-| 認証システム（JWT・ゲスト・Google OAuth） | [tech_auth.md](detail/tech_auth.md) → [登録・ログイン・ログアウト](detail/tech_auth/account.md) |
+| 認証システム（JWT・ゲスト・Google OAuth） | [tech_auth.md](detail/tech_auth.md) → [プレイヤー初期化](detail/tech_auth/init.md)・[登録・ログイン・ログアウト](detail/tech_auth/account.md) |
 | デザインシステム（トークン・UIプリミティブ・アプリシェル） | [tech_design_system.md](detail/tech_design_system.md) |
 | ボスラッシュ（ウェーブ進行・HP回復・マイルストーン付与・全滅判定・ランキング更新） | `tech_bossrush.md`（Phase 5 で新設予定・**未作成**） |
 | 転生（LV9999判定・リセット範囲の適用・ポイント投資の上限検証） | `tech_prestige.md`（Phase 5 で新設予定・**未作成**） |

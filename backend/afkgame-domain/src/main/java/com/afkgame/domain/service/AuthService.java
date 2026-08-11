@@ -13,7 +13,7 @@ import com.afkgame.domain.model.User;
  *
  * <p>ゲスト作成・リフレッシュ・登録・ログイン・ログアウト・アカウント移行・メール確認・
  * パスワード再設定（docs/tech/detail/tech_auth/password_reset.md §22・§24）と、
- * ユーザー作成時のプレイヤー初期化（tech_auth.md §8.2。実体は
+ * ユーザー作成時のプレイヤー初期化（tech_auth/init.md §8.2。実体は
  * {@link PlayerInitializationService}）を持つ。
  *
  * <p>実装は {@link AuthServiceImpl}。
@@ -23,7 +23,7 @@ public interface AuthService {
     /**
      * ゲストアカウントを作成し、プレイ可能な初期状態を組み立ててトークンペアを発行する。
      *
-     * <p>tech_auth.md §8.2 の手順1（ユーザー作成）→ 手順2〜6（初期化）→ 手順7（トークン発行）を
+     * <p>tech_auth/init.md §8.2 の手順1（ユーザー作成）→ 手順2〜6（初期化）→ 手順7（トークン発行）を
      * 1つのトランザクション境界にまとめる（手順8）。途中で失敗した場合はユーザーを含めて何も残さない。
      *
      * @return 作成したユーザーとトークンペア

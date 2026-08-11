@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Positive;
  * プレイヤー初期化で作成する初期キャラクターのマスターデータ。
  *
  * <p>値の正は docs/data/master/character.md §1.1、参照関係の正は
- * docs/tech/detail/tech_auth.md §8.1。ステータスは本 record に持たず、
+ * docs/tech/detail/tech_auth/init.md §8.1。ステータスは本 record に持たず、
  * {@code type} から {@link CharacterTypeData} を引いて得る（同 §8.2 手順4）。
  *
  * @param id    キャラクターマスターのID（例: {@code hero_001}）。

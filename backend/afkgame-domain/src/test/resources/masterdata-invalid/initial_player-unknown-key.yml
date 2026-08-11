@@ -1,6 +1,6 @@
 # 異常系フィクスチャ: 単一オブジェクト読み込みでスキーマに無いキーがある
 # 分岐一覧の行ではなく MasterDataLoader#loadSingle の横断検証（items.yml と同じ扱い）。
-# growthRate は「成長率はレベルアップ移植時に追加する」（tech_auth.md §8.1）の裏返しで、
+# growthRate は「成長率はレベルアップ移植時に追加する」（tech_auth/init.md §8.1）の裏返しで、
 # 先走って足すと起動時に落ちることを表す。
 
 character:

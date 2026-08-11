@@ -5,7 +5,7 @@ import com.afkgame.domain.model.Player;
 /**
  * プレイヤーの初期状態を組み立てるドメインサービス。
  *
- * <p>仕様: docs/tech/detail/tech_auth.md §8.2「処理フロー」手順2〜6・§8.3「分岐一覧」。
+ * <p>仕様: docs/tech/detail/tech_auth/init.md §8.2「処理フロー」手順2〜6・§8.3「分岐一覧」。
  * 既定値の正は docs/tech/basic/tech_db/player.md §1（players）・§2（player_settings）・§4（characters）。
  *
  * <p>共有 Service。{@link AuthService} のゲスト作成と本登録から利用する（入口が異なるだけで
@@ -16,7 +16,7 @@ import com.afkgame.domain.model.Player;
 public interface PlayerInitializationService {
 
     /**
-     * ユーザーにプレイ可能な初期状態を作る（tech_auth.md §8.2 手順2〜6）。
+     * ユーザーにプレイ可能な初期状態を作る（tech_auth/init.md §8.2 手順2〜6）。
      *
      * <p>1ユーザー1プレイヤーは {@code uq_players_user_id} が保証する。既にプレイヤーがある場合は
      * 一意制約違反がそのまま送出され、呼び出し側のトランザクションが全体をロールバックする（§8.3 #2・#12）。

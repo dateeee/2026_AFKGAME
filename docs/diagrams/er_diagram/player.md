@@ -1,6 +1,6 @@
 # ER図 — 認証・プレイヤー・キャラクター
 
-> 親: [er_diagram.md](../er_diagram.md)。**DBスキーマの正は** [tech_db/auth.md](../../tech/basic/tech_db/auth.md)・[tech_db/player.md](../../tech/basic/tech_db/player.md)（`CharacterEquipSlot` のみ [tech_db/item.md](../../tech/basic/tech_db/item.md)）であり、本図は視覚化として属性を再掲する（食い違いは定義書側へ揃える）。データ構造は [tech_data.md](../../tech/basic/tech_data.md)、認証は [tech_auth.md](../../tech/detail/tech_auth.md)。
+> 親: [er_diagram.md](../er_diagram.md)。**DBスキーマの正は** [tech_db/auth.md](../../tech/basic/tech_db/auth.md)・[tech_db/player.md](../../tech/basic/tech_db/player.md)・[tech_db/progression.md](../../tech/basic/tech_db/progression.md)（`CharacterEquipSlot` のみ [tech_db/item.md](../../tech/basic/tech_db/item.md)）であり、本図は視覚化として属性を再掲する（食い違いは定義書側へ揃える）。データ構造は [tech_data.md](../../tech/basic/tech_data.md)、認証は [tech_auth.md](../../tech/detail/tech_auth.md)。
 
 ## 認証・アカウント系
 

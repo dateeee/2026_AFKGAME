@@ -36,7 +36,7 @@ python .claude/scripts/review_prep.py --dir docs/reviews/doc-review \
 |------|------------|
 | 数値・計算式・定数 | `design/systems/`、`data/master/`、`tech_data.md`、`tech_battle.md`、`tech_offline.md` |
 | 塔データ | `TOWERS_OVERVIEW.md`、`towers/NNN_*.md`（配下全件）、`data/master/`、`systems/dungeon.md`、`master_data.md`（塔一覧） |
-| スキル・API・データ構造 | `SKILLS_OVERVIEW.md`、`skills/NNN_*.md`（配下全件）、`systems/character.md`、`tech_api.md`、`tech_data.md`、`tech_auth.md` |
+| スキル・API・データ構造 | `SKILLS_OVERVIEW.md`、`skills/NNN_*.md`（配下全件）、`systems/character.md`、`tech_api/`、`tech_data.md`、`tech_auth.md` |
 | 網羅性・Phase整合・リンク | `README.md`、`CLAUDE.md`、`glossary.md`、`development_process.md`、`documentation_rules.md`、各索引 + 全ファイルへの grep（TBD・未定・Phase表記） |
 
 ## 3. 観点
@@ -48,7 +48,7 @@ python .claude/scripts/review_prep.py --dir docs/reviews/doc-review \
 | 整合性 | 3 | **仕様の矛盾**: 戦闘フロー・オフライン計算・認証フロー・ショップ仕様 |
 | 整合性 | 4 | **Phase整合性**: 機能のPhase割り当てが全文書で一致するか |
 | 整合性 | 5 | **塔データ**: 階層数・推奨LV・解放条件・ボス名が概要と一致するか |
-| 整合性 | 6 | **API網羅性**: `game_spec.md` の機能に対応するAPIが `tech_api.md` にあるか |
+| 整合性 | 6 | **API網羅性**: `game_spec.md` の機能に対応するAPIが `tech_api/` にあるか |
 | 整合性 | 7 | **データ構造**: `tech_data.md` のJSON構造が `game_spec.md` の仕様を表現できるか |
 | 網羅性 | 8 | `open_specs.md` があれば、その確定済み項目が対応仕様書に反映されているか |
 | 網羅性 | 9 | 曖昧語（TBD・未定・後日検討・適宜・おおよそ）: `check_docs.py --words` の出力をそのまま取り込む |
