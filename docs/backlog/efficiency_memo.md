@@ -38,3 +38,9 @@
 - シグナル: same-command('python scripts/check_branch_li'×5, 'python scripts/check_docs.py'×4)
 - ターン概要: ツール147回・エラー1回・拒否0回。開始:「<command-message>next</command-message>」
 - 原因と改善案: （未記入 — Claude が1〜2行で追記する）
+## 2026-08-11 20:01 | session e707fe00 | 自動検出（フックの追記が消えたため手で復元）
+- シグナル: same-command('python scripts/check_branch_li'×5, 'python scripts/check_docs.py'×4)
+- ターン概要: ツール147回・エラー1回・拒否0回。開始:「<command-message>next</command-message>」
+- 原因と改善案: `check_docs.py` 4回のうち1往復は**正の逸脱の踏み抜き**（`tech_numeric.md` に新設した §6 へ `0.1〜0.5` を再掲 → `--owner` で ERROR → 書き直して再実行）。書く前に [spec_ownership.md](../process/spec_ownership.md) の**検出パターン列**を引いていれば0往復だった。改善案: **[detail-design.md](../../.claude/project/detail-design.md) §4 の記載ルールへ「数値・範囲・選択肢を仕様書へ書く前に `spec_ownership.md` の検出パターン列を grep し、正でなければリンクに替える」を1行追加する**（`profile.md` §7 #4 は「正は1ファイル」までで、機械照合の正規表現が存在することに触れていない）。`check_branch_list.py` 5回（着手前の基準・battle/rng 追加後・§5 再構成後・numeric 追加後・統合後）は状態が変わるたびのゲートで正当だが、**統合後の1回は ff マージで内容が変わらないため省ける**（18:12 と同じ再発）。
+- 付随して観測: **別セッションが main の作業ツリーを restore し、他セッションの未コミット（本エントリの自動追記）まで巻き込んだ**。`worktree_guide.md` §5.1 の「main のまま進めてよい作業」に沿わない編集が main に出ていたのが発端で、[worktree_guide.md](../process/worktree_guide.md) §2 ルール7 の「main の進行を確認する」を**復旧操作（`restore`・`checkout --`）の側にも**書くと再発を防げる。
+
