@@ -14,6 +14,8 @@
 - `docs/tech/detail/tech_state.md`: §4 の限界突破行に `CHARACTER_LOCKED_IN_TOWER` を明記した
 - `docs/tech/basic/tech_api.md`・`tech_error_handling.md`・`tech_spec.md`・`docs/INDEX.md`・`docs/data/master/character.md` §8: `tech_limitbreak.md` への参照を追加した
 - `docs/diagrams/api_sequence/character.md` §8・`api_sequence.md`: 限界突破フローを Phase 4 表記へ改め、検証順・トランザクション境界・レスポンス項目を処理仕様に合わせた
+- `docs/reviews/doc-review/2026-08-11_123351.md`: 新規。Phase 5 仕様確定ゲートの `doc-review` 結果（差分・11件＝高2/中7/低2）。`towersCleared` のキー体系は矛盾なし、「探索」タブ集約は転生の導線のみ欠落
+- `docs/backlog/next_session.md`: §2 候補キューへ「Phase 5 仕様確定ゲートの反映」を優先1で追加した（Java 移行と独立・並行可）
 
 ## 2026-08-10
 
