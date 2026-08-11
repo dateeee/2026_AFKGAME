@@ -27,3 +27,9 @@
 - シグナル: same-command('python scripts/check_doc_size.'×6, 'python scripts/check_docs.py'×3)
 - ターン概要: ツール91回・エラー0回・拒否0回。開始:「<command-message>next</command-message>」
 - 原因と改善案: `check_doc_size.py` 6回のうち4回は `next_session.md` §2 が H2 2,000字を 23字超えた後の**目分量トリムの往復**（2023→2009→2012→2001→1981。1回は削ったつもりが増えた）。事前の残量測定4件と `check_docs.py` 3回（着手前の鮮度確認・worktree での修正後・main での引き継ぎ更新後）はゲートとして正当。改善: [doc-size.md](../../.claude/project/doc-size.md) §3.1 と [profile.md](../../.claude/project/profile.md) §7 ルール7 の「`len()` で実測」を**超過分の削減にも適用する**と明記する（必要削減字数を先に出し、候補文の `len()` 差分の合計がそれを上回る組み合わせを**1回の編集で**当てる。1箇所ずつ削って測り直さない）
+
+## 2026-08-11 18:12 | session 6f7ef241 | 自動検出
+- シグナル: same-command('python scripts/check_doc_size.'×5, 'python scripts/check_branch_li'×3)
+- ターン概要: ツール99回・エラー1回・拒否0回。開始:「<command-message>next</command-message>」
+- 原因と改善案: `check_doc_size.py` 5回のうち3回は `next_session.md` §2 が H2 2,000字を超えた後の**目分量トリムの往復**（2,198→2,131→2,016→1,994）で、**16:25 のエントリと同一原因の再発**。前回の改善案（`len()` 実測を削減にも適用）は `doc-size.md` §3.1・`profile.md` §7 ルール7 に書いたが、`next`→工程スキルの経路ではどちらも読まないため届いていない。改善案: **[next.md](../../.claude/project/next.md) §4（引き継ぎ更新時のチェック）へ「書き換え前後の差分字数を `len()` で実測し、超過分の削減を同じ編集にまとめる」を1行追加する**（同§は既に `--sections` の事前実行を求めているので、その直後が置き場所）。`check_branch_list.py` 3回は worktree での追加後・マーカー重複解消後・統合後の確認で、うち統合後の1回は ff マージで内容が変わらないため省ける。
+
