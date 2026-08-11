@@ -22,7 +22,7 @@
 | 11 | 装備のステータス種別・値 | 離散一様 / 一様 | — | master/equipment.md |
 | 12 | HP吸収の付与 | 一様 `[0,1)` | `r < 0.10` | master/equipment.md |
 | 13 | アイテムドロップ | 一様 `[0,1)` | `r < rate` | [tech_data.md §1.2](../basic/tech_data.md) |
-| 14 | 酒場スカウト | 累積確率 | レアリティ順 | master_data §7.3 |
+| 14 | 酒場スカウト | 累積確率 | レアリティ順 | CHARACTERS_OVERVIEW §4.1 |
 | 15 | 装備製作（鍛冶屋・ランダム製作） | 離散一様 | ベース → 付与数 → ステータス種 の順 | [tech_forge/craft.md §4.1](tech_forge/craft.md) |
 
 **境界の統一規約**: 確率判定はすべて **`r < p`** とする（`r <= p` は使わない）。これにより `p = 0` は決して発生せず、`p = 1` は必ず発生する。

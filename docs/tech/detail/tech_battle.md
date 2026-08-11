@@ -92,7 +92,7 @@
 
 ```text
 def calc_final_stat(base, growth, lv, rarity_mult, limit_break_pct, rebirth_pct, equip_val, passive_pct, buff_pct, debuff_pct, env_pct):
-    raw = (base + growth * (lv - 1)) * rarity_mult          # ① 素ステータス × レアリティ倍率（master/character.md §7.2）
+    raw = (base + growth * (lv - 1)) * rarity_mult          # ① 素ステータス × レアリティ倍率（characters/CHARACTERS_OVERVIEW.md §2）
     enhanced = raw * (1 + limit_break_pct) * (1 + rebirth_pct)  # ② 限界突破・転生
     with_equip = enhanced + equip_val                        # ③ 装備（加算）
     with_passive = with_equip * (1 + passive_pct)            # ④ パッシブスキル（乗算）

@@ -74,8 +74,8 @@
 | `limit_break` | `INTEGER` | 不可 | `0` | 限界突破回数 |
 | `skill_points` | `INTEGER` | 不可 | `0` | 未使用SP |
 | `created_at` | `DATETIME(tz)` | 不可 | 現在時刻 | — |
-| `rarity` | `VARCHAR(20)` | 可 | — | **Phase 3・未実装**。`common` / `uncommon` / `rare` / `epic` / `legendary`。倍率は `master/character.md` §7.2 が正 |
-| `master_id` | `VARCHAR(50)` | 可 | — | **Phase 4・未実装**。マスターキャラのID（`hero_002` 等。`master/character.md` §7.1・§7.3 が正）。FKなし。同一キャラの判定（重複・限界突破）は `name` ではなくこの列で行う。Phase 3 以前に作られた行は NULL とし、Phase 4 の実装時に名前から補完する |
+| `rarity` | `VARCHAR(20)` | 可 | — | **Phase 3・未実装**。`common` / `uncommon` / `rare` / `epic` / `legendary`。倍率は `characters/CHARACTERS_OVERVIEW.md` §2 が正 |
+| `master_id` | `VARCHAR(50)` | 可 | — | **Phase 4・未実装**。マスターキャラのID（`hero_002` 等。`characters/` のタイプ別ファイル §3 が正）。FKなし。同一キャラの判定（重複・限界突破）は `name` ではなくこの列で行う。Phase 3 以前に作られた行は NULL とし、Phase 4 の実装時に名前から補完する |
 
 ## 5. `party_members`（Phase 3）
 

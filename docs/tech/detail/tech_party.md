@@ -1,6 +1,6 @@
 # AFK GAME — パーティ・スキル操作の処理仕様（Phase 3〜）
 
-> エンドポイント定義の正は [tech_api.md](../basic/tech_api.md)「パーティ・スキル」、状態×操作可否の正は [tech_state.md §4](tech_state.md)、データ構造は [tech_data.md](../basic/tech_data.md) と [er_diagram/player.md](../../diagrams/er_diagram/player.md)、数値の正は [master/character.md](../../data/master/character.md)・[skills/](../../data/skills/SKILLS_OVERVIEW.md)。
+> エンドポイント定義の正は [tech_api.md](../basic/tech_api.md)「パーティ・スキル」、状態×操作可否の正は [tech_state.md §4](tech_state.md)、データ構造は [tech_data.md](../basic/tech_data.md) と [er_diagram/player.md](../../diagrams/er_diagram/player.md)、数値の正は [master/character.md](../../data/master/character.md)・[CHARACTERS_OVERVIEW.md](../../data/characters/CHARACTERS_OVERVIEW.md)・[skills/](../../data/skills/SKILLS_OVERVIEW.md)。
 > エラーコードの体系は [tech_error_handling.md](../basic/tech_error_handling.md)。本書の各表に個別コードを定義する。
 
 ## 1. パーティ編成変更（PUT /api/party/edit）
@@ -25,9 +25,9 @@
 
 ## 2. キャラクター獲得（塔クリア報酬・tick処理内）
 
-階クリア処理で、確定入手キャラ（`master/character.md` §7.1）の入手条件（塔・階）に一致するかを判定する。
+階クリア処理で、確定入手キャラ（`characters/CHARACTERS_OVERVIEW.md` §3）の入手条件（塔・階）に一致するかを判定する。
 
-1. 対象階のクリア時、該当キャラを**未所持なら**付与する。初期状態は LV1・EXP0・SP0・スキル未習得・装備なし・HP=maxHP（加入時LV1 の根拠は `master/character.md` §7.1）
+1. 対象階のクリア時、該当キャラを**未所持なら**付与する。初期状態は LV1・EXP0・SP0・スキル未習得・装備なし・HP=maxHP（加入時LV1 の根拠は `characters/CHARACTERS_OVERVIEW.md` §3.1）
 2. 既所持（周回・再クリア）なら何もしない（Phase 3 に重複の概念はない。重複→限界突破素材は Phase 4 の酒場ガチャのみ）
 3. 付与してもパーティへ自動編入しない（控えとして加入。編成はプレイヤー操作）
 4. 戦闘ログに `type: "character_join"` の行を追加する（生JSON・snake_case。`tech_battle.md` §1）
