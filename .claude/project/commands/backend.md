@@ -35,7 +35,7 @@
 
 | ツール | 版・所在 | シェルへの反映 |
 |-------|---------|--------------|
-| JDK | Adoptium 17.0.20（`JAVA_HOME` = `C:\Program Files\Eclipse Adoptium\jdk-17.0.20.8-hotspot`） | **反映済み**。そのまま呼べる |
+| JDK | Adoptium 17.0.20（所在は `%JAVA_HOME%`） | **反映済み**。そのまま呼べる |
 | Maven | 3.9.11 | **反映済み**。`mvn` をそのまま呼べる |
 | Tomcat | 11.0.24（`%LOCALAPPDATA%\Programs\apache-tomcat-11.0.24`） | `CATALINA_HOME` はユーザー環境変数へ設定済みだが**既存シェルには未反映**。コマンド側で明示するかフルパスで呼ぶ |
 

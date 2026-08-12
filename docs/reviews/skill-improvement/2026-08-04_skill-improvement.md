@@ -66,7 +66,7 @@
 
 | 対象 | 内容 |
 |------|------|
-| `.claude/settings.local.json` | `Bash("c:/GIT/2026_AFKGAME/docs/tech_spec.md")` は誤承認由来の無意味な許可（対象ファイルも現存しない）。削除を推奨 |
+| `.claude/settings.local.json` | `Bash("<リポジトリルート>/docs/tech_spec.md")` は誤承認由来の無意味な許可（対象ファイルも現存しない）。削除を推奨 |
 | `.claude/settings.json` | `Bash` を包括許可しているため `Bash(find *)` は冗長。包括許可を続けるなら削除、絞るなら `Bash(python scripts/*)` 等へ置換を推奨 |
 
 ## 検証
