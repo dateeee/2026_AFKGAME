@@ -49,3 +49,9 @@
 - シグナル: same-read(next_session.md×2)
 - ターン概要: ツール125回・エラー2回・拒否0回。開始:「<command-message>next</command-message>」
 - 原因と改善案: `/next` 冒頭で読んだ `next_session.md` を worktree 統合後にそのまま Edit したため、並行セッション（`f30cdc7`）が消していた §2 行と食い違い、読み直しになった（`profile.md` §6 規律4「統合等でファイルが変わった場合」の例外には当たるが、順序で避けられる。1回目の Edit は古い読みのまま通っており、アンカー次第では他セッションの行を巻き込んでいた）。**`.claude/project/next.md` §4 へ「統合の直後・書き換える前に `next_session.md` を読み直す（並行セッションが §2 行を消していることがある）」を1行足す**のが最小の是正。
+
+## 2026-08-16 20:37 | session ba8894b9 | 自動検出
+- シグナル: same-read(next_session.md×2) / same-command('python scripts/check_branch_li'×3)
+- ターン概要: ツール92回・エラー2回・拒否0回。開始:「<command-message>next</command-message>」
+- 原因と改善案: 誤検出: `next_session.md` の再読は worktree 統合で main が進んだ後の再取得（並行セッションの `87f9a42`・`fef8870` が §2 行を消していた）で、`profile.md` §6 規律4 の除外かつ 20:10 エントリが提案した「統合の直後・書き換える前に読み直す」順序どおり。`check_branch_list.py`×3 もベースライン → §5 分割直後の構造検証 → テスト追加後のマーカー照合で、判定内容が毎回違う（分割だけ先に検証したので、テストを書く投資の前に構造の誤りを潰せている）。
+- 補足: **same-read(next_session.md×2) は 14:49・20:10 に続き3回目の誤検出**で、`/next` → 統合 → 引き継ぎ更新という**正しい手順を踏むと必ず出る**シグナルになっている。retro のたびに仕分ける手間を無くすため、`efficiency_check.py` の same-read 判定から `next_session.md` を除外する（または「統合コミットを挟んだ再読は数えない」）のが最小の是正。
