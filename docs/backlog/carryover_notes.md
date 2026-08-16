@@ -35,11 +35,13 @@
 - **`tech_numeric.md` §6「入力値の検証」2件は `PUT /api/game/settings` の Resource を作る回に消化する**（①-b で §5「丸め・クランプ・飽和」12件と分けた）
 - **`tech_offline.md` §7（期待値計算式・スキル/パッシブ依存）12行は Phase 3 の製造で Red へ展開する**（差し戻しの回で追加。Phase 1 の編成では到達しないためマーカーを付けておらず、`check_branch_list.py --tests` の照合対象外）。`skill_factor`・攻撃スキル2枠・範囲攻撃 `×0.7×敵数`・被ダメ軽減の実効上限0.8・挑発の按分・回復期待値の差し引きが対象
 - 獣の塔（`docs/data/towers/003_獣の塔.md`）をマスターデータへ追加する際、`FLOOR_CHARACTERS` へ `scout_001` ハヤテ（獣の塔10Fクリア。`characters/CHARACTERS_OVERVIEW.md` §3 の3体目）を足す。製造①では塔IDが未宣言で ID を発明しないため見送った（塔6〜8 のマスターデータ追加または STEP 5 へ合流させる）
+- **ボスラッシュ詳細設計（2026-08-16）の図への波及3件**は、いずれも diagrams-review 2026-08-11 の**未適用 ISSUE と同じ箇所**（`er_diagram/battle.md` の `best_wave_hp` 注釈＝ISSUE-708／`api_sequence/endgame.md` の終了・リタイア・ランキング＝ISSUE-702・704・705／`battle_flow/bossrush.md` の記録更新位置とリタイア経路＝ISSUE-701・703）。`fix-specs` で ISSUE-701〜708 をまとめて適用する回に一緒に消化する
+- **Phase 5 詳細設計の残り2件**（ボスラッシュは 2026-08-16 に完了。§2 の未作成3点のうち①②）: 転生 `tech_prestige.md`（3API・数値の正は `master/endgame.md` §16）と `docs/data/master/event_dungeon.md` §19。後者は `spec_ownership.md` §3 に正ファイルとして登録済みだが**ファイルが未作成**。§18.3 の 461F 再試算も未着手（今回は §15 のみ改訂）
 
 ## 3. 環境・ツール
 
+- **`check_schema_triple.py --note`（備考照合）は契機語と記録動詞が12字以内に隣接する句だけを拾う**。テーブル定義の備考へ「突破直後に…（長い条件）…更新する」と書くと契機語が抽出されず、ER図の注釈と食い違っても検出されない／別の語だけで赤になる。備考は**「<契機>直後に更新」を隣接させ、条件はそのあとに続ける**（2026-08-16 に `best_wave_hp` で実際に踏んだ）
 - **更新系 SQL の条件は実DBテストでしか検証されない**（サービス単体テストはモックで素通りする）。`AND used = FALSE` のような条件を足したら `RepositoryTestSupport` 継承の統合テストを同じコミットで足す
 - **統合テストでフィクスチャを直接書き換えるときは `WebIntegrationTestSupport#updateFixture` を通す**（`dataSource` が `defaultAutoCommit = false` のため、素の `jdbcTemplate.update` は更新件数が返るのに値が残らない）
 - **`check_java_conventions.py` の判定13（`--unused`）の現在値は WARN 6件**（`AuthSettings` 3・`GameSettings` 2・`LogKey.TOKEN`。13 → 7 は製造①-iii、7 → 6 は①-iv で読み手が付いたため）。ゼロを強制せず**増減だけ見る**
 - **境界ログのマスクが効かないパラメータが4件ある**（`logging/application.md` §3.1 規約1の固定表は `rawPassword` のみ一致し、`rawRefreshToken`・`rawToken`・`rawVerificationToken` は固定表の `refreshToken`/`token` と完全一致しないためマスクされない。`AuthServiceImpl#refresh`/`#logout`・`VerificationMailSenderImpl#send` 等の引数）。**固定表を拡張するかパラメータ名を揃えるかは規約側の決定が要る**ため、次に `logging/application.md` §3.1 を触るセッションで判断する
-- **`worktree_guide.md` §5 は H2 上限（2,000字）を構造的に超えている**（3,316字。ファイル全体は 6,718/8,000 で余裕あり）。§5.4「前提と注意」が肥大の主因なので、`doc-size` で **§5 を子ファイル（`worktree_guide/session.md` 等）へ分割**する。参照元の `profile.md` §8・`next.md`・`next_session.md` §0 が §5.1〜§5.4 を節番号で指すため**節番号は維持**すること。**着手は `.claude/project/**` の doc-size（`wt/docsize-claude-project`）の統合後**（参照元の `profile.md` が同 worktree の担当領域と重なる）

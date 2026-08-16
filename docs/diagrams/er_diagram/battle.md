@@ -28,7 +28,7 @@ erDiagram
         bigint accumulated_gold "累積獲得ゴールド"
         bigint accumulated_exp "累積獲得EXP"
         int best_wave "自己ベスト到達ウェーブ"
-        int best_wave_hp "ベスト更新ウェーブの突破直後の残HP合計 (タイブレーク用)"
+        int best_wave_hp "ベスト到達ウェーブの突破直後に更新する残HP合計 (タイブレーク用)"
     }
 
     BossRushMilestone {

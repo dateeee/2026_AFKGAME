@@ -35,7 +35,7 @@
 | `accumulated_gold` | `BIGINT` | 不可 | `0` | 進行中の挑戦の累積ゴールド。終了時に `players.gold` へ加算して 0 に戻す |
 | `accumulated_exp` | `BIGINT` | 不可 | `0` | 同じ扱いのEXP。全滅時も没収しない |
 | `best_wave` | `INTEGER` | 不可 | `0` | 自己ベスト到達ウェーブ。ランキングの順位指標 |
-| `best_wave_hp` | `INTEGER` | 不可 | `0` | ベスト到達時の残HP合計。同ウェーブのタイブレーク。`best_wave` を更新したウェーブの**突破直後に同時更新**する（全滅したウェーブは突破していないため対象外） |
+| `best_wave_hp` | `INTEGER` | 不可 | `0` | ベスト到達時の残HP合計。同ウェーブのタイブレーク。ウェーブの**突破直後に更新**し、`(wave, 残HP合計)` が `(best_wave, best_wave_hp)` を辞書順で上回るときだけ書き換える（`best_wave` 更新時は同時更新、同ウェーブ再到達時は本列のみ更新。全滅したウェーブは突破していないため対象外。更新規則の正は [tech_bossrush/wave.md §7](../../detail/tech_bossrush/wave.md)） |
 
 自己ベストを別テーブルに分けず同一行に置く。ランキング（`GET /api/boss-rush/ranking`）が1プレイヤー1行の走査で済み、挑戦の開始・終了で行を作り直す必要がなくなるため。
 

@@ -24,3 +24,8 @@
 ---
 
 （エントリなし）
+
+## 2026-08-16 13:42 | session d96e45a5 | 自動検出
+- シグナル: same-command('python scripts/check_docs.py'×3)
+- ターン概要: ツール101回・エラー2回・拒否0回。開始:「その作業は実施中だからほかの作業をして」
+- 原因と改善案: 3回のうち2回は別 worktree（`p5-detail-design` / `p5-erdiagram-note`）での正当な検証。残り1回は手戻りで、**`carryover_notes.md` へ申し送りを追記する前に残量を測らなかった**ため 8,205字で超過し、圧縮 → 再検証をやり直した（新規作成した `tech_bossrush` 側は測ってから書いたので超過なし）。`profile.md` §7 ルール7「書く前に残量を測る」は成果物だけでなく**申し送り・引き継ぎへの追記にも適用する**ものなので、規約の新設ではなく適用漏れ。`.claude/project/detail-design.md` §5（完了基準）へ「carryover_notes.md へ追記する場合も `--sections` で残量を測ってから書く」を1行足すのが最小の是正。
