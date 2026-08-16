@@ -147,15 +147,16 @@ class TowerServiceImplTest {
                 characterRepository);
     }
 
-    /** 通常塔（難易度なし）。{@code unlockTowerId} が null なら最初から解放。 */
+    /** 通常塔（難易度なし・環境効果なし）。{@code unlockTowerId} が null なら最初から解放。 */
     private static TowerData tower(String id, Integer totalFloors, String unlockTowerId) {
-        return new TowerData(id, id, "始まりのダンジョン", totalFloors, unlockTowerId, List.of());
+        return new TowerData(id, id, "始まりのダンジョン", totalFloors, unlockTowerId, List.of(),
+                List.of());
     }
 
     /** 難易度別エントリへ展開される塔（イベントダンジョン。Phase 5〜）。 */
     private static TowerData eventTower() {
         return new TowerData(EVENT_TOWER_ID, EVENT_TOWER_ID, "終焉のダンジョン",
-                EVENT_TOWER_FLOORS, null, DIFFICULTIES);
+                EVENT_TOWER_FLOORS, null, DIFFICULTIES, List.of());
     }
 
     private static TowerClearRecord record(String towerId, boolean cleared, int highestFloor) {

@@ -8,10 +8,9 @@ import com.afkgame.domain.model.TowerClearRecord;
  * {@code tower_clear_records} の Repository。
  *
  * <p>塔一覧（docs/tech/detail/tech_tower/list.md §5 手順1）と入塔の上限判定
- * （同 select.md §7 手順6）が使う読み取りのみを持つ。行の作成・更新は階クリア時に行うため
- * （tech_tower.md §2）、更新系は階進行を実装するセグメント②で追加する。
+ * （同 select.md §7 手順6）が使う読み取りと、階クリア時の作成・更新（同 progress.md §9 手順1）を持つ。
  *
- * <p><b>マッピング XML はテストリスト作成②-a では未作成。</b>本インタフェースは Red の
+ * <p><b>マッピング XML はテストリスト作成②-a・②-b では未作成。</b>本インタフェースは Red の
  * テストがモックする継ぎ目として置いてあり、{@code src/main/resources} 配下の
  * {@code TowerClearRecordRepository.xml} は製造②で書く。
  */
@@ -33,4 +32,25 @@ public interface TowerClearRecordRepository {
      * @return 該当する記録。未挑戦で行が無ければ null
      */
     TowerClearRecord findByPlayerIdAndTowerId(String playerId, String towerId);
+
+    /**
+     * クリア記録を登録する。
+     *
+     * <p>初めてその塔の階をクリアしたときに1回だけ呼ぶ（progress.md §9 手順1）。
+     * {@code highest_floor_at} は Phase 5 まで未実装のため書かない
+     * （列の正は docs/tech/basic/tech_db/player.md §3）。
+     *
+     * @param record 登録する記録
+     */
+    void save(TowerClearRecord record);
+
+    /**
+     * クリア記録の到達状況を更新する。
+     *
+     * <p>更新するのは {@code cleared} と {@code highest_floor} だけで、
+     * {@code player_id} / {@code tower_id} は一意キーとして検索条件に使う。
+     *
+     * @param record 更新する記録
+     */
+    void updateProgress(TowerClearRecord record);
 }
