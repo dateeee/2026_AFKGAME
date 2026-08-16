@@ -58,12 +58,10 @@
 
 | 検証項目 | 方法 |
 |---------|------|
-| DBスキーマ一致 | `python scripts/check_schema_triple.py`。`tech_db/`（正）↔ `er_diagram/` ↔ `afkgame-domain` の Entity ↔ Flyway DDL を、列名・並び順・PK/FK/UK タグ・一意制約・FKなし宣言・nullable・制約の命名規約・ER索引の7観点で照合する |
+| DBスキーマ一致 | `python scripts/check_schema_triple.py`。`tech_db/`（正）↔ `er_diagram/` ↔ `afkgame-domain` の Entity ↔ Flyway DDL を、列名・並び順・PK/FK/UK タグ・一意制約・FKなし宣言・nullable・**備考の記録時点**・制約の命名規約・ER索引の8観点で照合する |
 | 相対リンク切れ・索引到達性 | `python scripts/check_docs.py --links --reach` |
 | 文字数上限 | `python scripts/check_doc_size.py` |
-| コードフェンスの閉じ漏れ | ` ```mermaid ` と ` ``` ` の対応を数える（使い捨て） |
-| `end` の対応 | `subgraph` / `loop` / `alt` / `opt` と `end` の数を照合（使い捨て） |
-| ER図のリレーション整合 | リレーション両端のエンティティが定義済みか（使い捨て） |
+| Mermaid 構造 | `python scripts/check_mermaid.py`。フェンスの閉じ漏れ・`subgraph`/`loop`/`alt`/`opt`/`par` と `end` の対応・波括弧の対応・ER図リレーション両端の定義済み判定（`--fence` `--blocks` `--braces` `--relations` で個別実行）。**使い捨てで書き直さない**（`participant` の `par` 誤一致とカーディナリティ `\|\|--o{` の波括弧誤計上を除外規則として内蔵済み） |
 
 **常設スクリプトが解析するドキュメント行**（`check_schema_triple.py` のアンカー。書式を変えると照合が停止する）:
 

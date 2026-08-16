@@ -24,7 +24,8 @@
 | 分岐一覧の検証 | `python scripts/check_branch_list.py`（構造検証。`--tests` でテストとの対応照合） |
 | Java 規約チェック | `python scripts/check_java_conventions.py`（タブ・行長・import・ログ・DI・SQL・日時・乱数・マスク・未参照の13判定。`--format` 等で個別実行。避けられない箇所は `// 規約例外: <理由>` で抑止。未参照は WARN で exit code に算入しない） |
 | エラーコード一致 | `python scripts/check_error_codes.py`（`tech_error_handling.md` ↔ Web層の `ErrorCatalog`。欠落・余剰・ステータス不一致。`--summary` で件数のみ） |
-| DBスキーマ一致 | `python scripts/check_schema_triple.py`（定義書↔ER図↔models↔Flyway DDL。`--columns` `--tags` `--unique` `--nofk` `--nullable` `--naming` `--index` で個別実行） |
+| DBスキーマ一致 | `python scripts/check_schema_triple.py`（定義書↔ER図↔models↔Flyway DDL。`--columns` `--tags` `--unique` `--nofk` `--nullable` `--note` `--naming` `--index` で個別実行） |
+| Mermaid 構造チェック | `python scripts/check_mermaid.py`（フェンス・ブロックと `end`・波括弧・ER図リレーションの4判定。`--fence` `--blocks` `--braces` `--relations` で個別実行。**使い捨てで書き直さない**） |
 | 常設スクリプトの回帰テスト | `python -m pytest scripts/tests .claude/scripts/tests .claude/hooks/tests -q`（規約は [script-conventions.md](../references/script-conventions.md)） |
 | トークン使用量ログ | `logs/token_usage.csv`（Stop フックが自動更新。過去分は `python scripts/log_token_usage.py --all`） |
 | DB操作（起動中コンテナ） | `docker exec afkgame-postgres <cmd>`。**`docker compose exec` は使わない** — compose のプロジェクト名が cwd 由来で、worktree からは起動中コンテナを引けない（`container_name` は固定なので `docker exec` なら引ける） |
