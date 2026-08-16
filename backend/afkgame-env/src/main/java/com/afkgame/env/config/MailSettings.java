@@ -10,7 +10,8 @@ import java.time.Duration;
  * 組み立ては {@link com.afkgame.env.config.app.AfkgameSettingsConfig} が1か所で行う。
  *
  * <p>{@code smtpHost} が空文字のときは送信を行わず宛先と用途を INFO ログへ残すだけにする
- * （mail.md §16.2）。判定と送信は VerificationMailSenderImpl（{@code afkgame-domain}）が行い、
+ * （mail.md §16.2）。判定と送信は {@code VerificationMailSenderImpl}（{@code afkgame-domain} の
+ * {@code service.auth}）が行い、
  * 本 Bean は接続先・差出人・リンク生成元を渡す。
  *
  * @param smtpHost SMTP の接続先ホスト（{@code SMTP_HOST}）。未設定なら空文字

@@ -3,7 +3,7 @@
 > **使い方**: 新セッションの最初のメッセージで `/next` と送る（または §1 のコードブロックを貼り付ける）。**着手前に §0 を読む**。
 > 本ファイルは**ポインタ専用**。Phase 進捗の正は [development_process.md](../process/development_process.md) §5、書式の正は [.claude/project/next.md](../../.claude/project/next.md)、worktree 運用の正は [worktree_guide.md](../process/worktree_guide.md)。
 
-最終更新: 2026-08-16 / main `5376900`（**`worktree_guide.md` §5 の分冊化**。§5.1〜§5.4 を `worktree_guide/session.md` へ**節番号のまま**移して H2 超過3,377字を解消し、親 §5 は子への節リンク表だけの索引にした。参照元は節番号で指すため張り替えなし）。**同日、別セッションの成果2件も main に入っている**: Phase 5 詳細設計のボスラッシュ `tech_bossrush.md` + 分冊4件（`bbae6c8`。追随して `a8b0049` で ER図と定義書の `best_wave_hp` 注釈をそろえ、新設された `check_schema_triple.py --note` を exit 0 に戻した）と `spot-review` スキル（`c600c57`）。1つ前は main `3ca8262`（**diagrams-review 還元案3件の適用**。`check_mermaid.py` の新設・`check_schema_triple.py` への `--note` 追加・`fix-specs` のルール9）。詳細は [changelog.md](../changelog.md) の 2026-08-16 ブロック。
+最終更新: 2026-08-16 / main `5376900` の上に**申し送りメモの棚卸し**1件（`carryover_notes.md` の消化済み6行を削除、恒久知見3件を `coding_standards_backend/test.md` §1 と `.claude/project/basic-design.md` §4 へ移管、`java_migration.md` §4 の STEP 3 行を製造①完了までの実態へ更新。backend は `MailSettings` の Javadoc 1行のみ）。`5376900` 自体は **`worktree_guide.md` §5 の分冊化**（§5.1〜§5.4 を `worktree_guide/session.md` へ節番号のまま移し、親 §5 は子への節リンク表だけの索引に）。**同日、別セッションの成果2件も main に入っている**: Phase 5 詳細設計のボスラッシュ `tech_bossrush.md` + 分冊4件（`bbae6c8`。追随して `a8b0049` で ER図と定義書の `best_wave_hp` 注釈をそろえ、新設された `check_schema_triple.py --note` を exit 0 に戻した）と `spot-review` スキル（`c600c57`）。詳細は [changelog.md](../changelog.md) の 2026-08-16 ブロック。
 
 **製造①が残した前提**（セグメント②が上に積む）。
 
@@ -45,7 +45,7 @@ worktree を使う複数セッションが同時に走る前提。**着手状態
 /test-list 3-B テストリスト作成②-a（Phase 1: tower の一覧・入塔）: 分岐一覧を失敗するテストへ展開する
 完了条件: ①[tech_tower/list.md](../tech/detail/tech_tower/list.md) 9件・[select.md](../tech/detail/tech_tower/select.md) 15件の**計24件**を Red のテストへ展開し、両ファイルの分岐一覧へマーカーを付ける ②表層（インタフェース・record・Resource）は**テストクラスの Javadoc「製造工程への申し送り」へ書き**、本体は `UnsupportedOperationException` に留める（`@Service` は付けない＝前提2） ③`python scripts/check_branch_list.py --tests` 違反0・WARN 0 ④`mvn verify -Dmaven.test.failure.ignore=true` で **Red が24件だけ増え、結合88件 green・C1 の未達0** のままを確認する（Red がある回の見方は前文） ⑤`check_java_conventions.py` 違反0 ⑥main へ統合してコミットする
 参照: 上記2ファイルの分岐一覧（正）。書き方の手本は `BattleSimulatorImplTest`・`LapAnalyzerImplTest` の Javadoc、置き場は `domain.service.tower`（[common.md](../process/coding_standards_backend/common.md) §2.1）
-前提: main `5376900`。**Maven 3.9.11 は新規シェルで実行できるが、既定の `JAVA_HOME` は JDK 25.0.1（Microsoft）を指す**（2026-08-16 に `mvn -version` で実測。前回の「JDK 17.0.20 Temurin」は現在の PATH では見えない）。**Java 17 は `C:\Program Files\Eclipse Adoptium\jdk-17.0.7.7-hotspot`（Temurin 17.0.7・`java -version` で実行確認済み）にあるので、着手時に `$env:JAVA_HOME` をそこへ向けてから `mvn` を叩く**（JDK 25 のままでのビルド可否は未確認）。**単体378件・結合88件が全件 green（Red 0）・C1 100%（282/282）** が前回の実測値。`docs/backlog/open_specs.md` は不在＝未確定ゼロ。**worktree `3b-testlist-tower-a` を作って作業する**（`python scripts/worktree.py add 3b-testlist-tower-a`）
+前提: main `5376900` + 申し送り棚卸しコミット1件（ドキュメント中心。backend への影響なし）。**Maven 3.9.11 は新規シェルで実行できるが、既定の `JAVA_HOME` は JDK 25.0.1（Microsoft）を指す**（2026-08-16 に `mvn -version` で実測。前回の「JDK 17.0.20 Temurin」は現在の PATH では見えない）。**Java 17 は `C:\Program Files\Eclipse Adoptium\jdk-17.0.7.7-hotspot`（Temurin 17.0.7・`java -version` で実行確認済み）にあるので、着手時に `$env:JAVA_HOME` をそこへ向けてから `mvn` を叩く**（JDK 25 のままでのビルド可否は未確認）。**単体378件・結合88件が全件 green（Red 0）・C1 100%（282/282）** が前回の実測値。`docs/backlog/open_specs.md` は不在＝未確定ゼロ。**worktree `3b-testlist-tower-a` を作って作業する**（`python scripts/worktree.py add 3b-testlist-tower-a`）
 ```
 
 ## 2. 候補キュー（最大5行・優先順）

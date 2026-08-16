@@ -17,6 +17,8 @@
 | カバレッジのゲート | 親 POM に JaCoCo の branch しきい値100%が入っている。**追加した分岐はすべてテストで通す**（`mvn verify` の check で落ちる） |
 | 実行の分離 | surefire が `integration` を除外し、failsafe が `integration` だけを回す（**failsafe には `verify` ゴールを持たせる** — 無いと結合テストが失敗してもビルドが落ちない）。**C1（分岐カバレッジ）は単体テストだけで測る** |
 | パッケージ | 単体と統合をパッケージで分ける（[profile.md](../../../.claude/project/profile.md) §2） |
+| 更新系 SQL の条件 | **実DBテストでしか検証されない**（サービス単体テストはモックで素通りする）。`AND used = FALSE` のような条件を足したら `RepositoryTestSupport` 継承の統合テストを**同じコミットで**足す |
+| フィクスチャの書き換え | 統合テストで直接書き換えるときは `WebIntegrationTestSupport#updateFixture` を通す（`dataSource` が `defaultAutoCommit = false` のため、素の `jdbcTemplate.update` は更新件数が返るのに値が残らない） |
 
 ## 2. 記述規約
 
