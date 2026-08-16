@@ -66,9 +66,9 @@
 
 ### POST /api/shop/buy
 
-`dailySlotIndex`（整数 0〜4）を追加する。日替わり購入時のレスポンスは購入後のゴールドと、付与した装備を返す。
+`dailySlotIndex`（整数 0〜4）を追加する。日替わり購入時のレスポンスは購入後のゴールドと、付与した装備を返す（`gold` は文字列。理由は [tech_data.md](../basic/tech_data.md) §1.1）。
 
 ```json
-{ "status": "ok", "gold": 8500, "equipment": { /* 付与した装備1件 */ } }
+{ "status": "ok", "gold": "8500", "equipment": { /* 付与した装備1件 */ } }
 ```
 

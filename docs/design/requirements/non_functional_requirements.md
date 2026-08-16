@@ -47,7 +47,7 @@
 | アイテム・装備の所持枠 | 倉庫LVによる上限あり | [systems/economy.md](../systems/economy.md) |
 | ポーション所持数 | 種類ごと99個 | `systems/battle.md` |
 | リフレッシュトークン | 有効期限30日 | [tech_auth.md](../../tech/detail/tech_auth.md) |
-| アプリケーションログ | 保持30日 | [tech_logging.md](../../tech/basic/tech_logging.md) |
+| アプリケーションログ | 保持14日 | [coding_standards_backend/logging.md §1](../../process/coding_standards_backend/logging.md) |
 
 - **上限のないデータを新設しない**。新しいテーブルには必ず「1プレイヤーあたりの上限」または「保持期間」を定義し、本表に追記する
 - 1プレイヤーあたりのサイズ見積りとDB移行の判断ラインは `tech_performance.md` §10.3

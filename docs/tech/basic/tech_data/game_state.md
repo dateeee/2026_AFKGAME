@@ -11,7 +11,7 @@
 {
   "player": {
     "id": "uuid-string",
-    "gold": 1500,
+    "gold": "1500",                    // 64bit。精度保持のため文字列（親 §1.1）
     "currentTowerId": "goblin_tower",  // null = 塔外待機中
     "currentFloor": 3,                 // null = 塔外待機中（currentTowerIdと連動）
     "targetFloor": 10,                 // null = 塔外待機中

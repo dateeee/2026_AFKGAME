@@ -67,4 +67,4 @@
 | 100件超の古いログを削除する | 同上 | 同上。削除は同じ走査結果を使う |
 | プレイヤーのボスラッシュ状態を引く | `boss_rush_states.player_id`（UNIQUE） | 充足 |
 | 到達済みマイルストーンを引く | `uq_boss_rush_milestones_state_wave` | 充足（左端が `boss_rush_state_id`） |
-| ランキング上位100件を `best_wave` 降順で引く | なし（全行走査 + ソート） | 全プレイヤー横断クエリの1つで（もう1本は [player.md](player.md) §9 の深淵の塔ランキング）、行数が利用者数に比例する。(`best_wave`, `best_wave_hp`) の複合インデックス追加は `tech_db.md` §6-3 の再評価ラインで判断する |
+| ランキング上位100件を `best_wave` 降順で引く | なし（全行走査 + ソート） | 全プレイヤー横断クエリの1つで（もう1本は [player.md](player.md) §5 の深淵の塔ランキング）、行数が利用者数に比例する。(`best_wave`, `best_wave_hp`) の複合インデックス追加は `tech_db.md` §6-3 の再評価ラインで判断する |
