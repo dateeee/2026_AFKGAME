@@ -1,0 +1,104 @@
+# AFK GAME — 敵のマスターデータ
+#
+# 列の正は docs/data/towers/000_テンプレート.md §2、数値の正は各塔ファイル §2。
+# スキーマの正は com.afkgame.domain.masterdata.EnemyData（制約違反は起動時に検出して起動を中止する）。
+# 敵データはグローバル定義で、塔ごとの所属情報は持たない。どの階に出るかは塔側の
+# エンカウントプールが enemyId で参照する（docs/tech/basic/tech_data.md §1.2）。
+# critRate は味方と供給元を分ける決まりのため敵側はここが正で、Phase 1 の既定は基礎値 0.05
+# （tech_rng.md §6。味方側は character_types.yml の critRate 列）。
+# 未知のキーは起動時に弾かれるため、先回りしてキーを足さないこと。
+#
+# 載せるのは対象 Phase までの塔の敵だけとし、Phase 2 以降の塔の敵は該当 Phase で足す
+# （.claude/project/profile.md §5 不変条件5「Phase 厳守」）。
+
+# --- 001 ゴブリンの塔（Phase 1）: docs/data/towers/001_ゴブリンの塔.md §2 ---
+- id: slime
+  name: スライム
+  level: 1
+  hp: 20
+  atk: 5
+  def: 2
+  spd: 3
+  gold: 5
+  exp: 10
+  critRate: 0.05
+- id: goblin
+  name: ゴブリン
+  level: 2
+  hp: 35
+  atk: 8
+  def: 4
+  spd: 5
+  gold: 8
+  exp: 18
+  critRate: 0.05
+- id: wolf
+  name: オオカミ
+  level: 3
+  hp: 30
+  atk: 12
+  def: 3
+  spd: 8
+  gold: 10
+  exp: 22
+  critRate: 0.05
+- id: goblin_archer
+  name: ゴブリンアーチャー
+  level: 4
+  hp: 40
+  atk: 14
+  def: 5
+  spd: 7
+  gold: 12
+  exp: 28
+  critRate: 0.05
+- id: dire_wolf
+  name: ダイアウルフ
+  level: 6
+  hp: 60
+  atk: 18
+  def: 8
+  spd: 10
+  gold: 18
+  exp: 40
+  critRate: 0.05
+- id: hobgoblin
+  name: ホブゴブリン
+  level: 8
+  hp: 90
+  atk: 22
+  def: 12
+  spd: 7
+  gold: 25
+  exp: 55
+  critRate: 0.05
+- id: wolf_leader
+  name: ウルフリーダー
+  level: 9
+  hp: 100
+  atk: 25
+  def: 10
+  spd: 12
+  gold: 30
+  exp: 65
+  critRate: 0.05
+- id: goblin_shaman
+  name: ゴブリンシャーマン
+  level: 10
+  hp: 80
+  atk: 28
+  def: 8
+  spd: 9
+  gold: 28
+  exp: 60
+  critRate: 0.05
+- id: goblin_king
+  name: ゴブリンキング
+  level: 12
+  hp: 200
+  atk: 32
+  def: 16
+  spd: 8
+  gold: 80
+  exp: 150
+  critRate: 0.05

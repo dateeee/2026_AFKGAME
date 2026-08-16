@@ -100,7 +100,7 @@ class BattleSimulatorImplTest {
 
     private static final String PLAYER_ID = "player_001";
 
-    private static final String TOWER_ID = "tower_goblin";
+    private static final String TOWER_ID = "goblin_tower";
 
     private static final String ENEMY_ID = "enemy_goblin";
 

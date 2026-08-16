@@ -105,11 +105,11 @@ import com.afkgame.domain.repository.TowerClearRecordRepository;
  *       {@code TOWER_NOT_FOUND} だけ {@code ResourceNotFoundException}、ほかは
  *       {@code BusinessException} に {@code ResultMessages.error().add(code)} でコードだけを載せる。
  *       HTTP ステータスは Web 層の対応表が決めるので<b>ドメインは持たない</b></li>
- *   <li><b>塔IDの表記は未確定</b>。本クラスの {@code tower_goblin} 等は既存テスト
- *       （{@code BattleSimulatorImplTest} ほか）に合わせたフィクスチャ値で、
- *       tech_data.md §1.4 の例は {@code goblin_tower}、endgame.md は {@code abyss_tower} と
- *       食い違う。<b>{@code towers.yml} を書く製造②で表記をそろえ、既存テストの定数も
- *       同じ回で追随させる</b></li>
+ *   <li><b>塔IDの表記はテーマ名 + {@code _tower}</b>（製造②-i で確定）。仕様書・設計図・
+ *       フロントが {@code goblin_tower} / {@code forest_tower} / {@code abyss_tower} で
+ *       一貫していたため、そちら側を正としてテストのフィクスチャ値を追随させた
+ *       （tech_data.md §1.4・master/endgame.md §18・er_diagram/battle.md）。
+ *       {@code towers.yml} も同じ表記で書いてある</li>
  *   <li>Phase 5〜 の行（list.md #8・#9、select.md #9・#10）は<b>マスターデータの形だけで
  *       分岐する</b>ように実装する。深淵の塔は {@code totalFloors = null} の null 分岐、
  *       イベントダンジョンは {@code difficulties} が空かどうかの分岐で表し、
@@ -124,10 +124,10 @@ class TowerServiceImplTest {
     private static final String PLAYER_ID = "player_001";
 
     /** Phase 1 の塔（最初から解放・全20階）。 */
-    private static final String TOWER_ID = "tower_goblin";
+    private static final String TOWER_ID = "goblin_tower";
 
     /** Phase 2 の塔（{@link #TOWER_ID} のボス討伐で解放・全30階）。 */
-    private static final String NEXT_TOWER_ID = "tower_forest";
+    private static final String NEXT_TOWER_ID = "forest_tower";
 
     /** 深淵の塔（Phase 5〜）。IDの正は docs/data/master/endgame.md §18。 */
     private static final String ABYSS_TOWER_ID = "abyss_tower";

@@ -99,7 +99,7 @@ class BattleServiceImplTest {
 
     private static final String PLAYER_ID = "player_001";
 
-    private static final String TOWER_ID = "tower_goblin";
+    private static final String TOWER_ID = "goblin_tower";
 
     /**
      * 設定値は {@code afkgame.properties} の既定と同じ（tech_backend.md §4.2）。

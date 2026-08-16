@@ -88,6 +88,6 @@
 | 敵 | `EnemyData` の `critRate` 列（[towers/000_テンプレート.md](../../data/towers/000_テンプレート.md) §2） | 同クラスが `Enemies` 経由で読む |
 
 - Phase 3〜 はキャラクターごとの `crit_rate`（装備・スキルの合算）を参照し、合算値の上限100%は `StatCalculator#effectiveCritRate` が受け持つ
-- 敵側の YAML（`enemies.yml`）は塔マスターデータを載せるセグメント②で追加する（列と読み手は実装済み）
+- 敵側の YAML（`enemies.yml`）は Phase 1 の塔の敵9種を載せてあり、値の正は [towers/001_ゴブリンの塔.md](../../data/towers/001_ゴブリンの塔.md) §2（Phase 2 以降の塔の敵は該当 Phase で足す）
 
 §2 のインスタンス注入は Java 側で実装済み（`com.afkgame.domain.rng.RandomFactory`）。1リクエストにつき1つ生成し、戦闘・エンカウント・ドロップ・装備生成へ引き渡す。

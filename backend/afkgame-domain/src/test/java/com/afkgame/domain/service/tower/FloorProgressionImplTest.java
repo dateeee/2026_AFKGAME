@@ -105,7 +105,7 @@ class FloorProgressionImplTest {
     private static final String PLAYER_ID = "player_001";
 
     /** Phase 1 の塔。表記の正は製造②の {@code towers.yml}（②-a の申し送り）。 */
-    private static final String TOWER_ID = "tower_goblin";
+    private static final String TOWER_ID = "goblin_tower";
 
     private static final int TOTAL_FLOORS = 20;
 

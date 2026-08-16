@@ -89,9 +89,9 @@ class TowerSelectResourceTest {
         @CsvSource(nullValues = "null", value = {
             "null,         1, auto_repeat",     // towerId 欠落
             "'',           1, auto_repeat",     // towerId が空文字
-            "tower_goblin, null, auto_repeat",  // targetFloor 欠落
-            "tower_goblin, 0, auto_repeat",     // targetFloor が下限（1）未満
-            "tower_goblin, 1, repeat_forever",  // mode が2値以外
+            "goblin_tower, null, auto_repeat",  // targetFloor 欠落
+            "goblin_tower, 0, auto_repeat",     // targetFloor が下限（1）未満
+            "goblin_tower, 1, repeat_forever",  // mode が2値以外
         })
         void test_必須と値域の違反を検出する(String towerId, Integer targetFloor, String mode) {
             var violations = validate(new TowerSelectResource(towerId, targetFloor, mode, null));
@@ -106,7 +106,7 @@ class TowerSelectResourceTest {
          */
         @Test
         void test_適合していれば違反が無くmodeの省略は自動周回になる() {
-            var resource = new TowerSelectResource("tower_goblin", 1, null, null);
+            var resource = new TowerSelectResource("goblin_tower", 1, null, null);
 
             assertThat(validate(resource)).isEmpty();
             assertThat(resource.mode()).isEqualTo("auto_repeat");

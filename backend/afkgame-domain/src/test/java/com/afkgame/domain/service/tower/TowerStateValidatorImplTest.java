@@ -66,7 +66,7 @@ class TowerStateValidatorImplTest {
 
     private static final String PLAYER_ID = "player_001";
 
-    private static final String TOWER_ID = "tower_goblin";
+    private static final String TOWER_ID = "goblin_tower";
 
     private static final String ENEMY_ID = "enemy_goblin";
 
@@ -119,13 +119,13 @@ class TowerStateValidatorImplTest {
         @ParameterizedTest(name = "{5}")
         @CsvSource(nullValues = "null", value = {
             // 塔の対: 3列は同時に null か同時に非 null（現在階だけが欠けている）
-            "tower_goblin, null, 5,    null,         null, 塔IDがあるのに現在階がない",
+            "goblin_tower, null, 5,    null,         null, 塔IDがあるのに現在階がない",
             // 敵の対: 敵IDと残HPは同時に null か同時に非 null
-            "tower_goblin, 3,    5,    enemy_goblin, null, 敵IDがあるのに残HPがない",
+            "goblin_tower, 3,    5,    enemy_goblin, null, 敵IDがあるのに残HPがない",
             // 敵の従属: 敵がいるなら塔にいる
             "null,         null, null, enemy_goblin, 30,   塔外なのに敵がいる",
             // 階の範囲: 1 ≤ currentFloor
-            "tower_goblin, 0,    5,    null,         null, 現在階が1未満",
+            "goblin_tower, 0,    5,    null,         null, 現在階が1未満",
         })
         void test_不変条件に違反した進行状態は例外になる(String towerId, Integer currentFloor,
                 Integer targetFloor, String enemyId, Integer enemyHp, String description) {

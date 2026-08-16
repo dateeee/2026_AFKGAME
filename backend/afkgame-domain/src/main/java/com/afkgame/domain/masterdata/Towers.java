@@ -1,20 +1,42 @@
 package com.afkgame.domain.masterdata;
 
 import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * 塔のマスターデータを保持するレジストリ。
  *
- * <p>数値の正は docs/data/towers/TOWERS_OVERVIEW.md「塔一覧」。
- *
- * <p><b>本クラスはテストリスト作成②-a で用意した表層であり、レジストリ本体は未実装。</b>
- * YAML（{@code masterdata/towers.yml}）の読み込みと {@code @Component} 登録は、階層データを
- * 作る製造②（tower。docs/backlog/java_migration.md STEP 3-B）で {@link Items} と同じ形に
- * そろえる。YAML が無いまま {@code @Component} を付けると、起動時ローダが読み込みに失敗して
- * アプリケーションコンテキストが起動しなくなるため、登録は本体と同じ回に行う
- * （{@link Enemies} と同じ理由）。
+ * <p>数値の正は docs/data/towers/TOWERS_OVERVIEW.md「塔一覧」。起動時に一度だけ YAML を
+ * 読み込み、以降は不変 Map として公開する（docs/tech/basic/tech_structure.md §2「masterdata/」）。
+ * 読み込みに失敗した場合は Bean 生成が失敗し、アプリケーションは起動しない。
  */
+@Component
 public class Towers {
+
+    /** マスターデータ本体（{@code afkgame-domain} の {@code src/main/resources} 配下）。 */
+    private static final String RESOURCE_PATH = "masterdata/towers.yml";
+
+    private final Map<String, TowerData> towers;
+
+    /** コンストラクタが2つあるため、DI に使う側を {@code @Autowired} で明示する。 */
+    @Autowired
+    public Towers(MasterDataLoader loader) {
+        this(loader, RESOURCE_PATH);
+    }
+
+    /**
+     * 読み込み元を指定して構築する。異常系フィクスチャを読ませるテスト専用。
+     *
+     * @param loader       マスターデータローダ
+     * @param resourcePath クラスパス上の YAML
+     * @throws MasterDataException リソース不在・パース失敗・空・スキーマ違反・ID重複のいずれか
+     */
+    Towers(MasterDataLoader loader, String resourcePath) {
+        this.towers = loader.load(resourcePath, TowerData.class, TowerData::id);
+    }
 
     /**
      * 塔IDでマスターデータを取得する。
@@ -23,7 +45,7 @@ public class Towers {
      * @return 該当する塔データ。定義が無ければ null
      */
     public TowerData get(String towerId) {
-        throw new UnsupportedOperationException("製造②（tower マスターデータ）で実装する");
+        return towers.get(towerId);
     }
 
     /**
@@ -35,6 +57,6 @@ public class Towers {
      * @return 塔データの一覧
      */
     public List<TowerData> all() {
-        throw new UnsupportedOperationException("製造②（tower マスターデータ）で実装する");
+        return List.copyOf(towers.values());
     }
 }

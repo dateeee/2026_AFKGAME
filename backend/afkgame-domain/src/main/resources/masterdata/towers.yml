@@ -1,0 +1,22 @@
+# AFK GAME — 塔のマスターデータ
+#
+# 数値の正は docs/data/towers/TOWERS_OVERVIEW.md「塔一覧」と各塔ファイル §1 基本情報。
+# スキーマの正は com.afkgame.domain.masterdata.TowerData（制約違反は起動時に検出して起動を中止する）。
+# 記載順がそのまま塔一覧APIの応答順になる（docs/tech/detail/tech_tower/list.md §5 手順2）。
+# 塔IDの表記は {テーマ}_tower（docs/tech/basic/tech_data.md §1.4・design/systems/endgame.md の
+# abyss_tower と同じ形）。
+# unlockTowerId が null なら最初から解放、totalFloors が null なら階数無限（深淵の塔。Phase 5〜）。
+# difficulties が空でないものだけがイベントダンジョン（Phase 5〜）。
+# 各階のエンカウント定義（floorEncounters）は FloorCatalog を作る回に足す。未知のキーは
+# 起動時に弾かれるため、先回りしてキーを足さないこと。
+#
+# 載せるのは対象 Phase までの塔だけとし、Phase 2 以降の塔は該当 Phase で足す
+# （.claude/project/profile.md §5 不変条件5「Phase 厳守」）。
+
+- id: goblin_tower
+  name: ゴブリンの塔
+  dungeonName: 始まりのダンジョン
+  totalFloors: 20
+  unlockTowerId: # ゲーム開始時から解放
+  difficulties: []
+  modifiers: []

@@ -77,7 +77,7 @@ class LapAnalyzerImplTest {
 
     private static final String PLAYER_ID = "player_001";
 
-    private static final String TOWER_ID = "tower_goblin";
+    private static final String TOWER_ID = "goblin_tower";
 
     private static final String POTION_ID = "hp_potion";
 
