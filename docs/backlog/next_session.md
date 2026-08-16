@@ -3,7 +3,9 @@
 > **使い方**: 新セッションの最初のメッセージで `/next` と送る（または §1 のコードブロックを貼り付ける）。**着手前に §0 を読む**。
 > 本ファイルは**ポインタ専用**。Phase 進捗の正は [development_process.md](../process/development_process.md) §5、書式の正は [.claude/project/next.md](../../.claude/project/next.md)、worktree 運用の正は [worktree_guide.md](../process/worktree_guide.md)。
 
-最終更新: 2026-08-16 / main `5376900` の上に**申し送りメモの棚卸し**1件（`carryover_notes.md` の消化済み6行を削除、恒久知見3件を `coding_standards_backend/test.md` §1 と `.claude/project/basic-design.md` §4 へ移管、`java_migration.md` §4 の STEP 3 行を製造①完了までの実態へ更新。backend は `MailSettings` の Javadoc 1行のみ）。`5376900` 自体は **`worktree_guide.md` §5 の分冊化**（§5.1〜§5.4 を `worktree_guide/session.md` へ節番号のまま移し、親 §5 は子への節リンク表だけの索引に）。**同日、別セッションの成果2件も main に入っている**: Phase 5 詳細設計のボスラッシュ `tech_bossrush.md` + 分冊4件（`bbae6c8`。追随して `a8b0049` で ER図と定義書の `best_wave_hp` 注釈をそろえ、新設された `check_schema_triple.py --note` を exit 0 に戻した）と `spot-review` スキル（`c600c57`）。詳細は [changelog.md](../changelog.md) の 2026-08-16 ブロック。
+最終更新: 2026-08-16 / main `d52daea`（**申し送りメモの棚卸し**。消化済み6行を削除し、恒久知見3件を [coding_standards_backend/test.md](../process/coding_standards_backend/test.md) §1 と [basic-design.md](../../.claude/project/basic-design.md) §4 の正へ移した。backend は `MailSettings` の Javadoc 1行のみ）。同日は他セッションの成果も main に入っている（Phase 5 ボスラッシュ詳細設計 / `spot-review` スキル新設 / backend-review 還元案3件の常設化 / `worktree_guide.md` §5 の分冊化）。**履歴の正は [changelog.md](../changelog.md) の 2026-08-16 ブロック**なので、本ファイルへ積み増さない。
+
+**いまの位置**: Java 移行の残りは **3-B（Phase 1: tower）→ 4（Phase 2）→ 5（Phase 3）→ 6（切替と後始末）**（順序の正は [carryover_notes.md](carryover_notes.md) §1、手順・進捗の正は [java_migration.md](java_migration.md)、STEP の定義は [steps.md](java_migration/steps.md)「STEP 3〜5」）。**3-B は詳細設計・テストリスト作成①（game / battle）・製造①（①-i〜①-iv）まで完了**で、残るのは**テストリスト作成②（tower）→ 製造②**。**Phase 1〜3 の機能はどの言語でも未実装の期間**（E2E はハーネスと `GET /health` まで疎通済みで、テスト本体は STEP 5 完了まで赤が正常）。
 
 **製造①が残した前提**（セグメント②が上に積む）。
 
@@ -12,15 +14,20 @@
 | 1 | **本体が `UnsupportedOperationException` のまま残るのは `CharacterGrowth#applyLevelUp` だけ**（`addExp` は上限判定と加算のみ）。到達側の分岐が一覧に無く、ステータス再計算に要る成長率も `character_types.yml` が未搭載のため。分岐の正は `tech_party.md` §6（SP獲得3件・マーカー無し）＝**テストリスト工程が要る** |
 | 2 | **`@Service` を付けられるのはセグメント②**。`BattleSimulator` は `FloorProgression`・`Enemies`、`LapAnalyzer` は `FloorCatalog` を注入するため、実体が無いままスキャンに載せると**結合テストのコンテキスト起動が壊れる**（`@Transactional` は `BattleServiceImpl` へ付与済み） |
 | 3 | **敵の `enemies.yml` はセグメント②で載せる**（`critRate` 列を含む。味方側 `character_types.yml` は配線済みで [tech_rng.md](../tech/detail/tech_rng.md) §6 が供給元の正） |
-| 4 | **`check_java_conventions.py` は 違反0 / WARN 6 が現在の正常値**。ゼロを強制せず増減だけ見る（判定13 は pom の依存・更新系 Repository の戻り値まで見る。新しい依存を足す回は `DEPENDENCY_IMPORTS` への登録が要る） |
-| 5 | 表層の正は各テストクラスの Javadoc「製造工程への申し送り」。**そこに無い名前を新設しない** |
-| 6 | **詳細設計の「Java 実装時に満たすこと」節は全解消**（`tech_tick.md` §6 は節ごと削除、`tech_rng.md` §6 は恒久の節へ書き換え）。`steps.md`「移植時にあわせて処理するもの」も更新済み |
+| 4 | **表層の正は各テストクラスの Javadoc「製造工程への申し送り」**。そこに無い名前を新設しない |
 
-**Java 移行の残りは 3-B（Phase 1: tower）→ 4（Phase 2）→ 5（Phase 3）→ 6（切替と後始末）**（順序の正は [carryover_notes.md](carryover_notes.md) §1、手順・進捗の正は [java_migration.md](java_migration.md)、STEP の定義は [steps.md](java_migration/steps.md)「STEP 3〜5」）。**3-B は詳細設計・テストリスト作成①（game / battle）・製造①（①-i〜①-iv）まで完了**で、残るのはテストリスト作成②（tower）→ 製造②。**Phase 1〜3 の機能はどの言語でも未実装の期間**（E2E はハーネスと `GET /health` まで疎通済みで、テスト本体は STEP 5 完了まで赤が正常）。
+**現況の実測値**（2026-08-16）。
 
-**テストの現況**: 単体378件・結合88件が**全件 green（Red 0）**、**C1 は 100%（282/282・未達0）**。Red が無くなったので **`report_java_tests.py --run` がそのまま使える**（既定は `-DskipITs`。結合まで見るなら `--run --it`）。**Red を作る回（テストリスト工程）は再び `mvn verify -Dmaven.test.failure.ignore=true`** で見る — surefire の失敗で止まると failsafe が走らず結合の退行が見えないため（**PowerShell では `-D...=...` を引用符で囲む**。囲まないと引数が割れて `Unknown lifecycle phase` で即死する）。**常設スクリプトの回帰テストは全件 green**（`python -m pytest scripts/tests -q` = 509件・2026-08-16 実測。`.claude/scripts/tests` `.claude/hooks/tests` まで含めると602件）で、`scripts/**` を変更するタスクはこれを退行検出の網に使う。**Mermaid 構文は `python scripts/check_mermaid.py` が常設**（使い捨てで書き直さない）。
-
-**分岐一覧へ行を足すセッションは、同じセッションで対応する Red まで足す**（①-b で判明）。マーカーが付いている一覧に行だけ足すと `check_branch_list.py --tests` が「行 #N に対応するテストがない」で ERROR になり、次セッションの着手判定が止まる。**行は必ず末尾へ追加する**（途中挿入は既存マーカーの番号を全部ずらす）。
+| 対象 | 値・見方 |
+|------|---------|
+| Java テスト | 単体378件・結合88件が**全件 green（Red 0）**、**C1 は 100%（282/282・未達0）** |
+| Red が無い回 | `python scripts/report_java_tests.py --run` をそのまま使える（既定は `-DskipITs`。結合まで見るなら `--run --it`） |
+| **Red を作る回**（テストリスト工程） | `mvn verify "-Dmaven.test.failure.ignore=true"` で見る。surefire の失敗で止まると failsafe が走らず結合の退行が見えないため。**PowerShell では `-D...=...` を引用符で囲む**（囲まないと引数が割れて `Unknown lifecycle phase` で即死する） |
+| ビルド環境 | Maven 3.9.11 / `JAVA_HOME` は Temurin **17.0.20**（`C:\Program Files\Eclipse Adoptium\jdk-17.0.20.8-hotspot`）。Adoptium 配下はこの1本のみで、**新規シェルで `mvn` をそのまま叩ける**（PowerShell の `mvn -version` で実測） |
+| 常設スクリプト | `python -m pytest scripts/tests -q` = 509件が全件 green（`.claude/scripts/tests` `.claude/hooks/tests` まで含めると602件）。`scripts/**` を変更する回はこれを退行検出の網に使う |
+| Java 規約 | `check_java_conventions.py` は **違反0 / WARN 6 が正常値**。ゼロを強制せず増減だけ見る（内訳は carryover §3。新しい依存を足す回は `DEPENDENCY_IMPORTS` への登録が要る） |
+| Mermaid | `python scripts/check_mermaid.py` が常設（使い捨てで書き直さない） |
+| 未確定仕様 | `docs/backlog/open_specs.md` は不在＝ゼロ |
 
 **レビュー指摘の「既存テストへの影響」は鵜呑みにしない**（反映①②の学び）。**着手前に対象を `grep` して読み手を数える**（指摘どおり直すと既存の分岐一覧が代替なしで落ちることがある）。
 
@@ -43,9 +50,9 @@ worktree を使う複数セッションが同時に走る前提。**着手状態
 
 ```
 /test-list 3-B テストリスト作成②-a（Phase 1: tower の一覧・入塔）: 分岐一覧を失敗するテストへ展開する
-完了条件: ①[tech_tower/list.md](../tech/detail/tech_tower/list.md) 9件・[select.md](../tech/detail/tech_tower/select.md) 15件の**計24件**を Red のテストへ展開し、両ファイルの分岐一覧へマーカーを付ける ②表層（インタフェース・record・Resource）は**テストクラスの Javadoc「製造工程への申し送り」へ書き**、本体は `UnsupportedOperationException` に留める（`@Service` は付けない＝前提2） ③`python scripts/check_branch_list.py --tests` 違反0・WARN 0 ④`mvn verify -Dmaven.test.failure.ignore=true` で **Red が24件だけ増え、結合88件 green・C1 の未達0** のままを確認する（Red がある回の見方は前文） ⑤`check_java_conventions.py` 違反0 ⑥main へ統合してコミットする
+完了条件: ①[tech_tower/list.md](../tech/detail/tech_tower/list.md) 9件・[select.md](../tech/detail/tech_tower/select.md) 15件の**計24件**を Red のテストへ展開し、両ファイルの分岐一覧へマーカーを付ける ②表層（インタフェース・record・Resource）は**テストクラスの Javadoc「製造工程への申し送り」へ書き**、本体は `UnsupportedOperationException` に留める（`@Service` は付けない＝前提2） ③`python scripts/check_branch_list.py --tests` 違反0・WARN 0 ④`mvn verify "-Dmaven.test.failure.ignore=true"` で **Red が24件だけ増え、結合88件 green・C1 の未達0** のままを確認する（Red がある回の見方は前文） ⑤`check_java_conventions.py` 違反0 ⑥main へ統合してコミットする
 参照: 上記2ファイルの分岐一覧（正）。書き方の手本は `BattleSimulatorImplTest`・`LapAnalyzerImplTest` の Javadoc、置き場は `domain.service.tower`（[common.md](../process/coding_standards_backend/common.md) §2.1）
-前提: main `5376900` + 申し送り棚卸しコミット1件（ドキュメント中心。backend への影響なし）。**Maven 3.9.11 は新規シェルで実行できるが、既定の `JAVA_HOME` は JDK 25.0.1（Microsoft）を指す**（2026-08-16 に `mvn -version` で実測。前回の「JDK 17.0.20 Temurin」は現在の PATH では見えない）。**Java 17 は `C:\Program Files\Eclipse Adoptium\jdk-17.0.7.7-hotspot`（Temurin 17.0.7・`java -version` で実行確認済み）にあるので、着手時に `$env:JAVA_HOME` をそこへ向けてから `mvn` を叩く**（JDK 25 のままでのビルド可否は未確認）。**単体378件・結合88件が全件 green（Red 0）・C1 100%（282/282）** が前回の実測値。`docs/backlog/open_specs.md` は不在＝未確定ゼロ。**worktree `3b-testlist-tower-a` を作って作業する**（`python scripts/worktree.py add 3b-testlist-tower-a`）
+前提: main `d52daea`。ビルド環境・テストの実測値・常設チェックは前文の表が正（`JAVA_HOME` の切り替えは不要）。**worktree `3b-testlist-tower-a` を作って作業する**（`python scripts/worktree.py add 3b-testlist-tower-a`）
 ```
 
 ## 2. 候補キュー（最大5行・優先順）
@@ -59,7 +66,6 @@ worktree を使う複数セッションが同時に走る前提。**着手状態
 | 3 | **3-B 製造②（Phase 1: tower）**。`FloorCatalog`・`FloorProgression` の実装（`service/tower`）と `Enemies` のレジストリ化（`enemies.yml` + `@Component`）。**Green 済みクラスへ `@Service` を付けるのもこの回**（前提2）。着手時に規模を見てセグメントへ割る | キュー2 | `3b-dev-tower`<br>backend | `dev` |
 | 4 | **キャラ成長のテストリスト作成**（`applyLevelUp`・`addExp` のしきい値到達）。分岐は `tech_party.md` §6 の3件 + `tech_numeric.md` §5 へ足す到達側。成長率の列追加（`character_types.yml`・`CharacterTypeData`・`character.md` §1.2）と `LapAnalyzerImpl#lapsToLevelUp` の配線を含む（`carryover_notes.md` §1） | 前提1 | `3b-testlist-growth`<br>backend | `test-list` |
 
-- **仕様書の指摘を直したら、それを検証対象に持つ図まで同じパスで直す**（`.claude/project/review/docs.md` §5 ルール9として常設化済み。仕様書だけ直し ISSUE-1301・1303・1308 が図の指摘5件に化けた）
-- **`tech_polling.md` §5 の10件は `integration-test`（E2E）担当**（①-a で判断）。**tick API（Controller・Resource）が未作成**なので、それを作る回の後
-- **分岐一覧の旧形式は残り2件**（`tech_polling.md` §5・`tech_rng.md` §5）。標準形式への移行は**1行が真偽の両方を持つ行の分割＝既存マーカーの番号ずれ**を伴うので、参照元のテストを触る回に同じセッションでまとめて行う
+- **分岐一覧の旧形式は残り2件**（`tech_polling.md` §5・`tech_rng.md` §5）。標準形式への移行は**1行が真偽の両方を持つ行の分割＝既存マーカーの番号ずれ**を伴うので、参照元のテストを触る回に同じセッションでまとめて行う（[detail-design.md](../../.claude/project/detail-design.md) §4 が「残件は候補キューで追跡する」と定める分）
+- **`tech_polling.md` §5 の10件は tick API（Controller・Resource）を作る回の後**に `integration-test`（E2E）で消化する（判断根拠と照合対象外の扱いは carryover §1）
 - **マーカー0件の一覧2件（照合対象外）と Phase 4 の除外は [carryover_notes.md](carryover_notes.md) §2 が正**
