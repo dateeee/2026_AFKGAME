@@ -36,3 +36,5 @@ Logback を使用。設定は `afkgame-env` の `logback.xml`（Boot 拡張の `
 | INFO | 正常系イベント | 通信の START / END、層をまたぐ呼び出しの START / END（AOP）、tick処理完了（処理tick数・結果）、ゲストアカウント作成 |
 | WARNING | 想定内のエラー | 認証失敗（401）、バリデーションエラー（422）、リソース不足（ゴールド不足等） |
 | ERROR | 想定外のエラー | 未捕捉例外、DB接続失敗、データ整合性エラー |
+
+- **`WARNING` は出力上の表記**で、Logback の標準レベル名は `WARN`。text 形式は `logback-appenders-text.xml` の `%replace(%level){'WARN','WARNING'}`、JSON 形式は `JsonLogFormatter#levelName` が変換する。**レベルの指定（`LOG_LEVEL`・`<logger level>`）とコード側の `Level` には `WARN` を使う**

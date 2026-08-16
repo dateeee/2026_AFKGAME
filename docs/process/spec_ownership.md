@@ -54,8 +54,9 @@
 | ゲスト削除猶予（90日） | `docs/tech/detail/tech_auth.md` | `docs/design/requirements/non_functional_requirements.md`, `docs/tech/nonfunctional/tech_maintenance.md` | `90日` |
 | リフレッシュトークンの保管先 | `docs/tech/detail/tech_auth.md` | `docs/tech/basic/tech_architecture.md`, `docs/tech/nonfunctional/tech_security.md` | `httpOnly` |
 | 認証入力の長さ制限（メール254・パスワード8〜128） | `docs/tech/detail/tech_auth/account.md` | `docs/tech/nonfunctional/tech_security.md`, `docs/tech/detail/tech_auth/link.md`, `docs/tech/detail/tech_auth/password_reset.md` | `254文字` |
-| ログ3種別の定義・出力先・ローテーション・共通部品 | `docs/process/coding_standards_backend/logging.md` | `docs/tech/basic/tech_logging.md`, `docs/tech/nonfunctional/tech_operations.md` | `communication\.log` |
+| ログ3種別の定義・出力先・ローテーション（保持期間）・共通部品 | `docs/process/coding_standards_backend/logging.md` | `docs/tech/basic/tech_logging.md`, `docs/tech/nonfunctional/tech_operations.md`, `docs/design/requirements/non_functional_requirements.md` | `communication\.log` |
 | 到達記録（`towersCleared`）のキー体系 | `docs/tech/basic/tech_data.md` | — | `\{towerId\}_\{difficulty\}` |
+| 64bit整数の JSON 表現（安全整数を超え得る値は文字列） | `docs/tech/basic/tech_data.md` | `docs/tech/basic/tech_data/game_state.md`, `docs/tech/detail/tech_shop.md` | `2\^53` |
 | ゲーム設定の選択肢・範囲・刻み・既定値 | `docs/design/systems/ui.md` | `docs/design/systems/battle.md`, `docs/tech/basic/tech_db/player.md`, `docs/tech/basic/tech_data.md`, `docs/tech/nonfunctional/tech_security.md` | `0\.1〜0\.5` |
 | コスト規律（サブエージェント運用・読み方・工程区切り） | `.claude/project/profile.md` | `CLAUDE.md`, `.claude/references/review-procedure.md` | `同時最大4体` |
 | お知らせの既読管理（保持先） | `docs/design/requirements/operation_requirements.md` | `docs/tech/basic/tech_api/core.md`, `docs/design/systems/ui.md` | — |

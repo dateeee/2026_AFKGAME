@@ -25,6 +25,7 @@
 - Phase 3以降のキーは JSON 例では**コメントで予約**してあり、実体化は該当Phaseの基本設計で行う
 - 日替わりショップの状態は本JSONに含めない（Phase 2〜: `GET /api/shop/lineup` で取得。[tech_shop.md](../detail/tech_shop.md)）
 - 転生データ（Phase 5〜）はトップレベルではなく `characters` の各要素が `prestige` として持つ
+- **JS の安全整数（2^53-1）を超え得る値は JSON 上で文字列にする**（所持ゴールド `gold` が該当。上限 `Long.MAX_VALUE` の正は [game_spec.md](../../design/game_spec.md) §5）。JavaScript の `Number` はそれ以上の精度を保てないため。上限が安全整数に収まる値（`exp`・敵の報酬 `gold` 等）は数値のままとする。**本規約は API レスポンス全体に適用する**
 
 > **`towersCleared` のキー体系**: キーは塔ID。イベントダンジョン（Phase 5〜）のみ `{towerId}_{difficulty}` の形で難易度を畳み込み、難易度別に到達記録を持つ（`difficulty` = `beginner` / `intermediate` / `advanced`）。通常塔・深淵の塔はサフィックスを付けないため、Phase 1〜4 のセーブデータは移行処理なしでそのまま有効。値の型は全エントリ共通で `{ cleared, highestFloor }`。キーの組み立てはサーバーが行う（[tech_api/endgame.md](tech_api/endgame.md)「イベントダンジョン」）。
 

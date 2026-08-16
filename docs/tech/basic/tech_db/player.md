@@ -21,7 +21,7 @@
 | `hp_threshold` | `FLOAT` | 不可 | `0.3` | 撤退HP閾値（0.0〜1.0） |
 | `current_enemy_id` | `VARCHAR(50)` | 可 | — | 交戦中の敵マスターID。非交戦時は NULL |
 | `current_enemy_hp` | `INTEGER` | 可 | — | 敵の残HP。非交戦時は NULL |
-| `run_gold` | `BIGINT` | 不可 | `0` | 塔内の累積ゴールド |
+| `run_gold` | `BIGINT` | 不可 | `0` | 塔内の累積ゴールド。獲得時に `gold` へ加算済みで、本列は**全滅時に `gold` から減算する没収額**を追う。契機とリセット規則の正は [tech_state.md](../../detail/tech_state.md) §3 |
 | `highest_floor` | `INTEGER` | 不可 | `0` | 全塔を通じた最高到達階 |
 | `last_tick_at` | `DATETIME(tz)` | 不可 | 現在時刻 | 最終tick処理時刻。オフライン復帰の起点 |
 | `created_at` | `DATETIME(tz)` | 不可 | 現在時刻 | — |
@@ -41,7 +41,7 @@
 
 ## 3. `tower_clear_records`（Phase 1）
 
-実装予定: `com.afkgame.domain.model.TowerClearRecord`
+実装: `com.afkgame.domain.model.TowerClearRecord`
 
 | 列 | 型 | NULL | 既定 | 制約・備考 |
 |----|----|------|------|-----------|
