@@ -44,3 +44,8 @@
 - シグナル: Maven の実行を1回やり直した（`-pl` 単独指定でコンパイルエラー） / 分岐一覧の追記を1回やり直した（WARN 1件）
 - ターン概要: `/next` → キュー4「キャラ成長の製造」。開始:「<command-message>next</command-message>」
 - 原因と改善案: ①**`.claude/project/commands/backend.md` §3 ルール1「`-pl` には必ず `-am` を付ける」を読まずに `mvn -pl afkgame-domain test` を叩き**、`~/.m2` の古い `afkgame-env` を解決して `LoggerName.BATTLE` 未解決のコンパイルエラー → 再実行。規約は既に正しく存在しており**適用漏れ**。`dev.md` §5 は「コマンドは commands.md が正」とリンクしているが、`dev` SKILL §0 の読み込み表に `commands/backend.md` が無いため、Red 確認で初めて Maven を叩く段になって参照が抜けた。**`.claude/project/dev.md` §0 相当（本書冒頭の読み込み指示）へ「TDD を回す前に `commands/backend.md` §3 を読む」を1行足す**のが最小の是正。②`tech_offline.md` §6 へ足した行の条件列を「1周回のEXP」と書いたところ、`check_branch_list.py` の `LAP_COUNT = \d+\s*周` がループと誤判定して「0周・2周 の行がない」WARN → 用語を「周回EXP」へ統一して解消。**分岐一覧の条件・期待列に「数字+周」を書くとループ判定に入る**のは `check_branch_list.py` の docstring §4 にあるが、書式ルール側（`.claude/project/detail-design.md` の分岐一覧の記法）に無い。同§へ「ループでない分岐点の条件列に『1周回』のような数字+周を書かない（`LAP_COUNT` がループ判定に入り 0周・2周 を要求する）」を1行足す。
+
+## 2026-08-16 20:10 | session 66970fd1 | 自動検出
+- シグナル: same-read(next_session.md×2)
+- ターン概要: ツール125回・エラー2回・拒否0回。開始:「<command-message>next</command-message>」
+- 原因と改善案: `/next` 冒頭で読んだ `next_session.md` を worktree 統合後にそのまま Edit したため、並行セッション（`f30cdc7`）が消していた §2 行と食い違い、読み直しになった（`profile.md` §6 規律4「統合等でファイルが変わった場合」の例外には当たるが、順序で避けられる。1回目の Edit は古い読みのまま通っており、アンカー次第では他セッションの行を巻き込んでいた）。**`.claude/project/next.md` §4 へ「統合の直後・書き換える前に `next_session.md` を読み直す（並行セッションが §2 行を消していることがある）」を1行足す**のが最小の是正。
