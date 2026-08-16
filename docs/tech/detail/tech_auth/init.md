@@ -22,7 +22,7 @@
 | 装備スロット9種 | [systems/equipment.md](../../../design/systems/equipment.md) §2.4 | `equipment_slots.yml` |
 | Player・PlayerSettings の既定値 | [tech_db/player.md](../../basic/tech_db/player.md) §1・§2 | —（DB既定値） |
 
-ゲストの表示名は `冒険者` 固定（**本書が正**）。`character_types.yml` は LV1 基礎値のみを持ち、成長率は使う機能（レベルアップ）の移植時に追加する。
+ゲストの表示名は `冒険者` 固定（**本書が正**）。`character_types.yml` は LV1 基礎値と成長率（`growth*`）を持つ。初期化が書き写すのは LV1 基礎値だけで、成長率はレベルアップ時の再計算が読む（[tech_numeric.md §5](../tech_numeric.md) #21）。
 
 ## 8.2 処理フロー
 

@@ -66,9 +66,9 @@ class PlayerInitializationServiceImplTest {
     private static final InitialCharacterData INITIAL_CHARACTER =
             new InitialCharacterData("hero_001", "勇者", "melee", 1);
 
-    /** melee の LV1 基礎ステータス（character_types.yml 相当。正は master/character.md §1.2）。 */
+    /** melee の LV1 基礎ステータスと成長率（character_types.yml 相当。正は master/character.md §1.2）。 */
     private static final CharacterTypeData MELEE =
-            new CharacterTypeData("melee", 100, 10, 5, 5, 0.05);
+            new CharacterTypeData("melee", 100, 10, 5, 5, 0.05, 20, 3, 2, 1);
 
     /** 装備スロット9種。順序は equipment_slots.yml（装備画面の表示順）に合わせる。 */
     private static final List<String> SLOT_IDS =

@@ -21,10 +21,10 @@ import com.afkgame.env.config.GameSettings;
  * （docs/backlog/java_migration.md STEP 3-B）。
  *
  * <p><b>Phase 1 の範囲に絞った未実装</b>（いずれも分岐一覧に行が無く、テストも持たない）:
- * ①{@code lapsToLevelUp} は常に {@link Integer#MAX_VALUE}（＝到達しない）を返す。次レベルまでの
- * 必要EXPを返す口が {@link CharacterGrowth} に無く、追加はキャラ成長のテストリスト作成
- * （経験値テーブルは docs/data/master/character.md §1.4、成長率は {@code character_types.yml} が未搭載）
- * を先に要するため。周回中のレベルアップ分岐 tech_offline.md §5 #7・#8 は
+ * ①{@code lapsToLevelUp} は常に {@link Integer#MAX_VALUE}（＝到達しない）を返す。
+ * {@link CharacterGrowth#requiredExpToNextLevel(com.afkgame.domain.model.Character)} が
+ * 未実装（Red は {@code CharacterGrowthImplTest}）で、本クラスへの配線はキャラ成長の
+ * 製造工程で行うため。周回中のレベルアップ分岐 tech_offline.md §5 #7・#8 は
  * {@link OfflineCalculator} 側が持つ。
  * ②クリティカル率の合算値は {@link #SUMMED_CRIT_RATE}。③回復スキル・リジェネによる
  * 純被ダメの差し引き（§4.1「回復期待値」）と範囲攻撃・挑発・軽減パッシブは tech_offline.md §7
