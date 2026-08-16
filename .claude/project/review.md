@@ -1,7 +1,7 @@
 # レビュー共通 — プロジェクト固有プロファイル
 
 > 一般手順は [review-procedure.md](../references/review-procedure.md)、出力形式は [review-format.md](../references/review-format.md)。
-> 本書はレビュー系5スキルと `fix-specs` に**共通する AFK GAME 固有値**のみを持つ。スキル別の値は §3 の分冊で、各スキルは**本書 + 自分の分冊のみ**読む。
+> 本書はレビュー系6スキルと `fix-specs` に**共通する AFK GAME 固有値**のみを持つ。スキル別の値は §3 の分冊で、各スキルは**本書 + 自分の分冊のみ**読む。
 
 ## 1. 共通パラメータ
 
@@ -34,4 +34,5 @@
 | `full-review` | [review/fullstack.md](review/fullstack.md) |
 | `doc-review` | [review/docs.md](review/docs.md) |
 | `diagrams-review` | [review/diagrams.md](review/diagrams.md) |
+| `spot-review` | [review/spot.md](review/spot.md) |
 | `fix-specs` | [review/docs.md](review/docs.md) §5 修正適用の固有ルール |

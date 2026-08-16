@@ -42,6 +42,7 @@
 | `backend-review` | [review.md](review.md) + [review/backend.md](review/backend.md) | バックエンドのコードレビュー |
 | `frontend-review` | [review.md](review.md) + [review/frontend.md](review/frontend.md) | フロントエンドのコードレビュー |
 | `full-review` | [review.md](review.md) + [review/fullstack.md](review/fullstack.md) | 仕様↔コード・フロント↔バックの統合レビュー |
+| `spot-review` | [review.md](review.md) + [review/spot.md](review/spot.md) | 対象（ファイル・フォルダ・工程）を指定するレビュー。工程別の一般観点は `skills/spot-review/references/**` |
 | `resolve-specs` | [requirements.md](requirements.md) | 未確定仕様の確定（要件定義工程の一部） |
 | `next` | [next.md](next.md) | 新セッション冒頭で引き継ぎファイルから次タスクを特定し工程スキルへ委譲 |
 | `retro` | [retro.md](retro.md) | 効率メモ（Stop フックが自動追記）の振り返りとスキル・成果物への反映 |

@@ -38,7 +38,7 @@ Markdownには文字数上限を設けている。詳細は [docs/process/docume
 - **実装規約**: Resource(DTO) は `afkgame-web` の `resource/`（Bean Validation 付与）、ロジックは `afkgame-domain` の `service/`、ログは `logback.xml` 準拠
 - **バックエンドは Java/Terasoluna へ移行中**。手順と進捗の正は [docs/backlog/java_migration.md](docs/backlog/java_migration.md)
 - **編集は worktree 内で行う**（正は [worktree_guide.md](docs/process/worktree_guide.md) §5）
-- **作業はすべてスキル経由**: 7工程 + 支援10件を `.claude/skills/` に用意している（自動起動 / `/` で明示起動）。対応表は [.claude/project/INDEX.md](.claude/project/INDEX.md)
+- **作業はすべてスキル経由**: 7工程 + 支援11件を `.claude/skills/` に用意している（自動起動 / `/` で明示起動）。対応表は [.claude/project/INDEX.md](.claude/project/INDEX.md)
 - **一般手順と固有値の分離**: `.claude/` の固有値は `project/**` のみ。ほかは他プロジェクトへ無改造コピー可（[_TEMPLATE.md](.claude/project/_TEMPLATE.md) に沿って書き直す）
 
 ## コスト規律（AIエージェント運用）
