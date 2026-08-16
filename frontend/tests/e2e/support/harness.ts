@@ -30,9 +30,18 @@ export function rewindLastTick(seconds: number): void {
   const result = spawnSync(
     'docker',
     [
-      'exec', '-i', E2E_DB_CONTAINER,
-      'psql', '-v', 'ON_ERROR_STOP=1', '-U', E2E_DB_USER, '-d', E2E_DB_NAME,
-      '-c', `UPDATE players SET last_tick_at = now() - interval '${seconds} seconds'`,
+      'exec',
+      '-i',
+      E2E_DB_CONTAINER,
+      'psql',
+      '-v',
+      'ON_ERROR_STOP=1',
+      '-U',
+      E2E_DB_USER,
+      '-d',
+      E2E_DB_NAME,
+      '-c',
+      `UPDATE players SET last_tick_at = now() - interval '${seconds} seconds'`,
     ],
     { cwd: REPO_ROOT, encoding: 'utf-8' },
   )
@@ -125,7 +134,14 @@ export async function advanceUntil(
  * 読み取れない。丸め表記に入ったら黙って誤判定せず、その場で失敗させる。
  */
 export async function readGold(page: Page): Promise<number> {
-  const text = (await page.getByText(/^ゴールド: /).first().innerText()).replace('ゴールド:', '').trim()
+  const text = (
+    await page
+      .getByText(/^ゴールド: /)
+      .first()
+      .innerText()
+  )
+    .replace('ゴールド:', '')
+    .trim()
   if (/[KMB]$/.test(text)) {
     throw new Error(`ゴールドが丸め表記（${text}）で正確に読めない。tick数を減らして再試行すること`)
   }

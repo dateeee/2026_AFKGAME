@@ -12,7 +12,7 @@ export const usePlayerStore = defineStore('player', () => {
   }
 
   function updateCharacter(updated: Character) {
-    const index = characters.value.findIndex(c => c.id === updated.id)
+    const index = characters.value.findIndex((c) => c.id === updated.id)
     if (index !== -1) {
       characters.value[index] = updated
     }
@@ -25,7 +25,10 @@ export const usePlayerStore = defineStore('player', () => {
   }
 
   return {
-    characters, potions,
-    loadFromState, updateCharacter, reset,
+    characters,
+    potions,
+    loadFromState,
+    updateCharacter,
+    reset,
   }
 })

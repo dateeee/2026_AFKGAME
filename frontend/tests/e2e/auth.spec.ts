@@ -25,9 +25,9 @@ test.describe('シナリオ#1 認証からゲーム状態取得', () => {
     // 初期キャラクター（config.INITIAL_CHARACTER）
     await expect(page.getByText('勇者')).toBeVisible()
     await expect(page.getByText('LV 1')).toBeVisible()
-    await expect(page.locator('.stat-bar-hp').locator('xpath=following-sibling::span[1]')).toHaveText(
-      '100 / 100',
-    )
+    await expect(
+      page.locator('.stat-bar-hp').locator('xpath=following-sibling::span[1]'),
+    ).toHaveText('100 / 100')
 
     // 初期所持品（config.INITIAL_POTIONS）と初期ゴールド
     await expect(page.getByText('HPポーション: 5')).toBeVisible()

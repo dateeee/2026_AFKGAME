@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useAuthStore } from '@/stores/authStore'
-import AppIcon from '@/components/ui/AppIcon.vue'
+import BaseIcon from '@/components/ui/BaseIcon.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import BaseField from '@/components/ui/BaseField.vue'
 import BaseModal from '@/components/ui/BaseModal.vue'
@@ -38,7 +38,7 @@ async function submit() {
 
 <template>
   <div v-if="authStore.isAuthenticated && authStore.isGuest" class="guest-banner">
-    <AppIcon name="alert" :size="16" />
+    <BaseIcon name="alert" :size="16" />
     <span class="guest-banner-text">データを守るためにアカウント登録しましょう</span>
     <BaseButton variant="primary" size="sm" @click="openForm">登録</BaseButton>
   </div>

@@ -85,7 +85,10 @@ async function updateAutoSellRarity(value: string) {
 
     <BaseCard title="戦闘">
       <div class="setting-list">
-        <BaseField label="ポーション自動使用HP閾値" hint="HPがこの割合を下回ると自動でポーションを使います">
+        <BaseField
+          label="ポーション自動使用HP閾値"
+          hint="HPがこの割合を下回ると自動でポーションを使います"
+        >
           <template #default="{ id }">
             <BaseSelect
               :id="id"
@@ -112,14 +115,12 @@ async function updateAutoSellRarity(value: string) {
     </BaseCard>
 
     <BaseCard title="装備">
-      <BaseField label="自動売却レアリティ" hint="指定したレアリティ以下の装備を、拾った時点で売却します">
+      <BaseField
+        label="自動売却レアリティ"
+        hint="指定したレアリティ以下の装備を、拾った時点で売却します"
+      >
         <template #default="{ id }">
-          <BaseSelect
-            :id="id"
-            v-model="autoSellRarity"
-            block
-            :options="AUTO_SELL_OPTIONS"
-          />
+          <BaseSelect :id="id" v-model="autoSellRarity" block :options="AUTO_SELL_OPTIONS" />
         </template>
       </BaseField>
     </BaseCard>
@@ -211,7 +212,9 @@ async function updateAutoSellRarity(value: string) {
   border-radius: 999px;
   background-color: var(--color-surface-inset);
   border: 1px solid var(--color-line);
-  transition: background-color var(--duration-base) ease, border-color var(--duration-base) ease;
+  transition:
+    background-color var(--duration-base) ease,
+    border-color var(--duration-base) ease;
 }
 
 .switch-thumb {
@@ -223,7 +226,9 @@ async function updateAutoSellRarity(value: string) {
   border-radius: 999px;
   background-color: var(--color-content-faint);
   transform: translateY(-50%);
-  transition: transform var(--duration-base) var(--ease-out-quart), background-color var(--duration-base) ease;
+  transition:
+    transform var(--duration-base) var(--ease-out-quart),
+    background-color var(--duration-base) ease;
 }
 
 .switch-input:checked ~ .switch-track {

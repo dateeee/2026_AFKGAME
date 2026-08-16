@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import AppIcon from './AppIcon.vue'
+import BaseIcon from './BaseIcon.vue'
 import type { IconName } from './icons'
 
 /**
@@ -7,20 +7,24 @@ import type { IconName } from './icons'
  * 各画面で個別に padding / 色 / 角丸を書かないこと。
  * md 以上は最小高さ 44px（タップ領域の下限）を満たす。
  */
-withDefaults(defineProps<{
-  variant?: 'primary' | 'secondary' | 'ghost' | 'danger'
-  size?: 'sm' | 'md' | 'lg'
-  type?: 'button' | 'submit'
-  block?: boolean
-  disabled?: boolean
-  icon?: IconName
-  /** アイコンのみのボタン。ラベルは aria-label で渡すこと */
-  iconOnly?: boolean
-}>(), {
-  variant: 'secondary',
-  size: 'md',
-  type: 'button',
-})
+withDefaults(
+  defineProps<{
+    variant?: 'primary' | 'secondary' | 'ghost' | 'danger'
+    size?: 'sm' | 'md' | 'lg'
+    type?: 'button' | 'submit'
+    block?: boolean
+    disabled?: boolean
+    icon?: IconName
+    /** アイコンのみのボタン。ラベルは aria-label で渡すこと */
+    iconOnly?: boolean
+  }>(),
+  {
+    variant: 'secondary',
+    size: 'md',
+    type: 'button',
+    icon: undefined,
+  },
+)
 
 defineEmits<{ click: [MouseEvent] }>()
 </script>
@@ -33,7 +37,7 @@ defineEmits<{ click: [MouseEvent] }>()
     :class="[`btn-${variant}`, `btn-${size}`, { 'btn-block': block, 'btn-icon-only': iconOnly }]"
     @click="$emit('click', $event)"
   >
-    <AppIcon v-if="icon" :name="icon" :size="size === 'sm' ? 16 : 18" />
+    <BaseIcon v-if="icon" :name="icon" :size="size === 'sm' ? 16 : 18" />
     <span v-if="!iconOnly" class="btn-label"><slot /></span>
   </button>
 </template>

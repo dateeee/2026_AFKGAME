@@ -9,7 +9,7 @@ import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import type { UserInfo } from '@/types/game'
 import * as authApi from '@/api/auth'
-import { setTokens, clearTokens, getRefreshToken, tryRefresh } from '@/api/client'
+import { setTokens, clearTokens, getRefreshToken } from '@/api/client'
 import { errorMessage } from '@/api/errors'
 import { stopActivePolling } from '@/composables/usePolling'
 import { useGameStore } from '@/stores/gameStore'
@@ -25,7 +25,11 @@ export const useAuthStore = defineStore('auth', () => {
   const isAuthenticated = computed(() => !!user.value)
   const isGuest = computed(() => user.value?.isGuest ?? true)
 
-  function _handleAuthResponse(data: { accessToken: string; refreshToken: string; user: UserInfo }) {
+  function _handleAuthResponse(data: {
+    accessToken: string
+    refreshToken: string
+    user: UserInfo
+  }) {
     setTokens(data.accessToken, data.refreshToken)
     user.value = data.user
     error.value = null

@@ -3,7 +3,7 @@
 > **使い方**: 新セッションの最初のメッセージで `/next` と送る（または §1 のコードブロックを貼り付ける）。**着手前に §0 を読む**。
 > 本ファイルは**ポインタ専用**。Phase 進捗の正は [development_process.md](../process/development_process.md) §5、書式の正は [.claude/project/next.md](../../.claude/project/next.md)、worktree 運用の正は [worktree_guide.md](../process/worktree_guide.md)。
 
-最終更新: 2026-08-16 / main `d52daea`（**申し送りメモの棚卸し**。消化済み6行を削除し、恒久知見3件を [coding_standards_backend/test.md](../process/coding_standards_backend/test.md) §1 と [basic-design.md](../../.claude/project/basic-design.md) §4 の正へ移した。backend は `MailSettings` の Javadoc 1行のみ）。同日は他セッションの成果も main に入っている（Phase 5 ボスラッシュ詳細設計 / `spot-review` スキル新設 / backend-review 還元案3件の常設化 / `worktree_guide.md` §5 の分冊化）。**履歴の正は [changelog.md](../changelog.md) の 2026-08-16 ブロック**なので、本ファイルへ積み増さない。
+最終更新: 2026-08-16 / main `0bdc678`（**known_issues の棚卸しとフロント規約整備の是正**。#18 は既に解消済みと確認して削除、#21〜#25 を是正して削除、新たに #26・#27 を登録した。**番号の欠番が増えたので既存の参照は番号で追わず内容で照合する**。`frontend/**` は ESLint / Prettier の一括整形が入っており**行内容の差分が広い**）。同日は他セッションの成果も main に入っている（Phase 5 ボスラッシュ詳細設計 / `spot-review` スキル新設・worktree 前提化 / 要件定義の spot-review レポート / backend-review 還元案3件の常設化 / `worktree_guide.md` §5 の分冊化 / 申し送りメモの棚卸し）。**履歴の正は [changelog.md](../changelog.md) の 2026-08-16 ブロック**なので、本ファイルへ積み増さない。
 
 **いまの位置**: Java 移行の残りは **3-B（Phase 1: tower）→ 4（Phase 2）→ 5（Phase 3）→ 6（切替と後始末）**（順序の正は [carryover_notes.md](carryover_notes.md) §1、手順・進捗の正は [java_migration.md](java_migration.md)、STEP の定義は [steps.md](java_migration/steps.md)「STEP 3〜5」）。**3-B は詳細設計・テストリスト作成①（game / battle）・製造①（①-i〜①-iv）まで完了**で、残るのは**テストリスト作成②（tower）→ 製造②**。**Phase 1〜3 の機能はどの言語でも未実装の期間**（E2E はハーネスと `GET /health` まで疎通済みで、テスト本体は STEP 5 完了まで赤が正常）。
 

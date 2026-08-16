@@ -66,5 +66,5 @@
 | 業務エラー | 発生した画面・フォームの近傍でフィードバック（[component.md](component.md) §6） |
 | 想定外（描画エラー・未処理の Promise 拒否） | `app.config.errorHandler` + `unhandledrejection` リスナーで捕捉し、汎用エラー表示に倒す（黙って握りつぶさない） |
 
-- グローバル捕捉の置き場は `main.ts`（現状未実装。[known_issues.md](../../backlog/known_issues.md) の修正対象）
+- グローバル捕捉の置き場は `main.ts`（現状未実装。[known_issues.md](../../backlog/known_issues.md) #27 の修正対象）
 - エラーを `catch` して何もしない経路を作らない。意図して無視する場合は理由コメントを書く（`GameView` の `loadTowers().catch` が実例）

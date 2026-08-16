@@ -8,7 +8,7 @@ import EquipmentInventory from '@/components/equipment/EquipmentInventory.vue'
 import EquipmentCompare from '@/components/equipment/EquipmentCompare.vue'
 import BaseCard from '@/components/ui/BaseCard.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
-import AppIcon from '@/components/ui/AppIcon.vue'
+import BaseIcon from '@/components/ui/BaseIcon.vue'
 import type { Equipment, EquipmentSlot } from '@/types/game'
 
 const equipmentStore = useEquipmentStore()
@@ -82,14 +82,11 @@ async function onUnequip(slot: EquipmentSlot) {
         <!-- 絞り込み中であることと、その解除を1箇所にまとめる -->
         <button type="button" class="filter-chip" @click="selectedSlot = null">
           {{ SLOT_LABELS[selectedSlot] ?? selectedSlot }}のみ表示中
-          <AppIcon name="close" :size="12" />
+          <BaseIcon name="close" :size="12" />
         </button>
       </template>
 
-      <EquipmentInventory
-        :filter-slot="selectedSlot"
-        @select="onSelectInventoryItem"
-      />
+      <EquipmentInventory :filter-slot="selectedSlot" @select="onSelectInventoryItem" />
     </BaseCard>
 
     <EquipmentCompare

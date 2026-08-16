@@ -37,7 +37,11 @@ export const useBattleStore = defineStore('battle', () => {
   }
 
   return {
-    battleLogs, offlineSummary,
-    addBattleLogs, clearOfflineSummary, setOfflineSummary, reset,
+    battleLogs,
+    offlineSummary,
+    addBattleLogs,
+    clearOfflineSummary,
+    setOfflineSummary,
+    reset,
   }
 })

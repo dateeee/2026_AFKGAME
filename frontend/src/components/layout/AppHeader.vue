@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import AppIcon from '@/components/ui/AppIcon.vue'
+import BaseIcon from '@/components/ui/BaseIcon.vue'
 import { useGameStore } from '@/stores/gameStore'
 import { formatGold } from '@/utils/format'
 
@@ -15,7 +15,7 @@ const gameStore = useGameStore()
     <router-link to="/" class="brand" aria-label="ホームへ戻る">AFK GAME</router-link>
 
     <div class="wallet">
-      <AppIcon name="coin" :size="16" />
+      <BaseIcon name="coin" :size="16" />
       <span class="wallet-value num">ゴールド: {{ formatGold(gameStore.gold) }}</span>
     </div>
   </header>

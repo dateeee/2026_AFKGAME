@@ -1,20 +1,23 @@
 <script setup lang="ts">
-import AppIcon from './AppIcon.vue'
+import BaseIcon from './BaseIcon.vue'
 import type { IconName } from './icons'
 
 /**
  * 状態を示す小さなラベル。
  * 色だけに意味を持たせず、必ず文言（必要ならアイコン）を伴わせる。
  */
-withDefaults(defineProps<{
-  tone?: 'neutral' | 'gold' | 'danger' | 'success' | 'info'
-  icon?: IconName
-}>(), { tone: 'neutral' })
+withDefaults(
+  defineProps<{
+    tone?: 'neutral' | 'gold' | 'danger' | 'success' | 'info'
+    icon?: IconName
+  }>(),
+  { tone: 'neutral', icon: undefined },
+)
 </script>
 
 <template>
   <span class="badge" :class="`badge-${tone}`">
-    <AppIcon v-if="icon" :name="icon" :size="12" />
+    <BaseIcon v-if="icon" :name="icon" :size="12" />
     <slot />
   </span>
 </template>

@@ -148,7 +148,7 @@ JWT（JSON Web Token）によるステートレス認証。アクセストーク
 ## 7. フロント認証フロー
 
 **トークン管理:**
-- アクセストークン: メモリ上に保持（Piniaストア）。リロード時は消失
+- アクセストークン: メモリ上に保持（`api/client.ts` のモジュール変数。読み書きは同ファイルの管理関数に限る — [api.md](../../process/coding_standards_frontend/api.md) §3 #2）。リロード時は消失
 - リフレッシュトークン: LocalStorage に保持（キー: `refresh_token`）。`httpOnly` Cookie は採らない — ログアウト・ゲストID破棄をフロント側で完結させるため（XSS リスクの受容判断は [tech_security.md](../nonfunctional/tech_security.md) §11.7）
 - API呼び出し時にアクセストークンを `Authorization: Bearer <token>` ヘッダーに付与
 - 401レスポンス受信時にリフレッシュトークンで自動再取得を試行
