@@ -29,7 +29,7 @@ const RARITY_ORDER: Rarity[] = ['common', 'uncommon', 'rare', 'epic', 'legendary
 
 const RARITY_OPTIONS: Array<{ value: Rarity | ''; label: string }> = [
   { value: '', label: '全レアリティ' },
-  ...RARITY_ORDER.map(r => ({ value: r, label: RARITY_LABELS[r] ?? r })),
+  ...RARITY_ORDER.map((r) => ({ value: r, label: RARITY_LABELS[r] ?? r })),
 ]
 
 const SORT_OPTIONS: Array<{ value: 'level' | 'rarity'; label: string }> = [
@@ -38,14 +38,14 @@ const SORT_OPTIONS: Array<{ value: 'level' | 'rarity'; label: string }> = [
 ]
 
 const filteredItems = computed(() => {
-  let list = equipmentStore.items.filter(e =>
-    !Object.values(equipmentStore.equipped).includes(e.id)
+  let list = equipmentStore.items.filter(
+    (e) => !Object.values(equipmentStore.equipped).includes(e.id),
   )
   if (props.filterSlot) {
-    list = list.filter(e => e.slot === props.filterSlot)
+    list = list.filter((e) => e.slot === props.filterSlot)
   }
   if (filterRarity.value) {
-    list = list.filter(e => e.rarity === filterRarity.value)
+    list = list.filter((e) => e.rarity === filterRarity.value)
   }
   list.sort((a, b) => {
     if (sortKey.value === 'rarity') {
@@ -105,11 +105,7 @@ function handleClick(item: Equipment) {
         :options="RARITY_OPTIONS"
         aria-label="レアリティで絞り込む"
       />
-      <BaseSelect
-        v-model="sortKey"
-        :options="SORT_OPTIONS"
-        aria-label="並び替え"
-      />
+      <BaseSelect v-model="sortKey" :options="SORT_OPTIONS" aria-label="並び替え" />
       <BaseButton
         :variant="selectionMode ? 'danger' : 'secondary'"
         size="sm"

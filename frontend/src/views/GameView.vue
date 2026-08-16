@@ -4,15 +4,14 @@ import { useGameStore } from '@/stores/gameStore'
 import { usePlayerStore } from '@/stores/playerStore'
 import { useBattleStore } from '@/stores/battleStore'
 import { formatGold, formatTime } from '@/utils/format'
-import { postTowerSelect, postTowerRetire, putTowerMode, getGameState } from '@/api/client'
 import { RARITY_LABELS, SLOT_LABELS } from '@/stores/equipmentStore'
 import BaseCard from '@/components/ui/BaseCard.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import BaseBadge from '@/components/ui/BaseBadge.vue'
 import BaseModal from '@/components/ui/BaseModal.vue'
-import StatBar from '@/components/ui/StatBar.vue'
-import NumberStepper from '@/components/ui/NumberStepper.vue'
-import AppIcon from '@/components/ui/AppIcon.vue'
+import BaseStatBar from '@/components/ui/BaseStatBar.vue'
+import BaseNumberStepper from '@/components/ui/BaseNumberStepper.vue'
+import BaseIcon from '@/components/ui/BaseIcon.vue'
 import type { BattleLogEntry, TowerInfo } from '@/types/game'
 
 const gameStore = useGameStore()
@@ -24,22 +23,23 @@ const selectedTargetFloor = ref(5)
 const logScroller = ref<HTMLElement | null>(null)
 
 onMounted(() => {
-  gameStore.loadTowers().catch(() => { /* 一覧取得失敗時はゲーム状態から復元されるまで空表示 */ })
+  gameStore.loadTowers().catch(() => {
+    /* 一覧取得失敗時はゲーム状態から復元されるまで空表示 */
+  })
 })
 
 // 塔の解放状態は最新のゲーム状態（towersCleared）から算出する
 function isUnlocked(tower: TowerInfo): boolean {
   if (tower.unlockTowerId === null) return true
-  return gameStore.towersCleared[tower.unlockTowerId]?.cleared
-    ?? tower.unlocked
+  return gameStore.towersCleared[tower.unlockTowerId]?.cleared ?? tower.unlocked
 }
 
 function towerName(towerId: string | null): string {
-  return gameStore.towers.find(t => t.id === towerId)?.name ?? ''
+  return gameStore.towers.find((t) => t.id === towerId)?.name ?? ''
 }
 
-const selectedTower = computed(() =>
-  gameStore.towers.find(t => t.id === selectedTowerId.value) ?? null
+const selectedTower = computed(
+  () => gameStore.towers.find((t) => t.id === selectedTowerId.value) ?? null,
 )
 
 function selectTower(tower: TowerInfo) {
@@ -63,67 +63,48 @@ const effectiveMaxHp = computed(() => hero.value?.effectiveMaxHp ?? hero.value?.
 // 数値の正は docs/data/master/character.md）。ここは表示用の複製なので、
 // バランス調整でサーバー式を変えたら必ず合わせること
 // （恒久策の CharacterResponse.expRequired 追加は API 変更を伴うため full-review の管轄）。
-const expRequired = computed(() => hero.value ? Math.floor(100 * Math.pow(hero.value.level, 1.5)) : 100)
+const expRequired = computed(() =>
+  hero.value ? Math.floor(100 * Math.pow(hero.value.level, 1.5)) : 100,
+)
 const potionCount = computed(() => playerStore.potions['hp_potion'] ?? 0)
 const isInTower = computed(() => !!gameStore.currentTowerId)
 
 // 攻略中に最高到達階が伸びると targetFloorCap が変わる。塔選択へ戻ったタイミングで
-// 一覧を取り直さないと、実際には選べる階が NumberStepper の max で弾かれ続ける
+// 一覧を取り直さないと、実際には選べる階が BaseNumberStepper の max で弾かれ続ける
 watch(isInTower, (inTower, wasInTower) => {
   if (wasInTower && !inTower) {
-    gameStore.loadTowers().catch(() => { /* 失敗時は前回の一覧を保持する */ })
+    gameStore.loadTowers().catch(() => {
+      /* 失敗時は前回の一覧を保持する */
+    })
   }
 })
 
-const heroStats = computed(() => hero.value ? [
-  { key: 'ATK', value: hero.value.baseAtk },
-  { key: 'DEF', value: hero.value.baseDef },
-  { key: 'SPD', value: hero.value.baseSpd },
-] : [])
+const heroStats = computed(() =>
+  hero.value
+    ? [
+        { key: 'ATK', value: hero.value.baseAtk },
+        { key: 'DEF', value: hero.value.baseDef },
+        { key: 'SPD', value: hero.value.baseSpd },
+      ]
+    : [],
+)
 
 // 設定「戦闘ログ表示件数」（20/50/100・tick群単位）に従って直近ぶんだけ描画する。
 // ストア側も同じ上限で保持しているが、設定を下げた直後は保持済みログが残るため表示側でも絞る
-const visibleLogs = computed(() =>
-  battleStore.battleLogs.slice(-gameStore.settings.battleLogCount)
-)
+const visibleLogs = computed(() => battleStore.battleLogs.slice(-gameStore.settings.battleLogCount))
 
 // 新しいログは下に積まれるため、追加のたびに最新行まで送る
-watch(() => battleStore.battleLogs.length, async () => {
-  await nextTick()
-  const el = logScroller.value
-  if (el) el.scrollTop = el.scrollHeight
-})
+watch(
+  () => battleStore.battleLogs.length,
+  async () => {
+    await nextTick()
+    const el = logScroller.value
+    if (el) el.scrollTop = el.scrollHeight
+  },
+)
 
-async function enterTower() {
-  try {
-    await postTowerSelect(selectedTowerId.value, selectedTargetFloor.value)
-    const state = await getGameState()
-    gameStore.loadFromState(state)
-    playerStore.loadFromState(state)
-  } catch (e) {
-    gameStore.reportActionFailure(e)
-  }
-}
-
-async function retireFromTower() {
-  try {
-    await postTowerRetire()
-    const state = await getGameState()
-    gameStore.loadFromState(state)
-    playerStore.loadFromState(state)
-  } catch (e) {
-    gameStore.reportActionFailure(e)
-  }
-}
-
-async function toggleMode() {
-  const newMode = gameStore.towerMode === 'auto_repeat' ? 'stop_on_clear' : 'auto_repeat'
-  try {
-    await putTowerMode(newMode)
-    gameStore.towerMode = newMode
-  } catch (e) {
-    gameStore.reportActionFailure(e)
-  }
+function enterTower() {
+  return gameStore.enterTower(selectedTowerId.value, selectedTargetFloor.value)
 }
 
 function formatLogEntry(entry: BattleLogEntry): string {
@@ -178,13 +159,17 @@ function dismissOffline() {
     <BaseModal :open="!!battleStore.offlineSummary" title="オフライン報酬" @close="dismissOffline">
       <template v-if="battleStore.offlineSummary">
         <p class="offline-lead">
-          {{ formatTime(battleStore.offlineSummary.elapsedSeconds) }}のあいだ、冒険者は塔を進み続けました。
+          {{
+            formatTime(battleStore.offlineSummary.elapsedSeconds)
+          }}のあいだ、冒険者は塔を進み続けました。
         </p>
 
         <div class="offline-headline">
           <div class="offline-figure">
             <span class="label-caps">獲得ゴールド</span>
-            <span class="offline-value num text-gold">+{{ formatGold(battleStore.offlineSummary.totalGold) }}</span>
+            <span class="offline-value num text-gold"
+              >+{{ formatGold(battleStore.offlineSummary.totalGold) }}</span
+            >
           </div>
           <div class="offline-figure">
             <span class="label-caps">獲得EXP</span>
@@ -195,11 +180,21 @@ function dismissOffline() {
         </div>
 
         <dl class="offline-detail">
-          <div><dt>撃破した敵</dt><dd class="num">{{ battleStore.offlineSummary.enemiesDefeated }}</dd></div>
-          <div><dt>クリアしたフロア</dt><dd class="num">{{ battleStore.offlineSummary.floorsCleared }}</dd></div>
-          <div><dt>処理ティック数</dt><dd class="num">{{ battleStore.offlineSummary.processedTicks }}</dd></div>
+          <div>
+            <dt>撃破した敵</dt>
+            <dd class="num">{{ battleStore.offlineSummary.enemiesDefeated }}</dd>
+          </div>
+          <div>
+            <dt>クリアしたフロア</dt>
+            <dd class="num">{{ battleStore.offlineSummary.floorsCleared }}</dd>
+          </div>
+          <div>
+            <dt>処理ティック数</dt>
+            <dd class="num">{{ battleStore.offlineSummary.processedTicks }}</dd>
+          </div>
           <div v-if="battleStore.offlineSummary.potionsUsed > 0">
-            <dt>使用したポーション</dt><dd class="num">{{ battleStore.offlineSummary.potionsUsed }}</dd>
+            <dt>使用したポーション</dt>
+            <dd class="num">{{ battleStore.offlineSummary.potionsUsed }}</dd>
           </div>
         </dl>
 
@@ -222,8 +217,14 @@ function dismissOffline() {
         </div>
 
         <div class="bars">
-          <StatBar label="HP" :value="hero.hp" :max="effectiveMaxHp" tone="hp" :low-threshold="0.3" />
-          <StatBar label="EXP" :value="hero.exp" :max="expRequired" tone="exp" />
+          <BaseStatBar
+            label="HP"
+            :value="hero.hp"
+            :max="effectiveMaxHp"
+            tone="hp"
+            :low-threshold="0.3"
+          />
+          <BaseStatBar label="EXP" :value="hero.exp" :max="expRequired" tone="exp" />
         </div>
 
         <dl class="stat-grid">
@@ -233,7 +234,9 @@ function dismissOffline() {
           </div>
         </dl>
 
-        <p class="hero-potion">HPポーション: <span class="num">{{ potionCount }}</span></p>
+        <p class="hero-potion">
+          HPポーション: <span class="num">{{ potionCount }}</span>
+        </p>
       </div>
     </BaseCard>
 
@@ -248,7 +251,9 @@ function dismissOffline() {
           </BaseBadge>
         </div>
 
-        <p class="tower-floor num">フロア {{ gameStore.currentFloor }} / {{ gameStore.targetFloor }}</p>
+        <p class="tower-floor num">
+          フロア {{ gameStore.currentFloor }} / {{ gameStore.targetFloor }}
+        </p>
 
         <!-- 交戦中の敵 -->
         <div v-if="gameStore.currentEnemy" class="enemy">
@@ -256,7 +261,7 @@ function dismissOffline() {
             {{ gameStore.currentEnemy.name }}
             <span class="enemy-level num">LV{{ gameStore.currentEnemy.level }}</span>
           </p>
-          <StatBar
+          <BaseStatBar
             label="HP"
             :value="gameStore.currentEnemy.hp"
             :max="gameStore.currentEnemy.maxHp"
@@ -265,10 +270,10 @@ function dismissOffline() {
         </div>
 
         <div class="tower-actions">
-          <BaseButton variant="secondary" block @click="toggleMode">
+          <BaseButton variant="secondary" block @click="gameStore.toggleTowerMode">
             {{ gameStore.towerMode === 'auto_repeat' ? 'クリア時停止' : '自動周回' }}
           </BaseButton>
-          <BaseButton variant="danger" @click="retireFromTower">撤退</BaseButton>
+          <BaseButton variant="danger" @click="gameStore.retireFromTower">撤退</BaseButton>
         </div>
       </div>
 
@@ -300,12 +305,17 @@ function dismissOffline() {
               <BaseBadge v-if="gameStore.towersCleared[tower.id]?.cleared" tone="gold" icon="check">
                 クリア済
               </BaseBadge>
-              <BaseBadge v-else-if="!isUnlocked(tower)" tone="neutral" icon="lock">未解放</BaseBadge>
+              <BaseBadge v-else-if="!isUnlocked(tower)" tone="neutral" icon="lock"
+                >未解放</BaseBadge
+              >
             </div>
             <p v-if="!isUnlocked(tower)" class="tower-card-note">
               {{ towerName(tower.unlockTowerId) }}のボス討伐で解放
             </p>
-            <p v-else-if="(gameStore.towersCleared[tower.id]?.highestFloor ?? 0) > 0" class="tower-card-note num">
+            <p
+              v-else-if="(gameStore.towersCleared[tower.id]?.highestFloor ?? 0) > 0"
+              class="tower-card-note num"
+            >
               最高到達: {{ gameStore.towersCleared[tower.id]!.highestFloor }}F
             </p>
           </li>
@@ -315,7 +325,7 @@ function dismissOffline() {
 
         <div class="target-floor">
           <span class="target-floor-label">目標フロア</span>
-          <NumberStepper
+          <BaseNumberStepper
             v-model="selectedTargetFloor"
             :min="1"
             :max="targetFloorCap"
@@ -347,18 +357,13 @@ function dismissOffline() {
       <div ref="logScroller" class="battle-log">
         <template v-if="visibleLogs.length > 0">
           <div v-for="(tick, i) in visibleLogs" :key="i" class="log-tick">
-            <div
-              v-for="(entry, j) in tick"
-              :key="j"
-              class="log-entry"
-              :class="`log-${entry.type}`"
-            >
+            <div v-for="(entry, j) in tick" :key="j" class="log-entry" :class="`log-${entry.type}`">
               {{ formatLogEntry(entry) }}
             </div>
           </div>
         </template>
         <div v-else class="log-empty">
-          <AppIcon name="tower" :size="28" />
+          <BaseIcon name="tower" :size="28" />
           <p>まだ戦闘ログがありません。<br />塔に入って冒険を始めましょう！</p>
         </div>
       </div>
@@ -516,7 +521,9 @@ function dismissOffline() {
   border-left: 3px solid transparent;
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: border-color var(--duration-fast) ease, background-color var(--duration-fast) ease;
+  transition:
+    border-color var(--duration-fast) ease,
+    background-color var(--duration-fast) ease;
 }
 
 @media (hover: hover) {
@@ -603,8 +610,13 @@ function dismissOffline() {
 }
 
 @keyframes live-pulse {
-  0%, 100% { opacity: 0.35; }
-  50% { opacity: 1; }
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 .battle-log {
@@ -632,18 +644,45 @@ function dismissOffline() {
 }
 
 /* 種別ごとの色。彩度は抑え、重要なものだけ明るくする */
-.log-attack { color: var(--color-content); }
-.log-defeat { color: var(--color-gold); font-weight: 600; }
-.log-level_up { color: var(--color-exp-bright); font-weight: 700; }
-.log-encounter { color: var(--color-content-faint); }
-.log-tower_target_reached { color: var(--color-accent-bright); font-weight: 700; }
-.log-player_defeated { color: var(--color-danger-bright); font-weight: 700; }
-.log-retreat_hp { color: var(--color-danger-bright); }
+.log-attack {
+  color: var(--color-content);
+}
+.log-defeat {
+  color: var(--color-gold);
+  font-weight: 600;
+}
+.log-level_up {
+  color: var(--color-exp-bright);
+  font-weight: 700;
+}
+.log-encounter {
+  color: var(--color-content-faint);
+}
+.log-tower_target_reached {
+  color: var(--color-accent-bright);
+  font-weight: 700;
+}
+.log-player_defeated {
+  color: var(--color-danger-bright);
+  font-weight: 700;
+}
+.log-retreat_hp {
+  color: var(--color-danger-bright);
+}
 .log-potion,
-.log-recovery { color: var(--color-hp-bright); }
-.log-lifesteal { color: var(--color-hp); }
-.log-equipment_drop { color: var(--color-rarity-rare); font-weight: 600; }
-.log-equipment_auto_sold { color: var(--color-content-faint); }
+.log-recovery {
+  color: var(--color-hp-bright);
+}
+.log-lifesteal {
+  color: var(--color-hp);
+}
+.log-equipment_drop {
+  color: var(--color-rarity-rare);
+  font-weight: 600;
+}
+.log-equipment_auto_sold {
+  color: var(--color-content-faint);
+}
 
 .log-empty {
   display: flex;

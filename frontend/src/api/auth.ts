@@ -11,7 +11,7 @@ const BASE = '/api/auth'
 async function authFetch<T>(url: string, options: RequestInit = {}): Promise<T> {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    ...(options.headers as Record<string, string> || {}),
+    ...((options.headers as Record<string, string>) || {}),
   }
 
   let response: Response
@@ -25,7 +25,7 @@ async function authFetch<T>(url: string, options: RequestInit = {}): Promise<T> 
   if (!response.ok) {
     throw await toApiError(response)
   }
-  return await response.json() as T
+  return (await response.json()) as T
 }
 
 /** ゲストアカウント作成 */
@@ -34,7 +34,11 @@ export async function createGuest(): Promise<AuthResponse> {
 }
 
 /** メール+パスワード登録 */
-export async function register(email: string, password: string, displayName?: string): Promise<AuthResponse> {
+export async function register(
+  email: string,
+  password: string,
+  displayName?: string,
+): Promise<AuthResponse> {
   return authFetch<AuthResponse>(`${BASE}/register`, {
     method: 'POST',
     body: JSON.stringify({ email, password, displayName }),

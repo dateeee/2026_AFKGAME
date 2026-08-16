@@ -41,7 +41,11 @@ function fail(message) {
 function javaBin() {
   if (process.env.E2E_JAVA) return process.env.E2E_JAVA
   if (process.env.JAVA_HOME) {
-    const candidate = join(process.env.JAVA_HOME, 'bin', process.platform === 'win32' ? 'java.exe' : 'java')
+    const candidate = join(
+      process.env.JAVA_HOME,
+      'bin',
+      process.platform === 'win32' ? 'java.exe' : 'java',
+    )
     if (existsSync(candidate)) return candidate
   }
   return 'java'
@@ -57,7 +61,9 @@ function catalinaHome() {
     )
   }
   if (!existsSync(join(home, 'bin', 'bootstrap.jar'))) {
-    fail(`CATALINA_HOME=${home} に bin/bootstrap.jar が無い。Tomcat 11.0 の展開先を指しているか確認すること`)
+    fail(
+      `CATALINA_HOME=${home} に bin/bootstrap.jar が無い。Tomcat 11.0 の展開先を指しているか確認すること`,
+    )
   }
   return home
 }
@@ -102,7 +108,20 @@ function buildCatalinaBase(home, war) {
 function psql(database, sql) {
   return spawnSync(
     'docker',
-    ['exec', '-i', dbContainer, 'psql', '-v', 'ON_ERROR_STOP=1', '-U', dbUser, '-d', database, '-c', sql],
+    [
+      'exec',
+      '-i',
+      dbContainer,
+      'psql',
+      '-v',
+      'ON_ERROR_STOP=1',
+      '-U',
+      dbUser,
+      '-d',
+      database,
+      '-c',
+      sql,
+    ],
     { cwd: repoRoot, encoding: 'utf-8' },
   )
 }

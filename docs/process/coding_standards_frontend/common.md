@@ -71,7 +71,7 @@
 | Options API・`defineComponent` | `<script setup lang="ts">`（[basis.md](basis.md) §2 #1） |
 | `reactive()` | `ref()`（[composition.md](composition.md) §1 #1） |
 | `console.*` の残置 | エラーは `errorMessage()` → 画面表示（[api.md](api.md) §6）。デバッグ出力はコミット前に消す |
-| `v-html` | テンプレート補間・`AppIcon`。唯一の例外は静的定数の SVG 描画（[component.md](component.md) §3 #4） |
+| `v-html` | テンプレート補間・`BaseIcon`。唯一の例外は静的定数の SVG 描画（[component.md](component.md) §3 #4） |
 | ユーザー・サーバー由来値の `:href` / `:style` 直接バインド | 許可リスト・トークン参照への変換（[component.md](component.md) §3 #5） |
 | `localStorage` の直接操作 | トークンは `api/client.ts` の管理関数（保管先の正は [tech_auth.md](../../tech/detail/tech_auth.md) §7）。ゲーム状態・設定はサーバー保存 |
 | 生の16進数カラー・寸法の直値 | `var(--*)` トークン（[tech_design_system.md](../../tech/detail/tech_design_system.md)） |

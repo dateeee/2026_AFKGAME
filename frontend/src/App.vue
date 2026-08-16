@@ -13,7 +13,11 @@ const { initialize, isLoading } = useGameLoop()
 
 // ゲスト開始・ログインでは App が再マウントされないため、onMounted だけでは
 // 認証直後のゲーム状態が読み込まれない。認証状態の変化を起点に初期化する。
-watch(() => authStore.isAuthenticated, () => initialize(), { immediate: true })
+watch(
+  () => authStore.isAuthenticated,
+  () => initialize(),
+  { immediate: true },
+)
 
 // 認証画面はヘッダ・ナビを出さず、1枚の画面として見せる
 const isPublic = computed(() => route.meta.public === true)
@@ -67,7 +71,12 @@ const shellWidth = computed(() => (route.name === 'game' ? 'wide' : 'content'))
 }
 
 @keyframes loading-pulse {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 1; }
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 </style>

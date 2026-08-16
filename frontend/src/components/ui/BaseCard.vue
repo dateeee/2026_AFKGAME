@@ -5,15 +5,18 @@
  * 面の階層（surface-1 / surface-2）で情報の優先順位を出す。
  * カードごとに色付きの上辺ボーダーを付けると全パネルが等価に見えるため行わない。
  */
-withDefaults(defineProps<{
-  title?: string
-  /** セクションとして扱うか（見出しを持つ塊は section にする） */
-  as?: 'section' | 'div' | 'article'
-  /** 主役のカード。わずかに明るくして視線を集める */
-  emphasis?: boolean
-  /** 内側の余白を詰める */
-  dense?: boolean
-}>(), { as: 'section' })
+withDefaults(
+  defineProps<{
+    title?: string
+    /** セクションとして扱うか（見出しを持つ塊は section にする） */
+    as?: 'section' | 'div' | 'article'
+    /** 主役のカード。わずかに明るくして視線を集める */
+    emphasis?: boolean
+    /** 内側の余白を詰める */
+    dense?: boolean
+  }>(),
+  { as: 'section', title: undefined },
+)
 </script>
 
 <template>
@@ -37,7 +40,9 @@ withDefaults(defineProps<{
   border-radius: var(--radius-lg);
   padding: 1rem;
   /* 上端の 1px ハイライトで彫り込み感を出す */
-  box-shadow: var(--shadow-card), inset 0 1px 0 rgba(242, 239, 228, 0.045);
+  box-shadow:
+    var(--shadow-card),
+    inset 0 1px 0 rgba(242, 239, 228, 0.045);
 }
 
 .panel-emphasis {

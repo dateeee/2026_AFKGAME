@@ -1,8 +1,15 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import type { EnemyInfo, GameState, Settings, TowerClearInfo, TowerInfo } from '@/types/game'
-import { getTowerList } from '@/api/client'
+import {
+  getGameState,
+  getTowerList,
+  postTowerRetire,
+  postTowerSelect,
+  putTowerMode,
+} from '@/api/client'
 import { ApiError, errorMessage as errorMessage_ } from '@/api/errors'
+import { usePlayerStore } from '@/stores/playerStore'
 
 /** 設定の既定値（正はサーバー: backend/app/config.py の DEFAULT_* / ui.md §設定画面） */
 const DEFAULT_SETTINGS: Settings = {
@@ -46,6 +53,47 @@ export const useGameStore = defineStore('game', () => {
 
   async function loadTowers() {
     towers.value = await getTowerList()
+  }
+
+  /**
+   * 塔操作の結果をゲーム状態から取り直して反映する。
+   * 塔の出入りはプレイヤー側（HP・所持金）も動くため playerStore も同じ応答で更新する。
+   */
+  async function reloadState() {
+    const state = await getGameState()
+    loadFromState(state)
+    usePlayerStore().loadFromState(state)
+  }
+
+  /** 塔へ入る（目標階を指定して攻略を開始する） */
+  async function enterTower(towerId: string, floor: number) {
+    try {
+      await postTowerSelect(towerId, floor)
+      await reloadState()
+    } catch (e) {
+      reportActionFailure(e)
+    }
+  }
+
+  /** 攻略中の塔から撤退する */
+  async function retireFromTower() {
+    try {
+      await postTowerRetire()
+      await reloadState()
+    } catch (e) {
+      reportActionFailure(e)
+    }
+  }
+
+  /** 周回モードを反転させる（auto_repeat ⇄ stop_on_clear） */
+  async function toggleTowerMode() {
+    const newMode = towerMode.value === 'auto_repeat' ? 'stop_on_clear' : 'auto_repeat'
+    try {
+      await putTowerMode(newMode)
+      towerMode.value = newMode
+    } catch (e) {
+      reportActionFailure(e)
+    }
   }
 
   function setConnectionError(message: string) {
@@ -97,10 +145,31 @@ export const useGameStore = defineStore('game', () => {
   }
 
   return {
-    gold, currentTowerId, currentFloor, targetFloor, towerMode, hpThreshold,
-    highestFloor, currentEnemy,
-    settings, towersCleared, towers, isConnected, isLoading, errorMessage, actionError,
-    loadFromState, loadTowers, setConnectionError, clearError,
-    setActionError, clearActionError, reportActionFailure, reset,
+    gold,
+    currentTowerId,
+    currentFloor,
+    targetFloor,
+    towerMode,
+    hpThreshold,
+    highestFloor,
+    currentEnemy,
+    settings,
+    towersCleared,
+    towers,
+    isConnected,
+    isLoading,
+    errorMessage,
+    actionError,
+    loadFromState,
+    loadTowers,
+    enterTower,
+    retireFromTower,
+    toggleTowerMode,
+    setConnectionError,
+    clearError,
+    setActionError,
+    clearActionError,
+    reportActionFailure,
+    reset,
   }
 })

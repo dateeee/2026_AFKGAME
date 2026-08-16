@@ -1,19 +1,22 @@
 <script setup lang="ts">
-import AppIcon from './AppIcon.vue'
+import BaseIcon from './BaseIcon.vue'
 
 /**
  * 数値入力（−/＋ 付き）。
  * スマホでは数字キーボードを出すより ± の連打の方が速く確実なため、
  * 44px のボタンを両脇に置く。入力欄自体も残して直接入力もできるようにする。
  */
-const props = withDefaults(defineProps<{
-  modelValue: number
-  min?: number
-  max?: number
-  step?: number
-  id?: string
-  ariaLabel?: string
-}>(), { min: 1, step: 1 })
+const props = withDefaults(
+  defineProps<{
+    modelValue: number
+    min?: number
+    max?: number
+    step?: number
+    id?: string
+    ariaLabel?: string
+  }>(),
+  { min: 1, step: 1, max: undefined, id: undefined, ariaLabel: undefined },
+)
 
 const emit = defineEmits<{ 'update:modelValue': [number] }>()
 
@@ -42,7 +45,7 @@ function onInput(e: Event) {
       aria-label="1減らす"
       @click="shift(-step)"
     >
-      <AppIcon name="minus" :size="16" />
+      <BaseIcon name="minus" :size="16" />
     </button>
     <input
       :id="id"
@@ -62,7 +65,7 @@ function onInput(e: Event) {
       aria-label="1増やす"
       @click="shift(step)"
     >
-      <AppIcon name="plus" :size="16" />
+      <BaseIcon name="plus" :size="16" />
     </button>
   </div>
 </template>
@@ -87,7 +90,9 @@ function onInput(e: Event) {
   background: transparent;
   color: var(--color-content-muted);
   cursor: pointer;
-  transition: background-color var(--duration-fast) ease, color var(--duration-fast) ease;
+  transition:
+    background-color var(--duration-fast) ease,
+    color var(--duration-fast) ease;
 }
 
 @media (hover: hover) {

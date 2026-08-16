@@ -1,26 +1,27 @@
 <script setup lang="ts" generic="T extends string | number">
 import { computed } from 'vue'
-import AppIcon from './AppIcon.vue'
+import BaseIcon from './BaseIcon.vue'
 
 /**
  * 全画面共通のセレクト。
  * 選択肢は options で渡す（DOM 経由で文字列化されるのを避け、元の型のまま返すため）。
  * 文字サイズは 16px 固定（下回ると iOS Safari がタップ時に画面を拡大する）。
  */
-const props = withDefaults(defineProps<{
-  modelValue: T
-  options: ReadonlyArray<{ value: T; label: string }>
-  id?: string
-  ariaLabel?: string
-  block?: boolean
-}>(), { block: false })
+const props = withDefaults(
+  defineProps<{
+    modelValue: T
+    options: ReadonlyArray<{ value: T; label: string }>
+    id?: string
+    ariaLabel?: string
+    block?: boolean
+  }>(),
+  { block: false, id: undefined, ariaLabel: undefined },
+)
 
 const emit = defineEmits<{ 'update:modelValue': [T] }>()
 
 // value を DOM に渡すと文字列化されるため、添字で往復させる
-const selectedIndex = computed(() =>
-  props.options.findIndex(o => o.value === props.modelValue)
-)
+const selectedIndex = computed(() => props.options.findIndex((o) => o.value === props.modelValue))
 
 function onChange(e: Event) {
   const option = props.options[Number((e.target as HTMLSelectElement).value)]
@@ -41,7 +42,7 @@ function onChange(e: Event) {
         {{ option.label }}
       </option>
     </select>
-    <AppIcon name="chevron-down" :size="16" class="select-chevron" />
+    <BaseIcon name="chevron-down" :size="16" class="select-chevron" />
   </div>
 </template>
 

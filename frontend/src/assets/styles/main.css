@@ -1,5 +1,5 @@
-@import "tailwindcss";
-@import "./tokens.css";
+@import 'tailwindcss';
+@import './tokens.css';
 
 /* ============================================================
    Base Layer
@@ -212,10 +212,14 @@
 
 @keyframes rarity-glow {
   from {
-    box-shadow: 0 0 0 1px var(--glow-color), 0 0 6px -2px var(--glow-color);
+    box-shadow:
+      0 0 0 1px var(--glow-color),
+      0 0 6px -2px var(--glow-color);
   }
   to {
-    box-shadow: 0 0 0 1px var(--glow-color), 0 0 16px -2px var(--glow-color);
+    box-shadow:
+      0 0 0 1px var(--glow-color),
+      0 0 16px -2px var(--glow-color);
   }
 }
 

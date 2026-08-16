@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import AppIcon from '@/components/ui/AppIcon.vue'
+import BaseIcon from '@/components/ui/BaseIcon.vue'
 import { useGameStore } from '@/stores/gameStore'
 
 /**
@@ -14,7 +14,7 @@ const gameStore = useGameStore()
 <template>
   <transition name="banner">
     <div v-if="!gameStore.isConnected" class="conn-banner px-safe pt-safe" role="alert">
-      <AppIcon name="alert" :size="16" />
+      <BaseIcon name="alert" :size="16" />
       <span>{{ gameStore.errorMessage }}</span>
     </div>
   </transition>
@@ -42,7 +42,9 @@ const gameStore = useGameStore()
 
 .banner-enter-active,
 .banner-leave-active {
-  transition: transform var(--duration-base) var(--ease-out-quart), opacity var(--duration-base);
+  transition:
+    transform var(--duration-base) var(--ease-out-quart),
+    opacity var(--duration-base);
 }
 
 .banner-enter-from,

@@ -24,7 +24,7 @@ flowchart TB
         end
 
         subgraph Components["Components (tech_design_system.md が正)"]
-            UiPrimitives["ui/ UIプリミティブ\nBase{Button,Card,Modal,Badge,\nField,Select,TextInput}\nNumberStepper / StatBar\nAppIcon / icons.ts\n※ストアを参照しない"]
+            UiPrimitives["ui/ UIプリミティブ\nBase{Button,Card,Modal,Badge,\nField,Select,TextInput}\nBase{NumberStepper,StatBar,Icon}\nicons.ts\n※ストアを参照しない"]
             Layout["layout/ アプリシェル\nAppShell (100dvh grid)\nAppHeader / AppNav / navItems.ts\nConnectionBanner (接続エラー)"]
             EquipComp["equipment/ Phase2~\nEquipmentCard / EquipmentCompare\nEquipmentInventory / EquipmentSlotGrid"]
         end

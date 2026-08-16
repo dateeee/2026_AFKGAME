@@ -33,7 +33,9 @@ let timer: ReturnType<typeof setInterval> | undefined
 
 onMounted(async () => {
   await loadShop()
-  timer = setInterval(() => { nowMs.value = Date.now() }, 1000)
+  timer = setInterval(() => {
+    nowMs.value = Date.now()
+  }, 1000)
 })
 
 onUnmounted(() => {
@@ -58,8 +60,10 @@ watch(remainingLabel, (label, previous) => {
 
 function statLines(item: ShopDailyItem): string[] {
   const entries: Array<[string, number | null]> = [
-    ['ATK', item.statAtk], ['DEF', item.statDef],
-    ['HP', item.statHp], ['SPD', item.statSpd],
+    ['ATK', item.statAtk],
+    ['DEF', item.statDef],
+    ['HP', item.statHp],
+    ['SPD', item.statSpd],
   ]
   return entries.filter(([, v]) => v !== null).map(([k, v]) => `${k} +${v}`)
 }
@@ -70,14 +74,16 @@ async function loadShop() {
     shopItems.value = data.lineup
     dailyItems.value = data.daily ?? []
     dailyResetAt.value = data.dailyResetAt ?? ''
-  } catch (e) {
+  } catch {
     message.value = 'ショップの読み込みに失敗しました'
   }
 }
 
 function flash(text: string) {
   message.value = text
-  setTimeout(() => { message.value = '' }, 2000)
+  setTimeout(() => {
+    message.value = ''
+  }, 2000)
 }
 
 async function refreshPlayer() {
@@ -119,7 +125,10 @@ async function buyDaily(item: ShopDailyItem) {
     <!-- タブ。押せる範囲を広く取り、選択中は面ごと持ち上げる -->
     <div class="tabs" role="tablist">
       <button
-        v-for="t in [{ id: 'permanent', label: '常設' }, { id: 'daily', label: '日替わり' }] as const"
+        v-for="t in [
+          { id: 'permanent', label: '常設' },
+          { id: 'daily', label: '日替わり' },
+        ] as const"
         :key="t.id"
         class="tab"
         :class="{ 'tab-active': tab === t.id }"
@@ -141,19 +150,21 @@ async function buyDaily(item: ShopDailyItem) {
           <BaseBadge tone="gold" icon="coin" class="num">{{ item.price }}G</BaseBadge>
         </template>
 
-        <p class="item-effect">HP <span class="num">{{ (item.healRatio * 100).toFixed(0) }}</span>% 回復</p>
+        <p class="item-effect">
+          HP <span class="num">{{ (item.healRatio * 100).toFixed(0) }}</span
+          >% 回復
+        </p>
         <p class="item-stock num">所持: {{ item.quantityOwned }} / {{ item.stackLimit }}</p>
 
         <div class="buy-row">
-          <BaseSelect
-            v-model="buyQuantity"
-            :options="QUANTITY_OPTIONS"
-            aria-label="購入数"
-          />
+          <BaseSelect v-model="buyQuantity" :options="QUANTITY_OPTIONS" aria-label="購入数" />
           <BaseButton
             variant="primary"
             class="buy-btn"
-            :disabled="gameStore.gold < item.price * buyQuantity || item.quantityOwned + buyQuantity > item.stackLimit"
+            :disabled="
+              gameStore.gold < item.price * buyQuantity ||
+              item.quantityOwned + buyQuantity > item.stackLimit
+            "
             @click="buyItem(item.itemId)"
           >
             購入 ({{ formatGold(item.price * buyQuantity) }}G)
@@ -164,7 +175,9 @@ async function buyDaily(item: ShopDailyItem) {
 
     <!-- 日替わり -->
     <div v-else class="shop-list">
-      <p class="daily-reset">次回更新まで: <span class="num">{{ remainingLabel }}</span></p>
+      <p class="daily-reset">
+        次回更新まで: <span class="num">{{ remainingLabel }}</span>
+      </p>
 
       <BaseCard
         v-for="item in dailyItems"
@@ -231,7 +244,9 @@ async function buyDaily(item: ShopDailyItem) {
   font-size: var(--text-label);
   font-weight: 600;
   cursor: pointer;
-  transition: background-color var(--duration-fast) ease, color var(--duration-fast) ease;
+  transition:
+    background-color var(--duration-fast) ease,
+    color var(--duration-fast) ease;
 }
 
 @media (hover: hover) {

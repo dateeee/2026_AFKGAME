@@ -62,7 +62,10 @@ async function handleSubmit() {
 
     <div class="tabs" role="tablist">
       <button
-        v-for="t in [{ id: 'login', label: 'ログイン' }, { id: 'register', label: '新規登録' }] as const"
+        v-for="t in [
+          { id: 'login', label: 'ログイン' },
+          { id: 'register', label: '新規登録' },
+        ] as const"
         :key="t.id"
         type="button"
         class="tab"
@@ -78,7 +81,12 @@ async function handleSubmit() {
     <form class="form" @submit.prevent="handleSubmit">
       <BaseField v-if="mode === 'register'" label="表示名">
         <template #default="{ id }">
-          <BaseTextInput :id="id" v-model="displayName" placeholder="冒険者" autocomplete="nickname" />
+          <BaseTextInput
+            :id="id"
+            v-model="displayName"
+            placeholder="冒険者"
+            autocomplete="nickname"
+          />
         </template>
       </BaseField>
 
@@ -111,7 +119,7 @@ async function handleSubmit() {
       <p v-if="authStore.error" class="form-error" role="alert">{{ authStore.error }}</p>
 
       <BaseButton type="submit" variant="secondary" size="lg" block :disabled="authStore.loading">
-        {{ authStore.loading ? '処理中...' : (mode === 'login' ? 'ログイン' : '登録') }}
+        {{ authStore.loading ? '処理中...' : mode === 'login' ? 'ログイン' : '登録' }}
       </BaseButton>
     </form>
   </div>
@@ -191,7 +199,9 @@ async function handleSubmit() {
   font-size: var(--text-label);
   font-weight: 600;
   cursor: pointer;
-  transition: background-color var(--duration-fast) ease, color var(--duration-fast) ease;
+  transition:
+    background-color var(--duration-fast) ease,
+    color var(--duration-fast) ease;
 }
 
 .tab-active {

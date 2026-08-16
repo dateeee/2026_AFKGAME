@@ -40,11 +40,21 @@ export const SLOT_LABELS: Record<string, string> = {
 
 /** ベースID→表示名 */
 export const BASE_NAMES: Record<string, string> = {
-  sword: '剣', dagger: '短剣', mace: 'メイス',
-  greatsword: '大剣', spear: '槍', bow: '弓', staff: '杖',
-  shield: '盾', helm: '兜', chest_armor: '鎧',
-  gauntlets: '小手', belt: '帯', greaves: '脛当て',
-  earring: '耳飾り', ring: '指輪',
+  sword: '剣',
+  dagger: '短剣',
+  mace: 'メイス',
+  greatsword: '大剣',
+  spear: '槍',
+  bow: '弓',
+  staff: '杖',
+  shield: '盾',
+  helm: '兜',
+  chest_armor: '鎧',
+  gauntlets: '小手',
+  belt: '帯',
+  greaves: '脛当て',
+  earring: '耳飾り',
+  ring: '指輪',
 }
 
 export const useEquipmentStore = defineStore('equipment', () => {
@@ -65,13 +75,13 @@ export const useEquipmentStore = defineStore('equipment', () => {
   const equippedItems = computed(() => {
     const map: Record<string, Equipment | null> = {}
     for (const [slot, eqId] of Object.entries(equipped.value)) {
-      map[slot] = eqId ? items.value.find(e => e.id === eqId) ?? null : null
+      map[slot] = eqId ? (items.value.find((e) => e.id === eqId) ?? null) : null
     }
     return map
   })
 
   const inventory = computed(() =>
-    items.value.filter(e => !Object.values(equipped.value).includes(e.id))
+    items.value.filter((e) => !Object.values(equipped.value).includes(e.id)),
   )
 
   /**
@@ -87,13 +97,13 @@ export const useEquipmentStore = defineStore('equipment', () => {
 
   async function sellItems(equipmentIds: string[]) {
     const result = await postEquipmentSell(equipmentIds)
-    items.value = items.value.filter(e => !equipmentIds.includes(e.id))
+    items.value = items.value.filter((e) => !equipmentIds.includes(e.id))
     return result
   }
 
   async function toggleLock(equipmentId: string) {
     const result = await postEquipmentLock(equipmentId)
-    const item = items.value.find(e => e.id === equipmentId)
+    const item = items.value.find((e) => e.id === equipmentId)
     if (item) {
       item.locked = result.locked
     }
@@ -101,8 +111,14 @@ export const useEquipmentStore = defineStore('equipment', () => {
   }
 
   return {
-    items, equipped,
-    equippedItems, inventory,
-    loadFromState, reset, equipItem, sellItems, toggleLock,
+    items,
+    equipped,
+    equippedItems,
+    inventory,
+    loadFromState,
+    reset,
+    equipItem,
+    sellItems,
+    toggleLock,
   }
 })

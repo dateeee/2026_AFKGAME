@@ -9,10 +9,13 @@ import AppNav from './AppNav.vue'
  *  - スクロールするのは main だけ（grid の 1fr + min-height:0）
  *  - セーフエリア（ノッチ・ホームインジケータ）の余白確保
  */
-withDefaults(defineProps<{
-  /** 本文の最大幅。1カラム画面は content、2カラム前提の画面は wide */
-  width?: 'content' | 'wide'
-}>(), { width: 'content' })
+withDefaults(
+  defineProps<{
+    /** 本文の最大幅。1カラム画面は content、2カラム前提の画面は wide */
+    width?: 'content' | 'wide'
+  }>(),
+  { width: 'content' },
+)
 </script>
 
 <template>

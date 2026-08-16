@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Equipment } from '@/types/game'
 import { RARITY_COLORS, RARITY_LABELS, SLOT_LABELS, BASE_NAMES } from '@/stores/equipmentStore'
-import AppIcon from '@/components/ui/AppIcon.vue'
+import BaseIcon from '@/components/ui/BaseIcon.vue'
 
 defineProps<{
   item: Equipment
@@ -28,15 +28,11 @@ defineEmits<{
       <span class="font-semibold card-name">
         {{ BASE_NAMES[item.baseId] ?? item.baseId }}
       </span>
-      <AppIcon v-if="item.locked" name="lock" :size="14" class="card-lock" />
+      <BaseIcon v-if="item.locked" name="lock" :size="14" class="card-lock" />
     </div>
 
-    <p class="card-meta num">
-      {{ RARITY_LABELS[item.rarity] }} Lv.{{ item.level }}
-    </p>
-    <p class="card-meta">
-      {{ SLOT_LABELS[item.slot] }}{{ item.isTwoHanded ? '（両手）' : '' }}
-    </p>
+    <p class="card-meta num">{{ RARITY_LABELS[item.rarity] }} Lv.{{ item.level }}</p>
+    <p class="card-meta">{{ SLOT_LABELS[item.slot] }}{{ item.isTwoHanded ? '（両手）' : '' }}</p>
 
     <div class="chips">
       <span v-if="item.statAtk" class="stat-chip num">ATK +{{ item.statAtk }}</span>
@@ -62,7 +58,9 @@ defineEmits<{
   border-top: 2px solid var(--card-rarity-color, var(--color-line));
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: background-color var(--duration-fast) ease, box-shadow var(--duration-fast) ease;
+  transition:
+    background-color var(--duration-fast) ease,
+    box-shadow var(--duration-fast) ease;
 }
 
 @media (hover: hover) {

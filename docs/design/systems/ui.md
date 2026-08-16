@@ -5,7 +5,7 @@
 ## 描画方針
 - **すべてDOM（HTML/CSS）で構成**。Canvasは使用しない
 - 戦闘描写・キャラクターアニメーションなし。**テキストログのみで戦闘を表現**
-- アイテム・装備・レアリティ等にはアイコンを併用してよい。UIアイコンは**インラインSVG**（`AppIcon`）で表現し、**絵文字は使わない**（[tech_design_system.md](../../tech/detail/tech_design_system.md) 禁止事項）
+- アイテム・装備・レアリティ等にはアイコンを併用してよい。UIアイコンは**インラインSVG**（`BaseIcon`）で表現し、**絵文字は使わない**（[tech_design_system.md](../../tech/detail/tech_design_system.md) 禁止事項）
 - HPバー・経験値バーなどのゲージ表現はCSS（`<div>` + `width%`）で実装
 
 ## ブラウザ対応範囲・レスポンシブ設計

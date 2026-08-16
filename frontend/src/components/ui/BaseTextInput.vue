@@ -3,16 +3,25 @@
  * 全画面共通のテキスト入力。
  * 文字サイズは 16px 固定（下回ると iOS Safari がタップ時に画面を拡大する）。
  */
-withDefaults(defineProps<{
-  modelValue: string
-  id?: string
-  type?: 'text' | 'email' | 'password'
-  placeholder?: string
-  required?: boolean
-  minlength?: number
-  autocomplete?: string
-  invalid?: boolean
-}>(), { type: 'text' })
+withDefaults(
+  defineProps<{
+    modelValue: string
+    id?: string
+    type?: 'text' | 'email' | 'password'
+    placeholder?: string
+    required?: boolean
+    minlength?: number
+    autocomplete?: string
+    invalid?: boolean
+  }>(),
+  {
+    type: 'text',
+    id: undefined,
+    placeholder: undefined,
+    minlength: undefined,
+    autocomplete: undefined,
+  },
+)
 
 defineEmits<{ 'update:modelValue': [string] }>()
 </script>

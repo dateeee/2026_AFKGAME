@@ -4,7 +4,17 @@ import type { EquipmentSlot } from '@/types/game'
 
 const equipmentStore = useEquipmentStore()
 
-const SLOTS: EquipmentSlot[] = ['weapon', 'shield', 'head', 'body', 'arms', 'waist', 'legs', 'ears', 'ring']
+const SLOTS: EquipmentSlot[] = [
+  'weapon',
+  'shield',
+  'head',
+  'body',
+  'arms',
+  'waist',
+  'legs',
+  'ears',
+  'ring',
+]
 
 defineEmits<{
   selectSlot: [slot: EquipmentSlot]
@@ -19,14 +29,19 @@ defineEmits<{
       type="button"
       class="slot-item"
       :class="{ filled: equipmentStore.equippedItems[slot] }"
-      :style="equipmentStore.equippedItems[slot]
-        ? { '--slot-rarity-color': RARITY_COLORS[equipmentStore.equippedItems[slot]!.rarity] }
-        : {}"
+      :style="
+        equipmentStore.equippedItems[slot]
+          ? { '--slot-rarity-color': RARITY_COLORS[equipmentStore.equippedItems[slot]!.rarity] }
+          : {}
+      "
       @click="$emit('selectSlot', slot)"
     >
       <span class="slot-label">{{ SLOT_LABELS[slot] }}</span>
       <span v-if="equipmentStore.equippedItems[slot]" class="slot-name">
-        {{ BASE_NAMES[equipmentStore.equippedItems[slot]!.baseId] ?? equipmentStore.equippedItems[slot]!.baseId }}
+        {{
+          BASE_NAMES[equipmentStore.equippedItems[slot]!.baseId] ??
+          equipmentStore.equippedItems[slot]!.baseId
+        }}
       </span>
       <span v-else class="slot-empty" aria-label="未装備">—</span>
     </button>
@@ -54,7 +69,9 @@ defineEmits<{
   border: 1px dashed var(--color-line);
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: background-color var(--duration-fast) ease, border-color var(--duration-fast) ease;
+  transition:
+    background-color var(--duration-fast) ease,
+    border-color var(--duration-fast) ease;
 }
 
 @media (hover: hover) {

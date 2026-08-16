@@ -2,7 +2,7 @@
  * APIエラー型
  *
  * バックエンドは全例外を `{"error": {"code", "message"}}` に統一している
- * （backend/app/exceptions.py、コード体系は docs/tech/basic/tech_error_handling.md）。
+ * （応答形式・コード体系の正は docs/tech/basic/tech_error_handling.md）。
  * サーバーが用意した日本語メッセージとエラーコードを、そのまま画面へ届けるための型。
  */
 
@@ -42,12 +42,7 @@ export function isSessionExpired(error: unknown): boolean {
 
 /** 通信断を表す ApiError を作る */
 export function networkError(cause?: unknown): ApiError {
-  return new ApiError(
-    'サーバーに接続できません',
-    'NETWORK_ERROR',
-    NETWORK_ERROR_STATUS,
-    cause,
-  )
+  return new ApiError('サーバーに接続できません', 'NETWORK_ERROR', NETWORK_ERROR_STATUS, cause)
 }
 
 /**

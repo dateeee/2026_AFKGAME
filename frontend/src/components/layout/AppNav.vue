@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import AppIcon from '@/components/ui/AppIcon.vue'
+import BaseIcon from '@/components/ui/BaseIcon.vue'
 import { NAV_ITEMS } from './navItems'
 </script>
 
@@ -12,7 +12,7 @@ import { NAV_ITEMS } from './navItems'
       class="nav-link"
       active-class="nav-link-active"
     >
-      <AppIcon :name="item.icon" :size="22" />
+      <BaseIcon :name="item.icon" :size="22" />
       <span class="nav-label">{{ item.label }}</span>
     </router-link>
   </nav>
@@ -37,7 +37,9 @@ import { NAV_ITEMS } from './navItems'
   min-height: var(--size-nav-h);
   padding: 0.5rem 0.25rem;
   color: var(--color-content-faint);
-  transition: color var(--duration-fast) ease, background-color var(--duration-fast) ease;
+  transition:
+    color var(--duration-fast) ease,
+    background-color var(--duration-fast) ease;
 }
 
 @media (hover: hover) {

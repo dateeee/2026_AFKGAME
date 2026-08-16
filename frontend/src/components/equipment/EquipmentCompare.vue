@@ -4,7 +4,7 @@ import { RARITY_COLORS, RARITY_LABELS, BASE_NAMES } from '@/stores/equipmentStor
 import BaseModal from '@/components/ui/BaseModal.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 
-const props = defineProps<{
+defineProps<{
   current: Equipment | null
   preview: Equipment
 }>()
@@ -43,7 +43,9 @@ function diff(newVal: number | null, oldVal: number | null): { text: string; cls
           <span class="item-name" :style="{ color: RARITY_COLORS[current.rarity] }">
             {{ BASE_NAMES[current.baseId] ?? current.baseId }}
           </span>
-          <span class="item-meta num">{{ RARITY_LABELS[current.rarity] }} Lv.{{ current.level }}</span>
+          <span class="item-meta num"
+            >{{ RARITY_LABELS[current.rarity] }} Lv.{{ current.level }}</span
+          >
         </template>
         <span v-else class="item-none">なし</span>
       </div>
@@ -53,7 +55,9 @@ function diff(newVal: number | null, oldVal: number | null): { text: string; cls
         <span class="item-name" :style="{ color: RARITY_COLORS[preview.rarity] }">
           {{ BASE_NAMES[preview.baseId] ?? preview.baseId }}
         </span>
-        <span class="item-meta num">{{ RARITY_LABELS[preview.rarity] }} Lv.{{ preview.level }}</span>
+        <span class="item-meta num"
+          >{{ RARITY_LABELS[preview.rarity] }} Lv.{{ preview.level }}</span
+        >
       </div>
     </div>
 
@@ -77,8 +81,12 @@ function diff(newVal: number | null, oldVal: number | null): { text: string; cls
         </tr>
         <tr v-if="preview.lifesteal || current?.lifesteal">
           <th scope="row">吸収</th>
-          <td class="num">{{ current?.lifesteal ? (current.lifesteal * 100).toFixed(1) + '%' : '-' }}</td>
-          <td class="num">{{ preview.lifesteal ? (preview.lifesteal * 100).toFixed(1) + '%' : '-' }}</td>
+          <td class="num">
+            {{ current?.lifesteal ? (current.lifesteal * 100).toFixed(1) + '%' : '-' }}
+          </td>
+          <td class="num">
+            {{ preview.lifesteal ? (preview.lifesteal * 100).toFixed(1) + '%' : '-' }}
+          </td>
           <td>-</td>
         </tr>
       </tbody>

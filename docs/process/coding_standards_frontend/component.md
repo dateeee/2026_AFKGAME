@@ -33,7 +33,7 @@
 | 1 | `v-for` には安定した一意 ID で `:key` を必ず付ける（スタイルガイド優先度A）。並び替え・挿入がある一覧に配列 index をキーにしない |
 | 2 | `v-if` と `v-for` を同じ要素に書かない（スタイルガイド優先度A。`computed` で絞り込むか `<template>` で分ける） |
 | 3 | テンプレート式は一目で読める長さに留める。条件・変換が2段を超えたら `computed` か関数へ出す |
-| 4 | `v-html` は使わない。唯一の例外は**自前の静的定数**を描画する `AppIcon`（`icons.ts` の SVG パス）。ユーザー・サーバー由来の文字列が渡る経路を作らない（XSS。ガイド「セキュリティー」） |
+| 4 | `v-html` は使わない。唯一の例外は**自前の静的定数**を描画する `BaseIcon`（`icons.ts` の SVG パス）。ユーザー・サーバー由来の文字列が渡る経路を作らない（XSS。ガイド「セキュリティー」） |
 | 5 | `:href`・`:style` にユーザー・サーバー由来の値を直接束ねない（URL・スタイル注入）。色は `RARITY_COLORS` のように**トークン参照へ変換してから**束ねる |
 | 6 | イベントは `@click="fn"` の関数参照か1文の式で書く。複数文をテンプレートに書かない |
 
@@ -46,7 +46,7 @@
 | `components/<機能>/` | 機能名 | `EquipmentCard`。ストア参照可 |
 | `views/` | —（接尾辞 `View`） | `GameView.vue` |
 
-- `ui/` の接頭辞はスタイルガイド優先度B「ベースコンポーネントの名前」の適用で、**例外を作らない**（既存の `AppIcon`・`NumberStepper`・`StatBar` は逸脱 → [known_issues.md](../../backlog/known_issues.md) の修正対象）
+- `ui/` の接頭辞はスタイルガイド優先度B「ベースコンポーネントの名前」の適用で、**例外を作らない**（`BaseIcon`・`BaseNumberStepper`・`BaseStatBar` も接頭辞に従う）
 - 同じ見た目・挙動を画面側で再実装しない。部品の不足は `ui/` への追加が先（[tech_design_system.md](../../tech/detail/tech_design_system.md) §2）
 - コンポーネントでないモジュール（`navItems.ts`・`icons.ts`）は camelCase の ts ファイルとして同居してよい
 

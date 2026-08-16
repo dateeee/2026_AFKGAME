@@ -1,6 +1,6 @@
 /**
  * API通信クライアント（Phase 2: JWT認証対応）
- * - アクセストークンはメモリ保持（authStore経由）
+ * - アクセストークンは本ファイルのモジュール変数でメモリ保持（tech_auth.md §7）
  * - 401時にリフレッシュトークンで自動再取得
  * - USE_API=false でバックエンド未起動時のフォールバック
  * - リトライはネットワークエラー時のみ・冪等なリクエストに限る（下記 fetchWithRetry）
@@ -10,7 +10,6 @@ import type {
   Equipment,
   GameState,
   Settings,
-  ShopDailyItem,
   ShopLineupResponse,
   TickResponse,
   TowerInfo,
@@ -95,7 +94,7 @@ async function tryRefresh(): Promise<boolean> {
 function buildHeaders(options: RequestInit): Record<string, string> {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    ...(options.headers as Record<string, string> || {}),
+    ...((options.headers as Record<string, string>) || {}),
   }
   const token = getAccessToken()
   if (token) {
@@ -104,14 +103,14 @@ function buildHeaders(options: RequestInit): Record<string, string> {
   return headers
 }
 
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 /** 1回送信する。401 ならリフレッシュして1度だけ再送する（リトライ回数とは別枠） */
 async function sendWithAuth(url: string, options: RequestInit): Promise<Response> {
   const response = await fetch(url, { ...options, headers: buildHeaders(options) })
   if (response.status !== 401) return response
 
-  if (!await tryRefresh()) {
+  if (!(await tryRefresh())) {
     // リフレッシュ不可＝再送しても結果は変わらないので即時失敗させる
     throw new ApiError('認証に失敗しました', SESSION_EXPIRED_CODE, 401)
   }
@@ -148,7 +147,7 @@ async function fetchWithRetry<T>(url: string, options: RequestInit = {}): Promis
     }
 
     if (!response.ok) throw await toApiError(response)
-    return await response.json() as T
+    return (await response.json()) as T
   }
   throw networkError(lastCause)
 }
@@ -179,7 +178,11 @@ export async function getTowerList(): Promise<TowerInfo[]> {
 }
 
 /** 塔選択 */
-export async function postTowerSelect(towerId: string, targetFloor: number, mode: string = 'auto_repeat') {
+export async function postTowerSelect(
+  towerId: string,
+  targetFloor: number,
+  mode: string = 'auto_repeat',
+) {
   return fetchWithRetry<{ status: string }>('/api/tower/select', {
     method: 'POST',
     body: JSON.stringify({ towerId, targetFloor, mode }),
@@ -216,10 +219,13 @@ export async function getShopLineup(): Promise<ShopLineupResponse> {
 
 /** ショップ購入（常設商品） */
 export async function postShopBuy(itemId: string, quantity: number) {
-  return fetchWithRetry<{ status: string; gold: number; itemId: string; quantity: number }>('/api/shop/buy', {
-    method: 'POST',
-    body: JSON.stringify({ itemId, quantity }),
-  })
+  return fetchWithRetry<{ status: string; gold: number; itemId: string; quantity: number }>(
+    '/api/shop/buy',
+    {
+      method: 'POST',
+      body: JSON.stringify({ itemId, quantity }),
+    },
+  )
 }
 
 /** ショップ購入（日替わり装備） */

@@ -36,7 +36,8 @@ export interface Settings {
 }
 
 /** 装備スロット */
-export type EquipmentSlot = 'weapon' | 'shield' | 'head' | 'body' | 'arms' | 'waist' | 'legs' | 'ears' | 'ring'
+export type EquipmentSlot =
+  'weapon' | 'shield' | 'head' | 'body' | 'arms' | 'waist' | 'legs' | 'ears' | 'ring'
 
 /** レアリティ */
 export type Rarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary'

@@ -23,11 +23,15 @@ function onKeydown(e: KeyboardEvent) {
 }
 
 // 背面のスクロール（body）を止める。モーダル内部は独自にスクロールさせる
-watch(() => props.open, (open) => {
-  document.documentElement.style.overflow = open ? 'hidden' : ''
-  if (open) window.addEventListener('keydown', onKeydown)
-  else window.removeEventListener('keydown', onKeydown)
-}, { immediate: true })
+watch(
+  () => props.open,
+  (open) => {
+    document.documentElement.style.overflow = open ? 'hidden' : ''
+    if (open) window.addEventListener('keydown', onKeydown)
+    else window.removeEventListener('keydown', onKeydown)
+  },
+  { immediate: true },
+)
 
 onBeforeUnmount(() => {
   document.documentElement.style.overflow = ''
@@ -81,7 +85,9 @@ onBeforeUnmount(() => {
   background-color: var(--color-surface-1);
   border: 1px solid var(--color-line);
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-overlay), inset 0 1px 0 rgba(242, 239, 228, 0.06);
+  box-shadow:
+    var(--shadow-overlay),
+    inset 0 1px 0 rgba(242, 239, 228, 0.06);
 }
 
 .modal-head {

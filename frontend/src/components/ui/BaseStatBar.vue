@@ -7,22 +7,25 @@ import { computed } from 'vue'
  * ※ E2E がバー要素の「次の兄弟 span」を数値として参照するため、
  *   バー要素と数値 span の隣接関係を崩さないこと。
  */
-const props = withDefaults(defineProps<{
-  label: string
-  value: number
-  max: number
-  tone?: 'hp' | 'exp' | 'enemy'
-  /** HPが閾値以下のとき色を変える（危険域の可視化） */
-  lowThreshold?: number
-}>(), { tone: 'hp' })
+const props = withDefaults(
+  defineProps<{
+    label: string
+    value: number
+    max: number
+    tone?: 'hp' | 'exp' | 'enemy'
+    /** HPが閾値以下のとき色を変える（危険域の可視化） */
+    lowThreshold?: number
+  }>(),
+  { tone: 'hp', lowThreshold: undefined },
+)
 
 const percent = computed(() => {
   if (props.max <= 0) return 0
   return Math.min(100, Math.max(0, (props.value / props.max) * 100))
 })
 
-const isLow = computed(() =>
-  props.lowThreshold !== undefined && percent.value <= props.lowThreshold * 100
+const isLow = computed(
+  () => props.lowThreshold !== undefined && percent.value <= props.lowThreshold * 100,
 )
 </script>
 
