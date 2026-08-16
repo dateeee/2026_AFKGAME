@@ -56,6 +56,20 @@ public interface PlayerRepository {
     void updateTickState(Player player);
 
     /**
+     * 塔操作の結果として変わった探索状態を反映する。
+     *
+     * <p>入塔・リタイア・モード変更が更新する塔フィールド（現在の塔・現在階・目標階・周回モード・
+     * 交戦中の敵・周回ゴールド）だけを書き戻す（docs/tech/detail/tech_tower/select.md §7 手順8）。
+     * {@link #updateTickState} を流用しない — あちらは {@code last_tick_at} も更新するため、
+     * 塔操作で未処理tickを食い潰してしまう（docs/tech/detail/tech_tick.md §4）。
+     *
+     * <p><b>マッピング XML はテストリスト作成②-a では未作成で、製造②で書く。</b>
+     *
+     * @param player 更新するプレイヤー
+     */
+    void updateTowerState(Player player);
+
+    /**
      * プレイヤーを登録する。
      *
      * @param player 登録するプレイヤー
