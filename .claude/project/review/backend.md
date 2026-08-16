@@ -28,7 +28,7 @@ python .claude/scripts/review_prep.py --dir docs/reviews/backend-review \
 ## 2. 観点
 
 **コーディング規約への適合を先に見る**。§5 チェックリスト [review-checklist.md](../../references/coding-standards-backend/review-checklist.md)、§2〜§4 規約本体は索引 [coding-standards-backend.md](../../references/coding-standards-backend.md) の分冊（`layering` / `writing` / `exception-logging`）（正: [coding_standards_backend.md](../../../docs/process/coding_standards_backend.md)）。
-規約に書かれた項目の指摘は**規約の節番号を添える**。機械判定できる13ルール（タブ・行長・import・ログ・DI・SQL・日時・乱数・マスク・未参照）は `python scripts/check_java_conventions.py` が判定するので、**先に実行して出力をそのまま取り込み**、目視で重ねて探さない。下表はそれに加えて見る、AFK GAME 固有の観点。
+規約に書かれた項目の指摘は**規約の節番号を添える**。機械判定できる13ルール（タブ・行長・import・ログ・DI・SQL・日時・乱数・マスク・未参照）は `python scripts/check_java_conventions.py` が判定するので、**先に実行して出力をそのまま取り込み**、目視で重ねて探さない。ただし `// 規約例外:` で抑止した箇所は判定の外側に出るため、**`--suppressed` の一覧を見て「今も妥当か」を再点検する**（ISSUE-909 はこの死角から出た）。下表はそれに加えて見る、AFK GAME 固有の観点。
 
 | 分類 | # | 観点 |
 |------|---|------|

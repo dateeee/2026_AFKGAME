@@ -510,6 +510,236 @@ def test_check_unused_reports_at_warn_level(root):
     assert all(m.startswith("WARN ") for m in mod.check_unused(mod.java_files()))
 
 
+# ── 13. 未参照の pom 依存（--unused） ────────────────────────
+
+def pom(root, text: str, module: str = "afkgame-domain") -> None:
+    write(root, f"backend/{module}/pom.xml", text)
+
+
+POM = """<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+    <artifactId>afkgame-domain</artifactId>
+    <dependencies>
+{deps}
+    </dependencies>
+</project>
+"""
+
+
+def dep(artifact: str, extra: str = "") -> str:
+    return ("        <dependency>\n"
+            "            <groupId>example</groupId>\n"
+            f"            <artifactId>{artifact}</artifactId>\n"
+            f"{extra}"
+            "        </dependency>")
+
+
+def test_check_pom_passes_a_registered_dependency_with_an_import(root):
+    pom(root, POM.format(deps=dep("jjwt-api")))
+    java(root, "JwtServiceImpl", "import io.jsonwebtoken.Jwts;\n\nclass JwtServiceImpl {}\n")
+    assert mod.check_pom_dependencies(mod.java_files()) == []
+
+
+def test_check_pom_detects_a_dependency_without_an_import(root):
+    # ISSUE-905（Phase 2 でしか使わない依存の先行投入）と同じ形
+    pom(root, POM.format(deps=dep("jjwt-api")))
+    java(root, "A", "class A {}\n")
+    found = mod.check_pom_dependencies(mod.java_files())
+    assert len(found) == 1 and "jjwt-api" in found[0] and "参照されていない" in found[0]
+
+
+def test_check_pom_detects_a_dependency_missing_from_the_table(root):
+    pom(root, POM.format(deps=dep("httpclient5")))
+    found = mod.check_pom_dependencies(mod.java_files())
+    assert len(found) == 1 and "判定13 の表に無い" in found[0]
+
+
+def test_check_pom_passes_a_dependency_registered_as_having_no_source_reference(root):
+    pom(root, POM.format(deps=dep("jjwt-impl")))
+    assert mod.check_pom_dependencies(mod.java_files()) == []
+
+
+def test_check_pom_ignores_test_and_runtime_scopes(root):
+    deps = "\n".join([dep("junit-jupiter", "            <scope>test</scope>\n"),
+                      dep("httpclient5", "            <scope>runtime</scope>\n")])
+    pom(root, POM.format(deps=deps))
+    assert mod.check_pom_dependencies(mod.java_files()) == []
+
+
+def test_check_pom_ignores_an_aggregate_pom(root):
+    # 依存の束はそれ自体 import されない
+    pom(root, POM.format(deps=dep("terasoluna-gfw-common-dependencies", "            <type>pom</type>\n")))
+    assert mod.check_pom_dependencies(mod.java_files()) == []
+
+
+def test_check_pom_ignores_dependency_management_and_plugin_dependencies(root):
+    pom(root, "<project>\n    <dependencyManagement>\n        <dependencies>\n"
+        + dep("httpclient5") + "\n        </dependencies>\n    </dependencyManagement>\n"
+        "    <build>\n        <plugins>\n            <plugin>\n                <dependencies>\n"
+        + dep("mapstruct-processor") + "\n                </dependencies>\n"
+        "            </plugin>\n        </plugins>\n    </build>\n</project>\n")
+    assert mod.check_pom_dependencies(mod.java_files()) == []
+
+
+def test_check_pom_ignores_a_commented_out_dependency(root):
+    pom(root, POM.format(deps="        <!-- 復活待ち\n" + dep("httpclient5") + "\n        -->"))
+    assert mod.check_pom_dependencies(mod.java_files()) == []
+
+
+def test_check_pom_reports_the_line_of_the_dependency_tag(root):
+    text = POM.format(deps="        <!-- 復活待ち\n" + dep("ojdbc17") + "\n        -->\n" + dep("httpclient5"))
+    pom(root, text)
+    # コメントを潰しても行番号は動かない（`<dependency>` の開始行 ＝ artifactId の2行前）
+    expected = next(i for i, line in enumerate(text.splitlines(), 1) if "httpclient5" in line) - 2
+    found = mod.check_pom_dependencies(mod.java_files())
+    assert len(found) == 1 and found[0].startswith(f"WARN backend/afkgame-domain/pom.xml:{expected}:")
+
+
+def test_check_pom_does_not_count_an_import_from_another_module(root):
+    pom(root, POM.format(deps=dep("jjwt-api")))
+    write(root, "backend/afkgame-web/src/main/java/com/afkgame/web/A.java",
+          "import io.jsonwebtoken.Jwts;\n\nclass A {}\n")
+    found = mod.check_pom_dependencies(mod.java_files())
+    assert len(found) == 1 and "jjwt-api" in found[0]
+
+
+def test_check_pom_does_not_count_a_test_source_as_a_reader(root):
+    pom(root, POM.format(deps=dep("jjwt-api")))
+    java(root, "JwtServiceImplTest", "import io.jsonwebtoken.Jwts;\n\nclass JwtServiceImplTest {}\n", area="test")
+    assert len(mod.check_pom_dependencies(mod.java_files())) == 1
+
+
+def test_check_pom_reports_at_warn_level(root):
+    pom(root, POM.format(deps=dep("httpclient5")))
+    assert all(m.startswith("WARN ") for m in mod.check_pom_dependencies(mod.java_files()))
+
+
+# ── 13. 捨てられている Repository の戻り値（--unused） ────────
+
+def repository(root, name: str, body: str) -> None:
+    write(root, f"backend/afkgame-domain/src/main/java/com/afkgame/domain/repository/{name}.java", body)
+
+
+REPOSITORY = """package com.afkgame.domain.repository;
+
+public interface RefreshTokenRepository {
+
+    int updateRevokedByUserId(String userId);
+}
+"""
+
+
+def caller(root, body: str) -> None:
+    java(root, "AuthServiceImpl", "class AuthServiceImpl {\n    void m() {\n" + body + "    }\n}\n")
+
+
+def test_check_discarded_results_passes_a_result_used_in_a_condition(root):
+    repository(root, "RefreshTokenRepository", REPOSITORY)
+    caller(root, "        if (refreshTokenRepository.updateRevokedByUserId(id) == 0) {\n"
+                  "            throw detectReuse(id);\n        }\n")
+    assert mod.check_discarded_results(mod.java_files()) == []
+
+
+def test_check_discarded_results_detects_a_result_discarded_at_every_call_site(root):
+    # ISSUE-907（件数で経路を分けないのに int を返している）と同じ形
+    repository(root, "RefreshTokenRepository", REPOSITORY)
+    caller(root, "        refreshTokenRepository.updateRevokedByUserId(id);\n")
+    found = mod.check_discarded_results(mod.java_files())
+    assert len(found) == 1 and "RefreshTokenRepository#updateRevokedByUserId" in found[0]
+
+
+def test_check_discarded_results_detects_a_call_through_a_field_qualifier(root):
+    repository(root, "RefreshTokenRepository", REPOSITORY)
+    caller(root, "        this.refreshTokenRepository.updateRevokedByUserId(id);\n")
+    assert len(mod.check_discarded_results(mod.java_files())) == 1
+
+
+def test_check_discarded_results_passes_when_one_of_the_call_sites_uses_it(root):
+    repository(root, "RefreshTokenRepository", REPOSITORY)
+    caller(root, "        refreshTokenRepository.updateRevokedByUserId(id);\n")
+    java(root, "UserServiceImpl",
+         "class UserServiceImpl {\n    void m() {\n"
+         "        int n = refreshTokenRepository.updateRevokedByUserId(id);\n    }\n}\n")
+    assert mod.check_discarded_results(mod.java_files()) == []
+
+
+def test_check_discarded_results_counts_a_return_as_a_reader(root):
+    repository(root, "RefreshTokenRepository", REPOSITORY)
+    caller(root, "        return refreshTokenRepository.updateRevokedByUserId(id);\n")
+    assert mod.check_discarded_results(mod.java_files()) == []
+
+
+def test_check_discarded_results_ignores_void_methods(root):
+    repository(root, "RefreshTokenRepository", REPOSITORY.replace("int update", "void update"))
+    caller(root, "        refreshTokenRepository.updateRevokedByUserId(id);\n")
+    assert mod.check_discarded_results(mod.java_files()) == []
+
+
+def test_check_discarded_results_ignores_query_methods(root):
+    # `findOne()` は DB へ到達できるかの確認で、MyBatis が SELECT を出すために戻り値の型が要る
+    repository(root, "HealthRepository",
+               "public interface HealthRepository {\n\n    Integer findOne();\n}\n")
+    java(root, "HealthServiceImpl", "class HealthServiceImpl {\n    void m() {\n"
+         "        healthRepository.findOne();\n    }\n}\n")
+    assert mod.check_discarded_results(mod.java_files()) == []
+
+
+def test_check_discarded_results_ignores_a_method_without_call_sites(root):
+    # 呼び出しが1つも無いのは「未参照」であって本判定の対象ではない
+    repository(root, "RefreshTokenRepository", REPOSITORY)
+    assert mod.check_discarded_results(mod.java_files()) == []
+
+
+def test_check_discarded_results_ignores_classes_outside_the_repository_package(root):
+    java(root, "Counter", "public interface Counter {\n\n    int updateAll(String id);\n}\n")
+    caller(root, "        counter.updateAll(id);\n")
+    assert mod.check_discarded_results(mod.java_files()) == []
+
+
+def test_check_discarded_results_does_not_count_a_test_source_as_a_reader(root):
+    repository(root, "RefreshTokenRepository", REPOSITORY)
+    caller(root, "        refreshTokenRepository.updateRevokedByUserId(id);\n")
+    java(root, "AuthServiceImplTest", "class AuthServiceImplTest {\n    void m() {\n"
+         "        int n = refreshTokenRepository.updateRevokedByUserId(id);\n    }\n}\n", area="test")
+    assert len(mod.check_discarded_results(mod.java_files())) == 1
+
+
+def test_check_discarded_results_reports_at_warn_level(root):
+    repository(root, "RefreshTokenRepository", REPOSITORY)
+    caller(root, "        refreshTokenRepository.updateRevokedByUserId(id);\n")
+    assert all(m.startswith("WARN ") for m in mod.check_discarded_results(mod.java_files()))
+
+
+# ── 規約例外の一覧（--suppressed） ───────────────────────────
+
+def test_list_suppressed_lists_the_path_line_and_reason(root):
+    java(root, "JwtServiceImpl",
+         "import java.util.Date; // 規約例外: JJWT の expiration(Date) が Date を要求する\n\nclass JwtServiceImpl {}\n")
+    assert mod.list_suppressed(mod.java_files()) == [
+        "backend/afkgame-domain/src/main/java/com/afkgame/JwtServiceImpl.java:1:"
+        " JJWT の expiration(Date) が Date を要求する"]
+
+
+def test_list_suppressed_covers_mapping_xml_and_strips_the_close_tag(root):
+    xml(root, "com/afkgame/domain/repository/UserRepository.xml",
+        '<mapper namespace="x">\n  <!-- 規約例外: 表名は固定で外部入力を含まない -->\n</mapper>\n')
+    assert mod.list_suppressed(mod.mapper_files()) == [
+        "backend/afkgame-domain/src/main/resources/com/afkgame/domain/repository/UserRepository.xml:2:"
+        " 表名は固定で外部入力を含まない"]
+
+
+def test_list_suppressed_excludes_test_sources(root):
+    # テストは記述規約の対象外。Javadoc からこの注記に言及した行を拾わない側でもある
+    java(root, "AuthServiceImplTest",
+         " * {@code // 規約例外: ハッシュ}と同じ扱いにはしない\n", area="test")
+    assert mod.list_suppressed(mod.java_files()) == []
+
+
+def test_list_suppressed_ignores_a_note_without_a_reason(root):
+    java(root, "A", "class A {} // 規約例外:\n")
+    assert mod.list_suppressed(mod.java_files()) == []
+
+
 # ── main ─────────────────────────────────────────────────────
 
 def test_main_returns_zero_when_clean(root, capsys, monkeypatch):
@@ -541,3 +771,23 @@ def test_main_does_not_fail_on_warnings_alone(root, capsys, monkeypatch):
     assert mod.main() == 0
     out = capsys.readouterr().out
     assert "WARN" in out and "違反なし" in out and "WARN 2 件" in out
+
+
+def test_main_counts_all_three_targets_of_the_unused_check(root, capsys, monkeypatch):
+    # 設定値・pom の依存・Repository の戻り値をまとめて1つの WARN 件数で見る
+    config(root, "AuthSettings", SETTINGS)
+    pom(root, POM.format(deps=dep("httpclient5")))
+    repository(root, "RefreshTokenRepository", REPOSITORY)
+    caller(root, "        refreshTokenRepository.updateRevokedByUserId(id);\n")
+    monkeypatch.setattr(mod.sys, "argv", ["check_java_conventions.py", "--unused"])
+    assert mod.main() == 0
+    assert "WARN 4 件" in capsys.readouterr().out
+
+
+def test_main_lists_suppressions_without_running_the_checks(root, capsys, monkeypatch):
+    java(root, "A", "import java.util.*; // 規約例外: 事情がある\n\nclass A {}\n")
+    monkeypatch.setattr(mod.sys, "argv", ["check_java_conventions.py", "--suppressed"])
+    assert mod.main() == 0
+    out = capsys.readouterr().out
+    # ワイルドカード import の違反があっても判定は走らない（一覧だけを出す）
+    assert "SUPPRESSED" in out and "規約例外の抑止 1 件" in out and "[import]" not in out
