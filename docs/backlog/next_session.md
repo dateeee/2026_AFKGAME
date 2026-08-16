@@ -12,13 +12,13 @@
 | 1 | **本体が `UnsupportedOperationException` のまま残るのは `CharacterGrowth#applyLevelUp` だけ**（`addExp` は上限判定と加算のみ）。到達側の分岐が一覧に無く、ステータス再計算に要る成長率も `character_types.yml` が未搭載のため。分岐の正は `tech_party.md` §6（SP獲得3件・マーカー無し）＝**テストリスト工程が要る** |
 | 2 | **`@Service` を付けられるのはセグメント②**。`BattleSimulator` は `FloorProgression`・`Enemies`、`LapAnalyzer` は `FloorCatalog` を注入するため、実体が無いままスキャンに載せると**結合テストのコンテキスト起動が壊れる**（`@Transactional` は `BattleServiceImpl` へ付与済み） |
 | 3 | **敵の `enemies.yml` はセグメント②で載せる**（`critRate` 列を含む。味方側 `character_types.yml` は配線済みで [tech_rng.md](../tech/detail/tech_rng.md) §6 が供給元の正） |
-| 4 | **`check_java_conventions.py` は 違反0 / WARN 6 が現在の正常値**。ゼロを強制せず増減だけ見る |
+| 4 | **`check_java_conventions.py` は 違反0 / WARN 6 が現在の正常値**。ゼロを強制せず増減だけ見る（判定13 は pom の依存・更新系 Repository の戻り値まで見る。新しい依存を足す回は `DEPENDENCY_IMPORTS` への登録が要る） |
 | 5 | 表層の正は各テストクラスの Javadoc「製造工程への申し送り」。**そこに無い名前を新設しない** |
 | 6 | **詳細設計の「Java 実装時に満たすこと」節は全解消**（`tech_tick.md` §6 は節ごと削除、`tech_rng.md` §6 は恒久の節へ書き換え）。`steps.md`「移植時にあわせて処理するもの」も更新済み |
 
 **Java 移行の残りは 3-B（Phase 1: tower）→ 4（Phase 2）→ 5（Phase 3）→ 6（切替と後始末）**（順序の正は [carryover_notes.md](carryover_notes.md) §1、手順・進捗の正は [java_migration.md](java_migration.md)、STEP の定義は [steps.md](java_migration/steps.md)「STEP 3〜5」）。**3-B は詳細設計・テストリスト作成①（game / battle）・製造①（①-i〜①-iv）まで完了**で、残るのはテストリスト作成②（tower）→ 製造②。**Phase 1〜3 の機能はどの言語でも未実装の期間**（E2E はハーネスと `GET /health` まで疎通済みで、テスト本体は STEP 5 完了まで赤が正常）。
 
-**テストの現況**: 単体378件・結合88件が**全件 green（Red 0）**、**C1 は 100%（282/282・未達0）**。Red が無くなったので **`report_java_tests.py --run` がそのまま使える**（既定は `-DskipITs`。結合まで見るなら `--run --it`）。**Red を作る回（テストリスト工程）は再び `mvn verify -Dmaven.test.failure.ignore=true`** で見る — surefire の失敗で止まると failsafe が走らず結合の退行が見えないため（**PowerShell では `-D...=...` を引用符で囲む**。囲まないと引数が割れて `Unknown lifecycle phase` で即死する）。**常設スクリプトの回帰テストは全件 green**（`python -m pytest scripts/tests -q` = 480件・2026-08-16 実測。`.claude/scripts/tests` `.claude/hooks/tests` まで含めると573件）で、`scripts/**` を変更するタスクはこれを退行検出の網に使う。**Mermaid 構文は `python scripts/check_mermaid.py` が常設**（使い捨てで書き直さない）。
+**テストの現況**: 単体378件・結合88件が**全件 green（Red 0）**、**C1 は 100%（282/282・未達0）**。Red が無くなったので **`report_java_tests.py --run` がそのまま使える**（既定は `-DskipITs`。結合まで見るなら `--run --it`）。**Red を作る回（テストリスト工程）は再び `mvn verify -Dmaven.test.failure.ignore=true`** で見る — surefire の失敗で止まると failsafe が走らず結合の退行が見えないため（**PowerShell では `-D...=...` を引用符で囲む**。囲まないと引数が割れて `Unknown lifecycle phase` で即死する）。**常設スクリプトの回帰テストは全件 green**（`python -m pytest scripts/tests -q` = 509件・2026-08-16 実測。`.claude/scripts/tests` `.claude/hooks/tests` まで含めると602件）で、`scripts/**` を変更するタスクはこれを退行検出の網に使う。**Mermaid 構文は `python scripts/check_mermaid.py` が常設**（使い捨てで書き直さない）。
 
 **分岐一覧へ行を足すセッションは、同じセッションで対応する Red まで足す**（①-b で判明）。マーカーが付いている一覧に行だけ足すと `check_branch_list.py --tests` が「行 #N に対応するテストがない」で ERROR になり、次セッションの着手判定が止まる。**行は必ず末尾へ追加する**（途中挿入は既存マーカーの番号を全部ずらす）。
 
@@ -58,7 +58,6 @@ worktree を使う複数セッションが同時に走る前提。**着手状態
 | 2 | **3-B テストリスト作成②-c（進行制御・状態機械）**。[tech_tower/control.md](../tech/detail/tech_tower/control.md) 10件 + [tech_state.md](../tech/detail/tech_state.md) §5 の7件 ＝ 17件 | キュー1 | `3b-testlist-tower-c`<br>backend | `test-list` |
 | 3 | **3-B 製造②（Phase 1: tower）**。`FloorCatalog`・`FloorProgression` の実装（`service/tower`）と `Enemies` のレジストリ化（`enemies.yml` + `@Component`）。**Green 済みクラスへ `@Service` を付けるのもこの回**（前提2）。着手時に規模を見てセグメントへ割る | キュー2 | `3b-dev-tower`<br>backend | `dev` |
 | 4 | **キャラ成長のテストリスト作成**（`applyLevelUp`・`addExp` のしきい値到達）。分岐は `tech_party.md` §6 の3件 + `tech_numeric.md` §5 へ足す到達側。成長率の列追加（`character_types.yml`・`CharacterTypeData`・`character.md` §1.2）と `LapAnalyzerImpl#lapsToLevelUp` の配線を含む（`carryover_notes.md` §1） | 前提1 | `3b-testlist-growth`<br>backend | `test-list` |
-| 5 | **backend-review 還元候補3件の適用**（正は [2026-08-10_155729.md](../reviews/backend-review/2026-08-10_155729.md)「プロセスへの還元」）。着手時に3件の内容を見て、規約・スクリプト・プロファイルのどこへ落とすかを決める | なし（`docs`・`.claude`・`scripts` 領域。backend 実装と重ならず並行可） | `br-feedback`<br>docs/scripts | `retro` |
 
 - **仕様書の指摘を直したら、それを検証対象に持つ図まで同じパスで直す**（`.claude/project/review/docs.md` §5 ルール9として常設化済み。仕様書だけ直し ISSUE-1301・1303・1308 が図の指摘5件に化けた）
 - **`tech_polling.md` §5 の10件は `integration-test`（E2E）担当**（①-a で判断）。**tick API（Controller・Resource）が未作成**なので、それを作る回の後
