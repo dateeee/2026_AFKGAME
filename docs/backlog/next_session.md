@@ -30,9 +30,7 @@
 | Mermaid | `python scripts/check_mermaid.py` が常設（使い捨てで書き直さない） |
 | 未確定仕様 | [open_specs.md](open_specs.md) に**1件**（#1 Phase 1〜2 の計画メンテナンス告知手段。`f30cdc7` で登録） |
 
-**レビュー指摘の「既存テストへの影響」は鵜呑みにしない**（反映①②の学び）。**着手前に対象を `grep` して読み手を数える**（指摘どおり直すと既存の分岐一覧が代替なしで落ちることがある）。
-
-**複数セッションにまたがる申し送りの正は [carryover_notes.md](carryover_notes.md)**（§1 Java 移行 / §2 仕様・マスターデータ / §3 環境・ツール）。着手前にそちらも見る。**恒久的な知見は同ファイルに残さず規約・コマンド表の正へ移す**方針なので、Java 実装の流儀は [coding_standards_backend.md](../process/coding_standards_backend.md) の分冊、環境・コマンドは [commands.md](../../.claude/project/commands.md) が正。
+**複数セッションにまたがる申し送りの正は [carryover_notes.md](carryover_notes.md)**（§1 Java 移行 / §2 仕様・マスターデータ / §3 環境・ツール）。着手前にそちらも見る。**恒久的な知見は同ファイルに残さず正へ移す**方針で、Java 実装の流儀は [coding_standards_backend.md](../process/coding_standards_backend.md)、環境・コマンドは [commands.md](../../.claude/project/commands.md) が正。
 
 ## 0. 並行作業のルール（着手前に読む）
 
@@ -63,8 +61,9 @@ worktree を使う複数セッションが同時に走る前提。**着手状態
 | 優先 | タスク | 前提 | wt 名 / 領域 | 工程スキル |
 |------|-------|------|------------|-----------|
 | 1 | **3-B 製造②（Phase 1: tower）**。`TowerServiceImpl`・`FloorCatalog`・`FloorProgressionImpl` の実装（`service/tower`）と `Enemies`・`Towers` のレジストリ化（`enemies.yml`・`towers.yml` + `@Component`）。**Green 済みクラスへ `@Service` を付けるのもこの回**（前提1）。**塔IDの表記ゆれ**（テストの `tower_goblin` / `tech_data.md` §1.4 の `goblin_tower` / `endgame.md` の `abyss_tower`）は `towers.yml` を書くこの回でそろえ、既存テストの定数も同じ回で追随させる。着手時に規模を見てセグメントへ割る | §1（②-d）。**`onPartyWiped` は②-d が Red を用意するまで実装できない** | `3b-dev-tower`<br>backend | `dev` |
+| 2 | **基本設計 spot-review（[2026-08-16_193802](../reviews/spot-review/2026-08-16_193802.md)）の指摘6件を反映**（高1・中1・要検討3・低1）。**別セッションが並行して出したレポート**で反映は未着手。**ISSUE-1505（`run_gold` → `gold` の反映契機が未定義）は②-d の射程**なので、先に確定させると手戻りが減る | なし | `fixspecs-basic`<br>docs | `fix-specs` |
 
 - **分岐一覧の旧形式は残り2件**（`tech_polling.md` §5・`tech_rng.md` §5）。標準形式への移行は**1行が真偽の両方を持つ行の分割＝既存マーカーの番号ずれ**を伴うので、参照元のテストを触る回に同じセッションでまとめて行う（[detail-design.md](../../.claude/project/detail-design.md) §4 が「残件は候補キューで追跡する」と定める分）
 - **`tech_polling.md` §5 の10件は tick API（Controller・Resource）を作る回の後**に `integration-test`（E2E）で消化する（判断根拠と照合対象外の扱いは carryover §1）
 - **マーカー0件の一覧2件（照合対象外）と Phase 4 の除外は [carryover_notes.md](carryover_notes.md) §2 が正**
-- **本ファイルが残量WARN に入った**（②-c 更新後で 7,659字・残り341字。台帳の WARN は 11 → 12件）。次に前文が伸びる回は、書く前に §0 か前文を carryover へ逃がす（`doc-size` の一括是正でもよい）
+- **本ファイルは残量WARN**（台帳 11 → 12件）。前文が伸びる回は書く前に carryover へ逃がす

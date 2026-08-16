@@ -21,6 +21,7 @@
 - **`LapAnalyzerImpl#analyze` の `lapsToLevelUp` は常に `Integer.MAX_VALUE`（＝レベルアップに到達しない）**。口は `CharacterGrowth#requiredExpToNextLevel` として**追加済み**（2026-08-16。本体は `UnsupportedOperationException` で Red 済み）。**キャラ成長の製造で Green にし、同じ回で `LapAnalyzerImpl` を配線する**。オフライン周回中のレベルアップ分岐（`tech_offline.md` §5 #7・#8）は `OfflineCalculatorImpl` 側で実装済みなので、口が通れば動く
 - **全滅後の「全員 `maxHP` へ全回復」（`tech_state.md` §5 #6）は未実装**。`OfflineCalculatorImpl` の全滅ペナルティは §4 の表（EXP50%減・強制撤退・残tick破棄 + HP自然回復）までで、`tech_state.md` §3 のペナルティ適用順ごとセグメント②の担当
 - **`tech_state.md` §5 は Phase 別に分けないとテストへ展開できない**（2026-08-16・②-c で判明）。同節の7行は **Phase 1**（#3・#5〜#7 ＝ 全滅ペナルティのゴールド・EXP・HP と不変条件違反）・**Phase 2**（#4 装備の没収。`run_equipment_ids` 列も `EquipmentRepository` も未存在）・**Phase 3**（#1・#2 `party/edit`。`tech_backend.md` §4.1 が `party/` を Phase 3〜 と定義）にまたがるが、`check_branch_list.py` は**節単位で全行の対応を求める**ため部分展開では違反0にできない。②-c は同節へマーカーを1つも置かず先送りした結果、**`FloorProgression#onPartyWiped` に Red が無く製造②が実装できない**。**マーカー未参照の今なら番号を振り直せる**ので、分割は②-d（`next_session.md` §1）で行う
+- **レビュー指摘の「既存テストへの影響」は鵜呑みにしない**（反映①②の学び）。**着手前に対象を `grep` して読み手を数える** — 指摘どおり直すと既存の分岐一覧が代替なしで落ちることがある
 
 ## 2. 仕様・マスターデータ
 
