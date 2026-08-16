@@ -28,7 +28,7 @@ public interface CharacterGrowth {
      * レベルを1つ上げ、ステータスを再計算してSPを1加算する。
      *
      * <p>ステータスは {@code floor(base + growth × (LV - 1))} で求め直す（増分加算にしない。
-     * tech_numeric.md §5 #21）。maxHP の上昇分は現在HPへも加算し、HP欠損量を維持する（#22）。
+     * tech_numeric.md §5 #23）。maxHP の上昇分は現在HPへも加算し、HP欠損量を維持する（#25）。
      * スキルの自動習得は行わない（tech_offline.md §4 手順3g）。
      *
      * @param character 対象キャラクター

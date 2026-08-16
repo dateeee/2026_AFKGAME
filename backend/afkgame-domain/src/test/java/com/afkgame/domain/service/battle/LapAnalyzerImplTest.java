@@ -10,6 +10,7 @@ import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -36,7 +37,8 @@ import com.afkgame.env.config.GameSettings;
  *
  * <p>分岐観点: 期待与ダメージの下限（`base_hit` が1未満 / 1以上）、クリティカル期待値
  * （実効率が0より大きい / 0）、期待被ダメージの下限（負 / 0以上）、撃破ターン数の
- * 切り上げ（割り切れない / 割り切れる）、ポーション消費数（余裕HPを超える / 以下）。
+ * 切り上げ（割り切れない / 割り切れる）、ポーション消費数（余裕HPを超える / 以下）、
+ * レベルアップまでの周回数（到達する / LV上限で到達しない / 周回EXPが0）。
  *
  * <p><b>製造工程への申し送り（本セッションでは未実装。テストが要求する表層）</b>:
  * <ul>
@@ -64,8 +66,9 @@ import com.afkgame.env.config.GameSettings;
  *       {@code maxHP} を {@code floor}（下限1。tech_numeric.md §2）、自動使用閾値は
  *       {@code PlayerRepository#findSettingsByPlayerId} の {@code potionThreshold}</li>
  *   <li>{@code lapsToLevelUp}（§4 手順3b・3c）は {@code CharacterGrowth} から次レベルまでの
- *       必要EXPを取って求める。到達しないなら {@link Integer#MAX_VALUE}。
- *       レベルアップ側の分岐は §5 #7・#8 が持つため本クラスでは検証しない</li>
+ *       必要EXPを取って求める。到達しないなら {@link Integer#MAX_VALUE}。周回数の算出は
+ *       §6 #11〜#13 が持ち、レベルアップの<b>適用</b>側（§5 #7・#8）は
+ *       {@link OfflineCalculatorImplTest} の担当</li>
  * </ul>
  */
 @Tag("unit")
@@ -95,6 +98,9 @@ class LapAnalyzerImplTest {
 
     /** 在庫は全テストで足りる数にし、在庫切れの分岐（§5 #6）を持ち込まない。 */
     private static final int POTION_STOCK = 99;
+
+    /** 敵1体の撃破EXP。目標階が1階・1体なので、そのまま1周回のEXPになる。 */
+    private static final long ENEMY_EXP = 8L;
 
     @Mock
     private FloorCatalog floorCatalog;
@@ -144,7 +150,15 @@ class LapAnalyzerImplTest {
      * {@code def} で {@code base_hit} が動く。
      */
     private void givenFloorEnemy(int hp, int atk, int def) {
-        EnemyData enemy = new EnemyData("goblin", "ゴブリン", 1, hp, atk, def, 10, 12L, 8L, 0.05);
+        givenFloorEnemy(hp, atk, def, ENEMY_EXP);
+    }
+
+    /**
+     * 撃破EXPまで指定する敵編成。{@link EnemyData} の {@code exp} は {@code @PositiveOrZero} で
+     * 0を許すため、周回EXPが0になる分岐（§6 #13）を作れるようにする。
+     */
+    private void givenFloorEnemy(int hp, int atk, int def, long exp) {
+        EnemyData enemy = new EnemyData("goblin", "ゴブリン", 1, hp, atk, def, 10, 12L, exp, 0.05);
         when(floorCatalog.enemiesOf(TOWER_ID, 1)).thenReturn(List.of(enemy));
     }
 
@@ -300,6 +314,56 @@ class LapAnalyzerImplTest {
             LapAnalysis analysis = analyzer().analyze(player, party, POTION_STOCK);
 
             assertThat(analysis.potionsPerLap()).isEqualTo(expectedPotions);
+        }
+    }
+
+    @Nested
+    @DisplayName("レベルアップまでの周回数")
+    class TestLapsToLevelUp {
+
+        /**
+         * 次レベルまでの必要EXPを1周回のEXP（8）で割り、切り上げた周回数を返す。切り捨てると
+         * 到達前の周回でレベルアップを反映してしまい、以降の期待値が実際より強くなる。
+         * LV上限のキャラは必要EXPが {@link Long#MAX_VALUE} で、周回数は到達しない値に収める
+         * （{@code long} のまま返すと呼び出し側の {@code int} で溢れる）。
+         *
+         * <p>分岐: tech_offline.md §6 #11,12
+         */
+        @ParameterizedTest(name = "必要EXP{0} → {1}周")
+        @CsvSource({
+            "100,                          13", // ceil(100 ÷ 8) = 12.5 → 13
+            "9223372036854775807,  2147483647", // LV上限: 到達しない
+        })
+        void test_必要EXPを周回EXPで割って切り上げる(long requiredExp, int expectedLaps) {
+            Player player = givenPlayer();
+            Character hero = givenHero(10);
+            givenFloorEnemy(120, 10, 20);
+            givenEffectiveCritRate(0.0);
+            givenPotionSettings();
+            when(characterGrowth.requiredExpToNextLevel(hero)).thenReturn(requiredExp);
+
+            LapAnalysis analysis = analyzer().analyze(player, List.of(hero), POTION_STOCK);
+
+            assertThat(analysis.lapsToLevelUp()).isEqualTo(expectedLaps);
+        }
+
+        /**
+         * 1周回のEXPが0なら何周してもレベルアップしないので、到達しない値を返す。
+         * 割り算の前に判定しないとゼロ除算で簡略計算そのものが落ちる。
+         *
+         * <p>分岐: tech_offline.md §6 #13
+         */
+        @Test
+        @DisplayName("1周回のEXPが0なら到達しない値を返す")
+        void test_周回EXPが0なら到達しない値を返す() {
+            Player player = givenPlayer();
+            givenFloorEnemy(120, 10, 20, 0L);
+            givenEffectiveCritRate(0.0);
+            givenPotionSettings();
+
+            LapAnalysis analysis = analyzer().analyze(player, List.of(givenHero(10)), POTION_STOCK);
+
+            assertThat(analysis.lapsToLevelUp()).isEqualTo(Integer.MAX_VALUE);
         }
     }
 }

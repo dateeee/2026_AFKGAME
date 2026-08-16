@@ -14,7 +14,7 @@ import jakarta.validation.constraints.PositiveOrZero;
  *
  * <p>{@code growth*} は1LVあたりの上昇量（線形加算）。LV n のステータスは
  * {@code floor(base + growth × (n - 1))} で求め、LVごとの増分を足し込まない
- * （docs/tech/detail/tech_numeric.md §5 #21）。holy の {@code growthSpd}・agile の
+ * （docs/tech/detail/tech_numeric.md §5 #23）。holy の {@code growthSpd}・agile の
  * {@code growthDef} が 1.5 のため {@code double} で受ける。
  *
  * @param id        タイプID（YAML 内で一意。例: {@code melee}）

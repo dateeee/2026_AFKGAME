@@ -21,15 +21,10 @@ import com.afkgame.env.config.GameSettings;
  * （docs/backlog/java_migration.md STEP 3-B）。
  *
  * <p><b>Phase 1 の範囲に絞った未実装</b>（いずれも分岐一覧に行が無く、テストも持たない）:
- * ①{@code lapsToLevelUp} は常に {@link Integer#MAX_VALUE}（＝到達しない）を返す。
- * {@link CharacterGrowth#requiredExpToNextLevel(com.afkgame.domain.model.Character)} が
- * 未実装（Red は {@code CharacterGrowthImplTest}）で、本クラスへの配線はキャラ成長の
- * 製造工程で行うため。周回中のレベルアップ分岐 tech_offline.md §5 #7・#8 は
- * {@link OfflineCalculator} 側が持つ。
- * ②クリティカル率の合算値は {@link #SUMMED_CRIT_RATE}。③回復スキル・リジェネによる
+ * ①クリティカル率の合算値は {@link #SUMMED_CRIT_RATE}。②回復スキル・リジェネによる
  * 純被ダメの差し引き（§4.1「回復期待値」）と範囲攻撃・挑発・軽減パッシブは tech_offline.md §7
  * が持つ分岐で、Phase 1 の編成では到達しない（展開は Phase 3 の製造）。
- * ④ドロップアイテムは供給元（階ごとのドロップテーブル）がセグメント②まで無いため空リストを返す。
+ * ③ドロップアイテムは供給元（階ごとのドロップテーブル）がセグメント②まで無いため空リストを返す。
  */
 public class LapAnalyzerImpl implements LapAnalyzer {
 
@@ -83,8 +78,7 @@ public class LapAnalyzerImpl implements LapAnalyzer {
      *
      * @param floorCatalog     階のデータを読む継ぎ目
      * @param statCalculator   確率・軽減率の上限適用
-     * @param characterGrowth  次レベルまでの必要経験値の参照。参照する口が未追加のため
-     *                         現時点では読まない（クラス Javadoc の未実装①）
+     * @param characterGrowth  次レベルまでの必要経験値の参照
      * @param items            ポーションの回復割合の参照
      * @param playerRepository プレイヤー設定（自動使用閾値）の参照
      * @param gameSettings     1tickあたりのターン数の供給元
@@ -135,7 +129,41 @@ public class LapAnalyzerImpl implements LapAnalyzer {
         // 周回が成立した時点で目標階まで到達している（全滅なら周回自体が発生しない）。
         // 「新しい階か」の判定は目標階と上限の一致（§5 #9・#10）が持つ
         return new LapAnalysis(ticksPerLap, netDamage, potions, goldPerLap, expPerLap, List.of(),
-                Integer.MAX_VALUE, true, floorCatalog.targetFloorCap(player));
+                lapsToLevelUp(party, expPerLap), true, floorCatalog.targetFloorCap(player));
+    }
+
+    /**
+     * 最も早くレベルアップする1体を基準に、レベルアップまでの周回数を求める（§4 手順3b・3c）。
+     *
+     * @param party     パーティ
+     * @param expPerLap 1周回で得る経験値（キャラ1体あたり）
+     * @return レベルアップまでの周回数。到達しないなら {@link Integer#MAX_VALUE}
+     */
+    private int lapsToLevelUp(List<Character> party, long expPerLap) {
+        if (expPerLap == 0L) {
+            // 何周してもEXPが増えず到達しない（§6 #13）。除算の前に抜けてゼロ除算を避ける
+            return Integer.MAX_VALUE;
+        }
+        long fewest = Long.MAX_VALUE;
+        for (Character ally : party) {
+            long required = characterGrowth.requiredExpToNextLevel(ally);
+            fewest = Math.min(fewest, ceilDiv(required, expPerLap));
+        }
+        return (int) Math.min(Integer.MAX_VALUE, fewest);
+    }
+
+    /**
+     * 切り上げ除算（§6 #11）。
+     *
+     * <p>{@code (a + b − 1) / b} は必要EXPが {@link Long#MAX_VALUE}（LV上限に到達済み）のときに
+     * 桁溢れして負になるため、符号を反転した {@code floorDiv} で求める。
+     *
+     * @param dividend 被除数（0以上）
+     * @param divisor  除数（1以上）
+     * @return 切り上げた商
+     */
+    private static long ceilDiv(long dividend, long divisor) {
+        return -Math.floorDiv(-dividend, divisor);
     }
 
     /**
