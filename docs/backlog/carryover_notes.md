@@ -40,6 +40,7 @@
 
 ## 3. 環境・ツール
 
+- **`check_schema_triple.py --note`（備考照合）は契機語と記録動詞が12字以内に隣接する句だけを拾う**。テーブル定義の備考へ「突破直後に…（長い条件）…更新する」と書くと契機語が抽出されず、ER図の注釈と食い違っても検出されない／別の語だけで赤になる。備考は**「<契機>直後に更新」を隣接させ、条件はそのあとに続ける**（2026-08-16 に `best_wave_hp` で実際に踏んだ）
 - **更新系 SQL の条件は実DBテストでしか検証されない**（サービス単体テストはモックで素通りする）。`AND used = FALSE` のような条件を足したら `RepositoryTestSupport` 継承の統合テストを同じコミットで足す
 - **統合テストでフィクスチャを直接書き換えるときは `WebIntegrationTestSupport#updateFixture` を通す**（`dataSource` が `defaultAutoCommit = false` のため、素の `jdbcTemplate.update` は更新件数が返るのに値が残らない）
 - **`check_java_conventions.py` の判定13（`--unused`）の現在値は WARN 6件**（`AuthSettings` 3・`GameSettings` 2・`LogKey.TOKEN`。13 → 7 は製造①-iii、7 → 6 は①-iv で読み手が付いたため）。ゼロを強制せず**増減だけ見る**

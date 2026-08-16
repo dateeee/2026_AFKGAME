@@ -3,7 +3,7 @@
 > **使い方**: 新セッションの最初のメッセージで `/next` と送る（または §1 のコードブロックを貼り付ける）。**着手前に §0 を読む**。
 > 本ファイルは**ポインタ専用**。Phase 進捗の正は [development_process.md](../process/development_process.md) §5、書式の正は [.claude/project/next.md](../../.claude/project/next.md)、worktree 運用の正は [worktree_guide.md](../process/worktree_guide.md)。
 
-最終更新: 2026-08-16 / main `5376900`（**`worktree_guide.md` §5 の分冊化**。§5.1〜§5.4 を `worktree_guide/session.md` へ**節番号のまま**移して H2 超過3,377字を解消し、親 §5 は子への節リンク表だけの索引にした。参照元は節番号で指すため張り替えなし）。**同日、別セッションの成果2件も main に入っている**: Phase 5 詳細設計のボスラッシュ `tech_bossrush.md` + 分冊4件（`bbae6c8`）と `spot-review` スキル（`c600c57`）。1つ前は main `3ca8262`（**diagrams-review 還元案3件の適用**。`check_mermaid.py` の新設・`check_schema_triple.py` への `--note` 追加・`fix-specs` のルール9）。詳細は [changelog.md](../changelog.md) の 2026-08-16 ブロック。
+最終更新: 2026-08-16 / main `5376900`（**`worktree_guide.md` §5 の分冊化**。§5.1〜§5.4 を `worktree_guide/session.md` へ**節番号のまま**移して H2 超過3,377字を解消し、親 §5 は子への節リンク表だけの索引にした。参照元は節番号で指すため張り替えなし）。**同日、別セッションの成果2件も main に入っている**: Phase 5 詳細設計のボスラッシュ `tech_bossrush.md` + 分冊4件（`bbae6c8`。追随して `a8b0049` で ER図と定義書の `best_wave_hp` 注釈をそろえ、新設された `check_schema_triple.py --note` を exit 0 に戻した）と `spot-review` スキル（`c600c57`）。1つ前は main `3ca8262`（**diagrams-review 還元案3件の適用**。`check_mermaid.py` の新設・`check_schema_triple.py` への `--note` 追加・`fix-specs` のルール9）。詳細は [changelog.md](../changelog.md) の 2026-08-16 ブロック。
 
 **製造①が残した前提**（セグメント②が上に積む）。
 
