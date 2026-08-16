@@ -38,7 +38,12 @@ import com.afkgame.domain.service.battle.FloorProgression;
  * <p>本クラスが対象にするのは {@code onEnemyDefeated}（階クリア）だけである。
  * {@code ensureEncounter} はエンカウント抽選（tech_battle.md §3.2）、
  * {@code onPartyWiped} は全滅ペナルティ（tech_state.md §3）で、いずれも分岐一覧の所在が
- * 本書の外にあるため対象外（前者は tick API を作る回、後者はテストリスト作成②-c の担当）。
+ * 本書の外にあるため対象外（前者は tick API を作る回、後者は tech_state.md §5 を消化する回の担当。
+ * <b>②-c では消化していない</b> — 同 §5 の7行は Phase 1〜3 にまたがり、
+ * {@code check_branch_list.py} が節単位で全行の対応を求めるため、Phase 1 の回では閉じられない）。
+ *
+ * <p>HP閾値撤退の2件（#17・#18）は、撤退条件更新の効果（tech_tower/control.md §12 #9・#10）が
+ * 指す先でもあるため、マーカーを2本持つ。しきい値の保存側は {@code TowerServiceImplTest} が持つ。
  *
  * <p>分岐観点: 塔別・通算の最高到達階の更新、最上階クリアの記録、環境効果 {@code recovery} の
  * 適用と上限クランプ、目標階の上限追従（3条件）、目標到達の判定と進行モード、
@@ -511,7 +516,11 @@ class FloorProgressionImplTest {
          * 目標未到達でも、パーティのHP合計が閾値を下回れば撤退する。
          * 判定量は在籍パーティ全員の合計で、HP0のメンバーも分母に含む。
          *
+         * <p>{@code hpThreshold > 0} のとき撤退条件が判定に使われること（control.md §12 #10）も
+         * 同じ観測点で押さえる。しきい値の保存側は {@code TowerServiceImplTest} が持つ。
+         *
          * <p>分岐: tech_tower/progress.md §10 #17
+         * <p>分岐: tech_tower/control.md §12 #10
          */
         @Test
         void test_HP合計が閾値を下回れば撤退する() {
@@ -528,7 +537,11 @@ class FloorProgressionImplTest {
         /**
          * 閾値0は撤退の無効化。HPがいくら減っていても次階へ送る。
          *
+         * <p>control.md §12 #9（{@code hpThreshold = 0} は HP閾値撤退の無効化）が指す先が
+         * 本テストで、同 §12 の分岐一覧からも参照する。
+         *
          * <p>分岐: tech_tower/progress.md §10 #18
+         * <p>分岐: tech_tower/control.md §12 #9
          */
         @Test
         void test_閾値0なら撤退の判定をしない() {

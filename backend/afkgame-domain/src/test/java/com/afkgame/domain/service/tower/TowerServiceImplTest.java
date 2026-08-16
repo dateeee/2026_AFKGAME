@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -33,21 +34,26 @@ import com.afkgame.domain.repository.PlayerRepository;
 import com.afkgame.domain.repository.TowerClearRecordRepository;
 
 /**
- * {@link TowerServiceImpl} の単体テスト（塔一覧の組み立てと入塔）。
+ * {@link TowerServiceImpl} の単体テスト（塔一覧の組み立て・入塔・進行制御）。
  *
  * <p>仕様: docs/tech/detail/tech_tower/list.md §5・§6（一覧・解放判定）、
- * docs/tech/detail/tech_tower/select.md §7・§8（入塔）。解放判定・{@code cap} 式・
- * クリア記録の解決規則は docs/tech/detail/tech_tower.md §2、エラーコードは同 §4、
- * 状態の定義と操作可否は docs/tech/detail/tech_state.md §1・§4。
+ * docs/tech/detail/tech_tower/select.md §7・§8（入塔）、
+ * docs/tech/detail/tech_tower/control.md §11・§12（リタイア・進行モード切替・撤退条件更新）。
+ * 解放判定・{@code cap} 式・クリア記録の解決規則は docs/tech/detail/tech_tower.md §2、
+ * エラーコードは同 §4、状態の定義と操作可否は docs/tech/detail/tech_state.md §1・§4、
+ * 探索セッションの確定・リセットは同 §3。
  *
- * <p>階進行（tick内・階クリア後）は tech_tower/progress.md、進行制御（retire / mode /
- * retreat-conditions）は同 control.md が持ち、いずれも本クラスの対象外
- * （テストリスト作成②-b・②-c の担当）。Bean Validation が決める分岐（select.md §8 #1・#2）は
- * {@code TowerSelectResourceTest}（afkgame-web）が持つ。
+ * <p>階進行（tick内・階クリア後）は tech_tower/progress.md が持ち、本クラスの対象外
+ * （テストリスト作成②-b の {@code FloorProgressionImplTest} が担当）。Bean Validation が決める
+ * 分岐は afkgame-web が持つ — 入塔は {@code TowerSelectResourceTest}（select.md §8 #1・#2）、
+ * 進行モードは {@code TowerModeResourceTest}（control.md §12 #3・#4）、撤退条件は
+ * {@code TowerRetreatConditionsResourceTest}（同 #7・#8 の入力側）。しきい値が撤退判定へ
+ * 効くこと（同 #9・#10）は {@code FloorProgressionImplTest} が持つ。
  *
  * <p>分岐観点: 解放判定（条件なし / 前提塔クリア済み / 未クリア）、クリア記録の有無、
  * 目標階上限の決まり方（開拓側 / 総階数側 / 総階数なし）、入塔の検証順（状態 → 対象 → 権利 →
- * 難易度 → 引数 → 前提）と各検証の通過側。
+ * 難易度 → 引数 → 前提）と各検証の通過側、進行制御3操作の状態ガード（塔外 / 入塔中）と
+ * リタイアの即時成立（エンカウント待ち / 戦闘中）。
  *
  * <p><b>製造工程への申し送り（本セッションでは未実装。テストが要求する表層）</b>:
  * 分岐一覧に関数シグネチャが無く、{@code tech_backend.md} §4.1 の service 一覧にも
@@ -55,9 +61,12 @@ import com.afkgame.domain.repository.TowerClearRecordRepository;
  * （.claude/project/test-list.md §3）。<b>別名の表層を新設しない</b>。
  * <ul>
  *   <li>{@code interface TowerService}: {@code List<TowerInfo> list(String playerId)} と
- *       {@code TowerSelection select(String playerId, TowerSelectCommand command)}。
- *       {@code retire} / {@code mode} / {@code retreat-conditions} は②-c が同じ
- *       インタフェースへ足す</li>
+ *       {@code TowerSelection select(String playerId, TowerSelectCommand command)}（②-a）、
+ *       {@code void retire(String playerId)}・
+ *       {@code void changeMode(String playerId, String mode)}・
+ *       {@code void updateRetreatConditions(String playerId, double hpThreshold)}（②-c）。
+ *       <b>いずれも戻り値を持たない</b> — 応答の {@code status} / {@code mode} /
+ *       {@code hpThreshold}（tech_tower.md §3）は要求値の反射で、Web 層が組み立てる</li>
  *   <li>コンストラクタ注入: {@code TowerServiceImpl(Towers, TowerClearRecordRepository,
  *       PlayerRepository, CharacterRepository)}</li>
  *   <li><b>{@code @Service}・{@code @Transactional} は製造②で付ける</b>。{@link Towers} が
@@ -82,6 +91,13 @@ import com.afkgame.domain.repository.TowerClearRecordRepository;
  *   <li>{@code PlayerRepository#updateTowerState(Player)} を足す。{@code updateTickState} を
  *       流用しない — あちらは {@code last_tick_at} も更新するため、入塔で未処理tickを
  *       食い潰してしまう（tech_tick.md §4）</li>
+ *   <li><b>進行制御3操作も {@code updateTowerState} で書き戻す</b>（②-c）。同じ理由で
+ *       {@code updateTickState} を流用しない。ただし現行の UPDATE 文が {@code tower_mode} と
+ *       {@code hp_threshold} を含むかは<b>製造②で確かめる</b> — 含まないなら列を足す
+ *       （マッピング XML を書くのは製造②のため、本セッションでは呼び出しの検証に留める）</li>
+ *   <li><b>リタイアはキャラクターを読まない</b>（②-c）。HPは変更しない（control.md §11）ので
+ *       {@link CharacterRepository} を呼ぶ必要がなく、テストも
+ *       {@code verifyNoInteractions} でそれを固定している</li>
  *   <li><b>行ロック</b>: 検証の前に {@code PlayerRepository#findByIdForUpdate} で
  *       {@code players} 行を占有ロックする（tech_tower.md §1「排他」）。待機超過の
  *       {@code 503 BATTLE_TICK_BUSY} は tick と同じ経路のため本クラスでは検証しない</li>
@@ -121,6 +137,9 @@ class TowerServiceImplTest {
 
     /** イベントダンジョンの難易度（tech_data.md §1.1 のキー体系）。 */
     private static final List<String> DIFFICULTIES = List.of("beginner", "intermediate", "advanced");
+
+    /** 目標到達で停止する進行モード（tech_tower/control.md の {@code mode}）。 */
+    private static final String STOP_ON_CLEAR = "stop_on_clear";
 
     private static final int GOBLIN_TOWER_FLOORS = 20;
 
@@ -184,6 +203,14 @@ class TowerServiceImplTest {
         player.setCurrentTowerId(TOWER_ID);
         player.setCurrentFloor(3);
         player.setTargetFloor(5);
+        return player;
+    }
+
+    /** 戦闘中（{@code IN_BATTLE}）のプレイヤー。敵情報を持つ点だけが探索中と異なる。 */
+    private static Player battlingPlayer() {
+        Player player = exploringPlayer();
+        player.setCurrentEnemyId("goblin");
+        player.setCurrentEnemyHp(12);
         return player;
     }
 
@@ -644,6 +671,126 @@ class TowerServiceImplTest {
             assertThat(player.getRunGold()).isZero();
             // 入塔で回復しない（select.md §7 手順8）
             assertThat(survivor.getHp()).isEqualTo(42);
+            verify(playerRepository).updateTowerState(player);
+        }
+    }
+
+    @Nested
+    @DisplayName("リタイア")
+    class TestRetire {
+
+        /**
+         * 塔外（{@code IDLE}）でのリタイアは拒否する。
+         *
+         * <p>分岐: tech_tower/control.md §12 #1
+         */
+        @Test
+        void test_塔外ならリタイアできない() {
+            when(playerRepository.findByIdForUpdate(PLAYER_ID)).thenReturn(idlePlayer());
+
+            BusinessException ex = assertThrows(BusinessException.class,
+                    () -> service().retire(PLAYER_ID));
+
+            assertThat(codesOf(ex)).containsExactly("TOWER_NOT_IN_TOWER");
+        }
+
+        /**
+         * 入塔中なら即時に成立し、塔・敵情報をクリアして {@code IDLE} へ戻す。
+         * 戦闘中でも現在の戦闘の完了を待たず、討伐しきっていない敵は破棄する。
+         * 探索セッションは確定（没収なし）してリセットし、HPは変更しない。
+         *
+         * <p>分岐: tech_tower/control.md §12 #2
+         */
+        @ParameterizedTest(name = "戦闘中={0} → 即時にIDLEへ戻る")
+        @ValueSource(booleans = {
+            false,  // EXPLORING（エンカウント待ち）
+            true,   // IN_BATTLE（交戦中の敵は破棄する）
+        })
+        void test_入塔中ならリタイアが即時に成立する(boolean inBattle) {
+            Player player = inBattle ? battlingPlayer() : exploringPlayer();
+            when(playerRepository.findByIdForUpdate(PLAYER_ID)).thenReturn(player);
+
+            service().retire(PLAYER_ID);
+
+            // 塔の対・敵の対は同時にnull（tech_state.md §1.1）
+            assertThat(player.getCurrentTowerId()).isNull();
+            assertThat(player.getCurrentFloor()).isNull();
+            assertThat(player.getTargetFloor()).isNull();
+            assertThat(player.getCurrentEnemyId()).isNull();
+            assertThat(player.getCurrentEnemyHp()).isNull();
+            // 探索セッションは確定（没収なし）してリセットする（tech_state.md §3）
+            assertThat(player.getRunGold()).isZero();
+            // HPは変更しないため、キャラクターを読みに行かない（control.md §11）
+            verifyNoInteractions(characterRepository);
+            verify(playerRepository).updateTowerState(player);
+        }
+    }
+
+    @Nested
+    @DisplayName("進行モード切替")
+    class TestChangeMode {
+
+        /**
+         * 塔外でのモード変更は拒否する（入塔時に select の {@code mode} で指定するため、
+         * 塔外での変更を持たない）。
+         *
+         * <p>分岐: tech_tower/control.md §12 #5
+         */
+        @Test
+        void test_塔外ならモードを変更できない() {
+            when(playerRepository.findByIdForUpdate(PLAYER_ID)).thenReturn(idlePlayer());
+
+            BusinessException ex = assertThrows(BusinessException.class,
+                    () -> service().changeMode(PLAYER_ID, STOP_ON_CLEAR));
+
+            assertThat(codesOf(ex)).containsExactly("TOWER_NOT_IN_TOWER");
+        }
+
+        /**
+         * 入塔中なら {@code towerMode} を即時反映する（適用は次tickの判定から）。
+         * 塔・敵情報や探索セッションには触れない。
+         *
+         * <p>分岐: tech_tower/control.md §12 #6
+         */
+        @Test
+        void test_入塔中ならモードを即時反映する() {
+            Player player = battlingPlayer();
+            when(playerRepository.findByIdForUpdate(PLAYER_ID)).thenReturn(player);
+
+            service().changeMode(PLAYER_ID, STOP_ON_CLEAR);
+
+            assertThat(player.getTowerMode()).isEqualTo(STOP_ON_CLEAR);
+            // 進行中の探索はそのまま続く（control.md §11「次の目標到達・撤退判定から新モードを使う」）
+            assertThat(player.getCurrentTowerId()).isEqualTo(TOWER_ID);
+            assertThat(player.getCurrentEnemyId()).isEqualTo("goblin");
+            assertThat(player.getRunGold()).isEqualTo(500);
+            verify(playerRepository).updateTowerState(player);
+        }
+    }
+
+    @Nested
+    @DisplayName("撤退条件更新")
+    class TestRetreatConditions {
+
+        /**
+         * しきい値は塔外・入塔中のどちらでも保存できる（状態でガードしない）。
+         * 値域の検証は {@code TowerRetreatConditionsResourceTest} が持つ。
+         *
+         * <p>分岐: tech_tower/control.md §12 #8
+         */
+        @ParameterizedTest(name = "入塔中={0} しきい値={1} → 保存する")
+        @CsvSource({
+            "false, 0.5",  // 塔外でも変更できる
+            "true,  0.0",  // 入塔中に無効化（下限ちょうど）へ更新する
+            "true,  1.0",  // 入塔中に上限ちょうどへ更新する
+        })
+        void test_撤退条件は塔の内外どちらでも保存できる(boolean inTower, double hpThreshold) {
+            Player player = inTower ? exploringPlayer() : idlePlayer();
+            when(playerRepository.findByIdForUpdate(PLAYER_ID)).thenReturn(player);
+
+            service().updateRetreatConditions(PLAYER_ID, hpThreshold);
+
+            assertThat(player.getHpThreshold()).isEqualTo(hpThreshold);
             verify(playerRepository).updateTowerState(player);
         }
     }
