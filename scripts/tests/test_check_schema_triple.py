@@ -402,6 +402,53 @@ def test_check_nullable_detects_er_note_contradicting_definition(repo):
     assert any("ER図は nullable と注記するが 定義書は NULL 不可" in e for e in errors)
 
 
+# ── check_note ───────────────────────────────────────────────
+
+def note_repo(repo, note, comment):
+    """備考（定義書）と注釈（ER図）だけが異なる1列構成にする。"""
+    repo.write_def(def_doc([f"| `best_wave_hp` | INTEGER | 不可 | — | {note} |"]))
+    repo.write_er(er_doc([f'int best_wave_hp "{comment}"']))
+
+
+def test_check_note_passes_when_er_states_the_same_timing(repo):
+    note_repo(repo, "best_wave を更新したウェーブの突破直後に同時更新する",
+              "ベスト更新ウェーブの突破直後の残HP合計")
+    assert mod.check_note(sources()) == []
+
+
+def test_check_note_detects_er_annotation_missing_the_timing(repo):
+    """ISSUE-708: 列名・型が一致していても、図の注釈が記録時点を示さない。"""
+    note_repo(repo, "best_wave を更新したウェーブの突破直後に同時更新する",
+              "ベスト時の残HP合計")
+    errors = mod.check_note(sources())
+    assert len(errors) == 1
+    assert "記録時点「突破」を示していない" in errors[0]
+
+
+def test_check_note_detects_er_annotation_stating_another_timing(repo):
+    note_repo(repo, "突破直後に更新する", "全滅時の残HP合計")
+    errors = mod.check_note(sources())
+    assert len(errors) == 1 and "「突破」" in errors[0]
+
+
+@pytest.mark.parametrize("note", [
+    "同一キャラの判定（重複・限界突破）はこの列で行う",  # 契機語だが記録時点ではない
+    "同じ扱いのEXP。全滅時も没収しない",
+    "最終tick処理時刻。オフライン復帰の起点",
+    "購入済みの枠は行を消さずフラグで表す（リセットまで枠を残すため）",
+])
+def test_check_note_ignores_timing_words_outside_a_record_phrase(repo, note):
+    """契機語の出現だけで拾うと備考の説明文に反応する（実リポジトリで4件の誤検出）。"""
+    note_repo(repo, note, "説明のない注釈")
+    assert mod.check_note(sources()) == []
+
+
+def test_check_note_skips_columns_without_er_annotation(repo):
+    """注釈が空なのは「時点の食い違い」ではないため対象外。"""
+    note_repo(repo, "突破直後に更新する", "")
+    assert mod.check_note(sources()) == []
+
+
 # ── check_naming ─────────────────────────────────────────────
 
 def test_check_naming_passes_for_conforming_name(repo):

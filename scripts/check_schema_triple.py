@@ -21,8 +21,9 @@ Java の Entity は列メタデータを持たない素の POJO のため列の�
     3. 一意制約  定義書の uq_* ↔ DDL の UNIQUE 制約
     4. FKなし    「FKなし（親 §4-6）」の列に ER図・DDL が FK を持たないこと
     5. nullable  定義書の NULL 欄 ↔ ER図注記 ↔ DDL の NOT NULL
-    6. 命名規約  一意制約名が uq_<テーブル名>_<列>_<列>（tech_db.md §2）に適合するか
-    7. ER索引    er_diagram.md 索引の列挙エンティティ ↔ 各子ファイルの実在エンティティ
+    6. 備考      定義書の備考が示す記録時点・更新契機 ↔ ER図の注釈（ISSUE-708）
+    7. 命名規約  一意制約名が uq_<テーブル名>_<列>_<列>（tech_db.md §2）に適合するか
+    8. ER索引    er_diagram.md 索引の列挙エンティティ ↔ 各子ファイルの実在エンティティ
 
 単一列 UNIQUE は定義書では備考欄に `UNIQUE` と書き（項目2 で照合）、複合 UNIQUE は
 `一意制約:` 行で名前ごと宣言する（項目3 で照合）。DDL は両方を名前付き制約で書くため、
@@ -31,7 +32,7 @@ Java の Entity は列メタデータを持たない素の POJO のため列の�
 使い方:
     python scripts/check_schema_triple.py            # 全検証（ERROR があれば exit 1）
     python scripts/check_schema_triple.py --columns  # 列のみ
-        （--tags / --unique / --nofk / --nullable / --naming / --index も同様）
+        （--tags / --unique / --nofk / --nullable / --note / --naming / --index も同様）
     python scripts/check_schema_triple.py --summary  # 解析できた各ソースの規模だけを表示
 """
 
@@ -67,6 +68,7 @@ class DefColumn:
     unique: bool  # 単一列 UNIQUE
     unimplemented: bool
     line: int
+    note: str = ""  # 備考欄の原文（記録時点・更新契機の照合に使う）
 
 
 @dataclass
@@ -214,6 +216,7 @@ def parse_definitions() -> dict[str, DefTable]:
                     unique="UNIQUE" in note,
                     unimplemented="未実装" in note,
                     line=no,
+                    note=note,
                 )
             )
     return tables
@@ -691,6 +694,42 @@ def check_nullable(s: Sources) -> list[str]:
     return errors
 
 
+# 記録時点・更新契機（diagrams-review 2026-08-11 の還元案3 = ISSUE-708 の検出層）。
+# 語の出現だけでは拾いすぎる（「限界突破の判定に使う」「全滅時も没収しない」等、
+# 記録時点を述べていない文にも現れる）ため、**契機語 + 記録動詞**の句で判定する。
+TIMING_EVENT = "突破|全滅|撃破|到達|クリア|即時|初回|復帰|失効|受取|リセット|毎tick"
+RECORD_VERB = "更新|記録|加算|反映|確定|セット|保存|初期化"
+TIMING_PHRASE = re.compile(
+    rf"(?P<word>{TIMING_EVENT})(?:直後|時点|時|後|以降)?[^。]{{0,12}}?(?:{RECORD_VERB})"
+)
+
+
+def check_note(s: Sources) -> list[str]:
+    """定義書の備考が示す記録時点・更新契機が ER図の注釈にもあるか（ISSUE-708）。
+
+    列名・型タグが一致していても「ベスト時の」のような曖昧な注釈は残りうる。
+    定義書（正）の備考が「<契機>に更新する」と書いているとき、ER図の注釈が
+    その契機語を1つも持たなければ、図が別の時点を指している（か、時点を
+    落としている）とみなす。注釈が空の列は「注釈を持たない」だけなので対象にしない。
+    """
+    errors = []
+    for d, er in s.pairs():
+        for c in d.columns:
+            def_words = sorted({m.group("word") for m in TIMING_PHRASE.finditer(c.note)})
+            if not def_words:
+                continue
+            a = er.by_name(c.name)
+            if a is None or not a.comment.strip():
+                continue
+            if any(w in a.comment for w in def_words):
+                continue
+            errors.append(
+                f"ERROR {er.src}:{a.line} {er.name}.{c.name}: ER図の注釈が定義書の記録時点"
+                f"「{'・'.join(def_words)}」を示していない → \"{a.comment}\"（{d.src}:{c.line}）"
+            )
+    return errors
+
+
 def check_naming(s: Sources) -> list[str]:
     """一意制約名が uq_<テーブル名>_<列>_<列>（tech_db.md §2）に適合するか。"""
     errors = []
@@ -797,6 +836,7 @@ def main() -> int:
         "--unique": ("一意制約", check_unique),
         "--nofk": ("FKなし", check_nofk),
         "--nullable": ("nullable", check_nullable),
+        "--note": ("備考の記録時点", check_note),
         "--naming": ("命名規約", check_naming),
         "--index": ("ER索引", check_index),
     }
