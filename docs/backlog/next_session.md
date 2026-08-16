@@ -67,4 +67,4 @@ worktree を使う複数セッションが同時に走る前提。**着手状態
 - **分岐一覧の旧形式は残り2件**（`tech_polling.md` §5・`tech_rng.md` §5）。標準形式への移行は**1行が真偽の両方を持つ行の分割＝既存マーカーの番号ずれ**を伴うので、参照元のテストを触る回に同じセッションでまとめて行う（[detail-design.md](../../.claude/project/detail-design.md) §4 が「残件は候補キューで追跡する」と定める分）
 - **`tech_polling.md` §5 の10件は tick API（Controller・Resource）を作る回の後**に `integration-test`（E2E）で消化する（判断根拠と照合対象外の扱いは carryover §1）
 - **マーカー0件の一覧2件（照合対象外）と Phase 4 の除外は [carryover_notes.md](carryover_notes.md) §2 が正**
-- **本ファイルが残量WARN に入った**（②-c で 7,533字・残り467字。台帳の WARN は 11 → 12件）。次に前文が伸びる回は、書く前に §0 か前文を carryover へ逃がす（`doc-size` の一括是正でもよい）
+- **本ファイルが残量WARN に入った**（②-c 更新後で 7,659字・残り341字。台帳の WARN は 11 → 12件）。次に前文が伸びる回は、書く前に §0 か前文を carryover へ逃がす（`doc-size` の一括是正でもよい）
