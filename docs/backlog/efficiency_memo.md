@@ -35,3 +35,7 @@
 - ターン概要: ツール111回・エラー0回・拒否0回。開始:「<ide_opened_file>The user opened the file c:\GIT\2026_AFKGAM」
 - 原因と改善案: `check_doc_size --sections`×3 は対象ファイルが毎回異なる正当な計測（分割前・分割後・申し送り）だが、`check_docs.py`×5 は**編集の波ごとに走らせた**のが過剰。リンクを壊しうるのは「ファイル分割と参照の付け替え」「changelog・申し送りへの追記」の2箇所だけで、2回に畳めた。`fix-specs` SKILL §5「修正後の検証」が実行タイミングを定めていないのが原因なので、`.claude/project/review/docs.md` §5 へ「常設チェックは①分割・参照付け替えの直後 ②全修正完了後 の2回にまとめる（編集の波ごとに走らせない）」を1行足す。
 - 補足: 直前エントリ（13:42）と**同じ `carryover_notes.md` の残量計測漏れを再発**させた（ファイル合計 5,379字だけ見て H2 を見ず、追記先 §2 が 1,998字＝上限まで2字だったため超過）。前回の是正案は `.claude/project/detail-design.md` §5 限定だったが、申し送りを書くのは詳細設計工程に限らない。**`profile.md` §7 ルール7 の本文へ「`carryover_notes.md`・`next_session.md` への追記も対象。合計ではなく追記先 H2 の残量を測る」を入れる**のが再発防止として正しい位置。
+## 2026-08-16 14:49 | session 1bb2e400 | 自動検出
+- シグナル: same-read(next_session.md×2) / same-command('python scripts/check_branch_li'×3, 'python scripts/check_docs.py'×3) / errors×3
+- ターン概要: ツール121回・エラー3回・拒否0回。開始:「<command-message>next</command-message>」
+- 原因と改善案: シグナルの大半は誤検出（`next_session.md` の再読は別セッションが `d85ded9` で書き換えた後の再取得＝`profile.md` §6 規律4 の除外、`check_branch_list`／`check_docs` の複数回はベースライン → 是正後 → 統合後の退行確認、errors 3件のうち2件は引き継ぎの誤った JDK パス検出と Red の `RESULT FAIL` で正常）。**実際の手戻りは分岐一覧へ行を足す際の2件**: ①新設した分岐点4つを1行ずつで書き `check_branch_list.py` が「真偽の片側欠落」WARN 4件 → 行の追加と**テスト側マーカーの番号ずらし**をやり直した ②`tech_numeric.md` へ経験値計算式を再掲して `check_docs.py`「正の逸脱」違反 → リンク参照へ書き直した。どちらも**書く前に一度走らせれば分かる制約**なので、`.claude/project/test-list.md` §3（分岐一覧へ行を足す回のルール）へ「新設する分岐点は真偽の両側を1回で書く（片側だけだと WARN。マーカー付与後の是正は番号ずれを伴う）」「他ファイルが正の計算式・数値は再掲せずリンクする」の2行を足すのが最小の是正。

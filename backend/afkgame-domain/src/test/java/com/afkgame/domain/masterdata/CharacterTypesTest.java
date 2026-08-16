@@ -53,15 +53,16 @@ class CharacterTypesTest {
      *
      * <p>分岐: tech_auth/init.md §8.3 #3
      */
-    @ParameterizedTest(name = "{0}: HP{1} ATK{2} DEF{3} SPD{4}")
+    @ParameterizedTest(name = "{0}: HP{1} ATK{2} DEF{3} SPD{4} / 成長 {5}/{6}/{7}/{8}")
     @CsvSource({
-            "melee, 100, 10, 5, 5",   // 近接型。初期キャラ hero_001 のタイプ
-            "magic,  80, 12, 4, 7",   // 魔力型
-            "holy,   95,  8, 5, 6",   // 神聖型
-            "agile,  85, 10, 4, 10",  // 敏捷型
+            "melee, 100, 10, 5, 5,  20, 3, 2,   1",    // 近接型。初期キャラ hero_001 のタイプ
+            "magic,  80, 12, 4, 7,  12, 4, 1,   2",    // 魔力型
+            "holy,   95,  8, 5, 6,  18, 2, 2,   1.5",  // 神聖型。SPD の成長率が小数
+            "agile,  85, 10, 4, 10, 14, 3, 1.5, 3",    // 敏捷型。DEF の成長率が小数
     })
-    @DisplayName("タイプ別 LV1 基礎ステータスを master/character.md §1.2 どおりに公開する")
-    void test_タイプ別のLV1基礎値を公開する(String typeId, int hp, int atk, int def, int spd) {
+    @DisplayName("タイプ別 LV1 基礎ステータスと成長率を master/character.md §1.2 どおりに公開する")
+    void test_タイプ別のLV1基礎値を公開する(String typeId, int hp, int atk, int def, int spd,
+            double growthHp, double growthAtk, double growthDef, double growthSpd) {
         CharacterTypeData actual = characterTypes().all().get(typeId);
 
         assertThat(actual).as("タイプ %s が定義されていること", typeId).isNotNull();
@@ -69,6 +70,10 @@ class CharacterTypesTest {
         assertThat(actual.atk()).isEqualTo(atk);
         assertThat(actual.def()).isEqualTo(def);
         assertThat(actual.spd()).isEqualTo(spd);
+        assertThat(actual.growthHp()).isEqualTo(growthHp);
+        assertThat(actual.growthAtk()).isEqualTo(growthAtk);
+        assertThat(actual.growthDef()).isEqualTo(growthDef);
+        assertThat(actual.growthSpd()).isEqualTo(growthSpd);
     }
 
     /**

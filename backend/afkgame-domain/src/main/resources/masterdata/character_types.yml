@@ -2,7 +2,9 @@
 #
 # 数値の正は docs/data/master/character.md §1.2。スキーマの正は
 # com.afkgame.domain.masterdata.CharacterTypeData（制約違反は起動時に検出して起動を中止する）。
-# 成長率は持たない（レベルアップ機能の移植時に追加する。tech_auth/init.md §8.1）。
+# growth* は1LVあたりの上昇量（線形加算）。LV n のステータスは base + growth × (n - 1) を
+# floor した値で、増分をLVごとに足し込まない（tech_numeric.md §5 #21）。小数を持つタイプが
+# あるため double で受ける（holy の spd +1.5、agile の def +1.5）。
 # critRate は Phase 1 の基礎値5%。味方と敵で供給元を分ける決まりのため、敵側は EnemyData の列が持つ
 # （tech_rng.md §6）。Phase 3〜 は装備・スキルの合算をキャラクター側で持つ。
 # 未知のキーは起動時に弾かれるため、先回りしてキーを足さないこと。
@@ -13,21 +15,37 @@
   def: 5
   spd: 5
   critRate: 0.05
+  growthHp: 20
+  growthAtk: 3
+  growthDef: 2
+  growthSpd: 1
 - id: magic
   hp: 80
   atk: 12
   def: 4
   spd: 7
   critRate: 0.05
+  growthHp: 12
+  growthAtk: 4
+  growthDef: 1
+  growthSpd: 2
 - id: holy
   hp: 95
   atk: 8
   def: 5
   spd: 6
   critRate: 0.05
+  growthHp: 18
+  growthAtk: 2
+  growthDef: 2
+  growthSpd: 1.5
 - id: agile
   hp: 85
   atk: 10
   def: 4
   spd: 10
   critRate: 0.05
+  growthHp: 14
+  growthAtk: 3
+  growthDef: 1.5
+  growthSpd: 3

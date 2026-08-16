@@ -3,7 +3,7 @@
 > **使い方**: 新セッションの最初のメッセージで `/next` と送る（または §1 のコードブロックを貼り付ける）。**着手前に §0 を読む**。
 > 本ファイルは**ポインタ専用**。Phase 進捗の正は [development_process.md](../process/development_process.md) §5、書式の正は [.claude/project/next.md](../../.claude/project/next.md)、worktree 運用の正は [worktree_guide.md](../process/worktree_guide.md)。
 
-最終更新: 2026-08-16 / main `0bdc678`（**known_issues の棚卸しとフロント規約整備の是正**。#18 は既に解消済みと確認して削除、#21〜#25 を是正して削除、新たに #26・#27 を登録した。**番号の欠番が増えたので既存の参照は番号で追わず内容で照合する**。`frontend/**` は ESLint / Prettier の一括整形が入っており**行内容の差分が広い**）。同日は他セッションの成果も main に入っている（Phase 5 ボスラッシュ詳細設計 / `spot-review` スキル新設・worktree 前提化 / 要件定義の spot-review レポート / backend-review 還元案3件の常設化 / `worktree_guide.md` §5 の分冊化 / 申し送りメモの棚卸し）。**履歴の正は [changelog.md](../changelog.md) の 2026-08-16 ブロック**なので、本ファイルへ積み増さない。
+最終更新: 2026-08-16 / main `882d619`（**キャラ成長①: 到達側の分岐追加と Red 展開**。`tech_numeric.md` §5 へ #15〜#25 を末尾追加し、成長率の列を `character_types.yml`・`CharacterTypeData` へ搭載、`CharacterGrowth#requiredExpToNextLevel` を新設して **Red 11件**を置いた）。直前の `0bdc678` は **known_issues の棚卸しとフロント規約整備の是正**（**番号の欠番が増えたので既存の参照は番号で追わず内容で照合する**。`frontend/**` は ESLint / Prettier の一括整形が入っており**行内容の差分が広い**）。同日は他セッションの成果も main に入っている（Phase 5 ボスラッシュ詳細設計 / `spot-review` スキル新設・worktree 前提化 / 要件定義の spot-review レポート / backend-review 還元案3件の常設化 / `worktree_guide.md` §5 の分冊化 / 申し送りメモの棚卸し）。**履歴の正は [changelog.md](../changelog.md) の 2026-08-16 ブロック**なので、本ファイルへ積み増さない。
 
 **いまの位置**: Java 移行の残りは **3-B（Phase 1: tower）→ 4（Phase 2）→ 5（Phase 3）→ 6（切替と後始末）**（順序の正は [carryover_notes.md](carryover_notes.md) §1、手順・進捗の正は [java_migration.md](java_migration.md)、STEP の定義は [steps.md](java_migration/steps.md)「STEP 3〜5」）。**3-B は詳細設計・テストリスト作成①（game / battle）・製造①（①-i〜①-iv）まで完了**で、残るのは**テストリスト作成②（tower）→ 製造②**。**Phase 1〜3 の機能はどの言語でも未実装の期間**（E2E はハーネスと `GET /health` まで疎通済みで、テスト本体は STEP 5 完了まで赤が正常）。
 
@@ -11,7 +11,7 @@
 
 | # | 事実 |
 |---|------|
-| 1 | **本体が `UnsupportedOperationException` のまま残るのは `CharacterGrowth#applyLevelUp` だけ**（`addExp` は上限判定と加算のみ）。到達側の分岐が一覧に無く、ステータス再計算に要る成長率も `character_types.yml` が未搭載のため。分岐の正は `tech_party.md` §6（SP獲得3件・マーカー無し）＝**テストリスト工程が要る** |
+| 1 | **`CharacterGrowth` は Red 済みで未実装**（`applyLevelUp`・`requiredExpToNextLevel` が `UnsupportedOperationException`、`addExp` は上限判定と加算のみ）。分岐一覧（`tech_numeric.md` §5 #15〜#25・`tech_party.md` §6）と成長率の列は搭載済みなので、**残るのは製造だけ**＝候補キューの行 |
 | 2 | **`@Service` を付けられるのはセグメント②**。`BattleSimulator` は `FloorProgression`・`Enemies`、`LapAnalyzer` は `FloorCatalog` を注入するため、実体が無いままスキャンに載せると**結合テストのコンテキスト起動が壊れる**（`@Transactional` は `BattleServiceImpl` へ付与済み） |
 | 3 | **敵の `enemies.yml` はセグメント②で載せる**（`critRate` 列を含む。味方側 `character_types.yml` は配線済みで [tech_rng.md](../tech/detail/tech_rng.md) §6 が供給元の正） |
 | 4 | **表層の正は各テストクラスの Javadoc「製造工程への申し送り」**。そこに無い名前を新設しない |
@@ -20,7 +20,7 @@
 
 | 対象 | 値・見方 |
 |------|---------|
-| Java テスト | 単体378件・結合88件が**全件 green（Red 0）**、**C1 は 100%（282/282・未達0）** |
+| Java テスト | 単体**391件**（うち **Red 11件はキャラ成長の未実装＝正常**。内訳は `UnsupportedOperationException` の ERROR 7件・`AssertionFailedError` の FAILURE 4件で、いずれも `CharacterGrowthImplTest`）・結合88件 green・**C1 は 100%（282/282・未達0）** |
 | Red が無い回 | `python scripts/report_java_tests.py --run` をそのまま使える（既定は `-DskipITs`。結合まで見るなら `--run --it`） |
 | **Red を作る回**（テストリスト工程） | `mvn verify "-Dmaven.test.failure.ignore=true"` で見る。surefire の失敗で止まると failsafe が走らず結合の退行が見えないため。**PowerShell では `-D...=...` を引用符で囲む**（囲まないと引数が割れて `Unknown lifecycle phase` で即死する） |
 | ビルド環境 | Maven 3.9.11 / `JAVA_HOME` は Temurin **17.0.20**（`C:\Program Files\Eclipse Adoptium\jdk-17.0.20.8-hotspot`）。Adoptium 配下はこの1本のみで、**新規シェルで `mvn` をそのまま叩ける**（PowerShell の `mvn -version` で実測） |
@@ -64,7 +64,7 @@ worktree を使う複数セッションが同時に走る前提。**着手状態
 | 1 | **3-B テストリスト作成②-b（階進行）**。[tech_tower/progress.md](../tech/detail/tech_tower/progress.md) の21件（tick内・階クリア後） | §1（②-a が tower の表層を定義する） | `3b-testlist-tower-b`<br>backend | `test-list` |
 | 2 | **3-B テストリスト作成②-c（進行制御・状態機械）**。[tech_tower/control.md](../tech/detail/tech_tower/control.md) 10件 + [tech_state.md](../tech/detail/tech_state.md) §5 の7件 ＝ 17件 | キュー1 | `3b-testlist-tower-c`<br>backend | `test-list` |
 | 3 | **3-B 製造②（Phase 1: tower）**。`FloorCatalog`・`FloorProgression` の実装（`service/tower`）と `Enemies` のレジストリ化（`enemies.yml` + `@Component`）。**Green 済みクラスへ `@Service` を付けるのもこの回**（前提2）。着手時に規模を見てセグメントへ割る | キュー2 | `3b-dev-tower`<br>backend | `dev` |
-| 4 | **キャラ成長のテストリスト作成**（`applyLevelUp`・`addExp` のしきい値到達）。分岐は `tech_party.md` §6 の3件 + `tech_numeric.md` §5 へ足す到達側。成長率の列追加（`character_types.yml`・`CharacterTypeData`・`character.md` §1.2）と `LapAnalyzerImpl#lapsToLevelUp` の配線を含む（`carryover_notes.md` §1） | 前提1 | `3b-testlist-growth`<br>backend | `test-list` |
+| 4 | **キャラ成長の製造**（Red 11件を Green にする）。`CharacterGrowthImpl` の到達判定・ステータス再計算・SP付与を実装し、**同じ回で `LapAnalyzerImpl#lapsToLevelUp` を配線する**（`carryover_notes.md` §1）。仕様は `tech_numeric.md` §5 #15〜#25・`tech_party.md` §6 | なし（Red は main にある） | `3b-dev-growth`<br>backend | `dev` |
 
 - **分岐一覧の旧形式は残り2件**（`tech_polling.md` §5・`tech_rng.md` §5）。標準形式への移行は**1行が真偽の両方を持つ行の分割＝既存マーカーの番号ずれ**を伴うので、参照元のテストを触る回に同じセッションでまとめて行う（[detail-design.md](../../.claude/project/detail-design.md) §4 が「残件は候補キューで追跡する」と定める分）
 - **`tech_polling.md` §5 の10件は tick API（Controller・Resource）を作る回の後**に `integration-test`（E2E）で消化する（判断根拠と照合対象外の扱いは carryover §1）

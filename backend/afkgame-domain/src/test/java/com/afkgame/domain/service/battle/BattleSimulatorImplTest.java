@@ -125,7 +125,7 @@ class BattleSimulatorImplTest {
     private static final String HERO_TYPE = "melee";
 
     private static final CharacterTypeData HERO_TYPE_DATA =
-            new CharacterTypeData(HERO_TYPE, 100, 10, 5, 5, 0.05);
+            new CharacterTypeData(HERO_TYPE, 100, 10, 5, 5, 0.05, 20, 3, 2, 1);
 
     private static final int HERO_ATK = 20;
 
