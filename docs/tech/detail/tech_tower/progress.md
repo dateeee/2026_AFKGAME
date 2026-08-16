@@ -21,7 +21,7 @@
    - `stop_on_clear`: 塔・敵情報をクリアし `IDLE` へ。セッション確定
 5. **HP閾値撤退判定**（目標**未到達**のときだけ評価）: `hpThreshold > 0` かつ `Σhp < ΣeffectiveMaxHp × hpThreshold` なら撤退する
    - 判定量は**在籍パーティ全員の合計**（HP0のメンバーも分母に含む）。Phase 1〜2 は勇者1体なので単体のHP割合と同値
-   - 撤退時はまずセッションを**確定（没収なし）してリセット**し、`auto_repeat` なら `currentFloor = 1`・敵情報クリアで塔に留まって新しいセッションを開始、`stop_on_clear` なら塔・敵情報をクリアし `IDLE` へ（[systems/battle.md](../../../design/systems/battle.md)「撤退条件」）
+   - 撤退時はまずセッションを**確定（没収なし）してリセット**し、`auto_repeat` なら `currentFloor = 1`・敵情報クリアで塔に留まって新しいセッションを開始、`stop_on_clear` なら塔・敵情報をクリアし `IDLE` へ（[systems/battle/progress.md](../../../design/systems/battle/progress.md)「撤退条件」）
 6. **次階送り**: どちらにも該当しなければ `currentFloor = nextFloor`・敵情報クリア（次の敵は次のエンカウントで抽選。tech_battle.md §3.2）
 
 - 手順4・5の判定は**手順3の追従後の `targetFloor`** を使う（追従した周は目標到達にならず、放置のまま開拓が続く）

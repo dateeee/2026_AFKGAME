@@ -50,7 +50,7 @@ stateDiagram-v2
 | 塔選択 | `POST /api/tower/select` | `currentFloor = 1`、敵情報をクリア、探索セッションを開始（§3） |
 | 全滅 | パーティ全員HP=0 | 塔・敵情報をクリア。ペナルティ適用（§3）→ `IDLE`。自動周回でも再スタートしない |
 | リタイア | `POST /api/tower/retire` | **即時に**塔・敵情報をクリア（戦闘中でも待たない。[tech_tower/control.md §11](tech_tower/control.md)）。獲得済み報酬は保持 |
-| HP閾値撤退 | 階クリア後にHPが閾値未満（判定式は [tech_tower/progress.md §9](tech_tower/progress.md)） | セッションを確定してリセット。`auto_repeat` は1階から再開（塔に留まる）、`stop_on_clear` は `IDLE` へ（battle.md §撤退条件） |
+| HP閾値撤退 | 階クリア後にHPが閾値未満（判定式は [tech_tower/progress.md §9](tech_tower/progress.md)） | セッションを確定してリセット。`auto_repeat` は1階から再開（塔に留まる）、`stop_on_clear` は `IDLE` へ（battle/progress.md §撤退条件） |
 | 目標階クリア（`stop_on_clear`） | `currentFloor > targetFloor` | 塔・敵情報をクリアし `IDLE` へ |
 | 目標階クリア（`auto_repeat`） | 同上 | `currentFloor = 1` に戻し探索継続。探索セッションは継続する |
 
@@ -58,7 +58,7 @@ stateDiagram-v2
 
 ## 3. 探索セッション（run）
 
-`battle.md` §全滅時の処理 のペナルティは「**今回の塔探索中に**取得したゴールド・アイテムをすべて失う」と定義されている。これを成立させるため、入塔から離脱までを1つの**探索セッション**として集計する。
+`battle/progress.md` §全滅時の処理 のペナルティは「**今回の塔探索中に**取得したゴールド・アイテムをすべて失う」と定義されている。これを成立させるため、入塔から離脱までを1つの**探索セッション**として集計する。
 
 | フィールド | 内容 |
 |-----------|------|

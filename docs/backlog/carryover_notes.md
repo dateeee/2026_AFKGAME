@@ -31,6 +31,7 @@
 - **`tech_offline.md` §7（期待値計算式・スキル/パッシブ依存）12行は Phase 3 の製造で Red へ展開する**（差し戻しの回で追加。Phase 1 の編成では到達しないためマーカーを付けておらず、`check_branch_list.py --tests` の照合対象外）。`skill_factor`・攻撃スキル2枠・範囲攻撃 `×0.7×敵数`・被ダメ軽減の実効上限0.8・挑発の按分・回復期待値の差し引きが対象
 - 獣の塔（`docs/data/towers/003_獣の塔.md`）をマスターデータへ追加する際、`FLOOR_CHARACTERS` へ `scout_001` ハヤテ（獣の塔10Fクリア。`characters/CHARACTERS_OVERVIEW.md` §3 の3体目）を足す。製造①では塔IDが未宣言で ID を発明しないため見送った（塔6〜8 のマスターデータ追加または STEP 5 へ合流させる）
 - **ボスラッシュ詳細設計（2026-08-16）の図への波及3件**は、いずれも diagrams-review 2026-08-11 の**未適用 ISSUE と同じ箇所**（`er_diagram/battle.md` の `best_wave_hp` 注釈＝ISSUE-708／`api_sequence/endgame.md` の終了・リタイア・ランキング＝ISSUE-702・704・705／`battle_flow/bossrush.md` の記録更新位置とリタイア経路＝ISSUE-701・703）。`fix-specs` で ISSUE-701〜708 をまとめて適用する回に一緒に消化する
+- **要件定義 spot-review（[2026-08-16_141726.md](../reviews/spot-review/2026-08-16_141726.md)）の「プロセスへの還元」4件と担当範囲外2件が未適用**（指摘10件の仕様反映のみ実施）。内訳は同レポート末尾が正。①④（`requirements` の成果物チェック2点・観点表2行）は `retro`、②③（`--owner` へ `tech_db.md` からのテーブル名抽出・`--glossary` 新設）は常設スクリプトを触る回、`master/item.md` §4.2 の参照節ずれは `doc-review` で消化する。**②を台帳の検出パターン列へ直接書く案は不可**（`_states\.` 等は `tech_db/` 分冊・`tech_bossrush*`・`master/endgame.md` の正当な5箇所に誤検出＝実測済み）
 
 ## 3. 環境・ツール
 

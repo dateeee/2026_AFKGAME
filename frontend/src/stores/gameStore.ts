@@ -85,7 +85,7 @@ export const useGameStore = defineStore('game', () => {
     }
   }
 
-  /** 周回モードを反転させる（auto_repeat ⇄ stop_on_clear） */
+  /** 進行モードを反転させる（auto_repeat ⇄ stop_on_clear） */
   async function toggleTowerMode() {
     const newMode = towerMode.value === 'auto_repeat' ? 'stop_on_clear' : 'auto_repeat'
     try {

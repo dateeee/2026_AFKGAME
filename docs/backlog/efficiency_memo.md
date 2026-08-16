@@ -29,3 +29,9 @@
 - シグナル: same-command('python scripts/check_docs.py'×3)
 - ターン概要: ツール101回・エラー2回・拒否0回。開始:「その作業は実施中だからほかの作業をして」
 - 原因と改善案: 3回のうち2回は別 worktree（`p5-detail-design` / `p5-erdiagram-note`）での正当な検証。残り1回は手戻りで、**`carryover_notes.md` へ申し送りを追記する前に残量を測らなかった**ため 8,205字で超過し、圧縮 → 再検証をやり直した（新規作成した `tech_bossrush` 側は測ってから書いたので超過なし）。`profile.md` §7 ルール7「書く前に残量を測る」は成果物だけでなく**申し送り・引き継ぎへの追記にも適用する**ものなので、規約の新設ではなく適用漏れ。`.claude/project/detail-design.md` §5（完了基準）へ「carryover_notes.md へ追記する場合も `--sections` で残量を測ってから書く」を1行足すのが最小の是正。
+
+## 2026-08-16 15:51 | session cfb3c5e2 | 自動検出
+- シグナル: same-command('python scripts/check_docs.py'×5, 'python scripts/check_doc_size.'×3)
+- ターン概要: ツール111回・エラー0回・拒否0回。開始:「<ide_opened_file>The user opened the file c:\GIT\2026_AFKGAM」
+- 原因と改善案: `check_doc_size --sections`×3 は対象ファイルが毎回異なる正当な計測（分割前・分割後・申し送り）だが、`check_docs.py`×5 は**編集の波ごとに走らせた**のが過剰。リンクを壊しうるのは「ファイル分割と参照の付け替え」「changelog・申し送りへの追記」の2箇所だけで、2回に畳めた。`fix-specs` SKILL §5「修正後の検証」が実行タイミングを定めていないのが原因なので、`.claude/project/review/docs.md` §5 へ「常設チェックは①分割・参照付け替えの直後 ②全修正完了後 の2回にまとめる（編集の波ごとに走らせない）」を1行足す。
+- 補足: 直前エントリ（13:42）と**同じ `carryover_notes.md` の残量計測漏れを再発**させた（ファイル合計 5,379字だけ見て H2 を見ず、追記先 §2 が 1,998字＝上限まで2字だったため超過）。前回の是正案は `.claude/project/detail-design.md` §5 限定だったが、申し送りを書くのは詳細設計工程に限らない。**`profile.md` §7 ルール7 の本文へ「`carryover_notes.md`・`next_session.md` への追記も対象。合計ではなく追記先 H2 の残量を測る」を入れる**のが再発防止として正しい位置。

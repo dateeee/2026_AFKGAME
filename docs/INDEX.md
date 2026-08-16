@@ -16,7 +16,7 @@
 ## 仕様書
 - [docs/design/game_spec.md](design/game_spec.md) — ゲーム仕様の索引
   - [requirements/](design/requirements/) 要件 — product / non_functional / operation
-  - [systems/](design/systems/) — character / battle / equipment / economy / dungeon / endgame / ui（索引+[ui/](design/systems/ui/) onboarding: 認証画面・チュートリアル）
+  - [systems/](design/systems/) — character / battle（索引+[battle/](design/systems/battle/) progress: 進行制御 / calculation: 戦闘計算 / action: 行動順・ターゲット選択）/ equipment / economy / dungeon / endgame / ui（索引+[ui/](design/systems/ui/) onboarding: 認証画面・チュートリアル）
 - [docs/tech/tech_spec.md](tech/tech_spec.md) — 技術仕様の索引
   - [basic/](tech/basic/) 基本設計 — db（索引+[tech_db/](tech/basic/tech_db/) テーブル定義書）/ data（索引+[tech_data/](tech/basic/tech_data/) game_state: §1.1 の JSON 例）/ structure（§2〜§3）/ backend（§4）/ api（索引+[tech_api/](tech/basic/tech_api/) common: §5.0 共通仕様 / core・auth・gameplay・character・base・endgame）/ architecture / logging（索引+[tech_logging/](tech/basic/tech_logging/) format・fields・reason）/ error_handling（§9 エラー形式・コード体系）
   - [nonfunctional/](tech/nonfunctional/) 非機能 — performance / security / operations（§12.1〜§12.3 環境・設定・監視）/ maintenance（§12.4〜§12.7 手順）

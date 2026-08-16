@@ -159,6 +159,7 @@
 
 | 項目 | 内容 | Phase |
 |------|------|-------|
+| 表示名の変更 | ランキングに公開される表示名を変更する。制約（1〜16文字・使用可能文字・重複可否）は [non_functional_requirements.md §5](../requirements/non_functional_requirements.md) が正 | 2 |
 | 問い合わせ先 | メールまたはフォームへの導線（[operation_requirements.md](../requirements/operation_requirements.md) §5） | 2 |
 | 規約類 | 利用規約・プライバシーポリシーへの導線 | 2 |
 | クレジット | 帰属表示が必要なアセットの出典（[product_requirements.md](../requirements/product_requirements.md) §6） | 2 |

@@ -13,7 +13,7 @@
 | 004 | 敏捷型 (agile) | SPD が高い | 5体 | [004_敏捷型.md](004_敏捷型.md) |
 
 - タイプはキャラクター固有で変更不可。スキルは全系統から自由に習得できる（[SKILLS_OVERVIEW.md](../skills/SKILLS_OVERVIEW.md)）
-- 実効ステータス = `(base + growth × (LV - 1)) × レアリティ倍率（§2）× (1 + 限界突破ボーナス)`。`base`・`growth` の正は [master/character.md §1.2](../master/character.md)、適用位置は [tech_battle.md §3.1.1](../../tech/detail/tech_battle.md)
+- 実効ステータス = `(base + growth × (LV - 1)) × レアリティ倍率（§2）× (1 + 限界突破ボーナス)`。`base`・`growth` の正は [master/character.md §1.2](../master/character.md)、適用位置の正は [systems/battle/calculation.md](../../design/systems/battle/calculation.md)「ステータス計算の適用順序」（実装は [tech_battle.md §3.1.1](../../tech/detail/tech_battle.md)）
 - 総数は 4タイプ × 5レアリティ = **20体**（Phase 4 の酒場ガチャプールと一致する。§4）
 
 ## 2. キャラクターレアリティ
@@ -28,7 +28,7 @@
 | エピック | ×1.15 | 酒場LV6〜 |
 | レジェンダリー | ×1.25 | 酒場LV10〜 |
 
-- ステータス計算: `実効基礎値 = base × レアリティ倍率`（成長率にも適用）
+- 適用段階は [systems/battle/calculation.md](../../design/systems/battle/calculation.md)「ステータス計算の適用順序」①が正（`base`・成長率の両方に乗算される）
 - レアリティはキャラ固有（変更不可）
 - 初期キャラ含む確定入手4体はすべてレア
 

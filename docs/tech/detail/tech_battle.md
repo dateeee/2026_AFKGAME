@@ -68,12 +68,12 @@
       - 通常攻撃: ATK × (1 + random(-0.1, 0.1)) - DEF × 0.5
       - スキル攻撃: ATK × スキル倍率 - DEF × 0.5
       - クリティカル: DEF減算後に乗算 → (ATK×rand - DEF×0.5) × 1.5
-        - クリティカル率は合算で上限100%、超過分は切り捨て（[systems/battle.md](../../design/systems/battle.md)「確率・軽減率の上限」参照）
+        - クリティカル率は合算で上限100%、超過分は切り捨て（[systems/battle/calculation.md](../../design/systems/battle/calculation.md)「確率・軽減率の上限」参照）
       - 最低ダメージ保証:
         - 味方→敵: max(計算結果, 1) — 最低1ダメージ保証
         - 敵→味方: max(計算結果, 0) — 0ダメージ許容
       - パッシブ「被ダメ軽減」の適用
-        - 実効軽減率は乗算合算後に上限80%（最終ダメージ倍率の下限0.2。[systems/battle.md](../../design/systems/battle.md)「確率・軽減率の上限」参照）
+        - 実効軽減率は乗算合算後に上限80%（最終ダメージ倍率の下限0.2。[systems/battle/calculation.md](../../design/systems/battle/calculation.md)「確率・軽減率の上限」参照）
       - HP吸収装備の回復
       - パッシブ「反撃」の判定（被攻撃時）
 
@@ -113,7 +113,7 @@ def calc_final_stat(base, growth, lv, rarity_mult, limit_break_pct, rebirth_pct,
 ```text
 def select_target_with_taunt(enemies_or_allies, taunters):
     """taunters: [{char, taunt_rate}, ...]"""
-    TAUNT_CAP = 0.8  # 合算上限（systems/battle.md「確率・軽減率の上限」）
+    TAUNT_CAP = 0.8  # 合算上限（systems/battle/calculation.md「確率・軽減率の上限」）
     total_taunt = sum(t.taunt_rate for t in taunters)
 
     roll = random()
@@ -136,7 +136,7 @@ def select_target_with_taunt(enemies_or_allies, taunters):
 
 - 挑発は範囲攻撃には無効（範囲攻撃は全体に当たるため）
 - 挑発率はスキルレベルで変動: 段階1=50%、段階2=60%、段階3=70%、段階4=80%
-- 合算しても上限は80%で、常に20%はランダムターゲットに抜ける（正は [systems/battle.md](../../design/systems/battle.md)「確率・軽減率の上限」）
+- 合算しても上限は80%で、常に20%はランダムターゲットに抜ける（正は [systems/battle/calculation.md](../../design/systems/battle/calculation.md)「確率・軽減率の上限」）
 
 ### 3.1.4 ボスラッシュのウェーブ間処理
 

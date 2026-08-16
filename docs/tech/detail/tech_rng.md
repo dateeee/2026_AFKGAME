@@ -80,7 +80,7 @@
 
 ## 6. クリティカル率の供給元
 
-**プレイヤー・敵で共通の定数にしない。** Phase 1 の基礎5%（[systems/battle.md](../../design/systems/battle.md)「確率・軽減率の上限」）は供給元を左右で分ける（バランス値はマスターデータへ置く。`coding_standards_backend/common.md` §5 #10）。
+**プレイヤー・敵で共通の定数にしない。** Phase 1 の基礎5%（[systems/battle/calculation.md](../../design/systems/battle/calculation.md)「確率・軽減率の上限」）は供給元を左右で分ける（バランス値はマスターデータへ置く。`coding_standards_backend/common.md` §5 #10）。
 
 | 側 | 供給元（値の正） | 読み手 |
 |----|----------------|-------|

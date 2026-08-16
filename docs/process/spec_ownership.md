@@ -61,7 +61,8 @@
 | お知らせの既読管理（保持先） | `docs/design/requirements/operation_requirements.md` | `docs/tech/basic/tech_api/core.md`, `docs/design/systems/ui.md` | — |
 | ログアウトの挙動（フロー・トークン失効） | `docs/tech/detail/tech_auth.md` | `docs/design/systems/ui.md`, `docs/tech/basic/tech_api/auth.md` | — |
 | 未確定仕様・調整待ち数値の管理ルール | `docs/process/development_process.md` | `docs/backlog/open_specs.md`, `docs/backlog/balance_backlog.md`, `CLAUDE.md` | — |
-| 確率・軽減率の上限（挑発率・状態異常付与率） | `docs/design/systems/battle.md` | `docs/design/systems/character.md`, `docs/tech/detail/tech_battle.md`, `docs/data/skills/006_生存術系統.md` | — |
+| 確率・軽減率の上限（挑発率・状態異常付与率） | `docs/design/systems/battle/calculation.md` | `docs/design/systems/character.md`, `docs/tech/detail/tech_battle.md`, `docs/data/skills/006_生存術系統.md` | — |
+| ステータス計算の適用順序（①素→②強化→③装備→④パッシブ→⑤バフ） | `docs/design/systems/battle/calculation.md` | `docs/tech/detail/tech_battle.md`, `docs/design/systems/character.md`, `docs/data/master/character.md` | `素ステータス` |
 | Phaseごとの開発進捗（工程の完了状況） | `docs/process/development_process.md` | — | — |
 | メール送信の方式（時機・設定値・本文・再送） | `docs/tech/detail/tech_auth/mail.md` | `docs/tech/nonfunctional/tech_operations.md` | — |
 | 次セッションの開始タスク（引き継ぎ） | `docs/backlog/next_session.md` | `docs/backlog/carryover_notes.md` | — |
@@ -75,6 +76,7 @@
 - **ゲーム設定**: 正は%表記・技術層は小数表記のため、パターンは小数側だけを見る（正ファイル自身には一致しない）
 - **ログ3種別**: 出力先と書き方が `logging.md`（3分冊通しの §1〜§7）、形式・項目名・ロガー名体系・`reason` は `tech_logging.md`（索引 + 分冊3件。見出しと分冊の対応は索引の表）、エラーコード体系と統一エラーレスポンス形式は `tech_error_handling.md` が正
 - **ログアウト**: エンドポイント定義そのものは `tech_api/auth.md` が正
-- **DBスキーマ**: 実装側の正は Flyway DDL（`afkgame-initdb`）。`tech_data.md` が持つのは API/マスターの JSON 構造のみ。反映順は `phases.md` §3.2.1
+- **DBスキーマ**: 実装側の正は Flyway DDL（`afkgame-initdb`）。`tech_data.md` が持つのは API/マスターの JSON 構造のみ。反映順は `phases.md` §3.2.1。物理テーブル名の直書きは検出パターンを書けない（`_states\.` 等は `tech_db/` の分冊と `tech_bossrush*` に正当な出現があり誤検出になる）ため目視で拾う
+- **ステータス計算の適用順序**: 仕様としての順序は設計層が正、`tech_battle.md` §3.1.1 は同じ順序の実装疑似コード。レアリティ倍率の**値**は `characters/CHARACTERS_OVERVIEW.md` §2 が正（本行の対象外）
 - **引き継ぎ**: `next_session.md` はポインタ専用。複数セッションにまたがる申し送りは `carryover_notes.md` が持ち、引き継ぎ側へ転記しない
 - **コーディング規約**: 正 → 派生（`.claude/**`）の順に同じ変更で改訂する（`phases.md` §3.2.2）

@@ -23,5 +23,5 @@
 
 > **`targetFloor` の検証範囲**: `1 <= targetFloor <= min(その塔の TowerClearRecord.highestFloor + 1, totalFloors)`。塔ごとに個別判定し、範囲外は 400。深淵の塔（`abyss_tower`）は総階数を持たないため `highestFloor + 1` のみで判定する。この上限は `/api/tower/list` が塔ごとに `targetFloorCap` として返すため、クライアントは式を再実装しない。
 > **上限追従**: 目標階が上限と一致している状態で新しい階をクリアした場合、サーバーが tick 処理内で `targetFloor` を +1 する（クライアントからの再設定は不要）。目標階が上限未満なら追従しない。
-> 仕様は [systems/battle.md](../../../design/systems/battle.md) 「目標階設定」・[systems/endgame.md](../../../design/systems/endgame.md) §2.14 を参照。
+> 仕様は [systems/battle/progress.md](../../../design/systems/battle/progress.md) 「目標階設定」・[systems/endgame.md](../../../design/systems/endgame.md) §2.14 を参照。
 

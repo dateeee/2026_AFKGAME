@@ -80,7 +80,7 @@
 | 節 | 内容 | ファイル |
 |----|------|---------|
 | 2.1 キャラクター<br>2.7 パーティ編成<br>2.8 スキルシステム | ステータス・タイプ・レアリティ・限界突破・編成・スキル6系統 | [systems/character.md](systems/character.md) |
-| 2.2 戦闘システム<br>2.3 HP回復システム | ハイブリッドtick制・ダメージ計算・状態異常・ターゲット選択・ポーション | [systems/battle.md](systems/battle.md) |
+| 2.2 戦闘システム<br>2.3 HP回復システム | ハイブリッドtick制・オフライン計算・ポーション（索引 + [battle/](systems/battle/) progress: 進行モード・目標階・撤退条件・全滅 / calculation: ダメージ計算・上限・適用順序・状態異常 / action: 行動順・ターゲット選択・複数敵） | [systems/battle.md](systems/battle.md) |
 | 2.4 装備システム<br>2.10 素材・生産システム | 9スロット・レアリティ・HP吸収・装備強化・分解・製作 | [systems/equipment.md](systems/equipment.md) |
 | 2.5 ショップ<br>2.9 拠点システム | 常設／日替わり商品・5施設（酒場・鍛冶屋・訓練場・倉庫・市場） | [systems/economy.md](systems/economy.md) |
 | 2.6 ダンジョン・塔 | 塔構成・進行ルール・難易度スケーリング・環境効果 | [systems/dungeon.md](systems/dungeon.md) |
