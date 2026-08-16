@@ -61,6 +61,7 @@ worktree を使う複数セッションが同時に走る前提。**着手状態
 | 優先 | タスク | 前提 | wt 名 / 領域 | 工程スキル |
 |------|-------|------|------------|-----------|
 | 1 | **3-B 製造②（Phase 1: tower）**。`TowerServiceImpl`・`FloorCatalog`・`FloorProgressionImpl` の実装（`service/tower`）と `Enemies`・`Towers` のレジストリ化（`enemies.yml`・`towers.yml` + `@Component`）。**Green 済みクラスへ `@Service` を付けるのもこの回**（前提1）。**塔IDの表記ゆれ**（テストの `tower_goblin` / `tech_data.md` §1.4 の `goblin_tower` / `endgame.md` の `abyss_tower`）は `towers.yml` を書くこの回でそろえ、既存テストの定数も同じ回で追随させる。着手時に規模を見てセグメントへ割る | §1（②-c） | `3b-dev-tower`<br>backend | `dev` |
+| 2 | **要件定義 spot-review（[2026-08-16_191841](../reviews/spot-review/2026-08-16_191841.md)）の指摘1件を反映**。ISSUE-1401（中）: Phase 1〜2 の計画メンテナンスの告知手段が未定義。**別セッションが本セッションと並行して出したレポート**で、反映は未着手 | なし | `fixspecs-maint`<br>docs | `fix-specs` |
 
 - **分岐一覧の旧形式は残り2件**（`tech_polling.md` §5・`tech_rng.md` §5）。標準形式への移行は**1行が真偽の両方を持つ行の分割＝既存マーカーの番号ずれ**を伴うので、参照元のテストを触る回に同じセッションでまとめて行う（[detail-design.md](../../.claude/project/detail-design.md) §4 が「残件は候補キューで追跡する」と定める分）
 - **`tech_polling.md` §5 の10件は tick API（Controller・Resource）を作る回の後**に `integration-test`（E2E）で消化する（判断根拠と照合対象外の扱いは carryover §1）
