@@ -9,8 +9,7 @@ import java.util.List;
  * docs/tech/detail/tech_tower/list.md §5、入塔は同 select.md §7。
  * 状態遷移と操作可否は docs/tech/detail/tech_state.md §2・§4。
  *
- * <p>実装は {@link TowerServiceImpl}。リタイア・モード変更・撤退条件（同 control.md §11）は
- * テストリスト作成②-c で本インタフェースへ足す。
+ * <p>実装は {@link TowerServiceImpl}。リタイア・モード変更・撤退条件は同 control.md §11。
  */
 public interface TowerService {
 
@@ -43,4 +42,42 @@ public interface TowerService {
      *         {@code TOWER_NOT_FOUND}（塔マスターに存在しない）
      */
     TowerSelection select(String playerId, TowerSelectCommand command);
+
+    /**
+     * 塔から離脱する（リタイア）。
+     *
+     * <p>エンカウント待ち・戦闘中のどちらでも<b>即時に</b>成立し、塔・敵情報をクリアして
+     * {@code IDLE} へ戻す。探索セッションは確定（没収なし）してリセットし、HPは変更しない
+     * （control.md §11「リタイア」・tech_state.md §2・§3）。
+     *
+     * @param playerId プレイヤーID
+     * @throws org.terasoluna.gfw.common.exception.BusinessException
+     *         {@code TOWER_NOT_IN_TOWER}（塔外）
+     */
+    void retire(String playerId);
+
+    /**
+     * 進行モードを変更する。
+     *
+     * <p>入塔中のみ変更でき、次の目標到達・撤退判定（progress.md §9 手順4・5）から適用する
+     * （control.md §11「進行モード切替」）。値そのものの検証は Bean Validation の担当。
+     *
+     * @param playerId プレイヤーID
+     * @param mode     {@code auto_repeat} または {@code stop_on_clear}
+     * @throws org.terasoluna.gfw.common.exception.BusinessException
+     *         {@code TOWER_NOT_IN_TOWER}（塔外）
+     */
+    void changeMode(String playerId, String mode);
+
+    /**
+     * HP閾値撤退のしきい値を更新する。
+     *
+     * <p>塔外・入塔中のどちらでも変更でき、次の階クリア判定（progress.md §9 手順5）から適用する
+     * （control.md §11「撤退条件更新」）。範囲（{@code 0.0}〜{@code 1.0}）の検証は
+     * Bean Validation の担当。
+     *
+     * @param playerId    プレイヤーID
+     * @param hpThreshold しきい値。{@code 0} はHP閾値撤退の無効化
+     */
+    void updateRetreatConditions(String playerId, double hpThreshold);
 }

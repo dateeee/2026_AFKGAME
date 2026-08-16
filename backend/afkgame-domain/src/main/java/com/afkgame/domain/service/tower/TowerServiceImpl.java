@@ -10,9 +10,9 @@ import com.afkgame.domain.repository.TowerClearRecordRepository;
 /**
  * {@link TowerService} の実装。
  *
- * <p>仕様: docs/tech/detail/tech_tower/list.md §5・同 select.md §7。
+ * <p>仕様: docs/tech/detail/tech_tower/list.md §5・同 select.md §7・同 control.md §11。
  *
- * <p><b>本クラスはテストリスト作成②-a で用意した表層であり、本体は未実装。</b>
+ * <p><b>本クラスはテストリスト作成②-a・②-c で用意した表層であり、本体は未実装。</b>
  * 分岐は {@code TowerServiceImplTest} が Red のテストとして持ち、実装は製造②で行う。
  * {@code @Service} と {@code @Transactional} も製造②で付ける — {@link Towers} がまだ
  * {@code @Component} を持たず（YAML 未搭載）、実体が無いままスキャンに載せると
@@ -51,6 +51,21 @@ public class TowerServiceImpl implements TowerService {
 
     @Override
     public TowerSelection select(String playerId, TowerSelectCommand command) {
+        throw new UnsupportedOperationException("製造②（tower）で実装する");
+    }
+
+    @Override
+    public void retire(String playerId) {
+        throw new UnsupportedOperationException("製造②（tower）で実装する");
+    }
+
+    @Override
+    public void changeMode(String playerId, String mode) {
+        throw new UnsupportedOperationException("製造②（tower）で実装する");
+    }
+
+    @Override
+    public void updateRetreatConditions(String playerId, double hpThreshold) {
         throw new UnsupportedOperationException("製造②（tower）で実装する");
     }
 }
