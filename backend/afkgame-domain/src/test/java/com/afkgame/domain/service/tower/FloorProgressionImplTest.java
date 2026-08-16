@@ -35,12 +35,14 @@ import com.afkgame.domain.service.battle.FloorProgression;
  * docs/tech/detail/tech_state.md §1・§3、クリア記録の列は
  * docs/tech/basic/tech_db/player.md §3。
  *
- * <p>本クラスが対象にするのは {@code onEnemyDefeated}（階クリア）だけである。
- * {@code ensureEncounter} はエンカウント抽選（tech_battle.md §3.2）、
- * {@code onPartyWiped} は全滅ペナルティ（tech_state.md §3）で、いずれも分岐一覧の所在が
- * 本書の外にあるため対象外（前者は tick API を作る回、後者は tech_state.md §5 を消化する回の担当。
- * <b>②-c では消化していない</b> — 同 §5 の7行は Phase 1〜3 にまたがり、
- * {@code check_branch_list.py} が節単位で全行の対応を求めるため、Phase 1 の回では閉じられない）。
+ * <p>本クラスが対象にするのは {@code onEnemyDefeated}（階クリア）と
+ * {@code onPartyWiped}（全滅の後始末。tech_state.md §5 の Phase 1 分）である。
+ * {@code ensureEncounter} はエンカウント抽選（tech_battle.md §3.2）で、分岐一覧の所在が
+ * 本書の外にあるため対象外（tick API を作る回の担当）。
+ *
+ * <p>{@code onPartyWiped} を②-d で消化できるのは、同 §5 を <b>Phase 1（§5）と
+ * Phase 2〜3（§6）へ分けた</b>ためである。{@code check_branch_list.py} は節単位で全行の対応を
+ * 求めるので、装備の没収・編成ロックが混ざったままでは Phase 1 の回で閉じられなかった。
  *
  * <p>HP閾値撤退の2件（#17・#18）は、撤退条件更新の効果（tech_tower/control.md §12 #9・#10）が
  * 指す先でもあるため、マーカーを2本持つ。しきい値の保存側は {@code TowerServiceImplTest} が持つ。
@@ -79,7 +81,21 @@ import com.afkgame.domain.service.battle.FloorProgression;
  *   <li><b>セッションのリセットは {@code runGold} だけ</b>を対象にする。tech_state.md §3 の
  *       {@code runItems} / {@code runEquipmentIds} は {@code Player} にまだ列が無く、
  *       ドロップを載せる Phase 2〜で足す。セッションへの<b>加算</b>側（撃破ゴールドの
- *       {@code runGold} 累積）は tech_state.md §5 を持つ②-c の担当で、本クラスは持たない</li>
+ *       {@code runGold} 累積）は戦闘報酬を確定させる回の担当で、本クラスは持たない</li>
+ *   <li><b>{@code onPartyWiped} は依存を増やさない</b>（②-b が「必要な依存はその回に足す」と
+ *       申し送っていた分の回答）。tech_state.md §3 の手順1・4・5 はいずれも引数の
+ *       {@link Player} と {@code party} だけで完結し、手順2・3（{@code runItems} /
+ *       {@code runEquipmentIds}）は列が無いため Phase 1 では対象にならない
+ *       （同 §6 #3 へ分離済み）</li>
+ *   <li><b>EXP の減算対象は {@code Character#exp}</b>（＝現在レベル内の蓄積。
+ *       {@code CharacterGrowthImpl} がレベルアップでしきい値を差し引く形なので、
+ *       この列がそのまま §3 手順4 の「現在レベル内の蓄積EXP」になる）。{@code level} は
+ *       動かさない。<b>端数の丸めは未確定</b>のため、テストは丸めに依存しない偶数
+ *       （400 → 200）と0だけを置いている。奇数の扱いを決めるのは製造②で、
+ *       決めた規則は tech_state.md §3 手順4 へ書き戻す</li>
+ *   <li><b>§3 手順6（塔・敵情報をクリアして {@code IDLE} へ）に対応する行は §5 に無い</b>。
+ *       同 §5 の注記のとおり、適用順そのものの網羅は6手順を通しで検証するテストが担うため、
+ *       本クラスは手順1・4・5 の値だけを観測する</li>
  * </ul>
  */
 @Tag("unit")
@@ -163,6 +179,18 @@ class FloorProgressionImplTest {
         player.setRunGold(RUN_GOLD);
         player.setCurrentEnemyId("goblin");
         player.setCurrentEnemyHp(0);
+        return player;
+    }
+
+    /**
+     * 全滅した時点のプレイヤー。塔の中で交戦中（敵は生きている）で、
+     * 所持ゴールドと探索セッションの獲得ぶんだけをケースごとに変える。
+     */
+    private static Player wipedPlayer(long gold, long runGold) {
+        Player player = player(5, 10, AUTO_REPEAT);
+        player.setGold(gold);
+        player.setRunGold(runGold);
+        player.setCurrentEnemyHp(30);
         return player;
     }
 
@@ -613,6 +641,79 @@ class FloorProgressionImplTest {
             assertThat(player.getCurrentEnemyId()).isNull();
             assertThat(player.getCurrentEnemyHp()).isNull();
             assertThat(player.getRunGold()).isZero();
+        }
+    }
+
+    @Nested
+    @DisplayName("全滅の後始末")
+    class TestPartyWiped {
+
+        /**
+         * 探索セッション中に得たゴールドを所持ゴールドから引く（tech_state.md §3 手順1）。
+         * 獲得が0なら減算も0、run 中に使い込んで残高が獲得分を下回っていても下限0で止める
+         * （負の所持金を作らない）。適用後にセッションはリセットする（同 §3「全滅」）。
+         *
+         * <p>分岐: tech_state.md §5 #1
+         */
+        @ParameterizedTest(name = "所持={0} run獲得={1} → 所持={2}")
+        @CsvSource({
+            "1000,   0, 1000",  // 獲得0 → 減算0（所持ゴールドは動かない）
+            "1000, 120,  880",  // 獲得ぶんだけ引く
+            "  50, 120,    0",  // 残高が獲得分より少ない → 下限0でクランプする
+        })
+        void test_全滅で探索セッション分のゴールドを失う(long gold, long runGold, long expected) {
+            Player player = wipedPlayer(gold, runGold);
+
+            progression().onPartyWiped(player, List.of(hero(0)));
+
+            assertThat(player.getGold()).isEqualTo(expected);
+            assertThat(player.getRunGold()).isZero();
+        }
+
+        /**
+         * 現在レベル内の蓄積EXPを50%失う（tech_state.md §3 手順4）。蓄積が0なら減算も0で、
+         * 減るのはレベル内の蓄積分だけなのでレベルダウンはしない。
+         *
+         * <p>丸めが要らない値だけを置いている（理由はクラス Javadoc の申し送り）。
+         *
+         * <p>分岐: tech_state.md §5 #2
+         */
+        @ParameterizedTest(name = "EXP={0} → {1}")
+        @CsvSource({
+            "  0,   0",  // 蓄積0 → 減算0（下限を割らない）
+            "400, 200",  // 50%減算
+        })
+        void test_全滅で現在レベル内の蓄積EXPを半分失う(long exp, long expected) {
+            Player player = wipedPlayer(1000L, 0L);
+            Character character = hero(0);
+            character.setLevel(5);
+            character.setExp(exp);
+
+            progression().onPartyWiped(player, List.of(character));
+
+            assertThat(character.getExp()).isEqualTo(expected);
+            assertThat(character.getLevel()).isEqualTo(5);
+        }
+
+        /**
+         * 全滅後は全員を {@code maxHp} へ全回復する（tech_state.md §3 手順5）。
+         * HP0 のまま {@code IDLE} へ戻すと「自然回復を待つ時間」という第4のペナルティを
+         * 暗黙に足してしまうため（同 §3 の根拠）。上限はメンバーごとに異なる。
+         *
+         * <p>分岐: tech_state.md §5 #3
+         */
+        @Test
+        void test_全滅後は全員のHPがmaxHPまで回復する() {
+            Player player = wipedPlayer(1000L, 0L);
+            Character vanguard = hero(0);
+            Character rear = hero(0);
+            rear.setId("character_002");
+            rear.setMaxHp(80);
+
+            progression().onPartyWiped(player, List.of(vanguard, rear));
+
+            assertThat(vanguard.getHp()).isEqualTo(MAX_HP);
+            assertThat(rear.getHp()).isEqualTo(80);
         }
     }
 }
