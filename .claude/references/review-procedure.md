@@ -1,6 +1,6 @@
 # レビュー共通手順（一般）
 
-レビュー系スキル（`doc-review` `diagrams-review` `backend-review` `frontend-review` `full-review`）が共通で従う手順。
+レビュー系スキル（`doc-review` `diagrams-review` `backend-review` `frontend-review` `full-review` `spot-review`）が共通で従う手順。
 **プロジェクト固有の対象ファイル・観点・パラメータは、各スキルが指定するプロファイルに置く。**本書には固有の値を書かない。
 
 ## 1. コスト規律
@@ -105,6 +105,7 @@ python .claude/scripts/review_prep.py --dir <保存先> --paths <対象パス...
 | 仕様↔コード、フロント↔バックにまたがる | `full-review` |
 
 境界が曖昧な指摘は、**より広い範囲を担当するスキル**へ寄せる（コード品質より統合整合性を優先する）。
+`spot-review` は担当範囲ではなく**起動タイミング**で分かれる（ゲート外で対象を指定して行う単発レビュー）。上表のいずれかが担当する対象を扱うため、直近の定型レビューと**重複計上しない**こと。
 **設計図が絡む照合は、図↔仕様・図↔コード・図↔図のいずれも `diagrams-review` が担当する**（他スキルのプロファイルは図を照合先に持たない）。
 Phase完了ゲート等で図の再確認が必要な場合は、統合レビューと併せて `diagrams-review` を併走させる。
 
