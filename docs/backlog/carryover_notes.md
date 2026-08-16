@@ -18,7 +18,7 @@
 - **`tech_polling.md` §5 の10件は JUnit へ展開しない**（①-a で判断）。フロントは TDD 非適用（`test-list.md` §2）で、同 §5 自身が「単体レベルの検証はE2E（Playwright）に統合する」と定めている。**`integration-test` スキルの担当**。マーカー0件のままなら `check_branch_list.py --tests` の照合対象外で exit 0 は維持される
 - **`httpclient5` は STEP 4（Phase 2 の Google OAuth）で `afkgame-domain/pom.xml` へ戻す**（ISSUE-905 で先行投入を削除した。技術選定は有効で、正は [tech_selection.md](java_migration/tech_selection.md) §2・[tech_backend.md](../tech/basic/tech_backend.md) §4.3）。`RestClient` の `ClientHttpRequestFactory` を Bean 構成する回に、同じコミットで依存を足す
 - **サブパッケージを新設したら AOP 境界ログのポイントカットを確認する**。`afkgame.properties` の式は `..`（配下）で書いてあるので現状は追随不要だが、`.*.`（直下のみ）へ戻すと境界ログが**テストに検出されないまま消える**
-- **`LapAnalyzerImpl#analyze` の `lapsToLevelUp` は常に `Integer.MAX_VALUE`（＝レベルアップに到達しない）**。次レベルまでの必要EXPを返す口が `CharacterGrowth` に無いため（経験値テーブルは `character.md` §1.4 の `100 × level^1.5`）。**キャラ成長のテストリスト作成 → 製造で口を足し、同じ回で `LapAnalyzerImpl` を配線する**。オフライン周回中のレベルアップ分岐（`tech_offline.md` §5 #7・#8）は `OfflineCalculatorImpl` 側で実装済みなので、口が付けば通る
+- **`LapAnalyzerImpl#analyze` の `lapsToLevelUp` は常に `Integer.MAX_VALUE`（＝レベルアップに到達しない）**。口は `CharacterGrowth#requiredExpToNextLevel` として**追加済み**（2026-08-16。本体は `UnsupportedOperationException` で Red 済み）。**キャラ成長の製造で Green にし、同じ回で `LapAnalyzerImpl` を配線する**。オフライン周回中のレベルアップ分岐（`tech_offline.md` §5 #7・#8）は `OfflineCalculatorImpl` 側で実装済みなので、口が通れば動く
 - **全滅後の「全員 `maxHP` へ全回復」（`tech_state.md` §5 #6）は未実装**。`OfflineCalculatorImpl` の全滅ペナルティは §4 の表（EXP50%減・強制撤退・残tick破棄 + HP自然回復）までで、`tech_state.md` §3 のペナルティ適用順ごとセグメント②の担当
 
 ## 2. 仕様・マスターデータ
