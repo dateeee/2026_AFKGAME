@@ -55,3 +55,8 @@
 - ターン概要: ツール92回・エラー2回・拒否0回。開始:「<command-message>next</command-message>」
 - 原因と改善案: 誤検出: `next_session.md` の再読は worktree 統合で main が進んだ後の再取得（並行セッションの `87f9a42`・`fef8870` が §2 行を消していた）で、`profile.md` §6 規律4 の除外かつ 20:10 エントリが提案した「統合の直後・書き換える前に読み直す」順序どおり。`check_branch_list.py`×3 もベースライン → §5 分割直後の構造検証 → テスト追加後のマーカー照合で、判定内容が毎回違う（分割だけ先に検証したので、テストを書く投資の前に構造の誤りを潰せている）。
 - 補足: **same-read(next_session.md×2) は 14:49・20:10 に続き3回目の誤検出**で、`/next` → 統合 → 引き継ぎ更新という**正しい手順を踏むと必ず出る**シグナルになっている。retro のたびに仕分ける手間を無くすため、`efficiency_check.py` の same-read 判定から `next_session.md` を除外する（または「統合コミットを挟んだ再読は数えない」）のが最小の是正。
+
+## 2026-08-16 20:58 | session 278b36d0 | 自動検出
+- シグナル: same-command('python scripts/check_doc_size.'×3)
+- ターン概要: ツール39回・エラー0回・拒否0回。開始:「<ide_opened_file>The user opened the file c:\GIT\2026_AFKGAM」
+- 原因と改善案: 3回のうち**2回が無意味な再判定**だった。①`changelog.md` へ1行追記した後の再実行 — 同ファイルは `documentation_rules.md` §2・`EXCLUDE` で**上限対象外**なので結果は変わり得ない。②ff統合後に main で再実行 — ツリーが worktree と**バイト同一**なので同じく変わらない（有意だったのは編集直後の1回と `--sections` の測定のみ）。改善案: `.claude/project/doc-size.md` §1 のコマンド表へ「再判定が要るのは**判定対象ファイルを編集したとき**だけ（除外ファイルのみの編集・ff統合の後は不要）」を1行足す。
