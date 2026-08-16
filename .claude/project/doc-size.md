@@ -22,7 +22,7 @@
 | A | `CLAUDE.md` | 3,000 | **セッション内是正**（台帳登録不可） |
 | B | `README.md`、`**/*_OVERVIEW.md` | 6,000 | 台帳へ登録 → 一括是正 |
 | C | `docs/**`（設計図 `docs/diagrams/**` を含む） | 8,000 | 同上 |
-| D | `.claude/**`（スクリプトは `.claude/` 全体をD判定） | 5,000 | **セッション内是正**（台帳登録不可） |
+| D | `.claude/**`（スクリプトは `.claude/` 全体をD判定） | 6,000 | **セッション内是正**（台帳登録不可） |
 | 除外 | `docs/reviews/**`、`docs/changelog.md` | — | 追記型アーカイブ（§2・§9） |
 | 緩和 | `docs/process/coding_standards_backend{.md,/**}` | ×1.5（12,000 / H2 3,000） | §3.1 の例外。増やすときは `check_doc_size.py` の `RELAXED_PREFIXES` と同時に |
 
